@@ -38,7 +38,8 @@ export async function apiRequest<T>(
     },
   });
 
-  const body: unknown = await res.json().catch(() => null);
+  const body: unknown =
+    res.status === 204 ? null : await res.json().catch(() => null);
 
   if (!res.ok) {
     const err = (body as ApiErrorShape | null)?.error;
@@ -50,7 +51,7 @@ export async function apiRequest<T>(
     );
   }
 
-  return (body as ApiEnvelope<T>).data;
+  return body == null ? (undefined as T) : (body as ApiEnvelope<T>).data;
 }
 
 // Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v1/api-keys.

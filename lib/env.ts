@@ -3,8 +3,9 @@
 // referenced literally here — dynamic process.env[name] is not inlined client-side.
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000"
+).replace(/\/+$/, "");
 
 if (!SUPABASE_URL) {
   throw new Error("Missing required env var: NEXT_PUBLIC_SUPABASE_URL");
