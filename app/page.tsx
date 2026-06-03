@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { ApiHealthCheck } from "@/components/api-health-check";
 
 export default function Page() {
   return (
@@ -30,6 +31,8 @@ export default function Page() {
             Ver componentes
           </Button>
         </div>
+
+        <ApiHealthCheck />
 
         <p className="font-mono text-xs text-muted-foreground">
           Presiona <kbd className="rounded border px-1">d</kbd> para cambiar el
