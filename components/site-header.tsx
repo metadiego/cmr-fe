@@ -38,7 +38,7 @@ export function SiteHeader() {
               <HugeiconsIcon icon={Menu01Icon} />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64">
+          <SheetContent side="left" className="w-64" aria-describedby={undefined}>
             <SheetHeader>
               <SheetTitle asChild>
                 <Link href="/" onClick={() => setOpen(false)}>
@@ -84,7 +84,7 @@ export function SiteHeader() {
               size="sm"
               className={cn(
                 isActive(pathname, item.href)
-                  ? "text-foreground"
+                  ? "bg-muted text-foreground"
                   : "text-muted-foreground",
               )}
             >
