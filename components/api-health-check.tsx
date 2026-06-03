@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { env } from "@/lib/env";
 import { getHealth, type HealthStatus } from "@/lib/api/health";
@@ -17,6 +18,7 @@ type Result =
 // Live smoke test of the FE → BE wiring: calls the public /api/health endpoint
 // through the shared apiRequest client and renders whatever comes back.
 export function ApiHealthCheck() {
+  const t = useTranslations("apiHealth");
   const [result, setResult] = React.useState<Result>({ kind: "idle" });
 
   async function check() {
@@ -28,7 +30,7 @@ export function ApiHealthCheck() {
       if (err instanceof ApiError) {
         setResult({
           kind: "fail",
-          title: `Error ${err.status} · ${err.code}`,
+          title: t("errorTitle", { status: err.status, code: err.code }),
           detail: err.message,
           corsHint: false,
         });
@@ -38,7 +40,7 @@ export function ApiHealthCheck() {
         const detail = err instanceof Error ? err.message : String(err);
         setResult({
           kind: "fail",
-          title: "Sin conexión",
+          title: t("offline"),
           detail,
           corsHint: /fetch/i.test(detail),
         });
@@ -53,7 +55,7 @@ export function ApiHealthCheck() {
     <div className="w-full max-w-md rounded-lg border bg-card/60 p-5 text-left shadow-sm backdrop-blur">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold">Prueba de conexión con el API</h2>
+          <h2 className="text-sm font-semibold">{t("title")}</h2>
           <p className="mt-1 font-mono text-xs break-all text-muted-foreground">
             GET {env.API_BASE_URL}/api/health
           </p>
@@ -64,7 +66,7 @@ export function ApiHealthCheck() {
           disabled={result.kind === "loading"}
           className="shrink-0"
         >
-          {result.kind === "loading" ? "Probando…" : "Probar"}
+          {result.kind === "loading" ? t("testing") : t("test")}
         </Button>
       </div>
 
@@ -83,14 +85,14 @@ export function ApiHealthCheck() {
                 ok ? "bg-emerald-500" : "bg-destructive",
               )}
             />
-            {ok ? "Conectado · API saludable" : fail ? result.title : null}
+            {ok ? t("connected") : fail ? result.title : null}
           </div>
 
           {ok && (
             <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
-              <dt className="text-muted-foreground">estado</dt>
+              <dt className="text-muted-foreground">{t("estado")}</dt>
               <dd className="font-mono">{result.data.status}</dd>
-              <dt className="text-muted-foreground">base de datos</dt>
+              <dt className="text-muted-foreground">{t("database")}</dt>
               <dd className="font-mono">
                 {result.data.details?.database?.status ?? "—"}
               </dd>
@@ -102,9 +104,9 @@ export function ApiHealthCheck() {
               {result.detail}
               {result.corsHint && (
                 <span className="mt-1 block">
-                  Probable bloqueo CORS o backend inaccesible: confirma que el
-                  origen del frontend esté en <code>CORS_ORIGINS</code> del
-                  backend.
+                  {t.rich("corsHint", {
+                    code: (chunks) => <code>{chunks}</code>,
+                  })}
                 </span>
               )}
             </p>

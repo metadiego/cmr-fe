@@ -1,4 +1,6 @@
 import { Geist_Mono, Public_Sans } from "next/font/google"
+import { NextIntlClientProvider } from "next-intl"
+import { getLocale } from "next-intl/server"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -12,22 +14,29 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Locale resolved from the request config (i18n/request.ts, cookie-based).
+  const locale = await getLocale()
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", publicSans.variable)}
     >
       <body>
-        <ThemeProvider>
-          <SiteHeader />
-          <main>{children}</main>
-        </ThemeProvider>
+        {/* No props: NextIntlClientProvider inherits locale + messages from the
+            request config and exposes them to Client Components. */}
+        <NextIntlClientProvider>
+          <ThemeProvider>
+            <SiteHeader />
+            <main>{children}</main>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

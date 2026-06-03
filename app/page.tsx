@@ -1,7 +1,12 @@
+import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+
 import { Button } from "@/components/ui/button";
 import { ApiHealthCheck } from "@/components/api-health-check";
 
-export default function Page() {
+export default async function Page() {
+  const t = await getTranslations("landing");
+
   return (
     <div className="relative overflow-hidden">
       {/* Soft indigo glow — subtle in light mode, luminous on the deep-indigo dark theme. */}
@@ -13,30 +18,34 @@ export default function Page() {
       <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-24 text-center sm:py-32">
         <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
           <span className="size-1.5 rounded-full bg-primary" />
-          Centro de Medicina Regenerativa
+          {t("badge")}
         </span>
 
         <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          Gestión clínica, simple y moderna
+          {t("title")}
         </h1>
 
         <p className="max-w-xl leading-relaxed text-balance text-muted-foreground">
-          Pacientes, citas y expedientes en un solo lugar. Una base shadcn/ui
-          lista para construir el sistema CMR.
+          {t("subtitle")}
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg">Iniciar sesión</Button>
+          <Button size="lg" asChild>
+            <Link href="/login">{t("signIn")}</Link>
+          </Button>
           <Button size="lg" variant="outline">
-            Ver componentes
+            {t("viewComponents")}
           </Button>
         </div>
 
         <ApiHealthCheck />
 
         <p className="font-mono text-xs text-muted-foreground">
-          Presiona <kbd className="rounded border px-1">d</kbd> para cambiar el
-          tema
+          {t.rich("themeHint", {
+            kbd: (chunks) => (
+              <kbd className="rounded border px-1">{chunks}</kbd>
+            ),
+          })}
         </p>
       </section>
     </div>

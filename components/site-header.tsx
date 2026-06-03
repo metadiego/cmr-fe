@@ -6,10 +6,13 @@ import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Menu01Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
 
+import { useTranslations } from "next-intl";
+
 import { cn } from "@/lib/utils";
 import { isActive, navItems } from "@/lib/nav";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
 import { SearchBar } from "@/components/search-bar";
 import {
   Sheet,
@@ -37,6 +40,7 @@ function Brand({ onNavigate }: { onNavigate?: () => void }) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations("nav");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -48,7 +52,7 @@ export function SiteHeader() {
               variant="ghost"
               size="icon"
               className="md:hidden"
-              aria-label="Abrir menú"
+              aria-label={t("openMenu")}
             >
               <HugeiconsIcon icon={Menu01Icon} />
             </Button>
@@ -76,13 +80,15 @@ export function SiteHeader() {
                       : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                   )}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               ))}
             </nav>
             <div className="mt-4 px-2">
-              <Button size="sm" className="w-full">
-                Iniciar sesión
+              <Button size="sm" className="w-full" asChild>
+                <Link href="/login" onClick={() => setOpen(false)}>
+                  {t("signIn")}
+                </Link>
               </Button>
             </div>
           </SheetContent>
@@ -104,7 +110,7 @@ export function SiteHeader() {
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </nav>
@@ -113,8 +119,9 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <SearchBar />
           <ModeToggle />
-          <Button size="sm" className="hidden sm:inline-flex">
-            Iniciar sesión
+          <LanguageToggle />
+          <Button size="sm" className="hidden sm:inline-flex" asChild>
+            <Link href="/login">{t("signIn")}</Link>
           </Button>
         </div>
       </div>

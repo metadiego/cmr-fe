@@ -1,0 +1,57 @@
+{
+  "common": {
+    "toggleTheme": "Toggle theme",
+    "all": "(all)"
+  },
+  "language": {
+    "label": "Language",
+    "es": "Spanish",
+    "en": "English"
+  },
+  "nav": {
+    "home": "Home",
+    "clients": "Clients",
+    "appointments": "Appointments",
+    "openMenu": "Open menu",
+    "signIn": "Sign in",
+    "search": "Search",
+    "searchPlaceholder": "Search…"
+  },
+  "landing": {
+    "badge": "Regenerative Medicine Center",
+    "title": "Clinical management, simple and modern",
+    "subtitle": "Patients, appointments and records in one place. A shadcn/ui base ready to build the CMR system.",
+    "signIn": "Sign in",
+    "viewComponents": "View components",
+    "themeHint": "Press <kbd>d</kbd> to toggle the theme"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Regenerative Medicine Center",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "you@email.com",
+    "signingIn": "Signing in…",
+    "signIn": "Sign in",
+    "backHome": "← Back to home",
+    "errorEmptyCredentials": "Enter your email and password."
+  },
+  "dashboard": {
+    "title": "Your session",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "loading": "Loading context…",
+    "loadError": "Could not load <code>/auth/me</code>: {message}"
+  },
+  "apiHealth": {
+    "title": "API connection test",
+    "test": "Test",
+    "testing": "Testing…",
+    "connected": "Connected · API healthy",
+    "offline": "No connection",
+    "errorTitle": "Error {status} · {code}",
+    "estado": "status",
+    "database": "database",
+    "corsHint": "Likely CORS block or unreachable backend: confirm the frontend origin is in the backend's <code>CORS_ORIGINS</code>."
+  }
+}

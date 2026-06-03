@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 
@@ -8,6 +11,8 @@ import { Input } from "@/components/ui/input";
 // input with a leading search icon and a ⌘K affordance. Wiring to a real search
 // is future work — this is the visual surface only.
 export function SearchBar({ className }: { className?: string }) {
+  const t = useTranslations("nav");
+
   return (
     <div className={cn("relative hidden md:block", className)}>
       <HugeiconsIcon
@@ -16,8 +21,8 @@ export function SearchBar({ className }: { className?: string }) {
       />
       <Input
         type="search"
-        placeholder="Buscar…"
-        aria-label="Buscar"
+        placeholder={t("searchPlaceholder")}
+        aria-label={t("search")}
         className="h-9 w-56 border-transparent bg-muted/60 pr-12 pl-9 hover:bg-muted focus-visible:bg-background lg:w-72"
       />
       <kbd className="pointer-events-none absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground select-none sm:flex">

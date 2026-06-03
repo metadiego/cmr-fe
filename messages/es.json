@@ -1,0 +1,57 @@
+{
+  "common": {
+    "toggleTheme": "Cambiar tema",
+    "all": "(todos)"
+  },
+  "language": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "Inglés"
+  },
+  "nav": {
+    "home": "Inicio",
+    "clients": "Clientes",
+    "appointments": "Citas",
+    "openMenu": "Abrir menú",
+    "signIn": "Iniciar sesión",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar…"
+  },
+  "landing": {
+    "badge": "Centro de Medicina Regenerativa",
+    "title": "Gestión clínica, simple y moderna",
+    "subtitle": "Pacientes, citas y expedientes en un solo lugar. Una base shadcn/ui lista para construir el sistema CMR.",
+    "signIn": "Iniciar sesión",
+    "viewComponents": "Ver componentes",
+    "themeHint": "Presiona <kbd>d</kbd> para cambiar el tema"
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "subtitle": "Centro de Medicina Regenerativa",
+    "email": "Email",
+    "password": "Contraseña",
+    "emailPlaceholder": "tu@correo.com",
+    "signingIn": "Entrando…",
+    "signIn": "Entrar",
+    "backHome": "← Volver al inicio",
+    "errorEmptyCredentials": "Ingresa email y contraseña."
+  },
+  "dashboard": {
+    "title": "Tu sesión",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Saliendo…",
+    "loading": "Cargando contexto…",
+    "loadError": "No se pudo cargar <code>/auth/me</code>: {message}"
+  },
+  "apiHealth": {
+    "title": "Prueba de conexión con el API",
+    "test": "Probar",
+    "testing": "Probando…",
+    "connected": "Conectado · API saludable",
+    "offline": "Sin conexión",
+    "errorTitle": "Error {status} · {code}",
+    "estado": "estado",
+    "database": "base de datos",
+    "corsHint": "Probable bloqueo CORS o backend inaccesible: confirma que el origen del frontend esté en <code>CORS_ORIGINS</code> del backend."
+  }
+}

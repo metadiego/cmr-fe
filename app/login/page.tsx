@@ -1,0 +1,72 @@
+"use client";
+
+import Link from "next/link";
+import { useActionState } from "react";
+import { useTranslations } from "next-intl";
+
+import { login, type LoginState } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+const initialState: LoginState = {};
+
+export default function LoginPage() {
+  const [state, formAction, pending] = useActionState(login, initialState);
+  const t = useTranslations("login");
+
+  return (
+    <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-6 py-16">
+      <div className="rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+        <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("subtitle")}
+        </p>
+
+        <form action={formAction} className="mt-6 space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="text-sm font-medium">
+              {t("email")}
+            </label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="username"
+              required
+              placeholder={t("emailPlaceholder")}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="text-sm font-medium">
+              {t("password")}
+            </label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+            />
+          </div>
+
+          {state.error && (
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {state.error}
+            </p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? t("signingIn") : t("signIn")}
+          </Button>
+        </form>
+      </div>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
+        <Link href="/" className="hover:text-foreground">
+          {t("backHome")}
+        </Link>
+      </p>
+    </div>
+  );
+}

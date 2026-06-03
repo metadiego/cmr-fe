@@ -1,15 +1,17 @@
 // lib/nav.ts
 export type NavItem = {
   href: string;
-  label: string;
+  // i18n key under the "nav" namespace (messages/<locale>.json). Resolved with
+  // t(item.labelKey) at render time.
+  labelKey: "home" | "clients" | "appointments";
 };
 
 // Single source of truth for primary navigation links.
 // Destination routes may not exist yet (they will 404 until built).
 export const navItems: NavItem[] = [
-  { href: "/", label: "Inicio" },
-  { href: "/clientes", label: "Clientes" },
-  { href: "/citas", label: "Citas" },
+  { href: "/", labelKey: "home" },
+  { href: "/clientes", labelKey: "clients" },
+  { href: "/citas", labelKey: "appointments" },
 ];
 
 // "/" is active only on the exact root; every other item is active on an exact
