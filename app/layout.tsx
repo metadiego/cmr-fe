@@ -1,7 +1,8 @@
-import { Geist, Geist_Mono, Public_Sans } from "next/font/google"
+import { Geist_Mono, Public_Sans } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SiteHeader } from "@/components/site-header";
 import { cn } from "@/lib/utils";
 
 const publicSans = Public_Sans({subsets:['latin'],variable:'--font-sans'})
@@ -23,7 +24,10 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", publicSans.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SiteHeader />
+          <main>{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   )

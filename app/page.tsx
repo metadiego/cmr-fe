@@ -1,19 +1,44 @@
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { ApiHealthCheck } from "@/components/api-health-check";
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
+    <div className="relative overflow-hidden">
+      {/* Soft indigo glow — subtle in light mode, luminous on the deep-indigo dark theme. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-0 left-1/2 -z-10 h-72 w-[44rem] max-w-full -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]"
+      />
+
+      <section className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-24 text-center sm:py-32">
+        <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-primary" />
+          Centro de Medicina Regenerativa
+        </span>
+
+        <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+          Gestión clínica, simple y moderna
+        </h1>
+
+        <p className="max-w-xl leading-relaxed text-balance text-muted-foreground">
+          Pacientes, citas y expedientes en un solo lugar. Una base shadcn/ui
+          lista para construir el sistema CMR.
+        </p>
+
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Button size="lg">Iniciar sesión</Button>
+          <Button size="lg" variant="outline">
+            Ver componentes
+          </Button>
         </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
+
+        <ApiHealthCheck />
+
+        <p className="font-mono text-xs text-muted-foreground">
+          Presiona <kbd className="rounded border px-1">d</kbd> para cambiar el
+          tema
+        </p>
+      </section>
     </div>
-  )
+  );
 }
