@@ -4,7 +4,9 @@ import { getLocale } from "next-intl/server"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { PresentationProvider } from "@/components/presentation-provider"
 import { SiteHeader } from "@/components/site-header";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
 const publicSans = Public_Sans({subsets:['latin'],variable:'--font-sans'})
@@ -33,8 +35,11 @@ export default async function RootLayout({
             request config and exposes them to Client Components. */}
         <NextIntlClientProvider>
           <ThemeProvider>
-            <SiteHeader />
-            <main>{children}</main>
+            <PresentationProvider>
+              <SiteHeader />
+              <main>{children}</main>
+              <Toaster />
+            </PresentationProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

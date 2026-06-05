@@ -1,7 +1,40 @@
 {
   "common": {
     "toggleTheme": "Toggle theme",
-    "all": "(all)"
+    "all": "(all)",
+    "loading": "Loading…"
+  },
+  "pending": {
+    "title": "Access pending",
+    "waiting": "Your account is pending approval. We'll let you know when it's ready.",
+    "rejected": "Your access was rejected. Contact the administrator.",
+    "suspended": "Your account is suspended. Contact the administrator.",
+    "signOut": "Sign out"
+  },
+  "password": {
+    "title": "Change your password",
+    "description": "Set a new password to continue.",
+    "newPassword": "New password",
+    "confirm": "Confirm password",
+    "tooShort": "Minimum {min} characters.",
+    "mismatch": "Passwords don't match.",
+    "submit": "Save",
+    "submitting": "Saving…",
+    "success": "Password updated."
+  },
+  "setPassword": {
+    "title": "Create your password",
+    "description": "Set your password to activate your account.",
+    "verifying": "Verifying your invitation…",
+    "invalid": "The invitation link is invalid or has expired.",
+    "backToLogin": "Go to sign in",
+    "newPassword": "Password",
+    "confirm": "Confirm password",
+    "tooShort": "Minimum {min} characters.",
+    "mismatch": "Passwords don't match.",
+    "submit": "Create password",
+    "submitting": "Saving…",
+    "success": "Password created."
   },
   "language": {
     "label": "Language",
@@ -15,7 +48,87 @@
     "openMenu": "Open menu",
     "signIn": "Sign in",
     "search": "Search",
-    "searchPlaceholder": "Search…"
+    "searchPlaceholder": "Search…",
+    "admin": "Admin",
+    "center": "Center"
+  },
+  "admin": {
+    "title": "Administration",
+    "loading": "Loading…",
+    "noAccess": "You don't have access to this section.",
+    "comingSoon": "Coming soon.",
+    "tabs": {
+      "pending": "Pending",
+      "users": "Users",
+      "centers": "Centers"
+    },
+    "columns": {
+      "email": "Email",
+      "name": "Name",
+      "accessMode": "Access mode",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "{email} approved.",
+    "rejected": "{email} rejected.",
+    "emptyPending": "No pending profiles.",
+    "rejectTitle": "Reject profile",
+    "rejectDescription": "Provide the reason for rejecting {email}.",
+    "motivoPlaceholder": "Rejection reason",
+    "confirmReject": "Reject",
+    "cancel": "Cancel",
+    "users": {
+      "invite": "Invite user",
+      "empty": "No users yet.",
+      "assign": "Assign center"
+    },
+    "invite": {
+      "title": "Invite user",
+      "description": "Creates the user and an approved profile in one step.",
+      "email": "Email",
+      "name": "First name",
+      "lastName": "Last name",
+      "accessMode": "Access mode",
+      "operativo": "Operational",
+      "gerencial": "Managerial",
+      "submit": "Invite",
+      "submitting": "Inviting…",
+      "success": "{email} invited.",
+      "emailSentTitle": "Invitation sent",
+      "emailSent": "We emailed {email} so they can set their password.",
+      "created": "User created.",
+      "tempTitle": "Temporary password",
+      "tempHint": "Copy it now — it won't be shown again.",
+      "noTemp": "No temporary password generated (a custom one was used).",
+      "copy": "Copy",
+      "copied": "Copied",
+      "assignNow": "Assign center",
+      "done": "Done"
+    },
+    "assign": {
+      "title": "Assign center",
+      "description": "Assign a center to {email}.",
+      "center": "Center",
+      "submit": "Assign",
+      "submitting": "Assigning…",
+      "success": "Center assigned to {email}.",
+      "noCenters": "No centers yet. Create one first."
+    },
+    "centers": {
+      "create": "Create center",
+      "empty": "No centers yet.",
+      "name": "Name",
+      "code": "Code",
+      "address": "Address",
+      "active": "Active",
+      "createTitle": "Create center",
+      "createDescription": "Register a new center.",
+      "submit": "Create",
+      "submitting": "Creating…",
+      "success": "Center {name} created."
+    }
   },
   "landing": {
     "badge": "Regenerative Medicine Center",

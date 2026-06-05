@@ -74,7 +74,7 @@ export function ApiHealthCheck() {
         <div
           className={cn(
             "mt-4 rounded-md border p-3",
-            ok && "border-emerald-500/30 bg-emerald-500/10",
+            ok && "border-success/30 bg-success/10",
             fail && "border-destructive/30 bg-destructive/10",
           )}
         >
@@ -82,7 +82,7 @@ export function ApiHealthCheck() {
             <span
               className={cn(
                 "size-2 rounded-full",
-                ok ? "bg-emerald-500" : "bg-destructive",
+                ok ? "bg-success" : "bg-destructive",
               )}
             />
             {ok ? t("connected") : fail ? result.title : null}

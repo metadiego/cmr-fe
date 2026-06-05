@@ -1,9 +1,12 @@
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
+import { getActiveCentro } from "@/lib/tenant";
 import { ApiError, type ApiEnvelope, type ApiErrorShape } from "./types";
 
 // Reads the current Supabase session (browser) and builds auth + tenant headers.
 // No session → no headers (the BE will respond 401, surfaced as an ApiError).
+// X-Tenant-ID comes from the user-selected active center (cookie), falling back
+// to the session's app_metadata.clinic_id.
 async function authHeaders(): Promise<Record<string, string>> {
   const supabase = createClient();
   const {
@@ -13,7 +16,7 @@ async function authHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
   if (session?.access_token) {
     headers["Authorization"] = `Bearer ${session.access_token}`;
-    const clinicId = session.user.app_metadata?.clinic_id;
+    const clinicId = getActiveCentro() ?? session.user.app_metadata?.clinic_id;
     if (clinicId) {
       headers["X-Tenant-ID"] = String(clinicId);
     }

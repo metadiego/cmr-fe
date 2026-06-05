@@ -10,9 +10,11 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { isActive, navItems } from "@/lib/nav";
+import { useMe, isAdmin } from "@/hooks/use-me";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { CenterSelector } from "@/components/center-selector";
 import { SearchBar } from "@/components/search-bar";
 import {
   Sheet,
@@ -41,6 +43,9 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const t = useTranslations("nav");
+  // Cosmetic: show the Admin link only to admins/master (BE enforces access).
+  const me = useMe();
+  const showAdmin = me.kind === "ok" && isAdmin(me.me);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -83,6 +88,20 @@ export function SiteHeader() {
                   {t(item.labelKey)}
                 </Link>
               ))}
+              {showAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive(pathname, "/admin")
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                  )}
+                >
+                  {t("admin")}
+                </Link>
+              )}
             </nav>
             <div className="mt-4 px-2">
               <Button size="sm" className="w-full" asChild>
@@ -113,10 +132,24 @@ export function SiteHeader() {
               {t(item.labelKey)}
             </Link>
           ))}
+          {showAdmin && (
+            <Link
+              href="/admin"
+              className={cn(
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                isActive(pathname, "/admin")
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t("admin")}
+            </Link>
+          )}
         </nav>
 
         {/* Right cluster: search, theme, primary action */}
         <div className="ml-auto flex items-center gap-2">
+          <CenterSelector />
           <SearchBar />
           <ModeToggle />
           <LanguageToggle />

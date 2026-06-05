@@ -20,8 +20,16 @@ export interface Me {
   accessMode: AccessMode;
   allowedClinicIds: string[];
   activeClinicId: string | null;
+  // true after an invite that generated a tempPassword — the FE forces a change.
+  mustChangePassword?: boolean;
 }
 
 export function getMe(): Promise<Me> {
   return apiFetch<Me>("/auth/me");
+}
+
+// Clears mustChangePassword in the BE after the user set a new password
+// (via Supabase auth.updateUser on the client).
+export function markPasswordChanged(): Promise<void> {
+  return apiFetch<void>("/auth/me/password-changed", { method: "POST" });
 }

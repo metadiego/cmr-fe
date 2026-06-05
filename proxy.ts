@@ -5,7 +5,11 @@ import { env } from "@/lib/env";
 // Next 16 renamed `middleware` to `proxy`. Refreshes the Supabase session cookie
 // AND gates access: every route is auth-by-default except the public allowlist —
 // the nav menu stays visible but its destinations aren't reachable without a session.
-const PUBLIC_PATHS = new Set(["/", "/login"]);
+// /auth/set-password is public: the invited user arrives via a magic link and
+// the session is established client-side (URL hash / PKCE code), so there's no
+// server cookie yet — gating it would bounce them to /login before they can set
+// their password.
+const PUBLIC_PATHS = new Set(["/", "/login", "/auth/set-password"]);
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });

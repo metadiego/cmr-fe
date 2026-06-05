@@ -1,7 +1,40 @@
 {
   "common": {
     "toggleTheme": "Cambiar tema",
-    "all": "(todos)"
+    "all": "(todos)",
+    "loading": "Cargando…"
+  },
+  "pending": {
+    "title": "Acceso pendiente",
+    "waiting": "Tu cuenta está pendiente de aprobación. Te avisaremos cuando esté lista.",
+    "rejected": "Tu acceso fue rechazado. Contacta al administrador.",
+    "suspended": "Tu cuenta está suspendida. Contacta al administrador.",
+    "signOut": "Cerrar sesión"
+  },
+  "password": {
+    "title": "Cambia tu contraseña",
+    "description": "Define una contraseña nueva para continuar.",
+    "newPassword": "Nueva contraseña",
+    "confirm": "Confirmar contraseña",
+    "tooShort": "Mínimo {min} caracteres.",
+    "mismatch": "Las contraseñas no coinciden.",
+    "submit": "Guardar",
+    "submitting": "Guardando…",
+    "success": "Contraseña actualizada."
+  },
+  "setPassword": {
+    "title": "Crea tu contraseña",
+    "description": "Define tu contraseña para activar tu cuenta.",
+    "verifying": "Verificando tu invitación…",
+    "invalid": "El enlace de invitación no es válido o ya expiró.",
+    "backToLogin": "Ir a iniciar sesión",
+    "newPassword": "Contraseña",
+    "confirm": "Confirmar contraseña",
+    "tooShort": "Mínimo {min} caracteres.",
+    "mismatch": "Las contraseñas no coinciden.",
+    "submit": "Crear contraseña",
+    "submitting": "Guardando…",
+    "success": "Contraseña creada."
   },
   "language": {
     "label": "Idioma",
@@ -15,7 +48,87 @@
     "openMenu": "Abrir menú",
     "signIn": "Iniciar sesión",
     "search": "Buscar",
-    "searchPlaceholder": "Buscar…"
+    "searchPlaceholder": "Buscar…",
+    "admin": "Administración",
+    "center": "Centro"
+  },
+  "admin": {
+    "title": "Administración",
+    "loading": "Cargando…",
+    "noAccess": "No tienes acceso a esta sección.",
+    "comingSoon": "Próximamente.",
+    "tabs": {
+      "pending": "Pendientes",
+      "users": "Usuarios",
+      "centers": "Centros"
+    },
+    "columns": {
+      "email": "Email",
+      "name": "Nombre",
+      "accessMode": "Modo de acceso",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "approved": "{email} aprobado.",
+    "rejected": "{email} rechazado.",
+    "emptyPending": "No hay perfiles pendientes.",
+    "rejectTitle": "Rechazar perfil",
+    "rejectDescription": "Indica el motivo del rechazo de {email}.",
+    "motivoPlaceholder": "Motivo del rechazo",
+    "confirmReject": "Rechazar",
+    "cancel": "Cancelar",
+    "users": {
+      "invite": "Invitar usuario",
+      "empty": "Aún no hay usuarios.",
+      "assign": "Asignar centro"
+    },
+    "invite": {
+      "title": "Invitar usuario",
+      "description": "Crea el usuario y su perfil aprobado en un paso.",
+      "email": "Email",
+      "name": "Nombre",
+      "lastName": "Apellido",
+      "accessMode": "Modo de acceso",
+      "operativo": "Operativo",
+      "gerencial": "Gerencial",
+      "submit": "Invitar",
+      "submitting": "Invitando…",
+      "success": "{email} invitado.",
+      "emailSentTitle": "Invitación enviada",
+      "emailSent": "Le enviamos un correo a {email} para que cree su contraseña.",
+      "created": "Usuario creado.",
+      "tempTitle": "Contraseña temporal",
+      "tempHint": "Cópiala ahora — no se volverá a mostrar.",
+      "noTemp": "No se generó contraseña temporal (se usó una propia).",
+      "copy": "Copiar",
+      "copied": "Copiada",
+      "assignNow": "Asignar centro",
+      "done": "Listo"
+    },
+    "assign": {
+      "title": "Asignar centro",
+      "description": "Asigna un centro a {email}.",
+      "center": "Centro",
+      "submit": "Asignar",
+      "submitting": "Asignando…",
+      "success": "Centro asignado a {email}.",
+      "noCenters": "Aún no hay centros. Crea uno primero."
+    },
+    "centers": {
+      "create": "Crear centro",
+      "empty": "Aún no hay centros.",
+      "name": "Nombre",
+      "code": "Código",
+      "address": "Dirección",
+      "active": "Activo",
+      "createTitle": "Crear centro",
+      "createDescription": "Registra un nuevo centro.",
+      "submit": "Crear",
+      "submitting": "Creando…",
+      "success": "Centro {name} creado."
+    }
   },
   "landing": {
     "badge": "Centro de Medicina Regenerativa",
