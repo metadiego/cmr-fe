@@ -8,6 +8,7 @@ import { login, type LoginState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { ForgotPasswordDialog } from "@/components/auth/forgot-password-dialog";
 
 const initialState: LoginState = {};
 
@@ -49,6 +50,10 @@ export default function LoginPage() {
               autoComplete="current-password"
               required
             />
+          </div>
+
+          <div className="flex justify-end">
+            <ForgotPasswordDialog />
           </div>
 
           {state.error && (

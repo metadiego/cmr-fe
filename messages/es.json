@@ -217,7 +217,14 @@
     "signingIn": "Entrando…",
     "signIn": "Entrar",
     "backHome": "← Volver al inicio",
-    "errorEmptyCredentials": "Ingresa email y contraseña."
+    "errorEmptyCredentials": "Ingresa email y contraseña.",
+    "forgot": "¿Olvidaste tu contraseña?",
+    "forgotTitle": "Recuperar contraseña",
+    "forgotDescription": "Te enviaremos un enlace a tu correo para crear una nueva.",
+    "forgotSend": "Enviar enlace",
+    "forgotSending": "Enviando…",
+    "forgotSent": "Si el correo existe, te enviamos un enlace.",
+    "cancel": "Cancelar"
   },
   "dashboard": {
     "title": "Tu sesión",
