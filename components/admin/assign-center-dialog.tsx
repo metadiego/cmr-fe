@@ -8,6 +8,7 @@ import { assignCenter, type Perfil } from "@/lib/api/profiles";
 import { getCenters, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -92,7 +93,7 @@ export function AssignCenterDialog({
           <p className="text-sm text-muted-foreground">{t("noCenters")}</p>
         ) : (
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">{t("center")}</label>
+            <Label>{t("center")}</Label>
             <Select value={centroId} onValueChange={setCentroId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("center")} />

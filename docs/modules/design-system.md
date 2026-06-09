@@ -46,7 +46,26 @@ destroying it**. If a component hardcodes a color, the override can't reach it �
 - Provider paints client-side (brief default for custom themes; SSR injection = future optimization).
 - Overlay token carries its own alpha so modal backdrops are themeable.
 
+## Personalization UI (theming por capas)
+Spec: `docs/specs/2026-06-05-theming-ui-design.md`. Reusable editor over `ThemeConfig`:
+- `components/theme/theme-editor.tsx` — controlled editor (primary/accent/background color +
+  radius preset) with **live preview** (writes the CSS vars on `<html>`); parent persists + reloads.
+- **Part 1 (done):** `app/(app)/settings/appearance/page.tsx` — user layer: `getMyPreferences()`
+  (`layers.usuario`) → edit → `updateMyPreferences(config)`; Reset saves `{}`. i18n `appearance.*`;
+  link from the dashboard.
+- **Part 2 (done):** `components/admin/theme-settings.tsx` — **Theme** tab in `/admin`. System layer
+  (`/preferences/system`) + per-center (`/preferences/centro/:id`), reusing ThemeEditor via a keyed
+  `LayerThemeForm` (remount per layer; no setState-in-effect). i18n `admin.theme.*`. BE GET/PUT return
+  the layer's `config` blob; `lib/api/preferences.ts` has `get/updateSystemPreferences`,
+  `get/updateCentroPreferences` (+ `listOverrides/createOverride/deleteOverride` for Part 3).
+
+- **Part 3 (done):** `components/admin/override-settings.tsx` — corporate **override** (master/
+  super_admin), rendered in the Theme tab only when `isMaster`. List (name · scope global/center ·
+  vigencia) + remove; create dialog (ThemeEditor + name + scope select + vigencia date inputs) →
+  `createOverride`. The BE resolves precedence so the effective wins without deleting lower layers.
+  i18n `admin.override.*`.
+
 ## Pending / follow-on (BE ready)
-- User personalization UI (`PUT /me/preferences`).
-- Admin theme panel (system + per-center) and corporate **override** management (with vigencia).
 - SSR injection of the effective theme to remove the first-paint flash for custom themes.
+- ThemeEditor live-preview writes vars to `<html>` and doesn't revert on layer switch until reload
+  (reload-on-save makes it authoritative).

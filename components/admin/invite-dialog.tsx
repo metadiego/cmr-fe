@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/profiles";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -75,6 +76,7 @@ export function InviteDialog({
         nombre: nombre.trim(),
         apellido: apellido.trim() || undefined,
         accessMode,
+        redirectTo: `${window.location.origin}/auth/set-password`,
       });
       toast.success(t("success", { email: res.email }));
       onInvited?.();
@@ -209,7 +211,7 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium">{label}</label>
+      <Label>{label}</Label>
       {children}
     </div>
   );

@@ -40,6 +40,9 @@ export interface InvitePayload {
   // BE accepts operativo|gerencial here (admin/master is reserved for the master).
   accessMode?: Extract<AccessMode, "operativo" | "gerencial">;
   password?: string;
+  // Where the Supabase invite magic link should land (the FE set-password page).
+  // Sent per-request so it works in any environment (dev :8080 / prod Vercel).
+  redirectTo?: string;
 }
 
 // Invite without password → the BE sends a Supabase invitation email and

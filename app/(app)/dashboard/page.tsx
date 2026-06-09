@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -52,14 +53,19 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-2xl px-6 py-12">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={logout}
-          disabled={signingOut}
-        >
-          {signingOut ? t("signingOut") : t("signOut")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/settings/appearance">{t("appearance")}</Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={logout}
+            disabled={signingOut}
+          >
+            {signingOut ? t("signingOut") : t("signOut")}
+          </Button>
+        </div>
       </div>
 
       <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">

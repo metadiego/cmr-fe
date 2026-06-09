@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { getCenters, createCenter, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -168,15 +169,15 @@ function CreateCenterDialog({
 
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">{t("centers.name")}</label>
+            <Label>{t("centers.name")}</Label>
             <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">{t("centers.code")}</label>
+            <Label>{t("centers.code")}</Label>
             <Input value={codigo} onChange={(e) => setCodigo(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">{t("centers.address")}</label>
+            <Label>{t("centers.address")}</Label>
             <Input
               value={direccion}
               onChange={(e) => setDireccion(e.target.value)}

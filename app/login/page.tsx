@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { login, type LoginState } from "./actions";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const initialState: LoginState = {};
@@ -24,9 +25,9 @@ export default function LoginPage() {
 
         <form action={formAction} className="mt-6 space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-sm font-medium">
+            <Label htmlFor="email">
               {t("email")}
-            </label>
+            </Label>
             <Input
               id="email"
               name="email"
@@ -38,9 +39,9 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-sm font-medium">
+            <Label htmlFor="password">
               {t("password")}
-            </label>
+            </Label>
             <Input
               id="password"
               name="password"

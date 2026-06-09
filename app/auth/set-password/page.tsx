@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const MIN_LENGTH = 8;
@@ -17,15 +18,28 @@ const MIN_LENGTH = 8;
 // a PKCE ?code=); once it's established the invited user sets their own password.
 export default function SetPasswordPage() {
   const t = useTranslations("setPassword");
+  // Guard: only a real invite/recovery link is valid here. Capture the URL tokens
+  // at first render, before @supabase/ssr processes and clears the hash. Without a
+  // token we refuse — a normal logged-in session must NOT be able to change its
+  // password on this page (that caused the master-password incident).
+  const [hasAuthLink] = React.useState(() => {
+    if (typeof window === "undefined") return false;
+    const hasHashToken = /access_token=|type=(invite|recovery)/.test(
+      window.location.hash,
+    );
+    const hasCode = new URLSearchParams(window.location.search).has("code");
+    return hasHashToken || hasCode;
+  });
   const supabase = React.useMemo(() => createClient(), []);
   const [phase, setPhase] = React.useState<"verifying" | "ready" | "invalid">(
-    "verifying",
+    hasAuthLink ? "verifying" : "invalid",
   );
   const [password, setPassword] = React.useState("");
   const [confirm, setConfirm] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
+    if (!hasAuthLink) return;
     let settled = false;
     const ready = () => {
       if (!settled) {
@@ -59,7 +73,7 @@ export default function SetPasswordPage() {
       clearTimeout(timer);
       sub.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, hasAuthLink]);
 
   const tooShort = password.length > 0 && password.length < MIN_LENGTH;
   const mismatch = confirm.length > 0 && password !== confirm;
@@ -107,9 +121,9 @@ export default function SetPasswordPage() {
             </p>
             <form onSubmit={onSubmit} className="mt-6 space-y-4">
               <div className="space-y-1.5">
-                <label htmlFor="password" className="text-sm font-medium">
+                <Label htmlFor="password">
                   {t("newPassword")}
-                </label>
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -126,9 +140,9 @@ export default function SetPasswordPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="confirm" className="text-sm font-medium">
+                <Label htmlFor="confirm">
                   {t("confirm")}
-                </label>
+                </Label>
                 <Input
                   id="confirm"
                   type="password"

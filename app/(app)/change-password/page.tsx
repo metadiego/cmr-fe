@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { markPasswordChanged } from "@/lib/api/auth";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const MIN_LENGTH = 8;
@@ -52,9 +53,9 @@ export default function ChangePasswordPage() {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-sm font-medium">
+            <Label htmlFor="password">
               {t("newPassword")}
-            </label>
+            </Label>
             <Input
               id="password"
               type="password"
@@ -71,9 +72,9 @@ export default function ChangePasswordPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="confirm" className="text-sm font-medium">
+            <Label htmlFor="confirm">
               {t("confirm")}
-            </label>
+            </Label>
             <Input
               id="confirm"
               type="password"

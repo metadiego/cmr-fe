@@ -2,15 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Menu01Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
 
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import { isActive, navItems } from "@/lib/nav";
-import { useMe, isAdmin } from "@/hooks/use-me";
+import { isActive } from "@/lib/nav";
+import { useMenu } from "@/hooks/use-menu";
+import { useMe } from "@/hooks/use-me";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
@@ -41,11 +43,25 @@ function Brand({ onNavigate }: { onNavigate?: () => void }) {
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [signingOut, setSigningOut] = React.useState(false);
   const t = useTranslations("nav");
-  // Cosmetic: show the Admin link only to admins/master (BE enforces access).
+  // Root translator for menu labelKeys (full keys like "nav.home").
+  const tRoot = useTranslations();
+  // Dynamic, RBAC-filtered nav from the BE (#6). Empty when unauthenticated.
+  const menu = useMenu();
+  const topLevel = menu.filter((item) => !item.parentClave);
+  // Session for the header (email + sign out). Anonymous → shows "sign in".
   const me = useMe();
-  const showAdmin = me.kind === "ok" && isAdmin(me.me);
+  const session = me.kind === "ok" ? me.me : null;
+
+  async function signOut() {
+    setSigningOut(true);
+    await createClient().auth.signOut();
+    setOpen(false);
+    router.replace("/login");
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -73,42 +89,45 @@ export function SiteHeader() {
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
-              {navItems.map((item) => (
+              {topLevel.map((item) => (
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  key={item.clave}
+                  href={item.path}
                   onClick={() => setOpen(false)}
                   className={cn(
                     "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive(pathname, item.href)
+                    isActive(pathname, item.path)
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                   )}
                 >
-                  {t(item.labelKey)}
+                  {tRoot(item.labelKey)}
                 </Link>
               ))}
-              {showAdmin && (
-                <Link
-                  href="/admin"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive(pathname, "/admin")
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                  )}
-                >
-                  {t("admin")}
-                </Link>
-              )}
             </nav>
-            <div className="mt-4 px-2">
-              <Button size="sm" className="w-full" asChild>
-                <Link href="/login" onClick={() => setOpen(false)}>
-                  {t("signIn")}
-                </Link>
-              </Button>
+            <div className="mt-4 space-y-2 px-2">
+              {session ? (
+                <>
+                  <p className="truncate px-3 text-sm text-muted-foreground">
+                    {session.email}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={signOut}
+                    disabled={signingOut}
+                  >
+                    {signingOut ? t("signingOut") : t("signOut")}
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" className="w-full" asChild>
+                  <Link href="/login" onClick={() => setOpen(false)}>
+                    {t("signIn")}
+                  </Link>
+                </Button>
+              )}
             </div>
           </SheetContent>
         </Sheet>
@@ -116,35 +135,22 @@ export function SiteHeader() {
         {/* Brand */}
         <Brand />
 
-        {/* Desktop nav — flat text links, like the shadcn docs bar */}
+        {/* Desktop nav — dynamic, RBAC-filtered from the BE (#6) */}
         <nav className="hidden items-center gap-1 md:flex">
-          {navItems.map((item) => (
+          {topLevel.map((item) => (
             <Link
-              key={item.href}
-              href={item.href}
+              key={item.clave}
+              href={item.path}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive(pathname, item.href)
+                isActive(pathname, item.path)
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {t(item.labelKey)}
+              {tRoot(item.labelKey)}
             </Link>
           ))}
-          {showAdmin && (
-            <Link
-              href="/admin"
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive(pathname, "/admin")
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t("admin")}
-            </Link>
-          )}
         </nav>
 
         {/* Right cluster: search, theme, primary action */}
@@ -153,9 +159,25 @@ export function SiteHeader() {
           <SearchBar />
           <ModeToggle />
           <LanguageToggle />
-          <Button size="sm" className="hidden sm:inline-flex" asChild>
-            <Link href="/login">{t("signIn")}</Link>
-          </Button>
+          {session ? (
+            <div className="hidden items-center gap-2 sm:flex">
+              <span className="max-w-[12rem] truncate text-sm text-muted-foreground">
+                {session.email}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={signOut}
+                disabled={signingOut}
+              >
+                {signingOut ? t("signingOut") : t("signOut")}
+              </Button>
+            </div>
+          ) : (
+            <Button size="sm" className="hidden sm:inline-flex" asChild>
+              <Link href="/login">{t("signIn")}</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>

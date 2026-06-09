@@ -30,10 +30,71 @@ export function getMyPreferences(): Promise<MyPreferences> {
   return apiFetch<MyPreferences>("/me/preferences");
 }
 
-// Follow-on (BE ready): the user's own personalization layer.
-export function updateMyPreferences(config: ThemeConfig): Promise<MyPreferences> {
-  return apiFetch<MyPreferences>("/me/preferences", {
+// The user's own personalization layer. PUT returns the saved config blob.
+export function updateMyPreferences(config: ThemeConfig): Promise<ThemeConfig> {
+  return apiFetch<ThemeConfig>("/me/preferences", {
     method: "PUT",
     body: JSON.stringify({ config }),
   });
+}
+
+// --- Admin layers (admin/master). GET/PUT return the layer's config blob. ---
+
+export function getSystemPreferences(): Promise<ThemeConfig> {
+  return apiFetch<ThemeConfig>("/preferences/system");
+}
+
+export function updateSystemPreferences(config: ThemeConfig): Promise<ThemeConfig> {
+  return apiFetch<ThemeConfig>("/preferences/system", {
+    method: "PUT",
+    body: JSON.stringify({ config }),
+  });
+}
+
+export function getCentroPreferences(centroId: string): Promise<ThemeConfig> {
+  return apiFetch<ThemeConfig>(`/preferences/centro/${centroId}`);
+}
+
+export function updateCentroPreferences(
+  centroId: string,
+  config: ThemeConfig,
+): Promise<ThemeConfig> {
+  return apiFetch<ThemeConfig>(`/preferences/centro/${centroId}`, {
+    method: "PUT",
+    body: JSON.stringify({ config }),
+  });
+}
+
+// --- Corporate override (master / super_admin). ---
+
+export interface Override {
+  id: string;
+  nombre?: string | null;
+  centroId?: string | null;
+  vigenteDesde?: string | null;
+  vigenteHasta?: string | null;
+  config: ThemeConfig;
+}
+
+export interface CreateOverridePayload {
+  config: ThemeConfig;
+  centroId?: string;
+  vigenteDesde?: string;
+  vigenteHasta?: string;
+  nombre?: string;
+}
+
+export function listOverrides(): Promise<Override[]> {
+  return apiFetch<Override[]>("/preferences/override");
+}
+
+export function createOverride(payload: CreateOverridePayload): Promise<Override> {
+  return apiFetch<Override>("/preferences/override", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteOverride(id: string): Promise<void> {
+  return apiFetch<void>(`/preferences/override/${id}`, { method: "DELETE" });
 }
