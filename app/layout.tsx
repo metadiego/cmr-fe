@@ -5,6 +5,7 @@ import { getLocale } from "next-intl/server"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { PresentationProvider } from "@/components/presentation-provider"
+import { RecoveryRedirect } from "@/components/auth/recovery-redirect"
 import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ export default async function RootLayout({
         {/* No props: NextIntlClientProvider inherits locale + messages from the
             request config and exposes them to Client Components. */}
         <NextIntlClientProvider>
+          <RecoveryRedirect />
           <ThemeProvider>
             <PresentationProvider>
               <SiteHeader />
