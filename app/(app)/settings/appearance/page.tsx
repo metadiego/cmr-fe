@@ -9,22 +9,27 @@ import {
   updateMyPreferences,
 } from "@/lib/api/preferences";
 import type { ThemeConfig } from "@/lib/theme/config";
+import { uploadMedia } from "@/lib/api/media";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { ThemeEditor } from "@/components/theme/theme-editor";
+import { AvatarUploader } from "@/components/media/avatar-uploader";
 
 type State =
   | { kind: "loading" }
   | { kind: "ok"; config: ThemeConfig }
   | { kind: "fail"; message: string };
 
-// User personalization (config por capas #51 — the `usuario` layer). Edits are
-// previewed live by ThemeEditor; Save persists via PUT /me/preferences and
-// reloads so the PresentationProvider paints the authoritative effective theme.
+// User personalization (config por capas #51 — the `usuario` layer): avatar
+// (profile), theme colors/radius, and a background image. Edits are previewed
+// live; Save persists via PUT /me/preferences and reloads so PresentationProvider
+// paints the authoritative effective theme.
 export default function AppearancePage() {
   const t = useTranslations("appearance");
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [busy, setBusy] = React.useState(false);
+  const bgInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     let active = true;
@@ -54,11 +59,53 @@ export default function AppearancePage() {
     }
   }
 
+  async function onBgFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || state.kind !== "ok") return;
+    setBusy(true);
+    let url: string;
+    try {
+      url = await uploadMedia("background", file);
+    } catch (err) {
+      toast.error(apiErrorMessage(err));
+      setBusy(false);
+      return;
+    }
+    await persist(
+      {
+        ...state.config,
+        background: { ...state.config.background, imageUrl: url },
+      },
+      t("backgroundSaved"),
+    );
+  }
+
+  function removeBackground() {
+    if (state.kind !== "ok") return;
+    persist(
+      {
+        ...state.config,
+        background: { ...state.config.background, imageUrl: undefined },
+      },
+      t("backgroundRemoved"),
+    );
+  }
+
+  const hasBackground = state.kind === "ok" && !!state.config.background?.imageUrl;
+
   return (
     <div className="mx-auto max-w-md px-6 py-12">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
 
+      {/* Avatar (profile media, independent of the theme layers) */}
+      <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+        <h2 className="mb-4 text-sm font-medium">{t("avatarTitle")}</h2>
+        <AvatarUploader />
+      </div>
+
+      {/* Theme + background (the user preferences layer) */}
       <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
         {state.kind === "loading" && (
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
@@ -76,6 +123,38 @@ export default function AppearancePage() {
               value={state.config}
               onChange={(config) => setState({ kind: "ok", config })}
             />
+
+            <div className="mt-6 space-y-2">
+              <Label>{t("backgroundTitle")}</Label>
+              <input
+                ref={bgInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={onBgFile}
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => bgInputRef.current?.click()}
+                  disabled={busy}
+                >
+                  {hasBackground ? t("backgroundChange") : t("backgroundUpload")}
+                </Button>
+                {hasBackground && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={removeBackground}
+                    disabled={busy}
+                  >
+                    {t("backgroundRemove")}
+                  </Button>
+                )}
+              </div>
+            </div>
+
             <div className="mt-6 flex gap-2">
               <Button
                 onClick={() => persist(state.config, t("saved"))}

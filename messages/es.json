@@ -244,7 +244,19 @@
     "saving": "Guardando…",
     "reset": "Restablecer",
     "saved": "Apariencia guardada.",
-    "resetDone": "Apariencia restablecida."
+    "resetDone": "Apariencia restablecida.",
+    "avatarTitle": "Foto de perfil",
+    "avatarUpload": "Subir foto",
+    "avatarRemove": "Quitar",
+    "avatarSaved": "Foto actualizada.",
+    "avatarRemoved": "Foto eliminada.",
+    "uploading": "Subiendo…",
+    "backgroundTitle": "Imagen de fondo",
+    "backgroundUpload": "Subir imagen",
+    "backgroundChange": "Cambiar imagen",
+    "backgroundRemove": "Quitar fondo",
+    "backgroundSaved": "Fondo actualizado.",
+    "backgroundRemoved": "Fondo eliminado."
   },
   "apiHealth": {
     "title": "Prueba de conexión con el API",

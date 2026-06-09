@@ -244,7 +244,19 @@
     "saving": "Saving…",
     "reset": "Reset",
     "saved": "Appearance saved.",
-    "resetDone": "Appearance reset."
+    "resetDone": "Appearance reset.",
+    "avatarTitle": "Profile photo",
+    "avatarUpload": "Upload photo",
+    "avatarRemove": "Remove",
+    "avatarSaved": "Photo updated.",
+    "avatarRemoved": "Photo removed.",
+    "uploading": "Uploading…",
+    "backgroundTitle": "Background image",
+    "backgroundUpload": "Upload image",
+    "backgroundChange": "Change image",
+    "backgroundRemove": "Remove background",
+    "backgroundSaved": "Background updated.",
+    "backgroundRemoved": "Background removed."
   },
   "apiHealth": {
     "title": "API connection test",

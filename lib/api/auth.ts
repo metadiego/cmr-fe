@@ -22,6 +22,8 @@ export interface Me {
   activeClinicId: string | null;
   // true after an invite that generated a tempPassword — the FE forces a change.
   mustChangePassword?: boolean;
+  // Public URL of the user's avatar (Supabase Storage), or null.
+  avatarUrl?: string | null;
 }
 
 export function getMe(): Promise<Me> {

@@ -38,6 +38,11 @@ export interface ThemeConfig {
     sans?: string;
     heading?: string;
   };
+  /** Page background media (Supabase Storage public URLs). */
+  background?: {
+    imageUrl?: string;
+    videoUrl?: string; // applied by the FE separately (future); not a CSS var
+  };
 }
 
 // camelCase token key → CSS custom property in globals.css.
@@ -81,6 +86,10 @@ export function configToCssVars(config: ThemeConfig | null | undefined): Record<
   if (config.radius) vars["--radius"] = config.radius;
   if (config.font?.sans) vars["--font-sans"] = config.font.sans;
   if (config.font?.heading) vars["--font-heading"] = config.font.heading;
+  if (config.background?.imageUrl) {
+    // CSS.escape isn't needed for a URL inside url("…"); quote it.
+    vars["--app-bg-image"] = `url("${config.background.imageUrl}")`;
+  }
 
   return vars;
 }

@@ -14,6 +14,7 @@ import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { CenterSelector } from "@/components/center-selector";
@@ -161,6 +162,14 @@ export function SiteHeader() {
           <LanguageToggle />
           {session ? (
             <div className="hidden items-center gap-2 sm:flex">
+              <Avatar className="size-7">
+                {session.avatarUrl ? (
+                  <AvatarImage src={session.avatarUrl} alt="" />
+                ) : null}
+                <AvatarFallback className="text-xs">
+                  {(session.email ?? "?").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               <span className="max-w-[12rem] truncate text-sm text-muted-foreground">
                 {session.email}
               </span>
