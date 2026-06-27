@@ -13,7 +13,7 @@ export interface ListPacientesParams {
   q?: string;
 }
 
-// GET /pacientes — paginated; `q` searches name/cedula/etc. Tenant-scoped by the
+// GET /pacientes — paginated; `q` searches name/docId/etc. Tenant-scoped by the
 // active center header (handled in apiFetch).
 export function listPacientes(
   params: ListPacientesParams = {},

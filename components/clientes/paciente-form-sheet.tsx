@@ -40,7 +40,7 @@ type Sexo = "M" | "F" | "otro";
 type FormState = {
   nombres: string;
   apellidos: string;
-  cedula: string;
+  docId: string;
   sexo: "" | Sexo;
   fechaNacimiento: string;
   nacionalidad: string;
@@ -56,7 +56,7 @@ type FormState = {
 const EMPTY: FormState = {
   nombres: "",
   apellidos: "",
-  cedula: "",
+  docId: "",
   sexo: "",
   fechaNacimiento: "",
   nacionalidad: "",
@@ -73,7 +73,7 @@ function fromPaciente(p: Paciente): FormState {
   return {
     nombres: p.nombres ?? "",
     apellidos: p.apellidos ?? "",
-    cedula: p.cedula ?? "",
+    docId: p.docId ?? "",
     sexo: (p.sexo as Sexo | null) ?? "",
     fechaNacimiento: p.fechaNacimiento?.slice(0, 10) ?? "",
     nacionalidad: p.nacionalidad ?? "",
@@ -93,7 +93,7 @@ function toPayload(f: FormState): CreatePacientePayload {
   return {
     nombres: f.nombres.trim(),
     apellidos: t(f.apellidos),
-    cedula: t(f.cedula),
+    docId: t(f.docId),
     sexo: f.sexo || undefined,
     fechaNacimiento: t(f.fechaNacimiento),
     nacionalidad: t(f.nacionalidad),
@@ -229,10 +229,10 @@ export function PacienteFormSheet({
                   onChange={(e) => set("apellidos", e.target.value)}
                 />
               </Field>
-              <Field label={t("cedula")}>
+              <Field label={t("docId")}>
                 <Input
-                  value={form.cedula}
-                  onChange={(e) => set("cedula", e.target.value)}
+                  value={form.docId}
+                  onChange={(e) => set("docId", e.target.value)}
                 />
               </Field>
               <Field label={t("sexo")}>

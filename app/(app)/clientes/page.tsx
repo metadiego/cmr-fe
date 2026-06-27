@@ -43,7 +43,7 @@ export default function ClientesPage() {
   function matches(p: Paciente): boolean {
     const needle = q.trim().toLowerCase();
     if (!needle) return true;
-    return [p.nombres, p.apellidos, p.cedula, p.telefono, p.email]
+    return [p.nombres, p.apellidos, p.docId, p.telefono, p.email]
       .filter(Boolean)
       .some((v) => v!.toLowerCase().includes(needle));
   }
@@ -70,7 +70,7 @@ export default function ClientesPage() {
         </span>
       ),
     },
-    { key: "cedula", header: t("columns.cedula"), cell: (p) => p.cedula ?? "—" },
+    { key: "docId", header: t("columns.docId"), cell: (p) => p.docId ?? "—" },
     { key: "phone", header: t("columns.phone"), cell: (p) => p.telefono ?? "—" },
     { key: "email", header: t("columns.email"), cell: (p) => p.email ?? "—" },
     {

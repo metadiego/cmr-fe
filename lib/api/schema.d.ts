@@ -3563,6 +3563,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ahora-mismo/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream SSE de invalidaciones del centro: el FE re-pide el snapshot (debounced). */
+        get: operations["AhoraMismoController_stream_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/ahora-mismo": {
         parameters: {
             query?: never;
@@ -3570,7 +3587,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** Snapshot del día del centro activo (fuentes según preferencias). */
         get: operations["AhoraMismoController_delDia_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ahora-mismo/centros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Snapshot por centro de los centros alcanzables del principal + combinado. */
+        get: operations["AhoraMismoController_delDiaCentros_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4859,7 +4894,7 @@ export interface components {
         CreatePacienteDto: {
             nombres: string;
             apellidos?: string;
-            cedula?: string;
+            docId?: string;
             /** @enum {string} */
             sexo?: "M" | "F" | "otro";
             fechaNacimiento?: string;
@@ -4879,7 +4914,7 @@ export interface components {
         PacienteEntity: {
             nombres: string;
             apellidos: string | null;
-            cedula: string | null;
+            docId: string | null;
             /** @enum {string|null} */
             sexo: "M" | "F" | "otro" | null;
             fechaNacimiento: string | null;
@@ -4904,7 +4939,7 @@ export interface components {
         UpdatePacienteDto: {
             nombres?: string;
             apellidos?: string;
-            cedula?: string;
+            docId?: string;
             /** @enum {string} */
             sexo?: "M" | "F" | "otro";
             fechaNacimiento?: string;
@@ -12890,7 +12925,47 @@ export interface operations {
             };
         };
     };
+    AhoraMismoController_stream_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     AhoraMismoController_delDia_v1: {
+        parameters: {
+            query?: {
+                fecha?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    AhoraMismoController_delDiaCentros_v1: {
         parameters: {
             query?: {
                 fecha?: string;

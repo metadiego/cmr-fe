@@ -16,7 +16,7 @@
     "yearsOld": "{age} años",
     "columns": {
       "name": "Nombre",
-      "cedula": "ID",
+      "docId": "ID",
       "phone": "Teléfono",
       "email": "Email",
       "status": "Estado"
@@ -33,7 +33,7 @@
       "sectionClinical": "Información clínica",
       "nombres": "Nombres",
       "apellidos": "Apellidos",
-      "cedula": "ID",
+      "docId": "ID",
       "sexo": "Sexo",
       "sexoPlaceholder": "Selecciona…",
       "sexoM": "Masculino",

@@ -156,9 +156,9 @@ function PacienteDetail({
             {fullName(p)}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {p.cedula && (
+            {p.docId && (
               <Badge variant="outline" className="font-mono">
-                ID {p.cedula}
+                ID {p.docId}
               </Badge>
             )}
             {p.activo ? (
