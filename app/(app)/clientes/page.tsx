@@ -25,13 +25,10 @@ export default function ClientesPage() {
   const [q, setQ] = React.useState("");
   const [createOpen, setCreateOpen] = React.useState(false);
 
-  // NOTE: server-side search (`q`) is not yet deployed on the prod BE (returns
-  // 400 "property q should not exist"), so we fetch unfiltered and filter the
-  // loaded page client-side for now. Switch back to passing `q` to listPacientes
-  // once the BE supports it in prod.
+  // Server-side search: the BE filters by name/docId/phone/etc via `q`.
   const { state, reload } = useResource<Paginated<Paciente>>(
-    () => listPacientes({ page, limit: LIMIT }),
-    [page],
+    () => listPacientes({ page, limit: LIMIT, q }),
+    [page, q],
   );
 
   function onSearch(value: string) {
@@ -39,24 +36,12 @@ export default function ClientesPage() {
     setQ(value);
   }
 
-  // Client-side filter over the current page (interim, until server `q` lands).
-  function matches(p: Paciente): boolean {
-    const needle = q.trim().toLowerCase();
-    if (!needle) return true;
-    return [p.nombres, p.apellidos, p.docId, p.telefono, p.email]
-      .filter(Boolean)
-      .some((v) => v!.toLowerCase().includes(needle));
-  }
-
   // DataTable renders a rows array + an optional pagination footer; split the
   // Paginated result into those two shapes.
   const rows: ResourceState<Paciente[]> =
-    state.kind === "ok"
-      ? { kind: "ok", data: state.data.items.filter(matches) }
-      : state;
-  // Hide the pagination footer while a search term narrows the current page.
+    state.kind === "ok" ? { kind: "ok", data: state.data.items } : state;
   const pagination =
-    state.kind === "ok" && !q.trim()
+    state.kind === "ok"
       ? { meta: state.data.pagination, onPageChange: setPage }
       : undefined;
 
