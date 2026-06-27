@@ -8,6 +8,7 @@ import {
   getRoles,
   getPermisos,
   createRole,
+  updateRole,
   deleteRole,
   setRolePermisos,
   type Rol,
@@ -49,6 +50,7 @@ export function RbacSettings() {
   const [permisos, setPermisos] = React.useState<Permiso[]>([]);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [permisosFor, setPermisosFor] = React.useState<Rol | null>(null);
+  const [editFor, setEditFor] = React.useState<Rol | null>(null);
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
   const load = React.useCallback(async () => {
@@ -140,6 +142,15 @@ export function RbacSettings() {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => setEditFor(r)}
+                    >
+                      {t("edit")}
+                    </Button>
+                  )}
+                  {!r.esSistema && (
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => onDelete(r)}
                       disabled={busyId === r.id}
                     >
@@ -164,7 +175,79 @@ export function RbacSettings() {
         permisos={permisos}
         onOpenChange={(open) => !open && setPermisosFor(null)}
       />
+      <EditRoleDialog
+        key={editFor?.id ?? "edit-none"}
+        role={editFor}
+        onOpenChange={(open) => !open && setEditFor(null)}
+        onSaved={load}
+      />
     </section>
+  );
+}
+
+function EditRoleDialog({
+  role,
+  onOpenChange,
+  onSaved,
+}: {
+  role: Rol | null;
+  onOpenChange: (open: boolean) => void;
+  onSaved: () => void;
+}) {
+  const t = useTranslations("admin.rbac");
+  const tc = useTranslations("admin");
+  const [nombre, setNombre] = React.useState(role?.nombre ?? "");
+  const [descripcion, setDescripcion] = React.useState(role?.descripcion ?? "");
+  const [submitting, setSubmitting] = React.useState(false);
+
+  async function onSubmit() {
+    if (!role || !nombre.trim()) return;
+    setSubmitting(true);
+    try {
+      await updateRole(role.id, {
+        nombre: nombre.trim(),
+        descripcion: descripcion.trim() || undefined,
+      });
+      toast.success(t("updated"));
+      onOpenChange(false);
+      onSaved();
+    } catch (err) {
+      toast.error(apiErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={role !== null} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("editTitle")}</DialogTitle>
+          <DialogDescription>{role?.clave}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label>{t("name")}</Label>
+            <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("description")}</Label>
+            <Input
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {tc("cancel")}
+          </Button>
+          <Button onClick={onSubmit} disabled={submitting || !nombre.trim()}>
+            {submitting ? t("saving") : t("save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

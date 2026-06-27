@@ -8,6 +8,7 @@ import { CentersList } from "@/components/admin/centers-list";
 import { PendingProfiles } from "@/components/admin/pending-profiles";
 import { ThemeSettings } from "@/components/admin/theme-settings";
 import { RbacSettings } from "@/components/admin/rbac-settings";
+import { MenuAdmin } from "@/components/admin/menu-admin";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminPage() {
@@ -24,6 +25,7 @@ export default function AdminPage() {
             <TabsTrigger value="centers">{t("tabs.centers")}</TabsTrigger>
             <TabsTrigger value="theme">{t("tabs.theme")}</TabsTrigger>
             <TabsTrigger value="roles">{t("tabs.roles")}</TabsTrigger>
+            <TabsTrigger value="menu">{t("tabs.menu")}</TabsTrigger>
             <TabsTrigger value="pending">{t("tabs.pending")}</TabsTrigger>
           </TabsList>
 
@@ -41,6 +43,10 @@ export default function AdminPage() {
 
           <TabsContent value="roles" className="mt-4">
             <RbacSettings />
+          </TabsContent>
+
+          <TabsContent value="menu" className="mt-4">
+            <MenuAdmin />
           </TabsContent>
 
           <TabsContent value="pending" className="mt-4">

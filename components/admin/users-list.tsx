@@ -4,51 +4,58 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
-import { apiErrorMessage } from "@/lib/api/errors";
+import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/kit/data-table";
 import { InviteDialog } from "@/components/admin/invite-dialog";
 import { AssignCenterDialog } from "@/components/admin/assign-center-dialog";
-
-type State =
-  | { kind: "loading" }
-  | { kind: "ok"; profiles: Perfil[] }
-  | { kind: "fail"; message: string };
+import { AccessDialog } from "@/components/admin/access-dialog";
 
 export function UsersList() {
   const t = useTranslations("admin");
-  const [state, setState] = React.useState<State>({ kind: "loading" });
+  const { state, reload } = useResource<Perfil[]>(() => getProfiles());
   const [inviteOpen, setInviteOpen] = React.useState(false);
   const [assignFor, setAssignFor] = React.useState<Perfil | null>(null);
+  const [accessFor, setAccessFor] = React.useState<Perfil | null>(null);
 
-  const load = React.useCallback(async () => {
-    try {
-      const profiles = await getProfiles();
-      setState({ kind: "ok", profiles });
-    } catch (err) {
-      setState({ kind: "fail", message: apiErrorMessage(err) });
-    }
-  }, []);
-
-  React.useEffect(() => {
-    let active = true;
-    getProfiles()
-      .then((profiles) => active && setState({ kind: "ok", profiles }))
-      .catch(
-        (err) => active && setState({ kind: "fail", message: apiErrorMessage(err) }),
-      );
-    return () => {
-      active = false;
-    };
-  }, []);
+  const columns: Column<Perfil>[] = [
+    {
+      key: "email",
+      header: t("columns.email"),
+      cell: (p) => <span className="font-medium">{p.email}</span>,
+    },
+    {
+      key: "name",
+      header: t("columns.name"),
+      cell: (p) => [p.nombre, p.apellido].filter(Boolean).join(" "),
+    },
+    {
+      key: "accessMode",
+      header: t("columns.accessMode"),
+      cell: (p) => (p.isMaster ? "master" : p.accessMode),
+    },
+    {
+      key: "status",
+      header: t("columns.status"),
+      cell: (p) => <Badge variant="secondary">{p.estado}</Badge>,
+    },
+    {
+      key: "actions",
+      header: t("columns.actions"),
+      align: "right",
+      cell: (p) => (
+        <div className="flex justify-end gap-2">
+          <Button size="sm" variant="outline" onClick={() => setAccessFor(p)}>
+            {t("users.access")}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setAssignFor(p)}>
+            {t("users.assign")}
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-4">
@@ -58,67 +65,29 @@ export function UsersList() {
         </Button>
       </div>
 
-      {state.kind === "loading" && (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      )}
-
-      {state.kind === "fail" && (
-        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {state.message}
-        </p>
-      )}
-
-      {state.kind === "ok" &&
-        (state.profiles.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("users.empty")}</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("columns.email")}</TableHead>
-                <TableHead>{t("columns.name")}</TableHead>
-                <TableHead>{t("columns.accessMode")}</TableHead>
-                <TableHead>{t("columns.status")}</TableHead>
-                <TableHead className="text-right">{t("columns.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {state.profiles.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.email}</TableCell>
-                  <TableCell>
-                    {[p.nombre, p.apellido].filter(Boolean).join(" ")}
-                  </TableCell>
-                  <TableCell>{p.isMaster ? "master" : p.accessMode}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{p.estado}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setAssignFor(p)}
-                    >
-                      {t("users.assign")}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ))}
+      <DataTable
+        columns={columns}
+        state={state}
+        getRowKey={(p) => p.id}
+        onReload={reload}
+        labels={{ empty: t("users.empty") }}
+      />
 
       <InviteDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}
-        onInvited={load}
+        onInvited={reload}
         onRequestAssign={(profile) => setAssignFor(profile)}
       />
       <AssignCenterDialog
         profile={assignFor}
         open={assignFor !== null}
         onOpenChange={(open) => !open && setAssignFor(null)}
-        onAssigned={load}
+        onAssigned={reload}
+      />
+      <AccessDialog
+        profile={accessFor}
+        onOpenChange={(open) => !open && setAccessFor(null)}
       />
     </div>
   );

@@ -1,8 +1,65 @@
 {
+  "patients": {
+    "title": "Pacientes",
+    "searchPlaceholder": "Buscar por nombre o ID…",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "new": "Nuevo paciente",
+    "edit": "Editar",
+    "yearsOld": "{age} años",
+    "columns": {
+      "name": "Nombre",
+      "cedula": "ID",
+      "phone": "Teléfono",
+      "email": "Email",
+      "status": "Estado"
+    },
+    "form": {
+      "createTitle": "Nuevo paciente",
+      "editTitle": "Editar paciente",
+      "help": "Solo el nombre es obligatorio; el resto lo puedes completar después.",
+      "sectionCentro": "Centro",
+      "centro": "Centro",
+      "centroPlaceholder": "Selecciona el centro…",
+      "sectionPersonal": "Datos personales",
+      "sectionContact": "Contacto",
+      "sectionClinical": "Información clínica",
+      "nombres": "Nombres",
+      "apellidos": "Apellidos",
+      "cedula": "ID",
+      "sexo": "Sexo",
+      "sexoPlaceholder": "Selecciona…",
+      "sexoM": "Masculino",
+      "sexoF": "Femenino",
+      "sexoOtro": "Otro",
+      "fechaNacimiento": "Fecha de nacimiento",
+      "nacionalidad": "Nacionalidad",
+      "telefono": "Teléfono",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "direccion": "Dirección",
+      "zipcode": "Código postal",
+      "numeroHistoria": "Número de historia",
+      "aseguradora": "Aseguradora",
+      "created": "Paciente creado.",
+      "updated": "Paciente actualizado."
+    }
+  },
   "common": {
     "toggleTheme": "Cambiar tema",
     "all": "(todos)",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "empty": "Sin resultados.",
+    "retry": "Reintentar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "search": "Buscar…",
+    "pagination": {
+      "range": "{from}–{to} de {total}",
+      "prev": "Anterior",
+      "next": "Siguiente"
+    }
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -66,7 +123,8 @@
       "users": "Usuarios",
       "centers": "Centros",
       "theme": "Tema",
-      "roles": "Roles"
+      "roles": "Roles",
+      "menu": "Menú"
     },
     "rbac": {
       "title": "Roles y permisos",
@@ -92,7 +150,54 @@
       "permisosHelp": "Selecciona los permisos. Esto REEMPLAZA los permisos actuales del rol.",
       "permisosSaved": "Permisos guardados.",
       "saving": "Guardando…",
-      "save": "Guardar"
+      "save": "Guardar",
+      "edit": "Editar",
+      "editTitle": "Editar rol",
+      "updated": "Rol actualizado."
+    },
+    "access": {
+      "title": "Accesos del usuario",
+      "scope": "Ámbito",
+      "global": "Global (todos los centros)",
+      "tabs": {
+        "roles": "Roles",
+        "exceptions": "Excepciones",
+        "menu": "Menú"
+      },
+      "saved": "Guardado.",
+      "exception": "excepción",
+      "effective": "activo",
+      "inherit": "Heredado del rol",
+      "grant": "Conceder",
+      "deny": "Bloquear",
+      "allowed": "Visible",
+      "blocked": "Oculto",
+      "menuEmpty": "Sin ítems de menú."
+    },
+    "menu": {
+      "title": "Menú dinámico",
+      "help": "Crea y ordena los ítems del menú. Cada ítem se muestra según permiso y visibilidad.",
+      "create": "Crear ítem",
+      "orden": "Orden",
+      "clave": "Clave",
+      "path": "Ruta",
+      "visible": "Visible",
+      "yes": "Sí",
+      "no": "No",
+      "actions": "Acciones",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "deleted": "Ítem eliminado.",
+      "saved": "Ítem guardado.",
+      "createTitle": "Crear ítem de menú",
+      "editTitle": "Editar ítem de menú",
+      "formHelp": "Las rutas viven en el código del FE; aquí defines visibilidad, permiso y orden.",
+      "labelKey": "Clave de texto (i18n)",
+      "labelKeyHint": "Clave completa, p.ej. nav.patients",
+      "parentClave": "Clave del padre",
+      "parentClaveHint": "Vacío = ítem de primer nivel",
+      "permisoClave": "Permiso requerido",
+      "permisoClaveHint": "Vacío = visible para todos"
     },
     "theme": {
       "systemTitle": "Tema del sistema",
@@ -152,7 +257,8 @@
     "users": {
       "invite": "Invitar usuario",
       "empty": "Aún no hay usuarios.",
-      "assign": "Asignar centro"
+      "assign": "Asignar centro",
+      "access": "Accesos"
     },
     "invite": {
       "title": "Invitar usuario",

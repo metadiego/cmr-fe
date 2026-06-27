@@ -1,8 +1,65 @@
 {
+  "patients": {
+    "title": "Patients",
+    "searchPlaceholder": "Search by name or ID…",
+    "active": "Active",
+    "inactive": "Inactive",
+    "new": "New patient",
+    "edit": "Edit",
+    "yearsOld": "{age} years old",
+    "columns": {
+      "name": "Name",
+      "cedula": "ID",
+      "phone": "Phone",
+      "email": "Email",
+      "status": "Status"
+    },
+    "form": {
+      "createTitle": "New patient",
+      "editTitle": "Edit patient",
+      "help": "Only the name is required; you can fill in the rest later.",
+      "sectionCentro": "Center",
+      "centro": "Center",
+      "centroPlaceholder": "Select a center…",
+      "sectionPersonal": "Personal details",
+      "sectionContact": "Contact",
+      "sectionClinical": "Clinical info",
+      "nombres": "First name",
+      "apellidos": "Last name",
+      "cedula": "ID",
+      "sexo": "Sex",
+      "sexoPlaceholder": "Select…",
+      "sexoM": "Male",
+      "sexoF": "Female",
+      "sexoOtro": "Other",
+      "fechaNacimiento": "Date of birth",
+      "nacionalidad": "Nationality",
+      "telefono": "Phone",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "direccion": "Address",
+      "zipcode": "ZIP code",
+      "numeroHistoria": "Record number",
+      "aseguradora": "Insurer",
+      "created": "Patient created.",
+      "updated": "Patient updated."
+    }
+  },
   "common": {
     "toggleTheme": "Toggle theme",
     "all": "(all)",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "empty": "No results.",
+    "retry": "Retry",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "search": "Search…",
+    "pagination": {
+      "range": "{from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    }
   },
   "pending": {
     "title": "Access pending",
@@ -66,7 +123,8 @@
       "users": "Users",
       "centers": "Centers",
       "theme": "Theme",
-      "roles": "Roles"
+      "roles": "Roles",
+      "menu": "Menu"
     },
     "rbac": {
       "title": "Roles & permissions",
@@ -92,7 +150,54 @@
       "permisosHelp": "Select permissions. This REPLACES the role's current permissions.",
       "permisosSaved": "Permissions saved.",
       "saving": "Saving…",
-      "save": "Save"
+      "save": "Save",
+      "edit": "Edit",
+      "editTitle": "Edit role",
+      "updated": "Role updated."
+    },
+    "access": {
+      "title": "User access",
+      "scope": "Scope",
+      "global": "Global (all centers)",
+      "tabs": {
+        "roles": "Roles",
+        "exceptions": "Exceptions",
+        "menu": "Menu"
+      },
+      "saved": "Saved.",
+      "exception": "exception",
+      "effective": "active",
+      "inherit": "Inherit from role",
+      "grant": "Grant",
+      "deny": "Deny",
+      "allowed": "Visible",
+      "blocked": "Hidden",
+      "menuEmpty": "No menu items."
+    },
+    "menu": {
+      "title": "Dynamic menu",
+      "help": "Create and order menu items. Each item shows based on permission and visibility.",
+      "create": "Create item",
+      "orden": "Order",
+      "clave": "Key",
+      "path": "Path",
+      "visible": "Visible",
+      "yes": "Yes",
+      "no": "No",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleted": "Item deleted.",
+      "saved": "Item saved.",
+      "createTitle": "Create menu item",
+      "editTitle": "Edit menu item",
+      "formHelp": "Routes live in FE code; here you set visibility, permission and order.",
+      "labelKey": "Text key (i18n)",
+      "labelKeyHint": "Full key, e.g. nav.patients",
+      "parentClave": "Parent key",
+      "parentClaveHint": "Empty = top-level item",
+      "permisoClave": "Required permission",
+      "permisoClaveHint": "Empty = visible to everyone"
     },
     "theme": {
       "systemTitle": "System theme",
@@ -152,7 +257,8 @@
     "users": {
       "invite": "Invite user",
       "empty": "No users yet.",
-      "assign": "Assign center"
+      "assign": "Assign center",
+      "access": "Access"
     },
     "invite": {
       "title": "Invite user",

@@ -24,7 +24,14 @@ export interface ApiErrorDetail {
 }
 
 export interface ApiErrorShape {
-  error: { code: string; message: string; details?: ApiErrorDetail[] };
+  // labelKey: optional i18n key the BE attaches to domain errors
+  // (e.g. "facturacion.anulacion.fuera_de_ventana") for client-side translation.
+  error: {
+    code: string;
+    message: string;
+    labelKey?: string;
+    details?: ApiErrorDetail[];
+  };
   meta: ApiMeta;
 }
 
@@ -35,6 +42,7 @@ export class ApiError extends Error {
     message: string,
     public readonly status: number,
     public readonly details?: ApiErrorDetail[],
+    public readonly labelKey?: string,
   ) {
     super(message);
     this.name = "ApiError";

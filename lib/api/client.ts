@@ -1,7 +1,12 @@
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { getActiveCentro } from "@/lib/tenant";
-import { ApiError, type ApiEnvelope, type ApiErrorShape } from "./types";
+import {
+  ApiError,
+  type ApiEnvelope,
+  type ApiErrorShape,
+  type Paginated,
+} from "./types";
 
 // Reads the current Supabase session (browser) and builds auth + tenant headers.
 // No session → no headers (the BE will respond 401, surfaced as an ApiError).
@@ -24,12 +29,13 @@ async function authHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
-// Core request: takes an absolute path on the BE (e.g. "/api/health"),
-// attaches auth/tenant headers, and unwraps the { data, meta } envelope.
-export async function apiRequest<T>(
+// Core fetch: attaches auth/tenant headers, parses the JSON body, and on a
+// non-2xx response throws an ApiError (preserving the BE's labelKey for i18n).
+// Returns the full { data, meta } envelope so callers can read pagination.
+async function rawRequest<T>(
   path: string,
   init: RequestInit = {},
-): Promise<T> {
+): Promise<ApiEnvelope<T> | null> {
   const auth = await authHeaders();
 
   const res = await fetch(`${env.API_BASE_URL}${path}`, {
@@ -51,13 +57,48 @@ export async function apiRequest<T>(
       err?.message ?? res.statusText,
       res.status,
       err?.details,
+      err?.labelKey,
     );
   }
 
-  return body == null ? (undefined as T) : (body as ApiEnvelope<T>).data;
+  return body == null ? null : (body as ApiEnvelope<T>);
+}
+
+// Core request: takes an absolute path on the BE (e.g. "/api/health"),
+// attaches auth/tenant headers, and unwraps the { data, meta } envelope.
+export async function apiRequest<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const envelope = await rawRequest<T>(path, init);
+  return envelope == null ? (undefined as T) : envelope.data;
+}
+
+// Like apiRequest but keeps meta.pagination, returning { items, pagination }.
+// Falls back to a single-page shape when the BE omits meta.pagination.
+export async function apiRequestPaged<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<Paginated<T>> {
+  const envelope = await rawRequest<T[]>(path, init);
+  const items = (envelope?.data ?? []) as T[];
+  const pagination = envelope?.meta.pagination ?? {
+    total: items.length,
+    page: 1,
+    limit: items.length,
+  };
+  return { items, pagination };
 }
 
 // Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v1/api-keys.
 export function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   return apiRequest<T>(`/api/v1${path}`, init);
+}
+
+// Paginated variant of apiFetch (prefixes /api/v1).
+export function apiFetchPaged<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<Paginated<T>> {
+  return apiRequestPaged<T>(`/api/v1${path}`, init);
 }
