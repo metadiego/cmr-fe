@@ -15,11 +15,29 @@ import {
   UserIcon,
 } from "@hugeicons/core-free-icons";
 
-import { getPaciente, type Paciente } from "@/lib/api/pacientes";
+import { toast } from "sonner";
+
+import {
+  getPaciente,
+  updatePaciente,
+  deletePaciente,
+  type Paciente,
+} from "@/lib/api/pacientes";
+import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Can } from "@/components/kit/can";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import {
@@ -60,6 +78,8 @@ export default function PacienteDetailPage() {
         <PacienteDetail
           p={state.data}
           onEdit={() => setEditOpen(true)}
+          onChanged={reload}
+          onDeleted={() => router.push("/clientes")}
         />
       )}
 
@@ -75,9 +95,49 @@ export default function PacienteDetailPage() {
   );
 }
 
-function PacienteDetail({ p, onEdit }: { p: Paciente; onEdit: () => void }) {
+function PacienteDetail({
+  p,
+  onEdit,
+  onChanged,
+  onDeleted,
+}: {
+  p: Paciente;
+  onEdit: () => void;
+  onChanged: () => void;
+  onDeleted: () => void;
+}) {
   const t = useTranslations("patients");
   const age = ageFrom(p.fechaNacimiento);
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const centroId = p.clinicId ?? undefined;
+
+  async function deactivate() {
+    setBusy(true);
+    try {
+      await deletePaciente(p.id, centroId);
+      toast.success(t("deactivated"));
+      onDeleted();
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setBusy(false);
+      setConfirmOpen(false);
+    }
+  }
+
+  async function reactivate() {
+    setBusy(true);
+    try {
+      await updatePaciente(p.id, { activo: true }, centroId);
+      toast.success(t("reactivated"));
+      onChanged();
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -114,13 +174,63 @@ function PacienteDetail({ p, onEdit }: { p: Paciente; onEdit: () => void }) {
           </div>
         </div>
 
-        <Can permiso="pacientes.update">
-          <Button variant="outline" size="sm" onClick={onEdit}>
-            <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-            {t("edit")}
-          </Button>
-        </Can>
+        <div className="flex shrink-0 gap-2">
+          {!p.activo && (
+            <Can permiso="pacientes.update">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={reactivate}
+                disabled={busy}
+              >
+                {t("reactivate")}
+              </Button>
+            </Can>
+          )}
+          <Can permiso="pacientes.update">
+            <Button variant="outline" size="sm" onClick={onEdit}>
+              <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
+              {t("edit")}
+            </Button>
+          </Can>
+          {p.activo && (
+            <Can permiso="pacientes.delete">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setConfirmOpen(true)}
+                disabled={busy}
+              >
+                {t("deactivate")}
+              </Button>
+            </Can>
+          )}
+        </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("confirmDeactivateTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("confirmDeactivateBody", { name: fullName(p) })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                deactivate();
+              }}
+              disabled={busy}
+            >
+              {t("deactivate")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Sections */}
       <div className="grid gap-6 sm:grid-cols-2">

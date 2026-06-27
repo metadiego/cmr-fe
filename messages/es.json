@@ -6,6 +6,13 @@
     "inactive": "Inactivo",
     "new": "Nuevo paciente",
     "edit": "Editar",
+    "cancel": "Cancelar",
+    "deactivate": "Desactivar",
+    "reactivate": "Reactivar",
+    "deactivated": "Paciente desactivado.",
+    "reactivated": "Paciente reactivado.",
+    "confirmDeactivateTitle": "¿Desactivar paciente?",
+    "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
     "yearsOld": "{age} años",
     "columns": {
       "name": "Nombre",

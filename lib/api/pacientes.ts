@@ -53,3 +53,12 @@ export function updatePaciente(
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
 }
+
+// Soft-delete: the BE sets activo=false (clinical history is kept) and the
+// patient drops out of the list. Reactivate with updatePaciente(id,{activo:true}).
+export function deletePaciente(id: string, centroId?: string): Promise<void> {
+  return apiFetch<void>(`/pacientes/${id}`, {
+    method: "DELETE",
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+}
