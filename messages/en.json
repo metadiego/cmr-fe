@@ -39,6 +39,7 @@
       "typePlaceholder": "Select a type…",
       "doctor": "Doctor",
       "doctorPlaceholder": "Select a doctor…",
+      "doctorOptionalHint": "Optional for first visits; assigned later.",
       "date": "Date",
       "time": "Time",
       "channel": "Channel",

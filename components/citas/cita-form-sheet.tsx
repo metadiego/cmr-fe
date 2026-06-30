@@ -69,7 +69,10 @@ export function CitaFormSheet({
 
   const tipoList = tipos.state.kind === "ok" ? tipos.state.data : [];
   const tipo = tipoList.find((x) => x.id === tipoCitaId);
-  const needsMedico = !!tipo?.requiereMedico;
+  // Doctor is shown when the type uses one, but only REQUIRED when it's not a
+  // first visit — first visits are scheduled before the doctor is assigned.
+  const showMedico = !!tipo?.requiereMedico;
+  const medicoRequired = showMedico && !esPrimeraVez;
   const needsCentro = centros.length > 1;
   const effectiveCentro =
     centroSel || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
@@ -96,13 +99,13 @@ export function CitaFormSheet({
     !!paciente &&
     !!tipoCitaId &&
     !!fecha &&
-    (!needsMedico || !!medicoId) &&
+    (!medicoRequired || !!medicoId) &&
     (!needsCentro || !!effectiveCentro) &&
     !submitting;
 
   async function onSubmit() {
     if (!paciente || !tipoCitaId || !fecha) return;
-    if (needsMedico && !medicoId) return;
+    if (medicoRequired && !medicoId) return;
     setSubmitting(true);
     try {
       const saved = await createCita(
@@ -175,8 +178,20 @@ export function CitaFormSheet({
             </Select>
           </FieldRow>
 
-          {needsMedico && (
-            <FieldRow label={t("doctor")} required>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={esPrimeraVez}
+              onCheckedChange={(v) => setEsPrimeraVez(v === true)}
+            />
+            {t("firstVisit")}
+          </label>
+
+          {showMedico && (
+            <FieldRow
+              label={t("doctor")}
+              required={medicoRequired}
+              hint={medicoRequired ? undefined : t("doctorOptionalHint")}
+            >
               <Select value={medicoId || undefined} onValueChange={setMedicoId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("doctorPlaceholder")} />
@@ -216,14 +231,6 @@ export function CitaFormSheet({
             </Select>
           </FieldRow>
 
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox
-              checked={esPrimeraVez}
-              onCheckedChange={(v) => setEsPrimeraVez(v === true)}
-            />
-            {t("firstVisit")}
-          </label>
-
           <FieldRow label={t("reason")}>
             <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} />
           </FieldRow>
@@ -248,10 +255,12 @@ export function CitaFormSheet({
 function FieldRow({
   label,
   required,
+  hint,
   children,
 }: {
   label: string;
   required?: boolean;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -261,6 +270,7 @@ function FieldRow({
         {required && <span className="ml-0.5 text-destructive">*</span>}
       </Label>
       {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

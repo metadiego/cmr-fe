@@ -39,6 +39,7 @@
       "typePlaceholder": "Selecciona el tipo…",
       "doctor": "Médico",
       "doctorPlaceholder": "Selecciona el médico…",
+      "doctorOptionalHint": "Opcional en primera vez; se asigna después.",
       "date": "Fecha",
       "time": "Hora",
       "channel": "Canal",
