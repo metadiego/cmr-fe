@@ -1,4 +1,7 @@
 {
+  "citas": {
+    "medico_requerido": "This appointment type requires a doctor (except for first visits)."
+  },
   "appointments": {
     "title": "Appointments",
     "new": "New appointment",

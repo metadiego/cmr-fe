@@ -49,6 +49,9 @@ export function CitaFormSheet({
 }) {
   const t = useTranslations("appointments.form");
   const tc = useTranslations("common");
+  // Root translator so BE error labelKeys (e.g. "citas.medico_requerido") can be
+  // translated in the toast; falls back to the BE message when absent.
+  const tRoot = useTranslations();
 
   const tipos = useResource<TipoCita[]>(() => getTiposCita());
   const medicos = useResource<Personal[]>(() => getMedicos());
@@ -127,7 +130,7 @@ export function CitaFormSheet({
       onSaved(saved);
       onOpenChange(false);
     } catch (err) {
-      toastError(err);
+      toastError(err, tRoot);
     } finally {
       setSubmitting(false);
     }

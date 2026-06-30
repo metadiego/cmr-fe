@@ -1,4 +1,7 @@
 {
+  "citas": {
+    "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez)."
+  },
   "appointments": {
     "title": "Citas",
     "new": "Nueva cita",
