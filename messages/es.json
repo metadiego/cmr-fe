@@ -6,12 +6,29 @@
     "solapamiento": "Atención: este horario se solapa con otra cita del médico."
   },
   "agenda": {
+    "tabMedicas": "Citas Médicas",
+    "tabServicios": "Citas de Servicio",
     "today": "Hoy",
     "new": "Nueva Cita",
+    "newService": "Nueva cita de servicio",
     "allDoctors": "Doctores - todos",
+    "allServices": "Servicios - todos",
     "patients": "Pacientes",
     "searchPatient": "Buscar…",
     "typeLegend": "Tipo de Cita",
+    "serviceLegend": "Servicios",
+    "sesion": {
+      "title": "Nueva cita de servicio",
+      "centro": "Centro",
+      "centroPlaceholder": "Selecciona el centro…",
+      "date": "Fecha",
+      "patient": "Seleccionar Paciente",
+      "service": "Servicio",
+      "servicePlaceholder": "Seleccionar servicio",
+      "quantity": "Cantidad",
+      "save": "Guardar",
+      "created": "Cita de servicio creada."
+    },
     "dow": { "0": "Dom", "1": "Lun", "2": "Mar", "3": "Mié", "4": "Jue", "5": "Vie", "6": "Sáb" },
     "modal": {
       "title": "Nueva Cita",

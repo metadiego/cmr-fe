@@ -1,8 +1,18 @@
 # Agenda Médica (call-center · agendamiento) — FE module
 
-Route: `/citas` (vista calendario). i18n: `agenda` namespace (claves en inglés). Dominio **Citas Médicas**,
-óptica **call-center** (programar hacia adelante). Misma tabla `citas`, `canal=callcenter`.
-La vista operativa del día ("Atención", tablero `{columnas,filas}`) y **Servicios** (frontdesk) son módulos aparte.
+Route: `/citas` — **dos tabs sobre el mismo calendario** (`components/agenda/month-calendar.tsx`):
+**Citas Médicas** (módulo `citas`, con hora/horaFin, filtro por doctor) y **Citas de Servicio** (módulo
+`frontdesk`, **por día sin hora**, filtro por servicio). i18n: `agenda` namespace. La vista operativa del
+día ("Atención", tablero `{columnas,filas}`) es un módulo aparte (fase posterior).
+
+## Tab Citas de Servicio (frontdesk)
+- Clientes: `lib/api/servicios.ts` (`getServicios` → tabs/colores), `lib/api/frontdesk.ts`
+  (`listSesionesRango({desde,hasta,servicioId?})` → array plano; `crearSesion`).
+- `components/agenda/servicios-calendar.tsx`: calendario por servicio; eventos por **día** (sin hora),
+  color = `servicio.color`. `components/agenda/sesion-modal.tsx`: Nueva cita de servicio (paciente,
+  servicio, fecha, cantidad — **sin hora**; técnico se asigna en el tablero del día). `POST /frontdesk/sesiones`.
+- Sesiones se gestionan (presente/en-terapia/asistido) en el **tablero del día**, no en el calendario.
+- Verificado contra prod: crear sesión → 201; `GET /frontdesk/sesiones?desde&hasta&servicioId` la trae.
 
 ## Contrato BE (memoria `be-citas-agenda`)
 - `GET /citas/tipos` → `{ id, clave, nombre, color, duracionMin, requiereMedico }`. El FE autocompleta

@@ -3119,7 +3119,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. */
+        get: operations["FrontdeskController_listarSesiones_v1"];
         put?: never;
         post: operations["FrontdeskController_crear_v1"];
         delete?: never;
@@ -5828,22 +5829,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        CreateSesionDto: {
-            /** Format: uuid */
-            pacienteId: string;
-            /** Format: uuid */
-            servicioId: string;
-            fecha: string;
-            /** Format: uuid */
-            paqueteId?: string;
-            /** Format: uuid */
-            tecnicoId?: string;
-            /** Format: uuid */
-            enfermeraId?: string;
-            cantidad?: number;
-            /** Format: uuid */
-            actorId?: string;
-        };
         FrontdeskSesionEntity: {
             pacienteId: string;
             servicioId: string;
@@ -5869,6 +5854,22 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        CreateSesionDto: {
+            /** Format: uuid */
+            pacienteId: string;
+            /** Format: uuid */
+            servicioId: string;
+            fecha: string;
+            /** Format: uuid */
+            paqueteId?: string;
+            /** Format: uuid */
+            tecnicoId?: string;
+            /** Format: uuid */
+            enfermeraId?: string;
+            cantidad?: number;
+            /** Format: uuid */
+            actorId?: string;
         };
         FrontdeskEventoEntity: {
             sesionId: string;
@@ -12305,6 +12306,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    FrontdeskController_listarSesiones_v1: {
+        parameters: {
+            query: {
+                desde: string;
+                hasta: string;
+                servicioId?: string;
+                tecnicoId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"][];
                 };
             };
         };

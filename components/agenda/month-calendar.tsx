@@ -2,17 +2,16 @@
 
 import * as React from "react";
 
-import type { Cita } from "@/lib/api/citas";
 import type { Festivo } from "@/lib/api/disponibilidad";
 import { monthMatrix, toISO, isFestivo } from "@/lib/agenda/calendar";
 import { cn } from "@/lib/utils";
 
+// Domain-agnostic event: the parent maps `id` back to its entity on click.
 export interface AgendaEvent {
   id: string;
-  hora: string | null;
+  hora: string | null; // null for day-based events (service sessions)
   label: string;
   color: string;
-  cita: Cita;
 }
 
 // Month grid (Sun→Sat). Days outside the month are dimmed; holidays are tinted
@@ -32,7 +31,7 @@ export function MonthCalendar({
   eventsByDate: Map<string, AgendaEvent[]>;
   festivos: Festivo[];
   onDayClick: (iso: string) => void;
-  onEventClick: (cita: Cita) => void;
+  onEventClick: (id: string) => void;
 }) {
   const weeks = monthMatrix(year, month0);
   const todayIso = toISO(new Date());
@@ -86,12 +85,12 @@ export function MonthCalendar({
                     tabIndex={0}
                     onClick={(ev) => {
                       ev.stopPropagation();
-                      onEventClick(e.cita);
+                      onEventClick(e.id);
                     }}
                     onKeyDown={(ev) => {
                       if (ev.key === "Enter") {
                         ev.stopPropagation();
-                        onEventClick(e.cita);
+                        onEventClick(e.id);
                       }
                     }}
                     className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-[11px] text-white"

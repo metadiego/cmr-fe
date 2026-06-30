@@ -6,12 +6,29 @@
     "solapamiento": "Heads up: this time overlaps another appointment for the doctor."
   },
   "agenda": {
+    "tabMedicas": "Medical appointments",
+    "tabServicios": "Service appointments",
     "today": "Today",
     "new": "New appointment",
+    "newService": "New service appointment",
     "allDoctors": "Doctors - all",
+    "allServices": "Services - all",
     "patients": "Patients",
     "searchPatient": "Search…",
     "typeLegend": "Appointment type",
+    "serviceLegend": "Services",
+    "sesion": {
+      "title": "New service appointment",
+      "centro": "Center",
+      "centroPlaceholder": "Select a center…",
+      "date": "Date",
+      "patient": "Select patient",
+      "service": "Service",
+      "servicePlaceholder": "Select service",
+      "quantity": "Quantity",
+      "save": "Save",
+      "created": "Service appointment created."
+    },
     "dow": { "0": "Sun", "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat" },
     "modal": {
       "title": "New appointment",
