@@ -1,4 +1,60 @@
 {
+  "appointments": {
+    "title": "Citas",
+    "new": "Nueva cita",
+    "empty": "No hay citas para este día.",
+    "filterState": "Estado",
+    "filterDoctor": "Médico",
+    "allStates": "Todos los estados",
+    "allDoctors": "Todos los médicos",
+    "columns": {
+      "time": "Hora",
+      "patient": "Paciente",
+      "type": "Tipo",
+      "doctor": "Médico",
+      "status": "Estado"
+    },
+    "estados": {
+      "programada": "Programada",
+      "confirmada": "Confirmada",
+      "presente": "Presente",
+      "triage": "Triage",
+      "en_consulta": "En consulta",
+      "atendida": "Atendida",
+      "no_show": "No asistió",
+      "cancelada": "Cancelada",
+      "reprogramada": "Reprogramada"
+    },
+    "changePatient": "Cambiar",
+    "searchPatient": "Buscar paciente por nombre o ID…",
+    "searching": "Buscando…",
+    "noPatients": "Sin coincidencias.",
+    "form": {
+      "title": "Nueva cita",
+      "help": "Selecciona el paciente, el tipo y la fecha. El médico se pide según el tipo.",
+      "centro": "Centro",
+      "centroPlaceholder": "Selecciona el centro…",
+      "patient": "Paciente",
+      "type": "Tipo de cita",
+      "typePlaceholder": "Selecciona el tipo…",
+      "doctor": "Médico",
+      "doctorPlaceholder": "Selecciona el médico…",
+      "date": "Fecha",
+      "time": "Hora",
+      "channel": "Canal",
+      "channels": {
+        "atencion": "Atención",
+        "callcenter": "Call center",
+        "webhook": "Webhook",
+        "ia": "IA"
+      },
+      "firstVisit": "Primera vez",
+      "reason": "Motivo",
+      "notes": "Notas",
+      "created": "Cita creada.",
+      "submit": "Crear cita"
+    }
+  },
   "patients": {
     "title": "Pacientes",
     "searchPlaceholder": "Buscar por nombre o ID…",

@@ -1,4 +1,60 @@
 {
+  "appointments": {
+    "title": "Appointments",
+    "new": "New appointment",
+    "empty": "No appointments for this day.",
+    "filterState": "Status",
+    "filterDoctor": "Doctor",
+    "allStates": "All statuses",
+    "allDoctors": "All doctors",
+    "columns": {
+      "time": "Time",
+      "patient": "Patient",
+      "type": "Type",
+      "doctor": "Doctor",
+      "status": "Status"
+    },
+    "estados": {
+      "programada": "Scheduled",
+      "confirmada": "Confirmed",
+      "presente": "Checked in",
+      "triage": "Triage",
+      "en_consulta": "In consult",
+      "atendida": "Seen",
+      "no_show": "No-show",
+      "cancelada": "Cancelled",
+      "reprogramada": "Rescheduled"
+    },
+    "changePatient": "Change",
+    "searchPatient": "Search patient by name or ID…",
+    "searching": "Searching…",
+    "noPatients": "No matches.",
+    "form": {
+      "title": "New appointment",
+      "help": "Pick the patient, type and date. A doctor is requested depending on the type.",
+      "centro": "Center",
+      "centroPlaceholder": "Select a center…",
+      "patient": "Patient",
+      "type": "Appointment type",
+      "typePlaceholder": "Select a type…",
+      "doctor": "Doctor",
+      "doctorPlaceholder": "Select a doctor…",
+      "date": "Date",
+      "time": "Time",
+      "channel": "Channel",
+      "channels": {
+        "atencion": "Front desk",
+        "callcenter": "Call center",
+        "webhook": "Webhook",
+        "ia": "AI"
+      },
+      "firstVisit": "First visit",
+      "reason": "Reason",
+      "notes": "Notes",
+      "created": "Appointment created.",
+      "submit": "Create appointment"
+    }
+  },
   "patients": {
     "title": "Patients",
     "searchPlaceholder": "Search by name or ID…",
