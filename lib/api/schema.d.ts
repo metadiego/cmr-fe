@@ -1821,6 +1821,103 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/tipos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TiposCitaController_list_v1"];
+        put?: never;
+        post: operations["TiposCitaController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/tipos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TiposCitaController_update_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/reportes/resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CitasReportesController_resumen_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/reportes/por-medico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CitasReportesController_porMedico_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/reportes/tiempos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CitasReportesController_tiempos_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/reportes/vitales-por-enfermera": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contador de tomas de vitales por enfermera (derivado). */
+        get: operations["CitasReportesController_vitalesPorEnfermera_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/stream": {
         parameters: {
             query?: never;
@@ -1890,6 +1987,23 @@ export interface paths {
         get: operations["CitasController_get_v1"];
         put: operations["CitasController_update_v1"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/validar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dry-run: valida solapamiento SIN crear (el FE advierte antes de Guardar). */
+        post: operations["CitasController_validar_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2051,103 +2165,6 @@ export interface paths {
         put?: never;
         /** Reparación retroactiva de un día pasado (tarea privilegiada de admin). */
         post: operations["CitasController_reparar_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/citas/reportes/resumen": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["CitasReportesController_resumen_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/citas/reportes/por-medico": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["CitasReportesController_porMedico_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/citas/reportes/tiempos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["CitasReportesController_tiempos_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/citas/reportes/vitales-por-enfermera": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Contador de tomas de vitales por enfermera (derivado). */
-        get: operations["CitasReportesController_vitalesPorEnfermera_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/citas/tipos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["TiposCitaController_list_v1"];
-        put?: never;
-        post: operations["TiposCitaController_create_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/citas/tipos/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["TiposCitaController_update_v1"];
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3614,6 +3631,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/medicos/horarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HorariosController_list_v1"];
+        put?: never;
+        post: operations["HorariosController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medicos/horarios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["HorariosController_update_v1"];
+        post?: never;
+        delete: operations["HorariosController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/festivos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FestivosController_list_v1"];
+        put?: never;
+        post: operations["FestivosController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/festivos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["FestivosController_update_v1"];
+        post?: never;
+        delete: operations["FestivosController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles": {
         parameters: {
             query?: never;
@@ -4965,6 +5046,7 @@ export interface components {
             especialidad: string | null;
             telefono: string | null;
             email: string | null;
+            color: string;
             activo: boolean;
             id: string;
             clinicId: string | null;
@@ -4998,12 +5080,26 @@ export interface components {
             email?: string;
             activo?: boolean;
         };
+        TipoCitaEntity: {
+            clave: string;
+            nombre: string;
+            requiereMedico: boolean;
+            color: string;
+            duracionMin: number;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         CitaEntity: {
             pacienteId: string;
             tipoCitaId: string;
             medicoId: string | null;
             fecha: string;
             hora: string | null;
+            horaFin: string | null;
             /** @enum {string} */
             estado: "cancelada" | "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
             esPrimeraVez: boolean;
@@ -5033,6 +5129,17 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        ValidarCitaDto: {
+            /** Format: uuid */
+            medicoId: string;
+            fecha: string;
+            hora: string;
+            horaFin: string;
+            /** Format: uuid */
+            tipoCitaId?: string;
+            /** Format: uuid */
+            excluirCitaId?: string;
+        };
         CreateCitaDto: {
             /** Format: uuid */
             pacienteId: string;
@@ -5042,6 +5149,7 @@ export interface components {
             medicoId?: string;
             fecha: string;
             hora?: string;
+            horaFin?: string;
             esPrimeraVez?: boolean;
             /** @enum {string} */
             canal?: "atencion" | "callcenter" | "webhook" | "ia";
@@ -5056,6 +5164,7 @@ export interface components {
             /** Format: uuid */
             medicoId?: string;
             hora?: string;
+            horaFin?: string;
             motivo?: string;
             notas?: string;
         };
@@ -5114,17 +5223,6 @@ export interface components {
             vitalesEn?: string;
             horaInEn?: string;
             horaOutEn?: string;
-        };
-        TipoCitaEntity: {
-            clave: string;
-            nombre: string;
-            requiereMedico: boolean;
-            activo: boolean;
-            id: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
         };
         ColumnaEntity: {
             clave: string;
@@ -6044,6 +6142,59 @@ export interface components {
         VincularMedicionDto: {
             /** Format: uuid */
             citaId: string;
+        };
+        HorarioMedicoEntity: {
+            medicoId: string | null;
+            diaSemana: number;
+            horaInicio: string;
+            horaFin: string;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateHorarioMedicoDto: {
+            /** Format: uuid */
+            medicoId?: string;
+            diaSemana: number;
+            horaInicio: string;
+            horaFin: string;
+            activo?: boolean;
+        };
+        UpdateHorarioMedicoDto: {
+            /** Format: uuid */
+            medicoId?: string;
+            diaSemana?: number;
+            horaInicio?: string;
+            horaFin?: string;
+            activo?: boolean;
+        };
+        FestivoEntity: {
+            fecha: string;
+            nombre: string;
+            recurrenteAnual: boolean;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateFestivoDto: {
+            fecha: string;
+            nombre: string;
+            recurrenteAnual?: boolean;
+            activo?: boolean;
+        };
+        UpdateFestivoDto: {
+            fecha?: string;
+            nombre?: string;
+            recurrenteAnual?: boolean;
+            activo?: boolean;
         };
         CreatePerfilDto: {
             authUserId: string;
@@ -7760,7 +7911,6 @@ export interface operations {
             query: {
                 page: number;
                 limit: number;
-                productoId?: string;
             };
             header?: never;
             path?: never;
@@ -8150,9 +8300,6 @@ export interface operations {
             query: {
                 page: number;
                 limit: number;
-                productoId?: string;
-                desde?: string;
-                hasta?: string;
             };
             header?: never;
             path?: never;
@@ -9861,8 +10008,6 @@ export interface operations {
             query: {
                 page: number;
                 limit: number;
-                q?: string;
-                capacidad?: string;
             };
             header?: never;
             path?: never;
@@ -9980,6 +10125,145 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TiposCitaController_list_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TipoCitaEntity"][];
+                };
+            };
+        };
+    };
+    TiposCitaController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TipoCitaEntity"];
+                };
+            };
+        };
+    };
+    TiposCitaController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TipoCitaEntity"];
+                };
+            };
+        };
+    };
+    CitasReportesController_resumen_v1: {
+        parameters: {
+            query: {
+                desde: string;
+                hasta: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CitasReportesController_porMedico_v1: {
+        parameters: {
+            query: {
+                desde: string;
+                hasta: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CitasReportesController_tiempos_v1: {
+        parameters: {
+            query: {
+                desde: string;
+                hasta: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CitasReportesController_vitalesPorEnfermera_v1: {
+        parameters: {
+            query: {
+                desde: string;
+                hasta: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10126,6 +10410,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
                 };
+            };
+        };
+    };
+    CitasController_validar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ValidarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -10371,145 +10676,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CitaEntity"];
-                };
-            };
-        };
-    };
-    CitasReportesController_resumen_v1: {
-        parameters: {
-            query: {
-                desde: string;
-                hasta: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CitasReportesController_porMedico_v1: {
-        parameters: {
-            query: {
-                desde: string;
-                hasta: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CitasReportesController_tiempos_v1: {
-        parameters: {
-            query: {
-                desde: string;
-                hasta: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    CitasReportesController_vitalesPorEnfermera_v1: {
-        parameters: {
-            query: {
-                desde: string;
-                hasta: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    TiposCitaController_list_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TipoCitaEntity"][];
-                };
-            };
-        };
-    };
-    TiposCitaController_create_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TipoCitaEntity"];
-                };
-            };
-        };
-    };
-    TiposCitaController_update_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TipoCitaEntity"];
                 };
             };
         };
@@ -10806,8 +10972,6 @@ export interface operations {
             query: {
                 page: number;
                 limit: number;
-                estado?: string;
-                pacienteId?: string;
             };
             header?: never;
             path?: never;
@@ -10849,7 +11013,6 @@ export interface operations {
     FacturacionController_buscarPaciente_v1: {
         parameters: {
             query: {
-                q: string;
                 page: number;
                 limit: number;
             };
@@ -12386,8 +12549,6 @@ export interface operations {
             query: {
                 page: number;
                 limit: number;
-                pacienteId?: string;
-                medicoId?: string;
             };
             header?: never;
             path?: never;
@@ -12977,6 +13138,182 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    HorariosController_list_v1: {
+        parameters: {
+            query?: {
+                medicoId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HorarioMedicoEntity"][];
+                };
+            };
+        };
+    };
+    HorariosController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateHorarioMedicoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HorarioMedicoEntity"];
+                };
+            };
+        };
+    };
+    HorariosController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateHorarioMedicoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HorarioMedicoEntity"];
+                };
+            };
+        };
+    };
+    HorariosController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FestivosController_list_v1: {
+        parameters: {
+            query?: {
+                anio?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FestivoEntity"][];
+                };
+            };
+        };
+    };
+    FestivosController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFestivoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FestivoEntity"];
+                };
+            };
+        };
+    };
+    FestivosController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFestivoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FestivoEntity"];
+                };
+            };
+        };
+    };
+    FestivosController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

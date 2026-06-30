@@ -20,16 +20,16 @@ export default getRequestConfig(async () => {
   return {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default,
-    // CONSIDERACIONES-FE #14: date/currency/timezone formatting. Adjust the
-    // clinic timezone here if CMR operates elsewhere.
-    timeZone: "America/Mexico_City",
+    // Business is USA/Puerto Rico → AST + USD. (Ideally per-center via preferences
+    // `citas.timezone`; fixed default for now.)
+    timeZone: "America/Puerto_Rico",
     formats: {
       dateTime: {
         short: { day: "2-digit", month: "2-digit", year: "numeric" },
         long: { day: "numeric", month: "long", year: "numeric" },
       },
       number: {
-        currency: { style: "currency", currency: "MXN" },
+        currency: { style: "currency", currency: "USD" },
       },
     },
   };

@@ -1,6 +1,42 @@
 {
   "citas": {
-    "medico_requerido": "This appointment type requires a doctor (except for first visits)."
+    "medico_requerido": "This appointment type requires a doctor (except for first visits).",
+    "hora_fin_invalida": "End time must be after the start time.",
+    "conflicto_horario": "That time slot clashes with another appointment for the doctor.",
+    "solapamiento": "Heads up: this time overlaps another appointment for the doctor."
+  },
+  "agenda": {
+    "today": "Today",
+    "new": "New appointment",
+    "allDoctors": "Doctors - all",
+    "patients": "Patients",
+    "searchPatient": "Search…",
+    "typeLegend": "Appointment type",
+    "dow": { "0": "Sun", "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat" },
+    "modal": {
+      "title": "New appointment",
+      "editTitle": "Edit appointment",
+      "centro": "Center",
+      "centroPlaceholder": "Select a center…",
+      "date": "Date",
+      "start": "Start time",
+      "end": "End time",
+      "patient": "Select patient",
+      "doctor": "Select doctor",
+      "doctorPlaceholder": "Select doctor",
+      "type": "Appointment type",
+      "typePlaceholder": "Select type",
+      "status": "Status",
+      "statusScheduled": "Scheduled",
+      "firstVisit": "First visit",
+      "reason": "Reason for visit",
+      "notes": "Notes",
+      "overlapWarn": "This time overlaps another appointment for the doctor:",
+      "save": "Save",
+      "saveAnyway": "Save anyway",
+      "created": "Appointment created.",
+      "updated": "Appointment updated."
+    }
   },
   "appointments": {
     "title": "Appointments",

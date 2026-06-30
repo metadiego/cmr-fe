@@ -5,6 +5,9 @@ export interface ApiMeta {
   timestamp: string;
   requestId: string;
   pagination?: { total: number; page: number; limit: number };
+  // Non-fatal warnings the BE attaches to a successful write (e.g. an
+  // appointment created despite an overlap when the policy is "advertir").
+  advertencias?: Array<{ code: string; labelKey?: string; [k: string]: unknown }>;
 }
 
 export interface ApiEnvelope<T> {

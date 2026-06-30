@@ -102,3 +102,15 @@ export function apiFetchPaged<T>(
 ): Promise<Paginated<T>> {
   return apiRequestPaged<T>(`/api/v1${path}`, init);
 }
+
+// Like apiFetch but returns the FULL envelope ({ data, meta }) so callers can
+// read meta extras (e.g. meta.advertencias on cita create). Prefixes /api/v1.
+export async function apiFetchEnvelope<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<ApiEnvelope<T>> {
+  const envelope = await rawRequest<T>(`/api/v1${path}`, init);
+  return (
+    envelope ?? { data: undefined as T, meta: { timestamp: "", requestId: "" } }
+  );
+}

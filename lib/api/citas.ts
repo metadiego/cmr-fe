@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
 import type { Paginated } from "./types";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
@@ -8,6 +8,19 @@ export type CreateCitaPayload = components["schemas"]["CreateCitaDto"];
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
 export type EstadoCita = Cita["estado"];
 export type CanalCita = Cita["canal"];
+
+// Overlap conflict + warning shapes (POST /citas/validar and meta.advertencias).
+export interface CitaConflicto {
+  citaId: string;
+  pacienteId: string;
+  hora: string;
+  horaFin: string;
+}
+export interface ValidarCitaResult {
+  ok: boolean;
+  advertencias: Array<{ code: string; labelKey?: string }>;
+  conflictos: CitaConflicto[];
+}
 
 export const ESTADOS: EstadoCita[] = [
   "programada",
@@ -44,6 +57,26 @@ export function listCitas(
   return apiFetchPaged<Cita>(`/citas?${sp.toString()}`);
 }
 
+// Fetch ALL citas for a range across pages (BE caps limit at 100). Used by the
+// month calendar, where a busy month can exceed one page.
+export async function listCitasRango(params: {
+  desde: string;
+  hasta: string;
+  medicoId?: string;
+  estado?: EstadoCita;
+}): Promise<Cita[]> {
+  const acc: Cita[] = [];
+  let page = 1;
+  for (;;) {
+    const { items, pagination } = await listCitas({ ...params, page, limit: 100 });
+    acc.push(...items);
+    if (items.length === 0 || acc.length >= pagination.total) break;
+    page++;
+    if (page > 50) break; // safety
+  }
+  return acc;
+}
+
 export function getCita(id: string): Promise<Cita> {
   return apiFetch<Cita>(`/citas/${id}`);
 }
@@ -58,6 +91,53 @@ export function createCita(
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
+}
+
+// Dry-run overlap check before saving (POST /citas/validar). Does NOT create.
+export function validarCita(
+  payload: {
+    medicoId?: string;
+    fecha: string;
+    hora: string;
+    horaFin: string;
+    tipoCitaId?: string;
+    excluirCitaId?: string;
+  },
+  centroId?: string,
+): Promise<ValidarCitaResult> {
+  return apiFetch<ValidarCitaResult>(`/citas/validar`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+}
+
+// Create returning the cita PLUS any non-fatal warnings the BE attached
+// (meta.advertencias — e.g. an overlap created under the "advertir" policy).
+export async function crearCitaAgenda(
+  payload: CreateCitaPayload,
+  centroId?: string,
+): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
+  const env = await apiFetchEnvelope<Cita>(`/citas`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+  return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
+}
+
+// Update returning cita + warnings (same envelope contract as create).
+export async function actualizarCitaAgenda(
+  id: string,
+  payload: Partial<CreateCitaPayload>,
+  centroId?: string,
+): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
+  const env = await apiFetchEnvelope<Cita>(`/citas/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+  return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
 }
 
 // ---- Lifecycle transitions (slice 2: scheduling flow) ----------------------

@@ -1,6 +1,42 @@
 {
   "citas": {
-    "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez)."
+    "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
+    "hora_fin_invalida": "La hora de fin debe ser posterior a la hora de inicio.",
+    "conflicto_horario": "Ese horario choca con otra cita del médico.",
+    "solapamiento": "Atención: este horario se solapa con otra cita del médico."
+  },
+  "agenda": {
+    "today": "Hoy",
+    "new": "Nueva Cita",
+    "allDoctors": "Doctores - todos",
+    "patients": "Pacientes",
+    "searchPatient": "Buscar…",
+    "typeLegend": "Tipo de Cita",
+    "dow": { "0": "Dom", "1": "Lun", "2": "Mar", "3": "Mié", "4": "Jue", "5": "Vie", "6": "Sáb" },
+    "modal": {
+      "title": "Nueva Cita",
+      "editTitle": "Editar Cita",
+      "centro": "Centro",
+      "centroPlaceholder": "Selecciona el centro…",
+      "date": "Fecha",
+      "start": "Hora Inicio",
+      "end": "Hora Fin",
+      "patient": "Seleccionar Paciente",
+      "doctor": "Seleccionar Doctor",
+      "doctorPlaceholder": "Seleccionar Doctor",
+      "type": "Tipo de Cita",
+      "typePlaceholder": "Seleccionar Tipo",
+      "status": "Estado",
+      "statusScheduled": "Agendada",
+      "firstVisit": "Primera vez",
+      "reason": "Motivo de Consulta",
+      "notes": "Notas",
+      "overlapWarn": "Este horario se solapa con otra cita del médico:",
+      "save": "Guardar",
+      "saveAnyway": "Guardar de todos modos",
+      "created": "Cita creada.",
+      "updated": "Cita actualizada."
+    }
   },
   "appointments": {
     "title": "Citas",
