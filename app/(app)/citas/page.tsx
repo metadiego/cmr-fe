@@ -29,6 +29,8 @@ import {
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { Can } from "@/components/kit/can";
 import { CitaFormSheet } from "@/components/citas/cita-form-sheet";
+import { CitaActions } from "@/components/citas/cita-actions";
+import { CitaBoard } from "@/components/citas/cita-board";
 
 const ALL = "__all__";
 
@@ -57,6 +59,7 @@ export default function CitasPage() {
   const [estado, setEstado] = React.useState<string>(ALL);
   const [medico, setMedico] = React.useState<string>(ALL);
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [view, setView] = React.useState<"list" | "board">("list");
 
   // Reference data (small, loaded once) to resolve ids → names.
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
@@ -78,6 +81,13 @@ export default function CitasPage() {
       }),
     [fecha, estado, medico],
   );
+
+  // Realtime (interim): poll every 15s. SSE (/citas/stream) is pending BE
+  // header-less auth (native EventSource can't send the Bearer token).
+  React.useEffect(() => {
+    const id = setInterval(reload, 15000);
+    return () => clearInterval(id);
+  }, [reload]);
 
   const citas = state.kind === "ok" ? state.data.items : [];
   // Resolve patient names for the day's appointments (the list only has ids).
@@ -121,6 +131,12 @@ export default function CitasPage() {
         </span>
       ),
     },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      cell: (c) => <CitaActions cita={c} onChanged={reload} />,
+    },
   ];
 
   return (
@@ -137,6 +153,22 @@ export default function CitasPage() {
 
       <div className="mt-6 space-y-4">
         <div className="flex flex-wrap items-center gap-2">
+          <div className="mr-1 inline-flex rounded-md border p-0.5">
+            <Button
+              size="sm"
+              variant={view === "list" ? "secondary" : "ghost"}
+              onClick={() => setView("list")}
+            >
+              {t("viewList")}
+            </Button>
+            <Button
+              size="sm"
+              variant={view === "board" ? "secondary" : "ghost"}
+              onClick={() => setView("board")}
+            >
+              {t("viewBoard")}
+            </Button>
+          </div>
           <Input
             type="date"
             value={fecha}
@@ -171,13 +203,27 @@ export default function CitasPage() {
           </Select>
         </div>
 
-        <DataTable
-          columns={columns}
-          state={rows}
-          getRowKey={(c) => c.id}
-          onReload={reload}
-          labels={{ empty: t("empty") }}
-        />
+        {view === "list" ? (
+          <DataTable
+            columns={columns}
+            state={rows}
+            getRowKey={(c) => c.id}
+            onReload={reload}
+            labels={{ empty: t("empty") }}
+          />
+        ) : state.kind === "fail" ? (
+          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {state.message}
+          </p>
+        ) : (
+          <CitaBoard
+            citas={citas}
+            pacienteName={pacienteName}
+            tipoName={tipoName}
+            medicoName={medicoName}
+            onChanged={reload}
+          />
+        )}
       </div>
 
       <CitaFormSheet

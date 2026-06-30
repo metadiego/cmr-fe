@@ -60,6 +60,38 @@ export function createCita(
   });
 }
 
+// ---- Lifecycle transitions (slice 2: scheduling flow) ----------------------
+// State machine (verified): programada →confirmar→ confirmada →presente→ presente
+// →consulta→ en_consulta. triage/atender need vitals (slice 3). no-show/cancelar/
+// reagendar available from the open states. All are tenant-scoped writes.
+
+function transition<T = Cita>(
+  id: string,
+  action: string,
+  body: Record<string, unknown> | undefined,
+  centroId?: string,
+): Promise<T> {
+  return apiFetch<T>(`/citas/${id}/${action}`, {
+    method: "POST",
+    body: body ? JSON.stringify(body) : undefined,
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+}
+
+export const confirmarCita = (id: string, centroId?: string) =>
+  transition(id, "confirmar", undefined, centroId);
+export const presenteCita = (id: string, centroId?: string) =>
+  transition(id, "presente", undefined, centroId);
+export const noShowCita = (id: string, centroId?: string) =>
+  transition(id, "no-show", undefined, centroId);
+export const cancelarCita = (id: string, motivo: string, centroId?: string) =>
+  transition(id, "cancelar", { motivo }, centroId);
+export const reagendarCita = (
+  id: string,
+  payload: { fecha: string; hora?: string; motivo: string },
+  centroId?: string,
+) => transition(id, "reagendar", payload, centroId);
+
 // Appointment type catalog (medica / seguimiento / control, each requiereMedico).
 export async function getTiposCita(): Promise<TipoCita[]> {
   const res = (await apiFetch(`/citas/tipos`)) as unknown;
