@@ -5,10 +5,31 @@
     "conflicto_horario": "Ese horario choca con otra cita del médico.",
     "solapamiento": "Atención: este horario se solapa con otra cita del médico."
   },
+  "tablero": {
+    "col": {
+      "hora": "Hora",
+      "tipo": "Tipo",
+      "paciente": "Paciente",
+      "record": "Record",
+      "telefono": "Teléfono",
+      "medico": "Médico",
+      "comentarios": "Comentarios",
+      "citadoPor": "Citado por",
+      "estado": "Estado",
+      "acciones": "Acciones",
+      "centro": "Centro"
+    }
+  },
   "agenda": {
     "tabMedicas": "Citas Médicas",
     "tabServicios": "Citas de Servicio",
     "today": "Hoy",
+    "dia": {
+      "allCenters": "Todos los centros",
+      "summary": "{total} citas · {atendidas} atendidas · {noShow} no-show",
+      "noTime": "Sin hora",
+      "book": "Agendar {tipo} {hora}"
+    },
     "new": "Nueva Cita",
     "newService": "Nueva cita de servicio",
     "allDoctors": "Doctores - todos",

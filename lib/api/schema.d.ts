@@ -1918,6 +1918,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/cupos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CuposController_list_v1"];
+        put?: never;
+        post: operations["CuposController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/cupos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["CuposController_update_v1"];
+        post?: never;
+        delete: operations["CuposController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/notas-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["NotasDiaController_list_v1"];
+        put?: never;
+        post: operations["NotasDiaController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/notas-dia/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["NotasDiaController_update_v1"];
+        post?: never;
+        delete: operations["NotasDiaController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/stream": {
         parameters: {
             query?: never;
@@ -1969,6 +2033,27 @@ export interface paths {
         };
         /** Metadata-driven board: effective columns + projected rows for a day. */
         get: operations["CitasController_tablero_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/agenda-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Vista-día (tablero de agenda): reemplaza el "modal al click". Por centro objetivo devuelve
+         *     franjas horarias × tipo con cupo + slots vacíos pre-asignados, notas del día y columnas
+         *     dinámicas ricas. Sin `centroId` usa el centro activo (o combina los permitidos).
+         */
+        get: operations["CitasController_agendaDia_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5048,6 +5133,7 @@ export interface components {
             telefono: string | null;
             email: string | null;
             color: string;
+            codigoLegacy: string | null;
             activo: boolean;
             id: string;
             clinicId: string | null;
@@ -5087,12 +5173,65 @@ export interface components {
             requiereMedico: boolean;
             color: string;
             duracionMin: number;
+            codigo: string | null;
+            productoId: string | null;
             activo: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        CupoAgendaEntity: {
+            diaSemana: number | null;
+            hora: string;
+            tipoCitaId: string;
+            cantidad: number;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateCupoDto: {
+            diaSemana?: number;
+            hora: string;
+            /** Format: uuid */
+            tipoCitaId: string;
+            cantidad: number;
+            activo?: boolean;
+        };
+        UpdateCupoDto: {
+            diaSemana?: number;
+            hora?: string;
+            /** Format: uuid */
+            tipoCitaId?: string;
+            cantidad?: number;
+            activo?: boolean;
+        };
+        NotaDiaEntity: {
+            fecha: string;
+            contenido: string;
+            autorId: string | null;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateNotaDiaDto: {
+            fecha: string;
+            contenido: string;
+            /** Format: uuid */
+            autorId?: string;
+        };
+        UpdateNotaDiaDto: {
+            contenido?: string;
+            activo?: boolean;
         };
         CitaEntity: {
             pacienteId: string;
@@ -5146,6 +5285,12 @@ export interface components {
             pacienteId: string;
             /** Format: uuid */
             tipoCitaId: string;
+            /**
+             * Format: uuid
+             * @description Centro DESTINO (central de citas multi-centro). Si se omite, se usa el centro activo.
+             *     Debe pertenecer a los centros permitidos del principal.
+             */
+            centroId?: string;
             /** Format: uuid */
             medicoId?: string;
             fecha: string;
@@ -5173,6 +5318,12 @@ export interface components {
             fecha: string;
             hora?: string;
             motivo: string;
+            /**
+             * Format: uuid
+             * @description Centro DESTINO al reagendar: permite MOVER la cita a otro centro (central de citas).
+             *     Si se omite, mantiene el centro de la cita original.
+             */
+            centroId?: string;
         };
         CitaEventoEntity: {
             citaId: string;
@@ -10272,6 +10423,184 @@ export interface operations {
             };
         };
     };
+    CuposController_list_v1: {
+        parameters: {
+            query?: {
+                /** @description Filtra por día de la semana (0=domingo … 6=sábado) */
+                diaSemana?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CupoAgendaEntity"][];
+                };
+            };
+        };
+    };
+    CuposController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCupoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CupoAgendaEntity"];
+                };
+            };
+        };
+    };
+    CuposController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCupoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CupoAgendaEntity"];
+                };
+            };
+        };
+    };
+    CuposController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NotasDiaController_list_v1: {
+        parameters: {
+            query?: {
+                /** @description Filtra por fecha (YYYY-MM-DD) */
+                fecha?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotaDiaEntity"][];
+                };
+            };
+        };
+    };
+    NotasDiaController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateNotaDiaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotaDiaEntity"];
+                };
+            };
+        };
+    };
+    NotasDiaController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateNotaDiaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotaDiaEntity"];
+                };
+            };
+        };
+    };
+    NotasDiaController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     CitasController_stream_v1: {
         parameters: {
             query?: never;
@@ -10365,6 +10694,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    CitasController_agendaDia_v1: {
+        parameters: {
+            query: {
+                /** @description Día (YYYY-MM-DD) */
+                fecha: string;
+                /** @description Centro objetivo; si se omite, el activo o los permitidos (combinado) */
+                centroId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

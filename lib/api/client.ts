@@ -12,7 +12,11 @@ import {
 // No session → no headers (the BE will respond 401, surfaced as an ApiError).
 // X-Tenant-ID comes from the user-selected active center (cookie), falling back
 // to the session's app_metadata.clinic_id.
-async function authHeaders(): Promise<Record<string, string>> {
+// `tenant`: undefined → default (active-center cookie / clinic_id); a string →
+// force that center; null → OMIT X-Tenant-ID (multi-center "combined" reads).
+async function authHeaders(
+  tenant?: string | null,
+): Promise<Record<string, string>> {
   const supabase = createClient();
   const {
     data: { session },
@@ -21,7 +25,10 @@ async function authHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
   if (session?.access_token) {
     headers["Authorization"] = `Bearer ${session.access_token}`;
-    const clinicId = getActiveCentro() ?? session.user.app_metadata?.clinic_id;
+    const clinicId =
+      tenant === null
+        ? undefined
+        : (tenant ?? getActiveCentro() ?? session.user.app_metadata?.clinic_id);
     if (clinicId) {
       headers["X-Tenant-ID"] = String(clinicId);
     }
@@ -35,8 +42,9 @@ async function authHeaders(): Promise<Record<string, string>> {
 async function rawRequest<T>(
   path: string,
   init: RequestInit = {},
+  tenant?: string | null,
 ): Promise<ApiEnvelope<T> | null> {
-  const auth = await authHeaders();
+  const auth = await authHeaders(tenant);
 
   const res = await fetch(`${env.API_BASE_URL}${path}`, {
     ...init,
@@ -69,8 +77,9 @@ async function rawRequest<T>(
 export async function apiRequest<T>(
   path: string,
   init: RequestInit = {},
+  tenant?: string | null,
 ): Promise<T> {
-  const envelope = await rawRequest<T>(path, init);
+  const envelope = await rawRequest<T>(path, init, tenant);
   return envelope == null ? (undefined as T) : envelope.data;
 }
 
@@ -91,8 +100,12 @@ export async function apiRequestPaged<T>(
 }
 
 // Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v1/api-keys.
-export function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  return apiRequest<T>(`/api/v1${path}`, init);
+export function apiFetch<T>(
+  path: string,
+  init: RequestInit = {},
+  tenant?: string | null,
+): Promise<T> {
+  return apiRequest<T>(`/api/v1${path}`, init, tenant);
 }
 
 // Paginated variant of apiFetch (prefixes /api/v1).

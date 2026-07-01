@@ -5,10 +5,31 @@
     "conflicto_horario": "That time slot clashes with another appointment for the doctor.",
     "solapamiento": "Heads up: this time overlaps another appointment for the doctor."
   },
+  "tablero": {
+    "col": {
+      "hora": "Time",
+      "tipo": "Type",
+      "paciente": "Patient",
+      "record": "Record",
+      "telefono": "Phone",
+      "medico": "Doctor",
+      "comentarios": "Comments",
+      "citadoPor": "Booked by",
+      "estado": "Status",
+      "acciones": "Actions",
+      "centro": "Center"
+    }
+  },
   "agenda": {
     "tabMedicas": "Medical appointments",
     "tabServicios": "Service appointments",
     "today": "Today",
+    "dia": {
+      "allCenters": "All centers",
+      "summary": "{total} appts · {atendidas} seen · {noShow} no-show",
+      "noTime": "No time",
+      "book": "Book {tipo} {hora}"
+    },
     "new": "New appointment",
     "newService": "New service appointment",
     "allDoctors": "Doctors - all",
