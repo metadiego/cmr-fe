@@ -150,7 +150,11 @@ function CentroSheet({
   const t = useTranslations("agenda");
   const tRoot = useTranslations();
   const { can } = useCan();
-  const cols = columnas.filter((c) => !c.permiso || can(c.permiso));
+  // Combined mode returns each center's columns concatenated → dedupe by clave.
+  const seen = new Set<string>();
+  const cols = columnas
+    .filter((c) => (seen.has(c.clave) ? false : (seen.add(c.clave), true)))
+    .filter((c) => !c.permiso || can(c.permiso));
   const r = centro.resumen;
 
   return (
