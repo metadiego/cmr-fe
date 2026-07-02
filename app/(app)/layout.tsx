@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { SessionGate } from "@/components/session-gate";
+import { MeProvider } from "@/components/me-provider";
 
 // Server-side guard for the authenticated area. No session → /login.
 // Defense in depth alongside the redirect in proxy.ts. SessionGate then enforces
@@ -21,5 +22,9 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  return <SessionGate>{children}</SessionGate>;
+  return (
+    <MeProvider>
+      <SessionGate>{children}</SessionGate>
+    </MeProvider>
+  );
 }

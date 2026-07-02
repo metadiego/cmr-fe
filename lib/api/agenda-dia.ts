@@ -49,10 +49,18 @@ export interface ResumenDia {
   noShow: number;
 }
 
+export interface FestivoDia {
+  fecha: string;
+  nombre: string;
+  bloqueaAgenda: boolean;
+}
+
 export interface CentroDia {
   clinicId: string;
   nombre: string;
   notasDia: NotaDia[];
+  festivos: FestivoDia[];
+  bloqueado: boolean; // holiday with bloqueaAgenda → day closed (cupo/vacios all 0)
   franjas: Franja[];
   resumen: ResumenDia;
 }

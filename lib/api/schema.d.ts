@@ -2336,6 +2336,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/medicos/horarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HorariosController_list_v1"];
+        put?: never;
+        post: operations["HorariosController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medicos/horarios/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["HorariosController_update_v1"];
+        post?: never;
+        delete: operations["HorariosController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/festivos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FestivosController_list_v1"];
+        put?: never;
+        post: operations["FestivosController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/festivos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["FestivosController_update_v1"];
+        post?: never;
+        delete: operations["FestivosController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notificaciones/enviar": {
         parameters: {
             query?: never;
@@ -3712,70 +3776,6 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/medicos/horarios": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["HorariosController_list_v1"];
-        put?: never;
-        post: operations["HorariosController_create_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/medicos/horarios/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["HorariosController_update_v1"];
-        post?: never;
-        delete: operations["HorariosController_remove_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/festivos": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["FestivosController_list_v1"];
-        put?: never;
-        post: operations["FestivosController_create_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/festivos/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["FestivosController_update_v1"];
-        post?: never;
-        delete: operations["FestivosController_remove_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5183,13 +5183,15 @@ export interface components {
             updatedAt: string;
         };
         CupoAgendaEntity: {
+            /** @default null */
+            clinicId: string | null;
+            fecha: string | null;
             diaSemana: number | null;
             hora: string;
             tipoCitaId: string;
             cantidad: number;
             activo: boolean;
             id: string;
-            clinicId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -5197,19 +5199,32 @@ export interface components {
         };
         CreateCupoDto: {
             diaSemana?: number;
+            /** @description Override SOLO para esta fecha ("YYYY-MM-DD"); si se omite aplica por diaSemana/default. */
+            fecha?: string;
             hora: string;
             /** Format: uuid */
             tipoCitaId: string;
             cantidad: number;
             activo?: boolean;
+            /**
+             * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
+             * @enum {string}
+             */
+            scope?: "centro" | "global";
         };
         UpdateCupoDto: {
             diaSemana?: number;
+            fecha?: string;
             hora?: string;
             /** Format: uuid */
             tipoCitaId?: string;
             cantidad?: number;
             activo?: boolean;
+            /**
+             * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
+             * @enum {string}
+             */
+            scope?: "centro" | "global";
         };
         NotaDiaEntity: {
             fecha: string;
@@ -5458,6 +5473,74 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        HorarioMedicoEntity: {
+            medicoId: string | null;
+            diaSemana: number;
+            horaInicio: string;
+            horaFin: string;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateHorarioMedicoDto: {
+            /** Format: uuid */
+            medicoId?: string;
+            diaSemana: number;
+            horaInicio: string;
+            horaFin: string;
+            activo?: boolean;
+        };
+        UpdateHorarioMedicoDto: {
+            /** Format: uuid */
+            medicoId?: string;
+            diaSemana?: number;
+            horaInicio?: string;
+            horaFin?: string;
+            activo?: boolean;
+        };
+        FestivoEntity: {
+            /** @default null */
+            clinicId: string | null;
+            fecha: string;
+            nombre: string;
+            recurrenteAnual: boolean;
+            bloqueaAgenda: boolean;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateFestivoDto: {
+            fecha: string;
+            nombre: string;
+            recurrenteAnual?: boolean;
+            /** @description True (default) = cierra la agenda ese día; false = informativo. */
+            bloqueaAgenda?: boolean;
+            activo?: boolean;
+            /**
+             * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
+             * @enum {string}
+             */
+            scope?: "centro" | "global";
+        };
+        UpdateFestivoDto: {
+            fecha?: string;
+            nombre?: string;
+            recurrenteAnual?: boolean;
+            bloqueaAgenda?: boolean;
+            activo?: boolean;
+            /**
+             * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
+             * @enum {string}
+             */
+            scope?: "centro" | "global";
         };
         EnviarNotificacionDto: {
             /** Format: uuid */
@@ -6294,59 +6377,6 @@ export interface components {
         VincularMedicionDto: {
             /** Format: uuid */
             citaId: string;
-        };
-        HorarioMedicoEntity: {
-            medicoId: string | null;
-            diaSemana: number;
-            horaInicio: string;
-            horaFin: string;
-            activo: boolean;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        CreateHorarioMedicoDto: {
-            /** Format: uuid */
-            medicoId?: string;
-            diaSemana: number;
-            horaInicio: string;
-            horaFin: string;
-            activo?: boolean;
-        };
-        UpdateHorarioMedicoDto: {
-            /** Format: uuid */
-            medicoId?: string;
-            diaSemana?: number;
-            horaInicio?: string;
-            horaFin?: string;
-            activo?: boolean;
-        };
-        FestivoEntity: {
-            fecha: string;
-            nombre: string;
-            recurrenteAnual: boolean;
-            activo: boolean;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        CreateFestivoDto: {
-            fecha: string;
-            nombre: string;
-            recurrenteAnual?: boolean;
-            activo?: boolean;
-        };
-        UpdateFestivoDto: {
-            fecha?: string;
-            nombre?: string;
-            recurrenteAnual?: boolean;
-            activo?: boolean;
         };
         CreatePerfilDto: {
             authUserId: string;
@@ -10428,6 +10458,10 @@ export interface operations {
             query?: {
                 /** @description Filtra por día de la semana (0=domingo … 6=sábado) */
                 diaSemana?: number;
+                /** @description Filtra los overrides de una fecha ("YYYY-MM-DD") */
+                fecha?: string;
+                /** @description scope=global lista los cupos de todos los centros (clinicId=null) */
+                scope?: "centro" | "global";
             };
             header?: never;
             path?: never;
@@ -11165,6 +11199,185 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UsuarioColumnaEntity"];
                 };
+            };
+        };
+    };
+    HorariosController_list_v1: {
+        parameters: {
+            query?: {
+                medicoId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HorarioMedicoEntity"][];
+                };
+            };
+        };
+    };
+    HorariosController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateHorarioMedicoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HorarioMedicoEntity"];
+                };
+            };
+        };
+    };
+    HorariosController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateHorarioMedicoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HorarioMedicoEntity"];
+                };
+            };
+        };
+    };
+    HorariosController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FestivosController_list_v1: {
+        parameters: {
+            query?: {
+                /** @description Año (resuelve recurrentes) */
+                anio?: number;
+                /** @description scope=global lista los festivos de todos los centros (clinicId=null) */
+                scope?: "centro" | "global";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FestivoEntity"][];
+                };
+            };
+        };
+    };
+    FestivosController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFestivoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FestivoEntity"];
+                };
+            };
+        };
+    };
+    FestivosController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFestivoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FestivoEntity"];
+                };
+            };
+        };
+    };
+    FestivosController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -13516,182 +13729,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    HorariosController_list_v1: {
-        parameters: {
-            query?: {
-                medicoId?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HorarioMedicoEntity"][];
-                };
-            };
-        };
-    };
-    HorariosController_create_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateHorarioMedicoDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HorarioMedicoEntity"];
-                };
-            };
-        };
-    };
-    HorariosController_update_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateHorarioMedicoDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HorarioMedicoEntity"];
-                };
-            };
-        };
-    };
-    HorariosController_remove_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    FestivosController_list_v1: {
-        parameters: {
-            query?: {
-                anio?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FestivoEntity"][];
-                };
-            };
-        };
-    };
-    FestivosController_create_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateFestivoDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FestivoEntity"];
-                };
-            };
-        };
-    };
-    FestivosController_update_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateFestivoDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FestivoEntity"];
-                };
-            };
-        };
-    };
-    FestivosController_remove_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
                 headers: {
                     [name: string]: unknown;
                 };

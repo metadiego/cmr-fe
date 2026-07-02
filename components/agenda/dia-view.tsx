@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon, Add01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
 
 import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type TipoFranja } from "@/lib/api/agenda-dia";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
@@ -79,7 +79,16 @@ export function DiaView({ fecha }: { fecha: string }) {
           {t("today")}
         </Link>
         <h1 className="text-xl font-semibold capitalize">{fechaLabel}</h1>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Can permiso="citas.config">
+            <Link
+              href="/citas/agenda/cupos"
+              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <HugeiconsIcon icon={Settings02Icon} className="size-4" />
+              {t("cupos.configure")}
+            </Link>
+          </Can>
           <Select value={centro} onValueChange={pickCentro}>
             <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -156,6 +165,8 @@ function CentroSheet({
     .filter((c) => (seen.has(c.clave) ? false : (seen.add(c.clave), true)))
     .filter((c) => !c.permiso || can(c.permiso));
   const r = centro.resumen;
+  const festivos = centro.festivos ?? [];
+  const bloqueado = centro.bloqueado ?? false;
 
   return (
     <div className="space-y-4">
@@ -168,12 +179,31 @@ function CentroSheet({
             noShow: r?.noShow ?? 0,
           })}
         </span>
+        {festivos.map((f) => (
+          <span
+            key={f.fecha + f.nombre}
+            className={
+              f.bloqueaAgenda
+                ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
+                : "rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-400"
+            }
+          >
+            {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}
+            {f.bloqueaAgenda ? ` — ${t("dia.closed")}` : ""}
+          </span>
+        ))}
         {centro.notasDia.filter((n) => n.activo).map((n) => (
           <span key={n.id} className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">
             📌 {n.contenido}
           </span>
         ))}
       </div>
+
+      {bloqueado && (
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          {t("dia.closedNotice")}
+        </div>
+      )}
 
       {centro.franjas.map((franja) =>
         franja.tipos.map((tipo) => {
@@ -209,22 +239,27 @@ function CentroSheet({
                         ))}
                       </tr>
                     ))}
-                    {Array.from({ length: tipo.vacios }).map((_, i) => (
-                      <tr key={`v${i}`} className="border-t bg-muted/10">
-                        <td colSpan={cols.length} className="px-3 py-1">
-                          <Can permiso="citas.create">
-                            <button
-                              type="button"
-                              onClick={() => onAgendar(franja.hora, tipo)}
-                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                            >
-                              <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
-                              {t("dia.book", { tipo: tipo.tipoNombre, hora: franja.hora ?? "" })}
-                            </button>
-                          </Can>
+                    {tipo.vacios > 0 && (
+                      <tr className="border-t bg-muted/10">
+                        <td colSpan={cols.length} className="px-3 py-1.5">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-muted-foreground">
+                              {t("dia.freeSlots", { n: tipo.vacios })}
+                            </span>
+                            <Can permiso="citas.create">
+                              <button
+                                type="button"
+                                onClick={() => onAgendar(franja.hora, tipo)}
+                                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                              >
+                                <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
+                                {t("dia.book", { tipo: tipo.tipoNombre, hora: franja.hora ?? "" })}
+                              </button>
+                            </Can>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
