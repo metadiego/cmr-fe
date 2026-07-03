@@ -7,7 +7,8 @@ import { env } from "@/lib/env";
 // `version` = monotonic ordering token.
 export interface CitaStreamEvent {
   canal: string;
-  entidad: string; // "cita"
+  entidad: string; // "cita" | "sesion" | ...
+  tablero?: string; // originating board (optional)
   id: string;
   accion: string; // "estado" | "creada" | "reagendada" | ...
   estado?: {
@@ -45,7 +46,8 @@ export async function subscribeCitas(opts: {
   if (typeof opts.centroId === "string" && opts.centroId) headers["X-Tenant-ID"] = opts.centroId;
   if (opts.lastEventId) headers["Last-Event-ID"] = opts.lastEventId;
 
-  const res = await fetch(`${env.API_BASE_URL}/api/v1/citas/stream`, {
+  // Canonical single bus for all verticals (filter by entidad on the client).
+  const res = await fetch(`${env.API_BASE_URL}/api/v1/tablero/stream`, {
     headers,
     signal: opts.signal,
   });

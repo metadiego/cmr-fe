@@ -67,6 +67,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   // every open window stays in sync. combined → null (all permitted centers).
   const { live } = useCitaStream({
     centroId: centro === ALL ? null : centro,
+    entidad: "cita",
     onInvalidate: refresh,
   });
 

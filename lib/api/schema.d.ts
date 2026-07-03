@@ -3815,6 +3815,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tableros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Registro de verticales activas (el FE arma menú/rutas desde datos). */
+        get: operations["TablerosController_listTableros_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/definicion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Definición efectiva de un tablero (columnas + estados + transiciones + subtipos). */
+        get: operations["TablerosController_definicion_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/filas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Filas de un tablero (uniforme). subTipo = servicio (frontdesk); soloAtencion opcional. */
+        get: operations["TablerosController_filas_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/accion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ejecuta una acción/transición declarativa (aplica la transición del dominio + emite SSE). */
+        post: operations["TablerosController_accion_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles": {
         parameters: {
             query?: never;
@@ -5285,6 +5353,7 @@ export interface components {
         EstadoCitaEntity: {
             /** @default null */
             clinicId: string | null;
+            tablero: string;
             clave: string;
             labelKey: string;
             orden: number;
@@ -6452,6 +6521,29 @@ export interface components {
         VincularMedicionDto: {
             /** Format: uuid */
             citaId: string;
+        };
+        TableroEntity: {
+            clave: string;
+            labelKey: string;
+            icon: string | null;
+            orden: number;
+            permiso: string | null;
+            layout: string;
+            entidad: string;
+            filtros: Record<string, never> | null;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TableroAccionDto: {
+            tablero: string;
+            entidadId: string;
+            accion: string;
+            /** @description Campos que exige la transición (p. ej. vitales, motivo, enfermeraId, actorId). */
+            payload?: Record<string, never>;
         };
         CreatePerfilDto: {
             authUserId: string;
@@ -13865,6 +13957,98 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    TablerosController_listTableros_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroEntity"][];
+                };
+            };
+        };
+    };
+    TablerosController_definicion_v1: {
+        parameters: {
+            query: {
+                /** @description Clave del tablero */
+                tablero: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    TablerosController_filas_v1: {
+        parameters: {
+            query: {
+                /** @description Clave del tablero */
+                tablero: string;
+                /** @description Día (YYYY-MM-DD) */
+                fecha: string;
+                /** @description Subtipo (p. ej. servicio) para filtrar */
+                subTipo?: string;
+                /** @description true = solo estados visibleEnAtencion */
+                soloAtencion?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    TablerosController_accion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TableroAccionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

@@ -14,6 +14,33 @@
       "no_show": "No-show",
       "cancelada": "Cancelled",
       "reprogramada": "Rescheduled"
+    },
+    "accion": {
+      "confirmar": "Confirm",
+      "presente": "Check in",
+      "triage": "Triage",
+      "consulta": "To consultation",
+      "atender": "Mark seen",
+      "no_show": "No-show",
+      "cancelar": "Cancel",
+      "reagendar": "Reschedule"
+    },
+    "tipo": {
+      "nueva": "Consultation (New)",
+      "seguimiento": "Follow-up"
+    }
+  },
+  "tableroBoard": {
+    "live": "Live",
+    "empty": "No records for this day.",
+    "all": "All",
+    "actions": "Actions",
+    "confirmAction": "Confirm this action?",
+    "field": {
+      "motivo": "Reason",
+      "fecha": "Date",
+      "hora": "Time",
+      "enfermeraId": "Nurse"
     }
   },
   "tableroEditor": {

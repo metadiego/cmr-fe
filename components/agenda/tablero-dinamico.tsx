@@ -4,10 +4,8 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
-import type { Cita } from "@/lib/api/citas";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
-import { CitaActions } from "@/components/citas/cita-actions";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
@@ -34,14 +32,13 @@ export function useVisibleColumns(columnas: ColumnaEfectiva[]): ColumnaEfectiva[
 export function TableroDinamico({
   columnas,
   filas,
-  toCita,
-  onChanged,
+  renderAccion,
   emptyLabel,
 }: {
   columnas: ColumnaEfectiva[];
   filas: CitaFila[];
-  toCita: (fila: CitaFila) => Cita;
-  onChanged: () => void;
+  // Renders the cell for the "accion" column (declarative actions per row).
+  renderAccion?: (fila: CitaFila) => React.ReactNode;
   emptyLabel?: string;
 }) {
   const tRoot = useTranslations();
@@ -72,7 +69,7 @@ export function TableroDinamico({
               {cols.map((col) => (
                 <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
                   {col.tipo === "accion" ? (
-                    <CitaActions cita={toCita(fila)} onChanged={onChanged} />
+                    renderAccion?.(fila) ?? <Cell col={col} value={fila[col.clave]} />
                   ) : (
                     <Cell col={col} value={fila[col.clave]} />
                   )}

@@ -11,6 +11,7 @@ import { subscribeCitas, type CitaStreamEvent } from "@/lib/api/citas-stream";
 export function useCitaStream(opts: {
   centroId?: string | null;
   enabled?: boolean;
+  entidad?: string; // only react to events of this entity (cita|sesion|…)
   onInvalidate: () => void;
   onEvent?: (e: CitaStreamEvent) => void;
   debounceMs?: number;
@@ -52,6 +53,8 @@ export function useCitaStream(opts: {
               lastId = id;
             },
             onEvent: (e) => {
+              // Single bus for all verticals → ignore events of other entities.
+              if (cbRef.current.entidad && e.entidad !== cbRef.current.entidad) return;
               cbRef.current.onEvent?.(e);
               scheduleInvalidate();
             },

@@ -19,6 +19,9 @@ export const navManifest: Record<string, NavManifestEntry> = {
   clientes: { href: "/clientes", icon: "UserMultipleIcon" },
   citas: { href: "/citas", icon: "Calendar03Icon" },
   admin: { href: "/admin", icon: "Settings02Icon" },
+  // Vertical boards (atencion/servicios/operaciones/…) are NOT hardcoded here:
+  // the BE menu points them to /tablero/<clave> and the [clave] route renders
+  // them generically. Adding a vertical needs zero FE code.
 };
 
 // Resolve a menu clave to its FE route. Falls back to the BE-provided path when

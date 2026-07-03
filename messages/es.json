@@ -14,6 +14,33 @@
       "no_show": "No asistió",
       "cancelada": "Cancelada",
       "reprogramada": "Reagendada"
+    },
+    "accion": {
+      "confirmar": "Confirmar",
+      "presente": "Marcar presente",
+      "triage": "Triage",
+      "consulta": "Pasar a consulta",
+      "atender": "Marcar asistida",
+      "no_show": "No asistió",
+      "cancelar": "Cancelar",
+      "reagendar": "Reagendar"
+    },
+    "tipo": {
+      "nueva": "Consulta (Nueva)",
+      "seguimiento": "Seguimiento"
+    }
+  },
+  "tableroBoard": {
+    "live": "En vivo",
+    "empty": "Sin registros para este día.",
+    "all": "Todos",
+    "actions": "Acciones",
+    "confirmAction": "¿Confirmas esta acción?",
+    "field": {
+      "motivo": "Motivo",
+      "fecha": "Fecha",
+      "hora": "Hora",
+      "enfermeraId": "Enfermera"
     }
   },
   "tableroEditor": {
