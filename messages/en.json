@@ -40,6 +40,7 @@
     "all": "All",
     "actions": "Actions",
     "confirmAction": "Confirm this action?",
+    "transitionNotAllowed": "That state change isn't allowed.",
     "field": {
       "motivo": "Reason",
       "fecha": "Date",

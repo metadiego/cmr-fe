@@ -3832,6 +3832,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tablero/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stream ÚNICO del motor (SSE): emite TODOS los eventos declarativos del scope (clinicId) para
+         *     CUALQUIER vertical; cada evento lleva `entidad` (y `tablero?`) → el FE filtra por su tablero.
+         *     Un solo bus: no hay un stream por vertical. See docs/specs/tableros-motor-metadata.md.
+         */
+        get: operations["TablerosController_stream_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tablero/definicion": {
         parameters: {
             query?: never;
@@ -5474,7 +5495,7 @@ export interface components {
         CitaEventoEntity: {
             citaId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada" | "reparada" | "auto_revertida";
+            tipo: "cancelada" | "creada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada" | "reparada" | "auto_revertida" | "corregida";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -6252,7 +6273,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sesionId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "presente" | "reparada" | "en_terapia" | "asistido" | "datos";
+            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "en_terapia" | "asistido" | "datos";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -6531,6 +6552,7 @@ export interface components {
             layout: string;
             entidad: string;
             filtros: Record<string, never> | null;
+            esVertical: boolean;
             activo: boolean;
             id: string;
             /** Format: date-time */
@@ -13975,6 +13997,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TableroEntity"][];
+                };
+            };
+        };
+    };
+    TablerosController_stream_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

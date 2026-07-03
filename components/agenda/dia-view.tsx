@@ -15,7 +15,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
-import { TableroAcciones } from "@/components/tablero/tablero-acciones";
+import { EstadoSelect } from "@/components/tablero/estado-select";
 import { Cell } from "@/components/agenda/tablero-dinamico";
 import {
   Select,
@@ -56,9 +56,10 @@ export function DiaView({ fecha }: { fecha: string }) {
   const medicosRes = useResource<Personal[]>(() => getMedicos());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
-  // State machine (estados + transiciones) from the board engine — the row
-  // actions are 100% declarative, no hardcoded action list.
-  const defRes = useResource<TableroDefinicion>(() => getDefinicion("citas"));
+  // Call-center board definition: its own tablero (citas_cc) with just the CC
+  // states (agendada/confirmada) + their transitions. The Estado column becomes
+  // an inline selector driven by this — the FE invents no state list.
+  const defRes = useResource<TableroDefinicion>(() => getDefinicion("citas_cc"));
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
 
   const { state, reload, refresh } = useResource<AgendaDia>(
@@ -279,9 +280,9 @@ function CentroSheet({
                       <tr key={fila.id} className="border-t">
                         {cols.map((col) => (
                           <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
-                            {col.tipo === "accion" ? (
-                              <TableroAcciones
-                                tablero="citas"
+                            {col.clave === "estado" ? (
+                              <EstadoSelect
+                                tablero="citas_cc"
                                 entidadId={fila.id}
                                 estado={String(fila.estado ?? fila["estado"] ?? "")}
                                 estados={estados}
@@ -289,6 +290,9 @@ function CentroSheet({
                                 centroId={centro.clinicId}
                                 onDone={onChanged}
                               />
+                            ) : col.tipo === "accion" ? (
+                              // ⋯ reservado para otras acciones (no estado)
+                              null
                             ) : (
                               <Cell col={col} value={fila[col.clave]} />
                             )}
