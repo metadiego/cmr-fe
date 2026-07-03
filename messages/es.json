@@ -16,6 +16,16 @@
       "reprogramada": "Reagendada"
     }
   },
+  "tableroEditor": {
+    "title": "Columnas del tablero",
+    "help": "Elige qué columnas se muestran y en qué orden. Usa las flechas para reordenar.",
+    "boardMode": "Editas la composición del tablero (aplica a todos).",
+    "personalMode": "Personalizas tu propia vista (solo para ti).",
+    "pinned": "Fija",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "saved": "Columnas guardadas"
+  },
   "tablero": {
     "col": {
       "hora": "Hora",
@@ -289,6 +299,7 @@
     "saving": "Guardando…",
     "cancel": "Cancelar",
     "delete": "Eliminar",
+    "back": "Volver",
     "search": "Buscar…",
     "pagination": {
       "range": "{from}–{to} de {total}",
@@ -345,6 +356,19 @@
     "center": "Centro",
     "clientes": "Clientes",
     "citas": "Citas",
+    "ahora_mismo": "Ahora mismo",
+    "alertas": "Alertas",
+    "atencion": "Atención",
+    "auditoria": "Auditoría",
+    "caja": "Caja",
+    "consultas": "Consultas",
+    "facturacion": "Facturación",
+    "frontdesk": "Servicios",
+    "inventario": "Inventario",
+    "notificaciones": "Notificaciones",
+    "pacientes": "Pacientes",
+    "personal": "Personal",
+    "precios": "Precios",
     "signOut": "Cerrar sesión",
     "signingOut": "Saliendo…"
   },

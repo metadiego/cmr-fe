@@ -6,16 +6,17 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
 
-import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type Franja, type TipoFranja } from "@/lib/api/agenda-dia";
+import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type TipoFranja } from "@/lib/api/agenda-dia";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { getTiposCita, type TipoCita, type Cita, type EstadoCita } from "@/lib/api/citas";
+import { getTiposCita, type TipoCita } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
 import { CitaActions } from "@/components/citas/cita-actions";
-import { Badge } from "@/components/ui/badge";
+import { filaToCita } from "@/lib/agenda/fila-to-cita";
+import { Cell } from "@/components/agenda/tablero-dinamico";
 import {
   Select,
   SelectContent,
@@ -178,26 +179,6 @@ export function DiaView({ fecha }: { fecha: string }) {
   );
 }
 
-// Build a Cita-shaped object from the projected day-view row so CitaActions
-// (transitions / reschedule / history) can operate straight from the sheet.
-function filaToCita(
-  fila: Record<string, unknown> & { id: string; estado?: string },
-  centro: CentroDia,
-  franja: Franja,
-  tipo: TipoFranja,
-  fecha: string,
-): Cita {
-  return {
-    id: fila.id,
-    estado: (fila.estado ?? fila["estado"] ?? "programada") as EstadoCita,
-    clinicId: centro.clinicId,
-    tipoCitaId: tipo.tipoCitaId,
-    fecha,
-    hora: franja.hora,
-    medicoId: (fila["medicoId"] as string) ?? null,
-  } as Cita;
-}
-
 function CentroSheet({
   centro,
   columnas,
@@ -333,9 +314,3 @@ function CentroSheet({
   );
 }
 
-function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
-  const text = value == null || value === "" ? "—" : String(value);
-  if (col.tipo === "badge") return <Badge variant="secondary">{text}</Badge>;
-  if (col.tipo === "accion") return <span className="text-muted-foreground">·</span>; // Slice B
-  return <span className={col.tipo === "hora" ? "font-mono" : undefined}>{text}</span>;
-}

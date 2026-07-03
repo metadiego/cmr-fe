@@ -16,6 +16,16 @@
       "reprogramada": "Rescheduled"
     }
   },
+  "tableroEditor": {
+    "title": "Board columns",
+    "help": "Choose which columns show and in what order. Use the arrows to reorder.",
+    "boardMode": "You're editing the board composition (applies to everyone).",
+    "personalMode": "You're personalizing your own view (only for you).",
+    "pinned": "Pinned",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "saved": "Columns saved"
+  },
   "tablero": {
     "col": {
       "hora": "Time",
@@ -289,6 +299,7 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "delete": "Delete",
+    "back": "Back",
     "search": "Search…",
     "pagination": {
       "range": "{from}–{to} of {total}",
@@ -345,6 +356,19 @@
     "center": "Center",
     "clientes": "Clients",
     "citas": "Appointments",
+    "ahora_mismo": "Right now",
+    "alertas": "Alerts",
+    "atencion": "Patient care",
+    "auditoria": "Audit",
+    "caja": "Cash",
+    "consultas": "Consultations",
+    "facturacion": "Billing",
+    "frontdesk": "Services",
+    "inventario": "Inventory",
+    "notificaciones": "Notifications",
+    "pacientes": "Patients",
+    "personal": "Staff",
+    "precios": "Pricing",
     "signOut": "Sign out",
     "signingOut": "Signing out…"
   },

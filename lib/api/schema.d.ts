@@ -2337,6 +2337,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tablero/composicion/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Guarda la composición de un board completo en UNA llamada (constructor de columnas). */
+        post: operations["TableroController_setComposicionBulk_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tablero/personalizar": {
         parameters: {
             query?: never;
@@ -5445,6 +5462,7 @@ export interface components {
             editable: boolean;
             permiso: string | null;
             render: Record<string, never> | null;
+            ambitos: string[] | null;
             activo: boolean;
             id: string;
             /** Format: date-time */
@@ -5494,6 +5512,18 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        SetComposicionItemDto: {
+            /** Format: uuid */
+            columnaId: string;
+            orden?: number;
+            visible?: boolean;
+            fijo?: boolean;
+            activo?: boolean;
+        };
+        SetComposicionBulkDto: {
+            tablero: string;
+            columnas: components["schemas"]["SetComposicionItemDto"][];
         };
         PersonalizarColumnaDto: {
             tablero: string;
@@ -10767,8 +10797,12 @@ export interface operations {
     CitasController_tablero_v1: {
         parameters: {
             query: {
+                /** @description Día (YYYY-MM-DD) */
                 fecha: string;
+                /** @description Clave del tablero (default citas) */
                 tablero?: string;
+                /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
+                soloAtencion?: string;
             };
             header?: never;
             path?: never;
@@ -11142,7 +11176,10 @@ export interface operations {
     };
     TableroController_listColumnas_v1: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Filtra el catálogo a las columnas ELEGIBLES de ese tablero (por `ambitos`); sin él, todo el catálogo. */
+                tablero?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -11247,6 +11284,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TableroColumnaEntity"];
+                };
+            };
+        };
+    };
+    TableroController_setComposicionBulk_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetComposicionBulkDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroColumnaEntity"][];
                 };
             };
         };
