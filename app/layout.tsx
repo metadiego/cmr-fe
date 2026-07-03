@@ -1,5 +1,5 @@
 import { Geist_Mono, Public_Sans } from "next/font/google"
-import { getLocale } from "next-intl/server"
+import { getLocale, getMessages } from "next-intl/server"
 
 import "./globals.css"
 import { IntlProvider } from "@/components/intl-provider"
@@ -22,8 +22,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // Locale resolved from the request config (i18n/request.ts, cookie-based).
+  // Locale + messages resolved from the request config (cookie-based). Passed
+  // explicitly because IntlProvider is a client boundary (can't infer them).
   const locale = await getLocale()
+  const messages = await getMessages()
 
   return (
     <html
@@ -34,7 +36,7 @@ export default async function RootLayout({
       <body>
         {/* Inherits locale + messages from the request config; adds graceful
             fallback for missing keys (humanized) for config-only boards. */}
-        <IntlProvider>
+        <IntlProvider locale={locale} messages={messages}>
           <RecoveryRedirect />
           <ThemeProvider>
             <PresentationProvider>
