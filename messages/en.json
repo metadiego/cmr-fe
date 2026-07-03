@@ -42,7 +42,8 @@
       "book": "Book {tipo} {hora}",
       "freeSlots": "{n, plural, one {# free slot} other {# free slots}}",
       "closed": "closed",
-      "closedNotice": "Holiday — scheduling is closed. New appointments cannot be created."
+      "closedNotice": "Holiday — scheduling is closed. New appointments cannot be created.",
+      "live": "Live"
     },
     "cupos": {
       "title": "Schedule configuration",

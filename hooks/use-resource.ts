@@ -23,7 +23,7 @@ export type ResourceState<T> =
 export function useResource<T>(
   fetcher: () => Promise<T>,
   deps: React.DependencyList = [],
-): { state: ResourceState<T>; reload: () => void } {
+): { state: ResourceState<T>; reload: () => void; refresh: () => void } {
   const [state, setState] = React.useState<ResourceState<T>>({
     kind: "loading",
   });
@@ -60,5 +60,11 @@ export function useResource<T>(
     setNonce((n) => n + 1);
   }, []);
 
-  return { state, reload };
+  // Silent refetch: re-runs the fetcher WITHOUT flipping to "loading", so the
+  // current data stays on screen (used for live SSE-driven refreshes).
+  const refresh = React.useCallback(() => {
+    setNonce((n) => n + 1);
+  }, []);
+
+  return { state, reload, refresh };
 }

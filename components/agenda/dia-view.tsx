@@ -6,13 +6,15 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
 
-import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type TipoFranja } from "@/lib/api/agenda-dia";
+import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type Franja, type TipoFranja } from "@/lib/api/agenda-dia";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { getTiposCita, type TipoCita } from "@/lib/api/citas";
+import { getTiposCita, type TipoCita, type Cita, type EstadoCita } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { useResource } from "@/hooks/use-resource";
+import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
+import { CitaActions } from "@/components/citas/cita-actions";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -54,11 +56,18 @@ export function DiaView({ fecha }: { fecha: string }) {
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
 
-  const { state, reload } = useResource<AgendaDia>(
+  const { state, reload, refresh } = useResource<AgendaDia>(
     () =>
       getAgendaDia(fecha, centro === ALL ? { combinado: true } : { centroId: centro }),
     [fecha, centro],
   );
+
+  // Live: refetch (silently) whenever anyone changes a cita in this scope, so
+  // every open window stays in sync. combined → null (all permitted centers).
+  const { live } = useCitaStream({
+    centroId: centro === ALL ? null : centro,
+    onInvalidate: refresh,
+  });
 
   const fechaLabel = new Date(fecha + "T00:00:00").toLocaleDateString(undefined, {
     weekday: "long",
@@ -81,6 +90,15 @@ export function DiaView({ fecha }: { fecha: string }) {
           {t("today")}
         </Link>
         <h1 className="text-xl font-semibold capitalize">{fechaLabel}</h1>
+        {live && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            </span>
+            {t("dia.live")}
+          </span>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <Can permiso="citas.config">
             <Link
@@ -122,6 +140,8 @@ export function DiaView({ fecha }: { fecha: string }) {
               <CentroSheet
                 centro={c}
                 columnas={data.columnas}
+                fecha={fecha}
+                onChanged={refresh}
                 onAgendar={(hora, tipo) =>
                   setModal({ fecha, centroId: c.clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
                 }
@@ -133,6 +153,8 @@ export function DiaView({ fecha }: { fecha: string }) {
         <CentroSheet
           centro={centrosData[0]}
           columnas={data.columnas}
+          fecha={fecha}
+          onChanged={refresh}
           onAgendar={(hora, tipo) =>
             setModal({ fecha, centroId: centrosData[0].clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
           }
@@ -156,14 +178,38 @@ export function DiaView({ fecha }: { fecha: string }) {
   );
 }
 
+// Build a Cita-shaped object from the projected day-view row so CitaActions
+// (transitions / reschedule / history) can operate straight from the sheet.
+function filaToCita(
+  fila: Record<string, unknown> & { id: string; estado?: string },
+  centro: CentroDia,
+  franja: Franja,
+  tipo: TipoFranja,
+  fecha: string,
+): Cita {
+  return {
+    id: fila.id,
+    estado: (fila.estado ?? fila["estado"] ?? "programada") as EstadoCita,
+    clinicId: centro.clinicId,
+    tipoCitaId: tipo.tipoCitaId,
+    fecha,
+    hora: franja.hora,
+    medicoId: (fila["medicoId"] as string) ?? null,
+  } as Cita;
+}
+
 function CentroSheet({
   centro,
   columnas,
+  fecha,
   onAgendar,
+  onChanged,
 }: {
   centro: CentroDia;
   columnas: ColumnaEfectiva[];
+  fecha: string;
   onAgendar: (hora: string | null, tipo: TipoFranja) => void;
+  onChanged: () => void;
 }) {
   const t = useTranslations("agenda");
   const tRoot = useTranslations();
@@ -243,7 +289,14 @@ function CentroSheet({
                       <tr key={fila.id} className="border-t">
                         {cols.map((col) => (
                           <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
-                            <Cell col={col} value={fila[col.clave]} />
+                            {col.tipo === "accion" ? (
+                              <CitaActions
+                                cita={filaToCita(fila, centro, franja, tipo, fecha)}
+                                onChanged={onChanged}
+                              />
+                            ) : (
+                              <Cell col={col} value={fila[col.clave]} />
+                            )}
                           </td>
                         ))}
                       </tr>

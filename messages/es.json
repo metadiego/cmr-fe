@@ -42,7 +42,8 @@
       "book": "Agendar {tipo} {hora}",
       "freeSlots": "{n, plural, one {# cupo libre} other {# cupos libres}}",
       "closed": "cerrado",
-      "closedNotice": "Día feriado — la agenda está cerrada. No se pueden crear citas nuevas."
+      "closedNotice": "Día feriado — la agenda está cerrada. No se pueden crear citas nuevas.",
+      "live": "En vivo"
     },
     "cupos": {
       "title": "Configuración de agenda",
