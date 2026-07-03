@@ -8,14 +8,14 @@ import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free
 
 import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type TipoFranja } from "@/lib/api/agenda-dia";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { getTiposCita, type TipoCita } from "@/lib/api/citas";
+import { getTiposCita, type TipoCita, type EstadoCitaCatalogo } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
+import { getDefinicion, type TableroDefinicion, type Transicion } from "@/lib/api/tablero";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
-import { CitaActions } from "@/components/citas/cita-actions";
-import { filaToCita } from "@/lib/agenda/fila-to-cita";
+import { TableroAcciones } from "@/components/tablero/tablero-acciones";
 import { Cell } from "@/components/agenda/tablero-dinamico";
 import {
   Select,
@@ -56,6 +56,10 @@ export function DiaView({ fecha }: { fecha: string }) {
   const medicosRes = useResource<Personal[]>(() => getMedicos());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
+  // State machine (estados + transiciones) from the board engine — the row
+  // actions are 100% declarative, no hardcoded action list.
+  const defRes = useResource<TableroDefinicion>(() => getDefinicion("citas"));
+  const def = defRes.state.kind === "ok" ? defRes.state.data : null;
 
   const { state, reload, refresh } = useResource<AgendaDia>(
     () =>
@@ -142,7 +146,8 @@ export function DiaView({ fecha }: { fecha: string }) {
               <CentroSheet
                 centro={c}
                 columnas={data.columnas}
-                fecha={fecha}
+                estados={def?.estados ?? []}
+                transiciones={def?.transiciones ?? []}
                 onChanged={refresh}
                 onAgendar={(hora, tipo) =>
                   setModal({ fecha, centroId: c.clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
@@ -155,7 +160,8 @@ export function DiaView({ fecha }: { fecha: string }) {
         <CentroSheet
           centro={centrosData[0]}
           columnas={data.columnas}
-          fecha={fecha}
+          estados={def?.estados ?? []}
+          transiciones={def?.transiciones ?? []}
           onChanged={refresh}
           onAgendar={(hora, tipo) =>
             setModal({ fecha, centroId: centrosData[0].clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
@@ -183,13 +189,15 @@ export function DiaView({ fecha }: { fecha: string }) {
 function CentroSheet({
   centro,
   columnas,
-  fecha,
+  estados,
+  transiciones,
   onAgendar,
   onChanged,
 }: {
   centro: CentroDia;
   columnas: ColumnaEfectiva[];
-  fecha: string;
+  estados: EstadoCitaCatalogo[];
+  transiciones: Transicion[];
   onAgendar: (hora: string | null, tipo: TipoFranja) => void;
   onChanged: () => void;
 }) {
@@ -272,9 +280,14 @@ function CentroSheet({
                         {cols.map((col) => (
                           <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
                             {col.tipo === "accion" ? (
-                              <CitaActions
-                                cita={filaToCita(fila, centro, franja, tipo, fecha)}
-                                onChanged={onChanged}
+                              <TableroAcciones
+                                tablero="citas"
+                                entidadId={fila.id}
+                                estado={String(fila.estado ?? fila["estado"] ?? "")}
+                                estados={estados}
+                                transiciones={transiciones}
+                                centroId={centro.clinicId}
+                                onDone={onChanged}
                               />
                             ) : (
                               <Cell col={col} value={fila[col.clave]} />
