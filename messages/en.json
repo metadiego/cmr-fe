@@ -23,7 +23,11 @@
       "atender": "Mark seen",
       "no_show": "No-show",
       "cancelar": "Cancel",
-      "reagendar": "Reschedule"
+      "reagendar": "Reschedule",
+      "volver_programada": "Back to scheduled",
+      "volver_confirmada": "Back to confirmed",
+      "volver_presente": "Back to checked in",
+      "volver_triage": "Back to triage"
     },
     "tipo": {
       "nueva": "Consultation (New)",

@@ -1,8 +1,8 @@
 import { Geist_Mono, Public_Sans } from "next/font/google"
-import { NextIntlClientProvider } from "next-intl"
 import { getLocale } from "next-intl/server"
 
 import "./globals.css"
+import { IntlProvider } from "@/components/intl-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { PresentationProvider } from "@/components/presentation-provider"
 import { RecoveryRedirect } from "@/components/auth/recovery-redirect"
@@ -32,9 +32,9 @@ export default async function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", publicSans.variable)}
     >
       <body>
-        {/* No props: NextIntlClientProvider inherits locale + messages from the
-            request config and exposes them to Client Components. */}
-        <NextIntlClientProvider>
+        {/* Inherits locale + messages from the request config; adds graceful
+            fallback for missing keys (humanized) for config-only boards. */}
+        <IntlProvider>
           <RecoveryRedirect />
           <ThemeProvider>
             <PresentationProvider>
@@ -43,7 +43,7 @@ export default async function RootLayout({
               <Toaster />
             </PresentationProvider>
           </ThemeProvider>
-        </NextIntlClientProvider>
+        </IntlProvider>
       </body>
     </html>
   )

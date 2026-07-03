@@ -23,7 +23,11 @@
       "atender": "Marcar asistida",
       "no_show": "No asistió",
       "cancelar": "Cancelar",
-      "reagendar": "Reagendar"
+      "reagendar": "Reagendar",
+      "volver_programada": "Volver a agendada",
+      "volver_confirmada": "Volver a confirmada",
+      "volver_presente": "Volver a presente",
+      "volver_triage": "Volver a triage"
     },
     "tipo": {
       "nueva": "Consulta (Nueva)",

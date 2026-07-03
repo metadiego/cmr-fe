@@ -7,8 +7,10 @@
 
 import { cookies } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
+import { IntlErrorCode } from "next-intl";
 
 import { defaultLocale, isLocale, LOCALE_COOKIE, type Locale } from "./config";
+import { humanizeKey } from "@/lib/i18n/humanize";
 
 export default getRequestConfig(async () => {
   // TODO #51 (config por capas): resolve by precedence
@@ -31,6 +33,15 @@ export default getRequestConfig(async () => {
       number: {
         currency: { style: "currency", currency: "USD" },
       },
+    },
+    // Metadata-driven boards bring labelKeys the FE may not translate yet (new
+    // verticals are config-only). Missing keys fall back to a humanized label
+    // instead of the raw key, silently (no dev-overlay noise).
+    onError(error) {
+      if (error.code !== IntlErrorCode.MISSING_MESSAGE) console.error(error);
+    },
+    getMessageFallback({ key }) {
+      return humanizeKey(key);
     },
   };
 });
