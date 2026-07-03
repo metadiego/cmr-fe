@@ -12,6 +12,9 @@ export type PerfilEstado =
 export interface Me {
   id: string;
   perfilId: string | null;
+  // personal.id of the logged-in operator (call-center/atención). Used as
+  // callcenterId on create and actorId on reschedule for the audit trail.
+  personalId?: string | null;
   email: string | null;
   estado: PerfilEstado | null;
   roles: string[];

@@ -9,6 +9,21 @@ export type TipoCita = components["schemas"]["TipoCitaEntity"];
 export type EstadoCita = Cita["estado"];
 export type CanalCita = Cita["canal"];
 
+// State catalog (GET /citas/estados): labelKey/color/orden/flags. Drive UI from
+// this instead of hardcoding the state list. Fetched once (memoized promise).
+export type EstadoCitaCatalogo = components["schemas"]["EstadoCitaEntity"];
+
+let estadosPromise: Promise<EstadoCitaCatalogo[]> | null = null;
+export function getEstados(): Promise<EstadoCitaCatalogo[]> {
+  if (!estadosPromise) {
+    estadosPromise = apiFetch<EstadoCitaCatalogo[]>(`/citas/estados`).catch((err) => {
+      estadosPromise = null; // let it retry after a failure
+      throw err;
+    });
+  }
+  return estadosPromise;
+}
+
 // Overlap conflict + warning shapes (POST /citas/validar and meta.advertencias).
 export interface CitaConflicto {
   citaId: string;
@@ -44,6 +59,7 @@ export interface ListCitasParams {
   pacienteId?: string;
   estado?: EstadoCita;
   canal?: CanalCita;
+  soloAtencion?: boolean; // only states visible to the Atención board
 }
 
 export function listCitas(
@@ -166,11 +182,48 @@ export const noShowCita = (id: string, centroId?: string) =>
   transition(id, "no-show", undefined, centroId);
 export const cancelarCita = (id: string, motivo: string, centroId?: string) =>
   transition(id, "cancelar", { motivo }, centroId);
-export const reagendarCita = (
+// Reschedule / move. `centroId` in the BODY = destination center (omit = keep).
+// Cross-center MEDICA SEGUIMIENTO: send the destination `medicoId`. `actorId` =
+// the operator's personal.id (audit trail). `tenant` scopes the request (source
+// center). The BE records a `reprogramada` event with antes/después.
+export function reagendarCita(
   id: string,
-  payload: { fecha: string; hora?: string; motivo: string },
-  centroId?: string,
-) => transition(id, "reagendar", payload, centroId);
+  payload: {
+    fecha: string;
+    hora?: string;
+    motivo: string;
+    centroId?: string; // destination center (omit → keep current)
+    medicoId?: string;
+    actorId?: string;
+  },
+  tenant?: string,
+): Promise<Cita> {
+  return apiFetch<Cita>(
+    `/citas/${id}/reagendar`,
+    { method: "POST", body: JSON.stringify(payload) },
+    tenant,
+  );
+}
+
+// Appointment audit trail (GET /citas/:id/historial). The reschedule event
+// carries payload.antes / payload.despues (fecha, hora, centroId, medicoId).
+export interface CitaEvento {
+  id: string;
+  citaId: string;
+  tipo: string;
+  actorId: string | null;
+  motivo: string | null;
+  payload: {
+    antes?: Record<string, unknown>;
+    despues?: Record<string, unknown>;
+  } | null;
+  esRetroactivo: boolean;
+  createdAt: string;
+}
+
+export function getHistorial(id: string, centroId?: string): Promise<CitaEvento[]> {
+  return apiFetch<CitaEvento[]>(`/citas/${id}/historial`, {}, centroId);
+}
 
 // Appointment type catalog (medica / seguimiento / control, each requiereMedico).
 export async function getTiposCita(): Promise<TipoCita[]> {

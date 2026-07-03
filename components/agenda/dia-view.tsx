@@ -31,7 +31,9 @@ export function DiaView({ fecha }: { fecha: string }) {
   const t = useTranslations("agenda");
   const tc = useTranslations("common");
   const [centro, setCentro] = React.useState<string>(ALL);
-  const [modal, setModal] = React.useState<{ fecha: string } | null>(null);
+  const [modal, setModal] = React.useState<
+    { fecha: string; centroId?: string; hora?: string; tipoCitaId?: string } | null
+  >(null);
 
   // Restore persisted center choice once.
   const [prevF, setPrevF] = React.useState(false);
@@ -120,7 +122,9 @@ export function DiaView({ fecha }: { fecha: string }) {
               <CentroSheet
                 centro={c}
                 columnas={data.columnas}
-                onAgendar={() => setModal({ fecha })}
+                onAgendar={(hora, tipo) =>
+                  setModal({ fecha, centroId: c.clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
+                }
               />
             </TabsContent>
           ))}
@@ -129,7 +133,9 @@ export function DiaView({ fecha }: { fecha: string }) {
         <CentroSheet
           centro={centrosData[0]}
           columnas={data.columnas}
-          onAgendar={() => setModal({ fecha })}
+          onAgendar={(hora, tipo) =>
+            setModal({ fecha, centroId: centrosData[0].clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
+          }
         />
       ) : null}
 
@@ -137,6 +143,9 @@ export function DiaView({ fecha }: { fecha: string }) {
         <CitaModal
           open
           fecha={modal.fecha}
+          centroId={modal.centroId}
+          horaInicial={modal.hora}
+          tipoCitaIdInicial={modal.tipoCitaId}
           tipos={tipos}
           medicos={medicos}
           onOpenChange={(o) => !o && setModal(null)}

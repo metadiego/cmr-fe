@@ -3,7 +3,18 @@
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",
     "hora_fin_invalida": "End time must be after the start time.",
     "conflicto_horario": "That time slot clashes with another appointment for the doctor.",
-    "solapamiento": "Heads up: this time overlaps another appointment for the doctor."
+    "solapamiento": "Heads up: this time overlaps another appointment for the doctor.",
+    "estado": {
+      "programada": "Scheduled",
+      "confirmada": "Confirmed",
+      "presente": "Checked in",
+      "triage": "Triage",
+      "en_consulta": "In consultation",
+      "atendida": "Seen",
+      "no_show": "No-show",
+      "cancelada": "Cancelled",
+      "reprogramada": "Rescheduled"
+    }
   },
   "tablero": {
     "col": {
@@ -134,8 +145,32 @@
       "cancelTitle": "Cancel appointment",
       "cancelHelp": "Provide the reason for cancelling.",
       "reagendarTitle": "Reschedule appointment",
+      "centro": "Center",
+      "estado": "Status",
+      "moveFromTo": "Move from {from} → {to}",
+      "move": "Move appointment",
+      "doctor": "Doctor",
+      "doctorPlaceholder": "Select doctor",
+      "noCupo": "No slots at {hora}.",
+      "useNext": "Use {hora}",
+      "reasonPlaceholder": "Reschedule reason (e.g. requested by the patient)",
       "noShowTitle": "Mark as no-show?",
-      "noShowHelp": "The patient did not show up for the appointment."
+      "noShowHelp": "The patient did not show up for the appointment.",
+      "historial": "History",
+      "historialTitle": "Appointment history",
+      "historialEmpty": "No events recorded.",
+      "event": {
+        "creada": "Created",
+        "confirmada": "Confirmed",
+        "presente": "Checked in",
+        "triage": "Triage",
+        "en_consulta": "In consultation",
+        "atendida": "Seen",
+        "no_show": "No-show",
+        "cancelada": "Cancelled",
+        "reprogramada": "Rescheduled",
+        "reparada": "Repaired"
+      }
     },
     "filterState": "Status",
     "filterDoctor": "Doctor",

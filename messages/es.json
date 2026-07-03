@@ -3,7 +3,18 @@
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
     "hora_fin_invalida": "La hora de fin debe ser posterior a la hora de inicio.",
     "conflicto_horario": "Ese horario choca con otra cita del médico.",
-    "solapamiento": "Atención: este horario se solapa con otra cita del médico."
+    "solapamiento": "Atención: este horario se solapa con otra cita del médico.",
+    "estado": {
+      "programada": "Agendada",
+      "confirmada": "Confirmada",
+      "presente": "Presente",
+      "triage": "Triage",
+      "en_consulta": "En consulta",
+      "atendida": "Asistida",
+      "no_show": "No asistió",
+      "cancelada": "Cancelada",
+      "reprogramada": "Reagendada"
+    }
   },
   "tablero": {
     "col": {
@@ -134,8 +145,32 @@
       "cancelTitle": "Cancelar cita",
       "cancelHelp": "Indica el motivo de la cancelación.",
       "reagendarTitle": "Reagendar cita",
+      "centro": "Centro",
+      "estado": "Estado",
+      "moveFromTo": "Mover de {from} → {to}",
+      "move": "Mover cita",
+      "doctor": "Doctor",
+      "doctorPlaceholder": "Seleccionar doctor",
+      "noCupo": "Sin cupo a las {hora}.",
+      "useNext": "Usar {hora}",
+      "reasonPlaceholder": "Motivo del reagendamiento (ej. cambio solicitado por el paciente)",
       "noShowTitle": "¿Marcar como no asistió?",
-      "noShowHelp": "El paciente no se presentó a la cita."
+      "noShowHelp": "El paciente no se presentó a la cita.",
+      "historial": "Historial",
+      "historialTitle": "Historial de la cita",
+      "historialEmpty": "Sin eventos registrados.",
+      "event": {
+        "creada": "Creada",
+        "confirmada": "Confirmada",
+        "presente": "Presente",
+        "triage": "Triage",
+        "en_consulta": "En consulta",
+        "atendida": "Atendida",
+        "no_show": "No asistió",
+        "cancelada": "Cancelada",
+        "reprogramada": "Reagendada",
+        "reparada": "Reparada"
+      }
     },
     "filterState": "Estado",
     "filterDoctor": "Médico",

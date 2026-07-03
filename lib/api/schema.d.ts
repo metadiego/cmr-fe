@@ -2062,6 +2062,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/estados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de estados de cita (metadatos para el FE: labelKey, orden, color, flags). */
+        get: operations["CitasController_estadosCatalogo_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/{id}": {
         parameters: {
             query?: never;
@@ -5248,6 +5265,23 @@ export interface components {
             contenido?: string;
             activo?: boolean;
         };
+        EstadoCitaEntity: {
+            /** @default null */
+            clinicId: string | null;
+            clave: string;
+            labelKey: string;
+            orden: number;
+            color: string;
+            esInicial: boolean;
+            esTerminal: boolean;
+            visibleEnAtencion: boolean;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         CitaEntity: {
             pacienteId: string;
             tipoCitaId: string;
@@ -5339,11 +5373,22 @@ export interface components {
              *     Si se omite, mantiene el centro de la cita original.
              */
             centroId?: string;
+            /**
+             * Format: uuid
+             * @description Médico de la cita NUEVA. Si viene, se asigna (p. ej. médico del centro destino al mover);
+             *     si se omite y NO se mueve de centro, hereda el de la original; si se mueve, queda null.
+             */
+            medicoId?: string;
+            /**
+             * Format: uuid
+             * @description Personal que reagenda (queda en el evento reprogramada + como citadoPor de la nueva).
+             */
+            actorId?: string;
         };
         CitaEventoEntity: {
             citaId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada" | "reparada";
+            tipo: "cancelada" | "creada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada" | "reparada" | "auto_revertida";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -10316,7 +10361,10 @@ export interface operations {
     };
     TiposCitaController_list_v1: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description true = incluye tipos inactivos (pantalla de configuración). Por defecto solo activos. */
+                all?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -10673,6 +10721,11 @@ export interface operations {
                 estado?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 /** @description Filtra por canal (callcenter, atencion, …) */
                 canal?: "atencion" | "callcenter" | "webhook" | "ia";
+                /**
+                 * @description true = tablero de Atención al Paciente: solo citas cuyo estado tiene `visibleEnAtencion=true`
+                 *     (confirmada→presente→triage→en_consulta→atendida). Las `programada` (Agendada) no las ve Atención.
+                 */
+                soloAtencion?: boolean;
             };
             header?: never;
             path?: never;
@@ -10751,6 +10804,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    CitasController_estadosCatalogo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCitaEntity"][];
                 };
             };
         };

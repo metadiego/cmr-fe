@@ -18,6 +18,9 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { useMe } from "@/hooks/use-me";
+import { useEstados } from "@/hooks/use-estados";
+import { Badge } from "@/components/ui/badge";
 import { addMinutes } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +48,9 @@ export function CitaModal({
   fecha,
   cita,
   pacienteInicial,
+  centroId,
+  horaInicial,
+  tipoCitaIdInicial,
   tipos,
   medicos,
   onOpenChange,
@@ -54,6 +60,9 @@ export function CitaModal({
   fecha: string; // ISO prefilled
   cita?: Cita | null;
   pacienteInicial?: Paciente | null;
+  centroId?: string; // prefill center (e.g. from the day-view slot)
+  horaInicial?: string; // prefill start time from the block
+  tipoCitaIdInicial?: string; // prefill appointment type from the block
   tipos: TipoCita[];
   medicos: Personal[];
   onOpenChange: (open: boolean) => void;
@@ -64,18 +73,30 @@ export function CitaModal({
   const tRoot = useTranslations();
   const isEdit = !!cita;
 
+  const me = useMe();
+  const callcenterId = me.kind === "ok" ? me.me.personalId ?? undefined : undefined;
+  const { map: estadosMap, estados } = useEstados();
+  // On create the state is the catalog's initial one; on edit it's the cita's.
+  const estadoClave = cita?.estado ?? estados.find((e) => e.esInicial)?.clave ?? "programada";
+  const estadoDef = estadosMap.get(estadoClave);
+
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const needsCentro = !isEdit && centros.length > 1;
-  const [centroSel, setCentroSel] = React.useState("");
+  const [centroSel, setCentroSel] = React.useState(centroId ?? "");
   const effectiveCentro =
-    centroSel || cita?.clinicId || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
+    centroSel || cita?.clinicId || centroId || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
 
   const [paciente, setPaciente] = React.useState<Paciente | null>(pacienteInicial ?? null);
-  const [tipoCitaId, setTipoCitaId] = React.useState(cita?.tipoCitaId ?? "");
+  const [tipoCitaId, setTipoCitaId] = React.useState(cita?.tipoCitaId ?? tipoCitaIdInicial ?? "");
   const [medicoId, setMedicoId] = React.useState(cita?.medicoId ?? "");
-  const [hora, setHora] = React.useState(cita?.hora ?? "09:00");
-  const [horaFin, setHoraFin] = React.useState(cita?.horaFin ?? "09:30");
+  const [hora, setHora] = React.useState(cita?.hora ?? horaInicial ?? "09:00");
+  const [horaFin, setHoraFin] = React.useState(() => {
+    if (cita?.horaFin) return cita.horaFin;
+    const tp = tipos.find((x) => x.id === (cita?.tipoCitaId ?? tipoCitaIdInicial));
+    const start = cita?.hora ?? horaInicial ?? "09:00";
+    return tp ? addMinutes(start, tp.duracionMin) : "09:30";
+  });
   const [esPrimeraVez, setEsPrimeraVez] = React.useState(cita?.esPrimeraVez ?? false);
   const [motivo, setMotivo] = React.useState(cita?.motivo ?? "");
   const [notas, setNotas] = React.useState(cita?.notas ?? "");
@@ -146,7 +167,7 @@ export function CitaModal({
       };
       const { advertencias } = isEdit
         ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
-        : await crearCitaAgenda(payload, effectiveCentro || undefined);
+        : await crearCitaAgenda({ ...payload, callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
       toast.success(isEdit ? t("updated") : t("created"));
       for (const a of advertencias) {
@@ -235,7 +256,14 @@ export function CitaModal({
               </Select>
             </Field>
             <Field label={t("status")}>
-              <Input value={t("statusScheduled")} readOnly className="bg-muted/40" />
+              <div className="flex h-9 items-center">
+                <Badge
+                  variant="secondary"
+                  style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
+                >
+                  {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
+                </Badge>
+              </div>
             </Field>
           </div>
 

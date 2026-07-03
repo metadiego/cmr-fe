@@ -3,31 +3,9 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import type { Cita, EstadoCita } from "@/lib/api/citas";
+import type { Cita } from "@/lib/api/citas";
+import { useEstados } from "@/hooks/use-estados";
 import { CitaActions } from "@/components/citas/cita-actions";
-
-// Flow columns (left→right). States not listed (no_show/cancelada/reprogramada)
-// fall into a trailing "closed" column so nothing is silently dropped.
-const FLOW: EstadoCita[] = [
-  "programada",
-  "confirmada",
-  "presente",
-  "triage",
-  "en_consulta",
-  "atendida",
-];
-
-const DOT: Record<EstadoCita, string> = {
-  programada: "bg-slate-400",
-  confirmada: "bg-blue-500",
-  presente: "bg-amber-500",
-  triage: "bg-violet-500",
-  en_consulta: "bg-indigo-500",
-  atendida: "bg-emerald-500",
-  no_show: "bg-rose-500",
-  cancelada: "bg-zinc-400",
-  reprogramada: "bg-orange-500",
-};
 
 export function CitaBoard({
   citas,
@@ -43,17 +21,31 @@ export function CitaBoard({
   onChanged: () => void;
 }) {
   const t = useTranslations("appointments");
+  const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  const { estados, ready } = useEstados();
 
-  const closed = citas.filter((c) => !FLOW.includes(c.estado));
-  const columns: { key: string; label: string; items: Cita[]; dot?: EstadoCita }[] =
-    FLOW.map((e) => ({
-      key: e,
-      label: t(`estados.${e}`),
-      dot: e,
-      items: citas.filter((c) => c.estado === e),
+  // Flow columns come from the catalog (non-terminal, ordered). Terminal states
+  // (no_show/cancelada/reprogramada/atendida) fall into a trailing "closed"
+  // column so nothing is silently dropped. Colors/labels are catalog-driven.
+  const flow = estados
+    .filter((e) => !e.esTerminal)
+    .sort((a, b) => a.orden - b.orden);
+  const flowClaves = new Set(flow.map((e) => e.clave));
+  const closed = citas.filter((c) => !flowClaves.has(c.estado));
+  const columns: { key: string; label: string; color?: string; items: Cita[] }[] =
+    flow.map((e) => ({
+      key: e.clave,
+      label: tRoot(e.labelKey),
+      color: e.color,
+      items: citas.filter((c) => c.estado === e.clave),
     }));
   if (closed.length > 0) {
     columns.push({ key: "closed", label: t("boardClosed"), items: closed });
+  }
+
+  if (!ready) {
+    return <p className="px-1 py-3 text-sm text-muted-foreground">{tc("loading")}</p>;
   }
 
   return (
@@ -61,7 +53,9 @@ export function CitaBoard({
       {columns.map((col) => (
         <div key={col.key} className="flex w-64 shrink-0 flex-col">
           <div className="mb-2 flex items-center gap-2 px-1 text-sm font-medium">
-            {col.dot && <span className={`size-2 rounded-full ${DOT[col.dot]}`} />}
+            {col.color && (
+              <span className="size-2 rounded-full" style={{ backgroundColor: col.color }} />
+            )}
             <span>{col.label}</span>
             <span className="ml-auto text-xs text-muted-foreground">
               {col.items.length}
