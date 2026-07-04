@@ -4,8 +4,10 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
+import type { Opcion } from "@/lib/api/tablero";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
+import { CeldaSelect } from "@/components/tablero/celda-select";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
@@ -14,7 +16,12 @@ import { Badge } from "@/components/ui/badge";
 
 export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   const text = value == null || value === "" ? "—" : String(value);
-  if (col.tipo === "badge") return <Badge variant="secondary">{text}</Badge>;
+  if (col.tipo === "badge") {
+    const style = col.color
+      ? { color: col.color, borderColor: col.color, backgroundColor: `color-mix(in srgb, ${col.color} 12%, transparent)` }
+      : undefined;
+    return <Badge variant="secondary" style={style}>{text}</Badge>;
+  }
   if (col.tipo === "accion") return <span className="text-muted-foreground">·</span>;
   return <span className={col.tipo === "hora" ? "font-mono" : undefined}>{text}</span>;
 }
@@ -34,15 +41,45 @@ export function TableroDinamico({
   filas,
   renderAccion,
   emptyLabel,
+  // Editable-cell plumbing (optional; supplied by the generic board). Without
+  // these, cells render read-only exactly as before.
+  tablero,
+  centroId,
+  onRefresh,
+  optionsByCol,
 }: {
   columnas: ColumnaEfectiva[];
   filas: CitaFila[];
   // Renders the cell for the "accion" column (declarative actions per row).
   renderAccion?: (fila: CitaFila) => React.ReactNode;
   emptyLabel?: string;
+  tablero?: string;
+  centroId?: string;
+  onRefresh?: () => void;
+  optionsByCol?: Record<string, Opcion[]>;
 }) {
   const tRoot = useTranslations();
   const cols = useVisibleColumns(columnas);
+
+  function renderCell(col: ColumnaEfectiva, fila: CitaFila) {
+    if (col.tipo === "accion") {
+      return renderAccion?.(fila) ?? <Cell col={col} value={fila[col.clave]} />;
+    }
+    if (col.tipo === "select" && col.editable && tablero) {
+      return (
+        <CeldaSelect
+          tablero={tablero}
+          entidadId={fila.id}
+          columna={col.clave}
+          value={fila[col.clave]}
+          options={optionsByCol?.[col.clave] ?? []}
+          centroId={centroId}
+          onSaved={onRefresh}
+        />
+      );
+    }
+    return <Cell col={col} value={fila[col.clave]} />;
+  }
 
   return (
     <div className="overflow-x-auto rounded-md border">
@@ -51,7 +88,12 @@ export function TableroDinamico({
           <tr>
             {cols.map((col) => (
               <th key={col.clave} className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                {tRoot(col.labelKey)}
+                <span className="inline-flex items-center gap-1.5" style={col.color ? { color: col.color } : undefined}>
+                  {col.color && (
+                    <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: col.color }} />
+                  )}
+                  {tRoot(col.labelKey)}
+                </span>
               </th>
             ))}
           </tr>
@@ -68,11 +110,7 @@ export function TableroDinamico({
             <tr key={fila.id} className="border-t">
               {cols.map((col) => (
                 <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
-                  {col.tipo === "accion" ? (
-                    renderAccion?.(fila) ?? <Cell col={col} value={fila[col.clave]} />
-                  ) : (
-                    <Cell col={col} value={fila[col.clave]} />
-                  )}
+                  {renderCell(col, fila)}
                 </td>
               ))}
             </tr>

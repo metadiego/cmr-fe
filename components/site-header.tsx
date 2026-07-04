@@ -136,14 +136,16 @@ export function SiteHeader() {
         {/* Brand */}
         <Brand />
 
-        {/* Desktop nav — dynamic, RBAC-filtered from the BE (#6) */}
-        <nav className="hidden items-center gap-1 md:flex">
+        {/* Desktop nav — dynamic, RBAC-filtered from the BE (#6). Many verticals
+            can be registered, so the row scrolls horizontally instead of
+            clipping items off the right edge. */}
+        <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {topLevel.map((item) => (
             <Link
               key={item.clave}
               href={item.path}
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive(pathname, item.path)
                   ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground",

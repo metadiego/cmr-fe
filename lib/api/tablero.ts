@@ -83,6 +83,7 @@ export interface TableroRegistro {
   orden: number;
   permiso: string | null;
   layout: string; // "etapas" | "tabla" | ...
+  ruta: string; // ruta del board del vertical, ej. "/tablero/atencion"
   entidad: string; // "cita" | "sesion" | ...
   filtros: Record<string, unknown> | null;
   esVertical?: boolean; // true → aparece en /tableros (menú); false → consultable (citas_cc)
@@ -154,6 +155,34 @@ export function editarCelda(
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch(`/tablero/celda`, { method: "POST", body: JSON.stringify(body) }, centroId);
+}
+
+// An option for a data-driven `select` cell (GET /tablero/opciones). Populated
+// server-side from `render.optionsSource` (e.g. "medicos"). Query by column
+// CLAVE (not id): GET /tablero/opciones?tablero=&columna=<clave>.
+export interface Opcion {
+  value: string;
+  label: string;
+}
+
+export function getOpciones(tablero: string, columna: string): Promise<Opcion[]> {
+  return apiFetch<Opcion[]>(
+    `/tablero/opciones?tablero=${encodeURIComponent(tablero)}&columna=${encodeURIComponent(columna)}`,
+  );
+}
+
+// POST /tablero/composicion — set one column's placement/color in a board (admin
+// pre-personalization). `color` (null clears). Single-column upsert; does NOT
+// touch the rest of the composition.
+export function colorColumna(
+  tablero: string,
+  columnaId: string,
+  color: string | null,
+): Promise<unknown> {
+  return apiFetch(`/tablero/composicion`, {
+    method: "POST",
+    body: JSON.stringify({ tablero, columnaId, color }),
+  });
 }
 
 // POST /tablero/accion — execute a declarative transition. Fields go in payload

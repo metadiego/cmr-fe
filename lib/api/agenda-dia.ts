@@ -13,6 +13,7 @@ export interface ColumnaEfectiva {
   render: Record<string, unknown> | null;
   orden: number;
   fijo: boolean; // sticky column
+  color?: string | null; // admin pre-personalization (definicion.color); null = default
 }
 
 // A projected appointment row: values keyed by column clave (+ id/estado).

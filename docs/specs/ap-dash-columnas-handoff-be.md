@@ -1,0 +1,185 @@
+# Handoff BE — Columnas dinámicas del AP-Dash (tablero `atencion`)
+
+**Fecha:** 2026-07-04 · **De:** FE (cmr-fe) · **Para:** BE (cmr-be)
+**Regla:** el FE se detiene en las partes marcadas BE hasta tener este contrato resuelto.
+
+---
+
+## 📩 MENSAJE PARA BE (copiar/pegar) — hallazgos dogfood 4 jul 2026
+
+> Probé los endpoints reales. Esto es lo que encontré:
+>
+> **✅ Funciona:** color por columna (`POST /tablero/composicion {tablero,columnaId,color}` + `definicion.color`); edición de celda (`POST /tablero/celda {tablero,entidadId,columna,valor}`, `columna`=clave); opciones de médico (n=6, shape `{value,label}`).
+>
+> **⚠️ Corregir:**
+> 1. La llave que funciona es **`render.optionsSource`**, NO `optionsFrom`. La columna `estado_selector` (citas_cc) usa `optionsFrom` → por `/tablero/opciones` sale **vacía**; unificar y revisar el selector de estado del call-center.
+> 2. `/tablero/opciones` va por **`columna=<clave>`**; por `columnaId` (uuid) da **404**.
+> 3. Documentar el catálogo de `optionsSource` válidos (solo respondió `medicos`).
+>
+> **🔴 BLOQUEANTE — write del select de médico:** debe **mostrar** el nombre y **escribir** el FK `cita.medicoId`, pero hoy:
+> - binding `medico.nombre` → `POST /tablero/celda` da **400 "no es escribible"**.
+> - binding `cita.medicoId` → **500 INTERNAL_ERROR** + proyección `medico: null`.
+> - Necesito: write target del select (ej. `render.writeBinding:"cita.medicoId"`) **o** atar la columna a `cita.medicoId` con proyección que resuelva el FK a nombre y write que no crashee. Repro: cita `c4e30c8a-…`, columna `medico` id `4a254e63-…`, centro `ef6f87b0-…`.
+>
+> **⏸ Pendiente del contrato:** (1) toggle con hora (presente/en consulta/asistido); (5) personalización usuario (`render` con `{color,background}`; ¿background por columna o por tablero?); (6) acciones WA/vitales (¿endpoint o FE?).
+
+---
+
+## Objetivo
+Replicar y mejorar el AP-Dash legacy (`/cmr/atencion`) con columnas 100% dinámicas:
+cada columna tiene **comportamiento propio que escribe en la DB**, el **admin/supervisor/dev**
+pre-personaliza (tipo, color, orden), y el **usuario final** personaliza lo suyo
+(orden, colores, background) sin afectar a los demás.
+
+## Estado actual (verificado en prod, 2026-07-04)
+- **Catálogo** `ColumnaEntity`: `tipo ∈ {accion,fecha,hora,texto,select,toggle,badge,derivado}`,
+  `binding`, `editable`, `render`(JSON), `ambitos[]`, `permiso`. CRUD: POST/PUT `/tablero/columnas`.
+- **Composición admin** `TableroColumnaEntity`: `orden, visible, fijo, editable, activo`. **SIN color.**
+  Escritura: POST `/tablero/composicion/bulk`.
+- **Personalización usuario** `UsuarioColumnaEntity`: `visible, orden, fijo, render`(JSON).
+  Escritura: POST `/tablero/personalizar` (any user). `PersonalizarColumnaDto` acepta `render`.
+- **Edición de celda**: POST `/tablero/celda {tablero,entidadId,columna,valor}` (funciona, con historial `actorNombre`).
+- **`atencion` hoy**: `hora, paciente, estado(badge), primeraVez(toggle), medico(texto), enfermera, canal, motivo, acciones`.
+
+## Columnas objetivo (AP-Dash) y gap
+| Columna | tipo destino | binding sugerido | Gap |
+|---|---|---|---|
+| record | texto **editable** | `paciente.record` | editable + **auto-consecutivo** (§3) |
+| paciente | texto | `paciente.nombre` | ✅ existe |
+| medico | **select** | `cita.medicoId` | opciones + escritura (§2) |
+| consulta | texto/select | `cita.tipoConsulta` | definir binding real |
+| prox_cita | fecha | `cita.proxCita` | **crear** |
+| pago | texto/badge | `cita.pago` | **crear** |
+| presente | **toggle-hora** | `cita.presenteAt` | crear + semántica (§1) |
+| en_consulta | **toggle-hora** | `cita.enConsultaAt` | crear + semántica (§1) |
+| asistido | **toggle-hora** | `cita.asistidoAt` | crear + semántica (§1) |
+| vitales | accion | — | crear + acción (§6) |
+| wa | accion | — | crear + acción (§6) |
+| acciones | accion | `cita.acciones` | ✅ existe |
+
+> Crear el **catálogo** y **componer** ya se puede con endpoints existentes; el FE puede
+> sembrarlas. Lo que NO existe es el comportamiento/color de abajo. **Eso es lo que se necesita.**
+
+---
+
+## Lo que necesito del BE (contrato)
+
+### 1. `toggle` con timestamp — PRESENTE / EN CONSULTA / ASISTIDO
+- Click → BE fija el campo bound a la **hora actual** (`America/Puerto_Rico`) + historial; devuelve la hora para pintar "08:10". Segundo click → limpiar (o confirmar).
+- ¿Vía POST `/tablero/celda` con `valor` especial (`"__now__"` / `null`) o endpoint dedicado `/tablero/toggle {tablero,entidadId,columna}`? **Definir.**
+- ¿Estos toggles disparan **transición de estado** (agendada→presente→en_consulta→asistido)? Definir relación con `estados`/`transiciones` para no duplicar lógica.
+
+### 2. `select` con fuente de opciones — MEDICO
+- ¿Cómo obtiene el FE las opciones? Propuesta: `render = { optionsSource: "medicos", value:"id", label:"nombre" }` **o** GET `/tablero/opciones?tablero=&columna=`. **Definir** (aplica a cualquier select futuro).
+- Escritura: POST `/tablero/celda columna=medico valor=<medicoId>` → BE actualiza `cita.medicoId`. **Confirmar.**
+- Regla SEGUIMIENTO limpia médico (ver decisiones de reagendar) — ¿aplica al editar aquí?
+
+### 3. RECORD # auto-consecutivo
+- Columna `record` editable. Si está **vacío** y se guarda → BE genera el **siguiente consecutivo** y lo asigna.
+- ¿POST `/tablero/celda columna=record valor="__next__"` → devuelve el número asignado? ¿o `/pacientes/next-record`? **Definir.**
+- Multi-centro: ¿consecutivo **global o por centro**? Unicidad + concurrencia (dos usuarios a la vez).
+
+### 4. Color de pre-personalización (ADMIN, nivel composición) — cambio de esquema
+- Añadir `color?: string|null` (y opcional `bg?`, `textColor?`) a **`TableroColumnaEntity`** + **`SetComposicionItemDto`** + **`SetComposicionDto`**.
+- Es el color que el admin fija **por columna en ese tablero** (el "molde"). Correr **gen:api** tras el deploy.
+
+### 5. Personalización por usuario (orden + color + background)
+- `UsuarioColumnaEntity.render` + `PersonalizarColumnaDto.render` ya existen. **Confirmar** que persiste/devuelve JSON arbitrario, p.ej. `render = { color, background, textColor }`. Si sí → **el FE lo usa sin cambio BE**.
+- **Background**: ¿es por columna o **fondo general del board por usuario**? Si es a nivel tablero, ¿dónde se guarda la preferencia del usuario (¿`UsuarioTablero`?)? **Definir.**
+
+### 6. Acciones `accion` — VITALES / WA / ACCIONES
+- Cada `accion` necesita declarar **qué hace**: `render = { action: "vitales" | "whatsapp" | "doc" }`.
+- WA: ¿BE expone endpoint para enviar/registrar WhatsApp, o es link `wa.me` (FE)? VITALES: ¿abre formulario (FE) o hay endpoint?
+
+### 7. RBAC (2 niveles — importante)
+- **Crear/administrar columnas + color de pre-personalización + composición** = admin/supervisor/desarrollador (`tablero.admin`/`tablero.config`).
+- **Personalizar** (usuario) = cualquiera (`/tablero/personalizar`). **Confirmar** que un usuario NO-admin puede personalizar pero **NO** puede tocar catálogo/composición.
+
+---
+
+## Aceptación
+En el FE, el tablero `atencion` muestra las columnas del AP-Dash; los toggles fijan hora en DB;
+`medico` select escribe; `record` vacío genera consecutivo; el admin fija colores de columna;
+el usuario reordena/recolorea/pone background **sin afectar** a otros usuarios.
+
+## FE (lo que hago cuando el contrato esté resuelto)
+- Renderers por `tipo` (select / toggle-hora / fecha / editable / accion) en `GenericBoard` + `TableroDinamico`.
+- Builder (Columnas tab): selector de `tipo` (enum), **color por columna**, orden — pre-personalización admin.
+- Panel de personalización del usuario (orden / color / background) vía `/tablero/personalizar`.
+
+---
+
+## ✅ Respuesta BE recibida (2026-07-04) + hallazgos de verificación en vivo
+
+BE resolvió **3 de 6**: #2 select-opciones, #3 record-consecutivo, #4 color-composición. Al ejercer los
+endpoints reales (dogfood) encontré discrepancias entre lo descrito y lo que la API hace — **corregir en vivo**:
+
+### ✅ Confirmado funcionando
+- **#4 Color**: `GET /tablero/definicion` ya trae `color` (string|null) por columna efectiva. Todas null hoy (nadie configuró). FE lo lee y aplica si ≠ null.
+- **celda**: el DTO real es `{ tablero, entidadId, columna, valor }` donde `columna` = **clave** (no `campo`/binding, no `id`). El FE ya envía este shape. Para médico: `{tablero:"atencion", entidadId:<citaId>, columna:"medico", valor:<uuid>}`.
+- **#2 Select**: con `render.optionsSource:"medicos"` + `GET /tablero/opciones?tablero=atencion&columna=medico` → **200, n=6**, shape `{value,label}` (`{value:<uuid>, label:"Christina Rosa"}`). Médico ya quedó configurado como `select` editable vía API.
+
+### ⚠️ Discrepancias a corregir con BE
+1. **Llave de render**: la que funciona es **`render.optionsSource`**, NO `optionsFrom`. Ojo: la columna `estado_selector` (citas_cc) está con `render.optionsFrom:"estados"` → por `/tablero/opciones` devuelve **vacío**. BE: unificar a `optionsSource` (o que el endpoint acepte ambas) y **verificar que el selector de estado del call-center no esté roto**.
+2. **Parámetro de `opciones`**: es **`columna=<clave>`**. Por `columnaId` (uuid) da **404** (`ENTITY_NOT_FOUND … no está en '<tablero>'`). La doc de BE decía `columnaId` — corregir.
+3. **`definicion` no expone `columnaId`** por columna efectiva (trae `clave` pero no el id). No es bloqueante para el FE (opciones va por clave), pero conviene incluirlo.
+4. **Fuentes válidas de opciones**: solo `"medicos"` responde (n=6). `personal`/`medico`/`doctores`/`staff` → vacío. Documentar el catálogo de `optionsSource` soportados (medicos, enfermeras, tipos_cita, estados) y su nombre exacto.
+
+### ✅ BE resolvió los hallazgos de dogfood (2026-07-04, prod)
+1. **Llave de render** = **`render.optionsSource`** (única y correcta). `optionsFrom` era llave muerta. Se
+   corrigió el seed de `estado_selector` (citas_cc) a `optionsSource:"estados"` y el seed ahora **migra en vivo**
+   cualquier fila con `optionsFrom` → `optionsSource` (idempotente). Re-sembrado en prod: el selector de estado
+   del call-center ya devuelve opciones.
+2. **Parámetro de `opciones`** = **`columna=<clave>`** (confirmado; no uuid). Doc corregida.
+3. **`definicion` no trae `columnaId`**: se mantiene por clave (el FE no lo necesita). No se añade el id por ahora.
+4. **Catálogo de `optionsSource` soportados** (nombres EXACTOS): `medicos`, `enfermeras`, `tipos_cita`, `estados`.
+   Cualquier otro (`personal`/`medico`/`doctores`/`staff`) → `[]`. `medicos`/`enfermeras` resuelven por
+   `personal.porCapacidad('medico'|'enfermera')`; `tipos_cita` → catálogo activo; `estados` → estados del tablero.
+   Añadir una fuente nueva = una rama en `TablerosService.opciones` (no configurable por dato aún).
+
+### 🔴 BLOQUEANTE nuevo: el WRITE del select-FK (médico) NO funciona en BE
+La lectura del select (opciones + display) funciona, pero **escribir el médico falla por ambos caminos**:
+- Columna `medico` con `binding: "medico.nombre"` → `POST /tablero/celda {columna:"medico", valor:<uuid>}` → **400** `"la columna 'medico' (medico.nombre) no es escribible"` (binding de display, read-only).
+- Cambiando `binding: "cita.medicoId"` → el write da **500 INTERNAL_ERROR** y además la **proyección de filas devuelve `medico: null`** (no resuelve el FK a label).
+
+**✅ RESUELTO BE (Opción 1 — `render.writeBinding`, PR #23, prod).** El modelo elegido: la columna
+select-FK mantiene su binding de **display** (`medico.nombre` → la proyección sigue resolviendo el nombre,
+sin `null`) y declara el destino de escritura en `render.writeBinding` (`cita.medicoId`). `/tablero/celda`
+escribe en `writeBinding` si existe (si no, en el propio binding, como las columnas de texto). No más 400 ni 500.
+- La columna `medico` ya quedó sembrada como **`tipo:'select'`, `render:{optionsSource:'medicos',
+  writeBinding:'cita.medicoId'}`, editable en `atencion`** (re-seed en prod).
+- FE: enciende el renderer `select` de `medico`. Leer opciones con `GET /tablero/opciones?tablero=atencion&columna=medico`;
+  escribir con `POST /tablero/celda {tablero:'atencion', entidadId, columna:'medico', valor:<uuid>}`. La celda
+  sigue mostrando el nombre (display) y el historial registra `campo_editado` en `cita.medicoId`.
+- Patrón general: **cualquier** columna select-FK futura = binding de display + `render.optionsSource` +
+  `render.writeBinding`. Cero código nuevo.
+
+### ✅ Sigue abierto → RESUELTO (todo ya servido por BE existente, cero build; PR #23 doc)
+- **#1 toggle con hora (PRESENTE / EN CONSULTA / ASISTIDO)**: NO se escribe la hora a mano — se dispara una
+  **transición de estado** que estampa el timestamp server-side. `POST /tablero/accion {tablero:'atencion',
+  entidadId, accion}` con `accion`:
+  - `presente` → estado `presente`, estampa `cita.llegadaEn`.
+  - `consulta` → estado `en_consulta`, estampa `cita.horaInEn`.
+  - `atender` → estado `atendida`, estampa `cita.horaOutEn`. ⚠️ **GUARDA**: exige vitales (triage hecho) +
+    médico asignado; si no, 400. (Si el AP-Dash quiere un ASISTIDO sin triage, es decisión de negocio de
+    larciles para relajar la guarda — hoy la exige.)
+  Estas transiciones YA vienen en `definicion.transiciones` (claves presente/triage/consulta/atender con
+  labelKey) → el FE pinta el toggle desde datos. Pintar las horas con bindings `cita.llegadaEn/horaInEn/horaOutEn`.
+  Emite SSE + historial. NO crear campos.
+- **#5 personalización usuario**: `POST /tablero/personalizar {tablero, columnaId, render:{color, background,…}}`
+  persiste render arbitrario **por columna y por usuario**; `columnasEfectivas` lo mergea
+  (`{...catalog.render, ...user.render}`) y lo expone en `definicion.columnas[].render`. Fondo del board
+  **completo** por usuario (no por columna) = usa la capa usuario de **preferences** (`PUT /me/preferences`
+  con una clave tuya, ej. `tablero.atencion.background`); el FE la lee del effective. Sin build BE.
+- **#6 acciones WA / vitales**: endpoints existentes (acción de fila, no transición de estado):
+  - **WA/SMS**: `POST /notificaciones/enviar` (EnviarNotificacionDto: cita → paciente por whatsapp/sms/impresa).
+  - **vitales**: `POST /citas/:id/triage {enfermeraId, vitales}` (estampa `vitalesEn`, guarda vitales, avanza a
+    triage). El FE llama estos directo desde el botón de la fila.
+
+## Preguntas abiertas para BE (resumen)
+1. `toggle`: ¿celda con valor especial o endpoint dedicado? ¿dispara transición de estado?
+2. `select`: ¿opciones por `render.optionsSource` o endpoint `/tablero/opciones`?
+3. `record`: ¿endpoint del consecutivo? ¿global o por centro?
+4. Color admin: ¿ok añadir `color` a composición? (requiere migración + gen:api)
+5. Personalización usuario: ¿`render` persiste `{color,background}` arbitrario? ¿background es por columna o por tablero?
+6. Acciones: ¿WA/vitales tienen endpoint o son 100% FE?

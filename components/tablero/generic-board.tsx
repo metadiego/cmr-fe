@@ -7,9 +7,11 @@ import {
   getTableros,
   getDefinicion,
   getFilas,
+  getOpciones,
   type TableroRegistro,
   type TableroDefinicion,
   type Tablero,
+  type Opcion,
 } from "@/lib/api/tablero";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro } from "@/lib/tenant";
@@ -49,6 +51,30 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === tablero);
   const defRes = useResource<TableroDefinicion>(() => getDefinicion(tablero), [tablero]);
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
+
+  // Options for editable `select` columns — fetched once per definicion (every
+  // row of a column shares the same options). Keyed by column clave.
+  const [optionsByCol, setOptionsByCol] = React.useState<Record<string, Opcion[]>>({});
+  React.useEffect(() => {
+    const selects = (def?.columnas ?? []).filter((c) => c.tipo === "select" && c.editable);
+    if (selects.length === 0) {
+      setOptionsByCol({});
+      return;
+    }
+    let active = true;
+    Promise.all(
+      selects.map((c) =>
+        getOpciones(tablero, c.clave)
+          .then((o) => [c.clave, o] as const)
+          .catch(() => [c.clave, [] as Opcion[]] as const),
+      ),
+    ).then((pairs) => {
+      if (active) setOptionsByCol(Object.fromEntries(pairs));
+    });
+    return () => {
+      active = false;
+    };
+  }, [def, tablero]);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -127,6 +153,10 @@ export function GenericBoard({ tablero }: { tablero: string }) {
         <TableroDinamico
           columnas={data.columnas}
           filas={data.filas}
+          tablero={tablero}
+          centroId={centroId}
+          onRefresh={filasRes.refresh}
+          optionsByCol={optionsByCol}
           emptyLabel={t("empty")}
           renderAccion={(fila) => (
             <TableroAcciones

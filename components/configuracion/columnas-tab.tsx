@@ -7,9 +7,12 @@ import { toast } from "sonner";
 
 import {
   getColumnasCatalogo,
+  getDefinicion,
   crearColumna,
   actualizarColumna,
+  colorColumna,
   type ColumnaCatalogo,
+  type TableroDefinicion,
 } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -28,6 +31,26 @@ export function ColumnasTab({ clave }: { clave: string }) {
   const cols = (state.kind === "ok" ? state.data : []).filter((c) => c.activo);
   const [busyId, setBusyId] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState(false);
+
+  // Colores actuales del tablero (pre-personalización admin). Vienen de la
+  // definición (por columna efectiva); se escriben con colorColumna (composición).
+  const defRes = useResource<TableroDefinicion>(() => getDefinicion(clave), [clave]);
+  const colorByClave: Record<string, string | null> = {};
+  if (defRes.state.kind === "ok") {
+    for (const c of defRes.state.data.columnas) colorByClave[c.clave] = c.color ?? null;
+  }
+
+  async function setColor(c: ColumnaCatalogo, color: string | null) {
+    setBusyId(c.id);
+    try {
+      await colorColumna(clave, c.id, color);
+      defRes.reload();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function toggle(c: ColumnaCatalogo) {
     const has = (c.ambitos ?? []).includes(clave);
@@ -66,7 +89,17 @@ export function ColumnasTab({ clave }: { clave: string }) {
               <Checkbox checked={has} disabled={busyId === c.id} onCheckedChange={() => toggle(c)} />
               <span className="text-sm font-medium">{tRoot(c.labelKey)}</span>
               <span className="text-xs text-muted-foreground">· {c.clave} · {c.tipo}</span>
-              <span className="ml-auto truncate font-mono text-xs text-muted-foreground">{c.binding}</span>
+              <div className="ml-auto flex items-center gap-3">
+                {has && (
+                  <ColorControl
+                    value={colorByClave[c.clave] ?? null}
+                    disabled={busyId === c.id}
+                    onPick={(hex) => setColor(c, hex)}
+                    clearLabel={t("colClearColor")}
+                  />
+                )}
+                <span className="truncate font-mono text-xs text-muted-foreground">{c.binding}</span>
+              </div>
             </li>
           );
         })}
@@ -120,5 +153,56 @@ function NuevaColumnaDialog({ clave, onClose, onSaved }: { clave: string; onClos
       </div>
       <label className="flex items-center gap-2 text-sm"><Checkbox checked={v.editable} onCheckedChange={(x) => setV((s) => ({ ...s, editable: x === true }))} />{t("colEditable")}</label>
     </FormDialog>
+  );
+}
+
+// Admin pre-personalization: a colour per column in THIS board. Presets + clear.
+// Writes via colorColumna (/tablero/composicion); the user can still override it
+// in their own view later.
+const COLOR_PRESETS = ["#0D9488", "#0284C7", "#D97706", "#15803D", "#E11D48", "#7C3AED", "#64748B"];
+
+function ColorControl({
+  value,
+  disabled,
+  onPick,
+  clearLabel,
+}: {
+  value: string | null;
+  disabled?: boolean;
+  onPick: (hex: string | null) => void;
+  clearLabel: string;
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      {COLOR_PRESETS.map((hex) => (
+        <button
+          key={hex}
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(hex)}
+          title={hex}
+          aria-label={hex}
+          className={
+            "size-4 rounded-full border transition " +
+            (value === hex
+              ? "ring-2 ring-foreground ring-offset-1 ring-offset-background"
+              : "border-border hover:scale-110")
+          }
+          style={{ backgroundColor: hex }}
+        />
+      ))}
+      {value && (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onPick(null)}
+          title={clearLabel}
+          aria-label={clearLabel}
+          className="ml-1 text-sm leading-none text-muted-foreground hover:text-foreground"
+        >
+          ×
+        </button>
+      )}
+    </div>
   );
 }
