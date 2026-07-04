@@ -3,6 +3,8 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { LockedIcon } from "@hugeicons/core-free-icons";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
@@ -63,12 +65,23 @@ export function EstadoSelect({
 
   const def = estados.find((e) => e.clave === estado);
 
+  // Authority: if the current state isn't in this board's editable set (e.g. the
+  // AP board moved it to presente/atendida), CC can't change it → read-only.
+  if (!def) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
+        title={tRoot("tableroBoard.managedByAtencion")}
+      >
+        <HugeiconsIcon icon={LockedIcon} className="size-3.5" />
+        {tRoot(`citas.estado.${estado}`)}
+      </span>
+    );
+  }
+
   return (
     <Select value={estado} onValueChange={change} disabled={busy}>
-      <SelectTrigger
-        className="h-8 w-36"
-        style={def ? { color: def.color } : undefined}
-      >
+      <SelectTrigger className="h-8 w-36" style={{ color: def.color }}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

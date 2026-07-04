@@ -41,6 +41,7 @@
     "actions": "Acciones",
     "confirmAction": "¿Confirmas esta acción?",
     "transitionNotAllowed": "Ese cambio de estado no está permitido.",
+    "managedByAtencion": "Gestionado por Atención al Paciente — no editable desde aquí.",
     "edit": "Editar",
     "history": "Historial de cambios",
     "historyEmpty": "Sin cambios registrados.",
