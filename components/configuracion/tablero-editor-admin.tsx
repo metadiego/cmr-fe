@@ -8,9 +8,6 @@ import { toast } from "sonner";
 import {
   getTableros,
   actualizarTablero,
-  getColumnasCatalogo,
-  crearColumna,
-  actualizarColumna,
   getEstadosAdmin,
   crearEstado,
   actualizarEstado,
@@ -24,7 +21,6 @@ import {
   actualizarSubTipo,
   borrarSubTipo,
   type TableroRegistro,
-  type ColumnaCatalogo,
   type Transicion,
   type SubTipo,
 } from "@/lib/api/tablero";
@@ -34,6 +30,7 @@ import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { MetaCrud, type Draft } from "@/components/configuracion/meta-crud";
+import { ColumnasTab } from "@/components/configuracion/columnas-tab";
 import { Field } from "@/components/kit/form-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +38,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Column } from "@/components/kit/data-table";
 
 const s = (d: Draft, k: string) => (d[k] == null ? "" : String(d[k]));
 const num = (d: Draft, k: string) => (d[k] === "" || d[k] == null ? undefined : Number(d[k]));
@@ -85,39 +81,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
         </TabsContent>
 
         <TabsContent value="columnas">
-          <MetaCrud<ColumnaCatalogo>
-            title={t("tabColumnas")}
-            addLabel={t("addColumna")}
-            load={() => getColumnasCatalogo(clave)}
-            deps={[clave]}
-            getRowKey={(r) => r.id}
-            columns={[
-              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.clave}</span> },
-              { key: "label", header: t("label"), cell: (r) => tRoot(r.labelKey) },
-              { key: "tipo", header: t("colTipo"), cell: (r) => r.tipo },
-              { key: "editable", header: t("colEditable"), cell: (r) => (r.editable ? tc("yes") : tc("no")) },
-            ]}
-            initialDraft={{ tipo: "texto", editable: false }}
-            toDraft={(r) => ({ id: r.id, clave: r.clave, labelKey: r.labelKey, tipo: r.tipo, binding: r.binding, editable: r.editable, permiso: r.permiso ?? "" })}
-            canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim() && !!s(d, "binding").trim()}
-            create={(d) => crearColumna({ clave: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), tipo: (s(d, "tipo") || "texto") as never, binding: s(d, "binding").trim(), editable: !!d.editable, permiso: s(d, "permiso") || undefined, ambitos: [clave] })}
-            update={(id, d) => actualizarColumna(id, { labelKey: s(d, "labelKey").trim(), tipo: (s(d, "tipo") || "texto") as never, binding: s(d, "binding").trim(), editable: !!d.editable, permiso: s(d, "permiso") || undefined })}
-            fields={(d, patch) => (
-              <>
-                <Field label={t("clave")}><Input value={s(d, "clave")} onChange={(e) => patch({ clave: e.target.value })} placeholder="prioridad" /></Field>
-                <Field label={t("label")}><Input value={s(d, "labelKey")} onChange={(e) => patch({ labelKey: e.target.value })} placeholder="op.col.prioridad" /></Field>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label={t("colTipo")}><Input value={s(d, "tipo")} onChange={(e) => patch({ tipo: e.target.value })} placeholder="texto" /></Field>
-                  <Field label={t("colBinding")} hint={t("colBindingHint")}><Input value={s(d, "binding")} onChange={(e) => patch({ binding: e.target.value })} placeholder="op.prioridad" /></Field>
-                </div>
-                <label className="flex items-center gap-2 text-sm"><Checkbox checked={!!d.editable} onCheckedChange={(v) => patch({ editable: v === true })} />{t("colEditable")}</label>
-              </>
-            )}
-          />
-          <p className="mt-4 text-sm text-muted-foreground">
-            {t("composeHint")}{" "}
-            <Link href={`/citas/config/columnas?tablero=${clave}`} className="text-primary hover:underline">{t("composeLink")}</Link>
-          </p>
+          <ColumnasTab clave={clave} />
         </TabsContent>
 
         <TabsContent value="estados">

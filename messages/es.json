@@ -82,6 +82,7 @@
       "colEditable": "Editable",
       "colBinding": "Binding",
       "colBindingHint": "Campo del dato al que apunta (allowlist del BE).",
+      "colIncorporarHelp": "Marca las columnas del catálogo que van en este tablero (reutiliza; no dupliques).",
       "composeHint": "Elige qué columnas se muestran y en qué orden:",
       "composeLink": "Editar composición →",
       "addEstado": "Añadir estado",

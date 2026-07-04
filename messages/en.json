@@ -82,6 +82,7 @@
       "colEditable": "Editable",
       "colBinding": "Binding",
       "colBindingHint": "Data field it maps to (BE allowlist).",
+      "colIncorporarHelp": "Check the catalog columns that belong to this board (reuse; don't duplicate).",
       "composeHint": "Choose which columns show and in what order:",
       "composeLink": "Edit composition →",
       "addEstado": "Add state",

@@ -29,9 +29,11 @@ export function getTablero(
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────
 
-// GET /tablero/columnas?tablero= — catalog of columns ELIGIBLE for that board.
-export function getColumnasCatalogo(tablero: string): Promise<ColumnaCatalogo[]> {
-  return apiFetch<ColumnaCatalogo[]>(`/tablero/columnas?tablero=${encodeURIComponent(tablero)}`);
+// GET /tablero/columnas — catalog. With `tablero` → only columns ELIGIBLE for
+// that board (by ambitos); without → the WHOLE catalog (to incorporate/reuse).
+export function getColumnasCatalogo(tablero?: string): Promise<ColumnaCatalogo[]> {
+  const qs = tablero ? `?tablero=${encodeURIComponent(tablero)}` : "";
+  return apiFetch<ColumnaCatalogo[]>(`/tablero/columnas${qs}`);
 }
 
 // GET /tablero/efectivas?tablero= — the columns currently placed (orden/visible/fijo).
