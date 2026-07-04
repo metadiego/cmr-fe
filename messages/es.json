@@ -52,6 +52,27 @@
       "enfermeraId": "Enfermera"
     }
   },
+  "configuracion": {
+    "tableros": {
+      "title": "Constructor de Tableros",
+      "help": "Crea y gestiona los verticales (atención, servicios, operaciones…) desde aquí: sus columnas, estados, transiciones y subtipos. Sin código.",
+      "noAccess": "No tienes permiso para administrar tableros.",
+      "new": "Nuevo vertical",
+      "newHelp": "Registra un vertical. Luego defines sus columnas, estados, transiciones y subtipos.",
+      "created": "Vertical creado",
+      "clave": "Clave",
+      "claveHint": "Identificador único (ej. operaciones). No se repite.",
+      "label": "Etiqueta (labelKey)",
+      "labelHint": "Clave i18n del nombre (ej. nav.operaciones).",
+      "layout": "Layout",
+      "entidad": "Entidad",
+      "entidadHint": "Tipo de entidad (ej. cita, sesion, operacion) — define el bus de eventos.",
+      "icon": "Icono",
+      "esVertical": "Aparece en el menú (vertical)",
+      "active": "Activo",
+      "edit": "Editar"
+    }
+  },
   "tableroEditor": {
     "title": "Columnas del tablero",
     "help": "Elige qué columnas se muestran y en qué orden. Usa las flechas para reordenar.",
@@ -339,6 +360,8 @@
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "back": "Volver",
+    "yes": "Sí",
+    "no": "No",
     "search": "Buscar…",
     "pagination": {
       "range": "{from}–{to} de {total}",

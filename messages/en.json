@@ -52,6 +52,27 @@
       "enfermeraId": "Nurse"
     }
   },
+  "configuracion": {
+    "tableros": {
+      "title": "Board Builder",
+      "help": "Create and manage verticals (patient care, services, operations…) here: their columns, states, transitions and subtypes. No code.",
+      "noAccess": "You don't have permission to manage boards.",
+      "new": "New vertical",
+      "newHelp": "Register a vertical. Then define its columns, states, transitions and subtypes.",
+      "created": "Vertical created",
+      "clave": "Key",
+      "claveHint": "Unique identifier (e.g. operaciones). Must be unique.",
+      "label": "Label (labelKey)",
+      "labelHint": "i18n key for the name (e.g. nav.operaciones).",
+      "layout": "Layout",
+      "entidad": "Entity",
+      "entidadHint": "Entity type (e.g. cita, sesion, operacion) — drives the event bus.",
+      "icon": "Icon",
+      "esVertical": "Shows in the menu (vertical)",
+      "active": "Active",
+      "edit": "Edit"
+    }
+  },
   "tableroEditor": {
     "title": "Board columns",
     "help": "Choose which columns show and in what order. Use the arrows to reorder.",
@@ -339,6 +360,8 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "back": "Back",
+    "yes": "Yes",
+    "no": "No",
     "search": "Search…",
     "pagination": {
       "range": "{from}–{to} of {total}",
