@@ -332,6 +332,8 @@
     "loading": "Loading…",
     "empty": "No results.",
     "retry": "Retry",
+    "errorTitle": "Something went wrong",
+    "errorBody": "This screen hit an error. The rest of the system keeps working. You can retry.",
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",

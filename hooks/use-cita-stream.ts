@@ -15,8 +15,9 @@ export function useCitaStream(opts: {
   onInvalidate: () => void;
   onEvent?: (e: CitaStreamEvent) => void;
   debounceMs?: number;
+  pollMs?: number; // safety-net refetch interval while NOT live (SSE down)
 }): { live: boolean } {
-  const { centroId, enabled = true, debounceMs = 400 } = opts;
+  const { centroId, enabled = true, debounceMs = 400, pollMs = 20000 } = opts;
   const [live, setLive] = React.useState(false);
 
   // Keep callbacks current without re-subscribing on every render.
@@ -24,6 +25,29 @@ export function useCitaStream(opts: {
   React.useEffect(() => {
     cbRef.current = opts;
   });
+  const liveRef = React.useRef(live);
+  liveRef.current = live;
+
+  // Self-heal: refetch when the tab regains focus or the network comes back
+  // (a crashed/slept connection may have missed events). And while the SSE is
+  // down, poll as a safety net so the board never sits silently stale.
+  React.useEffect(() => {
+    if (!enabled) return;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") cbRef.current.onInvalidate();
+    };
+    const onOnline = () => cbRef.current.onInvalidate();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onOnline);
+    const poll = setInterval(() => {
+      if (!liveRef.current) cbRef.current.onInvalidate();
+    }, pollMs);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onOnline);
+      clearInterval(poll);
+    };
+  }, [enabled, pollMs]);
 
   React.useEffect(() => {
     if (!enabled) return;

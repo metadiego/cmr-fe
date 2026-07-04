@@ -332,6 +332,8 @@
     "loading": "Cargando…",
     "empty": "Sin resultados.",
     "retry": "Reintentar",
+    "errorTitle": "Algo salió mal",
+    "errorBody": "Ocurrió un error en esta pantalla. El resto del sistema sigue funcionando. Puedes reintentar.",
     "save": "Guardar",
     "saving": "Guardando…",
     "cancel": "Cancelar",
