@@ -90,6 +90,7 @@ export interface TableroRegistro {
 // A declarative transition (definicion.transiciones). `requiere` = payload field
 // claves the FE must collect. `desdeEstados` empty = available from any state.
 export interface Transicion {
+  id: string;
   clave: string;
   labelKey: string;
   desdeEstados: string[];
@@ -105,6 +106,7 @@ export interface Transicion {
 }
 
 export interface SubTipo {
+  id: string;
   clave: string;
   labelKey: string;
   orden: number;
