@@ -3904,6 +3904,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tablero/celda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Edición genérica de una celda editable (p. ej. comentarios). BE valida editable/permiso, mapea el
+         *     binding al campo real, aplica, registra `campo_editado` (antes/después + actor del token) y emite SSE.
+         */
+        post: operations["TablerosController_celda_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/profiles": {
         parameters: {
             query?: never;
@@ -5492,21 +5512,6 @@ export interface components {
              */
             actorId?: string;
         };
-        CitaEventoEntity: {
-            citaId: string;
-            /** @enum {string} */
-            tipo: "cancelada" | "creada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada" | "reparada" | "auto_revertida" | "corregida";
-            actorId: string | null;
-            motivo: string | null;
-            payload: Record<string, never> | null;
-            esRetroactivo: boolean;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         TransicionCitaDto: {
             /** Format: uuid */
             actorId?: string;
@@ -5588,6 +5593,8 @@ export interface components {
             visible?: boolean;
             fijo?: boolean;
             activo?: boolean;
+            /** @description Override de editabilidad de la columna en este tablero (null = hereda del catálogo). */
+            editable?: boolean;
         };
         TableroColumnaEntity: {
             tablero: string;
@@ -5595,6 +5602,7 @@ export interface components {
             orden: number;
             visible: boolean;
             fijo: boolean;
+            editable: boolean | null;
             activo: boolean;
             id: string;
             clinicId: string | null;
@@ -5610,6 +5618,8 @@ export interface components {
             visible?: boolean;
             fijo?: boolean;
             activo?: boolean;
+            /** @description Override de editabilidad de la columna en este tablero (null = hereda del catálogo). */
+            editable?: boolean;
         };
         SetComposicionBulkDto: {
             tablero: string;
@@ -6566,6 +6576,13 @@ export interface components {
             accion: string;
             /** @description Campos que exige la transición (p. ej. vitales, motivo, enfermeraId, actorId). */
             payload?: Record<string, never>;
+        };
+        TableroCeldaDto: {
+            tablero: string;
+            entidadId: string;
+            columna: string;
+            /** @description Nuevo valor de la celda (tipo libre según la columna). */
+            valor: Record<string, never>;
         };
         CreatePerfilDto: {
             authUserId: string;
@@ -11083,7 +11100,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CitaEventoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -14080,6 +14097,29 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TableroAccionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    TablerosController_celda_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TableroCeldaDto"];
             };
         };
         responses: {

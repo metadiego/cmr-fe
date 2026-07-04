@@ -16,6 +16,7 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
 import { EstadoSelect } from "@/components/tablero/estado-select";
+import { CeldaEditable } from "@/components/tablero/celda-editable";
 import { Cell } from "@/components/agenda/tablero-dinamico";
 import {
   Select,
@@ -61,6 +62,13 @@ export function DiaView({ fecha }: { fecha: string }) {
   // an inline selector driven by this — the FE invents no state list.
   const defRes = useResource<TableroDefinicion>(() => getDefinicion("citas_cc"));
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
+  // Editable columns come from the tablero definition (data-driven), not code.
+  // The estado column is handled by its own selector, so exclude it here.
+  const editableClaves = new Set(
+    (def?.columnas ?? [])
+      .filter((c) => c.editable && c.clave !== "estado_selector")
+      .map((c) => c.clave),
+  );
 
   const { state, reload, refresh } = useResource<AgendaDia>(
     () =>
@@ -149,6 +157,7 @@ export function DiaView({ fecha }: { fecha: string }) {
                 columnas={data.columnas}
                 estados={def?.estados ?? []}
                 transiciones={def?.transiciones ?? []}
+                editableClaves={editableClaves}
                 onChanged={refresh}
                 onAgendar={(hora, tipo) =>
                   setModal({ fecha, centroId: c.clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
@@ -163,6 +172,7 @@ export function DiaView({ fecha }: { fecha: string }) {
           columnas={data.columnas}
           estados={def?.estados ?? []}
           transiciones={def?.transiciones ?? []}
+          editableClaves={editableClaves}
           onChanged={refresh}
           onAgendar={(hora, tipo) =>
             setModal({ fecha, centroId: centrosData[0].clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
@@ -192,6 +202,7 @@ function CentroSheet({
   columnas,
   estados,
   transiciones,
+  editableClaves,
   onAgendar,
   onChanged,
 }: {
@@ -199,6 +210,7 @@ function CentroSheet({
   columnas: ColumnaEfectiva[];
   estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
+  editableClaves: Set<string>;
   onAgendar: (hora: string | null, tipo: TipoFranja) => void;
   onChanged: () => void;
 }) {
@@ -289,6 +301,16 @@ function CentroSheet({
                                 transiciones={transiciones}
                                 centroId={centro.clinicId}
                                 onDone={onChanged}
+                              />
+                            ) : editableClaves.has(col.clave) ? (
+                              <CeldaEditable
+                                tablero="citas_cc"
+                                entidadId={fila.id}
+                                columna={col.clave}
+                                tipo={col.tipo}
+                                value={fila[col.clave]}
+                                centroId={centro.clinicId}
+                                onChanged={onChanged}
                               />
                             ) : col.tipo === "accion" ? (
                               // ⋯ reservado para otras acciones (no estado)

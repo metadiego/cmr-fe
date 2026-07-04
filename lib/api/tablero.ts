@@ -141,6 +141,16 @@ export function getFilas(
   return apiFetch<Tablero>(`/tablero/filas?${sp.toString()}`, {}, opts.centroId);
 }
 
+// POST /tablero/celda — edit an editable cell. BE validates the column is
+// editable in that tablero, maps by binding (allowlist), applies it and records
+// a `campo_editado` audit event (antes/después + actor) + SSE. tenant scopes it.
+export function editarCelda(
+  body: { tablero: string; entidadId: string; columna: string; valor: unknown },
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(`/tablero/celda`, { method: "POST", body: JSON.stringify(body) }, centroId);
+}
+
 // POST /tablero/accion — execute a declarative transition. Fields go in payload
 // (definicion.transiciones[].requiere says which). tenant scopes the request.
 export function ejecutarAccion(

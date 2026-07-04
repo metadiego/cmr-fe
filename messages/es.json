@@ -41,6 +41,9 @@
     "actions": "Acciones",
     "confirmAction": "¿Confirmas esta acción?",
     "transitionNotAllowed": "Ese cambio de estado no está permitido.",
+    "edit": "Editar",
+    "history": "Historial de cambios",
+    "historyEmpty": "Sin cambios registrados.",
     "field": {
       "motivo": "Motivo",
       "fecha": "Fecha",
@@ -212,7 +215,8 @@
         "no_show": "No asistió",
         "cancelada": "Cancelada",
         "reprogramada": "Reagendada",
-        "reparada": "Reparada"
+        "reparada": "Reparada",
+        "campo_editado": "Campo editado"
       }
     },
     "filterState": "Estado",

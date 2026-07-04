@@ -210,12 +210,14 @@ export function reagendarCita(
 export interface CitaEvento {
   id: string;
   citaId: string;
-  tipo: string;
+  tipo: string; // "reprogramada" | "campo_editado" | "creada" | ...
   actorId: string | null;
+  actorNombre?: string | null; // resolved by BE (actorId → personal)
   motivo: string | null;
   payload: {
     antes?: Record<string, unknown>;
     despues?: Record<string, unknown>;
+    columna?: string; // campo_editado (antes/despues son valores simples)
   } | null;
   esRetroactivo: boolean;
   createdAt: string;
