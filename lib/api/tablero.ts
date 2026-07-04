@@ -80,9 +80,10 @@ export interface TableroRegistro {
   icon: string | null;
   orden: number;
   permiso: string | null;
-  layout: string; // "etapas" | ...
+  layout: string; // "etapas" | "tabla" | ...
   entidad: string; // "cita" | "sesion" | ...
   filtros: Record<string, unknown> | null;
+  esVertical?: boolean; // true → aparece en /tableros (menú); false → consultable (citas_cc)
   activo: boolean;
 }
 

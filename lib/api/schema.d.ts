@@ -3825,7 +3825,7 @@ export interface paths {
         /** Registro de verticales activas (el FE arma menú/rutas desde datos). */
         get: operations["TablerosController_listTableros_v1"];
         put?: never;
-        post?: never;
+        post: operations["TablerosController_crearTablero_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3919,6 +3919,118 @@ export interface paths {
          */
         post: operations["TablerosController_celda_v1"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tableros/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TablerosController_actualizarTablero_v1"];
+        post?: never;
+        delete: operations["TablerosController_desactivarTablero_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/estados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TablerosController_listEstados_v1"];
+        put?: never;
+        post: operations["TablerosController_crearEstado_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/estados/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TablerosController_actualizarEstado_v1"];
+        post?: never;
+        delete: operations["TablerosController_desactivarEstado_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/transiciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TablerosController_listTransiciones_v1"];
+        put?: never;
+        post: operations["TablerosController_crearTransicion_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/transiciones/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TablerosController_actualizarTransicion_v1"];
+        post?: never;
+        delete: operations["TablerosController_desactivarTransicion_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/subtipos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TablerosController_listSubtipos_v1"];
+        put?: never;
+        post: operations["TablerosController_crearSubtipo_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/subtipos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TablerosController_actualizarSubtipo_v1"];
+        post?: never;
+        delete: operations["TablerosController_desactivarSubtipo_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5574,6 +5686,8 @@ export interface components {
             editable?: boolean;
             permiso?: string;
             render?: Record<string, never>;
+            /** @description Tableros donde la columna es elegible (p. ej. ['citas','operaciones']); vacío/null = universal. */
+            ambitos?: string[];
         };
         UpdateColumnaDto: {
             labelKey?: string;
@@ -5584,6 +5698,8 @@ export interface components {
             permiso?: string;
             render?: Record<string, never>;
             activo?: boolean;
+            /** @description Tableros donde la columna es elegible; vacío/null = universal. */
+            ambitos?: string[];
         };
         SetComposicionDto: {
             tablero: string;
@@ -6581,8 +6697,126 @@ export interface components {
             tablero: string;
             entidadId: string;
             columna: string;
-            /** @description Nuevo valor de la celda (tipo libre según la columna). */
+            /**
+             * @description Nuevo valor de la celda (tipo LIBRE según la columna: texto/número/fecha/…). `@Allow()` lo deja
+             *     pasar el ValidationPipe (whitelist + forbidNonWhitelisted) sin restringir el tipo.
+             */
             valor: Record<string, never>;
+        };
+        CreateTableroDto: {
+            clave: string;
+            labelKey: string;
+            icon?: string;
+            orden?: number;
+            permiso?: string;
+            layout: string;
+            entidad: string;
+            filtros?: Record<string, never>;
+            esVertical?: boolean;
+            activo?: boolean;
+        };
+        UpdateTableroDto: {
+            labelKey?: string;
+            icon?: string;
+            orden?: number;
+            permiso?: string;
+            layout?: string;
+            entidad?: string;
+            filtros?: Record<string, never>;
+            esVertical?: boolean;
+            activo?: boolean;
+        };
+        CreateEstadoDto: {
+            tablero: string;
+            clave: string;
+            labelKey: string;
+            orden?: number;
+            color?: string;
+            esInicial?: boolean;
+            esTerminal?: boolean;
+            visibleEnAtencion?: boolean;
+            activo?: boolean;
+        };
+        UpdateEstadoDto: {
+            labelKey?: string;
+            orden?: number;
+            color?: string;
+            esInicial?: boolean;
+            esTerminal?: boolean;
+            visibleEnAtencion?: boolean;
+            activo?: boolean;
+        };
+        TableroTransicionEntity: {
+            tablero: string;
+            clave: string;
+            labelKey: string;
+            desdeEstados: string[] | null;
+            aEstado: string | null;
+            metodo: string;
+            path: string | null;
+            accion: string | null;
+            permiso: string | null;
+            requiere: string[] | null;
+            confirmar: boolean;
+            orden: number;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateTransicionDto: {
+            tablero: string;
+            clave: string;
+            labelKey: string;
+            desdeEstados?: string[];
+            aEstado?: string;
+            metodo?: string;
+            path?: string;
+            accion?: string;
+            permiso?: string;
+            requiere?: string[];
+            confirmar?: boolean;
+            orden?: number;
+            activo?: boolean;
+        };
+        UpdateTransicionDto: {
+            labelKey?: string;
+            desdeEstados?: string[];
+            aEstado?: string;
+            metodo?: string;
+            path?: string;
+            accion?: string;
+            permiso?: string;
+            requiere?: string[];
+            confirmar?: boolean;
+            orden?: number;
+            activo?: boolean;
+        };
+        TableroSubtipoEntity: {
+            tablero: string;
+            clave: string;
+            labelKey: string;
+            orden: number;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateSubtipoDto: {
+            tablero: string;
+            clave: string;
+            labelKey: string;
+            orden?: number;
+            activo?: boolean;
+        };
+        UpdateSubtipoDto: {
+            labelKey?: string;
+            orden?: number;
+            activo?: boolean;
         };
         CreatePerfilDto: {
             authUserId: string;
@@ -14018,6 +14252,29 @@ export interface operations {
             };
         };
     };
+    TablerosController_crearTablero_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTableroDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroEntity"];
+                };
+            };
+        };
+    };
     TablerosController_stream_v1: {
         parameters: {
             query?: never;
@@ -14129,6 +14386,326 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    TablerosController_actualizarTablero_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTableroDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_desactivarTablero_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_listEstados_v1: {
+        parameters: {
+            query?: {
+                tablero?: string;
+                /** @description true incluye inactivos */
+                all?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCitaEntity"][];
+                };
+            };
+        };
+    };
+    TablerosController_crearEstado_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEstadoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCitaEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_actualizarEstado_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEstadoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCitaEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_desactivarEstado_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoCitaEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_listTransiciones_v1: {
+        parameters: {
+            query?: {
+                tablero?: string;
+                all?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroTransicionEntity"][];
+                };
+            };
+        };
+    };
+    TablerosController_crearTransicion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTransicionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroTransicionEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_actualizarTransicion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTransicionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroTransicionEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_desactivarTransicion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroTransicionEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_listSubtipos_v1: {
+        parameters: {
+            query?: {
+                tablero?: string;
+                all?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroSubtipoEntity"][];
+                };
+            };
+        };
+    };
+    TablerosController_crearSubtipo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSubtipoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroSubtipoEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_actualizarSubtipo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSubtipoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroSubtipoEntity"];
+                };
+            };
+        };
+    };
+    TablerosController_desactivarSubtipo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TableroSubtipoEntity"];
                 };
             };
         };
