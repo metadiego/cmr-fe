@@ -160,3 +160,82 @@ export function ejecutarAccion(
 ): Promise<unknown> {
   return apiFetch(`/tablero/accion`, { method: "POST", body: JSON.stringify(body) }, centroId);
 }
+
+// ── Admin CRUD (Constructor de Tableros; gate `tablero.admin`) ───────────────
+// Create a vertical from the UI, no code. Delete is soft (activo:false). Admin
+// GETs use ?all=true to include inactive rows. Types come straight from Swagger.
+
+export type CreateTableroInput = components["schemas"]["CreateTableroDto"];
+export type UpdateTableroInput = components["schemas"]["UpdateTableroDto"];
+export type CreateColumnaInput = components["schemas"]["CreateColumnaDto"];
+export type UpdateColumnaInput = components["schemas"]["UpdateColumnaDto"];
+export type CreateEstadoInput = components["schemas"]["CreateEstadoDto"];
+export type UpdateEstadoInput = components["schemas"]["UpdateEstadoDto"];
+export type CreateTransicionInput = components["schemas"]["CreateTransicionDto"];
+export type UpdateTransicionInput = components["schemas"]["UpdateTransicionDto"];
+export type CreateSubTipoInput = components["schemas"]["CreateSubtipoDto"];
+export type UpdateSubTipoInput = components["schemas"]["UpdateSubtipoDto"];
+
+const q = (tablero: string, all: boolean) =>
+  `?tablero=${encodeURIComponent(tablero)}${all ? "&all=true" : ""}`;
+
+// Tableros registry
+export function crearTablero(body: CreateTableroInput): Promise<TableroRegistro> {
+  return apiFetch(`/tableros`, { method: "POST", body: JSON.stringify(body) });
+}
+export function actualizarTablero(id: string, body: UpdateTableroInput): Promise<TableroRegistro> {
+  return apiFetch(`/tableros/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+export function borrarTablero(id: string): Promise<void> {
+  return apiFetch(`/tableros/${id}`, { method: "DELETE" });
+}
+
+// Columnas de catálogo (GET catálogo: getColumnasCatalogo)
+export function crearColumna(body: CreateColumnaInput): Promise<ColumnaCatalogo> {
+  return apiFetch(`/tablero/columnas`, { method: "POST", body: JSON.stringify(body) });
+}
+export function actualizarColumna(id: string, body: UpdateColumnaInput): Promise<ColumnaCatalogo> {
+  return apiFetch(`/tablero/columnas/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+
+// Estados
+export function getEstadosAdmin(tablero: string, all = true): Promise<EstadoCitaCatalogo[]> {
+  return apiFetch(`/tablero/estados${q(tablero, all)}`);
+}
+export function crearEstado(body: CreateEstadoInput): Promise<EstadoCitaCatalogo> {
+  return apiFetch(`/tablero/estados`, { method: "POST", body: JSON.stringify(body) });
+}
+export function actualizarEstado(id: string, body: UpdateEstadoInput): Promise<EstadoCitaCatalogo> {
+  return apiFetch(`/tablero/estados/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+export function borrarEstado(id: string): Promise<void> {
+  return apiFetch(`/tablero/estados/${id}`, { method: "DELETE" });
+}
+
+// Transiciones
+export function getTransicionesAdmin(tablero: string, all = true): Promise<Transicion[]> {
+  return apiFetch(`/tablero/transiciones${q(tablero, all)}`);
+}
+export function crearTransicion(body: CreateTransicionInput): Promise<Transicion> {
+  return apiFetch(`/tablero/transiciones`, { method: "POST", body: JSON.stringify(body) });
+}
+export function actualizarTransicion(id: string, body: UpdateTransicionInput): Promise<Transicion> {
+  return apiFetch(`/tablero/transiciones/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+export function borrarTransicion(id: string): Promise<void> {
+  return apiFetch(`/tablero/transiciones/${id}`, { method: "DELETE" });
+}
+
+// SubTipos
+export function getSubTiposAdmin(tablero: string, all = true): Promise<SubTipo[]> {
+  return apiFetch(`/tablero/subtipos${q(tablero, all)}`);
+}
+export function crearSubTipo(body: CreateSubTipoInput): Promise<SubTipo> {
+  return apiFetch(`/tablero/subtipos`, { method: "POST", body: JSON.stringify(body) });
+}
+export function actualizarSubTipo(id: string, body: UpdateSubTipoInput): Promise<SubTipo> {
+  return apiFetch(`/tablero/subtipos/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+export function borrarSubTipo(id: string): Promise<void> {
+  return apiFetch(`/tablero/subtipos/${id}`, { method: "DELETE" });
+}
