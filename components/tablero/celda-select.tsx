@@ -37,21 +37,25 @@ export function CeldaSelect({
 }) {
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
+  // Optimistic: reflect the pick INSTANTLY; server + SSE confirm.
+  const [optimistic, setOptimistic] = React.useState<string | null>(null);
 
   const label = value == null || value === "" ? "" : String(value);
   // No options wired yet → don't block the cell, just show the text.
   if (options.length === 0) {
     return <span className={label ? undefined : "text-muted-foreground"}>{label || "—"}</span>;
   }
-  const current = options.find((o) => o.label === label)?.value ?? "";
+  const current = optimistic ?? (options.find((o) => o.label === label)?.value ?? "");
 
   async function onChange(next: string) {
     if (next === current) return;
     setBusy(true);
+    setOptimistic(next); // instant feedback
     try {
       await editarCelda({ tablero, entidadId, columna, valor: next }, centroId);
       onSaved?.();
     } catch (err) {
+      setOptimistic(null); // revert on failure
       toastError(err, tRoot);
     } finally {
       setBusy(false);

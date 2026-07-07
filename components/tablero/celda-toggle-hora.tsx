@@ -53,8 +53,10 @@ export function CeldaToggleHora({
 }) {
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
+  // Optimistic seal: show the hour INSTANTLY on click; the server + SSE confirm.
+  const [optimistic, setOptimistic] = React.useState<string | null>(null);
 
-  const hora = fmtHora(value);
+  const hora = fmtHora(optimistic ?? value);
   const transClave = (col.render as Record<string, unknown> | null)?.transition as string | undefined;
   const trans = transClave ? transiciones.find((t) => t.clave === transClave) : undefined;
   const canFire = !!trans && (trans.desdeEstados.length === 0 || trans.desdeEstados.includes(estado));
@@ -63,10 +65,12 @@ export function CeldaToggleHora({
   async function fire() {
     if (!trans) return;
     setBusy(true);
+    setOptimistic(new Date().toISOString()); // instant feedback
     try {
       await ejecutarAccion({ tablero, entidadId, accion: trans.clave }, centroId);
       onSaved?.();
     } catch (err) {
+      setOptimistic(null); // revert on failure
       toastError(err, tRoot);
     } finally {
       setBusy(false);
