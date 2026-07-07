@@ -169,7 +169,10 @@
       "citadoPor": "Booked by",
       "estado": "Status",
       "acciones": "Actions",
-      "centro": "Center"
+      "centro": "Center",
+      "consulta": "Consultation",
+      "prox_cita": "Next appt",
+      "pago": "Payment"
     }
   },
   "agenda": {

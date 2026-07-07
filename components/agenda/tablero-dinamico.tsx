@@ -39,6 +39,16 @@ export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   return <span className={col.tipo === "hora" ? "font-mono" : undefined}>{text}</span>;
 }
 
+const AVATAR_PALETTE = ["#0D9488", "#0284C7", "#7C3AED", "#D97706", "#15803D", "#E11D48", "#0891B2", "#4F46E5", "#DB2777"];
+function avatarColor(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return AVATAR_PALETTE[h % AVATAR_PALETTE.length];
+}
+function titleCase(s: string): string {
+  return s.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+}
+
 // Dedupe columns by clave (combined agenda repeats them) and drop ones the user
 // lacks permission for.
 export function useVisibleColumns(columnas: ColumnaEfectiva[]): ColumnaEfectiva[] {
@@ -74,7 +84,7 @@ export function TableroDinamico({
   onRefresh?: () => void;
   optionsByCol?: Record<string, Opcion[]>;
   transiciones?: Transicion[];
-  estados?: { clave: string; orden: number }[];
+  estados?: { clave: string; orden: number; color?: string | null }[];
   density?: "comodo" | "compacto";
 }) {
   const tRoot = useTranslations();
@@ -82,6 +92,22 @@ export function TableroDinamico({
   const rowPad = density === "compacto" ? "py-1" : "py-2";
 
   function renderCell(col: ColumnaEfectiva, fila: CitaFila) {
+    // Paciente: avatar de iniciales + nombre (como el mockup).
+    if (col.clave === "paciente") {
+      const nombre = fila[col.clave] == null ? "" : String(fila[col.clave]);
+      const iniciales = nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+      return (
+        <div className="flex items-center gap-2.5">
+          <span
+            className="grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
+            style={{ backgroundColor: avatarColor(nombre) }}
+          >
+            {iniciales || "?"}
+          </span>
+          <span className="font-medium">{titleCase(nombre)}</span>
+        </div>
+      );
+    }
     if (col.tipo === "accion") {
       return renderAccion?.(fila) ?? <Cell col={col} value={fila[col.clave]} />;
     }
@@ -145,15 +171,22 @@ export function TableroDinamico({
               </td>
             </tr>
           )}
-          {filas.map((fila) => (
-            <tr key={fila.id} className="border-t">
-              {cols.map((col) => (
-                <td key={col.clave} className={"px-3 whitespace-nowrap " + rowPad}>
-                  {renderCell(col, fila)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {filas.map((fila) => {
+            const rowColor = estados?.find((e) => e.clave === String(fila.estado ?? ""))?.color ?? null;
+            return (
+              <tr key={fila.id} className="border-t transition-colors hover:bg-muted/40">
+                {cols.map((col, ci) => (
+                  <td
+                    key={col.clave}
+                    className={"px-3 whitespace-nowrap " + rowPad}
+                    style={ci === 0 && rowColor ? { boxShadow: `inset 3px 0 0 ${rowColor}` } : undefined}
+                  >
+                    {renderCell(col, fila)}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

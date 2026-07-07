@@ -83,6 +83,8 @@ export function GenericBoard({ tablero }: { tablero: string }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of persisted pref
     setDensity(readDensity(tablero));
   }, [tablero]);
+  // KPI filter: click a card to filter rows by estado.
+  const [estadoFiltro, setEstadoFiltro] = React.useState<string>("");
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -157,11 +159,33 @@ export function GenericBoard({ tablero }: { tablero: string }) {
         </p>
       )}
 
-      {data && def && (
-        <TableroDinamico
-          columnas={data.columnas}
-          filas={data.filas}
-          tablero={tablero}
+      {data && def && (() => {
+        const counts = new Map<string, number>();
+        for (const f of data.filas) {
+          const e = String(f.estado ?? "");
+          counts.set(e, (counts.get(e) ?? 0) + 1);
+        }
+        const kpiEstados = def.estados.filter((e) => (counts.get(e.clave) ?? 0) > 0);
+        const filtered = estadoFiltro ? data.filas.filter((f) => String(f.estado ?? "") === estadoFiltro) : data.filas;
+        return (
+          <>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <KpiCard label={t("all")} count={data.filas.length} active={estadoFiltro === ""} onClick={() => setEstadoFiltro("")} />
+              {kpiEstados.map((e) => (
+                <KpiCard
+                  key={e.clave}
+                  label={tRoot(e.labelKey)}
+                  count={counts.get(e.clave) ?? 0}
+                  color={e.color}
+                  active={estadoFiltro === e.clave}
+                  onClick={() => setEstadoFiltro(estadoFiltro === e.clave ? "" : e.clave)}
+                />
+              ))}
+            </div>
+            <TableroDinamico
+              columnas={data.columnas}
+              filas={filtered}
+              tablero={tablero}
           centroId={centroId}
           onRefresh={filasRes.refresh}
           optionsByCol={optionsByCol}
@@ -190,9 +214,41 @@ export function GenericBoard({ tablero }: { tablero: string }) {
               />
             )
           }
-        />
-      )}
+            />
+          </>
+        );
+      })()}
     </div>
+  );
+}
+
+function KpiCard({
+  label,
+  count,
+  color,
+  active,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  color?: string | null;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={
+        "relative flex min-w-[7rem] flex-col gap-1 overflow-hidden rounded-xl border px-4 py-3 text-left transition-colors " +
+        (active ? "border-primary/60 bg-primary/5" : "hover:border-primary/40")
+      }
+    >
+      <span className="absolute inset-y-0 left-0 w-1" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} />
+      <span className="text-2xl font-bold tabular-nums leading-none">{count}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+    </button>
   );
 }
 

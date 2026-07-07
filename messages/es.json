@@ -169,7 +169,10 @@
       "citadoPor": "Citado por",
       "estado": "Estado",
       "acciones": "Acciones",
-      "centro": "Centro"
+      "centro": "Centro",
+      "consulta": "Consulta",
+      "prox_cita": "Próx-cita",
+      "pago": "Pago"
     }
   },
   "agenda": {
