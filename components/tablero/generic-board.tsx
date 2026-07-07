@@ -54,16 +54,21 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const defRes = useResource<TableroDefinicion>(() => getDefinicion(tablero), [tablero]);
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
 
-  // Options for editable `select` columns — fetched once per definicion (every
-  // row of a column shares the same options). Keyed by column clave.
+  const centrosRes = useResource<Centro[]>(() => getMyCentros());
+  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
+  const [picked, setPicked] = React.useState<string | null>(null);
+  const centroId = picked ?? defaultCentro(centros);
+
+  // Options for editable `select` columns — TENANT-SCOPED (por centro), para que
+  // solo aparezcan opciones válidas de ese centro (p.ej. médicos del centro).
+  // Sin esto, el FE mostraba médicos de otros centros → al elegirlos no persistían.
   const [optionsByCol, setOptionsByCol] = React.useState<Record<string, Opcion[]>>({});
   React.useEffect(() => {
     const selects = (def?.columnas ?? []).filter((c) => c.tipo === "select" && c.editable);
     let active = true;
-    // Async set only (empty selects → Promise.all([]) → {}), never a sync setState.
     Promise.all(
       selects.map((c) =>
-        getOpciones(tablero, c.clave)
+        getOpciones(tablero, c.clave, centroId)
           .then((o) => [c.clave, o] as const)
           .catch(() => [c.clave, [] as Opcion[]] as const),
       ),
@@ -73,7 +78,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
     return () => {
       active = false;
     };
-  }, [def, tablero]);
+  }, [def, tablero, centroId]);
 
   // View density: read-only here (set in Settings › Tableros, persisted per user).
   // Read the persisted value AFTER mount to avoid an SSR/localStorage hydration
@@ -85,11 +90,6 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   }, [tablero]);
   // KPI filter: click a card to filter rows by estado.
   const [estadoFiltro, setEstadoFiltro] = React.useState<string>("");
-
-  const centrosRes = useResource<Centro[]>(() => getMyCentros());
-  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  const [picked, setPicked] = React.useState<string | null>(null);
-  const centroId = picked ?? defaultCentro(centros);
 
   const [fecha, setFecha] = React.useState(todayISO());
   const [subTipo, setSubTipo] = React.useState<string>("");

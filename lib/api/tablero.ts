@@ -166,9 +166,11 @@ export interface Opcion {
   label: string;
 }
 
-export function getOpciones(tablero: string, columna: string): Promise<Opcion[]> {
+export function getOpciones(tablero: string, columna: string, centroId?: string): Promise<Opcion[]> {
   return apiFetch<Opcion[]>(
     `/tablero/opciones?tablero=${encodeURIComponent(tablero)}&columna=${encodeURIComponent(columna)}`,
+    undefined,
+    centroId,
   );
 }
 
