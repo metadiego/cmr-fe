@@ -52,10 +52,17 @@ export function FlujoAtencion({
     const clave = (col.render as Record<string, unknown> | null)?.transition as string | undefined;
     return clave ? transiciones.find((t) => t.clave === clave) : undefined;
   };
+  // Color de cada etapa = color del estado destino (dato: def.estados). Da los
+  // colores del mockup (presente/en consulta/asistido) sin hardcode.
+  const colorOf = (col: ColumnaEfectiva) => estados.find((e) => e.clave === fwdOf(col)?.aEstado)?.color ?? colColor(col) ?? null;
   const isChecked = (col: ColumnaEfectiva) => opt[col.clave] ?? (fila[col.clave] != null && fila[col.clave] !== "");
 
+  // Orden de la cadena = orden del estado destino de cada etapa (dato, no la
+  // composición). Así el encadenamiento respeta el flujo real.
+  const orderedCols = [...cols].sort((a, b) => ordenOf(fwdOf(a)?.aEstado ?? null) - ordenOf(fwdOf(b)?.aEstado ?? null));
+
   async function toggle(i: number) {
-    const col = cols[i];
+    const col = orderedCols[i];
     const checked = isChecked(col);
     const fwd = fwdOf(col);
     let accion: string | undefined;
@@ -63,7 +70,7 @@ export function FlujoAtencion({
       accion = fwd?.clave;
     } else if (i > 0) {
       // Volver a la etapa anterior (su estado destino).
-      const prevTarget = fwdOf(cols[i - 1])?.aEstado ?? null;
+      const prevTarget = fwdOf(orderedCols[i - 1])?.aEstado ?? null;
       accion = transiciones.find((t) => t.aEstado === prevTarget && fwd && t.desdeEstados.includes(fwd.aEstado ?? ""))?.clave;
     } else {
       // Primera etapa: bajar por debajo de su estado destino.
@@ -91,15 +98,15 @@ export function FlujoAtencion({
 
   return (
     <div className="flex items-center justify-center gap-1">
-      {cols.map((col, i) => {
+      {orderedCols.map((col, i) => {
         const checked = isChecked(col);
         const hora = checked ? fmtHora(fila[col.clave]) : null;
-        const prevOk = i === 0 || isChecked(cols[i - 1]);
-        const nextChecked = i < cols.length - 1 && isChecked(cols[i + 1]);
+        const prevOk = i === 0 || isChecked(orderedCols[i - 1]);
+        const nextChecked = i < orderedCols.length - 1 && isChecked(orderedCols[i + 1]);
         const canCheck = !checked && prevOk; // en orden hacia adelante
         const canUncheck = checked && !nextChecked; // en orden hacia atrás (LIFO)
         const disabled = busy === col.clave || (!checked && !canCheck) || (checked && !canUncheck);
-        const color = colColor(col);
+        const color = colorOf(col);
         return (
           <React.Fragment key={col.clave}>
             {i > 0 && <span className={"h-px w-4 shrink-0 " + (checked ? "bg-primary/50" : "bg-border")} aria-hidden />}

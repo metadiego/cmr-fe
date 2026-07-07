@@ -144,15 +144,16 @@ export function TableroDinamico({
     return <Cell col={col} value={fila[col.clave]} />;
   }
 
-  // Agrupa toggles de flujo consecutivos (presente/en_consulta/asistido) en UNA
-  // sola columna "Flujo de atención" con chips conectados (como el mockup).
-  type Group = { kind: "col"; col: ColumnaEfectiva } | { kind: "flow"; cols: ColumnaEfectiva[] };
+  // Encadenamiento CONFIGURABLE (dato): las columnas con el mismo `render.group`
+  // se agrupan en una sola columna encadenada. El orden/dependencias salen de las
+  // transiciones + orden de estados (en FlujoAtencion). Cero hardcode en el FE.
+  type Group = { kind: "col"; col: ColumnaEfectiva } | { kind: "flow"; group: string; cols: ColumnaEfectiva[] };
   const groups: Group[] = [];
   for (const col of cols) {
-    const isFlow = col.tipo === "toggle" && !!(col.render as Record<string, unknown> | null)?.transition;
+    const groupName = (col.render as Record<string, unknown> | null)?.group as string | undefined;
     const last = groups[groups.length - 1];
-    if (isFlow && last && last.kind === "flow") last.cols.push(col);
-    else groups.push(isFlow ? { kind: "flow", cols: [col] } : { kind: "col", col });
+    if (groupName && last && last.kind === "flow" && last.group === groupName) last.cols.push(col);
+    else groups.push(groupName ? { kind: "flow", group: groupName, cols: [col] } : { kind: "col", col });
   }
 
   return (
