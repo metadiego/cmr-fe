@@ -73,20 +73,23 @@ export function CeldaToggleHora({
     }
   }
 
+  // Sellado: pastilla llena con la hora + check (como el botón azul del legacy).
   if (hora) {
     const style = color
-      ? { color, backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` }
+      ? { backgroundColor: color, color: "#fff" }
       : undefined;
     return (
       <span
-        className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary"
+        className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-1 font-mono text-xs font-semibold text-primary-foreground"
         style={style}
       >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="size-3"><path d="M20 6 9 17l-5-5" /></svg>
         {hora}
       </span>
     );
   }
 
+  // Disponible: botón claramente clicable (borde + hover que se llena).
   if (canFire) {
     return (
       <button
@@ -95,14 +98,14 @@ export function CeldaToggleHora({
         onClick={fire}
         title={tRoot(col.labelKey)}
         aria-label={tRoot(col.labelKey)}
-        className="inline-flex size-6 items-center justify-center rounded-md border border-dashed border-muted-foreground/40 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+        className="inline-flex h-7 items-center gap-1.5 rounded-md border border-input bg-background px-2.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary disabled:opacity-50"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5">
-          <path d="M20 6 9 17l-5-5" />
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5"><path d="M20 6 9 17l-5-5" /></svg>
+        {tRoot(col.labelKey)}
       </button>
     );
   }
 
+  // Aún no disponible (falta un paso previo).
   return <span className="text-muted-foreground/40">·</span>;
 }

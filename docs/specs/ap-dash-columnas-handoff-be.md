@@ -220,10 +220,20 @@ escribe en `writeBinding` si existe (si no, en el propio binding, como las colum
 - **G. Hardening**: `/tablero/celda` (y cualquier lógica tenant-scoped) SIN `X-Tenant-ID` resoluble ahora
   responde **400 `TENANT_REQUERIDO`** (i18n `tenant.requerido`), no 500.
 
-## Preguntas abiertas para BE (resumen)
-1. `toggle`: ¿celda con valor especial o endpoint dedicado? ¿dispara transición de estado?
-2. `select`: ¿opciones por `render.optionsSource` o endpoint `/tablero/opciones`?
-3. `record`: ¿endpoint del consecutivo? ¿global o por centro?
-4. Color admin: ¿ok añadir `color` a composición? (requiere migración + gen:api)
-5. Personalización usuario: ¿`render` persiste `{color,background}` arbitrario? ¿background es por columna o por tablero?
-6. Acciones: ¿WA/vitales tienen endpoint o son 100% FE?
+## ✅ Catálogos del builder (round 2.2, PR pendiente de #, prod) — dropdowns 100% dato
+El builder ya no lista fuentes/computes/bindings a mano. Endpoints (lectura, principal autenticado):
+- **`GET /tablero/catalogos/options-sources`** → `[{clave, labelKey}]` (medicos, enfermeras, tipos_cita,
+  estados). MISMA lista que resuelve `/tablero/opciones` (fuente única, sin drift).
+- **`GET /tablero/catalogos/bindings?entidad=cita`** → `[{binding, grupo}]` (allowlist real = claves del
+  resolver de la entidad; grupo = prefijo cita/paciente/medico/computed/…). entidades: cita, sesion, factura.
+- **`GET /tablero/catalogos/computes`** → `[{clave, labelKey, binding}]` (esperaMin, duracionMin, cicloMin;
+  binding `computed.<clave>`). Transiciones ya vienen en `/tablero/definicion`.
+- MCP: `tablero_catalogos(entidad?)` → los tres de una. Agregar una fuente/cómputo = una entrada en su const, sin tocar FE.
+
+## Preguntas abiertas para BE — TODAS RESUELTAS ✅
+1. `toggle` → transición vía `POST /tablero/accion` (sella hora server-side). **Resuelto** (PR #24/#25/#26).
+2. `select` → `render.optionsSource` + `GET /tablero/opciones`. **Resuelto** (PR #22/#23).
+3. `record` → `POST /pacientes/:id/asignar-record`, **por centro**. **Resuelto** (PR #21).
+4. Color admin en composición (`tablero_columnas.color`). **Resuelto** (PR migr. 1783700000000).
+5. Personalización usuario `render{color,background}` (por columna) + fondo de board por preferences. **Resuelto**.
+6. Acciones WA (`/notificaciones/enviar`, incl. destinatario médico) / vitales (`/citas/:id/triage`). **Resuelto** (PR #26).
