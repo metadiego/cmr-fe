@@ -57,6 +57,9 @@ export default function DashboardPage() {
           <Button variant="outline" size="sm" asChild>
             <Link href="/settings/appearance">{t("appearance")}</Link>
           </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/settings/tableros">{t("myBoards")}</Link>
+          </Button>
           <Button
             variant="outline"
             size="sm"

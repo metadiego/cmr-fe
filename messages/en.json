@@ -36,6 +36,15 @@
   },
   "tableroBoard": {
     "live": "Live",
+    "personalize": "Personalize",
+    "personalizeTitle": "Your workspace",
+    "personalizeHint": "Changes only for you. No one else sees them.",
+    "density": "Density",
+    "comfortable": "Comfortable",
+    "compact": "Compact",
+    "colColor": "Column color",
+    "reset": "Clear",
+    "bgSoon": "Board background coming soon.",
     "empty": "No records for this day.",
     "all": "All",
     "actions": "Actions",
@@ -203,7 +212,15 @@
       "save": "Save",
       "created": "Service appointment created."
     },
-    "dow": { "0": "Sun", "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat" },
+    "dow": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    },
     "modal": {
       "title": "New appointment",
       "editTitle": "Edit appointment",
@@ -699,7 +716,13 @@
     "signingOut": "Signing out…",
     "appearance": "Appearance",
     "loading": "Loading context…",
-    "loadError": "Could not load <code>/auth/me</code>: {message}"
+    "loadError": "Could not load <code>/auth/me</code>: {message}",
+    "myBoards": "My boards"
+  },
+  "settingsTableros": {
+    "title": "My boards",
+    "description": "Tune your view of each board: density and per-column color. Only affects you.",
+    "selectBoard": "Board"
   },
   "appearance": {
     "title": "Appearance",

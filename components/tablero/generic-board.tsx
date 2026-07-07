@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { TableroDinamico } from "@/components/agenda/tablero-dinamico";
 import { TableroAcciones } from "@/components/tablero/tablero-acciones";
+import { readDensity, type Density } from "@/hooks/use-board-prefs";
 
 function todayISO(): string {
   const d = new Date();
@@ -75,6 +76,10 @@ export function GenericBoard({ tablero }: { tablero: string }) {
       active = false;
     };
   }, [def, tablero]);
+
+  // View density: read-only here (set in Settings › Tableros, persisted per user).
+  const [density, setDensity] = React.useState<Density>("comodo");
+  React.useEffect(() => setDensity(readDensity(tablero)), [tablero]);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -157,6 +162,8 @@ export function GenericBoard({ tablero }: { tablero: string }) {
           centroId={centroId}
           onRefresh={filasRes.refresh}
           optionsByCol={optionsByCol}
+          transiciones={def.transiciones}
+          density={density}
           emptyLabel={t("empty")}
           renderAccion={(fila) => (
             <TableroAcciones

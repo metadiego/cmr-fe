@@ -4,25 +4,38 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
-import type { Opcion } from "@/lib/api/tablero";
+import type { Opcion, Transicion } from "@/lib/api/tablero";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
 import { CeldaSelect } from "@/components/tablero/celda-select";
+import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
 // Shared by the call-center day-view and the Atención (AP) board so there's one
 // dynamic-column implementation.
 
+// Effective column colour: the user's personalization (render.color) wins over
+// the admin's board colour (col.color). null = default styling.
+export function colColor(col: ColumnaEfectiva): string | null {
+  const r = col.render as Record<string, unknown> | null;
+  const userColor = r && typeof r.color === "string" ? (r.color as string) : null;
+  return userColor ?? col.color ?? null;
+}
+
 export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   const text = value == null || value === "" ? "—" : String(value);
   if (col.tipo === "badge") {
-    const style = col.color
-      ? { color: col.color, borderColor: col.color, backgroundColor: `color-mix(in srgb, ${col.color} 12%, transparent)` }
+    const c = colColor(col);
+    const style = c
+      ? { color: c, borderColor: c, backgroundColor: `color-mix(in srgb, ${c} 12%, transparent)` }
       : undefined;
     return <Badge variant="secondary" style={style}>{text}</Badge>;
   }
   if (col.tipo === "accion") return <span className="text-muted-foreground">·</span>;
+  if (col.tipo === "derivado") {
+    return <span className="font-mono text-xs text-muted-foreground">{value == null || value === "" ? "—" : String(value)}</span>;
+  }
   return <span className={col.tipo === "hora" ? "font-mono" : undefined}>{text}</span>;
 }
 
@@ -47,6 +60,8 @@ export function TableroDinamico({
   centroId,
   onRefresh,
   optionsByCol,
+  transiciones,
+  density,
 }: {
   columnas: ColumnaEfectiva[];
   filas: CitaFila[];
@@ -57,13 +72,31 @@ export function TableroDinamico({
   centroId?: string;
   onRefresh?: () => void;
   optionsByCol?: Record<string, Opcion[]>;
+  transiciones?: Transicion[];
+  density?: "comodo" | "compacto";
 }) {
   const tRoot = useTranslations();
   const cols = useVisibleColumns(columnas);
+  const rowPad = density === "compacto" ? "py-1" : "py-2";
 
   function renderCell(col: ColumnaEfectiva, fila: CitaFila) {
     if (col.tipo === "accion") {
       return renderAccion?.(fila) ?? <Cell col={col} value={fila[col.clave]} />;
+    }
+    // Timed toggle (PRESENTE/EN CONSULTA/ASISTIDO): render.transition drives it.
+    if (col.tipo === "toggle" && (col.render as Record<string, unknown> | null)?.transition && tablero) {
+      return (
+        <CeldaToggleHora
+          tablero={tablero}
+          entidadId={fila.id}
+          estado={String(fila.estado ?? "")}
+          col={col}
+          value={fila[col.clave]}
+          transiciones={transiciones ?? []}
+          centroId={centroId}
+          onSaved={onRefresh}
+        />
+      );
     }
     if (col.tipo === "select" && col.editable && tablero) {
       return (
@@ -88,12 +121,15 @@ export function TableroDinamico({
           <tr>
             {cols.map((col) => (
               <th key={col.clave} className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                <span className="inline-flex items-center gap-1.5" style={col.color ? { color: col.color } : undefined}>
-                  {col.color && (
-                    <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: col.color }} />
-                  )}
-                  {tRoot(col.labelKey)}
-                </span>
+                {(() => {
+                  const c = colColor(col);
+                  return (
+                    <span className="inline-flex items-center gap-1.5" style={c ? { color: c } : undefined}>
+                      {c && <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />}
+                      {tRoot(col.labelKey)}
+                    </span>
+                  );
+                })()}
               </th>
             ))}
           </tr>
@@ -109,7 +145,7 @@ export function TableroDinamico({
           {filas.map((fila) => (
             <tr key={fila.id} className="border-t">
               {cols.map((col) => (
-                <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
+                <td key={col.clave} className={"px-3 whitespace-nowrap " + rowPad}>
                   {renderCell(col, fila)}
                 </td>
               ))}

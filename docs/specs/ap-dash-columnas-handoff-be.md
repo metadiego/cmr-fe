@@ -3,6 +3,17 @@
 **Fecha:** 2026-07-04 · **De:** FE (cmr-fe) · **Para:** BE (cmr-be)
 **Regla:** el FE se detiene en las partes marcadas BE hasta tener este contrato resuelto.
 
+> ## ✅ ESTADO: TODO RESUELTO Y EN PROD (BE, 2026-07-04)
+> El mensaje de dogfood de abajo está **atendido en su totalidad** (PRs #22/#23/#24, desplegados y verificados):
+> - ⚠️ 1 `optionsSource` (no `optionsFrom`) + `estado_selector` del call-center migrado → **PR #22**.
+> - ⚠️ 2 `/tablero/opciones` va por `columna=<clave>` → doc corregida. ⚠️ 3 catálogo de `optionsSource` documentado (`medicos`, `enfermeras`, `tipos_cita`, `estados`).
+> - 🔴 write del select-FK médico → **PR #23** (`render.writeBinding`: muestra `medico.nombre`, escribe `cita.medicoId`; `medico` = select editable en `atencion`).
+> - ⏸ 1 toggle con hora → **PR #24** (transiciones configurables: presente/consulta/atender sellan llegadaEn/horaInEn/horaOutEn; atender ya no exige triage). ⏸ 5 personalización usuario → `POST /tablero/personalizar` render{color,background} (+ fondo de board por preferences). ⏸ 6 WA = `POST /notificaciones/enviar`, vitales = `POST /citas/:id/triage`.
+>
+> Detalle en las secciones **"✅ BE resolvió…"** más abajo. El FE puede reanudar sin bloqueos.
+>
+> **FE verificó en vivo (4 jul, tras PRs):** ✅ `medico` = select con `render.writeBinding:cita.medicoId` — write por `/tablero/celda` con `X-Tenant-ID` correcto → **201**. ✅ transiciones traen `estampa` (confirmadaEn/llegadaEn/horaInEn/horaOutEn) + `requierePrevios`. ⚠️ **Nit BE (no bloquea):** `/tablero/celda` **sin** `X-Tenant-ID` → **500 INTERNAL_ERROR** (debería ser 400/validación; el FE siempre manda tenant, pero conviene endurecer). Repro requestId `a1e11707-…`.
+
 ---
 
 ## 📩 MENSAJE PARA BE (copiar/pegar) — hallazgos dogfood 4 jul 2026
@@ -155,17 +166,18 @@ escribe en `writeBinding` si existe (si no, en el propio binding, como las colum
   `render.writeBinding`. Cero código nuevo.
 
 ### ✅ Sigue abierto → RESUELTO (todo ya servido por BE existente, cero build; PR #23 doc)
-- **#1 toggle con hora (PRESENTE / EN CONSULTA / ASISTIDO)**: NO se escribe la hora a mano — se dispara una
-  **transición de estado** que estampa el timestamp server-side. `POST /tablero/accion {tablero:'atencion',
-  entidadId, accion}` con `accion`:
+- **#1 toggle con hora (PRESENTE / EN CONSULTA / ASISTIDO)** — RESUELTO y AHORA CONFIGURABLE (PR #24, prod):
+  NO se escribe la hora a mano — se dispara una **transición** que estampa el timestamp server-side.
+  `POST /tablero/accion {tablero:'atencion', entidadId, accion}` con `accion`:
   - `presente` → estado `presente`, estampa `cita.llegadaEn`.
-  - `consulta` → estado `en_consulta`, estampa `cita.horaInEn`.
-  - `atender` → estado `atendida`, estampa `cita.horaOutEn`. ⚠️ **GUARDA**: exige vitales (triage hecho) +
-    médico asignado; si no, 400. (Si el AP-Dash quiere un ASISTIDO sin triage, es decisión de negocio de
-    larciles para relajar la guarda — hoy la exige.)
-  Estas transiciones YA vienen en `definicion.transiciones` (claves presente/triage/consulta/atender con
-  labelKey) → el FE pinta el toggle desde datos. Pintar las horas con bindings `cita.llegadaEn/horaInEn/horaOutEn`.
-  Emite SSE + historial. NO crear campos.
+  - `consulta` → estado `en_consulta`, estampa `cita.horaInEn`. Exige `medicoId` (configurable).
+  - `atender` → estado `atendida`, estampa `cita.horaOutEn`. **YA NO exige triage** (la regla se relajó;
+    es configurable — un centro puede volver a exigir vitales sin deploy).
+  Las 3 marcas (presente/en_consulta/asistido) miden el tiempo de espera y de consulta. Estas transiciones
+  vienen en `definicion.transiciones` (con labelKey) → el FE pinta el toggle desde datos. Pintar las horas
+  con bindings `cita.llegadaEn/horaInEn/horaOutEn`. Emite SSE + historial. NO crear campos.
+  **Configurable, no rígido**: qué estampa y qué exige cada paso es dato (`tablero_transiciones.estampa` /
+  `.requierePrevios`), editable por CRUD/MCP; agregar un estado nuevo del flujo con su marca = una fila, cero código.
 - **#5 personalización usuario**: `POST /tablero/personalizar {tablero, columnaId, render:{color, background,…}}`
   persiste render arbitrario **por columna y por usuario**; `columnasEfectivas` lo mergea
   (`{...catalog.render, ...user.render}`) y lo expone en `definicion.columnas[].render`. Fondo del board
@@ -175,6 +187,38 @@ escribe en `writeBinding` si existe (si no, en el propio binding, como las colum
   - **WA/SMS**: `POST /notificaciones/enviar` (EnviarNotificacionDto: cita → paciente por whatsapp/sms/impresa).
   - **vitales**: `POST /citas/:id/triage {enfermeraId, vitales}` (estampa `vitalesEn`, guarda vitales, avanza a
     triage). El FE llama estos directo desde el botón de la fila.
+
+## ✅ BE resolvió el ROUND 2 (A–G, 2026-07-07, prod) — spec cmr-be/docs/specs/ap-dash-proyeccion-derivados.md
+- **A. Proyección de filas** (`GET /tablero/filas?tablero=atencion`): cada fila ahora trae **`pacienteId`
+  SIEMPRE** (como `id`, sin depender de columnas). Se enriqueció el ctx del board `atencion` → `record`
+  (`paciente.record`/alias `paciente.numeroHistoria`) y `telefono` (`paciente.telefono`) ya NO salen null.
+  `tipoConsulta` = binding EXISTENTE `cita.tipo` (nombre nueva/seguimiento). `proxCita` = DERIVADO
+  (`cita.proxCita`): próxima cita futura no cancelada del paciente. **Allowlist de bindings = el registro
+  `CITAS_RESOLVERS`** (binding no listado → celda null; nunca lee campos arbitrarios).
+- **E. Record**: `pacienteId` por fila + binding `record`=`paciente.numeroHistoria`. Flujo:
+  celda vacía → `POST /pacientes/:id/asignar-record` (por centro, idempotente); manual → `PUT /pacientes/:id`.
+- **C. Toggles-hora** (chips): columnas `presente`/`en_consulta`/`asistido` (tipo `toggle`) sembradas y
+  compuestas en `atencion`, con **`render = { transition, estampa }`**: `presente`→{transition:'presente',
+  estampa:'llegadaEn'}, `en_consulta`→{'consulta','horaInEn'}, `asistido`→{'atender','horaOutEn'}. El chip
+  dispara `POST /tablero/accion {accion: render.transition}` y muestra la hora del binding (`cita.llegadaEn`…).
+  **Cadena lineal estricta (round 2.1)**: `consulta` SOLO desde `presente`; `atender` SOLO desde `en_consulta`
+  (`consulta` sigue exigiendo `medicoId`). Es config (`tablero_transiciones.desdeEstados`) — cuando vuelva
+  enfermería/triage se re-añade a `desdeEstados` sin código.
+- **B. Derivados computados por config**: mecanismo = **computes con nombre** (seguro, sin eval), binding
+  `computed.<nombre>`, `tipo:'derivado'`. Ya disponibles: `computed.esperaMin` (llegada→consulta),
+  `computed.duracionMin` (consulta→salida), `computed.cicloMin`. Columnas `espera_min`/`duracion_min`
+  compuestas en `atencion`. NO hay `render.formula` arbitraria; ampliar catálogo = una función en BE.
+- **D. Acciones configurables** (`render.action`): payloads confirmados:
+  - `vitales` → `POST /citas/:id/triage { enfermeraId, vitales:{...} }`.
+  - `whatsapp` → `POST /notificaciones/enviar { citaId, canal:'whatsapp'|'sms'|'email'|'impresa',
+    plantillaClave?, idioma?, destinatario?:'paciente'|'medico' }`. **round 2.1**: `destinatario:'medico'`
+    envía al MÉDICO de la cita (destino = tel/email del `personal`; 400 si la cita no tiene médico). Default
+    `paciente`. Vars de plantilla disponibles: `{{paciente}}`, `{{medico}}`, `{{fecha}}`, `{{hora}}`, `{{motivo}}`.
+  - `expediente` → navegación FE (sin BE).
+- **F. Fondo del board por usuario**: `PUT /me/preferences { config:{ tablero:{ atencion:{ background:"<url|color>" }}}}`;
+  el FE lo lee del effective (`GET /me/preferences`). (El `render{color,background}` por-columna sigue por `/tablero/personalizar`.)
+- **G. Hardening**: `/tablero/celda` (y cualquier lógica tenant-scoped) SIN `X-Tenant-ID` resoluble ahora
+  responde **400 `TENANT_REQUERIDO`** (i18n `tenant.requerido`), no 500.
 
 ## Preguntas abiertas para BE (resumen)
 1. `toggle`: ¿celda con valor especial o endpoint dedicado? ¿dispara transición de estado?

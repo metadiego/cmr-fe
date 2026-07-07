@@ -64,6 +64,7 @@ export function personalizarColumna(payload: {
   visible?: boolean;
   orden?: number;
   fijo?: boolean;
+  render?: Record<string, unknown>; // override del usuario, ej. {color, background}
 }): Promise<unknown> {
   return apiFetch(`/tablero/personalizar`, {
     method: "POST",

@@ -36,6 +36,15 @@
   },
   "tableroBoard": {
     "live": "En vivo",
+    "personalize": "Personalizar",
+    "personalizeTitle": "Tu espacio de trabajo",
+    "personalizeHint": "Cambios solo para ti. Nadie más los ve.",
+    "density": "Densidad",
+    "comfortable": "Cómodo",
+    "compact": "Compacto",
+    "colColor": "Color por columna",
+    "reset": "Quitar",
+    "bgSoon": "El fondo del tablero llegará pronto.",
     "empty": "Sin registros para este día.",
     "all": "Todos",
     "actions": "Acciones",
@@ -203,7 +212,15 @@
       "save": "Guardar",
       "created": "Cita de servicio creada."
     },
-    "dow": { "0": "Dom", "1": "Lun", "2": "Mar", "3": "Mié", "4": "Jue", "5": "Vie", "6": "Sáb" },
+    "dow": {
+      "0": "Dom",
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mié",
+      "4": "Jue",
+      "5": "Vie",
+      "6": "Sáb"
+    },
     "modal": {
       "title": "Nueva Cita",
       "editTitle": "Editar Cita",
@@ -699,7 +716,13 @@
     "signingOut": "Saliendo…",
     "appearance": "Apariencia",
     "loading": "Cargando contexto…",
-    "loadError": "No se pudo cargar <code>/auth/me</code>: {message}"
+    "loadError": "No se pudo cargar <code>/auth/me</code>: {message}",
+    "myBoards": "Mis tableros"
+  },
+  "settingsTableros": {
+    "title": "Mis tableros",
+    "description": "Ajusta tu vista de cada tablero: densidad y color por columna. Solo te afecta a ti.",
+    "selectBoard": "Tablero"
   },
   "appearance": {
     "title": "Apariencia",
