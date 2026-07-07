@@ -9,6 +9,7 @@ import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
 import { CeldaSelect } from "@/components/tablero/celda-select";
 import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
+import { FlujoAtencion } from "@/components/tablero/flujo-atencion";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
@@ -195,19 +196,15 @@ export function TableroDinamico({
                 {groups.map((g, gi) =>
                   g.kind === "flow" ? (
                     <td key={`flow-${gi}`} className={"px-3 " + rowPad}>
-                      <div className="flex items-center justify-center gap-1">
-                        {g.cols.map((c, i) => (
-                          <React.Fragment key={c.clave}>
-                            {i > 0 && <span className="h-px w-3 shrink-0 bg-border" aria-hidden />}
-                            <div className="flex flex-col items-center gap-1">
-                              {renderCell(c, fila)}
-                              <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                {tRoot(c.labelKey)}
-                              </span>
-                            </div>
-                          </React.Fragment>
-                        ))}
-                      </div>
+                      <FlujoAtencion
+                        tablero={tablero ?? ""}
+                        fila={fila}
+                        cols={g.cols}
+                        transiciones={transiciones ?? []}
+                        estados={estados ?? []}
+                        centroId={centroId}
+                        onSaved={onRefresh}
+                      />
                     </td>
                   ) : (
                     <td
