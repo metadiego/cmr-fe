@@ -65,7 +65,9 @@ export function CeldaSelect({
   return (
     <Select value={current} onValueChange={onChange} disabled={busy}>
       <SelectTrigger className="h-8 w-full min-w-[9rem] border-transparent bg-transparent px-2 hover:bg-muted/60 focus:bg-background">
-        <SelectValue placeholder="—" />
+        {/* Si el valor no calza una opción, mostrar igual el nombre proyectado
+            (fila.medico) para que SIEMPRE se vea al cargar, aunque no preseleccione. */}
+        <SelectValue placeholder={label || "—"} />
       </SelectTrigger>
       <SelectContent>
         {options.map((o) => (
