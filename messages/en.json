@@ -65,7 +65,8 @@
       "fecha": "Date",
       "hora": "Time",
       "enfermeraId": "Nurse"
-    }
+    },
+    "flowTitle": "Care flow"
   },
   "configuracion": {
     "tableros": {

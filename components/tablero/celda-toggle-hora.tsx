@@ -76,7 +76,11 @@ export function CeldaToggleHora({
   );
 
   const canCheck = !checked && !!forward && (forward.desdeEstados.length === 0 || forward.desdeEstados.includes(estado));
-  const canUncheck = checked && !!back;
+  // Reversible EN ORDEN (LIFO): solo se desmarca la ÚLTIMA etapa activa, es decir
+  // cuando el estado actual es EXACTAMENTE el destino de esta etapa. Para deshacer
+  // una etapa anterior, primero hay que deshacer las posteriores.
+  const isLast = !!forward && estado === forward.aEstado;
+  const canUncheck = checked && isLast && !!back;
   const disabled = busy || (!checked && !canCheck) || (checked && !canUncheck);
 
   async function toggle() {
@@ -116,7 +120,7 @@ export function CeldaToggleHora({
         onCheckedChange={toggle}
         className={checked ? "border-white/70 data-[state=checked]:bg-white/20 data-[state=checked]:text-white" : ""}
       />
-      <span className="font-mono">{hora ?? tRoot(col.labelKey)}</span>
+      {hora && <span className="font-mono">{hora}</span>}
     </label>
   );
 }

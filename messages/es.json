@@ -65,7 +65,8 @@
       "fecha": "Fecha",
       "hora": "Hora",
       "enfermeraId": "Enfermera"
-    }
+    },
+    "flowTitle": "Flujo de atención"
   },
   "configuracion": {
     "tableros": {

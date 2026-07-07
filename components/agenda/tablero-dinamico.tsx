@@ -143,30 +143,47 @@ export function TableroDinamico({
     return <Cell col={col} value={fila[col.clave]} />;
   }
 
+  // Agrupa toggles de flujo consecutivos (presente/en_consulta/asistido) en UNA
+  // sola columna "Flujo de atención" con chips conectados (como el mockup).
+  type Group = { kind: "col"; col: ColumnaEfectiva } | { kind: "flow"; cols: ColumnaEfectiva[] };
+  const groups: Group[] = [];
+  for (const col of cols) {
+    const isFlow = col.tipo === "toggle" && !!(col.render as Record<string, unknown> | null)?.transition;
+    const last = groups[groups.length - 1];
+    if (isFlow && last && last.kind === "flow") last.cols.push(col);
+    else groups.push(isFlow ? { kind: "flow", cols: [col] } : { kind: "col", col });
+  }
+
   return (
     <div className="overflow-x-auto rounded-md border">
       <table className="w-full text-sm">
         <thead className="bg-muted/40 text-xs text-muted-foreground">
           <tr>
-            {cols.map((col) => (
-              <th key={col.clave} className="px-3 py-2 text-left font-medium whitespace-nowrap">
-                {(() => {
-                  const c = colColor(col);
-                  return (
-                    <span className="inline-flex items-center gap-1.5" style={c ? { color: c } : undefined}>
-                      {c && <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />}
-                      {tRoot(col.labelKey)}
-                    </span>
-                  );
-                })()}
-              </th>
-            ))}
+            {groups.map((g, gi) =>
+              g.kind === "flow" ? (
+                <th key={`flow-${gi}`} className="px-3 py-2 text-center font-medium whitespace-nowrap">
+                  {tRoot("tableroBoard.flowTitle")}
+                </th>
+              ) : (
+                <th key={g.col.clave} className="px-3 py-2 text-left font-medium whitespace-nowrap">
+                  {(() => {
+                    const c = colColor(g.col);
+                    return (
+                      <span className="inline-flex items-center gap-1.5" style={c ? { color: c } : undefined}>
+                        {c && <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />}
+                        {tRoot(g.col.labelKey)}
+                      </span>
+                    );
+                  })()}
+                </th>
+              ),
+            )}
           </tr>
         </thead>
         <tbody>
           {filas.length === 0 && (
             <tr>
-              <td colSpan={cols.length} className="px-3 py-6 text-center text-muted-foreground">
+              <td colSpan={groups.length} className="px-3 py-6 text-center text-muted-foreground">
                 {emptyLabel ?? "—"}
               </td>
             </tr>
@@ -175,15 +192,33 @@ export function TableroDinamico({
             const rowColor = estados?.find((e) => e.clave === String(fila.estado ?? ""))?.color ?? null;
             return (
               <tr key={fila.id} className="border-t transition-colors hover:bg-muted/40">
-                {cols.map((col, ci) => (
-                  <td
-                    key={col.clave}
-                    className={"px-3 whitespace-nowrap " + rowPad}
-                    style={ci === 0 && rowColor ? { boxShadow: `inset 3px 0 0 ${rowColor}` } : undefined}
-                  >
-                    {renderCell(col, fila)}
-                  </td>
-                ))}
+                {groups.map((g, gi) =>
+                  g.kind === "flow" ? (
+                    <td key={`flow-${gi}`} className={"px-3 " + rowPad}>
+                      <div className="flex items-center justify-center gap-1">
+                        {g.cols.map((c, i) => (
+                          <React.Fragment key={c.clave}>
+                            {i > 0 && <span className="h-px w-3 shrink-0 bg-border" aria-hidden />}
+                            <div className="flex flex-col items-center gap-1">
+                              {renderCell(c, fila)}
+                              <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                {tRoot(c.labelKey)}
+                              </span>
+                            </div>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </td>
+                  ) : (
+                    <td
+                      key={g.col.clave}
+                      className={"px-3 whitespace-nowrap " + rowPad}
+                      style={gi === 0 && rowColor ? { boxShadow: `inset 3px 0 0 ${rowColor}` } : undefined}
+                    >
+                      {renderCell(g.col, fila)}
+                    </td>
+                  ),
+                )}
               </tr>
             );
           })}
