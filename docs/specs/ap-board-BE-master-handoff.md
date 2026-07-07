@@ -39,6 +39,11 @@ Ya vienen ✓: `pacienteId, record, medico, llegadaEn, horaInEn, horaOutEn, espe
 3 casos (spec): **nuevo** → escribe `cita.medicoId` **Y** `paciente.medicoId` (default); **temporal** (solo ese día) → solo `cita.medicoId` (hoy ✓); **total** (cambio permanente / médico se fue) → ambas tablas.
 - BE: soportar "además fijar el médico **default** del paciente" (regla/flag detrás del mismo select). El FE ya escribe `cita.medicoId`.
 
+## 5b. Médicos por centro (datos) + write cross-centro — 🔴 ALTA
+Verificado en vivo: `optionsSource: medicos` es **por centro**. **Bayamón solo tiene "Médico Demo"** (`/personal` tenant Bayamón = 1); los médicos reales están en Caguas. El FE ya pide opciones por centro (fix), así que en Bayamón solo aparecerán sus médicos.
+- **BE/datos: sembrar/asignar los médicos reales de Bayamón** (hoy la operación en Bayamón no tiene médicos válidos que elegir).
+- **BE robustez:** escribir por `/tablero/celda columna=medico` un `medicoId` de **otro centro** devuelve **201 (éxito falso)** y deja `cita.medicoId` sin resolver (proyección `medico=null`). Debe **rechazar (400)** un médico que no pertenece al centro, en vez de fingir éxito.
+
 ## 6. VITALES + Enfermería (sub-proyecto, por SSE) — 🟡 MEDIA / GRANDE
 - **Modal VITALES**: (a) **notificar** a enfermería que hay paciente para signos vitales/triage; (b) **asignar** la enfermera que tomó los vitales al paciente (registro/estadística). Endpoint `POST /citas/:id/triage` (definir payload) + notificación.
 - **Pantalla de enfermería** (reemplazar el server NodeJS/WebSocket por **SSE**): tarjetas por enfermera (color, contador, AUSENTE), secciones **Vitales** + **Intravenoso** (cross-dominio frontdesk/servicios), tap para reclamar → apaga alarma + suma contador + pinta el nombre de la enfermera **bajo VITALES** en la fila del AP-Board.
