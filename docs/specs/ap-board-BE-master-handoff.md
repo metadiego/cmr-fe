@@ -27,6 +27,7 @@ Según spec del AP-Board:
 
 ## 3. Proyección de filas — exponer campos faltantes — 🔴 ALTA
 `GET /tablero/filas?tablero=atencion` — faltan: **`tipoConsulta`** (col CONSULTA), **`proxCita`** (col PROX-CITA), **`telefono`** del paciente (para WA).
+- 🔴 **`estado` SIEMPRE en la fila** (como `id`/`pacienteId`), **independiente de que la columna estado esté compuesta/visible**. Hoy, al ocultar la columna `estado`, la proyección deja de traer `fila.estado` → se rompen la franja de color por estado y el desglose de KPIs. El flujo ya no depende de esto (usa timestamps), pero accent + KPI sí.
 Ya vienen ✓: `pacienteId, record, medico, llegadaEn, horaInEn, horaOutEn, espera_min, duracion_min`.
 + **allowlist de bindings** para crear columnas atadas a esos campos.
 
