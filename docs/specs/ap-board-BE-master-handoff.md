@@ -58,6 +58,10 @@ Para que los dropdowns del builder sean 100% dato (hoy el FE lista algunos a man
 - `GET /tablero/catalogos/bindings?entidad=cita` (allowlist)
 - `GET /tablero/catalogos/computes` (`esperaMin, duracionMin, …`)
 
+## 9b. Encadenamiento de columnas configurable (`render.group`) — 🟡 MEDIA
+El "Flujo de atención" (presente/en_consulta/asistido) son **columnas distintas** que se **encadenan** en una sola visual. El FE lo hace por **config**: columnas con el mismo `render.group` se agrupan (orden/dependencias derivados de transiciones + orden de estados; color del estado destino). Ya sembré `render.group:"flujo"` en las 3 por API.
+- **BE: formalizar `group` en el schema de `render`** (Swagger + comentario en DB/Field), exponerlo en MCP (`set_tablero_columna`), spec/plan + TDD, drift-clean (gen:api). Es el mecanismo declarativo del encadenamiento — que sea dato de primera clase, no solo un JSON suelto.
+
 ## 10. Nits
 - `POST /tablero/celda` **sin** `X-Tenant-ID` → **500** (debería 400/validación).
 - Correr **gen:api** tras cada cambio de contrato.
