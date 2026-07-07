@@ -61,6 +61,7 @@ export function TableroDinamico({
   onRefresh,
   optionsByCol,
   transiciones,
+  estados,
   density,
 }: {
   columnas: ColumnaEfectiva[];
@@ -73,6 +74,7 @@ export function TableroDinamico({
   onRefresh?: () => void;
   optionsByCol?: Record<string, Opcion[]>;
   transiciones?: Transicion[];
+  estados?: { clave: string; orden: number }[];
   density?: "comodo" | "compacto";
 }) {
   const tRoot = useTranslations();
@@ -93,6 +95,7 @@ export function TableroDinamico({
           col={col}
           value={fila[col.clave]}
           transiciones={transiciones ?? []}
+          estados={estados ?? []}
           centroId={centroId}
           onSaved={onRefresh}
         />

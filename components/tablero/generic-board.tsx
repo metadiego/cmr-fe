@@ -166,6 +166,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
           onRefresh={filasRes.refresh}
           optionsByCol={optionsByCol}
           transiciones={def.transiciones}
+          estados={def.estados}
           density={density}
           emptyLabel={t("empty")}
           renderAccion={(fila) =>
