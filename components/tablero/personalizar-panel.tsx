@@ -34,7 +34,10 @@ export function PersonalizarTablero({ tablero }: { tablero: string }) {
   const cols = defRes.state.kind === "ok" ? defRes.state.data.columnas.filter((c) => c.tipo !== "accion") : [];
 
   const [density, setDensity] = React.useState<Density>("comodo");
-  React.useEffect(() => setDensity(readDensity(tablero)), [tablero]);
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of persisted pref
+    setDensity(readDensity(tablero));
+  }, [tablero]);
   function changeDensity(d: Density) {
     setDensity(d);
     writeDensity(tablero, d);

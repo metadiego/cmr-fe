@@ -17,6 +17,7 @@ import {
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { ColumnConfigDialog } from "@/components/configuracion/column-config-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +32,7 @@ export function ColumnasTab({ clave }: { clave: string }) {
   const cols = (state.kind === "ok" ? state.data : []).filter((c) => c.activo);
   const [busyId, setBusyId] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState(false);
+  const [configCol, setConfigCol] = React.useState<ColumnaCatalogo | null>(null);
 
   // Colores actuales del tablero (pre-personalización admin). Vienen de la
   // definición (por columna efectiva); se escriben con colorColumna (composición).
@@ -39,6 +41,7 @@ export function ColumnasTab({ clave }: { clave: string }) {
   if (defRes.state.kind === "ok") {
     for (const c of defRes.state.data.columnas) colorByClave[c.clave] = c.color ?? null;
   }
+  const transiciones = defRes.state.kind === "ok" ? defRes.state.data.transiciones : [];
 
   async function setColor(c: ColumnaCatalogo, color: string | null) {
     setBusyId(c.id);
@@ -98,7 +101,13 @@ export function ColumnasTab({ clave }: { clave: string }) {
                     clearLabel={t("colClearColor")}
                   />
                 )}
-                <span className="truncate font-mono text-xs text-muted-foreground">{c.binding}</span>
+                <button
+                  type="button"
+                  onClick={() => setConfigCol(c)}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {t("configure")}
+                </button>
               </div>
             </li>
           );
@@ -111,6 +120,17 @@ export function ColumnasTab({ clave }: { clave: string }) {
       </p>
 
       {open && <NuevaColumnaDialog clave={clave} onClose={() => setOpen(false)} onSaved={reload} />}
+      {configCol && (
+        <ColumnConfigDialog
+          col={configCol}
+          transiciones={transiciones}
+          onClose={() => setConfigCol(null)}
+          onSaved={() => {
+            reload();
+            defRes.reload();
+          }}
+        />
+      )}
     </div>
   );
 }

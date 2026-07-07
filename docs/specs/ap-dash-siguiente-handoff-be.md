@@ -75,6 +75,14 @@ Columna `accion` que declare qué hace por config: `render = { action: "vitales"
 - Confirmado: `POST /tablero/personalizar` render `{color, background}` por columna.
 - Falta: **fondo general del board por usuario** — ¿endpoint / shape? (se mencionó "por preferences"). Definir para el "tu espacio" del mockup.
 
+## H. Catálogos para el builder "simple de configurar" (para que los dropdowns sean 100% dato)
+El editor de columnas del builder debe ofrecer dropdowns **poblados por BE**, no listas escritas en el FE:
+- **`GET /tablero/catalogos/options-sources`** → fuentes válidas (`medicos, enfermeras, tipos_cita, estados, …`). Hoy el FE las lista a mano (stopgap); esto lo vuelve dato.
+- **`GET /tablero/catalogos/bindings?entidad=cita`** → allowlist de bindings escribibles/legibles por entidad.
+- **`GET /tablero/catalogos/computes`** → cómputos `derivado` soportados (`esperaMin, duracionMin, …`).
+- (Transiciones ya vienen en `/tablero/definicion` ✅.)
+Con esto, agregar una fuente/cómputo nuevo = dato, sin tocar FE.
+
 ## G. Nit de robustez
 - `POST /tablero/celda` **sin** `X-Tenant-ID` → **500** (debería ser 400/validación). Repro requestId `a1e11707-…`.
 

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { TableroDinamico } from "@/components/agenda/tablero-dinamico";
 import { TableroAcciones } from "@/components/tablero/tablero-acciones";
+import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { readDensity, type Density } from "@/hooks/use-board-prefs";
 
 function todayISO(): string {
@@ -58,11 +59,8 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const [optionsByCol, setOptionsByCol] = React.useState<Record<string, Opcion[]>>({});
   React.useEffect(() => {
     const selects = (def?.columnas ?? []).filter((c) => c.tipo === "select" && c.editable);
-    if (selects.length === 0) {
-      setOptionsByCol({});
-      return;
-    }
     let active = true;
+    // Async set only (empty selects → Promise.all([]) → {}), never a sync setState.
     Promise.all(
       selects.map((c) =>
         getOpciones(tablero, c.clave)
@@ -78,8 +76,13 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   }, [def, tablero]);
 
   // View density: read-only here (set in Settings › Tableros, persisted per user).
+  // Read the persisted value AFTER mount to avoid an SSR/localStorage hydration
+  // mismatch — the correct place for a one-time read from an external store.
   const [density, setDensity] = React.useState<Density>("comodo");
-  React.useEffect(() => setDensity(readDensity(tablero)), [tablero]);
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of persisted pref
+    setDensity(readDensity(tablero));
+  }, [tablero]);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -165,17 +168,27 @@ export function GenericBoard({ tablero }: { tablero: string }) {
           transiciones={def.transiciones}
           density={density}
           emptyLabel={t("empty")}
-          renderAccion={(fila) => (
-            <TableroAcciones
-              tablero={tablero}
-              entidadId={fila.id}
-              estado={String(fila.estado ?? fila["estado"] ?? "")}
-              estados={def.estados}
-              transiciones={def.transiciones}
-              centroId={centroId}
-              onDone={filasRes.refresh}
-            />
-          )}
+          renderAccion={(fila) =>
+            registro?.entidad === "cita" ? (
+              <AccionesModal
+                actions={
+                  ((data.columnas.find((c) => c.tipo === "accion")?.render as Record<string, unknown> | null)
+                    ?.actions as AccionItem[] | undefined) ?? []
+                }
+                fila={fila}
+              />
+            ) : (
+              <TableroAcciones
+                tablero={tablero}
+                entidadId={fila.id}
+                estado={String(fila.estado ?? fila["estado"] ?? "")}
+                estados={def.estados}
+                transiciones={def.transiciones}
+                centroId={centroId}
+                onDone={filasRes.refresh}
+              />
+            )
+          }
         />
       )}
     </div>
