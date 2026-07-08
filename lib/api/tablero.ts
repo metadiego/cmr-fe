@@ -130,6 +130,20 @@ export function getTableros(): Promise<TableroRegistro[]> {
   return apiFetch<TableroRegistro[]>(`/tableros`);
 }
 
+// GET /tablero/modal/modulos?postAccion= — catálogo GLOBAL de módulos pluggables de
+// un modal de post-acción (BE-3). El estado plugged/unplugged por-tablero sigue en
+// composicion.render (render.<clave>=false = desconectado).
+export interface ModalModulo {
+  clave: string;
+  labelKey: string;
+  descripcionKey: string;
+  postAccion: string;
+  requiereCatalogo: boolean;
+}
+export function getModalModulos(postAccion: string): Promise<ModalModulo[]> {
+  return apiFetch<ModalModulo[]>(`/tablero/modal/modulos?postAccion=${encodeURIComponent(postAccion)}`);
+}
+
 // GET /tablero/definicion?tablero= — columns + states + transitions + subtypes.
 // Tenant-scoped: la composición (incl. render override por-tablero) es POR CENTRO,
 // así que pasar centroId para leer la definición efectiva de ese centro.

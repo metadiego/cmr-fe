@@ -7,19 +7,20 @@ import { toast } from "sonner";
 import {
   getDefinicion,
   getColumnasCatalogo,
+  getModalModulos,
   setComposicionRender,
   type TableroDefinicion,
   type ColumnaCatalogo,
+  type ModalModulo,
 } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
 import { Switch } from "@/components/ui/switch";
 
-// Módulos pluggables del modal de post-acción, POR TABLERO. El estado
-// plugged/unplugged se guarda en el OVERRIDE de render de la composición
-// (`render.<modulo>=false` para desconectar; ausente = enchufado). BE ya fusiona
-// render por-tablero. El registro de módulos es local por ahora (BE-3 pendiente:
-// GET /tablero/modal/modulos). Ver docs/specs/prescripcion-obligatoria-y-modulos-modal-fe-request.md
-const MODULOS: Array<{ key: string; icon: string }> = [{ key: "prescripcion", icon: "℞" }];
+// Módulos pluggables del modal de post-acción, POR TABLERO. La LISTA de módulos
+// viene del catálogo del BE (GET /tablero/modal/modulos?postAccion=, BE-3); el
+// estado plugged/unplugged por-tablero se guarda en el OVERRIDE de render de la
+// composición (`render.<clave>=false` = desconectado; ausente = enchufado). BE ya
+// fusiona render por-tablero. Ver docs/specs/prescripcion-obligatoria-y-modulos-modal-fe-request.md
 
 // Solo los overrides de composición (los que difieren del catálogo). Así el toggle
 // preserva `postAccion` (override) sin congelar `group/transition/estampa` (catálogo).
@@ -64,6 +65,20 @@ export function ModalModulosConfig({ tablero, centroId }: { tablero: string; cen
   const catCol = modalCol ? cat.find((c) => c.clave === modalCol.clave) : undefined;
   const mergedRender = (modalCol?.render as Record<string, unknown> | null) ?? null;
   const catRender = ((catCol?.render as Record<string, unknown> | null) ?? null);
+  const postAccion = (mergedRender?.postAccion as string | undefined) ?? "";
+
+  // Lista de módulos (catálogo BE) para ese postAccion.
+  const [modulos, setModulos] = React.useState<ModalModulo[]>([]);
+  React.useEffect(() => {
+    if (!postAccion) return;
+    let active = true;
+    getModalModulos(postAccion)
+      .then((m) => active && setModulos(m))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [postAccion]);
 
   async function toggle(key: string, enabled: boolean) {
     if (!catCol) return;
@@ -88,22 +103,23 @@ export function ModalModulosConfig({ tablero, centroId }: { tablero: string; cen
 
   return (
     <div className="space-y-3">
-      {MODULOS.map((m) => {
-        const enabled = mergedRender?.[m.key] !== false;
+      {modulos.length === 0 && <p className="text-sm text-muted-foreground">{t("noModules")}</p>}
+      {modulos.map((m) => {
+        const enabled = mergedRender?.[m.clave] !== false;
         return (
-          <div key={m.key} className="flex items-center gap-4 rounded-xl border bg-card/60 p-4 shadow-sm">
+          <div key={m.clave} className="flex items-center gap-4 rounded-xl border bg-card/60 p-4 shadow-sm">
             <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-lg font-semibold text-primary">
-              {m.icon}
+              {tRoot(m.labelKey).charAt(0)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{t(`${m.key}.label`)}</p>
-              <p className="text-xs text-muted-foreground">{t(`${m.key}.desc`)}</p>
+              <p className="text-sm font-medium">{tRoot(m.labelKey)}</p>
+              <p className="text-xs text-muted-foreground">{tRoot(m.descripcionKey)}</p>
             </div>
             <Switch
               checked={enabled}
-              disabled={busy === m.key}
-              onCheckedChange={(v) => toggle(m.key, v)}
-              aria-label={t(`${m.key}.label`)}
+              disabled={busy === m.clave}
+              onCheckedChange={(v) => toggle(m.clave, v)}
+              aria-label={tRoot(m.labelKey)}
             />
           </div>
         );

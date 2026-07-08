@@ -3974,6 +3974,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tablero/modal/modulos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de módulos pluggables del modal post-acción (UI admin data-driven). */
+        get: operations["TablerosController_catalogoModalModulos_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tablero/filas": {
         parameters: {
             query?: never;
@@ -5854,6 +5871,10 @@ export interface components {
             estampa?: string;
             /** @description Modal/acción que el FE dispara tras ejecutar la acción de la columna (enruta por valor; p. ej. "nueva_cita_prescripcion" abre el modal de próxima cita). Data-driven y por-tablero (override de composición). Plug-and-play. */
             postAccion?: string;
+            /** @description Si el módulo de prescripción está CONECTADO (plugged) en el modal de este tablero. Override por composición; false = sin grilla. Plug-and-play. */
+            prescripcion?: boolean;
+            /** @description Si la prescripción es OBLIGATORIA para cerrar la atención en este tablero (regla de negocio configurable, no hardcode del FE). El servidor es la autoridad: ver GET /prescripcion/cita/:id.resuelto. */
+            prescripcionRequerida?: boolean;
             /** @description Color (#hex) sugerido para la celda/columna. */
             color?: string;
             /** @description Imagen/fondo de la celda o columna. */
@@ -14667,6 +14688,26 @@ export interface operations {
     TablerosController_catalogoComputes_v1: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TablerosController_catalogoModalModulos_v1: {
+        parameters: {
+            query?: {
+                /** @description Filtra por modal (postAccion) */
+                postAccion?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;

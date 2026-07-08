@@ -92,6 +92,7 @@ export function NuevaCitaModal({
   // (default true); admin lo apaga con render.prescripcion:false. Cero hardcode.
   const prescripcionEnabled = render?.prescripcion !== false;
   const prescripcionRequerida = render?.prescripcionRequerida !== false; // obligatoria por defecto cuando está plugged
+  const agendarEnabled = render?.agendar_cita !== false; // módulo de agendamiento (plugged por config)
   const [prescripcionOk, setPrescripcionOk] = React.useState(true);
 
   const pacienteId = String(fila.pacienteId ?? "");
@@ -327,7 +328,9 @@ export function NuevaCitaModal({
             </div>
           )}
 
-          {/* Agenda rápida */}
+          {/* Agenda rápida (módulo agendar_cita, plugged por config) */}
+          {agendarEnabled && (
+          <>
           <div className="space-y-2">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("whenBack")}</span>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -405,6 +408,8 @@ export function NuevaCitaModal({
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("notes")}</span>
             <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />
           </label>
+          </>
+          )}
 
           {/* Prescripción: plugged por config (render.prescripcion) + auto-oculta si no hay catálogo. */}
           {prescripcionEnabled && fila.id && (
@@ -422,7 +427,7 @@ export function NuevaCitaModal({
             {t("exit")}
           </Button>
           <div className="ml-auto flex items-center gap-2">
-            {canWrite && (
+            {canWrite && agendarEnabled && (
               <Button type="button" variant="outline" onClick={onAbierto} disabled={anyBusy || tipos.length === 0 || bloqueaPrescripcion}>
                 {t("open")}
               </Button>
@@ -436,7 +441,7 @@ export function NuevaCitaModal({
             >
               {t("discharge")}
             </Button>
-            {canWrite && (
+            {canWrite && agendarEnabled && (
               <Button type="button" onClick={onGuardar} disabled={anyBusy || !tipoId || !fecha || bloqueaPrescripcion}>
                 {t("save")}
               </Button>

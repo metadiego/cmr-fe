@@ -36,6 +36,7 @@ export function PrescripcionGrid({
   const [grupos, setGrupos] = React.useState<GrupoPrescripcion[]>([]);
   const [cant, setCant] = React.useState<Record<string, number>>({});
   const [none, setNone] = React.useState(false);
+  const [resuelto, setResuelto] = React.useState(false); // autoridad del BE
   const [ready, setReady] = React.useState(false);
   const timers = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -47,6 +48,7 @@ export function PrescripcionGrid({
         setGrupos([...(cat.grupos ?? [])].sort((a, b) => a.orden - b.orden));
         setCant(pc.registros ?? {});
         setNone(!!pc.noPrescripcion);
+        setResuelto(!!pc.resuelto);
         setReady(true);
       })
       .catch(() => active && setReady(true)); // error → ready sin grupos → oculto
@@ -55,34 +57,50 @@ export function PrescripcionGrid({
     };
   }, [citaId, centroId]);
 
-  // Reporta al modal si la prescripción está RESUELTA. Oculta/sin catálogo = no
-  // aplica (true) para no bloquear. (Cuando BE exponga `resuelto`, consumirlo aquí.)
+  // Re-sincroniza con el BE tras escribir: el servidor dueña la exclusión mutua
+  // (marcar cantidad apaga NO_PRESCRIPCION; marcar "sin prescripción" limpia grupos)
+  // y el `resuelto`. Consumimos esa verdad en vez de re-derivarla.
+  const resync = React.useCallback(() => {
+    getPrescripcionCita(citaId, centroId)
+      .then((pc) => {
+        setCant(pc.registros ?? {});
+        setNone(!!pc.noPrescripcion);
+        setResuelto(!!pc.resuelto);
+      })
+      .catch(() => {});
+  }, [citaId, centroId]);
+
+  // Reporta al modal la validez (autoridad = `resuelto`). Oculta/sin catálogo = no aplica.
   React.useEffect(() => {
     if (!onValidity) return;
-    if (!ready || grupos.length === 0) {
-      onValidity(true);
-      return;
-    }
-    onValidity(none || Object.values(cant).some((v) => v > 0));
-  }, [ready, grupos, cant, none, onValidity]);
+    onValidity(!ready || grupos.length === 0 ? true : resuelto);
+  }, [ready, grupos, resuelto, onValidity]);
 
   function change(clave: string, raw: string) {
     const val = Math.max(0, Math.floor(Number(raw) || 0));
-    setCant((c) => ({ ...c, [clave]: val }));
+    setCant((c) => {
+      const next = { ...c, [clave]: val };
+      // optimista: cantidad>0 apaga "sin prescripción" (como hará el BE).
+      setResuelto(none && val <= 0 ? true : val > 0 || Object.values(next).some((x) => x > 0) || none);
+      return next;
+    });
+    if (val > 0) setNone(false);
     clearTimeout(timers.current[clave]);
     timers.current[clave] = setTimeout(() => {
-      setPrescripcionCelda(citaId, clave, val, centroId).catch((err) => toastError(err, tRoot));
+      setPrescripcionCelda(citaId, clave, val, centroId).then(resync).catch((err) => toastError(err, tRoot));
     }, 500);
   }
 
   function toggleNone(on: boolean) {
     setNone(on);
-    setNoPrescripcion(citaId, on, centroId).catch((err) => toastError(err, tRoot));
+    if (on) setCant({}); // optimista: el BE limpia los grupos
+    setResuelto(on || Object.values(cant).some((v) => v > 0));
+    setNoPrescripcion(citaId, on, centroId).then(resync).catch((err) => toastError(err, tRoot));
   }
 
   if (!ready || grupos.length === 0) return null; // plug-and-play
 
-  const resuelta = none || Object.values(cant).some((v) => v > 0);
+  const resuelta = resuelto;
 
   return (
     <div className="space-y-2">

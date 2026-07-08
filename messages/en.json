@@ -850,11 +850,14 @@
   },
   "modalModulos": {
     "noModal": "This board has no action modal configured.",
-    "hint": "Changes apply per board and affect all users of that board.",
-    "saved": "Saved",
-    "prescripcion": {
-      "label": "Prescription",
-      "desc": "Show the prescription grid inside the attention modal."
+    "noModules": "No configurable modules for this modal.",
+    "hint": "Changes apply per board and center, and affect all users of that board.",
+    "saved": "Saved"
+  },
+  "modal": {
+    "modulo": {
+      "agendar_cita": { "desc": "Schedule the patient's next appointment." },
+      "prescripcion": { "desc": "Show the prescription grid inside the attention modal." }
     }
   }
 }

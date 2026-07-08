@@ -17,6 +17,7 @@ export interface CatalogoPrescripcion {
 export interface PrescripcionCita {
   registros: Record<string, number>; // { [grupoClave]: cantidad }
   noPrescripcion: boolean;
+  resuelto: boolean; // autoridad del BE: noPrescripcion || (∃ grupo con cantidad>0)
 }
 
 // Todo tenant-scoped: pasar centroId para el X-Tenant-ID de la petición.

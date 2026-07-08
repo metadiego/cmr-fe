@@ -850,11 +850,14 @@
   },
   "modalModulos": {
     "noModal": "Este tablero no tiene un modal de acción configurado.",
-    "hint": "Los cambios aplican por tablero y afectan a todos los usuarios de ese tablero.",
-    "saved": "Guardado",
-    "prescripcion": {
-      "label": "Prescripción",
-      "desc": "Muestra la grilla de prescripción dentro del modal de atención."
+    "noModules": "No hay módulos configurables para este modal.",
+    "hint": "Los cambios aplican por tablero y centro, y afectan a todos los usuarios de ese tablero.",
+    "saved": "Guardado"
+  },
+  "modal": {
+    "modulo": {
+      "agendar_cita": { "desc": "Agenda la próxima cita del paciente." },
+      "prescripcion": { "desc": "Muestra la grilla de prescripción dentro del modal de atención." }
     }
   }
 }
