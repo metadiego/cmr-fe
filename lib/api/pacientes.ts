@@ -24,8 +24,8 @@ export function listPacientes(
   return apiFetchPaged<Paciente>(`/pacientes?${sp.toString()}`);
 }
 
-export function getPaciente(id: string): Promise<Paciente> {
-  return apiFetch<Paciente>(`/pacientes/${id}`);
+export function getPaciente(id: string, centroId?: string): Promise<Paciente> {
+  return apiFetch<Paciente>(`/pacientes/${id}`, {}, centroId);
 }
 
 // Writes are tenant-scoped: the BE needs the target center. Pass `centroId` to

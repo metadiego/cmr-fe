@@ -887,6 +887,7 @@
     "emit": "Issue invoice",
     "payment": "Payment",
     "payMethod": "Payment method",
+    "cardLast4": "Card last 4 (optional)",
     "registerPayment": "Register",
     "fullyPaid": "Fully paid"
   },

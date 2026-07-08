@@ -887,6 +887,7 @@
     "emit": "Emitir factura",
     "payment": "Pago",
     "payMethod": "Forma de pago",
+    "cardLast4": "Últimos 4 de la tarjeta (opcional)",
     "registerPayment": "Registrar",
     "fullyPaid": "Pagada por completo"
   },
