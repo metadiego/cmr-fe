@@ -2669,6 +2669,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/cita/{citaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * "Facturar Consulta" desde el tablero de atención: crea (o reusa) una factura BORRADOR ligada a la cita,
+         *     con la línea del producto del tipo de cita, y la devuelve para que el FE la abra. Idempotente por cita.
+         */
+        post: operations["FacturacionController_facturarConsulta_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}/items": {
         parameters: {
             query?: never;
@@ -6156,6 +6176,11 @@ export interface components {
             pacienteId: string;
             /** Format: uuid */
             medicoId?: string;
+            /**
+             * Format: uuid
+             * @description Cita/consulta que origina la factura (puente cita↔factura). Opcional.
+             */
+            citaId?: string;
             /** Format: uuid */
             medioId?: string;
             serie?: string;
@@ -6166,6 +6191,7 @@ export interface components {
             serie: string | null;
             pacienteId: string;
             medicoId: string | null;
+            citaId: string | null;
             medioId: string | null;
             /** @enum {string} */
             estado: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
@@ -12483,6 +12509,27 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    FacturacionController_facturarConsulta_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                citaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

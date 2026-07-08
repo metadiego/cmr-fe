@@ -209,6 +209,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
                     ?.actions as AccionItem[] | undefined) ?? []
                 }
                 fila={fila}
+                centroId={centroId}
               />
             ) : (
               <TableroAcciones

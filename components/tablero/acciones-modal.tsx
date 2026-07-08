@@ -2,10 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { CitaFila } from "@/lib/api/agenda-dia";
+import { facturarCita } from "@/lib/api/facturas";
+import { toastError } from "@/lib/api/errors";
 import {
   Dialog,
   DialogContent,
@@ -48,13 +51,33 @@ function resolve(href: string, fila: CitaFila): string {
 export function AccionesModal({
   actions,
   fila,
+  centroId,
 }: {
   actions: AccionItem[];
   fila: CitaFila;
+  centroId?: string;
 }) {
   const t = useTranslations("tableroBoard");
   const tRoot = useTranslations();
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+
+  // "Facturar Consulta": crea/obtiene el borrador de la cita (idempotente) y abre
+  // la pantalla de facturación. POST /facturas/cita/:citaId (data-driven kind).
+  async function facturar() {
+    setBusy(true);
+    try {
+      const f = await facturarCita(String(fila.id), centroId);
+      setOpen(false);
+      const q = centroId ? `?centro=${centroId}` : "";
+      router.push(`/facturacion/${(f as { id: string }).id}${q}`);
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -80,29 +103,31 @@ export function AccionesModal({
           {actions.length === 0 && (
             <p className="px-1 py-3 text-sm text-muted-foreground">{t("noActions")}</p>
           )}
-          {actions.map((a) =>
-            a.kind === "link" && a.href ? (
-              <Link
-                key={a.key}
-                href={resolve(a.href, fila)}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors hover:bg-muted"
-              >
-                {iconFor(a.icon)}
-                {tRoot(a.labelKey)}
-              </Link>
-            ) : (
-              <button
-                key={a.key}
-                type="button"
-                onClick={() => toast(tRoot(a.labelKey) + " — " + t("soon"))}
-                className="flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors hover:bg-muted"
-              >
+          {actions.map((a) => {
+            const cls = "flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50";
+            if (a.kind === "link" && a.href) {
+              return (
+                <Link key={a.key} href={resolve(a.href, fila)} onClick={() => setOpen(false)} className={cls}>
+                  {iconFor(a.icon)}
+                  {tRoot(a.labelKey)}
+                </Link>
+              );
+            }
+            if (a.kind === "facturar") {
+              return (
+                <button key={a.key} type="button" onClick={facturar} disabled={busy} className={cls}>
+                  {iconFor(a.icon)}
+                  {tRoot(a.labelKey)}
+                </button>
+              );
+            }
+            return (
+              <button key={a.key} type="button" onClick={() => toast(tRoot(a.labelKey) + " — " + t("soon"))} className={cls}>
                 {iconFor(a.icon)}
                 {tRoot(a.labelKey)}
               </button>
-            ),
-          )}
+            );
+          })}
         </div>
       </DialogContent>
     </Dialog>
