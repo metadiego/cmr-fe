@@ -1,135 +1,282 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 import {
   getColumnasCatalogo,
+  getColumnasEfectivas,
   getDefinicion,
   crearColumna,
   actualizarColumna,
   colorColumna,
+  setComposicionBulk,
+  personalizarColumna,
   type ColumnaCatalogo,
   type TableroDefinicion,
+  type Transicion,
 } from "@/lib/api/tablero";
+import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { ColumnConfigDialog } from "@/components/configuracion/column-config-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Columnas de un vertical: REUSAR el catálogo existente (toggle `ambitos`) en vez
-// de duplicar. Lista todo el catálogo con un check "en este tablero"; crear nueva
-// solo para las genuinamente nuevas. Evita columnas fd_-style repetidas.
+// Superficie ÚNICA para gestionar las columnas de un tablero: agregar (del
+// catálogo o crear), reordenar ↑/↓, visible/fija, color y configurar — todo en un
+// lugar. Reusa el catálogo (ambitos) + composición (orden) + config por columna.
 export function ColumnasTab({ clave }: { clave: string }) {
-  const t = useTranslations("configuracion.tableros");
-  const tRoot = useTranslations();
-  const { state, reload } = useResource<ColumnaCatalogo[]>(() => getColumnasCatalogo());
-  const cols = (state.kind === "ok" ? state.data : []).filter((c) => c.activo);
-  const [busyId, setBusyId] = React.useState<string | null>(null);
-  const [open, setOpen] = React.useState(false);
-  const [configCol, setConfigCol] = React.useState<ColumnaCatalogo | null>(null);
-
-  // Colores actuales del tablero (pre-personalización admin). Vienen de la
-  // definición (por columna efectiva); se escriben con colorColumna (composición).
+  const catRes = useResource<ColumnaCatalogo[]>(() => getColumnasCatalogo());
+  const effRes = useResource<ColumnaEfectiva[]>(() => getColumnasEfectivas(clave), [clave]);
   const defRes = useResource<TableroDefinicion>(() => getDefinicion(clave), [clave]);
-  const colorByClave: Record<string, string | null> = {};
-  if (defRes.state.kind === "ok") {
-    for (const c of defRes.state.data.columnas) colorByClave[c.clave] = c.color ?? null;
-  }
+  const tc = useTranslations("common");
+
+  const loading =
+    catRes.state.kind === "loading" || effRes.state.kind === "loading" || defRes.state.kind === "loading";
+  const catalog = (catRes.state.kind === "ok" ? catRes.state.data : []).filter((c) => c.activo);
+  const efectivas = effRes.state.kind === "ok" ? effRes.state.data : [];
   const transiciones = defRes.state.kind === "ok" ? defRes.state.data.transiciones : [];
 
-  async function setColor(c: ColumnaCatalogo, color: string | null) {
-    setBusyId(c.id);
-    try {
-      await colorColumna(clave, c.id, color);
-      defRes.reload();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusyId(null);
-    }
+  function reloadAll() {
+    catRes.reload();
+    effRes.reload();
+    defRes.reload();
   }
 
-  async function toggle(c: ColumnaCatalogo) {
-    const has = (c.ambitos ?? []).includes(clave);
-    const ambitos = has
-      ? (c.ambitos ?? []).filter((a) => a !== clave)
-      : [...(c.ambitos ?? []), clave];
-    setBusyId(c.id);
-    try {
-      await actualizarColumna(c.id, { ambitos });
-      reload();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusyId(null);
-    }
-  }
+  // Firma para remontar el editor cuando cambia la membresía/orden del servidor.
+  const sig =
+    catalog.filter((c) => (c.ambitos ?? []).includes(clave)).map((c) => c.id).join(",") +
+    "|" +
+    efectivas.map((e) => `${e.clave}:${e.orden}`).join(",");
 
-  const sorted = [...cols].sort((a, b) => {
-    const am = (a.ambitos ?? []).includes(clave) ? 0 : 1;
-    const bm = (b.ambitos ?? []).includes(clave) ? 0 : 1;
-    return am - bm || a.clave.localeCompare(b.clave);
-  });
+  if (loading) return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">{t("colIncorporarHelp")}</p>
-        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>{t("addColumna")}</Button>
-      </div>
+    <ColumnasEditor
+      key={sig}
+      clave={clave}
+      catalog={catalog}
+      efectivas={efectivas}
+      transiciones={transiciones}
+      onChanged={reloadAll}
+    />
+  );
+}
 
-      <ul className="divide-y rounded-md border">
-        {sorted.map((c) => {
-          const has = (c.ambitos ?? []).includes(clave);
-          return (
-            <li key={c.id} className={"flex items-center gap-3 px-3 py-2 " + (has ? "" : "opacity-60")}>
-              <Checkbox checked={has} disabled={busyId === c.id} onCheckedChange={() => toggle(c)} />
-              <span className="text-sm font-medium">{tRoot(c.labelKey)}</span>
-              <span className="text-xs text-muted-foreground">· {c.clave} · {c.tipo}</span>
+type Row = { columnaId: string; clave: string; labelKey: string; tipo: string; visible: boolean; fijo: boolean };
+
+function buildRows(members: ColumnaCatalogo[], efectivas: ColumnaEfectiva[]): Row[] {
+  const eff = new Map(efectivas.map((e) => [e.clave, e]));
+  return members
+    .map((c) => {
+      const e = eff.get(c.clave);
+      return {
+        columnaId: c.id,
+        clave: c.clave,
+        labelKey: c.labelKey,
+        tipo: c.tipo,
+        visible: !!e,
+        fijo: !!e?.fijo,
+        orden: e?.orden ?? 9999,
+      };
+    })
+    .sort((a, b) => a.orden - b.orden || a.clave.localeCompare(b.clave))
+    .map((r) => ({ columnaId: r.columnaId, clave: r.clave, labelKey: r.labelKey, tipo: r.tipo, visible: r.visible, fijo: r.fijo }));
+}
+
+function ColumnasEditor({
+  clave,
+  catalog,
+  efectivas,
+  transiciones,
+  onChanged,
+}: {
+  clave: string;
+  catalog: ColumnaCatalogo[];
+  efectivas: ColumnaEfectiva[];
+  transiciones: Transicion[];
+  onChanged: () => void;
+}) {
+  const t = useTranslations("configuracion.tableros");
+  const te = useTranslations("tableroEditor");
+  const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  const { can } = useCan();
+  const boardMode = can("tablero.config");
+
+  const members = catalog.filter((c) => (c.ambitos ?? []).includes(clave));
+  const nonMembers = catalog.filter((c) => !(c.ambitos ?? []).includes(clave));
+  const catById = React.useMemo(() => new Map(catalog.map((c) => [c.id, c] as const)), [catalog]);
+
+  const [rows, setRows] = React.useState<Row[]>(() => buildRows(members, efectivas));
+  const [colors, setColors] = React.useState<Record<string, string | null>>(() =>
+    Object.fromEntries(efectivas.map((e) => [e.clave, e.color ?? null])),
+  );
+  const [busy, setBusy] = React.useState(false);
+  const [busyId, setBusyId] = React.useState<string | null>(null);
+  const [creating, setCreating] = React.useState(false);
+  const [configCol, setConfigCol] = React.useState<ColumnaCatalogo | null>(null);
+
+  function move(i: number, dir: -1 | 1) {
+    const j = i + dir;
+    if (j < 0 || j >= rows.length) return;
+    setRows((rs) => {
+      const next = rs.slice();
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  }
+  function patch(i: number, p: Partial<Row>) {
+    setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...p } : r)));
+  }
+
+  async function saveOrder() {
+    setBusy(true);
+    try {
+      if (boardMode) {
+        await setComposicionBulk(
+          clave,
+          rows.map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
+        );
+      } else {
+        await Promise.all(
+          rows.map((r, i) => personalizarColumna({ tablero: clave, columnaId: r.columnaId, visible: r.visible, orden: i, fijo: r.fijo })),
+        );
+      }
+      toast.success(te("saved"));
+      onChanged();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function setColor(row: Row, color: string | null) {
+    setBusyId(row.columnaId);
+    setColors((c) => ({ ...c, [row.clave]: color }));
+    try {
+      await colorColumna(clave, row.columnaId, color);
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  // Agregar del catálogo: mete al tablero (ambitos) Y la compone visible al final
+  // para que aparezca de inmediato (sin pasar por otra pantalla).
+  async function agregar(cat: ColumnaCatalogo) {
+    setBusyId(cat.id);
+    try {
+      await actualizarColumna(cat.id, { ambitos: [...(cat.ambitos ?? []), clave] });
+      await setComposicionBulk(clave, [
+        ...rows.map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
+        { columnaId: cat.id, orden: rows.length, visible: true, fijo: false, activo: true },
+      ]);
+      onChanged();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function quitar(row: Row) {
+    const cat = catById.get(row.columnaId);
+    if (!cat) return;
+    setBusyId(row.columnaId);
+    try {
+      await actualizarColumna(cat.id, { ambitos: (cat.ambitos ?? []).filter((a) => a !== clave) });
+      onChanged();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* En este tablero: orden + visible/fija + color + configurar + quitar */}
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">{t("colInBoard")}</h3>
+          <p className="text-xs text-muted-foreground">{boardMode ? te("boardMode") : te("personalMode")}</p>
+        </div>
+        <ul className="divide-y rounded-md border">
+          {rows.length === 0 && <li className="px-3 py-4 text-sm text-muted-foreground">{t("colNoneInBoard")}</li>}
+          {rows.map((r, i) => (
+            <li key={r.columnaId} className={"flex items-center gap-3 px-3 py-2 " + (r.visible ? "" : "opacity-50")}>
+              <div className="flex flex-col">
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveUp")}>
+                  <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
+                </button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === rows.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveDown")}>
+                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
+                </button>
+              </div>
+              <label className="flex cursor-pointer items-center gap-2">
+                <Checkbox checked={r.visible} onCheckedChange={(v) => patch(i, { visible: v === true })} />
+                <span className="text-sm font-medium">{tRoot(r.labelKey)}</span>
+              </label>
+              <span className="text-xs text-muted-foreground">· {r.clave} · {r.tipo}</span>
+              <label className="ml-2 inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+                <Checkbox checked={r.fijo} onCheckedChange={(v) => patch(i, { fijo: v === true })} />
+                {te("pinned")}
+              </label>
               <div className="ml-auto flex items-center gap-3">
-                {has && (
-                  <ColorControl
-                    value={colorByClave[c.clave] ?? null}
-                    disabled={busyId === c.id}
-                    onPick={(hex) => setColor(c, hex)}
-                    clearLabel={t("colClearColor")}
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => setConfigCol(c)}
-                  className="text-xs font-medium text-primary hover:underline"
-                >
+                <ColorControl value={colors[r.clave] ?? null} disabled={busyId === r.columnaId} onPick={(hex) => setColor(r, hex)} clearLabel={t("colClearColor")} />
+                <button type="button" onClick={() => setConfigCol(catById.get(r.columnaId) ?? null)} className="text-xs font-medium text-primary hover:underline">
                   {t("configure")}
+                </button>
+                <button type="button" onClick={() => quitar(r)} disabled={busyId === r.columnaId} className="text-xs text-destructive hover:underline">
+                  {t("colRemove")}
                 </button>
               </div>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+        <div className="flex justify-end">
+          <Button type="button" size="sm" onClick={saveOrder} disabled={busy}>
+            {busy ? tc("saving") : t("colSaveOrder")}
+          </Button>
+        </div>
+      </section>
 
-      <p className="text-sm text-muted-foreground">
-        {t("composeHint")}{" "}
-        <Link href={`/citas/config/columnas?tablero=${clave}`} className="text-primary hover:underline">{t("composeLink")}</Link>
-      </p>
+      {/* Agregar del catálogo + crear nueva */}
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">{t("colAddFromCatalog")}</h3>
+          <Button size="sm" variant="outline" onClick={() => setCreating(true)}>{t("addColumna")}</Button>
+        </div>
+        {nonMembers.length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t("colCatalogEmpty")}</p>
+        ) : (
+          <ul className="divide-y rounded-md border">
+            {nonMembers.map((c) => (
+              <li key={c.id} className="flex items-center gap-3 px-3 py-2 opacity-80">
+                <span className="text-sm font-medium">{tRoot(c.labelKey)}</span>
+                <span className="text-xs text-muted-foreground">· {c.clave} · {c.tipo}</span>
+                <Button className="ml-auto" size="sm" variant="ghost" disabled={busyId === c.id} onClick={() => agregar(c)}>
+                  {t("colAdd")}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-      {open && <NuevaColumnaDialog clave={clave} onClose={() => setOpen(false)} onSaved={reload} />}
+      {creating && <NuevaColumnaDialog clave={clave} onClose={() => setCreating(false)} onSaved={onChanged} />}
       {configCol && (
-        <ColumnConfigDialog
-          col={configCol}
-          transiciones={transiciones}
-          onClose={() => setConfigCol(null)}
-          onSaved={() => {
-            reload();
-            defRes.reload();
-          }}
-        />
+        <ColumnConfigDialog col={configCol} transiciones={transiciones} onClose={() => setConfigCol(null)} onSaved={onChanged} />
       )}
     </div>
   );
@@ -176,22 +323,9 @@ function NuevaColumnaDialog({ clave, onClose, onSaved }: { clave: string; onClos
   );
 }
 
-// Admin pre-personalization: a colour per column in THIS board. Presets + clear.
-// Writes via colorColumna (/tablero/composicion); the user can still override it
-// in their own view later.
 const COLOR_PRESETS = ["#0D9488", "#0284C7", "#D97706", "#15803D", "#E11D48", "#7C3AED", "#64748B"];
 
-function ColorControl({
-  value,
-  disabled,
-  onPick,
-  clearLabel,
-}: {
-  value: string | null;
-  disabled?: boolean;
-  onPick: (hex: string | null) => void;
-  clearLabel: string;
-}) {
+function ColorControl({ value, disabled, onPick, clearLabel }: { value: string | null; disabled?: boolean; onPick: (hex: string | null) => void; clearLabel: string }) {
   return (
     <div className="flex items-center gap-1">
       {COLOR_PRESETS.map((hex) => (
@@ -202,24 +336,12 @@ function ColorControl({
           onClick={() => onPick(hex)}
           title={hex}
           aria-label={hex}
-          className={
-            "size-4 rounded-full border transition " +
-            (value === hex
-              ? "ring-2 ring-foreground ring-offset-1 ring-offset-background"
-              : "border-border hover:scale-110")
-          }
+          className={"size-4 rounded-full border transition " + (value === hex ? "ring-2 ring-foreground ring-offset-1 ring-offset-background" : "border-border hover:scale-110")}
           style={{ backgroundColor: hex }}
         />
       ))}
       {value && (
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => onPick(null)}
-          title={clearLabel}
-          aria-label={clearLabel}
-          className="ml-1 text-sm leading-none text-muted-foreground hover:text-foreground"
-        >
+        <button type="button" disabled={disabled} onClick={() => onPick(null)} title={clearLabel} aria-label={clearLabel} className="ml-1 text-sm leading-none text-muted-foreground hover:text-foreground">
           ×
         </button>
       )}

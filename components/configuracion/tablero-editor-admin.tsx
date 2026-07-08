@@ -66,7 +66,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
         <Badge variant="secondary" className="font-mono">{clave}</Badge>
       </div>
 
-      <Tabs defaultValue="estados">
+      <Tabs defaultValue="columnas">
         <TabsList className="mb-4 flex flex-wrap">
           <TabsTrigger value="general">{t("tabGeneral")}</TabsTrigger>
           <TabsTrigger value="columnas">{t("tabColumnas")}</TabsTrigger>

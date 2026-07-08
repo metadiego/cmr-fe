@@ -145,7 +145,14 @@
       "cfgActionIcon": "icon",
       "cfgKindLink": "Link",
       "cfgKindSoon": "Coming soon",
-      "cfgRemove": "Remove"
+      "cfgRemove": "Remove",
+      "colInBoard": "In this board",
+      "colNoneInBoard": "No columns in this board yet.",
+      "colSaveOrder": "Save order",
+      "colAddFromCatalog": "Add from catalog",
+      "colCatalogEmpty": "All catalog columns are already in this board.",
+      "colAdd": "Add",
+      "colRemove": "Remove"
     }
   },
   "tableroEditor": {

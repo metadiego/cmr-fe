@@ -145,7 +145,14 @@
       "cfgActionIcon": "ícono",
       "cfgKindLink": "Enlace",
       "cfgKindSoon": "Próximamente",
-      "cfgRemove": "Quitar"
+      "cfgRemove": "Quitar",
+      "colInBoard": "En este tablero",
+      "colNoneInBoard": "Aún no hay columnas en este tablero.",
+      "colSaveOrder": "Guardar orden",
+      "colAddFromCatalog": "Agregar del catálogo",
+      "colCatalogEmpty": "Todas las columnas del catálogo ya están en este tablero.",
+      "colAdd": "Agregar",
+      "colRemove": "Quitar"
     }
   },
   "tableroEditor": {
