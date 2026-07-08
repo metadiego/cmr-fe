@@ -135,6 +135,8 @@
       "cfgTransition": "Transition",
       "cfgEstampa": "Stamps time in",
       "cfgEstampaHint": "Sealed-time field, e.g. llegadaEn.",
+      "cfgGroup": "Group (chain)",
+      "cfgGroupHint": "Columns with the same group chain together in the flow, e.g. flujo_atencion. Empty = standalone.",
       "cfgCompute": "Compute",
       "cfgComputeHint": "BE compute, e.g. esperaMin.",
       "cfgActions": "Actions",

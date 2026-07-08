@@ -61,18 +61,34 @@ export function ColumnConfigDialog({
   const [writeBinding, setWriteBinding] = React.useState((r.writeBinding as string) ?? "");
   const [transition, setTransition] = React.useState((r.transition as string) ?? "");
   const [estampa, setEstampa] = React.useState((r.estampa as string) ?? "");
+  const [group, setGroup] = React.useState((r.group as string) ?? "");
   const [compute, setCompute] = React.useState((r.compute as string) ?? "");
   const [actions, setActions] = React.useState<AccionRow[]>(
     Array.isArray(r.actions) ? (r.actions as AccionRow[]) : [],
   );
   const [busy, setBusy] = React.useState(false);
 
+  // Preserva las claves NO gestionadas por este diálogo (group, postAccion, color,
+  // background, ancho…): parte del render existente y solo setea/limpia las del tipo.
   function buildRender(): Record<string, unknown> | null {
-    if (tipo === "select") return { optionsSource: optionsSource || null, ...(writeBinding ? { writeBinding } : {}) };
-    if (tipo === "toggle") return { transition: transition || null, estampa: estampa || null };
-    if (tipo === "derivado") return { compute: compute || null };
-    if (tipo === "accion") return { actions };
-    return null;
+    const base: Record<string, unknown> = { ...r };
+    const setOrDel = (k: string, v: unknown) => {
+      if (v == null || v === "") delete base[k];
+      else base[k] = v;
+    };
+    if (tipo === "select") {
+      setOrDel("optionsSource", optionsSource);
+      setOrDel("writeBinding", writeBinding);
+    } else if (tipo === "toggle") {
+      setOrDel("transition", transition);
+      setOrDel("estampa", estampa);
+      setOrDel("group", group); // encadenamiento: mismo group → se encadenan
+    } else if (tipo === "derivado") {
+      setOrDel("compute", compute);
+    } else if (tipo === "accion") {
+      base.actions = actions;
+    }
+    return Object.keys(base).length ? base : null;
   }
 
   async function submit() {
@@ -158,6 +174,9 @@ export function ColumnConfigDialog({
           </Field>
           <Field label={t("cfgEstampa")} hint={t("cfgEstampaHint")}>
             <Input value={estampa} onChange={(e) => setEstampa(e.target.value)} placeholder="llegadaEn" />
+          </Field>
+          <Field label={t("cfgGroup")} hint={t("cfgGroupHint")}>
+            <Input value={group} onChange={(e) => setGroup(e.target.value)} placeholder="flujo_atencion" />
           </Field>
         </div>
       )}

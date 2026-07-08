@@ -135,6 +135,8 @@
       "cfgTransition": "Transición",
       "cfgEstampa": "Sella hora en",
       "cfgEstampaHint": "Campo de la hora sellada, ej. llegadaEn.",
+      "cfgGroup": "Grupo (cadena)",
+      "cfgGroupHint": "Columnas con el mismo grupo se encadenan en el flujo, ej. flujo_atencion. Vacío = suelta.",
       "cfgCompute": "Cómputo",
       "cfgComputeHint": "Cómputo del BE, ej. esperaMin.",
       "cfgActions": "Acciones",

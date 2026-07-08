@@ -1773,6 +1773,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pacientes/{id}/asignar-record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Asigna el siguiente RECORD (numeroHistoria) consecutivo POR CENTRO si el paciente no tiene.
+         *     Idempotente: si ya tiene record, lo devuelve sin cambiarlo. Para el AP-Dash (record vacío → generar).
+         */
+        post: operations["PacientesController_asignarRecord_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/personal": {
         parameters: {
             query?: never;
@@ -2186,6 +2206,23 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["CitasController_triage_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/{id}/asignar-medico": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Asigna el médico (alcance total → también el médico por defecto del paciente). */
+        post: operations["CitasController_asignarMedico_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3870,6 +3907,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tablero/opciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Opciones de un `select` (data-driven, según render.optionsSource de la columna). */
+        get: operations["TablerosController_opciones_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/catalogos/options-sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TablerosController_catalogoOptionsSources_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/catalogos/bindings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Allowlist de bindings por entidad (para atar columnas a campos válidos). */
+        get: operations["TablerosController_catalogoBindings_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/tablero/catalogos/computes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cómputos derivados soportados (binding computed.<clave>). */
+        get: operations["TablerosController_catalogoComputes_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tablero/filas": {
         parameters: {
             query?: never;
@@ -4031,6 +4135,58 @@ export interface paths {
         put: operations["TablerosController_actualizarSubtipo_v1"];
         post?: never;
         delete: operations["TablerosController_desactivarSubtipo_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prescripcion/catalogo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de la grilla (grupos activos/ordenados; kits/componentes = costura a inventario). */
+        get: operations["PrescripcionController_catalogo_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prescripcion/cita/{citaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Estado de la prescripción de una cita: {registros:{grupoClave:cantidad}, noPrescripcion}. */
+        get: operations["PrescripcionController_porCita_v1"];
+        put?: never;
+        /** Upsert de una celda (grupoClave, cantidad); idempotente por (citaId, grupoClave). */
+        post: operations["PrescripcionController_upsert_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prescripcion/cita/{citaId}/no-prescripcion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Marca/desmarca "no se prescribió nada al paciente". */
+        post: operations["PrescripcionController_noPrescripcion_v1"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -5634,6 +5790,14 @@ export interface components {
             enfermeraId: string;
             vitales?: Record<string, never>;
         };
+        AsignarMedicoDto: {
+            /** Format: uuid */
+            medicoId: string;
+            /** @enum {string} */
+            alcance?: "temporal" | "total";
+            /** Format: uuid */
+            actorId?: string;
+        };
         CancelarCitaDto: {
             motivo: string;
             /** Format: uuid */
@@ -5677,7 +5841,29 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        ColumnaRenderDto: {
+            /** @description Encadenamiento: columnas con el mismo group se encadenan en el FE (p. ej. los toggles presente/en_consulta/asistido → group "flujo_atencion"). */
+            group?: string;
+            /** @description Fuente de opciones de un select (medicos|enfermeras|tipos_cita|estados). */
+            optionsSource?: string;
+            /** @description Destino de escritura de un select-FK (p. ej. cita.medicoId), manteniendo el binding de display. */
+            writeBinding?: string;
+            /** @description Transición que dispara un toggle (clave en tablero_transiciones, p. ej. "presente"). */
+            transition?: string;
+            /** @description Campo de hora que el toggle muestra/sella (p. ej. llegadaEn). */
+            estampa?: string;
+            /** @description Modal/acción que el FE dispara tras ejecutar la acción de la columna (enruta por valor; p. ej. "nueva_cita_prescripcion" abre el modal de próxima cita). Data-driven y por-tablero (override de composición). Plug-and-play. */
+            postAccion?: string;
+            /** @description Color (#hex) sugerido para la celda/columna. */
+            color?: string;
+            /** @description Imagen/fondo de la celda o columna. */
+            background?: string;
+            /** @description Ancho sugerido de la columna. */
+            ancho?: number;
+        };
         CreateColumnaDto: {
+            /** @description Pistas de render declarativas; claves de primera clase documentadas en ColumnaRenderDto (group, optionsSource, writeBinding, transition, estampa, color, background, ancho). Acepta claves extra. */
+            render?: components["schemas"]["ColumnaRenderDto"];
             clave: string;
             labelKey: string;
             /** @enum {string} */
@@ -5685,23 +5871,25 @@ export interface components {
             binding: string;
             editable?: boolean;
             permiso?: string;
-            render?: Record<string, never>;
             /** @description Tableros donde la columna es elegible (p. ej. ['citas','operaciones']); vacío/null = universal. */
             ambitos?: string[];
         };
         UpdateColumnaDto: {
+            /** @description Pistas de render declarativas; claves de primera clase documentadas en ColumnaRenderDto (group, optionsSource, writeBinding, transition, estampa, color, background, ancho). Acepta claves extra. */
+            render?: components["schemas"]["ColumnaRenderDto"];
             labelKey?: string;
             /** @enum {string} */
             tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado";
             binding?: string;
             editable?: boolean;
             permiso?: string;
-            render?: Record<string, never>;
             activo?: boolean;
             /** @description Tableros donde la columna es elegible; vacío/null = universal. */
             ambitos?: string[];
         };
         SetComposicionDto: {
+            /** @description Override de render para la columna en este tablero (se fusiona sobre columnas.render). Ej. postAccion. Acepta claves extra. */
+            render?: components["schemas"]["ColumnaRenderDto"];
             tablero: string;
             /** Format: uuid */
             columnaId: string;
@@ -5711,6 +5899,8 @@ export interface components {
             activo?: boolean;
             /** @description Override de editabilidad de la columna en este tablero (null = hereda del catálogo). */
             editable?: boolean;
+            /** @description Color (#hex) de pre-personalización del admin para la columna en este tablero. */
+            color?: string;
         };
         TableroColumnaEntity: {
             tablero: string;
@@ -5719,6 +5909,8 @@ export interface components {
             visible: boolean;
             fijo: boolean;
             editable: boolean | null;
+            color: string | null;
+            render: Record<string, never> | null;
             activo: boolean;
             id: string;
             clinicId: string | null;
@@ -5728,6 +5920,8 @@ export interface components {
             updatedAt: string;
         };
         SetComposicionItemDto: {
+            /** @description Override de render para la columna en este tablero (se fusiona sobre columnas.render). Ej. postAccion (modal post-acción por-tablero). Acepta claves extra. */
+            render?: components["schemas"]["ColumnaRenderDto"];
             /** Format: uuid */
             columnaId: string;
             orden?: number;
@@ -5736,19 +5930,22 @@ export interface components {
             activo?: boolean;
             /** @description Override de editabilidad de la columna en este tablero (null = hereda del catálogo). */
             editable?: boolean;
+            /** @description Color (#hex) de pre-personalización del admin para la columna en este tablero. */
+            color?: string;
         };
         SetComposicionBulkDto: {
             tablero: string;
             columnas: components["schemas"]["SetComposicionItemDto"][];
         };
         PersonalizarColumnaDto: {
+            /** @description Pistas de render declarativas; claves de primera clase documentadas en ColumnaRenderDto (group, optionsSource, writeBinding, transition, estampa, color, background, ancho). Acepta claves extra. */
+            render?: components["schemas"]["ColumnaRenderDto"];
             tablero: string;
             /** Format: uuid */
             columnaId: string;
             visible?: boolean;
             orden?: number;
             fijo?: boolean;
-            render?: Record<string, never>;
         };
         UsuarioColumnaEntity: {
             usuarioId: string;
@@ -5840,6 +6037,11 @@ export interface components {
             canal: "whatsapp" | "sms" | "impresa" | "email";
             plantillaClave?: string;
             idioma?: string;
+            /**
+             * @description A quién va: 'paciente' (default) o 'medico' (el médico de la cita).
+             * @enum {string}
+             */
+            destinatario?: "paciente" | "medico";
         };
         NotificacionEntity: {
             citaId: string | null;
@@ -6180,7 +6382,7 @@ export interface components {
             /** @enum {string} */
             tipo: "readonly" | "texto" | "select" | "numero" | "calculado";
             /** @enum {string} */
-            rol: "accion" | "cantidad" | "precio" | "subtotal" | "descuento" | "impuesto" | "producto" | "tarifa" | "multiplicador" | "informativo";
+            rol: "accion" | "cantidad" | "precio" | "producto" | "subtotal" | "descuento" | "impuesto" | "tarifa" | "multiplicador" | "informativo";
             orden: number;
             requerido: boolean;
             visible: boolean;
@@ -6669,23 +6871,6 @@ export interface components {
             /** Format: uuid */
             citaId: string;
         };
-        TableroEntity: {
-            clave: string;
-            labelKey: string;
-            icon: string | null;
-            orden: number;
-            permiso: string | null;
-            layout: string;
-            entidad: string;
-            filtros: Record<string, never> | null;
-            esVertical: boolean;
-            activo: boolean;
-            id: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         TableroAccionDto: {
             tablero: string;
             entidadId: string;
@@ -6711,9 +6896,29 @@ export interface components {
             permiso?: string;
             layout: string;
             entidad: string;
+            /** @description Ruta del FE (null = convención /tablero/<clave>). */
+            ruta?: string;
             filtros?: Record<string, never>;
             esVertical?: boolean;
             activo?: boolean;
+        };
+        TableroEntity: {
+            clave: string;
+            labelKey: string;
+            icon: string | null;
+            orden: number;
+            permiso: string | null;
+            layout: string;
+            ruta: string | null;
+            entidad: string;
+            filtros: Record<string, never> | null;
+            esVertical: boolean;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         UpdateTableroDto: {
             labelKey?: string;
@@ -6722,6 +6927,7 @@ export interface components {
             permiso?: string;
             layout?: string;
             entidad?: string;
+            ruta?: string;
             filtros?: Record<string, never>;
             esVertical?: boolean;
             activo?: boolean;
@@ -6757,6 +6963,9 @@ export interface components {
             accion: string | null;
             permiso: string | null;
             requiere: string[] | null;
+            estampa: string | null;
+            requierePrevios: string[] | null;
+            limpia: string[] | null;
             confirmar: boolean;
             orden: number;
             activo: boolean;
@@ -6777,6 +6986,9 @@ export interface components {
             accion?: string;
             permiso?: string;
             requiere?: string[];
+            estampa?: string;
+            requierePrevios?: string[];
+            limpia?: string[];
             confirmar?: boolean;
             orden?: number;
             activo?: boolean;
@@ -6790,6 +7002,9 @@ export interface components {
             accion?: string;
             permiso?: string;
             requiere?: string[];
+            estampa?: string;
+            requierePrevios?: string[];
+            limpia?: string[];
             confirmar?: boolean;
             orden?: number;
             activo?: boolean;
@@ -6817,6 +7032,33 @@ export interface components {
             labelKey?: string;
             orden?: number;
             activo?: boolean;
+        };
+        UpsertPrescripcionDto: {
+            /** @description Clave del grupo (grupos_prescripcion.clave). */
+            grupoClave: string;
+            /** @description Cantidad prescrita (>=0; 0 = quitar/soft-delete). checked se deriva de cantidad>0. */
+            cantidad: number;
+        };
+        PrescripcionRegistroEntity: {
+            citaId: string;
+            grupoClave: string;
+            cantidad: number;
+            checked: boolean;
+            pacienteId: string | null;
+            medicoId: string | null;
+            usuarioId: string | null;
+            /** Format: date-time */
+            fecha: string;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        NoPrescripcionDto: {
+            /** @description true = marca "no se prescribió nada"; false = lo quita. */
+            on: boolean;
         };
         CreatePerfilDto: {
             authUserId: string;
@@ -10625,6 +10867,27 @@ export interface operations {
             };
         };
     };
+    PacientesController_asignarRecord_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     PersonalController_list_v1: {
         parameters: {
             query: {
@@ -11401,6 +11664,31 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TriageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CitaEntity"];
+                };
+            };
+        };
+    };
+    CitasController_asignarMedico_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AsignarMedicoDto"];
             };
         };
         responses: {
@@ -14247,7 +14535,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TableroEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -14313,6 +14601,83 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    TablerosController_opciones_v1: {
+        parameters: {
+            query: {
+                tablero: string;
+                /** @description Clave de la columna select */
+                columna: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    TablerosController_catalogoOptionsSources_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TablerosController_catalogoBindings_v1: {
+        parameters: {
+            query: {
+                /** @description Entidad del tablero (cita/sesion/factura) */
+                entidad: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TablerosController_catalogoComputes_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -14706,6 +15071,94 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TableroSubtipoEntity"];
+                };
+            };
+        };
+    };
+    PrescripcionController_catalogo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    PrescripcionController_porCita_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                citaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PrescripcionController_upsert_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                citaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertPrescripcionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrescripcionRegistroEntity"];
+                };
+            };
+        };
+    };
+    PrescripcionController_noPrescripcion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                citaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoPrescripcionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrescripcionRegistroEntity"];
                 };
             };
         };
