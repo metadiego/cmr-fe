@@ -70,13 +70,18 @@ export function ColumnasTab({ clave }: { clave: string }) {
   );
 }
 
-type Row = { columnaId: string; clave: string; labelKey: string; tipo: string; visible: boolean; fijo: boolean };
+type Row = { columnaId: string; clave: string; labelKey: string; tipo: string; visible: boolean; fijo: boolean; group: string | null };
+
+const renderGroup = (r: Record<string, unknown> | null | undefined) =>
+  (r?.group as string | undefined) || null;
 
 function buildRows(members: ColumnaCatalogo[], efectivas: ColumnaEfectiva[]): Row[] {
   const eff = new Map(efectivas.map((e) => [e.clave, e]));
   return members
     .map((c) => {
       const e = eff.get(c.clave);
+      // group = override por-tablero (composición) o el del catálogo. Encadena.
+      const group = renderGroup(e?.render) ?? renderGroup(c.render as Record<string, unknown> | null);
       return {
         columnaId: c.id,
         clave: c.clave,
@@ -85,10 +90,25 @@ function buildRows(members: ColumnaCatalogo[], efectivas: ColumnaEfectiva[]): Ro
         visible: !!e,
         fijo: !!e?.fijo,
         orden: e?.orden ?? 9999,
+        group,
       };
     })
     .sort((a, b) => a.orden - b.orden || a.clave.localeCompare(b.clave))
-    .map((r) => ({ columnaId: r.columnaId, clave: r.clave, labelKey: r.labelKey, tipo: r.tipo, visible: r.visible, fijo: r.fijo }));
+    .map((r) => ({ columnaId: r.columnaId, clave: r.clave, labelKey: r.labelKey, tipo: r.tipo, visible: r.visible, fijo: r.fijo, group: r.group }));
+}
+
+// Agrupa filas CONTIGUAS del mismo `group` en bloques (cadenas). Un bloque se
+// mueve como una sola unidad, manteniendo las columnas encadenadas juntas.
+type Block = { group: string | null; items: Array<{ row: Row; index: number }> };
+function toBlocks(rows: Row[]): Block[] {
+  const blocks: Block[] = [];
+  rows.forEach((row, index) => {
+    const g = row.group || null;
+    const last = blocks[blocks.length - 1];
+    if (g && last && last.group === g) last.items.push({ row, index });
+    else blocks.push({ group: g, items: [{ row, index }] });
+  });
+  return blocks;
 }
 
 function ColumnasEditor({
@@ -124,13 +144,16 @@ function ColumnasEditor({
   const [creating, setCreating] = React.useState(false);
   const [configCol, setConfigCol] = React.useState<ColumnaCatalogo | null>(null);
 
-  function move(i: number, dir: -1 | 1) {
-    const j = i + dir;
-    if (j < 0 || j >= rows.length) return;
+  // Mueve un BLOQUE completo (cadena o columna suelta) sobre el bloque contiguo,
+  // preservando la contigüidad de las columnas encadenadas.
+  function moveBlock(bi: number, dir: -1 | 1) {
     setRows((rs) => {
-      const next = rs.slice();
-      [next[i], next[j]] = [next[j], next[i]];
-      return next;
+      const blocks = toBlocks(rs);
+      const bj = bi + dir;
+      if (bj < 0 || bj >= blocks.length) return rs;
+      const arr = blocks.slice();
+      [arr[bi], arr[bj]] = [arr[bj], arr[bi]];
+      return arr.flatMap((b) => b.items.map((x) => x.row));
     });
   }
   function patch(i: number, p: Partial<Row>) {
@@ -203,46 +226,75 @@ function ColumnasEditor({
     }
   }
 
+  const blocks = toBlocks(rows);
+
+  // Contenido de una fila-columna (sin flechas: el orden lo maneja el bloque).
+  const memberRow = (r: Row, i: number) => (
+    <div className={"flex items-center gap-3 px-3 py-2 " + (r.visible ? "" : "opacity-50")}>
+      <label className="flex cursor-pointer items-center gap-2">
+        <Checkbox checked={r.visible} onCheckedChange={(v) => patch(i, { visible: v === true })} />
+        <span className="text-sm font-medium">{tRoot(r.labelKey)}</span>
+      </label>
+      <span className="text-xs text-muted-foreground">· {r.clave} · {r.tipo}</span>
+      <label className="ml-2 inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+        <Checkbox checked={r.fijo} onCheckedChange={(v) => patch(i, { fijo: v === true })} />
+        {te("pinned")}
+      </label>
+      <div className="ml-auto flex items-center gap-3">
+        <ColorControl value={colors[r.clave] ?? null} disabled={busyId === r.columnaId} onPick={(hex) => setColor(r, hex)} clearLabel={t("colClearColor")} />
+        <button type="button" onClick={() => setConfigCol(catById.get(r.columnaId) ?? null)} className="text-xs font-medium text-primary hover:underline">
+          {t("configure")}
+        </button>
+        <button type="button" onClick={() => quitar(r)} disabled={busyId === r.columnaId} className="text-xs text-destructive hover:underline">
+          {t("colRemove")}
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
-      {/* En este tablero: orden + visible/fija + color + configurar + quitar */}
+      {/* En este tablero: orden (por bloque) + visible/fija + color + configurar + quitar */}
       <section className="space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold">{t("colInBoard")}</h3>
           <p className="text-xs text-muted-foreground">{boardMode ? te("boardMode") : te("personalMode")}</p>
         </div>
-        <ul className="divide-y rounded-md border">
-          {rows.length === 0 && <li className="px-3 py-4 text-sm text-muted-foreground">{t("colNoneInBoard")}</li>}
-          {rows.map((r, i) => (
-            <li key={r.columnaId} className={"flex items-center gap-3 px-3 py-2 " + (r.visible ? "" : "opacity-50")}>
-              <div className="flex flex-col">
-                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveUp")}>
-                  <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
-                </button>
-                <button type="button" onClick={() => move(i, 1)} disabled={i === rows.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveDown")}>
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
-                </button>
-              </div>
-              <label className="flex cursor-pointer items-center gap-2">
-                <Checkbox checked={r.visible} onCheckedChange={(v) => patch(i, { visible: v === true })} />
-                <span className="text-sm font-medium">{tRoot(r.labelKey)}</span>
-              </label>
-              <span className="text-xs text-muted-foreground">· {r.clave} · {r.tipo}</span>
-              <label className="ml-2 inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
-                <Checkbox checked={r.fijo} onCheckedChange={(v) => patch(i, { fijo: v === true })} />
-                {te("pinned")}
-              </label>
-              <div className="ml-auto flex items-center gap-3">
-                <ColorControl value={colors[r.clave] ?? null} disabled={busyId === r.columnaId} onPick={(hex) => setColor(r, hex)} clearLabel={t("colClearColor")} />
-                <button type="button" onClick={() => setConfigCol(catById.get(r.columnaId) ?? null)} className="text-xs font-medium text-primary hover:underline">
-                  {t("configure")}
-                </button>
-                <button type="button" onClick={() => quitar(r)} disabled={busyId === r.columnaId} className="text-xs text-destructive hover:underline">
-                  {t("colRemove")}
-                </button>
-              </div>
-            </li>
-          ))}
+        <ul className="space-y-2">
+          {blocks.length === 0 && (
+            <li className="rounded-md border px-3 py-4 text-sm text-muted-foreground">{t("colNoneInBoard")}</li>
+          )}
+          {blocks.map((b, bi) => {
+            const isChain = !!b.group && b.items.length > 1;
+            return (
+              <li key={b.group ? `g:${b.group}:${b.items[0].row.columnaId}` : `c:${b.items[0].row.columnaId}`} className="flex items-stretch overflow-hidden rounded-md border">
+                <div className="flex flex-col justify-center gap-0.5 border-r bg-muted/30 px-2">
+                  <button type="button" onClick={() => moveBlock(bi, -1)} disabled={bi === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveUp")}>
+                    <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
+                  </button>
+                  <button type="button" onClick={() => moveBlock(bi, 1)} disabled={bi === blocks.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveDown")}>
+                    <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
+                  </button>
+                </div>
+                <div className="min-w-0 flex-1">
+                  {isChain ? (
+                    <div>
+                      <div className="flex items-center gap-1.5 border-b bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
+                        {t("colChain")} · {b.group}
+                      </div>
+                      <ul className="divide-y">
+                        {b.items.map((x) => (
+                          <li key={x.row.columnaId}>{memberRow(x.row, x.index)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    memberRow(b.items[0].row, b.items[0].index)
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
         <div className="flex justify-end">
           <Button type="button" size="sm" onClick={saveOrder} disabled={busy}>
