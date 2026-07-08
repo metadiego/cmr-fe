@@ -830,5 +830,9 @@
     "stepConsult": "In consult",
     "stepAttended": "Attended",
     "now": "now"
+  },
+  "prescripcion": {
+    "title": "Prescription",
+    "none": "Nothing prescribed"
   }
 }

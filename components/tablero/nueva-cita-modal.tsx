@@ -31,6 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { PrescripcionGrid } from "@/components/tablero/prescripcion-grid";
 
 const NO_MEDICO = "__none__";
 
@@ -394,6 +395,9 @@ export function NuevaCitaModal({
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("notes")}</span>
             <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />
           </label>
+
+          {/* Prescripción (plug-and-play): la sección se auto-oculta si no hay catálogo. */}
+          {fila.id && <PrescripcionGrid citaId={fila.id} centroId={centroId} />}
         </div>
 
         {/* Pie */}
