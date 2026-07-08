@@ -36,6 +36,7 @@
   },
   "tableroBoard": {
     "live": "Live",
+    "addCita": "Add appointment",
     "personalize": "Personalize",
     "personalizeTitle": "Your workspace",
     "personalizeHint": "Changes only for you. No one else sees them.",
@@ -859,5 +860,21 @@
       "agendar_cita": { "desc": "Schedule the patient's next appointment." },
       "prescripcion": { "desc": "Show the prescription grid inside the attention modal." }
     }
+  },
+  "agregarCita": {
+    "eyebrow": "Walk-in",
+    "title": "Add appointment",
+    "subline": "Register a patient on today's board (created as confirmed).",
+    "today": "Today",
+    "patient": "Patient",
+    "type": "Type",
+    "doctor": "Doctor",
+    "noDoctor": "No doctor assigned",
+    "time": "Time",
+    "firstTime": "First visit",
+    "notes": "Notes",
+    "notesPlaceholder": "Reason / notes…",
+    "cancel": "Cancel",
+    "save": "Add to board"
   }
 }

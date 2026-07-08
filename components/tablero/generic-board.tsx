@@ -28,7 +28,10 @@ import {
 import { TableroDinamico } from "@/components/agenda/tablero-dinamico";
 import { TableroAcciones } from "@/components/tablero/tablero-acciones";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
+import { AgregarCitaModal } from "@/components/tablero/agregar-cita-modal";
 import { readDensity, type Density } from "@/hooks/use-board-prefs";
+import { useCan } from "@/hooks/use-can";
+import { Button } from "@/components/ui/button";
 
 function todayISO(): string {
   const d = new Date();
@@ -48,6 +51,8 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const t = useTranslations("tableroBoard");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const { can } = useCan();
+  const [adding, setAdding] = React.useState(false);
 
   const regRes = useResource<TableroRegistro[]>(() => getTableros());
   const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === tablero);
@@ -136,6 +141,9 @@ export function GenericBoard({ tablero }: { tablero: string }) {
               </SelectContent>
             </Select>
           )}
+          {registro?.entidad === "cita" && can("citas.create") && centroId && (
+            <Button size="sm" onClick={() => setAdding(true)}>{t("addCita")}</Button>
+          )}
         </div>
       </div>
 
@@ -218,6 +226,15 @@ export function GenericBoard({ tablero }: { tablero: string }) {
           </>
         );
       })()}
+
+      {adding && centroId && (
+        <AgregarCitaModal
+          tablero={tablero}
+          centroId={centroId}
+          onClose={() => setAdding(false)}
+          onSaved={filasRes.refresh}
+        />
+      )}
     </div>
   );
 }

@@ -36,6 +36,7 @@
   },
   "tableroBoard": {
     "live": "En vivo",
+    "addCita": "Agregar cita",
     "personalize": "Personalizar",
     "personalizeTitle": "Tu espacio de trabajo",
     "personalizeHint": "Cambios solo para ti. Nadie más los ve.",
@@ -859,5 +860,21 @@
       "agendar_cita": { "desc": "Agenda la próxima cita del paciente." },
       "prescripcion": { "desc": "Muestra la grilla de prescripción dentro del modal de atención." }
     }
+  },
+  "agregarCita": {
+    "eyebrow": "Walk-in",
+    "title": "Agregar cita",
+    "subline": "Registra un paciente en el tablero de hoy (queda confirmada).",
+    "today": "Hoy",
+    "patient": "Paciente",
+    "type": "Tipo",
+    "doctor": "Médico",
+    "noDoctor": "Sin médico asociado",
+    "time": "Hora",
+    "firstTime": "Primera vez",
+    "notes": "Observación",
+    "notesPlaceholder": "Motivo / notas…",
+    "cancel": "Cancelar",
+    "save": "Agregar al tablero"
   }
 }
