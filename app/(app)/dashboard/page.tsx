@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getMe, type Me } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/types";
+import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 
 type State =
@@ -19,6 +20,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const t = useTranslations("dashboard");
   const tCommon = useTranslations("common");
+  const { can } = useCan();
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [signingOut, setSigningOut] = React.useState(false);
 
@@ -60,6 +62,11 @@ export default function DashboardPage() {
           <Button variant="outline" size="sm" asChild>
             <Link href="/settings/tableros">{t("myBoards")}</Link>
           </Button>
+          {can("tablero.admin") && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/settings/tablero-modulos">{t("boardModules")}</Link>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

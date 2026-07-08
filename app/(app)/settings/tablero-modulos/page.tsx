@@ -1,0 +1,94 @@
+"use client";
+
+import * as React from "react";
+import { useTranslations } from "next-intl";
+
+import { getTableros, type TableroRegistro } from "@/lib/api/tablero";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getActiveCentro } from "@/lib/tenant";
+import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
+import { ModalModulosConfig } from "@/components/configuracion/modal-modulos-config";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Settings › Módulos del modal (ADMIN, gate `tablero.admin`). Conectar/desconectar
+// módulos pluggables del modal de post-acción por tablero (hoy: Prescripción).
+// Reusable: sirve para cualquier tablero con modal.
+export default function SettingsModalModulosPage() {
+  const t = useTranslations("settingsModulos");
+  const tRoot = useTranslations();
+  const { can, ready } = useCan();
+
+  const { state } = useResource<TableroRegistro[]>(() => getTableros());
+  const boards = (state.kind === "ok" ? state.data : []).filter((b) => b.esVertical !== false && b.activo);
+  const [picked, setPicked] = React.useState<string>("");
+  const tablero = picked || boards[0]?.clave || "";
+
+  const centrosRes = useResource<Centro[]>(() => getMyCentros());
+  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
+  const [pickedCentro, setPickedCentro] = React.useState<string>("");
+  const active = getActiveCentro();
+  const centroId = pickedCentro || (active && centros.some((c) => c.id === active) ? active : centros[0]?.id) || "";
+
+  if (ready && !can("tablero.admin")) {
+    return <p className="mx-auto max-w-lg px-6 py-16 text-center text-sm text-muted-foreground">{t("noAccess")}</p>;
+  }
+
+  return (
+    <div className="mx-auto max-w-lg px-6 py-12">
+      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+
+      <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("selectBoard")}
+            </label>
+            <Select value={tablero} onValueChange={setPicked}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectBoard")} />
+              </SelectTrigger>
+              <SelectContent>
+                {boards.map((b) => (
+                  <SelectItem key={b.clave} value={b.clave}>
+                    {tRoot(b.labelKey)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("selectCenter")}
+            </label>
+            <Select value={centroId} onValueChange={setPickedCentro}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("selectCenter")} />
+              </SelectTrigger>
+              <SelectContent>
+                {centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {tablero && centroId && (
+          <div className="mt-6 border-t pt-6">
+            <ModalModulosConfig tablero={tablero} centroId={centroId} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

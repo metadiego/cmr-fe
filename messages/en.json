@@ -755,7 +755,8 @@
     "appearance": "Appearance",
     "loading": "Loading context…",
     "loadError": "Could not load <code>/auth/me</code>: {message}",
-    "myBoards": "My boards"
+    "myBoards": "My boards",
+    "boardModules": "Modules"
   },
   "settingsTableros": {
     "title": "My boards",
@@ -829,10 +830,28 @@
     "stepPresent": "Present",
     "stepConsult": "In consult",
     "stepAttended": "Attended",
-    "now": "now"
+    "now": "now",
+    "prescriptionRequired": "Select a prescription or mark “No prescription” to continue."
   },
   "prescripcion": {
     "title": "Prescription",
-    "none": "Nothing prescribed"
+    "none": "No prescription",
+    "required": "Required: enter a quantity or mark “No prescription”."
+  },
+  "settingsModulos": {
+    "title": "Modal modules",
+    "description": "Connect or disconnect modules of the attention modal, per board and center. Admins only.",
+    "selectBoard": "Board",
+    "selectCenter": "Center",
+    "noAccess": "You don't have access to this setting."
+  },
+  "modalModulos": {
+    "noModal": "This board has no action modal configured.",
+    "hint": "Changes apply per board and affect all users of that board.",
+    "saved": "Saved",
+    "prescripcion": {
+      "label": "Prescription",
+      "desc": "Show the prescription grid inside the attention modal."
+    }
   }
 }

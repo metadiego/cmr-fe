@@ -131,8 +131,10 @@ export function getTableros(): Promise<TableroRegistro[]> {
 }
 
 // GET /tablero/definicion?tablero= — columns + states + transitions + subtypes.
-export function getDefinicion(tablero: string): Promise<TableroDefinicion> {
-  return apiFetch<TableroDefinicion>(`/tablero/definicion?tablero=${encodeURIComponent(tablero)}`);
+// Tenant-scoped: la composición (incl. render override por-tablero) es POR CENTRO,
+// así que pasar centroId para leer la definición efectiva de ese centro.
+export function getDefinicion(tablero: string, centroId?: string): Promise<TableroDefinicion> {
+  return apiFetch<TableroDefinicion>(`/tablero/definicion?tablero=${encodeURIComponent(tablero)}`, {}, centroId);
 }
 
 // GET /tablero/filas?tablero=&fecha=(&subTipo=) — projected rows for a day.
@@ -186,6 +188,23 @@ export function colorColumna(
     method: "POST",
     body: JSON.stringify({ tablero, columnaId, color }),
   });
+}
+
+// POST /tablero/composicion — set one column's per-tablero `render` override
+// (merges over the catalog render; composición wins). Single-column upsert; does
+// NOT touch orden/visible/color. Used to plug/unplug modal modules per board
+// (e.g. { prescripcion:false }). Send the FULL render object (BE replaces it).
+export function setComposicionRender(
+  tablero: string,
+  columnaId: string,
+  render: Record<string, unknown>,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(
+    `/tablero/composicion`,
+    { method: "POST", body: JSON.stringify({ tablero, columnaId, render }) },
+    centroId,
+  );
 }
 
 // POST /tablero/accion — execute a declarative transition. Fields go in payload

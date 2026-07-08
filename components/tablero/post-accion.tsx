@@ -10,6 +10,7 @@ export interface PostAccionProps {
   tablero: string;
   fila: CitaFila;
   centroId?: string;
+  render?: Record<string, unknown> | null; // config por-tablero de la columna disparadora
   onClose: () => void;
   onSaved?: () => void;
 }

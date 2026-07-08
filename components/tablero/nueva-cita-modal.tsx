@@ -72,12 +72,14 @@ export function NuevaCitaModal({
   tablero,
   fila,
   centroId,
+  render,
   onClose,
   onSaved,
 }: {
   tablero: string;
   fila: CitaFila;
   centroId?: string;
+  render?: Record<string, unknown> | null; // config por-tablero de la columna (postAccion, prescripcion…)
   onClose: () => void;
   onSaved?: () => void;
 }) {
@@ -85,6 +87,12 @@ export function NuevaCitaModal({
   const tRoot = useTranslations();
   const locale = useLocale();
   const { can } = useCan();
+
+  // Módulo prescripción PLUGGED por config (por-tablero). Ausente = enchufado
+  // (default true); admin lo apaga con render.prescripcion:false. Cero hardcode.
+  const prescripcionEnabled = render?.prescripcion !== false;
+  const prescripcionRequerida = render?.prescripcionRequerida !== false; // obligatoria por defecto cuando está plugged
+  const [prescripcionOk, setPrescripcionOk] = React.useState(true);
 
   const pacienteId = String(fila.pacienteId ?? "");
   const paciente = String(fila.paciente ?? fila.pacienteNombre ?? "");
@@ -238,12 +246,14 @@ export function NuevaCitaModal({
   }
 
   const anyBusy = busy !== null;
+  // Obligatoriedad de prescripción: bloquea finalizar si está plugged+requerida y no resuelta.
+  const bloqueaPrescripcion = prescripcionEnabled && prescripcionRequerida && !prescripcionOk;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-xl">
+      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
         {/* Héroe */}
-        <div className="relative bg-gradient-to-br from-primary/12 via-primary/5 to-transparent px-6 pt-6 pb-5">
+        <div className="relative shrink-0 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent px-6 pt-6 pb-5">
           <div className="flex items-start gap-4 pr-8">
             <div className="grid size-12 shrink-0 place-items-center rounded-full bg-primary/15 text-base font-bold text-primary ring-2 ring-primary/25 ring-offset-2 ring-offset-background">
               {initials(paciente)}
@@ -300,8 +310,8 @@ export function NuevaCitaModal({
           </div>
         </div>
 
-        {/* Cuerpo */}
-        <div className="space-y-5 px-6 py-5">
+        {/* Cuerpo (scrollable) */}
+        <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
           {historial.length > 0 && (
             <div className="space-y-1.5">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("recentVisits")}</span>
@@ -396,18 +406,24 @@ export function NuevaCitaModal({
             <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />
           </label>
 
-          {/* Prescripción (plug-and-play): la sección se auto-oculta si no hay catálogo. */}
-          {fila.id && <PrescripcionGrid citaId={fila.id} centroId={centroId} />}
+          {/* Prescripción: plugged por config (render.prescripcion) + auto-oculta si no hay catálogo. */}
+          {prescripcionEnabled && fila.id && (
+            <PrescripcionGrid citaId={fila.id} centroId={centroId} onValidity={setPrescripcionOk} />
+          )}
         </div>
 
         {/* Pie */}
-        <div className="flex items-center gap-2 border-t bg-muted/30 px-6 py-4">
+        <div className="shrink-0 flex flex-col gap-2 border-t bg-muted/30 px-6 py-4">
+          {bloqueaPrescripcion && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t("prescriptionRequired")}</p>
+          )}
+          <div className="flex items-center gap-2">
           <Button type="button" variant="ghost" onClick={onSalir} disabled={anyBusy}>
             {t("exit")}
           </Button>
           <div className="ml-auto flex items-center gap-2">
             {canWrite && (
-              <Button type="button" variant="outline" onClick={onAbierto} disabled={anyBusy || tipos.length === 0}>
+              <Button type="button" variant="outline" onClick={onAbierto} disabled={anyBusy || tipos.length === 0 || bloqueaPrescripcion}>
                 {t("open")}
               </Button>
             )}
@@ -416,15 +432,16 @@ export function NuevaCitaModal({
               variant="outline"
               className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
               onClick={onAlta}
-              disabled={anyBusy}
+              disabled={anyBusy || bloqueaPrescripcion}
             >
               {t("discharge")}
             </Button>
             {canWrite && (
-              <Button type="button" onClick={onGuardar} disabled={anyBusy || !tipoId || !fecha}>
+              <Button type="button" onClick={onGuardar} disabled={anyBusy || !tipoId || !fecha || bloqueaPrescripcion}>
                 {t("save")}
               </Button>
             )}
+          </div>
           </div>
         </div>
       </DialogContent>

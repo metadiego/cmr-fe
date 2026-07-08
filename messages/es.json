@@ -755,7 +755,8 @@
     "appearance": "Apariencia",
     "loading": "Cargando contexto…",
     "loadError": "No se pudo cargar <code>/auth/me</code>: {message}",
-    "myBoards": "Mis tableros"
+    "myBoards": "Mis tableros",
+    "boardModules": "Módulos"
   },
   "settingsTableros": {
     "title": "Mis tableros",
@@ -829,10 +830,28 @@
     "stepPresent": "Presente",
     "stepConsult": "En consulta",
     "stepAttended": "Atendido",
-    "now": "ahora"
+    "now": "ahora",
+    "prescriptionRequired": "Selecciona una prescripción o marca «Sin prescripción» para continuar."
   },
   "prescripcion": {
     "title": "Prescripción",
-    "none": "No se prescribió nada"
+    "none": "Sin prescripción",
+    "required": "Obligatorio: ingresa una cantidad o marca «Sin prescripción»."
+  },
+  "settingsModulos": {
+    "title": "Módulos del modal",
+    "description": "Conecta o desconecta módulos del modal de atención, por tablero y centro. Solo administradores.",
+    "selectBoard": "Tablero",
+    "selectCenter": "Centro",
+    "noAccess": "No tienes acceso a esta configuración."
+  },
+  "modalModulos": {
+    "noModal": "Este tablero no tiene un modal de acción configurado.",
+    "hint": "Los cambios aplican por tablero y afectan a todos los usuarios de ese tablero.",
+    "saved": "Guardado",
+    "prescripcion": {
+      "label": "Prescripción",
+      "desc": "Muestra la grilla de prescripción dentro del modal de atención."
+    }
   }
 }
