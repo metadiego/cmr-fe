@@ -803,5 +803,20 @@
     "estado": "status",
     "database": "database",
     "corsHint": "Likely CORS block or unreachable backend: confirm the frontend origin is in the backend's <code>CORS_ORIGINS</code>."
+  },
+  "nuevaCita": {
+    "eyebrow": "New appointment",
+    "patient": "Patient",
+    "generateRecord": "Generate #",
+    "doctor": "Doctor",
+    "noDoctor": "No doctor assigned",
+    "date": "Date",
+    "type": "Type",
+    "notes": "Notes",
+    "notesPlaceholder": "Notes for the next appointment…",
+    "save": "Save",
+    "open": "Open",
+    "discharge": "DISCHARGE",
+    "exit": "Exit"
   }
 }

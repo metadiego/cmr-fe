@@ -54,6 +54,16 @@ export function updatePaciente(
   });
 }
 
+// Assign the next consecutive record number (numeroHistoria) for the patient's
+// center (POST /pacientes/:id/asignar-record). Used when a patient has no record
+// yet. Tenant-scoped: pass centroId so the BE picks the right center's sequence.
+export function asignarRecord(id: string, centroId?: string): Promise<Paciente> {
+  return apiFetch<Paciente>(`/pacientes/${id}/asignar-record`, {
+    method: "POST",
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+}
+
 // Soft-delete: the BE sets activo=false (clinical history is kept) and the
 // patient drops out of the list. Reactivate with updatePaciente(id,{activo:true}).
 export function deletePaciente(id: string, centroId?: string): Promise<void> {

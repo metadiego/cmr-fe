@@ -803,5 +803,20 @@
     "estado": "estado",
     "database": "base de datos",
     "corsHint": "Probable bloqueo CORS o backend inaccesible: confirma que el origen del frontend esté en <code>CORS_ORIGINS</code> del backend."
+  },
+  "nuevaCita": {
+    "eyebrow": "Nueva cita",
+    "patient": "Paciente",
+    "generateRecord": "Generar #",
+    "doctor": "Médico",
+    "noDoctor": "Sin médico asociado",
+    "date": "Fecha",
+    "type": "Tipo",
+    "notes": "Observación",
+    "notesPlaceholder": "Notas de la próxima cita…",
+    "save": "Guardar",
+    "open": "Abierto",
+    "discharge": "ALTA",
+    "exit": "Salir"
   }
 }

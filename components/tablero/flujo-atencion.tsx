@@ -8,6 +8,7 @@ import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PostAccionHost } from "@/components/tablero/post-accion";
 
 function fmtHora(v: unknown): string | null {
   if (v == null || v === "") return null;
@@ -46,6 +47,9 @@ export function FlujoAtencion({
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState<string | null>(null);
   const [opt, setOpt] = React.useState<Record<string, boolean>>({});
+  // Modal de post-acción (p.ej. "Nueva cita" al marcar asistido). La clave sale
+  // de `columna.render.postAccion` (dato), enrutada por PostAccionHost.
+  const [postAccion, setPostAccion] = React.useState<string | null>(null);
 
   const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
   const fwdOf = (col: ColumnaEfectiva) => {
@@ -84,6 +88,12 @@ export function FlujoAtencion({
     try {
       await ejecutarAccion({ tablero, entidadId: fila.id, accion }, centroId);
       onSaved?.();
+      // Tras avanzar (no al desmarcar), si la columna define un postAccion,
+      // abrir su modal registrado (data-driven, no hardcode).
+      if (!checked) {
+        const pa = (col.render as Record<string, unknown> | null)?.postAccion as string | undefined;
+        if (pa) setPostAccion(pa);
+      }
     } catch (err) {
       setOpt((o) => {
         const n = { ...o };
@@ -97,6 +107,7 @@ export function FlujoAtencion({
   }
 
   return (
+    <>
     <div className="flex items-center justify-center gap-1">
       {orderedCols.map((col, i) => {
         const checked = isChecked(col);
@@ -137,5 +148,16 @@ export function FlujoAtencion({
         );
       })}
     </div>
+    {postAccion && (
+      <PostAccionHost
+        postAccion={postAccion}
+        tablero={tablero}
+        fila={fila}
+        centroId={centroId}
+        onClose={() => setPostAccion(null)}
+        onSaved={onSaved}
+      />
+    )}
+    </>
   );
 }
