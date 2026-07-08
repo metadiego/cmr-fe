@@ -61,6 +61,9 @@ export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   // Renderer especial por DATO (render.kind), no por tipo → reusable sin tocar el
   // enum de tipos del BE. "factura" = resumen de la factura (nº/monto/modo/usuario/saldo).
   if ((col.render as Record<string, unknown> | null)?.kind === "factura") return <FacturaCell value={value} />;
+  // Defensivo: un binding que resuelve a OBJETO (p.ej. cita.factura) NUNCA debe caer
+  // a "[object Object]"; lo pinta el FacturaCell (maneja shape/null).
+  if (value != null && typeof value === "object") return <FacturaCell value={value} />;
   if (col.tipo === "badge") {
     // Color por-VALOR opcional (dato: render.valueColors {valor:hex}); si no, el
     // color fijo de la columna. Label humanizado (borrador → Borrador). Sin hardcode.
