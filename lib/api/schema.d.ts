@@ -5758,6 +5758,13 @@ export interface components {
             hora?: string;
             horaFin?: string;
             esPrimeraVez?: boolean;
+            /**
+             * @description Estado INICIAL de la cita. Default 'programada' (agenda/call-center). Atención puede crear una cita del
+             *     día directamente 'confirmada' para que entre al tablero (que filtra visibleEnAtencion). Allowlist BE:
+             *     solo programada|confirmada al crear.
+             * @enum {string}
+             */
+            estado?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
             /** @enum {string} */
             canal?: "atencion" | "callcenter" | "webhook" | "ia";
             motivo?: string;

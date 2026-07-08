@@ -181,6 +181,9 @@ export function NuevaCitaModal({
         fecha: f,
         ...(medicoId !== NO_MEDICO ? { medicoId } : {}),
         ...(notas.trim() ? { notas: notas.trim() } : {}),
+        // Desde atención, una cita PARA HOY entra al tablero como confirmada
+        // (BE: default programada). Futuras → omitir (programada). Ver POST /citas.
+        ...(f === todayISO() ? { estado: "confirmada" } : {}),
       } as Parameters<typeof createCita>[0],
       centroId,
     );
