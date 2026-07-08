@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import type { Opcion, Transicion } from "@/lib/api/tablero";
@@ -56,14 +56,38 @@ function FacturaCell({ value }: { value: unknown }) {
   );
 }
 
+// Tipo de consulta como badge coloreado (render.kind="tipoConsulta"). Acepta objeto
+// {clave,nombre,color} (ideal BE) o string (mínimo). Reusable en cualquier tablero.
+function TipoConsultaCell({ value }: { value: unknown }) {
+  const o = value && typeof value === "object" ? (value as { nombre?: unknown; color?: unknown }) : null;
+  const nombre = o?.nombre != null ? String(o.nombre) : value != null && value !== "" ? String(value) : "";
+  if (!nombre) return <span className="text-muted-foreground">—</span>;
+  const color = o?.color ? String(o.color) : null;
+  const style = color ? { color, borderColor: color, backgroundColor: `color-mix(in srgb, ${color} 14%, transparent)` } : undefined;
+  return <Badge variant="secondary" style={style}>{nombre}</Badge>;
+}
+
+// Fecha corta y legible (binding fecha, p.ej. cita.proxCita). null → "—".
+function fmtFecha(v: unknown, locale: string): string {
+  if (v == null || v === "") return "—";
+  const s = String(v);
+  const d = new Date(s.length <= 10 ? s + "T00:00:00" : s);
+  return Number.isNaN(d.getTime())
+    ? s
+    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Puerto_Rico" }).format(d);
+}
+
 export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
+  const locale = useLocale();
   const text = value == null || value === "" ? "—" : String(value);
-  // Renderer especial por DATO (render.kind), no por tipo → reusable sin tocar el
-  // enum de tipos del BE. "factura" = resumen de la factura (nº/monto/modo/usuario/saldo).
-  if ((col.render as Record<string, unknown> | null)?.kind === "factura") return <FacturaCell value={value} />;
-  // Defensivo: un binding que resuelve a OBJETO (p.ej. cita.factura) NUNCA debe caer
-  // a "[object Object]"; lo pinta el FacturaCell (maneja shape/null).
+  const kind = (col.render as Record<string, unknown> | null)?.kind;
+  // Renderers especiales por DATO (render.kind), no por tipo → reusables sin tocar
+  // el enum de tipos del BE.
+  if (kind === "factura") return <FacturaCell value={value} />;
+  if (kind === "tipoConsulta") return <TipoConsultaCell value={value} />;
+  // Defensivo: un binding que resuelve a OBJETO NUNCA debe caer a "[object Object]".
   if (value != null && typeof value === "object") return <FacturaCell value={value} />;
+  if (col.tipo === "fecha") return <span className="whitespace-nowrap tabular-nums">{fmtFecha(value, locale)}</span>;
   if (col.tipo === "badge") {
     // Color por-VALOR opcional (dato: render.valueColors {valor:hex}); si no, el
     // color fijo de la columna. Label humanizado (borrador → Borrador). Sin hardcode.
