@@ -805,7 +805,8 @@
     "corsHint": "Likely CORS block or unreachable backend: confirm the frontend origin is in the backend's <code>CORS_ORIGINS</code>."
   },
   "nuevaCita": {
-    "eyebrow": "New appointment",
+    "eyebrow": "Visit completed",
+    "subline": "Schedule the patient's next appointment",
     "patient": "Patient",
     "generateRecord": "Generate #",
     "doctor": "Doctor",
@@ -814,9 +815,20 @@
     "type": "Type",
     "notes": "Notes",
     "notesPlaceholder": "Notes for the next appointment…",
-    "save": "Save",
+    "save": "Save appointment",
     "open": "Open",
     "discharge": "DISCHARGE",
-    "exit": "Exit"
+    "exit": "Exit",
+    "whenBack": "When do they return?",
+    "quick1w": "1 week",
+    "quick2w": "2 weeks",
+    "quick1m": "1 month",
+    "quick3m": "3 months",
+    "custom": "Other date",
+    "recentVisits": "Recent visits",
+    "stepPresent": "Present",
+    "stepConsult": "In consult",
+    "stepAttended": "Attended",
+    "now": "now"
   }
 }

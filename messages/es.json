@@ -805,7 +805,8 @@
     "corsHint": "Probable bloqueo CORS o backend inaccesible: confirma que el origen del frontend esté en <code>CORS_ORIGINS</code> del backend."
   },
   "nuevaCita": {
-    "eyebrow": "Nueva cita",
+    "eyebrow": "Atención completada",
+    "subline": "Agenda la próxima cita del paciente",
     "patient": "Paciente",
     "generateRecord": "Generar #",
     "doctor": "Médico",
@@ -814,9 +815,20 @@
     "type": "Tipo",
     "notes": "Observación",
     "notesPlaceholder": "Notas de la próxima cita…",
-    "save": "Guardar",
+    "save": "Guardar cita",
     "open": "Abierto",
     "discharge": "ALTA",
-    "exit": "Salir"
+    "exit": "Salir",
+    "whenBack": "¿Cuándo regresa?",
+    "quick1w": "1 semana",
+    "quick2w": "2 semanas",
+    "quick1m": "1 mes",
+    "quick3m": "3 meses",
+    "custom": "Otra fecha",
+    "recentVisits": "Últimas visitas",
+    "stepPresent": "Presente",
+    "stepConsult": "En consulta",
+    "stepAttended": "Atendido",
+    "now": "ahora"
   }
 }

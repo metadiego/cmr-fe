@@ -227,6 +227,15 @@ export function getHistorial(id: string, centroId?: string): Promise<CitaEvento[
   return apiFetch<CitaEvento[]>(`/citas/${id}/historial`, {}, centroId);
 }
 
+// Recent visits for a patient (most recent first), tenant-scoped. Used by the
+// "Nueva cita" modal to show clinical context. Returns the unwrapped array.
+export function getVisitasRecientes(
+  pacienteId: string,
+  centroId?: string,
+): Promise<Cita[]> {
+  return apiFetch<Cita[]>(`/citas?pacienteId=${pacienteId}&limit=6`, {}, centroId);
+}
+
 // Appointment type catalog (medica / seguimiento / control, each requiereMedico).
 export async function getTiposCita(): Promise<TipoCita[]> {
   const res = (await apiFetch(`/citas/tipos`)) as unknown;
