@@ -37,6 +37,7 @@
   "tableroBoard": {
     "live": "En vivo",
     "addCita": "Agregar cita",
+    "balance": "Saldo",
     "personalize": "Personalizar",
     "personalizeTitle": "Tu espacio de trabajo",
     "personalizeHint": "Cambios solo para ti. Nadie más los ve.",

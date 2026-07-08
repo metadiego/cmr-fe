@@ -37,6 +37,7 @@
   "tableroBoard": {
     "live": "Live",
     "addCita": "Add appointment",
+    "balance": "Balance",
     "personalize": "Personalize",
     "personalizeTitle": "Your workspace",
     "personalizeHint": "Changes only for you. No one else sees them.",

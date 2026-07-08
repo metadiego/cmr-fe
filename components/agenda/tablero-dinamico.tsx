@@ -24,8 +24,43 @@ export function colColor(col: ColumnaEfectiva): string | null {
   return userColor ?? col.color ?? null;
 }
 
+// Resumen de factura (tipo REUSABLE "factura"): el binding trae un objeto
+// { numero, total, saldo, estado, modoPago, usuario }. Cualquier tablero de cita
+// puede componer una columna tipo "factura" (p.ej. la columna "pago" de atención).
+function FacturaCell({ value }: { value: unknown }) {
+  const t = useTranslations("tableroBoard");
+  const f = (value && typeof value === "object" ? value : null) as
+    | { numero?: unknown; total?: unknown; saldo?: unknown; estado?: unknown; modoPago?: unknown; usuario?: unknown }
+    | null;
+  if (!f || (f.numero == null && !f.estado)) return <span className="text-muted-foreground">—</span>;
+  const estado = String(f.estado ?? "");
+  const tone =
+    estado === "borrador" ? "#D97706" : estado === "anulada" ? "#E11D48" : "#15803D";
+  const saldo = Number(f.saldo ?? 0);
+  const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
+  const sub = [f.modoPago, f.usuario].map((x) => (x == null ? "" : String(x))).filter(Boolean).join(" · ");
+  return (
+    <div className="flex flex-col gap-0.5 text-xs leading-tight">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {estado && (
+          <span className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold" style={{ color: tone, backgroundColor: `color-mix(in srgb, ${tone} 14%, transparent)` }}>
+            {estado.charAt(0).toUpperCase() + estado.slice(1)}
+          </span>
+        )}
+        {f.numero != null && <span className="font-mono tabular-nums text-muted-foreground">F{String(f.numero)}</span>}
+        {f.total != null && <span className="font-semibold tabular-nums">{money(f.total)}</span>}
+      </div>
+      {sub && <span className="truncate text-muted-foreground">{sub}</span>}
+      {saldo > 0 && <span className="font-medium text-amber-600 dark:text-amber-400">{t("balance")}: {money(saldo)}</span>}
+    </div>
+  );
+}
+
 export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   const text = value == null || value === "" ? "—" : String(value);
+  // Renderer especial por DATO (render.kind), no por tipo → reusable sin tocar el
+  // enum de tipos del BE. "factura" = resumen de la factura (nº/monto/modo/usuario/saldo).
+  if ((col.render as Record<string, unknown> | null)?.kind === "factura") return <FacturaCell value={value} />;
   if (col.tipo === "badge") {
     // Color por-VALOR opcional (dato: render.valueColors {valor:hex}); si no, el
     // color fijo de la columna. Label humanizado (borrador → Borrador). Sin hardcode.
