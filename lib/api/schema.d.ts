@@ -6434,9 +6434,9 @@ export interface components {
             clave: string;
             labelKey: string;
             /** @enum {string} */
-            tipo: "readonly" | "texto" | "select" | "numero" | "calculado";
+            tipo: "readonly" | "numero" | "texto" | "select" | "calculado";
             /** @enum {string} */
-            rol: "accion" | "cantidad" | "precio" | "producto" | "subtotal" | "descuento" | "impuesto" | "tarifa" | "multiplicador" | "informativo";
+            rol: "accion" | "cantidad" | "precio" | "subtotal" | "descuento" | "impuesto" | "producto" | "tarifa" | "multiplicador" | "informativo";
             orden: number;
             requerido: boolean;
             visible: boolean;

@@ -27,11 +27,15 @@ export function colColor(col: ColumnaEfectiva): string | null {
 export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   const text = value == null || value === "" ? "—" : String(value);
   if (col.tipo === "badge") {
-    const c = colColor(col);
+    // Color por-VALOR opcional (dato: render.valueColors {valor:hex}); si no, el
+    // color fijo de la columna. Label humanizado (borrador → Borrador). Sin hardcode.
+    const raw = value == null || value === "" ? "" : String(value);
+    const valueColors = (col.render as Record<string, unknown> | null)?.valueColors as Record<string, string> | undefined;
+    const c = (raw && valueColors?.[raw]) || colColor(col);
     const style = c
       ? { color: c, borderColor: c, backgroundColor: `color-mix(in srgb, ${c} 12%, transparent)` }
       : undefined;
-    return <Badge variant="secondary" style={style}>{text}</Badge>;
+    return <Badge variant="secondary" style={style}>{raw ? titleCase(raw) : "—"}</Badge>;
   }
   if (col.tipo === "accion") return <span className="text-muted-foreground">·</span>;
   if (col.tipo === "derivado") {
