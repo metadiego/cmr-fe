@@ -6358,6 +6358,8 @@ export interface components {
             formaPagoId?: string;
             monto: number;
             notas?: string;
+            /** @description Referencia estructurada (p. ej. últimos 4 de tarjeta / nº de aprobación) para conciliación por tarjeta. */
+            referencia?: string;
         };
         PagosMultipleDto: {
             pagos: components["schemas"]["RegistrarPagoDto"][];
@@ -6373,6 +6375,7 @@ export interface components {
             fecha: string | null;
             usuarioId: string | null;
             notas: string | null;
+            referencia: string | null;
             /** Format: date-time */
             anuladoEn: string | null;
             anuladoPor: string | null;
