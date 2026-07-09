@@ -865,6 +865,23 @@
       "prescripcion": { "desc": "Muestra la grilla de prescripción dentro del modal de atención." }
     }
   },
+  "receipt": {
+    "print": "Imprimir recibo",
+    "previewTitle": "Vista previa del recibo",
+    "void": "ANULADA",
+    "invoice": "Factura",
+    "patientLabelEn": "Patient or Responsible Party",
+    "patientLabelEs": "Paciente o responsable",
+    "record": "Record",
+    "subtotal": "SubTotal",
+    "discount": "Descuento",
+    "tax": "Impuesto",
+    "total": "Total",
+    "paid": "Total pagado",
+    "balance": "Saldo",
+    "attendedBy": "Atendido por",
+    "thanks": "¡Gracias por su visita!"
+  },
   "facturacion": {
     "title": "Facturar consulta",
     "back": "Volver",

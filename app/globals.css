@@ -156,3 +156,33 @@
     @apply font-sans;
     }
 }
+/* Impresión de recibo térmico 80mm (Epson TM como impresora del sistema).
+   Aísla `.recibo-print`: oculta todo lo demás y dimensiona la página a 80mm.
+   Ver docs/specs/factura-formato-termico-fe.md. */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .recibo-print,
+  .recibo-print * {
+    visibility: visible !important;
+  }
+  .recibo-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0;
+    padding: 2mm;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .recibo-print img {
+    filter: grayscale(100%) contrast(1.15);
+  }
+  @page {
+    size: 80mm auto;
+    margin: 2mm;
+  }
+}

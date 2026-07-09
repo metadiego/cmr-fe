@@ -21,7 +21,12 @@ import {
   type FormaPago,
 } from "@/lib/api/facturas";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { toastError } from "@/lib/api/errors";
+import { buildRecibo } from "@/lib/factura/build-recibo";
+import { ReciboTermico } from "@/components/facturacion/recibo-termico";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PrinterIcon } from "@hugeicons/core-free-icons";
 import {
   Select,
   SelectContent,
@@ -48,6 +53,7 @@ export default function FacturacionPage() {
   const [paciente, setPaciente] = React.useState<Paciente | null>(null);
   const [catalogo, setCatalogo] = React.useState<Producto[]>([]);
   const [formas, setFormas] = React.useState<FormaPago[]>([]);
+  const [centros, setCentros] = React.useState<Centro[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [busy, setBusy] = React.useState(false);
 
@@ -59,12 +65,18 @@ export default function FacturacionPage() {
 
   React.useEffect(() => {
     let active = true;
-    Promise.all([getFactura(id, centro), getCatalogoFacturacion(centro), getFormasPago(centro)])
-      .then(([f, c, fp]) => {
+    Promise.all([
+      getFactura(id, centro),
+      getCatalogoFacturacion(centro),
+      getFormasPago(centro),
+      getMyCentros().catch(() => [] as Centro[]),
+    ])
+      .then(([f, c, fp, ce]) => {
         if (!active) return;
         setFactura(f);
         setCatalogo(c);
         setFormas(fp);
+        setCentros(ce);
         if (f.pacienteId) {
           getPaciente(String(f.pacienteId), centro).then((p) => active && setPaciente(p)).catch(() => {});
         }
@@ -97,6 +109,17 @@ export default function FacturacionPage() {
   const estado = String(factura.estado ?? "");
   const nombre = paciente ? [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ") : "";
   const record = paciente?.record ?? "";
+  // F1: header del recibo con el nombre del centro (el bloque fiscal legal por
+  // sucursal llega del BE — ver docs/specs/factura-datos-impresion-handoff-be.md).
+  const centroNombre = factura.clinicId
+    ? centros.find((c) => c.id === factura.clinicId)?.nombre
+    : undefined;
+  // El recibo usa el paciente proyectado en la factura; si el fetch aparte del
+  // paciente completo ya llegó, se prefiere para tener docId.
+  const facturaParaRecibo = paciente
+    ? { ...factura, paciente: { nombres: paciente.nombres, apellidos: paciente.apellidos, record: paciente.record, docId: paciente.docId } }
+    : factura;
+  const recibo = buildRecibo(facturaParaRecibo, { centroNombre });
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-6">
@@ -119,6 +142,10 @@ export default function FacturacionPage() {
             </span>
           )}
           <EstadoBadge estado={estado} />
+          <Button variant="outline" size="sm" className="no-print" onClick={() => window.print()}>
+            <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+            {tRoot("receipt.print")}
+          </Button>
         </div>
       </div>
 
@@ -133,6 +160,22 @@ export default function FacturacionPage() {
         busy={busy}
         run={run}
       />
+
+      {/* Vista previa del recibo térmico 80mm (el print CSS lo aísla al imprimir). */}
+      <section className="mt-8">
+        <div className="mb-3 flex items-center justify-between no-print">
+          <h2 className="text-sm font-semibold text-muted-foreground">{tRoot("receipt.previewTitle")}</h2>
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+            {tRoot("receipt.print")}
+          </Button>
+        </div>
+        <div className="flex justify-center rounded-xl border bg-muted/30 p-6">
+          <div className="shadow-lg ring-1 ring-border">
+            <ReciboTermico recibo={recibo} />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

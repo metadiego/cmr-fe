@@ -865,6 +865,23 @@
       "prescripcion": { "desc": "Show the prescription grid inside the attention modal." }
     }
   },
+  "receipt": {
+    "print": "Print receipt",
+    "previewTitle": "Receipt preview",
+    "void": "VOID",
+    "invoice": "Invoice",
+    "patientLabelEn": "Patient or Responsible Party",
+    "patientLabelEs": "Paciente o responsable",
+    "record": "Record",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "tax": "Tax",
+    "total": "Total",
+    "paid": "Total paid",
+    "balance": "Balance",
+    "attendedBy": "Attended by",
+    "thanks": "Thanks for your visit!"
+  },
   "facturacion": {
     "title": "Bill consultation",
     "back": "Back",
