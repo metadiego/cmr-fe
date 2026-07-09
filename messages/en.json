@@ -407,12 +407,14 @@
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
     "yearsOld": "{age} years old",
+    "allCenters": "All centers",
     "columns": {
       "name": "Name",
       "docId": "ID",
       "phone": "Phone",
       "email": "Email",
-      "status": "Status"
+      "status": "Status",
+      "centro": "Center"
     },
     "form": {
       "createTitle": "New patient",
@@ -429,9 +431,10 @@
       "docId": "ID",
       "sexo": "Sex",
       "sexoPlaceholder": "Select…",
-      "sexoM": "Male",
-      "sexoF": "Female",
+      "sexoFemenino": "Female",
+      "sexoMasculino": "Male",
       "sexoOtro": "Other",
+      "sexoDesconocido": "Unknown",
       "fechaNacimiento": "Date of birth",
       "nacionalidad": "Nationality",
       "telefono": "Phone",
@@ -439,7 +442,7 @@
       "email": "Email",
       "direccion": "Address",
       "zipcode": "ZIP code",
-      "numeroHistoria": "Record number",
+      "record": "Record number",
       "aseguradora": "Insurer",
       "created": "Patient created.",
       "updated": "Patient updated."

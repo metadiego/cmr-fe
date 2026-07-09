@@ -1783,10 +1783,58 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Asigna el siguiente RECORD (numeroHistoria) consecutivo POR CENTRO si el paciente no tiene.
+         * Asigna el siguiente RECORD consecutivo POR CENTRO si el paciente no tiene.
          *     Idempotente: si ya tiene record, lo devuelve sin cambiarlo. Para el AP-Dash (record vacío → generar).
          */
         post: operations["PacientesController_asignarRecord_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/paises": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GeoController_paises_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/estados": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GeoController_estados_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/geo/ciudades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GeoController_ciudades_v1"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5511,19 +5559,44 @@ export interface components {
             apellidos?: string;
             docId?: string;
             /** @enum {string} */
-            sexo?: "M" | "F" | "otro";
+            sexo?: "femenino" | "masculino" | "otro" | "desconocido";
             fechaNacimiento?: string;
+            fallecido?: boolean;
             telefono?: string;
+            telCasa?: string;
+            telOficina?: string;
             whatsapp?: string;
+            /** @enum {string} */
+            telPref?: "principal" | "casa" | "oficina" | "whatsapp";
             /** Format: email */
             email?: string;
             direccion?: string;
             zipcode?: string;
-            nacionalidad?: string;
-            numeroHistoria?: string;
-            aseguradora?: string;
+            /** Format: uuid */
+            ciudadId?: string;
+            /** Format: uuid */
+            estadoId?: string;
+            /** Format: uuid */
+            paisId?: string;
+            envDireccion?: string;
+            envZipcode?: string;
+            /** Format: uuid */
+            envCiudadId?: string;
+            /** Format: uuid */
+            envEstadoId?: string;
+            /** Format: uuid */
+            envPaisId?: string;
+            envioIgual?: boolean;
             /** Format: uuid */
             medicoId?: string;
+            /** Format: uuid */
+            atendidoPor?: string;
+            nacionalidad?: string;
+            record?: string;
+            aseguradora?: string;
+            esTestimonio?: boolean;
+            altaOriginal?: string;
+            creadoPor?: string;
             codigoLegacy?: string;
         };
         PacienteEntity: {
@@ -5531,7 +5604,7 @@ export interface components {
             apellidos: string | null;
             docId: string | null;
             /** @enum {string|null} */
-            sexo: "M" | "F" | "otro" | null;
+            sexo: "femenino" | "masculino" | "otro" | "desconocido" | null;
             fechaNacimiento: string | null;
             telefono: string | null;
             whatsapp: string | null;
@@ -5539,9 +5612,28 @@ export interface components {
             direccion: string | null;
             zipcode: string | null;
             nacionalidad: string | null;
-            numeroHistoria: string | null;
+            record: string | null;
             aseguradora: string | null;
             medicoId: string | null;
+            telCasa: string | null;
+            telOficina: string | null;
+            /** @enum {string|null} */
+            telPref: "principal" | "casa" | "oficina" | "whatsapp" | null;
+            ciudadId: string | null;
+            estadoId: string | null;
+            paisId: string | null;
+            envDireccion: string | null;
+            envCiudadId: string | null;
+            envEstadoId: string | null;
+            envPaisId: string | null;
+            envZipcode: string | null;
+            envioIgual: boolean;
+            atendidoPor: string | null;
+            fallecido: boolean;
+            esTestimonio: boolean;
+            /** Format: date-time */
+            altaOriginal: string | null;
+            creadoPor: string | null;
             codigoLegacy: string | null;
             activo: boolean;
             id: string;
@@ -5553,23 +5645,81 @@ export interface components {
         };
         UpdatePacienteDto: {
             nombres?: string;
+            activo?: boolean;
             apellidos?: string;
             docId?: string;
             /** @enum {string} */
-            sexo?: "M" | "F" | "otro";
+            sexo?: "femenino" | "masculino" | "otro" | "desconocido";
             fechaNacimiento?: string;
+            fallecido?: boolean;
             telefono?: string;
+            telCasa?: string;
+            telOficina?: string;
             whatsapp?: string;
+            /** @enum {string} */
+            telPref?: "principal" | "casa" | "oficina" | "whatsapp";
             /** Format: email */
             email?: string;
             direccion?: string;
             zipcode?: string;
-            nacionalidad?: string;
-            numeroHistoria?: string;
-            aseguradora?: string;
+            /** Format: uuid */
+            ciudadId?: string;
+            /** Format: uuid */
+            estadoId?: string;
+            /** Format: uuid */
+            paisId?: string;
+            envDireccion?: string;
+            envZipcode?: string;
+            /** Format: uuid */
+            envCiudadId?: string;
+            /** Format: uuid */
+            envEstadoId?: string;
+            /** Format: uuid */
+            envPaisId?: string;
+            envioIgual?: boolean;
             /** Format: uuid */
             medicoId?: string;
-            activo?: boolean;
+            /** Format: uuid */
+            atendidoPor?: string;
+            nacionalidad?: string;
+            record?: string;
+            aseguradora?: string;
+            esTestimonio?: boolean;
+            altaOriginal?: string;
+            creadoPor?: string;
+            codigoLegacy?: string;
+        };
+        PaisEntity: {
+            nombre: string;
+            iso2: string | null;
+            codigoLegacy: string | null;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        EstadoEntity: {
+            nombre: string;
+            abreviatura: string | null;
+            paisId: string | null;
+            codigoLegacy: string | null;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CiudadEntity: {
+            nombre: string;
+            estadoId: string | null;
+            paisId: string | null;
+            codigoLegacy: string | null;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         PersonalEntity: {
             nombre: string;
@@ -10941,6 +11091,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    GeoController_paises_v1: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaisEntity"][];
+                };
+            };
+        };
+    };
+    GeoController_estados_v1: {
+        parameters: {
+            query: {
+                paisId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoEntity"][];
+                };
+            };
+        };
+    };
+    GeoController_ciudades_v1: {
+        parameters: {
+            query: {
+                estadoId: string;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CiudadEntity"][];
                 };
             };
         };

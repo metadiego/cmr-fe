@@ -241,7 +241,7 @@ export function NuevaCitaModal({
     setBusy("record");
     try {
       const p = await asignarRecord(pacienteId, centroId);
-      setRecord(String((p as { numeroHistoria?: unknown }).numeroHistoria ?? ""));
+      setRecord(p.record ?? "");
     } catch (err) {
       toastError(err, tRoot);
     } finally {

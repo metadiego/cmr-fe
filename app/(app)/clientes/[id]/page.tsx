@@ -256,7 +256,7 @@ function PacienteDetail({
         </Card>
 
         <Card title={t("form.sectionClinical")}>
-          <InfoRow label={t("form.numeroHistoria")} value={p.numeroHistoria} />
+          <InfoRow label={t("form.record")} value={p.record} />
           <InfoRow label={t("form.aseguradora")} value={p.aseguradora} />
         </Card>
       </div>
@@ -312,9 +312,10 @@ function sexoLabel(
   t: ReturnType<typeof useTranslations>,
   sexo: Paciente["sexo"],
 ): string | null {
-  if (sexo === "M") return t("form.sexoM");
-  if (sexo === "F") return t("form.sexoF");
+  if (sexo === "femenino") return t("form.sexoFemenino");
+  if (sexo === "masculino") return t("form.sexoMasculino");
   if (sexo === "otro") return t("form.sexoOtro");
+  if (sexo === "desconocido") return t("form.sexoDesconocido");
   return null;
 }
 

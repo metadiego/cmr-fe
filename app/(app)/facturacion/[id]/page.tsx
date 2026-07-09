@@ -96,7 +96,7 @@ export default function FacturacionPage() {
 
   const estado = String(factura.estado ?? "");
   const nombre = paciente ? [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ") : "";
-  const record = paciente?.numeroHistoria ?? "";
+  const record = paciente?.record ?? "";
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-6">

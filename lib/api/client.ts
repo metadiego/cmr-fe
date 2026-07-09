@@ -88,8 +88,9 @@ export async function apiRequest<T>(
 export async function apiRequestPaged<T>(
   path: string,
   init: RequestInit = {},
+  tenant?: string | null,
 ): Promise<Paginated<T>> {
-  const envelope = await rawRequest<T[]>(path, init);
+  const envelope = await rawRequest<T[]>(path, init, tenant);
   const items = (envelope?.data ?? []) as T[];
   const pagination = envelope?.meta.pagination ?? {
     total: items.length,
@@ -109,11 +110,14 @@ export function apiFetch<T>(
 }
 
 // Paginated variant of apiFetch (prefixes /api/v1).
+// `tenant`: undefined → default center; a string → force it; null → OMIT
+// X-Tenant-ID (multi-center "combined" read, e.g. master viewing all centers).
 export function apiFetchPaged<T>(
   path: string,
   init: RequestInit = {},
+  tenant?: string | null,
 ): Promise<Paginated<T>> {
-  return apiRequestPaged<T>(`/api/v1${path}`, init);
+  return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
 }
 
 // Like apiFetch but returns the FULL envelope ({ data, meta }) so callers can

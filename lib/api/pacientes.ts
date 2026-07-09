@@ -13,15 +13,18 @@ export interface ListPacientesParams {
   q?: string;
 }
 
-// GET /pacientes — paginated; `q` searches name/docId/etc. Tenant-scoped by the
-// active center header (handled in apiFetch).
+// GET /pacientes — paginated; `q` searches name/docId/etc. Tenant scope:
+// `tenant` undefined → active center; a centroId string → force that center;
+// null → OMIT X-Tenant-ID so the BE returns patients across ALL the user's
+// centers (master "todos los centros" view — distinguish rows by clinicId).
 export function listPacientes(
   params: ListPacientesParams = {},
+  tenant?: string | null,
 ): Promise<Paginated<Paciente>> {
   const { page = 1, limit = 20, q } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
-  return apiFetchPaged<Paciente>(`/pacientes?${sp.toString()}`);
+  return apiFetchPaged<Paciente>(`/pacientes?${sp.toString()}`, {}, tenant);
 }
 
 export function getPaciente(id: string, centroId?: string): Promise<Paciente> {
@@ -54,7 +57,7 @@ export function updatePaciente(
   });
 }
 
-// Assign the next consecutive record number (numeroHistoria) for the patient's
+// Assign the next consecutive record number (`record`) for the patient's
 // center (POST /pacientes/:id/asignar-record). Used when a patient has no record
 // yet. Tenant-scoped: pass centroId so the BE picks the right center's sequence.
 export function asignarRecord(id: string, centroId?: string): Promise<Paciente> {

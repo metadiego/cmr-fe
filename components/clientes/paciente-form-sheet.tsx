@@ -33,7 +33,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Sexo = "M" | "F" | "otro";
+// Derived from the API contract so it never drifts from schema.d.ts.
+type Sexo = NonNullable<Paciente["sexo"]>;
+// Runtime whitelist of the values the BE accepts on write. Typed as Sexo[] so TS
+// errors if any value drops out of the API enum. Legacy patients still hold codes
+// like "0"/"1" (the BE v2 backfill has NOT run yet); those are coerced to "" on
+// load so a plain edit never re-submits an invalid value → avoids a 400 (BE rejects
+// non-enum sexo). See docs/plans/pacientes-v2-migracion-fe.md.
+const SEXO_VALUES: readonly Sexo[] = [
+  "femenino",
+  "masculino",
+  "otro",
+  "desconocido",
+];
 
 // Editable fields (the form's working state). Strings throughout; trimmed and
 // pruned to the API payload on submit.
@@ -49,7 +61,7 @@ type FormState = {
   email: string;
   direccion: string;
   zipcode: string;
-  numeroHistoria: string;
+  record: string;
   aseguradora: string;
 };
 
@@ -65,7 +77,7 @@ const EMPTY: FormState = {
   email: "",
   direccion: "",
   zipcode: "",
-  numeroHistoria: "",
+  record: "",
   aseguradora: "",
 };
 
@@ -74,7 +86,7 @@ function fromPaciente(p: Paciente): FormState {
     nombres: p.nombres ?? "",
     apellidos: p.apellidos ?? "",
     docId: p.docId ?? "",
-    sexo: (p.sexo as Sexo | null) ?? "",
+    sexo: SEXO_VALUES.includes(p.sexo as Sexo) ? (p.sexo as Sexo) : "",
     fechaNacimiento: p.fechaNacimiento?.slice(0, 10) ?? "",
     nacionalidad: p.nacionalidad ?? "",
     telefono: p.telefono ?? "",
@@ -82,7 +94,7 @@ function fromPaciente(p: Paciente): FormState {
     email: p.email ?? "",
     direccion: p.direccion ?? "",
     zipcode: p.zipcode ?? "",
-    numeroHistoria: p.numeroHistoria ?? "",
+    record: p.record ?? "",
     aseguradora: p.aseguradora ?? "",
   };
 }
@@ -102,7 +114,7 @@ function toPayload(f: FormState): CreatePacientePayload {
     email: t(f.email),
     direccion: t(f.direccion),
     zipcode: t(f.zipcode),
-    numeroHistoria: t(f.numeroHistoria),
+    record: t(f.record),
     aseguradora: t(f.aseguradora),
   };
 }
@@ -244,9 +256,10 @@ export function PacienteFormSheet({
                     <SelectValue placeholder={t("sexoPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="M">{t("sexoM")}</SelectItem>
-                    <SelectItem value="F">{t("sexoF")}</SelectItem>
+                    <SelectItem value="femenino">{t("sexoFemenino")}</SelectItem>
+                    <SelectItem value="masculino">{t("sexoMasculino")}</SelectItem>
                     <SelectItem value="otro">{t("sexoOtro")}</SelectItem>
+                    <SelectItem value="desconocido">{t("sexoDesconocido")}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -306,10 +319,10 @@ export function PacienteFormSheet({
 
           <Section title={t("sectionClinical")}>
             <Grid>
-              <Field label={t("numeroHistoria")}>
+              <Field label={t("record")}>
                 <Input
-                  value={form.numeroHistoria}
-                  onChange={(e) => set("numeroHistoria", e.target.value)}
+                  value={form.record}
+                  onChange={(e) => set("record", e.target.value)}
                 />
               </Field>
               <Field label={t("aseguradora")}>

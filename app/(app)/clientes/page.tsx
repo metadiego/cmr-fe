@@ -7,6 +7,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getActiveCentro } from "@/lib/tenant";
 import { useResource, type ResourceState } from "@/hooks/use-resource";
 import type { Paginated } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +17,18 @@ import { DataTable, type Column } from "@/components/kit/data-table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
 import { Can } from "@/components/kit/can";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const LIMIT = 20;
+// Sentinel scope: omit X-Tenant-ID so the BE returns patients across ALL the
+// user's centers (only offered to multi-center / master users).
+const ALL_CENTERS = "__all__";
 
 export default function ClientesPage() {
   const t = useTranslations("patients");
@@ -25,15 +37,49 @@ export default function ClientesPage() {
   const [q, setQ] = React.useState("");
   const [createOpen, setCreateOpen] = React.useState(false);
 
+  // The user's centers (with names). Master → all; operativo → their allowed
+  // ones. Drives the scope selector and resolves clinicId → name in the table.
+  const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
+  const centros = centrosState.kind === "ok" ? centrosState.data : [];
+  const multiCentro = centros.length > 1;
+  const centroName = React.useMemo(() => {
+    const m = new Map<string, string>();
+    centros.forEach((c) => m.set(c.id, c.nombre));
+    return m;
+  }, [centros]);
+
+  // Scope: which center's patients to show. Derived (no effect): an explicit
+  // user choice wins; otherwise default to the active center (header selector),
+  // else the single center, else "all" for a multi-center user so the mixed
+  // list is at least distinguishable via the Centro column.
+  const [scopeChoice, setScopeChoice] = React.useState<string | null>(null);
+  const scope =
+    scopeChoice ??
+    getActiveCentro() ??
+    (centros.length === 1
+      ? centros[0].id
+      : centros.length > 1
+        ? ALL_CENTERS
+        : "");
+
+  // undefined → default header center; a centroId → force it; null → omit tenant.
+  const tenant = scope === ALL_CENTERS ? null : scope || undefined;
+  const showCentroCol = scope === ALL_CENTERS && multiCentro;
+
   // Server-side search: the BE filters by name/docId/phone/etc via `q`.
   const { state, reload } = useResource<Paginated<Paciente>>(
-    () => listPacientes({ page, limit: LIMIT, q }),
-    [page, q],
+    () => listPacientes({ page, limit: LIMIT, q }, tenant),
+    [page, q, scope],
   );
 
   function onSearch(value: string) {
     setPage(1);
     setQ(value);
+  }
+
+  function onScopeChange(value: string) {
+    setPage(1);
+    setScopeChoice(value);
   }
 
   // DataTable renders a rows array + an optional pagination footer; split the
@@ -70,6 +116,19 @@ export default function ClientesPage() {
     },
   ];
 
+  // In the "all centers" view, show which center each patient belongs to.
+  if (showCentroCol) {
+    columns.push({
+      key: "centro",
+      header: t("columns.centro"),
+      cell: (p) => (
+        <Badge variant="outline">
+          {(p.clinicId && centroName.get(p.clinicId)) || "—"}
+        </Badge>
+      ),
+    });
+  }
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <div className="flex items-center justify-between gap-4">
@@ -87,7 +146,23 @@ export default function ClientesPage() {
           search={q}
           onSearchChange={onSearch}
           searchPlaceholder={t("searchPlaceholder")}
-        />
+        >
+          {multiCentro && (
+            <Select value={scope || undefined} onValueChange={onScopeChange}>
+              <SelectTrigger size="sm" className="w-[190px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
+                {centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </ListToolbar>
         <DataTable
           columns={columns}
           state={rows}
