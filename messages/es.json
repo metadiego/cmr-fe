@@ -36,9 +36,6 @@
   },
   "tableroBoard": {
     "live": "En vivo",
-    "testimonioTooltip": "Posible testimonio",
-    "testimonioConfirmOn": "¿Marcar a {name} como posible testimonio?",
-    "testimonioConfirmOff": "¿Quitar la marca de posible testimonio a {name}?",
     "addCita": "Agregar cita",
     "balance": "Saldo",
     "personalize": "Personalizar",
@@ -188,8 +185,7 @@
       "centro": "Centro",
       "consulta": "Consulta",
       "prox_cita": "Próx-cita",
-      "pago": "Pago",
-      "testimonio": "Testimonio"
+      "pago": "Pago"
     }
   },
   "agenda": {
@@ -463,7 +459,6 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "cancel": "Cancelar",
-    "confirm": "Confirmar",
     "delete": "Eliminar",
     "back": "Volver",
     "yes": "Sí",
