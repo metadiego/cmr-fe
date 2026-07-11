@@ -44,11 +44,18 @@ Logo: `f.empresa.logoUrl ?? asset por defecto (logo_cmr.png)`. Pie: `f.empresa.p
   (`q` busca por nº de factura O paciente por nombre/record).
 - Data-table server-side (TanStack + shadcn): search global (`q`) + rango de fechas (`desde/hasta`) + filtro `estado`, estado en URL. Acciones por fila (RBAC `can()`): consultar/re-imprimir, anular, devolver, editar (borrador). Buscar patrón moderno de data-table.
 
-## 4. Datos fiscales por centro — UI administrativa (nueva sección) 🔴 FALTA en FE
-El admin (`/admin` → Centros, `components/admin/centers-list.tsx`) hoy solo edita `nombre/codigo/direccion`. Falta la **definición de empresa** por centro.
+## 4. Datos fiscales por centro — UI administrativa (nueva sección) — BE LISTO ✅ (GET + PUT desplegados)
+El admin (`/admin` → Centros, `components/admin/centers-list.tsx`) hoy solo edita `nombre/codigo/direccion`. Ya puedes construir el editor completo de la **definición de empresa** por centro: **el `PUT` ya existe** (era lo que faltaba).
 - **Leer:** `GET /centros/:id/datos-fiscales` → `{ nombreLegal, nombreComercial, registroFiscal, registroFiscalLabel, telefono, direccion, sucursal, pieFactura, web, logoUrl }`.
-- **Editar:** `PUT /centros/:id { nombreLegal, nombreComercial, registroFiscal, registroFiscalLabel, telefono, direccionFiscal, zip, web, pieFactura, logoUrl }` — RBAC **`centro.fiscal.write`**.
-- Agregar al `CentersList` un panel/edición "Datos fiscales" con esos 9 campos (por centro). i18n en los labels.
+- **Editar:** `PUT /centros/:id/datos-fiscales` (patch parcial) — RBAC **`centro.fiscal.write`** — body (todos opcionales):
+  ```jsonc
+  { "nombreLegal","nombreComercial","registroFiscal","registroFiscalLabel",
+    "telefono","direccionFiscal","zip","web","pieFactura","logoUrl" }
+  ```
+  Devuelve el mismo bloque de `GET /datos-fiscales` ya compuesto. (Ojo: la dirección se envía como
+  `direccionFiscal`; el GET la devuelve como `direccion`.)
+- Agregar al `CentersList` un panel/edición "Datos fiscales" con esos 10 campos (por centro). i18n en los labels.
+  El editor completo se puede construir **en un solo pase** — ya no hay bloqueo de BE.
 
 ## 5. Pacientes v2 (si aún queda algo pendiente)
 Ya debería estar hecho, pero confirmar tras `gen:api`:
@@ -68,7 +75,7 @@ Ya debería estar hecho, pero confirmar tras `gen:api`:
 ## Endpoints BE (referencia rápida — todos desplegados)
 - `GET /api/v1/facturas/:id` — payload de impresión enriquecido
 - `GET /api/v1/facturas?estado&pacienteId&desde&hasta&q&page&limit` — listado
-- `GET /api/v1/centros/:id/datos-fiscales` · `PUT /api/v1/centros/:id` (RBAC `centro.fiscal.write`)
+- `GET /api/v1/centros/:id/datos-fiscales` · `PUT /api/v1/centros/:id/datos-fiscales` (RBAC `centro.fiscal.write`)
 - `GET /api/v1/geo/paises` · `/geo/estados?paisId=` · `/geo/ciudades?estadoId=&q=`
 - `GET /api/v1/citas/tablero?fecha&soloAtencion&tablero` — tablero (composición global)
 - `PUT /api/v1/pacientes/:id { esTestimonio }` — toggle testimonio
