@@ -733,6 +733,26 @@
       "submit": "Create",
       "submitting": "Creating…",
       "success": "Center {name} created."
+    },
+    "fiscal": {
+      "edit": "Fiscal data",
+      "title": "Fiscal data — {name}",
+      "description": "The company definition printed on this center's invoices.",
+      "saved": "Fiscal data saved.",
+      "save": "Save",
+      "saving": "Saving…",
+      "field": {
+        "nombreLegal": "Legal name",
+        "nombreComercial": "Trade name (DBA)",
+        "registroFiscal": "Fiscal registry (MN/tax id)",
+        "registroFiscalLabel": "Registry label (MN, RIF…)",
+        "telefono": "Phone",
+        "direccionFiscal": "Fiscal address",
+        "zip": "ZIP code",
+        "web": "Website",
+        "logoUrl": "Logo URL",
+        "pieFactura": "Invoice footer"
+      }
     }
   },
   "landing": {

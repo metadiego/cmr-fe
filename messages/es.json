@@ -733,6 +733,26 @@
       "submit": "Crear",
       "submitting": "Creando…",
       "success": "Centro {name} creado."
+    },
+    "fiscal": {
+      "edit": "Datos fiscales",
+      "title": "Datos fiscales — {name}",
+      "description": "Definición de la empresa que aparece en la factura de este centro.",
+      "saved": "Datos fiscales guardados.",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "field": {
+        "nombreLegal": "Nombre legal (razón social)",
+        "nombreComercial": "Nombre comercial (DBA)",
+        "registroFiscal": "Registro fiscal (MN/tax id)",
+        "registroFiscalLabel": "Etiqueta del registro (MN, RIF…)",
+        "telefono": "Teléfono",
+        "direccionFiscal": "Dirección fiscal",
+        "zip": "Código postal",
+        "web": "Sitio web",
+        "logoUrl": "URL del logo",
+        "pieFactura": "Pie de factura"
+      }
     }
   },
   "landing": {

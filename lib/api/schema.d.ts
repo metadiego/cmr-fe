@@ -318,7 +318,8 @@ export interface paths {
         };
         /** Datos fiscales del centro para la impresión de factura (encabezado + pie). */
         get: operations["CentrosController_datosFiscales_v1"];
-        put?: never;
+        /** Edita los datos fiscales/branding del centro (RBAC centro.fiscal.write). */
+        put: operations["CentrosController_updateDatosFiscales_v1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -4640,6 +4641,40 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        DatosFiscalesDto: {
+            /** @description Razón social / nombre legal. */
+            nombreLegal: string | null;
+            /** @description Nombre comercial (DBA). */
+            nombreComercial: string | null;
+            /** @description Número de registro fiscal (tax id). */
+            registroFiscal: string | null;
+            /** @description Etiqueta del registro fiscal (p.ej. MN, RIF); default "MN". */
+            registroFiscalLabel: string;
+            /** @description Teléfono del centro. */
+            telefono: string | null;
+            /** @description Dirección fiscal (o la física de fallback). */
+            direccion: string | null;
+            /** @description Nombre de la sucursal (= nombre del centro). */
+            sucursal: string;
+            /** @description Pie de factura (multilínea). */
+            pieFactura: string | null;
+            /** @description Web del centro. */
+            web: string | null;
+            /** @description URL del logo para el encabezado. */
+            logoUrl: string | null;
+        };
+        UpdateDatosFiscalesDto: {
+            nombreLegal?: string;
+            nombreComercial?: string;
+            registroFiscal?: string;
+            registroFiscalLabel?: string;
+            telefono?: string;
+            direccionFiscal?: string;
+            zip?: string;
+            web?: string;
+            pieFactura?: string;
+            logoUrl?: string;
+        };
         UpsertPreferenceDto: {
             config: Record<string, never>;
         };
@@ -8096,7 +8131,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["DatosFiscalesDto"];
+                };
+            };
+        };
+    };
+    CentrosController_updateDatosFiscales_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDatosFiscalesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatosFiscalesDto"];
                 };
             };
         };

@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 import { getCenters, createCenter, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { useCan } from "@/hooks/use-can";
+import { DatosFiscalesDialog } from "@/components/admin/datos-fiscales-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -34,8 +36,11 @@ type State =
 
 export function CentersList() {
   const t = useTranslations("admin");
+  const { can } = useCan();
+  const canFiscal = can("centro.fiscal.write");
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [fiscalCentro, setFiscalCentro] = React.useState<Centro | null>(null);
 
   const load = React.useCallback(async () => {
     try {
@@ -87,6 +92,7 @@ export function CentersList() {
                 <TableHead>{t("centers.code")}</TableHead>
                 <TableHead>{t("centers.address")}</TableHead>
                 <TableHead>{t("centers.active")}</TableHead>
+                {canFiscal && <TableHead />}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -100,6 +106,13 @@ export function CentersList() {
                       {String(c.activo ?? true)}
                     </Badge>
                   </TableCell>
+                  {canFiscal && (
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={() => setFiscalCentro(c)}>
+                        {t("fiscal.edit")}
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -110,6 +123,13 @@ export function CentersList() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={load}
+      />
+
+      <DatosFiscalesDialog
+        centro={fiscalCentro}
+        open={!!fiscalCentro}
+        onOpenChange={(o) => !o && setFiscalCentro(null)}
+        onSaved={load}
       />
     </div>
   );

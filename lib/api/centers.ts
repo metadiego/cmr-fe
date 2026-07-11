@@ -1,3 +1,4 @@
+import type { components } from "./schema";
 import { apiFetch } from "./client";
 
 export interface Centro {
@@ -6,6 +7,34 @@ export interface Centro {
   codigo: string;
   direccion?: string | null;
   activo?: boolean;
+  // Datos fiscales por centro (CentroEntity) — para el editor de empresa.
+  // El GET /datos-fiscales expone `direccion` (combinada) pero para editar se usan
+  // los campos crudos del centro: direccionFiscal + zip (asimetría del contrato BE).
+  nombreLegal?: string | null;
+  nombreComercial?: string | null;
+  registroFiscal?: string | null;
+  registroFiscalLabel?: string | null;
+  telefono?: string | null;
+  direccionFiscal?: string | null;
+  zip?: string | null;
+  web?: string | null;
+  pieFactura?: string | null;
+  logoUrl?: string | null;
+}
+
+// PUT /centros/:id/datos-fiscales — patch parcial (todos opcionales). La dirección
+// se ENVÍA como `direccionFiscal` (el GET la lee como `direccion`). RBAC centro.fiscal.write.
+export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"];
+
+export function updateDatosFiscales(
+  centroId: string,
+  payload: DatosFiscalesPayload,
+): Promise<unknown> {
+  return apiFetch(
+    `/centros/${centroId}/datos-fiscales`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    centroId,
+  );
 }
 
 export interface CreateCenterPayload {
