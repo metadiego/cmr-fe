@@ -115,7 +115,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const subTipos = def?.subTipos ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <div className="w-full px-6 py-6">
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">
           {registro ? tRoot(registro.labelKey) : tablero}
