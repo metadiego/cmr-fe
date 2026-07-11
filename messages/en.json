@@ -877,6 +877,15 @@
     "allStates": "All statuses",
     "from": "From",
     "to": "To",
+    "actions": {
+      "menu": "Actions",
+      "view": "View / print",
+      "edit": "Edit",
+      "void": "Void",
+      "voidTitle": "Void invoice?",
+      "voidBody": "The invoice will be voided. This action is recorded under your user.",
+      "voidReason": "Reason for voiding"
+    },
     "columns": {
       "numero": "No.",
       "fecha": "Date",

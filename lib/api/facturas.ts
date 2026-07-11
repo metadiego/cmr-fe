@@ -116,6 +116,16 @@ export function emitirFactura(facturaId: string, centroId?: string): Promise<Fac
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/emitir`, { method: "POST" }, centroId);
 }
 
+// Anular una factura emitida (RBAC factura.anular; motivo obligatorio). El BE sella
+// actor/fecha. La ventana "mismo día" es configurable en el BE.
+export function anularFactura(facturaId: string, motivo: string, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(
+    `/facturas/${facturaId}/anular`,
+    { method: "POST", body: JSON.stringify({ motivo }) },
+    centroId,
+  );
+}
+
 export function getFormasPago(centroId?: string): Promise<FormaPago[]> {
   return apiFetch<FormaPago[]>(`/facturacion/formas-pago`, {}, centroId);
 }

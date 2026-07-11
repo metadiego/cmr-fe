@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
+import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
 import {
   Select,
   SelectContent,
@@ -77,7 +78,7 @@ export default function FacturasListPage() {
     router.replace(qs ? `?${qs}` : "?", { scroll: false });
   }, [q, estado, desde, hasta, page, router]);
 
-  const { state } = useResource<Paginated<Factura>>(
+  const { state, reload } = useResource<Paginated<Factura>>(
     () => listFacturas({ page, limit: LIMIT, q, estado, desde, hasta }),
     [page, q, estado, desde, hasta],
   );
@@ -129,6 +130,15 @@ export default function FacturasListPage() {
           <span className="text-muted-foreground">{money(0)}</span>
         );
       },
+    },
+    {
+      key: "acciones",
+      header: "",
+      cell: (f) => (
+        <div className="flex justify-end">
+          <FacturaRowActions factura={f} onChanged={reload} />
+        </div>
+      ),
     },
   ];
 

@@ -877,6 +877,15 @@
     "allStates": "Todos los estados",
     "from": "Desde",
     "to": "Hasta",
+    "actions": {
+      "menu": "Acciones",
+      "view": "Ver / imprimir",
+      "edit": "Editar",
+      "void": "Anular",
+      "voidTitle": "¿Anular factura?",
+      "voidBody": "La factura quedará anulada. Esta acción se registra con tu usuario.",
+      "voidReason": "Motivo de la anulación"
+    },
     "columns": {
       "numero": "N.º",
       "fecha": "Fecha",
