@@ -1,18 +1,8 @@
-import type { FacturaConItems } from "@/lib/api/facturas";
+import type { FacturaConItems, FacturaEmpresa } from "@/lib/api/facturas";
 
-// Fiscal/branch block that must travel from the BE (per sucursal). Null until the
-// BE ships it (see docs/specs/factura-datos-impresion-handoff-be.md) → the header
-// degrades to the center name. NO hardcoded company data here.
-export type ReciboEmpresa = {
-  nombreLegal: string;
-  registroFiscal?: string | null;
-  registroFiscalLabel?: string | null; // "MN" (PR) / "RIF" / "EIN" — comes from BE
-  telefono?: string | null;
-  direccion?: string | null;
-  sucursal?: string | null;
-  web?: string | null;
-  pieFactura?: string | null;
-} | null;
+// Fiscal/branch block, projected by the BE per sucursal (getById `empresa`). NO
+// hardcoded company data here.
+export type ReciboEmpresa = FacturaEmpresa | null;
 
 export type ReciboItem = {
   cantidad: number;
@@ -26,7 +16,7 @@ export type ReciboItem = {
 // dynamic invoice contract so the same receipt works for consulta/productos/servicios.
 export type Recibo = {
   empresa: ReciboEmpresa;
-  centroNombre?: string;
+  logoUrl: string | null;
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -46,20 +36,10 @@ export type Recibo = {
 
 const num = (v: unknown) => Number(v ?? 0);
 
-// Legacy format: serie + 7-digit zero-padded number. Prefer the BE's preformatted
-// `numeroDisplay` once it ships (F2), so the format stays configurable server-side.
-function numeroDisplay(f: FacturaConItems): string {
-  const pre = (f as { numeroDisplay?: string }).numeroDisplay;
-  if (pre) return pre;
-  if (f.numero == null) return "—";
-  const padded = String(f.numero).padStart(7, "0");
-  return f.serie ? `${f.serie}-${padded}` : padded;
-}
-
-export function buildRecibo(
-  f: FacturaConItems,
-  opts: { empresa?: ReciboEmpresa; centroNombre?: string } = {},
-): Recibo {
+// Assemble the receipt model from the BE's enriched GET /facturas/:id projection.
+// All data travels from the BE (empresa, pagos, emisor, medico, numeroDisplay,
+// emitidaEn) — no FE fallbacks/hardcode. numeroDisplay is null on drafts → "—".
+export function buildRecibo(f: FacturaConItems): Recibo {
   const items: ReciboItem[] = (f.items ?? []).map((it) => ({
     cantidad: num(it.cantidad),
     descripcion: it.descripcion ?? "—",
@@ -73,7 +53,7 @@ export function buildRecibo(
   const total = num(f.total) || Math.max(0, subtotal - descuento + impuesto);
   const montoAbonado = num(f.montoAbonado);
 
-  // Tax breakdown if the BE projects it (products); consulta has none.
+  // Tax breakdown when the BE projects it (products); consulta has none.
   const impuestosRaw =
     (f as { impuestos?: { nombre?: string; label?: string; monto?: number }[] })
       .impuestos ?? [];
@@ -81,25 +61,14 @@ export function buildRecibo(
     .map((i) => ({ nombre: i.nombre ?? i.label ?? "", monto: num(i.monto) }))
     .filter((i) => i.monto > 0);
 
-  // pagos[] / emisor / emitidaEn are pending BE (F2); read defensively so the
-  // receipt still renders (empty blocks are hidden by the component).
-  const pagosRaw =
-    (f as {
-      pagos?: { formaPagoNombre?: string; monto?: number; referencia?: string | null }[];
-    }).pagos ?? [];
-  const emisor = (f as { emisor?: { nombre?: string } }).emisor?.nombre;
-  const emitidaEn = (f as { emitidaEn?: string }).emitidaEn;
-
-  const pac = f.paciente as
-    | { nombres?: string; apellidos?: string | null; record?: string | null; docId?: string | null }
-    | null
-    | undefined;
+  const pac = f.paciente;
 
   return {
-    empresa: opts.empresa ?? null,
-    centroNombre: opts.centroNombre,
-    numeroDisplay: numeroDisplay(f),
-    fecha: emitidaEn ?? f.fecha ?? f.createdAt ?? "",
+    empresa: f.empresa ?? null,
+    // Per-branch logo enables distinct brands; null → the FE default asset.
+    logoUrl: f.empresa?.logoUrl ?? null,
+    numeroDisplay: f.numeroDisplay ?? "—",
+    fecha: f.emitidaEn ?? f.fecha ?? f.createdAt ?? "",
     estado: String(f.estado ?? ""),
     anulada: String(f.estado ?? "") === "anulada",
     paciente: {
@@ -115,11 +84,12 @@ export function buildRecibo(
     total,
     montoAbonado,
     saldo: Math.max(0, total - montoAbonado),
-    pagos: pagosRaw.map((p) => ({
+    pagos: (f.pagos ?? []).map((p) => ({
       formaPagoNombre: p.formaPagoNombre ?? "—",
       monto: num(p.monto),
       referencia: p.referencia ?? null,
     })),
-    atendidoPor: f.medico?.nombre ?? emisor,
+    // "Atendido por" = cajero/emisor (legacy); médico si no hay emisor.
+    atendidoPor: f.emisor?.nombre ?? f.medico?.nombre,
   };
 }

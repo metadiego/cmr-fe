@@ -309,6 +309,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/centros/{id}/datos-fiscales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Datos fiscales del centro para la impresión de factura (encabezado + pie). */
+        get: operations["CentrosController_datosFiscales_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preferences/public": {
         parameters: {
             query?: never;
@@ -4607,6 +4624,16 @@ export interface components {
             codigo: string;
             direccion: string | null;
             activo: boolean;
+            nombreLegal: string | null;
+            nombreComercial: string | null;
+            registroFiscal: string | null;
+            registroFiscalLabel: string | null;
+            telefono: string | null;
+            direccionFiscal: string | null;
+            zip: string | null;
+            web: string | null;
+            pieFactura: string | null;
+            logoUrl: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6341,6 +6368,7 @@ export interface components {
             serie: string | null;
             pacienteId: string;
             medicoId: string | null;
+            emisorId: string | null;
             citaId: string | null;
             medioId: string | null;
             /** @enum {string} */
@@ -8047,6 +8075,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CentroEntity"];
+                };
+            };
+        };
+    };
+    CentrosController_datosFiscales_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

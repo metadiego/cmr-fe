@@ -870,6 +870,28 @@
       "prescripcion": { "desc": "Show the prescription grid inside the attention modal." }
     }
   },
+  "facturacionList": {
+    "title": "Invoices",
+    "draft": "Draft",
+    "searchPlaceholder": "Search by no. or record…",
+    "allStates": "All statuses",
+    "from": "From",
+    "to": "To",
+    "columns": {
+      "numero": "No.",
+      "fecha": "Date",
+      "estado": "Status",
+      "total": "Total",
+      "saldo": "Balance"
+    },
+    "estado": {
+      "borrador": "Draft",
+      "emitida": "Issued",
+      "anulada": "Voided",
+      "devuelta_parcial": "Partially returned",
+      "devuelta_total": "Fully returned"
+    }
+  },
   "receipt": {
     "print": "Print receipt",
     "previewTitle": "Receipt preview",

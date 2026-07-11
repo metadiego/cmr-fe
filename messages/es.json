@@ -870,6 +870,28 @@
       "prescripcion": { "desc": "Muestra la grilla de prescripción dentro del modal de atención." }
     }
   },
+  "facturacionList": {
+    "title": "Facturas",
+    "draft": "Borrador",
+    "searchPlaceholder": "Buscar por n.º o record…",
+    "allStates": "Todos los estados",
+    "from": "Desde",
+    "to": "Hasta",
+    "columns": {
+      "numero": "N.º",
+      "fecha": "Fecha",
+      "estado": "Estado",
+      "total": "Total",
+      "saldo": "Saldo"
+    },
+    "estado": {
+      "borrador": "Borrador",
+      "emitida": "Emitida",
+      "anulada": "Anulada",
+      "devuelta_parcial": "Devuelta parcial",
+      "devuelta_total": "Devuelta total"
+    }
+  },
   "receipt": {
     "print": "Imprimir recibo",
     "previewTitle": "Vista previa del recibo",

@@ -63,13 +63,12 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       <div className="text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/img/logo_cmr.png"
+          src={recibo.logoUrl ?? "/img/logo_cmr.png"}
           alt=""
           className="mx-auto mb-1 max-h-[18mm] w-auto object-contain"
         />
-        <div className="text-[13px] font-bold uppercase">
-          {emp?.nombreLegal ?? recibo.centroNombre ?? ""}
-        </div>
+        <div className="text-[13px] font-bold uppercase">{emp?.nombreLegal ?? ""}</div>
+        {emp?.nombreComercial && <div>{emp.nombreComercial}</div>}
         {emp?.sucursal && <div>{emp.sucursal}</div>}
         {emp?.direccion && (
           <div className="whitespace-pre-line">{emp.direccion}</div>
