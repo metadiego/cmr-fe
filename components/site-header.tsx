@@ -4,7 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Menu01Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
+import {
+  Menu01Icon,
+  Stethoscope02Icon,
+  ArrowDown01Icon,
+} from "@hugeicons/core-free-icons";
 
 import { useTranslations } from "next-intl";
 
@@ -26,6 +30,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function Brand({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -53,6 +63,10 @@ export function SiteHeader() {
   // Dynamic, RBAC-filtered nav from the BE (#6). Empty when unauthenticated.
   const menu = useMenu();
   const topLevel = menu.filter((item) => !item.parentClave);
+  // Submenús: hijos por parentClave. Un ítem de primer nivel con hijos se pinta
+  // como dropdown; sin hijos, como enlace plano (compatible con lo de antes).
+  const childrenOf = (clave: string) =>
+    menu.filter((m) => m.parentClave === clave);
   // Session for the header (email + sign out). Anonymous → shows "sign in".
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
@@ -90,21 +104,46 @@ export function SiteHeader() {
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
-              {topLevel.map((item) => (
-                <Link
-                  key={item.clave}
-                  href={item.path}
-                  onClick={() => setOpen(false)}
-                  className={cn(
+              {topLevel.map((item) => {
+                const children = childrenOf(item.clave);
+                const rowClass = (active: boolean, indent?: boolean) =>
+                  cn(
                     "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    isActive(pathname, item.path)
+                    indent && "ml-3 text-[13px]",
+                    active
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                  )}
-                >
-                  {tRoot(item.labelKey)}
-                </Link>
-              ))}
+                  );
+                if (children.length === 0) {
+                  return (
+                    <Link
+                      key={item.clave}
+                      href={item.path}
+                      onClick={() => setOpen(false)}
+                      className={rowClass(isActive(pathname, item.path))}
+                    >
+                      {tRoot(item.labelKey)}
+                    </Link>
+                  );
+                }
+                return (
+                  <div key={item.clave} className="flex flex-col gap-0.5">
+                    <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {tRoot(item.labelKey)}
+                    </span>
+                    {children.map((c) => (
+                      <Link
+                        key={c.clave}
+                        href={c.path}
+                        onClick={() => setOpen(false)}
+                        className={rowClass(isActive(pathname, c.path), true)}
+                      >
+                        {tRoot(c.labelKey)}
+                      </Link>
+                    ))}
+                  </div>
+                );
+              })}
             </nav>
             <div className="mt-4 space-y-2 px-2">
               {session ? (
@@ -140,20 +179,45 @@ export function SiteHeader() {
             can be registered, so the row scrolls horizontally instead of
             clipping items off the right edge. */}
         <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {topLevel.map((item) => (
-            <Link
-              key={item.clave}
-              href={item.path}
-              className={cn(
+          {topLevel.map((item) => {
+            const children = childrenOf(item.clave);
+            const linkClass = (active: boolean) =>
+              cn(
                 "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive(pathname, item.path)
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {tRoot(item.labelKey)}
-            </Link>
-          ))}
+                active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+              );
+            if (children.length === 0) {
+              return (
+                <Link
+                  key={item.clave}
+                  href={item.path}
+                  className={linkClass(isActive(pathname, item.path))}
+                >
+                  {tRoot(item.labelKey)}
+                </Link>
+              );
+            }
+            const active =
+              isActive(pathname, item.path) ||
+              children.some((c) => isActive(pathname, c.path));
+            return (
+              <DropdownMenu key={item.clave}>
+                <DropdownMenuTrigger
+                  className={cn(linkClass(active), "inline-flex items-center gap-1 outline-none")}
+                >
+                  {tRoot(item.labelKey)}
+                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {children.map((c) => (
+                    <DropdownMenuItem key={c.clave} asChild>
+                      <Link href={c.path}>{tRoot(c.labelKey)}</Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            );
+          })}
         </nav>
 
         {/* Right cluster: search, theme, primary action */}
