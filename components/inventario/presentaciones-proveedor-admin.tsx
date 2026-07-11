@@ -45,7 +45,10 @@ export function PresentacionesProveedorAdmin() {
   const tc = useTranslations("common");
 
   // Catálogos (una vez). Pueden venir vacíos si el BE no los sembró.
-  const productosRes = useResource<Producto[]>(() => listProductos());
+  // soloFisicos: el BE excluye servicios/consultas (no tienen presentación de proveedor).
+  const productosRes = useResource<Producto[]>(() =>
+    listProductos({ soloFisicos: true }),
+  );
   const unidadesRes = useResource<Unidad[]>(() => listUnidades());
   const fabricantesRes = useResource<Clasificacion[]>(() =>
     listClasificaciones("fabricante"),

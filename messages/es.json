@@ -922,6 +922,38 @@
     }
   },
   "inventario": {
+    "prov": {
+      "title": "Proveedores",
+      "help": "Empresas a las que les compras. Se usan al recibir compras y al definir presentaciones de proveedor.",
+      "new": "Nuevo proveedor",
+      "empty": "Aún no hay proveedores.",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "deactivate": "Desactivar",
+      "deleted": "Proveedor desactivado.",
+      "deactivateTitle": "¿Desactivar proveedor?",
+      "deactivateBody": "{name} dejará de estar disponible. Es baja lógica: puedes reactivarlo luego.",
+      "created": "Proveedor creado.",
+      "updated": "Proveedor actualizado.",
+      "newTitle": "Nuevo proveedor",
+      "editTitle": "Editar proveedor",
+      "formDescription": "Datos de contacto del proveedor.",
+      "col": {
+        "nombre": "Nombre",
+        "rnc": "RNC",
+        "telefono": "Teléfono",
+        "email": "Email",
+        "activo": "Estado"
+      },
+      "field": {
+        "nombre": "Nombre",
+        "rnc": "RNC",
+        "telefono": "Teléfono",
+        "email": "Email",
+        "direccion": "Dirección",
+        "activo": "Activo"
+      }
+    },
     "pp": {
       "title": "Presentaciones de proveedor",
       "help": "Cuando cambia el proveedor o llega otra presentación/concentración, agrega una presentación de proveedor (AMP) — no edites ni dupliques el producto. Se receta el derivado; se compra y stockea el AMP.",

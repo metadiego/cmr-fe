@@ -4777,6 +4777,7 @@ export interface components {
             sku: string;
             nombre: string;
             descripcion: string | null;
+            nombreCorto: string | null;
             /** @enum {string} */
             tipo: "base" | "unico" | "compuesto" | "servicio";
             esInventariable: boolean;
@@ -4786,6 +4787,9 @@ export interface components {
             unidadInventarioId: string | null;
             contenido: number | null;
             unidadContenidoId: string | null;
+            tamano: string | null;
+            peso: number | null;
+            pesoUnidadId: string | null;
             categoriaId: string | null;
             grupoFacturacionId: string | null;
             gravado: boolean | null;
@@ -4806,6 +4810,7 @@ export interface components {
             sku: string;
             nombre: string;
             descripcion?: string;
+            nombreCorto?: string;
             /** @enum {string} */
             tipo: "base" | "unico" | "compuesto" | "servicio";
             esInventariable?: boolean;
@@ -4816,6 +4821,10 @@ export interface components {
             contenido?: number;
             /** Format: uuid */
             unidadContenidoId?: string;
+            tamano?: string;
+            peso?: number;
+            /** Format: uuid */
+            pesoUnidadId?: string;
             /** Format: uuid */
             categoriaId?: string;
             /** Format: uuid */
@@ -4832,6 +4841,7 @@ export interface components {
         UpdateProductoDto: {
             nombre?: string;
             descripcion?: string;
+            nombreCorto?: string;
             /** @enum {string} */
             tipo?: "base" | "unico" | "compuesto" | "servicio";
             esInventariable?: boolean;
@@ -4842,6 +4852,10 @@ export interface components {
             contenido?: number;
             /** Format: uuid */
             unidadContenidoId?: string;
+            tamano?: string;
+            peso?: number;
+            /** Format: uuid */
+            pesoUnidadId?: string;
             /** Format: uuid */
             categoriaId?: string;
             /** Format: uuid */
@@ -4997,6 +5011,7 @@ export interface components {
             productoId: string;
             activo: boolean;
             stockMinimo: number | null;
+            stockMaximo: number | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -5008,10 +5023,12 @@ export interface components {
             /** Format: uuid */
             productoId: string;
             stockMinimo?: number;
+            stockMaximo?: number;
         };
         UpdateProductoCentroDto: {
             activo?: boolean;
             stockMinimo?: number;
+            stockMaximo?: number;
         };
         AlmacenEntity: {
             nombre: string;
@@ -5063,6 +5080,7 @@ export interface components {
             productoId: string;
             almacenId: string;
             numeroLote: string | null;
+            numeroFacturaCompra: string | null;
             fechaVencimiento: string | null;
             costoUnitario: number | null;
             proveedorId: string | null;
@@ -5082,6 +5100,7 @@ export interface components {
             /** Format: uuid */
             almacenId: string;
             numeroLote?: string;
+            numeroFacturaCompra?: string;
             fechaVencimiento?: string;
             costoUnitario?: number;
             /** Format: uuid */
@@ -5091,6 +5110,7 @@ export interface components {
         };
         UpdateLoteDto: {
             numeroLote?: string;
+            numeroFacturaCompra?: string;
             fechaVencimiento?: string;
             costoUnitario?: number;
             /** Format: uuid */
@@ -5279,6 +5299,7 @@ export interface components {
             cantidad: number;
             costoUnitario?: number;
             numeroLote?: string;
+            numeroFacturaCompra?: string;
             fechaVencimiento?: string;
             /** Format: uuid */
             proveedorId?: string;
@@ -8647,6 +8668,7 @@ export interface operations {
             query: {
                 page: number;
                 limit: number;
+                soloFisicos?: string;
             };
             header?: never;
             path?: never;

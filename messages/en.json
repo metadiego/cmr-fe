@@ -922,6 +922,38 @@
     }
   },
   "inventario": {
+    "prov": {
+      "title": "Suppliers",
+      "help": "Companies you buy from. Used when receiving purchases and defining supplier presentations.",
+      "new": "New supplier",
+      "empty": "No suppliers yet.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Deactivate",
+      "deleted": "Supplier deactivated.",
+      "deactivateTitle": "Deactivate supplier?",
+      "deactivateBody": "{name} will no longer be available. This is a soft delete: you can reactivate it later.",
+      "created": "Supplier created.",
+      "updated": "Supplier updated.",
+      "newTitle": "New supplier",
+      "editTitle": "Edit supplier",
+      "formDescription": "Supplier contact details.",
+      "col": {
+        "nombre": "Name",
+        "rnc": "RNC",
+        "telefono": "Phone",
+        "email": "Email",
+        "activo": "Status"
+      },
+      "field": {
+        "nombre": "Name",
+        "rnc": "RNC",
+        "telefono": "Phone",
+        "email": "Email",
+        "direccion": "Address",
+        "activo": "Active"
+      }
+    },
     "pp": {
       "title": "Supplier presentations",
       "help": "When the supplier changes or a different presentation/concentration arrives, add a supplier presentation (AMP) — don't edit or duplicate the product. The derivative is prescribed; the AMP is purchased and stocked.",
