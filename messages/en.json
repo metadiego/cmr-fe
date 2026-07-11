@@ -921,6 +921,53 @@
       "devuelta_total": "Fully returned"
     }
   },
+  "inventario": {
+    "pp": {
+      "title": "Supplier presentations",
+      "help": "When the supplier changes or a different presentation/concentration arrives, add a supplier presentation (AMP) — don't edit or duplicate the product. The derivative is prescribed; the AMP is purchased and stocked.",
+      "producto": "Product",
+      "selectProducto": "Select a product…",
+      "pickProducto": "Pick a product to view and manage its presentations.",
+      "new": "New presentation",
+      "empty": "This product has no supplier presentations yet.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Deactivate",
+      "deleted": "Presentation deactivated.",
+      "deactivateTitle": "Deactivate presentation?",
+      "deactivateBody": "{name} will no longer be available. This is a soft delete: you can reactivate it later.",
+      "created": "Presentation created.",
+      "updated": "Presentation updated.",
+      "newTitle": "New supplier presentation",
+      "editTitle": "Edit supplier presentation",
+      "description": "The vial/package details as sent by the current supplier.",
+      "col": {
+        "nombre": "Name",
+        "marcaFab": "Brand / manufacturer",
+        "concentracion": "Concentration",
+        "contenido": "Content",
+        "sku": "SKU",
+        "vigencia": "Validity",
+        "activo": "Status"
+      },
+      "field": {
+        "nombre": "Name",
+        "fabricante": "Manufacturer",
+        "marca": "Brand",
+        "concentracion": "Concentration",
+        "unidadConcentracion": "Concentration unit",
+        "contenido": "Content per package",
+        "unidadContenido": "Content unit",
+        "factorABase": "Factor to base unit",
+        "sku": "SKU",
+        "barcode": "Barcode",
+        "vigenciaDesde": "Valid from",
+        "vigenciaHasta": "Valid to",
+        "activo": "Active",
+        "none": "(none)"
+      }
+    }
+  },
   "receipt": {
     "print": "Print receipt",
     "previewTitle": "Receipt preview",

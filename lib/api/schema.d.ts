@@ -551,6 +551,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/presentaciones-proveedor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PresentacionesProveedorController_list_v1"];
+        put?: never;
+        post: operations["PresentacionesProveedorController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/presentaciones-proveedor/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PresentacionesProveedorController_findOne_v1"];
+        put: operations["PresentacionesProveedorController_update_v1"];
+        post?: never;
+        delete: operations["PresentacionesProveedorController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/componentes": {
         parameters: {
             query?: never;
@@ -4689,6 +4721,7 @@ export interface components {
         UnidadEntity: {
             clave: string;
             nombre: string;
+            /** @deprecated */
             factorBase: number;
             activo: boolean;
             id: string;
@@ -4827,6 +4860,7 @@ export interface components {
             productoId: string;
             nombre: string;
             unidadVentaId: string | null;
+            /** @deprecated */
             factorConversion: number;
             precioBase: number | null;
             gravado: boolean | null;
@@ -4865,6 +4899,66 @@ export interface components {
             impuestoId?: string;
             esDefault?: boolean;
             barcode?: string;
+            activo?: boolean;
+        };
+        PresentacionProveedorEntity: {
+            productoId: string;
+            nombre: string;
+            fabricanteId: string | null;
+            marcaId: string | null;
+            concentracion: number | null;
+            unidadConcentracionId: string | null;
+            contenidoPorEmpaque: number | null;
+            unidadContenidoId: string | null;
+            factorABase: number | null;
+            sku: string | null;
+            barcode: string | null;
+            vigenciaDesde: string | null;
+            vigenciaHasta: string | null;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreatePresentacionProveedorDto: {
+            /** Format: uuid */
+            productoId: string;
+            nombre: string;
+            /** Format: uuid */
+            fabricanteId?: string;
+            /** Format: uuid */
+            marcaId?: string;
+            concentracion?: number;
+            /** Format: uuid */
+            unidadConcentracionId?: string;
+            contenidoPorEmpaque?: number;
+            /** Format: uuid */
+            unidadContenidoId?: string;
+            factorABase?: number;
+            sku?: string;
+            barcode?: string;
+            vigenciaDesde?: string;
+            vigenciaHasta?: string;
+        };
+        UpdatePresentacionProveedorDto: {
+            nombre?: string;
+            /** Format: uuid */
+            fabricanteId?: string;
+            /** Format: uuid */
+            marcaId?: string;
+            concentracion?: number;
+            /** Format: uuid */
+            unidadConcentracionId?: string;
+            contenidoPorEmpaque?: number;
+            /** Format: uuid */
+            unidadContenidoId?: string;
+            factorABase?: number;
+            sku?: string;
+            barcode?: string;
+            vigenciaDesde?: string;
+            vigenciaHasta?: string;
             activo?: boolean;
         };
         ProductoComponenteEntity: {
@@ -4972,6 +5066,7 @@ export interface components {
             fechaVencimiento: string | null;
             costoUnitario: number | null;
             proveedorId: string | null;
+            presentacionProveedorId: string | null;
             /** @enum {string} */
             estado: "activo" | "recall" | "bloqueado" | "vencido";
             id: string;
@@ -4991,6 +5086,8 @@ export interface components {
             costoUnitario?: number;
             /** Format: uuid */
             proveedorId?: string;
+            /** Format: uuid */
+            presentacionProveedorId?: string;
         };
         UpdateLoteDto: {
             numeroLote?: string;
@@ -5185,6 +5282,8 @@ export interface components {
             fechaVencimiento?: string;
             /** Format: uuid */
             proveedorId?: string;
+            /** Format: uuid */
+            presentacionProveedorId?: string;
             /** Format: uuid */
             ubicacionId?: string;
             fechaEfectiva?: string;
@@ -8721,6 +8820,116 @@ export interface operations {
         };
     };
     PresentacionesController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PresentacionesProveedorController_list_v1: {
+        parameters: {
+            query: {
+                productoId: string;
+                activo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentacionProveedorEntity"][];
+                };
+            };
+        };
+    };
+    PresentacionesProveedorController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePresentacionProveedorDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentacionProveedorEntity"];
+                };
+            };
+        };
+    };
+    PresentacionesProveedorController_findOne_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentacionProveedorEntity"];
+                };
+            };
+        };
+    };
+    PresentacionesProveedorController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePresentacionProveedorDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresentacionProveedorEntity"];
+                };
+            };
+        };
+    };
+    PresentacionesProveedorController_remove_v1: {
         parameters: {
             query?: never;
             header?: never;

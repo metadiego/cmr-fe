@@ -921,6 +921,53 @@
       "devuelta_total": "Devuelta total"
     }
   },
+  "inventario": {
+    "pp": {
+      "title": "Presentaciones de proveedor",
+      "help": "Cuando cambia el proveedor o llega otra presentación/concentración, agrega una presentación de proveedor (AMP) — no edites ni dupliques el producto. Se receta el derivado; se compra y stockea el AMP.",
+      "producto": "Producto",
+      "selectProducto": "Selecciona un producto…",
+      "pickProducto": "Elige un producto para ver y gestionar sus presentaciones.",
+      "new": "Nueva presentación",
+      "empty": "Este producto aún no tiene presentaciones de proveedor.",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "deactivate": "Desactivar",
+      "deleted": "Presentación desactivada.",
+      "deactivateTitle": "¿Desactivar presentación?",
+      "deactivateBody": "{name} dejará de estar disponible. Es baja lógica: puedes reactivarla luego.",
+      "created": "Presentación creada.",
+      "updated": "Presentación actualizada.",
+      "newTitle": "Nueva presentación de proveedor",
+      "editTitle": "Editar presentación de proveedor",
+      "description": "Datos del vial/empaque tal como lo manda el proveedor de turno.",
+      "col": {
+        "nombre": "Nombre",
+        "marcaFab": "Marca / fabricante",
+        "concentracion": "Concentración",
+        "contenido": "Contenido",
+        "sku": "SKU",
+        "vigencia": "Vigencia",
+        "activo": "Estado"
+      },
+      "field": {
+        "nombre": "Nombre",
+        "fabricante": "Fabricante",
+        "marca": "Marca",
+        "concentracion": "Concentración",
+        "unidadConcentracion": "Unidad de concentración",
+        "contenido": "Contenido por empaque",
+        "unidadContenido": "Unidad de contenido",
+        "factorABase": "Factor a unidad base",
+        "sku": "SKU",
+        "barcode": "Código de barras",
+        "vigenciaDesde": "Vigencia desde",
+        "vigenciaHasta": "Vigencia hasta",
+        "activo": "Activa",
+        "none": "(ninguno)"
+      }
+    }
+  },
   "receipt": {
     "print": "Imprimir recibo",
     "previewTitle": "Vista previa del recibo",
