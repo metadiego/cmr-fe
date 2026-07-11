@@ -9,6 +9,7 @@ import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
 import { CeldaSelect } from "@/components/tablero/celda-select";
 import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
+import { CeldaToggleIcon } from "@/components/tablero/celda-toggle-icon";
 import { FlujoAtencion } from "@/components/tablero/flujo-atencion";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
@@ -192,6 +193,13 @@ export function TableroDinamico({
           centroId={centroId}
           onSaved={onRefresh}
         />
+      );
+    }
+    // Icon toggle of a PATIENT flag (render.icon + writeBinding, sin transición):
+    // p.ej. "testimonio" → paciente.esTestimonio. Reusable por cualquier flag.
+    if (col.tipo === "toggle" && (col.render as Record<string, unknown> | null)?.writeBinding) {
+      return (
+        <CeldaToggleIcon col={col} fila={fila} centroId={centroId} onSaved={onRefresh} />
       );
     }
     if (col.tipo === "select" && col.editable && tablero) {

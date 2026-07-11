@@ -36,6 +36,9 @@
   },
   "tableroBoard": {
     "live": "Live",
+    "testimonioTooltip": "Possible testimonial",
+    "testimonioConfirmOn": "Mark {name} as a possible testimonial?",
+    "testimonioConfirmOff": "Remove the possible-testimonial mark from {name}?",
     "addCita": "Add appointment",
     "balance": "Balance",
     "personalize": "Personalize",
@@ -185,7 +188,8 @@
       "centro": "Center",
       "consulta": "Consultation",
       "prox_cita": "Next appt",
-      "pago": "Payment"
+      "pago": "Payment",
+      "testimonio": "Testimonial"
     }
   },
   "agenda": {
@@ -459,6 +463,7 @@
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "delete": "Delete",
     "back": "Back",
     "yes": "Yes",
