@@ -91,7 +91,6 @@ export function ProveedoresAdmin() {
           <thead>
             <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="px-3 py-2 font-semibold">{t("col.nombre")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.rnc")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.telefono")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.email")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.activo")}</th>
@@ -101,14 +100,14 @@ export function ProveedoresAdmin() {
           <tbody className="divide-y">
             {state.kind === "loading" && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
+                <td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">
                   {tc("loading")}
                 </td>
               </tr>
             )}
             {state.kind === "ok" && rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
+                <td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">
                   {t("empty")}
                 </td>
               </tr>
@@ -116,7 +115,6 @@ export function ProveedoresAdmin() {
             {rows.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
                 <td className="px-3 py-2 font-medium">{p.nombre}</td>
-                <td className="px-3 py-2 font-mono text-xs">{p.rnc ?? "—"}</td>
                 <td className="px-3 py-2">{p.telefono ?? "—"}</td>
                 <td className="px-3 py-2 text-muted-foreground">{p.email ?? "—"}</td>
                 <td className="px-3 py-2">
@@ -176,7 +174,6 @@ export function ProveedoresAdmin() {
 
 type FormState = {
   nombre: string;
-  rnc: string;
   telefono: string;
   email: string;
   direccion: string;
@@ -184,7 +181,6 @@ type FormState = {
 };
 const EMPTY: FormState = {
   nombre: "",
-  rnc: "",
   telefono: "",
   email: "",
   direccion: "",
@@ -217,7 +213,6 @@ function ProveedorForm({
       proveedor
         ? {
             nombre: proveedor.nombre ?? "",
-            rnc: proveedor.rnc ?? "",
             telefono: proveedor.telefono ?? "",
             email: proveedor.email ?? "",
             direccion: proveedor.direccion ?? "",
@@ -238,7 +233,6 @@ function ProveedorForm({
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const base = {
         nombre: form.nombre.trim(),
-        rnc: txt(form.rnc),
         telefono: txt(form.telefono),
         email: txt(form.email),
         direccion: txt(form.direccion),
@@ -270,18 +264,13 @@ function ProveedorForm({
           <FormRow label={t("field.nombre")}>
             <Input value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
           </FormRow>
-          <div className="grid grid-cols-2 gap-3">
-            <FormRow label={t("field.rnc")}>
-              <Input value={form.rnc} onChange={(e) => set("rnc", e.target.value)} />
-            </FormRow>
-            <FormRow label={t("field.telefono")}>
-              <Input
-                type="tel"
-                value={form.telefono}
-                onChange={(e) => set("telefono", e.target.value)}
-              />
-            </FormRow>
-          </div>
+          <FormRow label={t("field.telefono")}>
+            <Input
+              type="tel"
+              value={form.telefono}
+              onChange={(e) => set("telefono", e.target.value)}
+            />
+          </FormRow>
           <FormRow label={t("field.email")}>
             <Input
               type="email"
