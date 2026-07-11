@@ -47,6 +47,10 @@ async function rawRequest<T>(
   const auth = await authHeaders(tenant);
 
   const res = await fetch(`${env.API_BASE_URL}${path}`, {
+    // Datos siempre frescos: el BE manda ETag y sin no-store el navegador servía
+    // respuestas cacheadas (menú/tablero viejos aunque el dato ya cambió). Esta app
+    // es data-driven/en-vivo → nunca queremos caché HTTP de la API.
+    cache: "no-store",
     ...init,
     headers: {
       "Content-Type": "application/json",
