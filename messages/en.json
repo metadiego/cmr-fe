@@ -534,6 +534,8 @@
     "consultas": "Consultations",
     "facturacion": "Billing",
     "frontdesk": "Services",
+    "en_desarrollo": "In development",
+    "por_desarrollar": "To be developed",
     "inventario": "Inventory",
     "inventario_proveedores": "Suppliers",
     "inventario_amp": "Supplier presentations",
