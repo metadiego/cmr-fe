@@ -6128,6 +6128,8 @@ export interface components {
             color?: string;
         };
         TableroColumnaEntity: {
+            /** @default null */
+            clinicId: string | null;
             tablero: string;
             columnaId: string;
             orden: number;
@@ -6138,7 +6140,6 @@ export interface components {
             render: Record<string, never> | null;
             activo: boolean;
             id: string;
-            clinicId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
