@@ -5,17 +5,16 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
-  listProductos,
   listAlmacenes,
   listProveedores,
   listPresentacionesProveedor,
   recibirCompra,
-  type Producto,
   type Almacen,
   type Proveedor,
   type PresentacionProveedor,
   type RecibirCompraPayload,
 } from "@/lib/api/inventario";
+import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -35,10 +34,8 @@ const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
 export function RecibirCompra() {
   const t = useTranslations("inventario.compra");
 
-  const productosRes = useResource<Producto[]>(() => listProductos({ soloFisicos: true }));
   const almacenesRes = useResource<Almacen[]>(() => listAlmacenes());
   const proveedoresRes = useResource<Proveedor[]>(() => listProveedores());
-  const productos = productosRes.state.kind === "ok" ? productosRes.state.data : [];
   const almacenes = almacenesRes.state.kind === "ok" ? almacenesRes.state.data : [];
   const proveedores = proveedoresRes.state.kind === "ok" ? proveedoresRes.state.data : [];
 
@@ -121,24 +118,14 @@ export function RecibirCompra() {
       <div className="space-y-5 rounded-xl border p-5">
         {/* Producto + AMP */}
         <Row label={t("field.producto")}>
-          <Select
+          <ProductoPicker
             value={productoId}
-            onValueChange={(v) => {
-              setProductoId(v);
+            onChange={(id) => {
+              setProductoId(id);
               setPresentacionId("");
             }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("field.selectProducto")} />
-            </SelectTrigger>
-            <SelectContent>
-              {productos.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.nombre}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder={t("field.selectProducto")}
+          />
         </Row>
 
         {productoId && (

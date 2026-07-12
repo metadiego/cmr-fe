@@ -1092,6 +1092,13 @@
         "activo": "Active",
         "none": "(none)"
       }
+    },
+    "picker": {
+      "placeholder": "Select a product…",
+      "search": "Search product…",
+      "loading": "Searching…",
+      "empty": "No results",
+      "clear": "Clear"
     }
   },
   "receipt": {

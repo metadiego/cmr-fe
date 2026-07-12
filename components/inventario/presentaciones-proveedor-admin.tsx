@@ -7,27 +7,19 @@ import { Add01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import {
-  listProductos,
   listUnidades,
   listClasificaciones,
   listPresentacionesProveedor,
   deletePresentacionProveedor,
-  type Producto,
   type Unidad,
   type Clasificacion,
   type PresentacionProveedor,
 } from "@/lib/api/inventario";
+import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,17 +36,12 @@ export function PresentacionesProveedorAdmin() {
   const t = useTranslations("inventario.pp");
   const tc = useTranslations("common");
 
-  // soloFisicos: el BE excluye servicios/consultas (no tienen AMP).
-  const productosRes = useResource<Producto[]>(() =>
-    listProductos({ soloFisicos: true }),
-  );
   const unidadesRes = useResource<Unidad[]>(() => listUnidades());
   const fabricantesRes = useResource<Clasificacion[]>(() =>
     listClasificaciones("fabricante"),
   );
   const marcasRes = useResource<Clasificacion[]>(() => listClasificaciones("marca"));
 
-  const productos = productosRes.state.kind === "ok" ? productosRes.state.data : [];
   const unidades = unidadesRes.state.kind === "ok" ? unidadesRes.state.data : [];
   const fabricantes =
     fabricantesRes.state.kind === "ok" ? fabricantesRes.state.data : [];
@@ -117,18 +104,11 @@ export function PresentacionesProveedorAdmin() {
         <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
           {t("producto")}
         </label>
-        <Select value={productoId} onValueChange={setProductoId}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={t("selectProducto")} />
-          </SelectTrigger>
-          <SelectContent>
-            {productos.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.nombre}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ProductoPicker
+          value={productoId}
+          onChange={(id) => setProductoId(id)}
+          placeholder={t("selectProducto")}
+        />
       </div>
 
       {!productoId ? (

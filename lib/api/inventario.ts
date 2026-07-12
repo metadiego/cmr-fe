@@ -12,22 +12,35 @@ export type UpdateProveedorPayload = components["schemas"]["UpdateProveedorDto"]
 
 // Catálogos de apoyo (pueden venir vacíos si el BE aún no los sembró).
 // `soloFisicos`: excluye servicios/consultas (usar en TODO picker de productos).
-// Resiliente: si el BE aún no soporta `soloFisicos` (400), cae a lista completa y
-// filtra servicios en el cliente — así funciona aunque el BE local vaya atrás.
+// `q`: búsqueda server-side (nombre/sku/barcode). Usar con debounce en el picker.
+// Resiliente: si el BE aún no soporta `soloFisicos`/`q` (400 — p.ej. prod sin deploy),
+// cae a la lista completa y filtra servicios + texto en el cliente. Así funciona
+// aunque el BE vaya atrás; cuando el BE los soporta, usa el filtrado server-side.
 export async function listProductos(
-  opts: { soloFisicos?: boolean } = {},
+  opts: { soloFisicos?: boolean; q?: string } = {},
 ): Promise<Producto[]> {
-  if (opts.soloFisicos) {
+  const q = opts.q?.trim();
+  const sp = new URLSearchParams({ limit: "100" });
+  if (q) sp.set("q", q);
+  if (opts.soloFisicos) sp.set("soloFisicos", "true");
+
+  if (opts.soloFisicos || q) {
     try {
-      return await apiFetch<Producto[]>(
-        `/inventario/productos?limit=100&soloFisicos=true`,
-      );
+      return await apiFetch<Producto[]>(`/inventario/productos?${sp.toString()}`);
     } catch {
+      // BE sin soloFisicos/q → lista base y filtramos en cliente.
       const all = await apiFetch<Producto[]>(`/inventario/productos?limit=100`);
-      return all.filter((p) => p.tipo !== "servicio");
+      const needle = q?.toLowerCase();
+      return all.filter((p) => {
+        if (opts.soloFisicos && p.tipo === "servicio") return false;
+        if (!needle) return true;
+        return [p.nombre, p.sku, p.barcode]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(needle));
+      });
     }
   }
-  return apiFetch<Producto[]>(`/inventario/productos?limit=100`);
+  return apiFetch<Producto[]>(`/inventario/productos?${sp.toString()}`);
 }
 
 // Proveedores (RBAC admin/super_admin). DELETE = baja lógica.
