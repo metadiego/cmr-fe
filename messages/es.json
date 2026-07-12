@@ -1291,7 +1291,9 @@
         "nombre": "Nombre",
         "clave": "Clave",
         "estado": "Estado"
-      }
+      },
+      "createEmpty": "Crear vacía",
+      "createClone": "Clonar de otra lista (±$/%)"
     }
   }
 }

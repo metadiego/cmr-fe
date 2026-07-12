@@ -31,7 +31,14 @@ function slugify(s: string) {
 }
 
 // Gestión de LISTAS de precio (tipos). Crear/renombrar/activar-desactivar. CRUD BE verificado.
-export function ListasPrecio({ onChange }: { onChange?: () => void }) {
+// `onClone(nombre)`: crea la lista clonando de otra con ajuste ±$/% (delega en Derivar).
+export function ListasPrecio({
+  onChange,
+  onClone,
+}: {
+  onChange?: () => void;
+  onClone?: (nombre: string) => void;
+}) {
   const t = useTranslations("precios.listas");
   const tc = useTranslations("common");
   const { state, reload } = useResource<TipoPrecio[]>(() => listTiposPrecio());
@@ -112,10 +119,21 @@ export function ListasPrecio({ onChange }: { onChange?: () => void }) {
             </span>
           )}
         </label>
-        <Button onClick={crear} disabled={!nombre.trim() || busy}>
-          <HugeiconsIcon icon={Add01Icon} className="size-4" />
-          {t("create")}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={crear} disabled={!nombre.trim() || busy}>
+            <HugeiconsIcon icon={Add01Icon} className="size-4" />
+            {t("createEmpty")}
+          </Button>
+          {onClone && (
+            <Button
+              variant="outline"
+              disabled={!nombre.trim() || busy}
+              onClick={() => onClone(nombre.trim())}
+            >
+              {t("createClone")}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabla de listas */}

@@ -36,7 +36,13 @@ type Ambito = "global" | "centro" | "individual";
 
 // Pantalla "Derivar precios" (§2 roadmap). Origen (lista+scope) → destino (lista+ámbito)
 // con ajuste lineal %/$ y redondeo; preview dryRun (antes/después) antes de aplicar.
-export function DerivarPrecios({ onDone }: { onDone?: () => void }) {
+export function DerivarPrecios({
+  onDone,
+  initialNewListName,
+}: {
+  onDone?: () => void;
+  initialNewListName?: string;
+}) {
   const t = useTranslations("precios.derivar");
 
   const tiposRes = useResource<TipoPrecio[]>(() => listTiposPrecio());
@@ -46,8 +52,10 @@ export function DerivarPrecios({ onDone }: { onDone?: () => void }) {
   const regular = tipos.find((x) => x.clave === "regular");
 
   const [origenTipoRaw, setOrigenTipo] = React.useState("");
-  const [destinoTipo, setDestinoTipo] = React.useState("");
-  const [newListName, setNewListName] = React.useState("");
+  const [destinoTipo, setDestinoTipo] = React.useState(
+    initialNewListName ? NEW_LIST : "",
+  );
+  const [newListName, setNewListName] = React.useState(initialNewListName ?? "");
   const [ambito, setAmbito] = React.useState<Ambito>("global");
   const [clinicId, setClinicId] = React.useState("");
   const [modo, setModo] = React.useState<"porcentaje" | "monto">("porcentaje");

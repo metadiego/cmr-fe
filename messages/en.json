@@ -1291,7 +1291,9 @@
         "nombre": "Name",
         "clave": "Key",
         "estado": "Status"
-      }
+      },
+      "createEmpty": "Create empty",
+      "createClone": "Clone from another list (±$/%)"
     }
   }
 }

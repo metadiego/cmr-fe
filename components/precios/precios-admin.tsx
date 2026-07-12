@@ -50,6 +50,8 @@ export function PreciosAdmin() {
   const tc = useTranslations("common");
 
   const [mode, setMode] = React.useState<"catalogo" | "listas" | "derivar">("catalogo");
+  // Nombre prellenado al "clonar de otra lista" desde la pestaña Listas.
+  const [cloneName, setCloneName] = React.useState<string | undefined>(undefined);
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
   const [page, setPage] = React.useState(1);
@@ -156,7 +158,7 @@ export function PreciosAdmin() {
             <button
               key={m}
               type="button"
-              onClick={() => setMode(m)}
+              onClick={() => { setCloneName(undefined); setMode(m); }}
               className={cn(
                 "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                 mode === m
@@ -172,9 +174,16 @@ export function PreciosAdmin() {
       <p className="mb-4 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
       {mode === "listas" ? (
-        <ListasPrecio onChange={() => { tiposRes.reload(); reload(); }} />
+        <ListasPrecio
+          onChange={() => { tiposRes.reload(); reload(); }}
+          onClone={(nombre) => { setCloneName(nombre); setMode("derivar"); }}
+        />
       ) : mode === "derivar" ? (
-        <DerivarPrecios onDone={reload} />
+        <DerivarPrecios
+          key={cloneName ?? "derivar"}
+          initialNewListName={cloneName}
+          onDone={() => { setCloneName(undefined); tiposRes.reload(); reload(); }}
+        />
       ) : (
         <>
       <div className="mb-4 flex flex-wrap items-center gap-3">
