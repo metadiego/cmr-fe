@@ -550,7 +550,8 @@
     "personal": "Staff",
     "precios": "Pricing",
     "signOut": "Sign out",
-    "signingOut": "Signing out…"
+    "signingOut": "Signing out…",
+    "dashboard": "Dashboard"
   },
   "admin": {
     "title": "Administration",
@@ -896,8 +897,12 @@
   },
   "modal": {
     "modulo": {
-      "agendar_cita": { "desc": "Schedule the patient's next appointment." },
-      "prescripcion": { "desc": "Show the prescription grid inside the attention modal." }
+      "agendar_cita": {
+        "desc": "Schedule the patient's next appointment."
+      },
+      "prescripcion": {
+        "desc": "Show the prescription grid inside the attention modal."
+      }
     }
   },
   "facturacionList": {

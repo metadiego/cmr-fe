@@ -550,7 +550,8 @@
     "personal": "Personal",
     "precios": "Precios",
     "signOut": "Cerrar sesión",
-    "signingOut": "Saliendo…"
+    "signingOut": "Saliendo…",
+    "dashboard": "Dashboard"
   },
   "admin": {
     "title": "Administración",
@@ -896,8 +897,12 @@
   },
   "modal": {
     "modulo": {
-      "agendar_cita": { "desc": "Agenda la próxima cita del paciente." },
-      "prescripcion": { "desc": "Muestra la grilla de prescripción dentro del modal de atención." }
+      "agendar_cita": {
+        "desc": "Agenda la próxima cita del paciente."
+      },
+      "prescripcion": {
+        "desc": "Muestra la grilla de prescripción dentro del modal de atención."
+      }
     }
   },
   "facturacionList": {
