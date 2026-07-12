@@ -1272,6 +1272,7 @@
         "fuente": "Fuente"
       }
     },
-    "scopeGlobal": "Global (franquicia)"
+    "scopeGlobal": "Global (franquicia)",
+    "noPresentacion": "Sin presentación"
   }
 }

@@ -249,9 +249,11 @@ export function PreciosAdmin() {
               </tr>
             )}
             {rows.map((row) => {
-              const isEditing = editingId === row.presentacionId;
+              // Filas sin presentación no se pueden precificar (no hay a qué colgar el precio).
+              const editable = !!row.presentacionId;
+              const isEditing = editable && editingId === row.presentacionId;
               return (
-                <tr key={row.presentacionId} className="group hover:bg-muted/30">
+                <tr key={row.presentacionId ?? row.productoId} className="group hover:bg-muted/30">
                   <td className="px-3 py-2 font-medium">{row.nombre}</td>
                   <td className="px-3 py-2 font-mono text-xs">{row.sku ?? "—"}</td>
                   <td className="px-3 py-2 text-muted-foreground">{row.presentacionNombre}</td>
@@ -287,7 +289,7 @@ export function PreciosAdmin() {
                           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
                         </Button>
                       </div>
-                    ) : (
+                    ) : editable ? (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -297,6 +299,8 @@ export function PreciosAdmin() {
                         <HugeiconsIcon icon={PencilEdit01Icon} className="size-4" />
                         {t("editPrice")}
                       </Button>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">{t("noPresentacion")}</span>
                     )}
                   </td>
                 </tr>
