@@ -63,7 +63,16 @@ export default function FacturacionPage() {
 
   React.useEffect(() => {
     let active = true;
-    Promise.all([getFactura(id, centro), getCatalogoFacturacion(centro), getFormasPago(centro)])
+    // La factura primero: si es de CONSULTA (tiene citaId) el catálogo se pide con contexto=consulta
+    // (solo Consulta/Seguimiento); una factura de venta pide el catálogo completo.
+    getFactura(id, centro)
+      .then((f) =>
+        Promise.all([
+          Promise.resolve(f),
+          getCatalogoFacturacion(centro, f.citaId ? "consulta" : undefined),
+          getFormasPago(centro),
+        ]),
+      )
       .then(([f, c, fp]) => {
         if (!active) return;
         setFactura(f);

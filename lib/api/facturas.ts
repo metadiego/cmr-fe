@@ -91,8 +91,14 @@ export function getFactura(id: string, centroId?: string): Promise<FacturaConIte
 }
 
 // Catálogo facturable (productos/servicios) para agregar líneas.
-export function getCatalogoFacturacion(centroId?: string): Promise<Producto[]> {
-  return apiFetch<Producto[]>(`/facturas/catalogo`, {}, centroId);
+// `contexto='consulta'` → el BE restringe a los productos de los tipos de cita activos (Consulta,
+// Seguimiento): una factura de consulta médica no ofrece el catálogo físico completo.
+export function getCatalogoFacturacion(
+  centroId?: string,
+  contexto?: string,
+): Promise<Producto[]> {
+  const qs = contexto ? `?contexto=${encodeURIComponent(contexto)}` : "";
+  return apiFetch<Producto[]>(`/facturas/catalogo${qs}`, {}, centroId);
 }
 
 export function agregarItem(facturaId: string, payload: AgregarItemPayload, centroId?: string): Promise<FacturaConItems> {

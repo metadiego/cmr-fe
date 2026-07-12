@@ -34,14 +34,20 @@ export interface TipoPrecio {
 
 // `tipoPrecioId` = lista concreta (regular/mayorista/…); sin él = precio efectivo.
 // `clinicId` = centro para el que resolver (admin); sin él = scope del header.
-export function listCatalogoPrecios(opts: {
-  q?: string;
-  page?: number;
-  limit?: number;
-  asOf?: string;
-  tipoPrecioId?: string;
-  clinicId?: string;
-}): Promise<Paginated<PrecioCatalogoRow>> {
+// `tenant`: undefined = centro activo del header; null = OMITE X-Tenant-ID (scope
+// global/franquicia); un id = fuerza ese centro. Combínalo con `clinicId` para que el
+// BE resuelva la vista del centro elegido (admin).
+export function listCatalogoPrecios(
+  opts: {
+    q?: string;
+    page?: number;
+    limit?: number;
+    asOf?: string;
+    tipoPrecioId?: string;
+    clinicId?: string;
+  },
+  tenant?: string | null,
+): Promise<Paginated<PrecioCatalogoRow>> {
   const sp = new URLSearchParams();
   if (opts.q?.trim()) sp.set("q", opts.q.trim());
   if (opts.asOf) sp.set("asOf", opts.asOf);
@@ -49,7 +55,11 @@ export function listCatalogoPrecios(opts: {
   if (opts.clinicId) sp.set("clinicId", opts.clinicId);
   sp.set("page", String(opts.page ?? 1));
   sp.set("limit", String(opts.limit ?? 50));
-  return apiFetchPaged<PrecioCatalogoRow>(`/precios/catalogo?${sp.toString()}`);
+  return apiFetchPaged<PrecioCatalogoRow>(
+    `/precios/catalogo?${sp.toString()}`,
+    {},
+    tenant,
+  );
 }
 
 export function listTiposPrecio(): Promise<TipoPrecio[]> {
@@ -93,28 +103,40 @@ export function derivarPrecios(
   );
 }
 
-// Filas de precio de una presentación (para hallar el precioId regular a editar).
+// Filas de precio de una presentación (para hallar el precioId a editar).
+// `tenant`: null = global; id = ese centro (para editar el override del centro).
 export function listPreciosByPresentacion(
   presentacionId: string,
+  tenant?: string | null,
 ): Promise<PrecioEntity[]> {
   return apiFetch<PrecioEntity[]>(
     `/precios?presentacionId=${encodeURIComponent(presentacionId)}`,
+    {},
+    tenant,
   );
 }
 
-export function createPrecio(payload: CreatePrecioPayload): Promise<PrecioEntity> {
-  return apiFetch<PrecioEntity>(`/precios`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+// El centro del precio lo fija el BE por X-Tenant-ID → pasa `tenant` para dirigirlo
+// (null = global/franquicia; id = override de ese centro).
+export function createPrecio(
+  payload: CreatePrecioPayload,
+  tenant?: string | null,
+): Promise<PrecioEntity> {
+  return apiFetch<PrecioEntity>(
+    `/precios`,
+    { method: "POST", body: JSON.stringify(payload) },
+    tenant,
+  );
 }
 
 export function updatePrecio(
   id: string,
   payload: UpdatePrecioPayload,
+  tenant?: string | null,
 ): Promise<PrecioEntity> {
-  return apiFetch<PrecioEntity>(`/precios/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
+  return apiFetch<PrecioEntity>(
+    `/precios/${id}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    tenant,
+  );
 }

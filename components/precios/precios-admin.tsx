@@ -16,6 +16,7 @@ import {
   type PrecioFuente,
   type TipoPrecio,
 } from "@/lib/api/precios";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
 import type { Paginated } from "@/lib/api/types";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -53,6 +54,10 @@ export function PreciosAdmin() {
   const [page, setPage] = React.useState(1);
   // "" = precio efectivo (default); un id = lista concreta (regular/mayorista/…).
   const [tipoFiltro, setTipoFiltro] = React.useState("");
+  // Scope de centro (admin): "global" = franquicia; un id = ese centro. Default global.
+  const [scope, setScope] = React.useState("global");
+  const scopeTenant = scope === "global" ? null : scope;
+  const scopeClinicId = scope === "global" ? undefined : scope;
   React.useEffect(() => {
     const id = setTimeout(() => {
       setDebounced(q);
@@ -63,18 +68,25 @@ export function PreciosAdmin() {
 
   const { state, reload } = useResource<Paginated<PrecioCatalogoRow>>(
     () =>
-      listCatalogoPrecios({
-        q: debounced,
-        page,
-        limit: PAGE_SIZE,
-        tipoPrecioId: tipoFiltro || undefined,
-      }),
-    [debounced, page, tipoFiltro],
+      listCatalogoPrecios(
+        {
+          q: debounced,
+          page,
+          limit: PAGE_SIZE,
+          tipoPrecioId: tipoFiltro || undefined,
+          clinicId: scopeClinicId,
+        },
+        scopeTenant,
+      ),
+    [debounced, page, tipoFiltro, scope],
   );
 
   // Tipos de precio (listas). El "regular" es el fallback para POST.
   const tiposRes = useResource<TipoPrecio[]>(() => listTiposPrecio());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
+  // Centros para el selector de scope (admin ve todos).
+  const centrosRes = useResource<Centro[]>(() => getMyCentros());
+  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const regularTipoId = tipos.find((x) => x.clave === "regular")?.id ?? null;
   // Lista destino de una edición: la lista filtrada, o regular por defecto.
   const targetTipoId = tipoFiltro || regularTipoId;
@@ -101,18 +113,28 @@ export function PreciosAdmin() {
     setSaving(true);
     try {
       const listaId = row.tipoPrecioId ?? targetTipoId;
-      // ¿Ya existe una fila de precio en esta lista para la presentación? → PUT; si no → POST.
-      const filas = await listPreciosByPresentacion(row.presentacionId);
-      const existente = listaId ? filas.find((f) => f.tipoPrecioId === listaId) : undefined;
+      // Escribe en el scope elegido (global o el centro): el BE fija clinicId por X-Tenant-ID.
+      // Busca la fila EN ese scope para decidir PUT vs POST (un centro no ve la global como suya).
+      const filas = await listPreciosByPresentacion(row.presentacionId, scopeTenant);
+      const existente = listaId
+        ? filas.find(
+            (f) =>
+              f.tipoPrecioId === listaId &&
+              (scope === "global" ? f.clinicId == null : f.clinicId === scope),
+          )
+        : undefined;
       if (existente) {
-        await updatePrecio(existente.id, { precio: value });
+        await updatePrecio(existente.id, { precio: value }, scopeTenant);
       } else {
         if (!targetTipoId) throw new Error(t("regularNotFound"));
-        await createPrecio({
-          presentacionId: row.presentacionId,
-          tipoPrecioId: targetTipoId,
-          precio: value,
-        });
+        await createPrecio(
+          {
+            presentacionId: row.presentacionId,
+            tipoPrecioId: targetTipoId,
+            precio: value,
+          },
+          scopeTenant,
+        );
       }
       toast.success(t("saved"));
       setEditingId(null);
@@ -159,6 +181,20 @@ export function PreciosAdmin() {
           placeholder={t("search")}
           className="max-w-sm"
         />
+        {/* Scope de centro (admin): franquicia global o un centro concreto */}
+        <Select value={scope} onValueChange={(v) => { setScope(v); setPage(1); }}>
+          <SelectTrigger className="w-56">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="global">{t("scopeGlobal")}</SelectItem>
+            {centros.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={tipoFiltro || "__efectivo__"} onValueChange={(v) => { setTipoFiltro(v === "__efectivo__" ? "" : v); setPage(1); }}>
           <SelectTrigger className="w-56">
             <SelectValue />
