@@ -25,11 +25,12 @@ export interface PrecioCatalogoRow {
   impuestoId: string | null;
 }
 
-// Tipo de precio (regular/oferta/…). El regular es `clave:"regular"`.
+// Tipo de precio = una LISTA (regular/mayorista/navidad/…). El regular es `clave:"regular"`.
 export interface TipoPrecio {
   id: string;
   clave: string;
   nombre?: string;
+  activo?: boolean;
 }
 
 // `tipoPrecioId` = lista concreta (regular/mayorista/…); sin él = precio efectivo.
@@ -67,11 +68,24 @@ export function listTiposPrecio(): Promise<TipoPrecio[]> {
 }
 
 export type CreateTipoPrecioPayload = components["schemas"]["CreateTipoPrecioDto"];
+export type UpdateTipoPrecioPayload = components["schemas"]["UpdateTipoPrecioDto"];
 export function createTipoPrecio(payload: CreateTipoPrecioPayload): Promise<TipoPrecio> {
   return apiFetch<TipoPrecio>(`/precios/tipos`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+export function updateTipoPrecio(
+  id: string,
+  payload: UpdateTipoPrecioPayload,
+): Promise<TipoPrecio> {
+  return apiFetch<TipoPrecio>(`/precios/tipos/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+export function deleteTipoPrecio(id: string): Promise<void> {
+  return apiFetch<void>(`/precios/tipos/${id}`, { method: "DELETE" });
 }
 
 // Derivar una lista a partir de otra (ajuste lineal %/$). Verificado prod 2026-07-12.

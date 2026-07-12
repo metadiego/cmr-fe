@@ -1230,7 +1230,8 @@
     },
     "mode": {
       "catalogo": "Catálogo",
-      "derivar": "Derivar precios"
+      "derivar": "Derivar precios",
+      "listas": "Listas"
     },
     "efectivo": "Precio efectivo",
     "derivar": {
@@ -1273,6 +1274,24 @@
       }
     },
     "scopeGlobal": "Global (franquicia)",
-    "noPresentacion": "Sin presentación"
+    "noPresentacion": "Sin presentación",
+    "listas": {
+      "newName": "Nombre de la lista",
+      "newPlaceholder": "Ej. Navidad en Julio",
+      "create": "Crear lista",
+      "claveHint": "Clave: {clave}",
+      "created": "Lista «{nombre}» creada",
+      "renamed": "Lista renombrada",
+      "empty": "Sin listas",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "deactivate": "Desactivar",
+      "activate": "Activar",
+      "col": {
+        "nombre": "Nombre",
+        "clave": "Clave",
+        "estado": "Estado"
+      }
+    }
   }
 }

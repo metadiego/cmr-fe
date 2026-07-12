@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DerivarPrecios } from "@/components/precios/derivar-precios";
+import { ListasPrecio } from "@/components/precios/listas-precio";
 
 const PAGE_SIZE = 50;
 const money = (v: number) =>
@@ -48,7 +49,7 @@ export function PreciosAdmin() {
   const t = useTranslations("precios");
   const tc = useTranslations("common");
 
-  const [mode, setMode] = React.useState<"catalogo" | "derivar">("catalogo");
+  const [mode, setMode] = React.useState<"catalogo" | "listas" | "derivar">("catalogo");
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
   const [page, setPage] = React.useState(1);
@@ -151,7 +152,7 @@ export function PreciosAdmin() {
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <div className="inline-flex rounded-lg border p-0.5">
-          {(["catalogo", "derivar"] as const).map((m) => (
+          {(["catalogo", "listas", "derivar"] as const).map((m) => (
             <button
               key={m}
               type="button"
@@ -170,7 +171,9 @@ export function PreciosAdmin() {
       </div>
       <p className="mb-4 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
-      {mode === "derivar" ? (
+      {mode === "listas" ? (
+        <ListasPrecio onChange={() => { tiposRes.reload(); reload(); }} />
+      ) : mode === "derivar" ? (
         <DerivarPrecios onDone={reload} />
       ) : (
         <>

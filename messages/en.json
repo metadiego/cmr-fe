@@ -1230,7 +1230,8 @@
     },
     "mode": {
       "catalogo": "Catalog",
-      "derivar": "Derive prices"
+      "derivar": "Derive prices",
+      "listas": "Lists"
     },
     "efectivo": "Effective price",
     "derivar": {
@@ -1273,6 +1274,24 @@
       }
     },
     "scopeGlobal": "Global (franchise)",
-    "noPresentacion": "No presentation"
+    "noPresentacion": "No presentation",
+    "listas": {
+      "newName": "List name",
+      "newPlaceholder": "e.g. Christmas in July",
+      "create": "Create list",
+      "claveHint": "Key: {clave}",
+      "created": "List “{nombre}” created",
+      "renamed": "List renamed",
+      "empty": "No lists",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "col": {
+        "nombre": "Name",
+        "clave": "Key",
+        "estado": "Status"
+      }
+    }
   }
 }
