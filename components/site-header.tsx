@@ -62,11 +62,43 @@ export function SiteHeader() {
   const tRoot = useTranslations();
   // Dynamic, RBAC-filtered nav from the BE (#6). Empty when unauthenticated.
   const menu = useMenu();
-  const topLevel = menu.filter((item) => !item.parentClave);
-  // Submenús: hijos por parentClave. Un ítem de primer nivel con hijos se pinta
-  // como dropdown; sin hijos, como enlace plano (compatible con lo de antes).
-  const childrenOf = (clave: string) =>
-    menu.filter((m) => m.parentClave === clave);
+  // Categorización 100% en el FE (independiente de la config/caché del menú del BE):
+  // "En desarrollo" = la ruta existe como página; "Por desarrollar" = el resto.
+  // Rutas reales de la app (prefijos). Actualizar al agregar módulos nuevos.
+  const REAL_ROUTES = [
+    "/dashboard",
+    "/clientes",
+    "/citas",
+    "/facturacion",
+    "/tablero",
+    "/inventario/proveedores",
+    "/inventario/presentaciones-proveedor",
+    "/admin",
+    "/configuracion/tableros",
+    "/settings",
+  ];
+  const hasPage = (p: string) =>
+    p === "/" ||
+    REAL_ROUTES.some((r) => p === r || p.startsWith(r + "/") || p.startsWith(r));
+  const navItems = menu.filter(
+    (m) =>
+      !!m.path &&
+      m.path !== "#" &&
+      m.clave !== "en-desarrollo" &&
+      m.clave !== "por-desarrollar",
+  );
+  const grupos = [
+    {
+      clave: "en-desarrollo",
+      labelKey: "nav.en_desarrollo",
+      items: navItems.filter((m) => hasPage(m.path)),
+    },
+    {
+      clave: "por-desarrollar",
+      labelKey: "nav.por_desarrollar",
+      items: navItems.filter((m) => !hasPage(m.path)),
+    },
+  ].filter((g) => g.items.length > 0);
   // Session for the header (email + sign out). Anonymous → shows "sign in".
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
@@ -104,46 +136,28 @@ export function SiteHeader() {
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
-              {topLevel.map((item) => {
-                const children = childrenOf(item.clave);
-                const rowClass = (active: boolean, indent?: boolean) =>
-                  cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    indent && "ml-3 text-[13px]",
-                    active
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                  );
-                if (children.length === 0) {
-                  return (
+              {grupos.map((g) => (
+                <div key={g.clave} className="flex flex-col gap-0.5">
+                  <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {tRoot(g.labelKey)}
+                  </span>
+                  {g.items.map((c) => (
                     <Link
-                      key={item.clave}
-                      href={item.path}
+                      key={c.clave}
+                      href={c.path}
                       onClick={() => setOpen(false)}
-                      className={rowClass(isActive(pathname, item.path))}
+                      className={cn(
+                        "ml-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
+                        isActive(pathname, c.path)
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                      )}
                     >
-                      {tRoot(item.labelKey)}
+                      {tRoot(c.labelKey)}
                     </Link>
-                  );
-                }
-                return (
-                  <div key={item.clave} className="flex flex-col gap-0.5">
-                    <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      {tRoot(item.labelKey)}
-                    </span>
-                    {children.map((c) => (
-                      <Link
-                        key={c.clave}
-                        href={c.path}
-                        onClick={() => setOpen(false)}
-                        className={rowClass(isActive(pathname, c.path), true)}
-                      >
-                        {tRoot(c.labelKey)}
-                      </Link>
-                    ))}
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              ))}
             </nav>
             <div className="mt-4 space-y-2 px-2">
               {session ? (
@@ -179,37 +193,23 @@ export function SiteHeader() {
             can be registered, so the row scrolls horizontally instead of
             clipping items off the right edge. */}
         <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {topLevel.map((item) => {
-            const children = childrenOf(item.clave);
-            const linkClass = (active: boolean) =>
-              cn(
-                "shrink-0 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-              );
-            if (children.length === 0) {
-              return (
-                <Link
-                  key={item.clave}
-                  href={item.path}
-                  className={linkClass(isActive(pathname, item.path))}
-                >
-                  {tRoot(item.labelKey)}
-                </Link>
-              );
-            }
-            const active =
-              isActive(pathname, item.path) ||
-              children.some((c) => isActive(pathname, c.path));
+          {grupos.map((g) => {
+            const active = g.items.some((c) => isActive(pathname, c.path));
             return (
-              <DropdownMenu key={item.clave}>
+              <DropdownMenu key={g.clave}>
                 <DropdownMenuTrigger
-                  className={cn(linkClass(active), "inline-flex items-center gap-1 outline-none")}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
+                    active
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
                 >
-                  {tRoot(item.labelKey)}
+                  {tRoot(g.labelKey)}
                   <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {children.map((c) => (
+                <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
+                  {g.items.map((c) => (
                     <DropdownMenuItem key={c.clave} asChild>
                       <Link href={c.path}>{tRoot(c.labelKey)}</Link>
                     </DropdownMenuItem>
