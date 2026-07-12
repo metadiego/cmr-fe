@@ -474,7 +474,12 @@
       "range": "{from}–{to} of {total}",
       "prev": "Previous",
       "next": "Next"
-    }
+    },
+    "prev": "Previous",
+    "next": "Next",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "error": "Could not load"
   },
   "pending": {
     "title": "Access pending",
@@ -1064,7 +1069,8 @@
         "sku": "SKU",
         "tipo": "Type",
         "marcaFab": "Brand / manufacturer",
-        "activo": "Status"
+        "activo": "Status",
+        "proveedor": "Supplier"
       },
       "tipo": {
         "base": "Base",
@@ -1091,7 +1097,11 @@
         "gravado": "Taxable",
         "activo": "Active",
         "none": "(none)"
-      }
+      },
+      "proveedorMas": "+{n}",
+      "noResults": "No results for “{q}”",
+      "totalCount": "{total} products",
+      "pageOf": "Page {page} of {totalPages}"
     },
     "picker": {
       "placeholder": "Select a product…",
@@ -1099,6 +1109,35 @@
       "loading": "Searching…",
       "empty": "No results",
       "clear": "Clear"
+    },
+    "amp": {
+      "sectionTitle": "Supplier presentations (AMP)",
+      "new": "New presentation",
+      "empty": "No presentations",
+      "newTitle": "New presentation",
+      "editTitle": "Edit presentation",
+      "created": "Presentation created",
+      "updated": "Presentation updated",
+      "showAdvanced": "Show advanced fields",
+      "hideAdvanced": "Hide advanced fields",
+      "col": {
+        "presentacion": "Presentation",
+        "contenido": "Content"
+      },
+      "field": {
+        "proveedor": "Supplier",
+        "selectProveedor": "Select a supplier…",
+        "contenido": "Content per package",
+        "unidad": "Unit",
+        "none": "—",
+        "nombre": "Name",
+        "concentracion": "Concentration",
+        "unidadConc": "Concentration unit",
+        "marca": "Brand",
+        "fabricante": "Manufacturer",
+        "sku": "SKU",
+        "barcode": "Barcode"
+      }
     }
   },
   "receipt": {
@@ -1163,5 +1202,31 @@
     "notesPlaceholder": "Reason / notes…",
     "cancel": "Cancel",
     "save": "Add to board"
+  },
+  "precios": {
+    "title": "Prices",
+    "help": "Price catalog per presentation. Edit the price inline; the source tells where it comes from (offer, regular, base or no price).",
+    "search": "Search by name or SKU…",
+    "empty": "No products",
+    "noResults": "No results for “{q}”",
+    "editPrice": "Edit",
+    "saved": "Price saved",
+    "invalidPrice": "Invalid price",
+    "regularNotFound": "Regular price type not found",
+    "totalCount": "{total} products",
+    "pageOf": "Page {page} of {totalPages}",
+    "col": {
+      "producto": "Product",
+      "sku": "SKU",
+      "presentacion": "Presentation",
+      "precio": "Price",
+      "fuente": "Source"
+    },
+    "fuente": {
+      "oferta": "Offer",
+      "precio": "Regular",
+      "base": "Base",
+      "ninguno": "No price"
+    }
   }
 }

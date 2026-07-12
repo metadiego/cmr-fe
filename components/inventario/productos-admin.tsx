@@ -3,24 +3,37 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  ArrowRight01Icon,
+  ArrowDown01Icon,
+} from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import {
-  listProductos,
+  listProductosPaged,
+  listPresentacionesProveedor,
   listClasificaciones,
+  listProveedores,
+  listUnidades,
   createProducto,
   updateProducto,
   type Producto,
+  type ProductoConProveedores,
+  type PresentacionProveedor,
+  type Proveedor,
+  type Unidad,
   type Clasificacion,
   type CreateProductoPayload,
 } from "@/lib/api/inventario";
+import type { Paginated } from "@/lib/api/types";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -36,40 +49,82 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { AmpEditorSheet } from "@/components/inventario/amp-editor-sheet";
 
 const NONE = "__none__";
 const TIPOS = ["base", "unico", "compuesto", "servicio"] as const;
 const MODOS = ["a_la_venta", "a_la_entrega", "no_descarga"] as const;
+const PAGE_SIZE = 50;
 
 export function ProductosAdmin() {
   const t = useTranslations("inventario.prod");
   const tc = useTranslations("common");
 
-  const { state, reload } = useResource<Producto[]>(() => listProductos());
+  // Búsqueda server-side con debounce 300ms (§1). `q` se manda en cada tecla.
+  const [q, setQ] = React.useState("");
+  const [debounced, setDebounced] = React.useState("");
+  const [page, setPage] = React.useState(1);
+  React.useEffect(() => {
+    const id = setTimeout(() => {
+      setDebounced(q);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(id);
+  }, [q]);
+
+  const { state, reload } = useResource<Paginated<ProductoConProveedores>>(
+    () =>
+      listProductosPaged({
+        soloFisicos: true,
+        conProveedores: true,
+        q: debounced,
+        page,
+        limit: PAGE_SIZE,
+      }),
+    [debounced, page],
+  );
+
+  // Selectores para el CRUD de producto y el editor de AMP (§4).
   const catRes = useResource<Clasificacion[]>(() => listClasificaciones("categoria"));
   const marcaRes = useResource<Clasificacion[]>(() => listClasificaciones("marca"));
   const fabRes = useResource<Clasificacion[]>(() => listClasificaciones("fabricante"));
-
-  const rows = state.kind === "ok" ? state.data : [];
+  const provRes = useResource<Proveedor[]>(() => listProveedores());
+  const unidadRes = useResource<Unidad[]>(() => listUnidades());
   const categorias = catRes.state.kind === "ok" ? catRes.state.data : [];
   const marcas = marcaRes.state.kind === "ok" ? marcaRes.state.data : [];
   const fabricantes = fabRes.state.kind === "ok" ? fabRes.state.data : [];
-  const nameById = new Map<string, string>();
-  [...categorias, ...marcas, ...fabricantes].forEach((x) => nameById.set(x.id, x.nombre));
+  const proveedores = provRes.state.kind === "ok" ? provRes.state.data : [];
+  const unidades = unidadRes.state.kind === "ok" ? unidadRes.state.data : [];
 
-  const [q, setQ] = React.useState("");
-  const filtered = rows.filter((p) => {
-    const s = q.trim().toLowerCase();
-    if (!s) return true;
-    return (
-      p.nombre?.toLowerCase().includes(s) ||
-      p.sku?.toLowerCase().includes(s) ||
-      p.barcode?.toLowerCase().includes(s)
-    );
-  });
+  const rows = state.kind === "ok" ? state.data.items : [];
+  const total = state.kind === "ok" ? state.data.pagination.total : 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const [expanded, setExpanded] = React.useState<Set<string>>(new Set());
+  const [ampReloadToken, setAmpReloadToken] = React.useState(0);
+  function toggleExpand(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const [formOpen, setFormOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Producto | null>(null);
+
+  // Editor de AMP (§2) — instancia única controlada desde las filas expandidas.
+  const [ampSheet, setAmpSheet] = React.useState<{
+    productoId: string;
+    productoNombre: string;
+    amp: PresentacionProveedor | null;
+  } | null>(null);
+
+  function afterAmpSaved() {
+    setAmpReloadToken((n) => n + 1); // recarga las sub-tablas de AMP abiertas
+    reload(); // la columna Proveedor del producto puede cambiar
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -92,74 +147,140 @@ export function ProductosAdmin() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder={t("search")}
-        className="mb-4 max-w-xs"
+        className="mb-4 max-w-sm"
       />
 
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+          <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
+            <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              <th className="w-8 px-2 py-2" />
               <th className="px-3 py-2 font-semibold">{t("col.nombre")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.sku")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.tipo")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.marcaFab")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.proveedor")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.activo")}</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody className="divide-y">
-            {state.kind === "loading" && (
-              <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
-                  {tc("loading")}
-                </td>
-              </tr>
-            )}
-            {state.kind === "ok" && filtered.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
-                  {t("empty")}
-                </td>
-              </tr>
-            )}
-            {filtered.map((p) => {
-              const marcaFab = [
-                p.marcaId ? nameById.get(p.marcaId) : null,
-                p.fabricanteId ? nameById.get(p.fabricanteId) : null,
-              ]
-                .filter(Boolean)
-                .join(" · ");
-              return (
-                <tr key={p.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-medium">{p.nombre}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{p.sku ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    <Badge variant="outline">{t(`tipo.${p.tipo}`)}</Badge>
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{marcaFab || "—"}</td>
-                  <td className="px-3 py-2">
-                    <Badge variant={p.activo ? "secondary" : "outline"}>
-                      {p.activo ? t("active") : t("inactive")}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditing(p);
-                        setFormOpen(true);
-                      }}
-                    >
-                      {tc("edit")}
-                    </Button>
+            {state.kind === "loading" &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={`sk-${i}`}>
+                  <td colSpan={7} className="px-3 py-3">
+                    <div className="h-4 w-full animate-pulse rounded bg-muted" />
                   </td>
                 </tr>
+              ))}
+            {state.kind === "fail" && (
+              <tr>
+                <td colSpan={7} className="px-3 py-8 text-center">
+                  <p className="text-sm text-muted-foreground">{tc("error")}</p>
+                  <Button variant="outline" size="sm" className="mt-2" onClick={reload}>
+                    {tc("retry")}
+                  </Button>
+                </td>
+              </tr>
+            )}
+            {state.kind === "ok" && rows.length === 0 && (
+              <tr>
+                <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
+                  {debounced ? t("noResults", { q: debounced }) : t("empty")}
+                </td>
+              </tr>
+            )}
+            {rows.map((p) => {
+              const isOpen = expanded.has(p.id);
+              return (
+                <React.Fragment key={p.id}>
+                  <tr className="hover:bg-muted/30">
+                    <td className="px-2 py-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(p.id)}
+                        className="grid size-6 place-items-center rounded hover:bg-muted"
+                        aria-label={isOpen ? tc("collapse") : tc("expand")}
+                      >
+                        <HugeiconsIcon
+                          icon={isOpen ? ArrowDown01Icon : ArrowRight01Icon}
+                          className="size-4 text-muted-foreground"
+                        />
+                      </button>
+                    </td>
+                    <td className="px-3 py-2 font-medium">{p.nombre}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{p.sku ?? "—"}</td>
+                    <td className="px-3 py-2">
+                      <Badge variant="outline">{t(`tipo.${p.tipo}`)}</Badge>
+                    </td>
+                    <td className="px-3 py-2">
+                      <ProveedorCell proveedores={p.proveedores} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Badge variant={p.activo ? "secondary" : "outline"}>
+                        {p.activo ? t("active") : t("inactive")}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditing(p);
+                          setFormOpen(true);
+                        }}
+                      >
+                        {tc("edit")}
+                      </Button>
+                    </td>
+                  </tr>
+                  {isOpen && (
+                    <tr>
+                      <td colSpan={7} className="bg-muted/20 px-3 py-3">
+                        <ExpandedAmp
+                          producto={p}
+                          reloadToken={ampReloadToken}
+                          onNew={() =>
+                            setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp: null })
+                          }
+                          onEdit={(amp) =>
+                            setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp })
+                          }
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })}
           </tbody>
         </table>
       </div>
+
+      {/* Paginación */}
+      {total > 0 && (
+        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+          <span>{t("totalCount", { total })}</span>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage((n) => Math.max(1, n - 1))}
+            >
+              {tc("prev")}
+            </Button>
+            <span>{t("pageOf", { page, totalPages })}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage((n) => Math.min(totalPages, n + 1))}
+            >
+              {tc("next")}
+            </Button>
+          </div>
+        </div>
+      )}
 
       <ProductoForm
         open={formOpen}
@@ -170,6 +291,109 @@ export function ProductosAdmin() {
         onOpenChange={setFormOpen}
         onSaved={reload}
       />
+
+      {ampSheet && (
+        <AmpEditorSheet
+          open={!!ampSheet}
+          productoId={ampSheet.productoId}
+          productoNombre={ampSheet.productoNombre}
+          amp={ampSheet.amp}
+          proveedores={proveedores}
+          unidades={unidades}
+          marcas={marcas}
+          fabricantes={fabricantes}
+          onOpenChange={(o) => !o && setAmpSheet(null)}
+          onSaved={afterAmpSaved}
+        />
+      )}
+    </div>
+  );
+}
+
+// Columna Proveedor (§1): 0→—, 1→nombre, 2+→"primero +N" con tooltip que lista todos.
+function ProveedorCell({
+  proveedores,
+}: {
+  proveedores?: { id: string; nombre: string }[];
+}) {
+  const t = useTranslations("inventario.prod");
+  const list = proveedores ?? [];
+  if (list.length === 0) return <span className="text-muted-foreground">—</span>;
+  if (list.length === 1) return <span className="truncate">{list[0].nombre}</span>;
+  const extra = list.length - 1;
+  return (
+    <Tooltip content={list.map((p) => p.nombre).join(", ")}>
+      <span className="inline-flex max-w-[16rem] cursor-default items-center gap-1 truncate">
+        <span className="truncate">{list[0].nombre}</span>
+        <span className="shrink-0 text-muted-foreground">{t("proveedorMas", { n: extra })}</span>
+      </span>
+    </Tooltip>
+  );
+}
+
+// Sub-tabla de AMP dentro de la fila expandida (§1 progressive disclosure + §2 GET).
+function ExpandedAmp({
+  producto,
+  reloadToken,
+  onNew,
+  onEdit,
+}: {
+  producto: Producto;
+  reloadToken: number;
+  onNew: () => void;
+  onEdit: (amp: PresentacionProveedor) => void;
+}) {
+  const t = useTranslations("inventario.amp");
+  const tc = useTranslations("common");
+  const { state } = useResource<PresentacionProveedor[]>(
+    () => listPresentacionesProveedor(producto.id),
+    [producto.id, reloadToken],
+  );
+  const items = state.kind === "ok" ? state.data : [];
+
+  return (
+    <div className="rounded-lg border bg-background">
+      <div className="flex items-center justify-between border-b px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("sectionTitle")}
+        </span>
+        <Button variant="outline" size="sm" onClick={onNew}>
+          <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
+          {t("new")}
+        </Button>
+      </div>
+      {state.kind === "loading" && (
+        <p className="px-3 py-4 text-sm text-muted-foreground">{tc("loading")}</p>
+      )}
+      {state.kind === "ok" && items.length === 0 && (
+        <p className="px-3 py-4 text-sm text-muted-foreground">{t("empty")}</p>
+      )}
+      {items.length > 0 && (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-1.5 font-semibold">{t("col.presentacion")}</th>
+              <th className="px-3 py-1.5 font-semibold">{t("col.contenido")}</th>
+              <th className="px-3 py-1.5" />
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {items.map((a) => (
+              <tr key={a.id} className="hover:bg-muted/30">
+                <td className="px-3 py-1.5">{a.nombre}</td>
+                <td className="px-3 py-1.5 tabular-nums text-muted-foreground">
+                  {a.contenidoPorEmpaque ?? "—"}
+                </td>
+                <td className="px-3 py-1.5 text-right">
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(a)}>
+                    {tc("edit")}
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

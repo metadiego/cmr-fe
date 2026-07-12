@@ -474,7 +474,12 @@
       "range": "{from}–{to} de {total}",
       "prev": "Anterior",
       "next": "Siguiente"
-    }
+    },
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "error": "No se pudo cargar"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -1064,7 +1069,8 @@
         "sku": "SKU",
         "tipo": "Tipo",
         "marcaFab": "Marca / fabricante",
-        "activo": "Estado"
+        "activo": "Estado",
+        "proveedor": "Proveedor"
       },
       "tipo": {
         "base": "Base",
@@ -1091,7 +1097,11 @@
         "gravado": "Gravado (impuesto)",
         "activo": "Activo",
         "none": "(ninguno)"
-      }
+      },
+      "proveedorMas": "+{n}",
+      "noResults": "Sin resultados para «{q}»",
+      "totalCount": "{total} productos",
+      "pageOf": "Página {page} de {totalPages}"
     },
     "picker": {
       "placeholder": "Selecciona un producto…",
@@ -1099,6 +1109,35 @@
       "loading": "Buscando…",
       "empty": "Sin resultados",
       "clear": "Quitar"
+    },
+    "amp": {
+      "sectionTitle": "Presentaciones de proveedor (AMP)",
+      "new": "Nueva presentación",
+      "empty": "Sin presentaciones",
+      "newTitle": "Nueva presentación",
+      "editTitle": "Editar presentación",
+      "created": "Presentación creada",
+      "updated": "Presentación actualizada",
+      "showAdvanced": "Mostrar campos avanzados",
+      "hideAdvanced": "Ocultar campos avanzados",
+      "col": {
+        "presentacion": "Presentación",
+        "contenido": "Contenido"
+      },
+      "field": {
+        "proveedor": "Proveedor",
+        "selectProveedor": "Selecciona un proveedor…",
+        "contenido": "Contenido por empaque",
+        "unidad": "Unidad",
+        "none": "—",
+        "nombre": "Nombre",
+        "concentracion": "Concentración",
+        "unidadConc": "Unidad de concentración",
+        "marca": "Marca",
+        "fabricante": "Fabricante",
+        "sku": "SKU",
+        "barcode": "Código de barras"
+      }
     }
   },
   "receipt": {
@@ -1163,5 +1202,31 @@
     "notesPlaceholder": "Motivo / notas…",
     "cancel": "Cancelar",
     "save": "Agregar al tablero"
+  },
+  "precios": {
+    "title": "Precios",
+    "help": "Catálogo de precios por presentación. Edita el precio en línea; la fuente indica de dónde sale (oferta, regular, base o sin precio).",
+    "search": "Buscar por nombre o SKU…",
+    "empty": "Sin productos",
+    "noResults": "Sin resultados para «{q}»",
+    "editPrice": "Editar",
+    "saved": "Precio guardado",
+    "invalidPrice": "Precio inválido",
+    "regularNotFound": "No se encontró el tipo de precio regular",
+    "totalCount": "{total} productos",
+    "pageOf": "Página {page} de {totalPages}",
+    "col": {
+      "producto": "Producto",
+      "sku": "SKU",
+      "presentacion": "Presentación",
+      "precio": "Precio",
+      "fuente": "Fuente"
+    },
+    "fuente": {
+      "oferta": "Oferta",
+      "precio": "Regular",
+      "base": "Base",
+      "ninguno": "Sin precio"
+    }
   }
 }

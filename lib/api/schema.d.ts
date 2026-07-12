@@ -439,6 +439,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/unidades/convertir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Convierte una cantidad entre unidades (motor UoM). `desde`/`hasta` = unidades.id. */
+        get: operations["UnidadesController_convertir_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/unidades/{id}": {
         parameters: {
             query?: never;
@@ -1706,6 +1723,23 @@ export interface paths {
         put: operations["ImpuestosController_update_v1"];
         post?: never;
         delete: operations["ImpuestosController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/precios/catalogo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de precios: producto + presentación por defecto + precio efectivo (paginado, búsqueda q). */
+        get: operations["PreciosController_catalogo_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -4721,6 +4755,10 @@ export interface components {
         UnidadEntity: {
             clave: string;
             nombre: string;
+            /** @enum {string|null} */
+            dimension: "masa" | "volumen" | "actividad" | "conteo" | "longitud" | null;
+            factorACanonica: number;
+            esCanonica: boolean;
             /** @deprecated */
             factorBase: number;
             activo: boolean;
@@ -4733,10 +4771,25 @@ export interface components {
         CreateUnidadDto: {
             clave: string;
             nombre: string;
+            /**
+             * @description Dimensión/familia (masa, volumen, actividad, conteo, longitud).
+             * @enum {string}
+             */
+            dimension?: "masa" | "volumen" | "actividad" | "conteo" | "longitud";
+            /** @description Factor a la unidad canónica de su dimensión (g→1000, mcg→0.001). */
+            factorACanonica?: number;
+            /** @description Si es la unidad canónica de su dimensión. */
+            esCanonica?: boolean;
+            /** @deprecated */
             factorBase?: number;
         };
         UpdateUnidadDto: {
             nombre?: string;
+            /** @enum {string} */
+            dimension?: "masa" | "volumen" | "actividad" | "conteo" | "longitud";
+            factorACanonica?: number;
+            esCanonica?: boolean;
+            /** @deprecated */
             factorBase?: number;
             activo?: boolean;
         };
@@ -4917,6 +4970,7 @@ export interface components {
         };
         PresentacionProveedorEntity: {
             productoId: string;
+            proveedorId: string | null;
             nombre: string;
             fabricanteId: string | null;
             marcaId: string | null;
@@ -4940,6 +4994,11 @@ export interface components {
             /** Format: uuid */
             productoId: string;
             nombre: string;
+            /**
+             * Format: uuid
+             * @description Proveedor de esta presentación (proveedores.id).
+             */
+            proveedorId?: string;
             /** Format: uuid */
             fabricanteId?: string;
             /** Format: uuid */
@@ -4958,6 +5017,11 @@ export interface components {
         };
         UpdatePresentacionProveedorDto: {
             nombre?: string;
+            /**
+             * Format: uuid
+             * @description Proveedor de esta presentación (proveedores.id).
+             */
+            proveedorId?: string;
             /** Format: uuid */
             fabricanteId?: string;
             /** Format: uuid */
@@ -5296,7 +5360,15 @@ export interface components {
             productoId: string;
             /** Format: uuid */
             almacenId: string;
+            /**
+             * @description Cantidad comprada, en la UNIDAD DE INVENTARIO del producto
+             *     (`producto.unidadInventarioId`; la misma en que vive el stock y descuenta la
+             *     salida). El backend NO convierte por el AMP: si el proveedor entrega en un
+             *     empaque distinto, el FE hace la conversión de presentación y envía aquí la
+             *     cantidad ya en unidad de inventario.
+             */
             cantidad: number;
+            /** @description Costo unitario por unidad de inventario (misma unidad que `cantidad`). */
             costoUnitario?: number;
             numeroLote?: string;
             numeroFacturaCompra?: string;
@@ -5372,7 +5444,6 @@ export interface components {
             direccion: string | null;
             activo: boolean;
             id: string;
-            clinicId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -8533,6 +8604,33 @@ export interface operations {
             };
         };
     };
+    UnidadesController_convertir_v1: {
+        parameters: {
+            query: {
+                cantidad: number;
+                /** @description Unidad de origen (unidades.id). */
+                desde: string;
+                /** @description Unidad de destino (unidades.id). */
+                hasta: string;
+                /** @description Contexto para puentes cross-dimensión (envase↔medida). */
+                productoId?: string;
+                /** @description Contexto para puentes del proveedor (contenido/concentración). */
+                presentacionProveedorId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     UnidadesController_update_v1: {
         parameters: {
             query?: never;
@@ -8666,9 +8764,16 @@ export interface operations {
     ProductosController_list_v1: {
         parameters: {
             query: {
+                /** @description Solo comprables (base/unico): sin servicios ni kits. 'true' para el picker de compra/AMP. */
+                soloFisicos?: string;
+                /** @description Búsqueda por nombre o sku (ILIKE). */
+                q?: string;
+                /** @description 'true' para incluir inactivos (gestión); por defecto solo activos. */
+                incluirInactivos?: string;
+                /** @description 'true' para adjuntar proveedor(es) derivados de los AMP de cada producto. */
+                conProveedores?: string;
                 page: number;
                 limit: number;
-                soloFisicos?: string;
             };
             header?: never;
             path?: never;
@@ -11108,6 +11213,30 @@ export interface operations {
             };
         };
     };
+    PreciosController_catalogo_v1: {
+        parameters: {
+            query: {
+                /** @description Búsqueda por nombre o sku del producto (ILIKE). */
+                q?: string;
+                /** @description Momento para resolver el precio efectivo (default ahora). */
+                asOf?: string;
+                page: number;
+                limit: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     PreciosController_efectivo_v1: {
         parameters: {
             query: {
@@ -11309,9 +11438,9 @@ export interface operations {
     PacientesController_list_v1: {
         parameters: {
             query: {
+                q?: string;
                 page: number;
                 limit: number;
-                q?: string;
             };
             header?: never;
             path?: never;
@@ -11975,8 +12104,6 @@ export interface operations {
     CitasController_list_v1: {
         parameters: {
             query: {
-                page: number;
-                limit: number;
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
                 desde?: string;
                 /** @description Rango: fecha fin (YYYY-MM-DD, inclusivo) */
@@ -11996,6 +12123,8 @@ export interface operations {
                  *     (confirmada→presente→triage→en_consulta→atendida). Las `programada` (Agendada) no las ve Atención.
                  */
                 soloAtencion?: boolean;
+                page: number;
+                limit: number;
             };
             header?: never;
             path?: never;

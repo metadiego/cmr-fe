@@ -1,8 +1,36 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import type { Paginated } from "./types";
+import { apiFetch, apiFetchPaged } from "./client";
 
 // Inventario — proveedores, productos y catálogos de apoyo.
 export type Producto = components["schemas"]["ProductoEntity"];
+
+// `conProveedores=true` adjunta esta lista a cada producto (columna Proveedor).
+export type ProductoConProveedores = Producto & {
+  proveedores?: { id: string; nombre: string }[];
+};
+
+// Listado paginado para la pantalla Productos (§1 del hand-off). Solo params del
+// whitelist del BE: soloFisicos, conProveedores, q, incluirInactivos, page, limit.
+export function listProductosPaged(opts: {
+  soloFisicos?: boolean;
+  conProveedores?: boolean;
+  q?: string;
+  incluirInactivos?: boolean;
+  page?: number;
+  limit?: number;
+}): Promise<Paginated<ProductoConProveedores>> {
+  const sp = new URLSearchParams();
+  if (opts.soloFisicos) sp.set("soloFisicos", "true");
+  if (opts.conProveedores) sp.set("conProveedores", "true");
+  if (opts.q?.trim()) sp.set("q", opts.q.trim());
+  if (opts.incluirInactivos) sp.set("incluirInactivos", "true");
+  sp.set("page", String(opts.page ?? 1));
+  sp.set("limit", String(opts.limit ?? 50));
+  return apiFetchPaged<ProductoConProveedores>(
+    `/inventario/productos?${sp.toString()}`,
+  );
+}
 export type Unidad = components["schemas"]["UnidadEntity"];
 export type Clasificacion = components["schemas"]["ClasificacionEntity"];
 
