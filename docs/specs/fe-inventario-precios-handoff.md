@@ -206,6 +206,43 @@ Params: `q` (nombre|sku, debounce 300ms), `page`, `limit`, `asOf` (momento para 
 3. **Editor de AMP** (§2 POST/PUT) con selectores de proveedor + unidad (§4).
 4. Pantalla **Precios** (§3) con catálogo + edición inline.
 
+## 5-bis. DERIVADOS + RECETAS  (base → derivado → dosis)  — LIVE EN PROD
+
+**Modelo:** hay 3 tipos de producto que importan aquí:
+- `base` = **sustancia/insumo** (ej. `tirzepatide`, unidad mg). No se vende sola; la consumen los derivados.
+- `compuesto` = **derivado** (ej. `GLP-1 5.0 mg`). Es lo que se vende/receta.
+- La **receta** (`producto_componentes`, endpoint `/inventario/componentes`) dice: un derivado consume
+  X cantidad de un componente (base/único) en tal unidad. Al vender/dispensar el derivado, el BE descarga
+  la receta (base × cantidad).
+- **YA en prod:** `tirzepatide` (base) + 6 derivados `GLP1-2.5 … GLP1-15.0` + sus recetas (2.5/5/7.5/10/12.5/15 mg de tirzepatide).
+
+### Endpoints
+```
+GET    /api/v1/inventario/componentes?productoCompuestoId=<uuid>   → receta del derivado
+POST   /api/v1/inventario/componentes   { productoCompuestoId, componenteId, cantidad, unidadId? }
+PUT    /api/v1/inventario/componentes/<id>   { cantidad?, unidadId?, activo? }
+DELETE /api/v1/inventario/componentes/<id>   (baja lógica)
+```
+Fila de receta (GET): `{ id, productoCompuestoId, componenteId, cantidad, unidadId, presentacionId, activo }`.
+
+### Listar derivados / bases
+El endpoint de productos (§1) NO tiene filtro por `tipo`, y `soloFisicos=true` **excluye** los compuestos.
+Para la pantalla de derivados: `GET /api/v1/inventario/productos?q=<texto>` (sin `soloFisicos`) y **filtra en el
+FE** por `tipo === 'compuesto'` (derivados) o `tipo === 'base'` (sustancias). El **componente** de una receta
+se elige con el buscador de productos (tipo base|unico).
+
+### UI — editor de receta (patrón "bill of materials / recipe")
+- Dentro de la ficha de un producto **compuesto**: sección **Receta** = tabla de componentes
+  `Componente | Cantidad | Unidad | (quitar)`.
+- **Agregar componente**: buscador "type-ahead" (escribe 2+ letras → busca productos) → seleccionar → fila nueva
+  con inputs de **cantidad** + **unidad**. Repetir para armar la receta. (Patrón estándar BOM: buscar-y-agregar filas.)
+- **Editar cantidad/unidad**: inline por fila. **Quitar**: DELETE.
+- Cada fila: cantidad exacta por unidad de producto terminado + su unidad de medida (no estimar).
+- i18n en labels; estados vacío ("Sin receta — agrega componentes") / loading / error.
+
+Fuentes UI: [Craftybase — recipes/BOM](https://help.craftybase.com/article/1165-introduction-to-recipes) ·
+[Autodesk — BOM editor](https://help.autodesk.com/cloudhelp/2024/ENU/Inventor-Help/files/GUID-AB53D7BB-A43B-4522-9AEC-BEAA21B96A77.htm).
+
 ## 6. Reglas transversales (obligatorias)
 - **i18n**: TODO label vía `labelKey`/traducción, cero strings hardcodeados.
 - **Estados**: siempre loading / vacío / error explícitos (no pantalla en blanco).

@@ -1401,6 +1401,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/productos/{productoId}/reglas/receta-desde-componentes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** (Re)publica la regla-receta versionada espejo de producto_componentes (Fase 3). */
+        post: operations["ReglasDescargaController_recetaDesdeComponentes_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/productos/{productoId}/reglas/{reglaId}/publicar": {
         parameters: {
             query?: never;
@@ -1735,10 +1752,27 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Catálogo de precios: producto + presentación por defecto + precio efectivo (paginado, búsqueda q). */
+        /** Catálogo de precios: producto + presentación + precio (efectivo o de un tipo). Paginado + búsqueda. */
         get: operations["PreciosController_catalogo_v1"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/precios/derivar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deriva una lista de precios de otra (ajuste %/$ + redondeo, ámbito, dryRun preview). */
+        post: operations["PreciosController_derivar_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5721,7 +5755,51 @@ export interface components {
             activo?: boolean;
             esDefault?: boolean;
         };
+        OrigenDto: {
+            /** Format: uuid */
+            tipoPrecioId: string;
+            /**
+             * Format: uuid
+             * @description Centro de origen (null/omitido = global).
+             */
+            clinicId?: string;
+        };
+        DestinoDto: {
+            /** Format: uuid */
+            tipoPrecioId: string;
+            /** @enum {string} */
+            ambito: "global" | "centro" | "individual";
+            /**
+             * Format: uuid
+             * @description Requerido si ambito=centro.
+             */
+            clinicId?: string;
+            /** @description Requerido si ambito=individual. */
+            productoIds?: string[];
+        };
+        AjusteDto: {
+            /** @enum {string} */
+            modo: "porcentaje" | "monto";
+            valor: number;
+            /** @enum {string} */
+            direccion: "aumentar" | "disminuir";
+        };
+        RedondeoDto: {
+            /** @enum {string} */
+            modo: "ninguno" | "entero" | "multiplo" | "terminacion";
+            valor?: number;
+        };
+        DerivarPreciosDto: {
+            origen: components["schemas"]["OrigenDto"];
+            destino: components["schemas"]["DestinoDto"];
+            ajuste: components["schemas"]["AjusteDto"];
+            redondeo?: components["schemas"]["RedondeoDto"];
+            /** @description true = preview (no escribe). */
+            dryRun?: boolean;
+        };
         PrecioEntity: {
+            /** @default null */
+            clinicId: string | null;
             presentacionId: string;
             tipoPrecioId: string;
             precio: number;
@@ -5733,7 +5811,6 @@ export interface components {
             vigenciaHasta: string | null;
             activo: boolean;
             id: string;
-            clinicId: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -5745,6 +5822,11 @@ export interface components {
             /** Format: uuid */
             tipoPrecioId: string;
             precio: number;
+            /**
+             * Format: uuid
+             * @description Centro dueño (admin fija el centro). Sin él = scope del header.
+             */
+            clinicId?: string;
             /** Format: uuid */
             monedaId?: string;
             /** Format: uuid */
@@ -10626,6 +10708,27 @@ export interface operations {
             };
         };
     };
+    ReglasDescargaController_recetaDesdeComponentes_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     ReglasDescargaController_publicar_v1: {
         parameters: {
             query?: never;
@@ -11220,6 +11323,10 @@ export interface operations {
                 q?: string;
                 /** @description Momento para resolver el precio efectivo (default ahora). */
                 asOf?: string;
+                /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
+                tipoPrecioId?: string;
+                /** @description Centro para el que resolver (admin); sin él = scope del header. */
+                clinicId?: string;
                 page: number;
                 limit: number;
             };
@@ -11230,6 +11337,27 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PreciosController_derivar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DerivarPreciosDto"];
+            };
+        };
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

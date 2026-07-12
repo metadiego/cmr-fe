@@ -32,15 +32,21 @@ export interface TipoPrecio {
   nombre?: string;
 }
 
+// `tipoPrecioId` = lista concreta (regular/mayorista/…); sin él = precio efectivo.
+// `clinicId` = centro para el que resolver (admin); sin él = scope del header.
 export function listCatalogoPrecios(opts: {
   q?: string;
   page?: number;
   limit?: number;
   asOf?: string;
+  tipoPrecioId?: string;
+  clinicId?: string;
 }): Promise<Paginated<PrecioCatalogoRow>> {
   const sp = new URLSearchParams();
   if (opts.q?.trim()) sp.set("q", opts.q.trim());
   if (opts.asOf) sp.set("asOf", opts.asOf);
+  if (opts.tipoPrecioId) sp.set("tipoPrecioId", opts.tipoPrecioId);
+  if (opts.clinicId) sp.set("clinicId", opts.clinicId);
   sp.set("page", String(opts.page ?? 1));
   sp.set("limit", String(opts.limit ?? 50));
   return apiFetchPaged<PrecioCatalogoRow>(`/precios/catalogo?${sp.toString()}`);
@@ -48,6 +54,43 @@ export function listCatalogoPrecios(opts: {
 
 export function listTiposPrecio(): Promise<TipoPrecio[]> {
   return apiFetch<TipoPrecio[]>(`/precios/tipos`);
+}
+
+export type CreateTipoPrecioPayload = components["schemas"]["CreateTipoPrecioDto"];
+export function createTipoPrecio(payload: CreateTipoPrecioPayload): Promise<TipoPrecio> {
+  return apiFetch<TipoPrecio>(`/precios/tipos`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// Derivar una lista a partir de otra (ajuste lineal %/$). Verificado prod 2026-07-12.
+// dryRun=true → PREVIEW (no escribe): devuelve { cambios, total, aplicados }.
+// Scope: ámbito "global" exige scope GLOBAL → pasar tenant=null (omite X-Tenant-ID);
+// "centro" → pasar el clinicId como tenant. El BE rechaza derivar de otro centro.
+export type DerivarPayload = components["schemas"]["DerivarPreciosDto"];
+export interface DerivarCambio {
+  productoId: string;
+  sku: string | null;
+  presentacionId: string;
+  precioAntes: number | null;
+  precioDespues: number | null;
+  fuente: string;
+}
+export interface DerivarResult {
+  cambios: DerivarCambio[];
+  total: number;
+  aplicados: number;
+}
+export function derivarPrecios(
+  payload: DerivarPayload,
+  tenant?: string | null,
+): Promise<DerivarResult> {
+  return apiFetch<DerivarResult>(
+    `/precios/derivar`,
+    { method: "POST", body: JSON.stringify(payload) },
+    tenant,
+  );
 }
 
 // Filas de precio de una presentación (para hallar el precioId regular a editar).

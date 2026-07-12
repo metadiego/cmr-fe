@@ -1227,6 +1227,50 @@
       "precio": "Regular",
       "base": "Base",
       "ninguno": "Sin precio"
+    },
+    "mode": {
+      "catalogo": "Catálogo",
+      "derivar": "Derivar precios"
+    },
+    "efectivo": "Precio efectivo",
+    "derivar": {
+      "origen": "Origen",
+      "destino": "Destino",
+      "lista": "Lista",
+      "selectLista": "Selecciona una lista…",
+      "newList": "+ Nueva lista",
+      "newListName": "Nombre de la lista",
+      "newListPlaceholder": "Ej. Mayorista",
+      "ambito": "Ámbito",
+      "ambitoGlobal": "Global (todos los centros)",
+      "ambitoCentro": "Un centro",
+      "centro": "Centro",
+      "selectCentro": "Selecciona un centro…",
+      "ajuste": "Ajuste",
+      "direccion": "Dirección",
+      "aumentar": "Aumentar",
+      "disminuir": "Disminuir",
+      "valor": "Valor",
+      "modo": "Tipo",
+      "redondeo": "Redondeo",
+      "redNinguno": "Sin redondeo",
+      "redEntero": "Entero",
+      "redMultiplo": "Múltiplo",
+      "redTerminacion": "Terminación",
+      "redValor": "Valor",
+      "preview": "Previsualizar",
+      "calculating": "Calculando…",
+      "apply": "Aplicar ({n})",
+      "applied": "{n} precios derivados",
+      "total": "{n} evaluados",
+      "aplicables": "{n} a cambiar",
+      "nothingToApply": "Nada que aplicar con estos parámetros",
+      "col": {
+        "sku": "SKU",
+        "antes": "Antes",
+        "despues": "Después",
+        "fuente": "Fuente"
+      }
     }
   }
 }

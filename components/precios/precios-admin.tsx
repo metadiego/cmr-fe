@@ -19,9 +19,18 @@ import {
 import type { Paginated } from "@/lib/api/types";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DerivarPrecios } from "@/components/precios/derivar-precios";
 
 const PAGE_SIZE = 50;
 const money = (v: number) =>
@@ -38,9 +47,12 @@ export function PreciosAdmin() {
   const t = useTranslations("precios");
   const tc = useTranslations("common");
 
+  const [mode, setMode] = React.useState<"catalogo" | "derivar">("catalogo");
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
   const [page, setPage] = React.useState(1);
+  // "" = precio efectivo (default); un id = lista concreta (regular/mayorista/…).
+  const [tipoFiltro, setTipoFiltro] = React.useState("");
   React.useEffect(() => {
     const id = setTimeout(() => {
       setDebounced(q);
@@ -50,14 +62,22 @@ export function PreciosAdmin() {
   }, [q]);
 
   const { state, reload } = useResource<Paginated<PrecioCatalogoRow>>(
-    () => listCatalogoPrecios({ q: debounced, page, limit: PAGE_SIZE }),
-    [debounced, page],
+    () =>
+      listCatalogoPrecios({
+        q: debounced,
+        page,
+        limit: PAGE_SIZE,
+        tipoPrecioId: tipoFiltro || undefined,
+      }),
+    [debounced, page, tipoFiltro],
   );
 
-  // Tipo de precio "regular" (para POST cuando no hay fila de precio).
+  // Tipos de precio (listas). El "regular" es el fallback para POST.
   const tiposRes = useResource<TipoPrecio[]>(() => listTiposPrecio());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const regularTipoId = tipos.find((x) => x.clave === "regular")?.id ?? null;
+  // Lista destino de una edición: la lista filtrada, o regular por defecto.
+  const targetTipoId = tipoFiltro || regularTipoId;
 
   const rows = state.kind === "ok" ? state.data.items : [];
   const total = state.kind === "ok" ? state.data.pagination.total : 0;
@@ -80,20 +100,17 @@ export function PreciosAdmin() {
     }
     setSaving(true);
     try {
-      if (row.fuente === "precio") {
-        // Ya existe fila de precio regular → hallar su id y PUT.
-        const filas = await listPreciosByPresentacion(row.presentacionId);
-        const regular = filas.find(
-          (f) => f.tipoPrecioId === (row.tipoPrecioId ?? regularTipoId),
-        );
-        if (!regular) throw new Error(t("regularNotFound"));
-        await updatePrecio(regular.id, { precio: value });
+      const listaId = row.tipoPrecioId ?? targetTipoId;
+      // ¿Ya existe una fila de precio en esta lista para la presentación? → PUT; si no → POST.
+      const filas = await listPreciosByPresentacion(row.presentacionId);
+      const existente = listaId ? filas.find((f) => f.tipoPrecioId === listaId) : undefined;
+      if (existente) {
+        await updatePrecio(existente.id, { precio: value });
       } else {
-        // base/ninguno → no hay fila → POST con el tipo regular.
-        if (!regularTipoId) throw new Error(t("regularNotFound"));
+        if (!targetTipoId) throw new Error(t("regularNotFound"));
         await createPrecio({
           presentacionId: row.presentacionId,
-          tipoPrecioId: regularTipoId,
+          tipoPrecioId: targetTipoId,
           precio: value,
         });
       }
@@ -109,15 +126,53 @@ export function PreciosAdmin() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <div className="inline-flex rounded-lg border p-0.5">
+          {(["catalogo", "derivar"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMode(m)}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                mode === m
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {t(`mode.${m}`)}
+            </button>
+          ))}
+        </div>
+      </div>
       <p className="mb-4 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder={t("search")}
-        className="mb-4 max-w-sm"
-      />
+      {mode === "derivar" ? (
+        <DerivarPrecios onDone={reload} />
+      ) : (
+        <>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={t("search")}
+          className="max-w-sm"
+        />
+        <Select value={tipoFiltro || "__efectivo__"} onValueChange={(v) => { setTipoFiltro(v === "__efectivo__" ? "" : v); setPage(1); }}>
+          <SelectTrigger className="w-56">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__efectivo__">{t("efectivo")}</SelectItem>
+            {tipos.map((x) => (
+              <SelectItem key={x.id} value={x.id}>
+                {x.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
@@ -228,6 +283,8 @@ export function PreciosAdmin() {
             </Button>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

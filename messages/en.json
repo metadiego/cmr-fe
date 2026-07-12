@@ -1227,6 +1227,50 @@
       "precio": "Regular",
       "base": "Base",
       "ninguno": "No price"
+    },
+    "mode": {
+      "catalogo": "Catalog",
+      "derivar": "Derive prices"
+    },
+    "efectivo": "Effective price",
+    "derivar": {
+      "origen": "Source",
+      "destino": "Target",
+      "lista": "List",
+      "selectLista": "Select a list…",
+      "newList": "+ New list",
+      "newListName": "List name",
+      "newListPlaceholder": "e.g. Wholesale",
+      "ambito": "Scope",
+      "ambitoGlobal": "Global (all centers)",
+      "ambitoCentro": "One center",
+      "centro": "Center",
+      "selectCentro": "Select a center…",
+      "ajuste": "Adjustment",
+      "direccion": "Direction",
+      "aumentar": "Increase",
+      "disminuir": "Decrease",
+      "valor": "Value",
+      "modo": "Type",
+      "redondeo": "Rounding",
+      "redNinguno": "No rounding",
+      "redEntero": "Whole",
+      "redMultiplo": "Multiple",
+      "redTerminacion": "Ending",
+      "redValor": "Value",
+      "preview": "Preview",
+      "calculating": "Calculating…",
+      "apply": "Apply ({n})",
+      "applied": "{n} prices derived",
+      "total": "{n} evaluated",
+      "aplicables": "{n} to change",
+      "nothingToApply": "Nothing to apply with these parameters",
+      "col": {
+        "sku": "SKU",
+        "antes": "Before",
+        "despues": "After",
+        "fuente": "Source"
+      }
     }
   }
 }
