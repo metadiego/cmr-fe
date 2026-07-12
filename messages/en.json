@@ -552,7 +552,8 @@
     "signingOut": "Signing out…",
     "dashboard": "Dashboard",
     "inventario_amp": "Supplier presentations",
-    "inventario_recibir": "Receive purchase"
+    "inventario_recibir": "Receive purchase",
+    "inventario_productos": "Products"
   },
   "admin": {
     "title": "Administration",
@@ -1043,6 +1044,53 @@
       "preview": {
         "entrada": "Enters as {qty} in base unit",
         "costo": "· cost/base {costo}"
+      }
+    },
+    "prod": {
+      "title": "Products",
+      "help": "Catalog of physical products and services. Purchases stock them; supplier presentations (AMP) hang off the product.",
+      "new": "New product",
+      "empty": "No products.",
+      "search": "Search by name, SKU or barcode…",
+      "active": "Active",
+      "inactive": "Inactive",
+      "created": "Product created.",
+      "updated": "Product updated.",
+      "newTitle": "New product",
+      "editTitle": "Edit product",
+      "description": "Base product data. What changes per supplier goes in the AMP.",
+      "col": {
+        "nombre": "Name",
+        "sku": "SKU",
+        "tipo": "Type",
+        "marcaFab": "Brand / manufacturer",
+        "activo": "Status"
+      },
+      "tipo": {
+        "base": "Base",
+        "unico": "Single",
+        "compuesto": "Composite (kit)",
+        "servicio": "Service"
+      },
+      "modo": {
+        "a_la_venta": "On sale",
+        "a_la_entrega": "On delivery",
+        "no_descarga": "No discharge"
+      },
+      "field": {
+        "nombre": "Name",
+        "sku": "SKU",
+        "nombreCorto": "Short name",
+        "tipo": "Type",
+        "modoDescarga": "Discharge mode",
+        "categoria": "Category",
+        "marca": "Brand",
+        "fabricante": "Manufacturer",
+        "barcode": "Barcode",
+        "esInventariable": "Inventoried (tracks stock)",
+        "gravado": "Taxable",
+        "activo": "Active",
+        "none": "(none)"
       }
     }
   },

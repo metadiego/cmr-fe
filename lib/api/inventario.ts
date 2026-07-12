@@ -12,12 +12,22 @@ export type UpdateProveedorPayload = components["schemas"]["UpdateProveedorDto"]
 
 // Catálogos de apoyo (pueden venir vacíos si el BE aún no los sembró).
 // `soloFisicos`: excluye servicios/consultas (usar en TODO picker de productos).
-export function listProductos(
+// Resiliente: si el BE aún no soporta `soloFisicos` (400), cae a lista completa y
+// filtra servicios en el cliente — así funciona aunque el BE local vaya atrás.
+export async function listProductos(
   opts: { soloFisicos?: boolean } = {},
 ): Promise<Producto[]> {
-  const sp = new URLSearchParams({ limit: "100" });
-  if (opts.soloFisicos) sp.set("soloFisicos", "true");
-  return apiFetch<Producto[]>(`/inventario/productos?${sp.toString()}`);
+  if (opts.soloFisicos) {
+    try {
+      return await apiFetch<Producto[]>(
+        `/inventario/productos?limit=100&soloFisicos=true`,
+      );
+    } catch {
+      const all = await apiFetch<Producto[]>(`/inventario/productos?limit=100`);
+      return all.filter((p) => p.tipo !== "servicio");
+    }
+  }
+  return apiFetch<Producto[]>(`/inventario/productos?limit=100`);
 }
 
 // Proveedores (RBAC admin/super_admin). DELETE = baja lógica.
@@ -43,6 +53,28 @@ export function updateProveedor(
 }
 export function deleteProveedor(id: string): Promise<void> {
   return apiFetch<void>(`/inventario/proveedores/${id}`, { method: "DELETE" });
+}
+
+export type CreateProductoPayload = components["schemas"]["CreateProductoDto"];
+export type UpdateProductoPayload = components["schemas"]["UpdateProductoDto"];
+
+export function createProducto(payload: CreateProductoPayload): Promise<Producto> {
+  return apiFetch<Producto>(`/inventario/productos`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+export function updateProducto(
+  id: string,
+  payload: UpdateProductoPayload,
+): Promise<Producto> {
+  return apiFetch<Producto>(`/inventario/productos/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+export function deleteProducto(id: string): Promise<void> {
+  return apiFetch<void>(`/inventario/productos/${id}`, { method: "DELETE" });
 }
 
 export function listUnidades(): Promise<Unidad[]> {

@@ -552,7 +552,8 @@
     "signingOut": "Saliendo…",
     "dashboard": "Dashboard",
     "inventario_amp": "Presentaciones de proveedor",
-    "inventario_recibir": "Recibir compra"
+    "inventario_recibir": "Recibir compra",
+    "inventario_productos": "Productos"
   },
   "admin": {
     "title": "Administración",
@@ -1043,6 +1044,53 @@
       "preview": {
         "entrada": "Entra como {qty} en unidad base",
         "costo": "· costo/base {costo}"
+      }
+    },
+    "prod": {
+      "title": "Productos",
+      "help": "Catálogo de productos físicos y servicios. Al recibir compras se stockean; las presentaciones de proveedor (AMP) cuelgan del producto.",
+      "new": "Nuevo producto",
+      "empty": "No hay productos.",
+      "search": "Buscar por nombre, SKU o código…",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "created": "Producto creado.",
+      "updated": "Producto actualizado.",
+      "newTitle": "Nuevo producto",
+      "editTitle": "Editar producto",
+      "description": "Datos base del producto. Lo que cambia por proveedor va en el AMP.",
+      "col": {
+        "nombre": "Nombre",
+        "sku": "SKU",
+        "tipo": "Tipo",
+        "marcaFab": "Marca / fabricante",
+        "activo": "Estado"
+      },
+      "tipo": {
+        "base": "Base",
+        "unico": "Único",
+        "compuesto": "Compuesto (kit)",
+        "servicio": "Servicio"
+      },
+      "modo": {
+        "a_la_venta": "A la venta",
+        "a_la_entrega": "A la entrega",
+        "no_descarga": "No descarga"
+      },
+      "field": {
+        "nombre": "Nombre",
+        "sku": "SKU",
+        "nombreCorto": "Nombre corto",
+        "tipo": "Tipo",
+        "modoDescarga": "Modo de descarga",
+        "categoria": "Categoría",
+        "marca": "Marca",
+        "fabricante": "Fabricante",
+        "barcode": "Código de barras",
+        "esInventariable": "Inventariable (lleva stock)",
+        "gravado": "Gravado (impuesto)",
+        "activo": "Activo",
+        "none": "(ninguno)"
       }
     }
   },
