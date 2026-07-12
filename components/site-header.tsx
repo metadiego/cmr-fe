@@ -72,7 +72,6 @@ export function SiteHeader() {
     "/facturacion",
     "/tablero",
     "/inventario/proveedores",
-    "/inventario/presentaciones-proveedor",
     "/admin",
     "/configuracion/tableros",
     "/settings",
