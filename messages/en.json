@@ -550,7 +550,9 @@
     "precios": "Pricing",
     "signOut": "Sign out",
     "signingOut": "Signing out…",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "inventario_amp": "Supplier presentations",
+    "inventario_recibir": "Receive purchase"
   },
   "admin": {
     "title": "Administration",
@@ -966,6 +968,81 @@
         "email": "Email",
         "direccion": "Address",
         "activo": "Active"
+      }
+    },
+    "pp": {
+      "title": "Supplier presentations",
+      "help": "This is where everything that changes when the supplier or its presentation changes lives (concentration, content, factor to base). The base product, its price and recipe are untouched: supplier changes → add a new AMP.",
+      "producto": "Product",
+      "selectProducto": "Select a product…",
+      "pickProducto": "Pick a product to view and manage its presentations.",
+      "new": "New presentation",
+      "empty": "This product has no supplier presentations yet.",
+      "active": "Active",
+      "inactive": "Inactive",
+      "deactivate": "Deactivate",
+      "deleted": "Presentation deactivated.",
+      "deactivateTitle": "Deactivate presentation?",
+      "deactivateBody": "{name} will no longer be available. Soft delete: you can reactivate it later.",
+      "created": "Presentation created.",
+      "updated": "Presentation updated.",
+      "newTitle": "New supplier presentation",
+      "editTitle": "Edit supplier presentation",
+      "description": "The vial/package details as sent by the current supplier.",
+      "col": {
+        "nombre": "Name",
+        "marcaFab": "Brand / manufacturer",
+        "concentracion": "Concentration",
+        "factorABase": "Factor to base",
+        "sku": "SKU",
+        "activo": "Status"
+      },
+      "field": {
+        "nombre": "Name",
+        "factorABase": "Factor to base unit",
+        "factorABaseHint": "Base units per package (e.g. 60 mg vial → 60). The BE uses it to convert the purchase.",
+        "fabricante": "Manufacturer",
+        "marca": "Brand",
+        "concentracion": "Concentration",
+        "unidadConcentracion": "Concentration unit",
+        "contenido": "Content per package",
+        "unidadContenido": "Content unit",
+        "sku": "SKU",
+        "barcode": "Barcode",
+        "vigenciaDesde": "Valid from",
+        "vigenciaHasta": "Valid to",
+        "activo": "Active",
+        "none": "(none)"
+      }
+    },
+    "compra": {
+      "title": "Receive purchase",
+      "help": "Register incoming stock. If you pick a supplier presentation (AMP), quantity and cost are PER PACKAGE — the system converts to base unit with the factor. Without AMP, they go in base unit directly.",
+      "received": "Purchase received.",
+      "receive": "Receive",
+      "receiving": "Receiving…",
+      "field": {
+        "producto": "Product",
+        "selectProducto": "Select a product…",
+        "presentacion": "Supplier presentation (AMP)",
+        "presentacionHint": "Optional. If you pick it, you buy per package.",
+        "sinAmp": "No presentation (base unit)",
+        "cantidadEmpaques": "Quantity (packages)",
+        "cantidadBase": "Quantity (base unit)",
+        "costoEmpaque": "Cost per package",
+        "costoBase": "Cost per base unit",
+        "almacen": "Warehouse",
+        "selectAlmacen": "Select…",
+        "proveedor": "Supplier",
+        "lote": "Lot no.",
+        "vencimiento": "Expiry",
+        "factura": "Purchase invoice no.",
+        "notas": "Notes",
+        "none": "(none)"
+      },
+      "preview": {
+        "entrada": "Enters as {qty} in base unit",
+        "costo": "· cost/base {costo}"
       }
     }
   },

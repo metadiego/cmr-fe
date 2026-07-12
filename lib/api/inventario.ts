@@ -54,3 +54,68 @@ export function listClasificaciones(tipo?: string): Promise<Clasificacion[]> {
   const qs = tipo ? `?tipo=${encodeURIComponent(tipo)}&limit=100` : `?limit=100`;
   return apiFetch<Clasificacion[]>(`/inventario/clasificaciones${qs}`);
 }
+
+export type Almacen = components["schemas"]["AlmacenEntity"];
+export type Ubicacion = components["schemas"]["UbicacionEntity"];
+
+export function listAlmacenes(): Promise<Almacen[]> {
+  return apiFetch<Almacen[]>(`/inventario/almacenes?limit=100`);
+}
+// Ubicaciones (opcional; puede filtrar por almacén). Devuelve [] si el BE no soporta el filtro.
+export function listUbicaciones(almacenId?: string): Promise<Ubicacion[]> {
+  const qs = almacenId ? `?almacenId=${almacenId}&limit=100` : `?limit=100`;
+  return apiFetch<Ubicacion[]>(`/inventario/ubicaciones${qs}`).catch(() => []);
+}
+
+// AMP (presentación de proveedor) — dm+d: donde vive lo que cambia con el proveedor
+// (concentración, contenido, factorABase). Catálogo GLOBAL. RBAC admin/super_admin.
+export type PresentacionProveedor =
+  components["schemas"]["PresentacionProveedorEntity"];
+export type CreatePresentacionProveedorPayload =
+  components["schemas"]["CreatePresentacionProveedorDto"];
+export type UpdatePresentacionProveedorPayload =
+  components["schemas"]["UpdatePresentacionProveedorDto"];
+
+export function listPresentacionesProveedor(
+  productoId: string,
+  opts: { activo?: boolean } = {},
+): Promise<PresentacionProveedor[]> {
+  const sp = new URLSearchParams({ productoId });
+  if (opts.activo !== undefined) sp.set("activo", String(opts.activo));
+  return apiFetch<PresentacionProveedor[]>(
+    `/inventario/presentaciones-proveedor?${sp.toString()}`,
+  );
+}
+export function createPresentacionProveedor(
+  payload: CreatePresentacionProveedorPayload,
+): Promise<PresentacionProveedor> {
+  return apiFetch<PresentacionProveedor>(`/inventario/presentaciones-proveedor`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+export function updatePresentacionProveedor(
+  id: string,
+  payload: UpdatePresentacionProveedorPayload,
+): Promise<PresentacionProveedor> {
+  return apiFetch<PresentacionProveedor>(
+    `/inventario/presentaciones-proveedor/${id}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+  );
+}
+export function deletePresentacionProveedor(id: string): Promise<void> {
+  return apiFetch<void>(`/inventario/presentaciones-proveedor/${id}`, {
+    method: "DELETE",
+  });
+}
+
+// Recibir compra. CONTRATO CLAVE: con AMP, `cantidad` = EMPAQUES y `costoUnitario` =
+// costo POR EMPAQUE; el BE convierte a unidad base con factorABase. NO pre-convertir.
+// Sin AMP: cantidad/costo en unidad base directa.
+export type RecibirCompraPayload = components["schemas"]["RecibirCompraDto"];
+export function recibirCompra(payload: RecibirCompraPayload): Promise<unknown> {
+  return apiFetch(`/inventario/operaciones/recibir-compra`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}

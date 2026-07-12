@@ -550,7 +550,9 @@
     "precios": "Precios",
     "signOut": "Cerrar sesión",
     "signingOut": "Saliendo…",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "inventario_amp": "Presentaciones de proveedor",
+    "inventario_recibir": "Recibir compra"
   },
   "admin": {
     "title": "Administración",
@@ -966,6 +968,81 @@
         "email": "Email",
         "direccion": "Dirección",
         "activo": "Activo"
+      }
+    },
+    "pp": {
+      "title": "Presentaciones de proveedor",
+      "help": "Aquí vive todo lo que cambia cuando cambia el proveedor o su presentación (concentración, contenido, factor a base). El producto base, su precio y su receta no se tocan: cambia el proveedor → agrega un AMP nuevo.",
+      "producto": "Producto",
+      "selectProducto": "Selecciona un producto…",
+      "pickProducto": "Elige un producto para ver y gestionar sus presentaciones.",
+      "new": "Nueva presentación",
+      "empty": "Este producto aún no tiene presentaciones de proveedor.",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "deactivate": "Desactivar",
+      "deleted": "Presentación desactivada.",
+      "deactivateTitle": "¿Desactivar presentación?",
+      "deactivateBody": "{name} dejará de estar disponible. Es baja lógica: puedes reactivarla luego.",
+      "created": "Presentación creada.",
+      "updated": "Presentación actualizada.",
+      "newTitle": "Nueva presentación de proveedor",
+      "editTitle": "Editar presentación de proveedor",
+      "description": "Datos del vial/empaque tal como lo manda el proveedor de turno.",
+      "col": {
+        "nombre": "Nombre",
+        "marcaFab": "Marca / fabricante",
+        "concentracion": "Concentración",
+        "factorABase": "Factor a base",
+        "sku": "SKU",
+        "activo": "Estado"
+      },
+      "field": {
+        "nombre": "Nombre",
+        "factorABase": "Factor a unidad base",
+        "factorABaseHint": "Unidades base por empaque (ej. vial de 60 mg → 60). El BE lo usa para convertir la compra.",
+        "fabricante": "Fabricante",
+        "marca": "Marca",
+        "concentracion": "Concentración",
+        "unidadConcentracion": "Unidad de concentración",
+        "contenido": "Contenido por empaque",
+        "unidadContenido": "Unidad de contenido",
+        "sku": "SKU",
+        "barcode": "Código de barras",
+        "vigenciaDesde": "Vigencia desde",
+        "vigenciaHasta": "Vigencia hasta",
+        "activo": "Activa",
+        "none": "(ninguno)"
+      }
+    },
+    "compra": {
+      "title": "Recibir compra",
+      "help": "Registra la entrada de mercancía. Si eliges una presentación de proveedor (AMP), la cantidad y el costo van POR EMPAQUE — el sistema convierte a unidad base con el factor. Sin AMP, van en unidad base directa.",
+      "received": "Compra recibida.",
+      "receive": "Recibir",
+      "receiving": "Recibiendo…",
+      "field": {
+        "producto": "Producto",
+        "selectProducto": "Selecciona un producto…",
+        "presentacion": "Presentación de proveedor (AMP)",
+        "presentacionHint": "Opcional. Si la eliges, compras por empaque.",
+        "sinAmp": "Sin presentación (unidad base)",
+        "cantidadEmpaques": "Cantidad (empaques)",
+        "cantidadBase": "Cantidad (unidad base)",
+        "costoEmpaque": "Costo por empaque",
+        "costoBase": "Costo por unidad base",
+        "almacen": "Almacén",
+        "selectAlmacen": "Selecciona…",
+        "proveedor": "Proveedor",
+        "lote": "N.º de lote",
+        "vencimiento": "Vencimiento",
+        "factura": "N.º factura de compra",
+        "notas": "Notas",
+        "none": "(ninguno)"
+      },
+      "preview": {
+        "entrada": "Entra como {qty} en unidad base",
+        "costo": "· costo/base {costo}"
       }
     }
   },
