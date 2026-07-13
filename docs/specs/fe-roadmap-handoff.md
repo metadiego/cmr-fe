@@ -9,6 +9,23 @@
 > **Globales (ambos):** 88 productos (28 kits/compuestos) · 39 AMP (presentación de proveedor) ·
 > 100 recetas (producto_componentes) · 28 reglas de descarga tipo `receta` · 2 proveedores.
 
+## Cambios de BE recientes que el FE debe CONOCER (2026-07-13)
+Todo lo de abajo ya está **en prod, ambos centros**, verificado:
+1. **Catálogo completo en prod (Bayamón incluido).** Antes solo Caguas estaba promovido; hoy Bayamón quedó a la
+   par: 39 fichas · 41 precios · 1 almacén · ~30 lotes de apertura por centro. Globales: 88 productos (28 kits)
+   · 39 AMP · 100 recetas. → El FE puede trabajar sobre **datos reales de prod** en los dos centros.
+2. **Factura de consulta filtrada:** `GET /facturas/catalogo?contexto=consulta` devuelve **solo** Consulta/
+   Seguimiento (los tipos de cita), no el catálogo físico. El editor de factura ya lo pasa cuando `factura.citaId`.
+3. **Un servicio nuevo nace con pestaña USABLE:** al crear un servicio (`POST /servicios` / MCP `crear_servicio`)
+   el BE le provisiona las **columnas por defecto** (paciente, estado, sesiones, técnico, enfermera, acciones),
+   composición global e idempotente. El FE **no** compone columnas tras crear; ajustes finos vía `POST /servicios/:id/columnas`.
+4. **Modelo de descarga = 2 ejes explícitos** (ver §0): esto es lo que hay que reflejar en la UI para acabar con
+   el "a veces descarga, a veces no".
+
+**Plan UI de inventario (crear/editar productos + kits + recepción):** ver
+`docs/plans/fe-inventario-creacion-ux-handoff.md` — **ya casi todo está construido**; ese doc trae la
+RECONCILIACIÓN (delta (a)→(b)→(c)) para **no duplicar pantallas**.
+
 ## Reglas transversales (aplican a TODA pantalla)
 - Leer `response.data` + `meta.pagination`. Auth: `Authorization: Bearer` + `X-Tenant-ID`.
 - **Whitelist estricto**: mandar un query param no documentado = **HTTP 400**. Manda solo los documentados.
