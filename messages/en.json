@@ -480,7 +480,9 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "error": "Could not load",
-    "view": "View"
+    "view": "View",
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "pending": {
     "title": "Access pending",
@@ -563,7 +565,8 @@
     "inventario_recetas": "Compound recipes",
     "servicios": "Services",
     "inventario_index": "Inventory",
-    "inventario_transferencias": "Transfers"
+    "inventario_transferencias": "Transfers",
+    "comunicaciones": "Communications"
   },
   "admin": {
     "title": "Administration",
@@ -1462,6 +1465,28 @@
       "required": "Required",
       "negativo": "Cannot be negative",
       "excede": "Exceeds sent"
+    }
+  },
+  "comunicaciones": {
+    "title": "Alerts",
+    "pageTitle": "Communications",
+    "verTodas": "View all",
+    "empty": "No alerts",
+    "bellAria": "Alerts",
+    "resolver": "Resolve",
+    "descartar": "Dismiss",
+    "noPlantillas": "No templates",
+    "pageHelp": "Internal channel (live alerts) and outbound notification templates, in one place.",
+    "tab": {
+      "alertas": "Alerts",
+      "plantillas": "Templates"
+    },
+    "col": {
+      "clave": "Key",
+      "canal": "Channel",
+      "idioma": "Language",
+      "asunto": "Subject",
+      "estado": "Status"
     }
   }
 }

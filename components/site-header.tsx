@@ -23,6 +23,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
 import { CenterSelector } from "@/components/center-selector";
 import { SearchBar } from "@/components/search-bar";
+import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
 import {
   Sheet,
   SheetContent,
@@ -79,6 +80,7 @@ export function SiteHeader() {
     "/inventario/recetas",
     "/precios",
     "/servicios",
+    "/comunicaciones",
     "/admin",
     "/configuracion/tableros",
     "/settings",
@@ -230,6 +232,7 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <CenterSelector />
           <SearchBar />
+          {session ? <AlertasBell /> : null}
           <ModeToggle />
           <LanguageToggle />
           {session ? (

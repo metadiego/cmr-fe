@@ -480,7 +480,9 @@
     "expand": "Expandir",
     "collapse": "Contraer",
     "error": "No se pudo cargar",
-    "view": "Ver"
+    "view": "Ver",
+    "active": "Activo",
+    "inactive": "Inactivo"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -563,7 +565,8 @@
     "inventario_recetas": "Recetas de compuestos",
     "servicios": "Servicios",
     "inventario_index": "Inventario",
-    "inventario_transferencias": "Transferencias"
+    "inventario_transferencias": "Transferencias",
+    "comunicaciones": "Comunicaciones"
   },
   "admin": {
     "title": "Administración",
@@ -1462,6 +1465,28 @@
       "required": "Requerido",
       "negativo": "No puede ser negativo",
       "excede": "Mayor a lo enviado"
+    }
+  },
+  "comunicaciones": {
+    "title": "Alertas",
+    "pageTitle": "Comunicaciones",
+    "verTodas": "Ver todas",
+    "empty": "Sin alertas",
+    "bellAria": "Alertas",
+    "resolver": "Resolver",
+    "descartar": "Descartar",
+    "noPlantillas": "Sin plantillas",
+    "pageHelp": "Canal interno (alertas en vivo) y plantillas de notificaciones salientes, en un solo lugar.",
+    "tab": {
+      "alertas": "Alertas",
+      "plantillas": "Plantillas"
+    },
+    "col": {
+      "clave": "Clave",
+      "canal": "Canal",
+      "idioma": "Idioma",
+      "asunto": "Asunto",
+      "estado": "Estado"
     }
   }
 }
