@@ -67,6 +67,7 @@ export function SiteHeader() {
   // Rutas reales de la app (prefijos). Actualizar al agregar módulos nuevos.
   const REAL_ROUTES = [
     "/dashboard",
+    "/inventario",
     "/clientes",
     "/citas",
     "/facturacion",

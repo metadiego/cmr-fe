@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 
 import {
   listProductosPaged,
+  listCompuestos,
   listPresentacionesProveedor,
   listClasificaciones,
   listProveedores,
@@ -64,6 +66,8 @@ export function ProductosAdmin() {
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
   const [page, setPage] = React.useState(1);
+  // Filtro por tipo: "fisicos" (comprables, default) | "compuestos" (derivados/kits).
+  const [tipoFiltro, setTipoFiltro] = React.useState<"fisicos" | "compuestos">("fisicos");
   React.useEffect(() => {
     const id = setTimeout(() => {
       setDebounced(q);
@@ -74,14 +78,21 @@ export function ProductosAdmin() {
 
   const { state, reload } = useResource<Paginated<ProductoConProveedores>>(
     () =>
-      listProductosPaged({
-        soloFisicos: true,
-        conProveedores: true,
-        q: debounced,
-        page,
-        limit: PAGE_SIZE,
-      }),
-    [debounced, page],
+      tipoFiltro === "compuestos"
+        ? // Reusa listCompuestos (sin soloFisicos, filtra tipo=compuesto). Todos caben en
+          // una página → envolvemos como Paginated para no duplicar la tabla.
+          listCompuestos(debounced).then((items) => ({
+            items: items as ProductoConProveedores[],
+            pagination: { total: items.length, page: 1, limit: items.length || 1 },
+          }))
+        : listProductosPaged({
+            soloFisicos: true,
+            conProveedores: true,
+            q: debounced,
+            page,
+            limit: PAGE_SIZE,
+          }),
+    [debounced, page, tipoFiltro],
   );
 
   // Selectores para el CRUD de producto y el editor de AMP (§4).
@@ -143,12 +154,26 @@ export function ProductosAdmin() {
       </div>
       <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
-      <Input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder={t("search")}
-        className="mb-4 max-w-sm"
-      />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={t("search")}
+          className="max-w-sm"
+        />
+        <Select
+          value={tipoFiltro}
+          onValueChange={(v) => { setTipoFiltro(v as "fisicos" | "compuestos"); setPage(1); }}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="fisicos">{t("filtro.fisicos")}</SelectItem>
+            <SelectItem value="compuestos">{t("filtro.compuestos")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
@@ -221,16 +246,25 @@ export function ProductosAdmin() {
                       </Badge>
                     </td>
                     <td className="px-3 py-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditing(p);
-                          setFormOpen(true);
-                        }}
-                      >
-                        {tc("edit")}
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        {p.tipo === "compuesto" && (
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/inventario/recetas?compuestoId=${p.id}`}>
+                              {t("editarReceta")}
+                            </Link>
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditing(p);
+                            setFormOpen(true);
+                          }}
+                        >
+                          {tc("edit")}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                   {isOpen && (

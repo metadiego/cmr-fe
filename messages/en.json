@@ -560,7 +560,8 @@
     "inventario_recibir": "Receive purchase",
     "inventario_productos": "Products",
     "inventario_recetas": "Compound recipes",
-    "servicios": "Services"
+    "servicios": "Services",
+    "inventario_index": "Inventory"
   },
   "admin": {
     "title": "Administration",
@@ -1103,7 +1104,12 @@
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",
       "totalCount": "{total} products",
-      "pageOf": "Page {page} of {totalPages}"
+      "pageOf": "Page {page} of {totalPages}",
+      "editarReceta": "Edit recipe",
+      "filtro": {
+        "fisicos": "Physical (buyable)",
+        "compuestos": "Compounds / derivatives"
+      }
     },
     "picker": {
       "placeholder": "Select a product…",
@@ -1161,6 +1167,37 @@
         "componente": "Component",
         "cantidad": "Quantity",
         "unidad": "Unit"
+      }
+    },
+    "index": {
+      "title": "Inventory",
+      "help": "All inventory in one place: products, purchase receiving, compound recipes, suppliers and prices.",
+      "open": "Open",
+      "sections": {
+        "productos": {
+          "title": "Products",
+          "desc": "Create and edit products; search, suppliers, compounds."
+        },
+        "recepcion": {
+          "title": "Inventory receiving",
+          "desc": "Receive purchase: stock entry by lot and warehouse."
+        },
+        "recetas": {
+          "title": "Compound recipes",
+          "desc": "Bill-of-materials: what each derivative is made of."
+        },
+        "proveedores": {
+          "title": "Suppliers",
+          "desc": "Supplier catalog."
+        },
+        "amp": {
+          "title": "Supplier presentation",
+          "desc": "AMP: brand, concentration and packaging per supplier."
+        },
+        "precios": {
+          "title": "Prices",
+          "desc": "Catalog by list/center and price derivation."
+        }
       }
     }
   },

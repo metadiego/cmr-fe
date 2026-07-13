@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon } from "@hugeicons/core-free-icons";
@@ -63,7 +64,12 @@ export function RecetasAdmin() {
   const unidadName = (id: string | null) =>
     id ? (unidades.find((u) => u.id === id)?.nombre ?? "") : "";
 
-  const [selId, setSelId] = React.useState<string | null>(null);
+  // (b) Deep-link desde el producto: ?compuestoId= preselecciona el compuesto. Un solo
+  // editor, alcanzable standalone Y desde Productos → sin duplicar el editor de receta.
+  const searchParams = useSearchParams();
+  const [selId, setSelId] = React.useState<string | null>(
+    () => searchParams.get("compuestoId") ?? null,
+  );
   const selected = compuestos.find((p) => p.id === selId) ?? null;
 
   return (

@@ -560,7 +560,8 @@
     "inventario_recibir": "Recibir compra",
     "inventario_productos": "Productos",
     "inventario_recetas": "Recetas de compuestos",
-    "servicios": "Servicios"
+    "servicios": "Servicios",
+    "inventario_index": "Inventario"
   },
   "admin": {
     "title": "Administración",
@@ -1103,7 +1104,12 @@
       "proveedorMas": "+{n}",
       "noResults": "Sin resultados para «{q}»",
       "totalCount": "{total} productos",
-      "pageOf": "Página {page} de {totalPages}"
+      "pageOf": "Página {page} de {totalPages}",
+      "editarReceta": "Editar receta",
+      "filtro": {
+        "fisicos": "Físicos (comprables)",
+        "compuestos": "Compuestos / derivados"
+      }
     },
     "picker": {
       "placeholder": "Selecciona un producto…",
@@ -1161,6 +1167,37 @@
         "componente": "Componente",
         "cantidad": "Cantidad",
         "unidad": "Unidad"
+      }
+    },
+    "index": {
+      "title": "Inventario",
+      "help": "Todo el inventario en un solo lugar: productos, recepción de compras, recetas de compuestos, proveedores y precios.",
+      "open": "Abrir",
+      "sections": {
+        "productos": {
+          "title": "Productos",
+          "desc": "Alta y edición de productos; buscar, proveedores, compuestos."
+        },
+        "recepcion": {
+          "title": "Recepción de inventario",
+          "desc": "Recibir compra: entrada de stock por lote y almacén."
+        },
+        "recetas": {
+          "title": "Recetas de compuestos",
+          "desc": "Bill-of-materials: de qué se compone cada derivado."
+        },
+        "proveedores": {
+          "title": "Proveedores",
+          "desc": "Catálogo de proveedores."
+        },
+        "amp": {
+          "title": "Presentación de proveedor",
+          "desc": "AMP: marca, concentración y empaque por proveedor."
+        },
+        "precios": {
+          "title": "Precios",
+          "desc": "Catálogo por lista/centro y derivación de precios."
+        }
       }
     }
   },
