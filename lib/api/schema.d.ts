@@ -5613,7 +5613,7 @@ export interface components {
             almacenOrigenId: string;
             almacenDestinoId: string;
             /** @enum {string} */
-            estado: "pendiente" | "recibida" | "cancelada" | "rechazada";
+            estado: "pendiente" | "recibida" | "cancelada" | "recibida_parcial" | "rechazada";
             requiereRecepcion: boolean;
             motivo: string | null;
             creadoPor: string | null;
@@ -5627,9 +5627,21 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        RecibirItemDto: {
+            /** Format: uuid */
+            itemId: string;
+            cantidadRecibida: number;
+        };
         RecibirTransferenciaInvDto: {
             /** Format: uuid */
             actorId?: string;
+            /** @description Cantidades recibidas por línea (aprobación PARCIAL). Omitido = recepción TOTAL. */
+            items?: components["schemas"]["RecibirItemDto"][];
+            /**
+             * @description Qué hacer con el remanente no recibido. Default: devolver al origen.
+             * @enum {string}
+             */
+            politicaRemanente?: "merma" | "devolver_origen";
         };
         RechazarTransferenciaInvDto: {
             motivo: string;
@@ -13295,6 +13307,7 @@ export interface operations {
             query?: {
                 tipo?: string;
                 q?: string;
+                contexto?: string;
             };
             header?: never;
             path?: never;

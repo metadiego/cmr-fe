@@ -131,8 +131,10 @@ export function listClasificaciones(tipo?: string): Promise<Clasificacion[]> {
 export type Almacen = components["schemas"]["AlmacenEntity"];
 export type Ubicacion = components["schemas"]["UbicacionEntity"];
 
-export function listAlmacenes(): Promise<Almacen[]> {
-  return apiFetch<Almacen[]>(`/inventario/almacenes?limit=100`);
+// `tenant`: undefined = centro activo; un id = almacenes de ESE centro (para elegir el
+// almacén destino en una transferencia entre centros).
+export function listAlmacenes(tenant?: string | null): Promise<Almacen[]> {
+  return apiFetch<Almacen[]>(`/inventario/almacenes?limit=100`, {}, tenant);
 }
 // Ubicaciones (opcional; puede filtrar por almacén). Devuelve [] si el BE no soporta el filtro.
 export function listUbicaciones(almacenId?: string): Promise<Ubicacion[]> {

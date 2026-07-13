@@ -479,7 +479,8 @@
     "next": "Siguiente",
     "expand": "Expandir",
     "collapse": "Contraer",
-    "error": "No se pudo cargar"
+    "error": "No se pudo cargar",
+    "view": "Ver"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -561,7 +562,8 @@
     "inventario_productos": "Productos",
     "inventario_recetas": "Recetas de compuestos",
     "servicios": "Servicios",
-    "inventario_index": "Inventario"
+    "inventario_index": "Inventario",
+    "inventario_transferencias": "Transferencias"
   },
   "admin": {
     "title": "Administración",
@@ -1197,6 +1199,10 @@
         "precios": {
           "title": "Precios",
           "desc": "Catálogo por lista/centro y derivación de precios."
+        },
+        "transferencias": {
+          "title": "Transferencias",
+          "desc": "Mover stock entre centros con recepción/aprobación parcial."
         }
       }
     }
@@ -1391,6 +1397,71 @@
       "requiereEnfermera": "Requiere enfermera",
       "badge": "Mostrar contador",
       "activo": "Activo"
+    }
+  },
+  "transferencias": {
+    "title": "Transferencias",
+    "help": "Mueve stock entre centros. El origen baja al enviar; el destino aprueba la recepción (total o parcial) y el remanente se reconcilia. Solo el centro destino puede recibir.",
+    "new": "Nueva transferencia",
+    "empty": "Sin transferencias pendientes",
+    "porRecibir": "Por recibir",
+    "recibirAprobar": "Recibir / Aprobar",
+    "backToList": "Transferencias",
+    "newTitle": "Nueva transferencia",
+    "newHelp": "El stock sale del origen al crear; el destino aprueba la recepción.",
+    "lineas": "Productos a transferir",
+    "addLinea": "Agregar producto",
+    "crear": "Crear transferencia",
+    "creando": "Creando…",
+    "creadaOk": "Transferencia creada",
+    "politicaRemanente": "Remanente no recibido",
+    "recibidaOk": "Recepción aprobada",
+    "rechazadaOk": "Transferencia rechazada",
+    "aprobar": "Aprobar recepción",
+    "rechazar": "Rechazar",
+    "recibirAprobarTitle": "Recibir / Aprobar",
+    "soloDestino": "Solo {centro} (destino) puede recibir esta transferencia.",
+    "readonlyEnEspera": "Enviada — en espera de recepción del destino.",
+    "confirmAprobarTitle": "Aprobar recepción",
+    "confirmAprobarBody": "Se registrará lo recibido y el remanente se procesará como: {politica}.",
+    "rechazarTitle": "Rechazar transferencia",
+    "rechazarBody": "Todo el stock vuelve al origen. Indica el motivo.",
+    "motivoPlaceholder": "Motivo del rechazo…",
+    "estado": {
+      "pendiente": "Pendiente",
+      "recibida": "Recibida",
+      "recibida_parcial": "Recibida parcial",
+      "rechazada": "Rechazada",
+      "cancelada": "Cancelada"
+    },
+    "pol": {
+      "devolver": "Devolver al origen",
+      "merma": "Merma (baja)"
+    },
+    "col": {
+      "ruta": "Ruta",
+      "estado": "Estado",
+      "motivo": "Motivo",
+      "producto": "Producto",
+      "cantidad": "Cantidad",
+      "enviado": "Enviado",
+      "recibido": "Recibido",
+      "remanente": "Remanente"
+    },
+    "field": {
+      "origen": "Centro origen",
+      "destino": "Centro destino",
+      "selectCentro": "Selecciona un centro…",
+      "almacenOrigen": "Almacén origen",
+      "almacenDestino": "Almacén destino",
+      "selectAlmacen": "Selecciona…",
+      "motivo": "Motivo",
+      "selectProducto": "Buscar producto…"
+    },
+    "err": {
+      "required": "Requerido",
+      "negativo": "No puede ser negativo",
+      "excede": "Mayor a lo enviado"
     }
   }
 }

@@ -10,6 +10,7 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 const SECTIONS: { key: string; href: string }[] = [
   { key: "productos", href: "/inventario/productos" },
   { key: "recepcion", href: "/inventario/recibir-compra" },
+  { key: "transferencias", href: "/inventario/transferencias" },
   { key: "recetas", href: "/inventario/recetas" },
   { key: "proveedores", href: "/inventario/proveedores" },
   { key: "amp", href: "/inventario/presentaciones-proveedor" },

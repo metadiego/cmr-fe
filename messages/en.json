@@ -479,7 +479,8 @@
     "next": "Next",
     "expand": "Expand",
     "collapse": "Collapse",
-    "error": "Could not load"
+    "error": "Could not load",
+    "view": "View"
   },
   "pending": {
     "title": "Access pending",
@@ -561,7 +562,8 @@
     "inventario_productos": "Products",
     "inventario_recetas": "Compound recipes",
     "servicios": "Services",
-    "inventario_index": "Inventory"
+    "inventario_index": "Inventory",
+    "inventario_transferencias": "Transfers"
   },
   "admin": {
     "title": "Administration",
@@ -1197,6 +1199,10 @@
         "precios": {
           "title": "Prices",
           "desc": "Catalog by list/center and price derivation."
+        },
+        "transferencias": {
+          "title": "Transfers",
+          "desc": "Move stock between centers with partial reception/approval."
         }
       }
     }
@@ -1391,6 +1397,71 @@
       "requiereEnfermera": "Requires nurse",
       "badge": "Show counter",
       "activo": "Active"
+    }
+  },
+  "transferencias": {
+    "title": "Transfers",
+    "help": "Move stock between centers. Origin decrements on send; destination approves reception (full or partial) and the remainder is reconciled. Only the destination center can receive.",
+    "new": "New transfer",
+    "empty": "No pending transfers",
+    "porRecibir": "To receive",
+    "recibirAprobar": "Receive / Approve",
+    "backToList": "Transfers",
+    "newTitle": "New transfer",
+    "newHelp": "Stock leaves the origin on create; the destination approves reception.",
+    "lineas": "Products to transfer",
+    "addLinea": "Add product",
+    "crear": "Create transfer",
+    "creando": "Creating…",
+    "creadaOk": "Transfer created",
+    "politicaRemanente": "Unreceived remainder",
+    "recibidaOk": "Reception approved",
+    "rechazadaOk": "Transfer rejected",
+    "aprobar": "Approve reception",
+    "rechazar": "Reject",
+    "recibirAprobarTitle": "Receive / Approve",
+    "soloDestino": "Only {centro} (destination) can receive this transfer.",
+    "readonlyEnEspera": "Sent — awaiting destination reception.",
+    "confirmAprobarTitle": "Approve reception",
+    "confirmAprobarBody": "Received amounts will be recorded and the remainder handled as: {politica}.",
+    "rechazarTitle": "Reject transfer",
+    "rechazarBody": "All stock returns to origin. State the reason.",
+    "motivoPlaceholder": "Rejection reason…",
+    "estado": {
+      "pendiente": "Pending",
+      "recibida": "Received",
+      "recibida_parcial": "Partially received",
+      "rechazada": "Rejected",
+      "cancelada": "Cancelled"
+    },
+    "pol": {
+      "devolver": "Return to origin",
+      "merma": "Write-off"
+    },
+    "col": {
+      "ruta": "Route",
+      "estado": "Status",
+      "motivo": "Reason",
+      "producto": "Product",
+      "cantidad": "Quantity",
+      "enviado": "Sent",
+      "recibido": "Received",
+      "remanente": "Remainder"
+    },
+    "field": {
+      "origen": "Origin center",
+      "destino": "Destination center",
+      "selectCentro": "Select a center…",
+      "almacenOrigen": "Origin warehouse",
+      "almacenDestino": "Destination warehouse",
+      "selectAlmacen": "Select…",
+      "motivo": "Reason",
+      "selectProducto": "Search product…"
+    },
+    "err": {
+      "required": "Required",
+      "negativo": "Cannot be negative",
+      "excede": "Exceeds sent"
     }
   }
 }
