@@ -559,7 +559,8 @@
     "inventario_amp": "Supplier presentations",
     "inventario_recibir": "Receive purchase",
     "inventario_productos": "Products",
-    "inventario_recetas": "Compound recipes"
+    "inventario_recetas": "Compound recipes",
+    "servicios": "Services"
   },
   "admin": {
     "title": "Administration",
@@ -1317,6 +1318,42 @@
       },
       "createEmpty": "Create empty",
       "createClone": "Clone from another list (±$/%)"
+    }
+  },
+  "servicios": {
+    "title": "Services",
+    "help": "Each service is a tab on the frontdesk board. Link a product so every session discounts stock; leave it without a product for a pure service (counts sessions only, e.g. Shock Wave). On create, the tab is born ready.",
+    "new": "New service",
+    "empty": "No services",
+    "active": "Active",
+    "inactive": "Inactive",
+    "tipoInventariable": "Discounts stock",
+    "tipoPuro": "Pure service",
+    "tecnico": "Technician",
+    "enfermera": "Nurse",
+    "newTitle": "New service",
+    "editTitle": "Edit service",
+    "created": "Service created",
+    "updated": "Service updated",
+    "formHelp": "The tab is created with its default columns. Adjust them later if needed.",
+    "col": {
+      "nombre": "Service",
+      "tipo": "Type",
+      "requisitos": "Requires",
+      "estado": "Status"
+    },
+    "field": {
+      "nombre": "Name",
+      "clave": "Key",
+      "orden": "Order",
+      "color": "Color",
+      "producto": "Linked product",
+      "productoHint": "With a product → each session discounts stock. Without → pure service (counts only).",
+      "productoNone": "None (pure service)",
+      "requiereTecnico": "Requires technician",
+      "requiereEnfermera": "Requires nurse",
+      "badge": "Show counter",
+      "activo": "Active"
     }
   }
 }

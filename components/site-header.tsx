@@ -77,6 +77,7 @@ export function SiteHeader() {
     "/inventario/recibir-compra",
     "/inventario/recetas",
     "/precios",
+    "/servicios",
     "/admin",
     "/configuracion/tableros",
     "/settings",

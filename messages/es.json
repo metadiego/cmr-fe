@@ -559,7 +559,8 @@
     "inventario_amp": "Presentaciones de proveedor",
     "inventario_recibir": "Recibir compra",
     "inventario_productos": "Productos",
-    "inventario_recetas": "Recetas de compuestos"
+    "inventario_recetas": "Recetas de compuestos",
+    "servicios": "Servicios"
   },
   "admin": {
     "title": "Administración",
@@ -1317,6 +1318,42 @@
       },
       "createEmpty": "Crear vacía",
       "createClone": "Clonar de otra lista (±$/%)"
+    }
+  },
+  "servicios": {
+    "title": "Servicios",
+    "help": "Cada servicio es una pestaña del tablero de frontdesk. Vincula un producto para que cada sesión descuente stock; déjalo sin producto para un servicio puro (solo cuenta sesiones, p. ej. Shock Wave). Al crear, la pestaña nace lista.",
+    "new": "Nuevo servicio",
+    "empty": "Sin servicios",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "tipoInventariable": "Descuenta stock",
+    "tipoPuro": "Servicio puro",
+    "tecnico": "Técnico",
+    "enfermera": "Enfermera",
+    "newTitle": "Nuevo servicio",
+    "editTitle": "Editar servicio",
+    "created": "Servicio creado",
+    "updated": "Servicio actualizado",
+    "formHelp": "La pestaña se crea con sus columnas por defecto. Ajústalas después si hace falta.",
+    "col": {
+      "nombre": "Servicio",
+      "tipo": "Tipo",
+      "requisitos": "Requiere",
+      "estado": "Estado"
+    },
+    "field": {
+      "nombre": "Nombre",
+      "clave": "Clave",
+      "orden": "Orden",
+      "color": "Color",
+      "producto": "Producto vinculado",
+      "productoHint": "Con producto → cada sesión descuenta stock. Sin producto → servicio puro (solo cuenta).",
+      "productoNone": "Ninguno (servicio puro)",
+      "requiereTecnico": "Requiere técnico",
+      "requiereEnfermera": "Requiere enfermera",
+      "badge": "Mostrar contador",
+      "activo": "Activo"
     }
   }
 }

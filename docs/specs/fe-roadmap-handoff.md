@@ -86,6 +86,9 @@ Aquí vive el **Eje 2** y las **pestañas por servicio**. Base `/servicios` y `/
 ### Caso concreto: **Shock Wave (onda de choque) — servicio NO inventariable**
 - Se crea con `POST /servicios`: `clave:'shock_wave'`, `nombre:'Shock Wave'`, color/icono/orden,
   **`productoId: null`** (servicio puro → cuenta sesiones, no toca stock). Aparece como **nueva pestaña** automáticamente.
+- **El BE ya provisiona las columnas por defecto al crear el servicio** (paciente, estado, sesiones, técnico,
+  enfermera, acciones) → la pestaña **nace usable**, no vacía. El FE NO tiene que componer columnas tras crear;
+  si el negocio quiere ajustar/añadir columnas de ESE servicio, usa `POST /servicios/:id/columnas`.
 - Dosis de aplicación: aún sin definir por el negocio → por ahora solo cuenta sesiones; la config de dosis se
   suma después vía el esquema de acciones del servicio (`/servicios/:id/columnas`), sin código.
 
