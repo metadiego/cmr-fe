@@ -182,6 +182,50 @@ export function deletePresentacionProveedor(id: string): Promise<void> {
   });
 }
 
+// Recetas de compuestos (bill-of-materials): un producto `compuesto` (derivado) consume
+// N componentes (base|unico) en cierta cantidad/unidad. Al vender/entregar, el BE descarga
+// la receta. GET devuelve IDs crudos → el FE resuelve nombres con productos+unidades.
+export type ProductoComponente = components["schemas"]["ProductoComponenteEntity"];
+export type CreateComponentePayload =
+  components["schemas"]["CreateProductoComponenteDto"];
+export type UpdateComponentePayload =
+  components["schemas"]["UpdateProductoComponenteDto"];
+
+export function listComponentes(
+  productoCompuestoId: string,
+): Promise<ProductoComponente[]> {
+  return apiFetch<ProductoComponente[]>(
+    `/inventario/componentes?productoCompuestoId=${encodeURIComponent(productoCompuestoId)}`,
+  );
+}
+export function createComponente(
+  payload: CreateComponentePayload,
+): Promise<ProductoComponente> {
+  return apiFetch<ProductoComponente>(`/inventario/componentes`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+export function updateComponente(
+  id: string,
+  payload: UpdateComponentePayload,
+): Promise<ProductoComponente> {
+  return apiFetch<ProductoComponente>(`/inventario/componentes/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+export function deleteComponente(id: string): Promise<void> {
+  return apiFetch<void>(`/inventario/componentes/${id}`, { method: "DELETE" });
+}
+
+// Compuestos (derivados). El endpoint de productos no filtra por `tipo` y `soloFisicos`
+// EXCLUYE compuestos → traemos sin soloFisicos y filtramos tipo==='compuesto' en el FE.
+export async function listCompuestos(q?: string): Promise<Producto[]> {
+  const all = await listProductos({ q });
+  return all.filter((p) => p.tipo === "compuesto");
+}
+
 // Recibir compra. CONTRATO CLAVE: con AMP, `cantidad` = EMPAQUES y `costoUnitario` =
 // costo POR EMPAQUE; el BE convierte a unidad base con factorABase. NO pre-convertir.
 // Sin AMP: cantidad/costo en unidad base directa.

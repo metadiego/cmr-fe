@@ -558,7 +558,8 @@
     "dashboard": "Dashboard",
     "inventario_amp": "Presentaciones de proveedor",
     "inventario_recibir": "Recibir compra",
-    "inventario_productos": "Productos"
+    "inventario_productos": "Productos",
+    "inventario_recetas": "Recetas de compuestos"
   },
   "admin": {
     "title": "Administración",
@@ -1137,6 +1138,28 @@
         "fabricante": "Fabricante",
         "sku": "SKU",
         "barcode": "Código de barras"
+      }
+    },
+    "recetas": {
+      "title": "Recetas de compuestos",
+      "help": "Define de qué se compone cada derivado: sus componentes (sustancia base/insumo), cantidad y unidad. Es la receta que el sistema descuenta al vender o entregar.",
+      "searchCompuesto": "Buscar compuesto…",
+      "noCompuestos": "Sin compuestos",
+      "pickCompuesto": "Elige un compuesto para ver y editar su receta.",
+      "recipeOf": "Componentes de este compuesto (se descuentan al vender/entregar)",
+      "emptyRecipe": "Sin receta — agrega componentes",
+      "addComponente": "Componente",
+      "selectComponente": "Buscar producto…",
+      "add": "Agregar",
+      "added": "Componente agregado",
+      "removed": "Componente quitado",
+      "updated": "Receta actualizada",
+      "invalidComponente": "Elige un componente y una cantidad válida",
+      "unidadDefault": "Unidad base",
+      "col": {
+        "componente": "Componente",
+        "cantidad": "Cantidad",
+        "unidad": "Unidad"
       }
     }
   },

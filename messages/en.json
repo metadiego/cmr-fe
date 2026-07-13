@@ -558,7 +558,8 @@
     "dashboard": "Dashboard",
     "inventario_amp": "Supplier presentations",
     "inventario_recibir": "Receive purchase",
-    "inventario_productos": "Products"
+    "inventario_productos": "Products",
+    "inventario_recetas": "Compound recipes"
   },
   "admin": {
     "title": "Administration",
@@ -1137,6 +1138,28 @@
         "fabricante": "Manufacturer",
         "sku": "SKU",
         "barcode": "Barcode"
+      }
+    },
+    "recetas": {
+      "title": "Compound recipes",
+      "help": "Define what each derivative is made of: its components (base substance/input), quantity and unit. This is the recipe the system discounts on sale or delivery.",
+      "searchCompuesto": "Search compound…",
+      "noCompuestos": "No compounds",
+      "pickCompuesto": "Pick a compound to view and edit its recipe.",
+      "recipeOf": "Components of this compound (discounted on sale/delivery)",
+      "emptyRecipe": "No recipe — add components",
+      "addComponente": "Component",
+      "selectComponente": "Search product…",
+      "add": "Add",
+      "added": "Component added",
+      "removed": "Component removed",
+      "updated": "Recipe updated",
+      "invalidComponente": "Pick a component and a valid quantity",
+      "unidadDefault": "Base unit",
+      "col": {
+        "componente": "Component",
+        "cantidad": "Quantity",
+        "unidad": "Unit"
       }
     }
   },

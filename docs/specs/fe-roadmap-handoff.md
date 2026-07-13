@@ -1,75 +1,107 @@
-# Handoff FE — Roadmap: qué construir para avanzar (hacia la doble descarga)
+# Handoff FE — Cerrar el ciclo: catálogo → doble descarga (inventario + sesiones)
 
-> **De:** BE (cmr-be). **Para:** cmr-fe. **Fecha:** 2026-07-12.
-> **Meta:** habilitar la validación de **DOBLE DESCARGA** — vender/entregar un tratamiento y que descargue
-> **(1) inventario** (por la receta) **y (2) sesiones + dosis** que el paciente adquirió.
-> **Todo el BE de abajo YA existe y está en producción** (`https://api.centrodemedicinaregenerativa.com`).
-> Lo que falta son las **pantallas FE**. Reglas: leer `response.data` + `meta.pagination`; `Authorization:
-> Bearer` + `X-Tenant-ID`; whitelist estricto (400 si mandas un query param no documentado); i18n `labelKey`;
-> estados loading/vacío/error; **buscar en internet el layout UI más moderno** antes de construir cada pantalla.
+> **De:** BE (cmr-be). **Para:** cmr-fe. **Actualizado:** 2026-07-13.
+> **Estado BE:** TODO el BE de abajo existe y está **en producción, VERIFICADO en los DOS centros**
+> (`https://api.centrodemedicinaregenerativa.com`). No falta backend para cerrar el ciclo — **falta FE**.
+>
+> **Baseline prod verificado (2026-07-13), por centro (Caguas + Bayamón, a la par):**
+> 39 fichas · 41 precios · 1 almacén · ~29–30 lotes de apertura cada uno.
+> **Globales (ambos):** 88 productos (28 kits/compuestos) · 39 AMP (presentación de proveedor) ·
+> 100 recetas (producto_componentes) · 28 reglas de descarga tipo `receta` · 2 proveedores.
 
-## Prioridad (orden recomendado)
-1. Catálogo (base) → 2. Precios → 3. Facturación → 4. Frontdesk/Sesiones → 5. **Validación doble descarga.**
+## Reglas transversales (aplican a TODA pantalla)
+- Leer `response.data` + `meta.pagination`. Auth: `Authorization: Bearer` + `X-Tenant-ID`.
+- **Whitelist estricto**: mandar un query param no documentado = **HTTP 400**. Manda solo los documentados.
+- i18n por `labelKey` (nunca strings hardcodeados). Estados loading / vacío / error en cada pantalla.
+- **Buscar en internet el layout UI más moderno** antes de construir cada pantalla.
 
 ---
 
-## 1. Catálogo — LISTO en BE (ver detalle aparte)
-Detalle completo en **`docs/specs/fe-inventario-precios-handoff.md`** (endpoints, JSON real, estados):
-- **Productos** `/inventario/productos?soloFisicos=&conProveedores=&q=` (columna Proveedor con tooltip).
-- **Presentación de proveedor (AMP)** `/inventario/presentaciones-proveedor` (editor con selector de proveedor+unidad).
-- **Recetas de compuestos** `/inventario/componentes?productoCompuestoId=` (editor tipo bill-of-materials).
-- **Recibir compra** `POST /inventario/operaciones/recibir-compra`.
-- **Unidades / Proveedores** para selectores.
+## 0. El MODELO que hay que reflejar en la UI (la raíz del "a veces descarga, a veces no")
 
-## 2. Precios — LISTO en BE (ver `fe-inventario-precios-handoff.md` §3 + §5-bis)
-- **Catálogo por tipo** `GET /precios/catalogo?tipoPrecioId=&clinicId=&q=` (regular/mayorista/seguro; `null`=hueco).
-- **Derivar lista** `POST /precios/derivar` con `dryRun:true` (PREVIEW) → tabla antes/después; luego `dryRun:false`.
-  Ajuste %/$, redondeo (.99/entero/múltiplo), ámbito global/centro/individual. Pantalla: "Derivar precios" con
-  preview antes de aplicar.
+La descarga NO es azar: son **dos ejes independientes**, cada uno **dato explícito**. La UI de configuración
+del producto/servicio DEBE mostrar y editar ambos, para que nunca quede implícito.
 
-## 3. Facturación — BE LISTO, faltan pantallas (base de la descarga #1)
-Base URL `/api/v1/facturas`. Endpoints clave:
-- `POST /facturas` (nueva) · `GET /facturas` (lista) · `GET /facturas/:id` · `GET /facturas/tablero` ·
-  `GET /facturas/catalogo` (productos facturables) · `GET /facturas/buscar-paciente?...`.
-- Items: `POST /facturas/:id/items` · `PUT/DELETE /facturas/:id/items/:itemId` ·
-  `PUT /facturas/:id/items/:itemId/kit` (editar la receta del kit en la línea).
-- Descuentos/exento: `PUT /facturas/:id/descuento-global` · `.../descuentos-grupo` · `.../exento`.
-- **`POST /facturas/:id/emitir`** ← aquí ocurre la **descarga de inventario** (recorre la receta/regla).
-- `POST /facturas/:id/anular` · `POST /facturas/:id/devolver` · `GET /facturas/:id/devoluciones`.
-- Pagos: `POST /facturas/:id/pagos` (+ `/multiple`) · `GET /facturas/:id/pagos` · `.../resumen`.
-- Config: `/facturacion/formas-pago`, `/facturacion/medios`, `/facturacion/columnas` (grupos/columnas de captura),
-  `/facturacion/reportes/{resumen,por-medico,por-producto,impuestos}`, `POST /facturas/cita/:citaId` (facturar consulta).
+**Eje 1 — ¿toca inventario? (rebaja de stock)** — en el **producto**:
+- `esInventariable` (bool) — ¿genera/descuenta stock?
+- `modoDescarga` (enum) — **cuándo**: `a_la_venta` (al facturar) · `a_la_entrega` (al entregar por sesiones) ·
+  `no_descarga` (nunca).
 
-**Pantallas FE:** POS/factura (buscar paciente → agregar ítems del catálogo → precio efectivo → descuentos →
-**emitir** → pagos), lista/tablero de facturas, devoluciones. UI: buscar el layout POS moderno (línea de ítems
-editable inline, totales sticky, panel de pago).
+**Eje 2 — ¿se entrega por sesiones? (rebaja de sesiones/dosis)** — en el **servicio de frontdesk**:
+- El servicio (una pestaña = un tablero) tiene `productoId` **o no**.
+  - **Con** `productoId` → cada sesión entregada descarga stock del producto (vía `reglas_descarga`).
+  - **Sin** `productoId` = **servicio puro** → la sesión solo **cuenta** (estadística/dosis), no toca inventario.
 
-## 4. Frontdesk / Sesiones — BE LISTO, faltan pantallas (base de la descarga #2)
-Base URL `/api/v1/frontdesk` y `/api/v1/servicios`. Endpoints clave:
-- **Servicios** (config): `GET/POST/PUT/DELETE /servicios`, `/servicios/:id/columnas`.
-- **Sesiones:** `GET /frontdesk/sesiones` · `POST /frontdesk/sesiones` · `GET /frontdesk/sesiones/:id` ·
-  `GET /frontdesk/sesiones/:id/historial` · **`POST /frontdesk/sesiones/:id/presente|en-terapia|asistido`**
-  (transiciones; en "asistido/entrega" ocurre la **descarga por sesión/dosis**) · `.../acciones` · `.../cancelar` · `.../reparar`.
-- **Tablero:** `GET /frontdesk/tablero`. **Estado enfermería:** `GET/POST /frontdesk/nurse-status`.
-- Reportes: `/frontdesk/reportes/{resumen,por-servicio,por-tecnico,tiempos}`.
+Las 4 combinaciones que la UI debe dejar configurar sin ambigüedad:
 
-**Pantallas FE:** tablero de sesiones (columnas por estado, arrastrar/transicionar), ficha de sesión con
-historial, marcar presente/en-terapia/asistido. UI: buscar el layout moderno de "board" clínico (kanban por
-estado, contadores, tiempos).
+| Caso | esInventariable | modoDescarga | servicio.productoId | Stock | Sesión |
+|---|---|---|---|---|---|
+| Consulta médica | no | no_descarga | — | ❌ | ❌ |
+| Venta directa (frasco) | sí | a_la_venta | — | ✅ al facturar | ❌ |
+| Tratamiento por sesiones inventariable (Vit C, GLP) | sí | a_la_entrega | ✅ | ✅ por sesión | ✅ |
+| **Servicio NO inventariable (p. ej. Shock Wave)** | **no** | **no_descarga** | **null** | ❌ | ✅ solo cuenta |
 
-## 5. Validación de DOBLE DESCARGA (la meta)
-Con 1–4 construidos, el escenario de prueba end-to-end:
-1. Paciente adquiere un tratamiento (derivado/kit o paquete de sesiones) → **factura** (`emitir`).
-   → **Descarga #1:** inventario descarga la receta (sustancia base, materiales) — motor versionado
-   (`reglas_descarga` receta, ya en prod).
-2. La entrega por **sesiones** (frontdesk) → cada sesión "asistida" descarga su dosis.
-   → **Descarga #2:** sesiones + **dosis total** acumulada del paciente.
-3. Verificar: stock derivado del insumo baja correctamente (kardex) + total de dosis/sesiones del paciente cuadra.
+---
 
-**Para que esto sea un ROLEX**, el catálogo debe estar completo (ya lo está: 39 físicos + 27 kits + recetas
-versionadas + precios + AMP/proveedor, todo en prod).
+## 1. Catálogo (base → derivados → AMP → kits) — BE LISTO
+Detalle de JSON real en `docs/specs/fe-inventario-precios-handoff.md`.
+- **Productos** `GET /inventario/productos?soloFisicos=&conProveedores=&q=&incluirInactivos=`. Cada producto trae
+  `tipo` (base|unico|compuesto|servicio), **`esInventariable`**, **`modoDescarga`**, `unidadInventarioId`,
+  `contenido`. La pantalla de alta/edición debe exponer **los dos ejes** (§0). `GET/PUT/POST/DELETE /inventario/productos`.
+- **Derivados + dosis (receta)** `GET/POST/PUT/DELETE /inventario/componentes?productoCompuestoId=` (editor
+  bill-of-materials; cantidad = dosis en unidad base). Editar aquí **re-publica** la regla versionada — no hay que hacer nada extra.
+- **Presentación de proveedor (AMP)** `GET/POST/PUT/DELETE /inventario/presentaciones-proveedor` (selector de
+  proveedor + unidad + concentración/contenido). ⚠️ **AMP es DESCRIPTIVO** (marca, concentración, empaque): NO
+  convierte la salida. La autoridad de descarga es la regla/receta. No pintar el AMP como "factor de conversión".
+- **Recibir compra** `POST /inventario/operaciones/recibir-compra` (crea lote; exige `almacenId`).
+- **Selectores**: `GET /inventario/unidades` (+ `GET /inventario/unidades/convertir`), `GET /inventario/proveedores`,
+  `GET /inventario/almacenes`.
 
-## Nota de dependencias BE (si algo falta al construir)
-Si al construir una pantalla el endpoint no devuelve lo que necesitas (campo, filtro), **no improvises**: pide
-el ajuste al BE con un mini-handoff (como `precios-listas-multicentro-handoff-be.md`): requerimiento, evidencia,
-gap, contrato propuesto, preguntas sí/no.
+## 2. Precios — BE LISTO (ver `fe-inventario-precios-handoff.md` §3)
+- Catálogo por tipo `GET /precios/catalogo?tipoPrecioId=&clinicId=&q=` (`null`=hueco de precio).
+- Derivar lista `POST /precios/derivar` con `dryRun:true` (preview) → tabla antes/después → `dryRun:false`.
+  Ajuste %/$, redondeo, ámbito global/centro/individual.
+
+## 3. Facturación (descarga #1) — BE LISTO
+Base `/facturas`. POS/factura: buscar paciente → agregar líneas del catálogo → precio efectivo → descuentos →
+**`POST /facturas/:id/emitir`** (aquí ocurre la **descarga de inventario** recorriendo la receta/regla) → pagos.
+- **`GET /facturas/catalogo?contexto=consulta`** → factura de consulta ofrece **solo** Consulta/Seguimiento
+  (sin `contexto` = catálogo de venta completo). Ya implementado.
+- Líneas/kit: `POST/PUT/DELETE /facturas/:id/items(/:itemId)(/kit)`. Descuentos/exento; anular/devolver; pagos;
+  `POST /facturas/cita/:citaId` (Facturar Consulta). Reportes en `/facturacion/reportes/*`.
+
+## 4. Frontdesk / Servicios (descarga #2 + shock wave) — BE LISTO
+Aquí vive el **Eje 2** y las **pestañas por servicio**. Base `/servicios` y `/frontdesk`.
+- **Servicios (config = pestañas)**: `GET /servicios`, `GET /servicios/:id`, `POST /servicios`, `PUT /servicios/:id`,
+  `DELETE /servicios/:id`, `GET/POST /servicios/:id/columnas`. Campos: `clave` (= clave del tablero/pestaña),
+  `nombre`, `color`, `icono`, `orden`, **`productoId`** (null = servicio puro), `requiereTecnico`,
+  `requiereEnfermera`, `mostrarConteo`, esquema de acciones. **Cada servicio = una pestaña**, data-driven: crear
+  un servicio nuevo debe crear su pestaña sin tocar código.
+- **Sesiones**: `GET/POST /frontdesk/sesiones`, `GET /frontdesk/sesiones/:id`, `.../historial`, transiciones
+  **`POST /frontdesk/sesiones/:id/presente|en-terapia|asistido`** (en `asistido`/entrega ocurre la **descarga por
+  sesión/dosis** si el servicio tiene `productoId`), `.../acciones`, `.../cancelar`, `.../reparar`.
+- **Tablero**: `GET /frontdesk/tablero`. **Enfermería**: `GET/POST /frontdesk/nurse-status(/tipos)`.
+  Reportes: `/frontdesk/reportes/{resumen,por-servicio,por-tecnico,tiempos}`.
+
+### Caso concreto: **Shock Wave (onda de choque) — servicio NO inventariable**
+- Se crea con `POST /servicios`: `clave:'shock_wave'`, `nombre:'Shock Wave'`, color/icono/orden,
+  **`productoId: null`** (servicio puro → cuenta sesiones, no toca stock). Aparece como **nueva pestaña** automáticamente.
+- Dosis de aplicación: aún sin definir por el negocio → por ahora solo cuenta sesiones; la config de dosis se
+  suma después vía el esquema de acciones del servicio (`/servicios/:id/columnas`), sin código.
+
+## 5. VALIDACIÓN de la doble descarga (la meta del ciclo)
+Escenario end-to-end para probar (sobre datos de prod o local):
+1. Paciente adquiere un tratamiento (kit/derivado) → **factura → emitir** ⇒ **Descarga #1**: baja el stock del
+   insumo por la receta (verificable en kardex/movimientos).
+2. Entrega por **sesiones** (frontdesk); cada sesión `asistido`:
+   - servicio con `productoId` (inventariable) ⇒ **Descarga #2** baja stock por dosis **y** cuenta la sesión.
+   - servicio puro (shock wave) ⇒ solo **cuenta** la sesión, stock intacto.
+3. Verificar: stock del insumo baja solo donde debe + total de sesiones/dosis del paciente cuadra.
+
+## 6. Decisión abierta (negocio + FE)
+¿Se factura/receta alguna vez el **AMP/marca directo**, o **siempre el derivado (dosis en mg)**? Hoy: siempre el
+derivado; el FE no deja elegir marca. Si el negocio quiere elegir marca, se agrega selector de AMP en la línea.
+
+## Nota
+Si al construir una pantalla un endpoint no devuelve lo que necesitas, **no improvises**: pide el ajuste al BE con
+un mini-handoff (requerimiento, evidencia, gap, contrato propuesto, preguntas sí/no).
