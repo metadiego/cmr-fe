@@ -1272,14 +1272,16 @@
       "noResults": "No results",
       "iniciar": "Start sale",
       "creando": "Creating…",
-      "sinNombre": "(no name)"
+      "sinNombre": "(no name)",
+      "lista": "Price list"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",
     "titleGeneral": "General billing",
     "lista": "List",
     "listaPlaceholder": "Regular",
-    "adding": "Adding…"
+    "adding": "Adding…",
+    "listaLabel": "List: {lista}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

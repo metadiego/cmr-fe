@@ -21,7 +21,7 @@ import {
   type Producto,
   type FormaPago,
 } from "@/lib/api/facturas";
-import { listTiposPrecio, listCatalogoPrecios, type TipoPrecio } from "@/lib/api/precios";
+import { listTiposPrecio, type TipoPrecio } from "@/lib/api/precios";
 import { useResource } from "@/hooks/use-resource";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
@@ -206,6 +206,14 @@ function Editor({
   // general; el editor de consulta queda idéntico a antes. Comparten motor, separadas al facturar.
   const esGeneral = !factura.citaId;
 
+  // Lista de precios de la factura (se fija al crear). El server resuelve cada precio por esta
+  // lista (fallback a efectivo). Solo la mostramos; no la recalculamos en el cliente.
+  const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
+  const listaNombre =
+    listasRes.state.kind === "ok"
+      ? (listasRes.state.data.find((l) => l.id === (factura as { tipoPrecioId?: string }).tipoPrecioId)?.nombre ?? null)
+      : null;
+
   // Ediciones locales (cantidad/precio) por item → cálculo INSTANTÁNEO al teclear;
   // se persiste al salir del campo. Sembrado del servidor (el padre remonta al guardar).
   type Edit = { cantidad: number; precioUnitario: number };
@@ -268,7 +276,14 @@ function Editor({
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
       {/* Líneas */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold">{t("items")}</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold">{t("items")}</h2>
+          {esGeneral && listaNombre && (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+              {t("listaLabel", { lista: listaNombre })}
+            </span>
+          )}
+        </div>
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full text-sm">
             <thead>
@@ -347,7 +362,7 @@ function Editor({
           </table>
         </div>
 
-        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} centro={centro} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
+        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
       </section>
 
       {/* Resumen + acciones */}
@@ -422,68 +437,33 @@ function Lbl({ children }: { children: React.ReactNode }) {
   return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
 }
 
-function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; centro?: string; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
+function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
-  const [precio, setPrecio] = React.useState(""); // override manual (vacío = usa el de la lista)
+  const [precio, setPrecio] = React.useState(""); // override manual (vacío = precio de la lista de la factura)
   const [gravado, setGravado] = React.useState(true);
-  const [tipoPrecioId, setTipoPrecioId] = React.useState("");
   const prod = catalogo.find((p) => p.id === prodId);
-
-  // Listas de precio (las envía el BE en /precios/tipos). Default = esDefault (la que tiene precios).
-  const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
-  const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
-  const defaultId = (listas.find((l) => l.esDefault) ?? listas.find((l) => l.clave === "regular"))?.id ?? "";
-  const listaSel = tipoPrecioId || defaultId;
-
-  // MOSTRAR EL PRECIO: al elegir producto+lista, busca el precio de esa lista (con fallback a
-  // efectivo). useResource re-busca al cambiar producto o lista. "Magia": se ve el precio y su código.
-  const precioRes = useResource<{ precio: number | null; sku: string | null } | null>(
-    () => {
-      const p = catalogo.find((x) => x.id === prodId);
-      if (!p || !listaSel) return Promise.resolve(null);
-      const q = p.sku ?? p.nombre;
-      return listCatalogoPrecios({ tipoPrecioId: listaSel, q, limit: 50 }, centro)
-        .then(async (res) => {
-          let row = res.items.find((r) => r.productoId === p.id) ?? null;
-          if (!row || row.precio == null) {
-            // fallback a precio efectivo (sin lista) — la lista puede no tener precio para este producto
-            const eff = await listCatalogoPrecios({ q, limit: 50 }, centro);
-            row = eff.items.find((r) => r.productoId === p.id) ?? row;
-          }
-          return row ? { precio: row.precio, sku: row.sku } : null;
-        });
-    },
-    [prodId, listaSel],
-  );
-  const buscandoPrecio = precioRes.state.kind === "loading" && !!prodId;
-  const precioLista = precioRes.state.kind === "ok" && precioRes.state.data ? precioRes.state.data.precio : null;
-  const codigo = precioRes.state.kind === "ok" && precioRes.state.data ? precioRes.state.data.sku : (prod?.sku ?? null);
-  // Precio efectivo de la línea: override manual si lo hay; si no, el de la lista.
-  const precioEfectivo = precio.trim() !== "" ? Math.max(0, Number(precio) || 0) : precioLista;
-  const canAdd = !!prodId && !disabled && !buscandoPrecio;
+  const canAdd = !!prodId && !disabled;
 
   function add() {
     if (!prod) return;
-    // General: el cajero elige IVU. Consulta: gravado del producto (como antes).
     const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
-    // Manda el precio que se está MOSTRANDO (override o el de la lista). Si no hay ninguno,
-    // lo omite y el server resuelve el efectivo.
-    const precioUnitario = precioEfectivo != null ? precioEfectivo : undefined;
+    // Precio VACÍO = auto: el server resuelve por la LISTA de la factura (fallback efectivo).
+    // Solo se envía si el cajero escribe un override.
+    const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
     onAdd({
       productoId: prod.id,
       descripcion: prod.nombre,
       cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
-      ...(precioUnitario !== undefined ? { precioUnitario } : {}),
+      ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
       gravado: g,
     });
-    setProdId(""); setCant("1"); setPrecio(""); setGravado(true); // se mantiene la lista elegida
+    setProdId(""); setCant("1"); setPrecio(""); setGravado(true);
   }
 
   return (
     <div className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-nowrap">
-      {/* Producto — ocupa el espacio disponible */}
       <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
         <Lbl>{t("addItem")}</Lbl>
         <Select value={prodId} onValueChange={setProdId}>
@@ -491,29 +471,13 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
           <SelectContent>{catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}</SelectContent>
         </Select>
       </label>
-      {showIvu && listas.length > 0 && (
-        <label className="flex w-full flex-col gap-1 md:w-40">
-          <Lbl>{t("lista")}</Lbl>
-          <Select value={listaSel} onValueChange={setTipoPrecioId}>
-            <SelectTrigger className="w-full"><SelectValue placeholder={t("listaPlaceholder")} /></SelectTrigger>
-            <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
-          </Select>
-        </label>
-      )}
       <label className="flex w-20 flex-col gap-1">
         <Lbl>{t("qty")}</Lbl>
         <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 text-right tabular-nums" inputMode="numeric" />
       </label>
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
-        <Input
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-          placeholder={buscandoPrecio ? "…" : precioLista != null ? money(precioLista) : t("priceAuto")}
-          title={t("priceAutoHint")}
-          className="h-9 text-right tabular-nums"
-          inputMode="decimal"
-        />
+        <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
       </label>
       {showIvu && (
         <label className="flex flex-col gap-1">
@@ -528,18 +492,6 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
           </button>
         </label>
       )}
-      {/* Precio a la vista (magia): unitario de la lista + total de la línea + código */}
-      <div className="flex min-w-24 flex-col gap-1 md:items-end">
-        <Lbl>{t("lineTotal")}</Lbl>
-        <span className="text-sm font-semibold tabular-nums">
-          {buscandoPrecio
-            ? "…"
-            : precioEfectivo != null
-              ? money(precioEfectivo * Math.max(1, Math.floor(Number(cant) || 1)))
-              : "—"}
-        </span>
-        {codigo && <span className="text-[10px] font-mono text-muted-foreground">{codigo}</span>}
-      </div>
       <Button type="button" size="sm" className="col-span-2 h-9 md:col-span-1" disabled={!canAdd} onClick={add}>
         {t("add")}
       </Button>

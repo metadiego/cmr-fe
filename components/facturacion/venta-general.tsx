@@ -8,12 +8,20 @@ import { Search01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import { buscarPaciente, crearFactura, type PacienteBusqueda } from "@/lib/api/facturas";
+import { listTiposPrecio, type TipoPrecio } from "@/lib/api/precios";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { getActiveCentro } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Facturación GENERAL — punto de entrada PROPIO y separado (doc §5: dos flujos, dos entradas,
 // nunca mezclados). Aquí se INICIA la venta: buscar paciente → POST /facturas (borrador,
@@ -25,6 +33,13 @@ export function VentaGeneral() {
   const [debounced, setDebounced] = React.useState("");
   const [sel, setSel] = React.useState<PacienteBusqueda | null>(null);
   const [creating, setCreating] = React.useState(false);
+  const [tipoPrecioId, setTipoPrecioId] = React.useState("");
+
+  // Lista de precios de la venta (default = esDefault). Se manda al crear; el server resuelve.
+  const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
+  const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
+  const defaultId = (listas.find((l) => l.esDefault) ?? listas.find((l) => l.clave === "regular"))?.id ?? "";
+  const listaSel = tipoPrecioId || defaultId;
 
   React.useEffect(() => {
     const id = setTimeout(() => setDebounced(q), 300);
@@ -46,7 +61,10 @@ export function VentaGeneral() {
     if (!sel || creating) return;
     setCreating(true);
     try {
-      const f = await crearFactura({ pacienteId: sel.id }, getActiveCentro() ?? undefined);
+      const f = await crearFactura(
+        { pacienteId: sel.id, ...(listaSel ? { tipoPrecioId: listaSel } : {}) },
+        getActiveCentro() ?? undefined,
+      );
       router.push(`/facturacion/${f.id}`);
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -95,6 +113,20 @@ export function VentaGeneral() {
           </button>
         ))}
       </div>
+
+      {listas.length > 0 && (
+        <label className="mb-4 flex flex-col gap-1.5">
+          <span className="text-xs font-medium text-muted-foreground">{t("lista")}</span>
+          <Select value={listaSel} onValueChange={setTipoPrecioId}>
+            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {listas.map((l) => (
+                <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+      )}
 
       <Button className="w-full" onClick={iniciar} disabled={!sel || creating}>
         {creating ? t("creando") : t("iniciar")}

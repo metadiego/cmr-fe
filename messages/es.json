@@ -1272,14 +1272,16 @@
       "noResults": "Sin resultados",
       "iniciar": "Iniciar venta",
       "creando": "Creando…",
-      "sinNombre": "(sin nombre)"
+      "sinNombre": "(sin nombre)",
+      "lista": "Lista de precios"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",
     "titleGeneral": "Facturación general",
     "lista": "Lista",
     "listaPlaceholder": "Regular",
-    "adding": "Agregando…"
+    "adding": "Agregando…",
+    "listaLabel": "Lista: {lista}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
