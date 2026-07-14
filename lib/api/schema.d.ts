@@ -2829,7 +2829,8 @@ export interface paths {
         get: operations["FacturacionController_get_v1"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Descartar un BORRADOR (no emitido): lo borra con sus líneas. Emitida → se anula, no se descarta. */
+        delete: operations["FacturacionController_descartar_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5916,10 +5917,14 @@ export interface components {
         CreateTipoPrecioDto: {
             clave: string;
             nombre: string;
+            /** @description Marca esta lista como la POR DEFECTO (desmarca las demás). */
+            esDefault?: boolean;
         };
         UpdateTipoPrecioDto: {
             nombre?: string;
             activo?: boolean;
+            /** @description Marca esta lista como la POR DEFECTO (desmarca las demás). */
+            esDefault?: boolean;
         };
         CreateMonedaDto: {
             clave: string;
@@ -6858,6 +6863,11 @@ export interface components {
             citaId?: string;
             /** Format: uuid */
             medioId?: string;
+            /**
+             * Format: uuid
+             * @description Lista de precios con la que se factura (tipos_precio.id). Omitido = lista por defecto (esDefault).
+             */
+            tipoPrecioId?: string;
             serie?: string;
             notas?: string;
         };
@@ -6868,6 +6878,7 @@ export interface components {
             medicoId: string | null;
             emisorId: string | null;
             citaId: string | null;
+            tipoPrecioId: string | null;
             medioId: string | null;
             /** @enum {string} */
             estado: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
@@ -6952,6 +6963,8 @@ export interface components {
             descuentoTipo?: "monto" | "porcentaje";
             descuentoValor?: number;
             descuento?: number;
+            /** @description Toggle IVU/exento por línea (override del gravado heredado). El impuesto se recalcula. */
+            gravado?: boolean;
         };
         KitComponenteDto: {
             /** Format: uuid */
@@ -13485,6 +13498,7 @@ export interface operations {
                 tipo?: string;
                 q?: string;
                 contexto?: string;
+                tipoPrecioId?: string;
             };
             header?: never;
             path?: never;
@@ -13497,7 +13511,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProductoEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -13520,6 +13534,25 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    FacturacionController_descartar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -31,6 +31,7 @@ export interface TipoPrecio {
   clave: string;
   nombre?: string;
   activo?: boolean;
+  esDefault?: boolean;
 }
 
 // `tipoPrecioId` = lista concreta (regular/mayorista/…); sin él = precio efectivo.

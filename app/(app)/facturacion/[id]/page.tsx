@@ -426,50 +426,59 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
-  const [precio, setPrecio] = React.useState("");
+  const [precio, setPrecio] = React.useState(""); // override manual (vacío = usa el de la lista)
   const [gravado, setGravado] = React.useState(true);
   const [tipoPrecioId, setTipoPrecioId] = React.useState("");
-  const [resolving, setResolving] = React.useState(false);
   const prod = catalogo.find((p) => p.id === prodId);
-  const canAdd = !!prodId && Number(precio) >= 0 && !disabled && !resolving;
 
-  // Listas de precio (las envía el BE en /precios/tipos). Solo aplican a General.
+  // Listas de precio (las envía el BE en /precios/tipos). Default = esDefault (la que tiene precios).
   const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
   const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
-  const regularId = listas.find((l) => l.clave === "regular")?.id ?? "";
-  const listaSel = tipoPrecioId || regularId; // default = regular
+  const defaultId = (listas.find((l) => l.esDefault) ?? listas.find((l) => l.clave === "regular"))?.id ?? "";
+  const listaSel = tipoPrecioId || defaultId;
 
-  async function add() {
+  // MOSTRAR EL PRECIO: al elegir producto+lista, busca el precio de esa lista (con fallback a
+  // efectivo). useResource re-busca al cambiar producto o lista. "Magia": se ve el precio y su código.
+  const precioRes = useResource<{ precio: number | null; sku: string | null } | null>(
+    () => {
+      const p = catalogo.find((x) => x.id === prodId);
+      if (!p || !listaSel) return Promise.resolve(null);
+      const q = p.sku ?? p.nombre;
+      return listCatalogoPrecios({ tipoPrecioId: listaSel, q, limit: 50 }, centro)
+        .then(async (res) => {
+          let row = res.items.find((r) => r.productoId === p.id) ?? null;
+          if (!row || row.precio == null) {
+            // fallback a precio efectivo (sin lista) — la lista puede no tener precio para este producto
+            const eff = await listCatalogoPrecios({ q, limit: 50 }, centro);
+            row = eff.items.find((r) => r.productoId === p.id) ?? row;
+          }
+          return row ? { precio: row.precio, sku: row.sku } : null;
+        });
+    },
+    [prodId, listaSel],
+  );
+  const buscandoPrecio = precioRes.state.kind === "loading" && !!prodId;
+  const precioLista = precioRes.state.kind === "ok" && precioRes.state.data ? precioRes.state.data.precio : null;
+  const codigo = precioRes.state.kind === "ok" && precioRes.state.data ? precioRes.state.data.sku : (prod?.sku ?? null);
+  // Precio efectivo de la línea: override manual si lo hay; si no, el de la lista.
+  const precioEfectivo = precio.trim() !== "" ? Math.max(0, Number(precio) || 0) : precioLista;
+  const canAdd = !!prodId && !disabled && !buscandoPrecio;
+
+  function add() {
     if (!prod) return;
-    setResolving(true);
-    try {
-      // General: el cajero elige IVU. Consulta: se mantiene el gravado del producto (como antes).
-      const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
-      // Precio VACÍO = auto: el server resuelve el efectivo REGULAR por el centro de la factura.
-      let precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
-      // Lista NO-regular sin override manual → resolvemos el precio de ESA lista y lo mandamos
-      // como precioUnitario (client-side; el server aún no factura por lista → ver
-      // mini-handoff pos-lista-de-precios). En Regular se deja al auto del server.
-      if (precioOverride === undefined && showIvu && listaSel && listaSel !== regularId) {
-        try {
-          const res = await listCatalogoPrecios({ tipoPrecioId: listaSel, q: prod.sku ?? prod.nombre, limit: 50 }, centro);
-          const row = res.items.find((r) => r.productoId === prod.id && r.precio != null);
-          if (row?.precio != null) precioOverride = row.precio;
-        } catch {
-          /* si falla, cae al auto del server (regular) */
-        }
-      }
-      onAdd({
-        productoId: prod.id,
-        descripcion: prod.nombre,
-        cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
-        ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
-        gravado: g,
-      });
-      setProdId(""); setCant("1"); setPrecio(""); setGravado(true); // se mantiene la lista elegida
-    } finally {
-      setResolving(false);
-    }
+    // General: el cajero elige IVU. Consulta: gravado del producto (como antes).
+    const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
+    // Manda el precio que se está MOSTRANDO (override o el de la lista). Si no hay ninguno,
+    // lo omite y el server resuelve el efectivo.
+    const precioUnitario = precioEfectivo != null ? precioEfectivo : undefined;
+    onAdd({
+      productoId: prod.id,
+      descripcion: prod.nombre,
+      cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
+      ...(precioUnitario !== undefined ? { precioUnitario } : {}),
+      gravado: g,
+    });
+    setProdId(""); setCant("1"); setPrecio(""); setGravado(true); // se mantiene la lista elegida
   }
 
   return (
@@ -497,7 +506,14 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
       </label>
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
-        <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
+        <Input
+          value={precio}
+          onChange={(e) => setPrecio(e.target.value)}
+          placeholder={buscandoPrecio ? "…" : precioLista != null ? money(precioLista) : t("priceAuto")}
+          title={t("priceAutoHint")}
+          className="h-9 text-right tabular-nums"
+          inputMode="decimal"
+        />
       </label>
       {showIvu && (
         <label className="flex flex-col gap-1">
@@ -512,8 +528,20 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
           </button>
         </label>
       )}
+      {/* Precio a la vista (magia): unitario de la lista + total de la línea + código */}
+      <div className="flex min-w-24 flex-col gap-1 md:items-end">
+        <Lbl>{t("lineTotal")}</Lbl>
+        <span className="text-sm font-semibold tabular-nums">
+          {buscandoPrecio
+            ? "…"
+            : precioEfectivo != null
+              ? money(precioEfectivo * Math.max(1, Math.floor(Number(cant) || 1)))
+              : "—"}
+        </span>
+        {codigo && <span className="text-[10px] font-mono text-muted-foreground">{codigo}</span>}
+      </div>
       <Button type="button" size="sm" className="col-span-2 h-9 md:col-span-1" disabled={!canAdd} onClick={add}>
-        {resolving ? t("adding") : t("add")}
+        {t("add")}
       </Button>
     </div>
   );
