@@ -107,8 +107,8 @@ export default function FacturacionPage() {
     [refetch, tRoot],
   );
 
-  if (loading) return <p className="mx-auto max-w-5xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
-  if (!factura) return <p className="mx-auto max-w-5xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
+  if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
+  if (!factura) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
 
   const estado = String(factura.estado ?? "");
   // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
@@ -122,7 +122,7 @@ export default function FacturacionPage() {
   const recibo = buildRecibo(factura);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-6">
+    <div className="mx-auto max-w-7xl px-6 py-6">
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {t("back")}</Link>
 
       {/* Cabecera */}
@@ -418,6 +418,10 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   );
 }
 
+function Lbl({ children }: { children: React.ReactNode }) {
+  return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
+}
+
 function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; centro?: string; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
@@ -427,7 +431,6 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
   const [tipoPrecioId, setTipoPrecioId] = React.useState("");
   const [resolving, setResolving] = React.useState(false);
   const prod = catalogo.find((p) => p.id === prodId);
-  const previewTotal = (Math.max(1, Math.floor(Number(cant) || 0)) * Math.max(0, Number(precio) || 0));
   const canAdd = !!prodId && Number(precio) >= 0 && !disabled && !resolving;
 
   // Listas de precio (las envía el BE en /precios/tipos). Solo aplican a General.
@@ -470,42 +473,48 @@ function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Pro
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dashed p-3">
-      <label className="flex min-w-48 flex-1 flex-col gap-1">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("addItem")}</span>
+    <div className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-nowrap">
+      {/* Producto — ocupa el espacio disponible */}
+      <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
+        <Lbl>{t("addItem")}</Lbl>
         <Select value={prodId} onValueChange={setProdId}>
           <SelectTrigger className="w-full"><SelectValue placeholder={t("selectProduct")} /></SelectTrigger>
           <SelectContent>{catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}</SelectContent>
         </Select>
       </label>
       {showIvu && listas.length > 0 && (
-        <label className="flex w-40 flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("lista")}</span>
+        <label className="flex w-full flex-col gap-1 md:w-40">
+          <Lbl>{t("lista")}</Lbl>
           <Select value={listaSel} onValueChange={setTipoPrecioId}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("listaPlaceholder")} /></SelectTrigger>
             <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
           </Select>
         </label>
       )}
-      <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 w-16 text-right tabular-nums" inputMode="numeric" aria-label={t("qty")} />
-      <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 w-24 text-right tabular-nums" inputMode="decimal" aria-label={t("price")} />
+      <label className="flex w-20 flex-col gap-1">
+        <Lbl>{t("qty")}</Lbl>
+        <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 text-right tabular-nums" inputMode="numeric" />
+      </label>
+      <label className="flex w-28 flex-col gap-1">
+        <Lbl>{t("price")}</Lbl>
+        <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
+      </label>
       {showIvu && (
-        <button
-          type="button"
-          onClick={() => setGravado((g) => !g)}
-          className={
-            "h-9 rounded-md border px-2 text-[11px] font-medium " +
-            (gravado ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")
-          }
-          title={t("ivuToggleHint")}
-        >
-          {gravado ? t("ivuGravado") : t("ivuExento")}
-        </button>
+        <label className="flex flex-col gap-1">
+          <Lbl>{t("ivu")}</Lbl>
+          <button
+            type="button"
+            onClick={() => setGravado((g) => !g)}
+            className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravado ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")}
+            title={t("ivuToggleHint")}
+          >
+            {gravado ? t("ivuGravado") : t("ivuExento")}
+          </button>
+        </label>
       )}
-      <span className="min-w-16 pb-2 text-right text-sm font-medium tabular-nums text-muted-foreground">
-        {precio.trim() === "" ? t("priceAuto") : money(previewTotal)}
-      </span>
-      <Button type="button" variant="outline" size="sm" disabled={!canAdd} onClick={add}>{t("add")}</Button>
+      <Button type="button" size="sm" className="col-span-2 h-9 md:col-span-1" disabled={!canAdd} onClick={add}>
+        {resolving ? t("adding") : t("add")}
+      </Button>
     </div>
   );
 }

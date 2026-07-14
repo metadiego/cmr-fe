@@ -1278,7 +1278,8 @@
     "priceAutoHint": "Empty = center price (effective). Type to override.",
     "titleGeneral": "General billing",
     "lista": "List",
-    "listaPlaceholder": "Regular"
+    "listaPlaceholder": "Regular",
+    "adding": "Adding…"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
