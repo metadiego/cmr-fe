@@ -412,7 +412,7 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   );
 }
 
-function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario: number; gravado?: boolean }) => void }) {
+function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
@@ -426,7 +426,16 @@ function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[];
     if (!prod) return;
     // General: el cajero elige IVU. Consulta: se mantiene el gravado del producto (como antes).
     const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
-    onAdd({ productoId: prod.id, descripcion: prod.nombre, cantidad: Math.max(1, Math.floor(Number(cant) || 1)), precioUnitario: Math.max(0, Number(precio) || 0), gravado: g });
+    // Precio VACÍO → no se envía: el server resuelve el precio efectivo (regular, por el centro de la factura).
+    // Solo se envía si el cajero escribió un override.
+    const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
+    onAdd({
+      productoId: prod.id,
+      descripcion: prod.nombre,
+      cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
+      ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
+      gravado: g,
+    });
     setProdId(""); setCant("1"); setPrecio(""); setGravado(true);
   }
 
