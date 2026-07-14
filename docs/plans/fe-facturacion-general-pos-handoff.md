@@ -80,6 +80,13 @@ Patrón shadcn/POS de una sola vista, sin pestañas por tipo:
 5. **Panel de pago single-pane** (efectivo/tarjeta/mixto; cambio; últimos-4) → emitir → cobrar.
 6. Acciones: anular, devolver (total/parcial). Imprimir/recibo (contrato de impresión ya existe).
 
+## ⚠️ Toggle IVU: nace del `gravado` del PRODUCTO (no siempre ON)
+Bug observado: el toggle IVU sale en ON por defecto y se manda `gravado:true` → aplica IVU a productos que
+NO lo llevan (ej. los ULTRA, que son `gravado:false`). **Fix FE:** al seleccionar/agregar un producto, el toggle
+IVU debe inicializarse con el **`producto.gravado`** que devuelve `GET /facturas/catalogo` (true→ON, false/null→OFF).
+El cajero puede cambiarlo puntualmente, pero el default = el `gravado` del producto. Solo los físicos
+(`prod_serv='p'` del legacy, 43 productos) traen `gravado:true`; ULTRA/servicios/kits = false.
+
 ## IVU / exento
 Por **ítem** (toggle `gravado`) + global (`factura.exento`), con herencia del server. El FE solo expone los toggles;
 el server calcula. (Los productos hoy no traen `gravado` fijo → el cajero decide por ítem.)
