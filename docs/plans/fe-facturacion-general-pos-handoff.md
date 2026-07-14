@@ -96,6 +96,14 @@ Campos por componente:
 Notas: se congela **al emitir** (en borrador aún no hay `componentes`). Editar el kit en la factura sigue por
 `PUT /facturas/:id/items/:itemId/kit`. El FE **no** calcula nada: solo lee/pinta `componentes`.
 
+## Precio de la línea + lista de precios
+- El precio se resuelve **server-side al Agregar** (`precioEfectivo` por el centro de la FACTURA; default **regular**:
+  oferta→regular→base). No hace falta que el FE lo calcule; llega en la línea agregada.
+- **Falta (FE):** un **selector de lista de precios** en el POS, con **regular por defecto**. Solo si el negocio
+  quiere facturar con OTRA lista (mayorista/seguro) el FE la elige y pasa `tipoPrecioId`; sin eso, regular.
+- (Opcional) para mostrar el precio en el PREVIEW antes de Agregar, el FE puede pedir `GET /precios/efectivo?
+  presentacionId=` con `X-Tenant-ID` del centro; requiere el presentacionId por defecto del producto.
+
 ## Fuera de alcance
 - Pestañas/filtros por tipo de producto. Comisiones. Cargar productos faltantes (lo hace el BE "al final").
 - La pantalla de Consultas es aparte (ya tiene su contrato: `?contexto=consulta` + `POST /facturas/cita/:citaId`).
