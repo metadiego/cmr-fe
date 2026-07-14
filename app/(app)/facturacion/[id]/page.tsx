@@ -195,6 +195,10 @@ function Editor({
   const serverItems = React.useMemo(() => factura.items ?? [], [factura.items]);
   const estado = String(factura.estado ?? "");
   const esBorrador = estado === "borrador";
+  // General = sin cita (productos/servicios). Consulta = con cita (ya funciona perfecto → no se
+  // toca). Las features del POS general (IVU por ítem, exento, hook de sesiones) SOLO aplican a
+  // general; el editor de consulta queda idéntico a antes. Comparten motor, separadas al facturar.
+  const esGeneral = !factura.citaId;
 
   // Ediciones locales (cantidad/precio) por item → cálculo INSTANTÁNEO al teclear;
   // se persiste al salir del campo. Sembrado del servidor (el padre remonta al guardar).
@@ -266,14 +270,14 @@ function Editor({
                 <th className="px-3 py-2 font-semibold">{t("concept")}</th>
                 <th className="w-20 px-3 py-2 text-right font-semibold">{t("qty")}</th>
                 <th className="w-28 px-3 py-2 text-right font-semibold">{t("price")}</th>
-                <th className="w-20 px-3 py-2 text-center font-semibold">{t("ivu")}</th>
+                {esGeneral && <th className="w-20 px-3 py-2 text-center font-semibold">{t("ivu")}</th>}
                 <th className="w-28 px-3 py-2 text-right font-semibold">{t("lineTotal")}</th>
                 {esBorrador && <th className="w-10 px-3 py-2" />}
               </tr>
             </thead>
             <tbody className="divide-y">
               {serverItems.length === 0 && (
-                <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">{t("noItems")}</td></tr>
+                <tr><td colSpan={4 + (esGeneral ? 1 : 0) + (esBorrador ? 1 : 0)} className="px-3 py-6 text-center text-muted-foreground">{t("noItems")}</td></tr>
               )}
               {serverItems.map((it) => {
                 const e = edits[it.id] ?? { cantidad: n(it.cantidad), precioUnitario: n(it.precioUnitario) };
@@ -300,28 +304,30 @@ function Editor({
                         />
                       ) : <span className="tabular-nums">{money(it.precioUnitario)}</span>}
                     </td>
-                    <td className="px-3 py-2 text-center">
-                      {esBorrador ? (
-                        <button
-                          type="button"
-                          onClick={() => toggleGravado(it)}
-                          disabled={busy}
-                          className={
-                            "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
-                            (it.gravado
-                              ? "bg-sky-500/15 text-sky-600 dark:text-sky-400"
-                              : "bg-muted text-muted-foreground")
-                          }
-                          title={t("ivuToggleHint")}
-                        >
-                          {it.gravado ? t("ivuGravado") : t("ivuExento")}
-                        </button>
-                      ) : (
-                        <span className="text-[11px] text-muted-foreground">
-                          {it.gravado ? t("ivuGravado") : t("ivuExento")}
-                        </span>
-                      )}
-                    </td>
+                    {esGeneral && (
+                      <td className="px-3 py-2 text-center">
+                        {esBorrador ? (
+                          <button
+                            type="button"
+                            onClick={() => toggleGravado(it)}
+                            disabled={busy}
+                            className={
+                              "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
+                              (it.gravado
+                                ? "bg-sky-500/15 text-sky-600 dark:text-sky-400"
+                                : "bg-muted text-muted-foreground")
+                            }
+                            title={t("ivuToggleHint")}
+                          >
+                            {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">
+                            {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                          </span>
+                        )}
+                      </td>
+                    )}
                     <td className="px-3 py-2 text-right font-medium tabular-nums">{money(lineTotal(it))}</td>
                     {esBorrador && (
                       <td className="px-3 py-2 text-right">
@@ -335,7 +341,7 @@ function Editor({
           </table>
         </div>
 
-        {esBorrador && <AddItem catalogo={catalogo} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
+        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
       </section>
 
       {/* Resumen + acciones */}
@@ -357,7 +363,7 @@ function Editor({
           <DescuentoGlobal disabled={busy} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
         )}
 
-        {esBorrador && (
+        {esBorrador && esGeneral && (
           <label className="flex items-center justify-between rounded-xl border px-4 py-3">
             <span className="text-sm">{t("exentoLabel")}</span>
             <input
@@ -370,7 +376,7 @@ function Editor({
           </label>
         )}
 
-        {!esBorrador && sesionesPorEntregar > 0 && (
+        {!esBorrador && esGeneral && sesionesPorEntregar > 0 && (
           <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-sm text-sky-700 dark:text-sky-400">
             {t("sesionesPorEntregar", { n: sesionesPorEntregar })}
           </div>
@@ -406,7 +412,7 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   );
 }
 
-function AddItem({ catalogo, disabled, onAdd }: { catalogo: Producto[]; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario: number; gravado?: boolean }) => void }) {
+function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario: number; gravado?: boolean }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
@@ -418,7 +424,9 @@ function AddItem({ catalogo, disabled, onAdd }: { catalogo: Producto[]; disabled
 
   function add() {
     if (!prod) return;
-    onAdd({ productoId: prod.id, descripcion: prod.nombre, cantidad: Math.max(1, Math.floor(Number(cant) || 1)), precioUnitario: Math.max(0, Number(precio) || 0), gravado });
+    // General: el cajero elige IVU. Consulta: se mantiene el gravado del producto (como antes).
+    const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
+    onAdd({ productoId: prod.id, descripcion: prod.nombre, cantidad: Math.max(1, Math.floor(Number(cant) || 1)), precioUnitario: Math.max(0, Number(precio) || 0), gravado: g });
     setProdId(""); setCant("1"); setPrecio(""); setGravado(true);
   }
 
@@ -433,17 +441,19 @@ function AddItem({ catalogo, disabled, onAdd }: { catalogo: Producto[]; disabled
       </label>
       <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 w-16 text-right tabular-nums" inputMode="numeric" aria-label={t("qty")} />
       <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="0.00" className="h-9 w-24 text-right tabular-nums" inputMode="decimal" aria-label={t("price")} />
-      <button
-        type="button"
-        onClick={() => setGravado((g) => !g)}
-        className={
-          "h-9 rounded-md border px-2 text-[11px] font-medium " +
-          (gravado ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")
-        }
-        title={t("ivuToggleHint")}
-      >
-        {gravado ? t("ivuGravado") : t("ivuExento")}
-      </button>
+      {showIvu && (
+        <button
+          type="button"
+          onClick={() => setGravado((g) => !g)}
+          className={
+            "h-9 rounded-md border px-2 text-[11px] font-medium " +
+            (gravado ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")
+          }
+          title={t("ivuToggleHint")}
+        >
+          {gravado ? t("ivuGravado") : t("ivuExento")}
+        </button>
+      )}
       <span className="min-w-16 pb-2 text-right text-sm font-medium tabular-nums text-muted-foreground">{money(previewTotal)}</span>
       <Button type="button" variant="outline" size="sm" disabled={!canAdd} onClick={add}>{t("add")}</Button>
     </div>
