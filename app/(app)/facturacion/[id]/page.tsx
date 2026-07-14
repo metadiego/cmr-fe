@@ -21,7 +21,7 @@ import {
   type Producto,
   type FormaPago,
 } from "@/lib/api/facturas";
-import { listTiposPrecio, type TipoPrecio } from "@/lib/api/precios";
+import { listTiposPrecio, listImpuestos, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { useResource } from "@/hooks/use-resource";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
@@ -213,6 +213,14 @@ function Editor({
     listasRes.state.kind === "ok"
       ? (listasRes.state.data.find((l) => l.id === (factura as { tipoPrecioId?: string }).tipoPrecioId)?.nombre ?? null)
       : null;
+  // IVU activo: el BE calcula el impuesto SOLO si el ítem lleva impuestoId → lo mandamos cuando
+  // la línea es gravada (el cajero decide con el toggle IVU). Sin él, gravado no hace nada.
+  const impuestosRes = useResource<Impuesto[]>(() => listImpuestos(), []);
+  const ivuId =
+    impuestosRes.state.kind === "ok"
+      ? (impuestosRes.state.data.find((i) => i.esDefault && i.activo)?.id ??
+         impuestosRes.state.data.find((i) => i.activo)?.id ?? null)
+      : null;
 
   // Ediciones locales (cantidad/precio) por item → cálculo INSTANTÁNEO al teclear;
   // se persiste al salir del campo. Sembrado del servidor (el padre remonta al guardar).
@@ -249,6 +257,7 @@ function Editor({
   // tiene) → borramos y re-agregamos con el gravado invertido. Ver mini-handoff BE
   // (pos-item-gravado-y-descartar-borrador). Cuando BE lo agregue al PUT, será un PUT directo.
   function toggleGravado(it: FacturaItem) {
+    const nuevoGravado = !it.gravado;
     run(async () => {
       await eliminarItem(id, it.id, centro);
       await agregarItem(
@@ -258,7 +267,9 @@ function Editor({
           descripcion: it.descripcion,
           cantidad: n(it.cantidad),
           precioUnitario: n(it.precioUnitario),
-          gravado: !it.gravado,
+          gravado: nuevoGravado,
+          // IVU solo si queda gravado (el BE necesita impuestoId para calcularlo).
+          ...(nuevoGravado && ivuId ? { impuestoId: ivuId } : {}),
         },
         centro,
       );
@@ -362,7 +373,7 @@ function Editor({
           </table>
         </div>
 
-        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
+        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} ivuId={ivuId} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
       </section>
 
       {/* Resumen + acciones */}
@@ -437,7 +448,7 @@ function Lbl({ children }: { children: React.ReactNode }) {
   return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
 }
 
-function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
+function AddItem({ catalogo, showIvu, ivuId, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
@@ -458,6 +469,8 @@ function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[];
       cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
       ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
       gravado: g,
+      // IVU: el BE calcula el monto solo si mandamos impuestoId; lo enviamos cuando es gravado.
+      ...(g && ivuId ? { impuestoId: ivuId } : {}),
     });
     setProdId(""); setCant("1"); setPrecio(""); setGravado(true);
   }

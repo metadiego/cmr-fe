@@ -68,6 +68,20 @@ export function listTiposPrecio(): Promise<TipoPrecio[]> {
   return apiFetch<TipoPrecio[]>(`/precios/tipos`);
 }
 
+// Impuestos (IVU). El BE calcula el monto SOLO si el ítem lleva impuestoId → el FE manda
+// el IVU activo cuando la línea es gravada. Verificado: 9000 × 11.5% = 1035.
+export interface Impuesto {
+  id: string;
+  clave: string;
+  nombre?: string;
+  tasa?: number;
+  activo?: boolean;
+  esDefault?: boolean;
+}
+export function listImpuestos(): Promise<Impuesto[]> {
+  return apiFetch<Impuesto[]>(`/precios/impuestos`);
+}
+
 export type CreateTipoPrecioPayload = components["schemas"]["CreateTipoPrecioDto"];
 export type UpdateTipoPrecioPayload = components["schemas"]["UpdateTipoPrecioDto"];
 export function createTipoPrecio(payload: CreateTipoPrecioPayload): Promise<TipoPrecio> {
