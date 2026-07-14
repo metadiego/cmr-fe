@@ -17,6 +17,8 @@ pantalla que haga "ambos según un flag".
 - El catálogo de **General NUNCA** muestra Consulta/Seguimiento; el de **Consultas NUNCA** muestra productos.
 - (Clasificaciones producto/láser/suero = **internas**, no pestañas: dentro de General todo va en **un solo select**.)
 - Comisiones = **FUERA**.
+- ⚠️ **NO romper el shortcut existente de Atención** ("Facturar Consulta" en el AP-board → crea/abre la factura de
+  consulta). Ese flujo YA funciona y se queda **tal cual**. General se agrega como entrada NUEVA, sin tocarlo.
 
 > Reglas: `response.data`+`meta.pagination`; `Bearer`+`X-Tenant-ID`; whitelist estricto (param no doc = 400); i18n
 > `labelKey`; `can()` por permiso; estados loading/vacío/error; **NO duplicar** (compartir el motor/componente y `lib/api/*`).
