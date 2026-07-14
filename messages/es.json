@@ -1273,7 +1273,9 @@
       "iniciar": "Iniciar venta",
       "creando": "Creando…",
       "sinNombre": "(sin nombre)"
-    }
+    },
+    "priceAuto": "auto",
+    "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

@@ -449,7 +449,7 @@ function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[];
         </Select>
       </label>
       <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 w-16 text-right tabular-nums" inputMode="numeric" aria-label={t("qty")} />
-      <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="0.00" className="h-9 w-24 text-right tabular-nums" inputMode="decimal" aria-label={t("price")} />
+      <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 w-24 text-right tabular-nums" inputMode="decimal" aria-label={t("price")} />
       {showIvu && (
         <button
           type="button"
@@ -463,7 +463,9 @@ function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[];
           {gravado ? t("ivuGravado") : t("ivuExento")}
         </button>
       )}
-      <span className="min-w-16 pb-2 text-right text-sm font-medium tabular-nums text-muted-foreground">{money(previewTotal)}</span>
+      <span className="min-w-16 pb-2 text-right text-sm font-medium tabular-nums text-muted-foreground">
+        {precio.trim() === "" ? t("priceAuto") : money(previewTotal)}
+      </span>
       <Button type="button" variant="outline" size="sm" disabled={!canAdd} onClick={add}>{t("add")}</Button>
     </div>
   );

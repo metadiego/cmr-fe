@@ -1273,7 +1273,9 @@
       "iniciar": "Start sale",
       "creando": "Creating…",
       "sinNombre": "(no name)"
-    }
+    },
+    "priceAuto": "auto",
+    "priceAutoHint": "Empty = center price (effective). Type to override."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
