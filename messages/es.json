@@ -1276,7 +1276,9 @@
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",
-    "titleGeneral": "Facturación general"
+    "titleGeneral": "Facturación general",
+    "lista": "Lista",
+    "listaPlaceholder": "Regular"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

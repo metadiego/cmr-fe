@@ -21,6 +21,8 @@ import {
   type Producto,
   type FormaPago,
 } from "@/lib/api/facturas";
+import { listTiposPrecio, listCatalogoPrecios, type TipoPrecio } from "@/lib/api/precios";
+import { useResource } from "@/hooks/use-resource";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
@@ -345,7 +347,7 @@ function Editor({
           </table>
         </div>
 
-        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
+        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} centro={centro} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
       </section>
 
       {/* Resumen + acciones */}
@@ -416,31 +418,55 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
   );
 }
 
-function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
+function AddItem({ catalogo, showIvu, centro, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; centro?: string; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
   const [precio, setPrecio] = React.useState("");
   const [gravado, setGravado] = React.useState(true);
+  const [tipoPrecioId, setTipoPrecioId] = React.useState("");
+  const [resolving, setResolving] = React.useState(false);
   const prod = catalogo.find((p) => p.id === prodId);
   const previewTotal = (Math.max(1, Math.floor(Number(cant) || 0)) * Math.max(0, Number(precio) || 0));
-  const canAdd = !!prodId && Number(precio) >= 0 && !disabled;
+  const canAdd = !!prodId && Number(precio) >= 0 && !disabled && !resolving;
 
-  function add() {
+  // Listas de precio (las envía el BE en /precios/tipos). Solo aplican a General.
+  const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
+  const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
+  const regularId = listas.find((l) => l.clave === "regular")?.id ?? "";
+  const listaSel = tipoPrecioId || regularId; // default = regular
+
+  async function add() {
     if (!prod) return;
-    // General: el cajero elige IVU. Consulta: se mantiene el gravado del producto (como antes).
-    const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
-    // Precio VACÍO → no se envía: el server resuelve el precio efectivo (regular, por el centro de la factura).
-    // Solo se envía si el cajero escribió un override.
-    const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
-    onAdd({
-      productoId: prod.id,
-      descripcion: prod.nombre,
-      cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
-      ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
-      gravado: g,
-    });
-    setProdId(""); setCant("1"); setPrecio(""); setGravado(true);
+    setResolving(true);
+    try {
+      // General: el cajero elige IVU. Consulta: se mantiene el gravado del producto (como antes).
+      const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
+      // Precio VACÍO = auto: el server resuelve el efectivo REGULAR por el centro de la factura.
+      let precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
+      // Lista NO-regular sin override manual → resolvemos el precio de ESA lista y lo mandamos
+      // como precioUnitario (client-side; el server aún no factura por lista → ver
+      // mini-handoff pos-lista-de-precios). En Regular se deja al auto del server.
+      if (precioOverride === undefined && showIvu && listaSel && listaSel !== regularId) {
+        try {
+          const res = await listCatalogoPrecios({ tipoPrecioId: listaSel, q: prod.sku ?? prod.nombre, limit: 50 }, centro);
+          const row = res.items.find((r) => r.productoId === prod.id && r.precio != null);
+          if (row?.precio != null) precioOverride = row.precio;
+        } catch {
+          /* si falla, cae al auto del server (regular) */
+        }
+      }
+      onAdd({
+        productoId: prod.id,
+        descripcion: prod.nombre,
+        cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
+        ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
+        gravado: g,
+      });
+      setProdId(""); setCant("1"); setPrecio(""); setGravado(true); // se mantiene la lista elegida
+    } finally {
+      setResolving(false);
+    }
   }
 
   return (
@@ -452,6 +478,15 @@ function AddItem({ catalogo, showIvu, disabled, onAdd }: { catalogo: Producto[];
           <SelectContent>{catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}</SelectContent>
         </Select>
       </label>
+      {showIvu && listas.length > 0 && (
+        <label className="flex w-40 flex-col gap-1">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("lista")}</span>
+          <Select value={listaSel} onValueChange={setTipoPrecioId}>
+            <SelectTrigger className="w-full"><SelectValue placeholder={t("listaPlaceholder")} /></SelectTrigger>
+            <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
+          </Select>
+        </label>
+      )}
       <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 w-16 text-right tabular-nums" inputMode="numeric" aria-label={t("qty")} />
       <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 w-24 text-right tabular-nums" inputMode="decimal" aria-label={t("price")} />
       {showIvu && (
