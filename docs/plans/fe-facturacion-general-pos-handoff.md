@@ -69,6 +69,18 @@ Patrón shadcn/POS de una sola vista, sin pestañas por tipo:
 Por **ítem** (toggle `gravado`) + global (`factura.exento`), con herencia del server. El FE solo expone los toggles;
 el server calcula. (Los productos hoy no traen `gravado` fijo → el cajero decide por ítem.)
 
+## Componentes de kit — snapshot congelado (para el FE)
+`GET /facturas/:id` incluye **`componentes: []`** (solo en facturas **emitidas**). Es el detalle congelado de qué
+llevó cada línea de kit — para reimprimir/mostrar y como origen de la entrega en frontdesk. **Agrupar por `facturaItemId`.**
+Campos por componente:
+- `facturaItemId`, `facturaId`, `productoId`, `cantidad` (total congelado).
+- `origen`: `receta` (no editado) | `editado` (personalizado en esa factura) → así el FE muestra si se editó.
+- `esInventariable` (bool), `modoDescarga` (`a_la_venta`|`a_la_entrega`|`no_descarga`).
+- `dosis`, `sesiones` (hoy null; se poblarán con láser/suero).
+
+Notas: se congela **al emitir** (en borrador aún no hay `componentes`). Editar el kit en la factura sigue por
+`PUT /facturas/:id/items/:itemId/kit`. El FE **no** calcula nada: solo lee/pinta `componentes`.
+
 ## Fuera de alcance
 - Pestañas/filtros por tipo de producto. Comisiones. Cargar productos faltantes (lo hace el BE "al final").
 - La pantalla de Consultas es aparte (ya tiene su contrato: `?contexto=consulta` + `POST /facturas/cita/:citaId`).
