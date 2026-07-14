@@ -21,7 +21,7 @@ import {
   type Producto,
   type FormaPago,
 } from "@/lib/api/facturas";
-import { listTiposPrecio, listImpuestos, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
+import { listTiposPrecio, listImpuestos, listCatalogoPrecios, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { useResource } from "@/hooks/use-resource";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
@@ -373,7 +373,17 @@ function Editor({
           </table>
         </div>
 
-        {esBorrador && <AddItem catalogo={catalogo} showIvu={esGeneral} ivuId={ivuId} disabled={busy} onAdd={(p) => run(() => agregarItem(id, p, centro))} />}
+        {esBorrador && (
+          <AddItem
+            catalogo={catalogo}
+            showIvu={esGeneral}
+            ivuId={ivuId}
+            tipoPrecioId={(factura as { tipoPrecioId?: string }).tipoPrecioId ?? null}
+            tenant={(factura as { clinicId?: string }).clinicId ?? centro ?? null}
+            disabled={busy}
+            onAdd={(p) => run(() => agregarItem(id, p, centro))}
+          />
+        )}
       </section>
 
       {/* Resumen + acciones */}
@@ -448,14 +458,38 @@ function Lbl({ children }: { children: React.ReactNode }) {
   return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
 }
 
-function AddItem({ catalogo, showIvu, ivuId, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string }) => void }) {
+function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string }) => void }) {
   const t = useTranslations("facturacion");
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
   const [precio, setPrecio] = React.useState(""); // override manual (vacío = precio de la lista de la factura)
   const [gravado, setGravado] = React.useState(true);
   const prod = catalogo.find((p) => p.id === prodId);
-  const canAdd = !!prodId && !disabled;
+
+  // PREVIEW DEL PRECIO: al elegir el producto, busca el precio de la LISTA de la factura
+  // (con el centro de la factura → robusto; fallback a efectivo). Se muestra en el campo.
+  const precioRes = useResource<number | null>(
+    () => {
+      const p = catalogo.find((x) => x.id === prodId);
+      if (!p) return Promise.resolve(null);
+      const q = p.sku ?? p.nombre;
+      const opts = tipoPrecioId ? { tipoPrecioId, q, limit: 50 } : { q, limit: 50 };
+      return listCatalogoPrecios(opts, tenant ?? undefined).then(async (res) => {
+        let row = res.items.find((r) => r.productoId === p.id) ?? null;
+        if (!row || row.precio == null) {
+          const eff = await listCatalogoPrecios({ q, limit: 50 }, tenant ?? undefined);
+          row = eff.items.find((r) => r.productoId === p.id) ?? row;
+        }
+        return row?.precio ?? null;
+      });
+    },
+    [prodId, tipoPrecioId, tenant],
+  );
+  const buscando = precioRes.state.kind === "loading" && !!prodId;
+  const precioLista = precioRes.state.kind === "ok" ? precioRes.state.data : null;
+  // Lo que se muestra en el campo: override si el cajero escribió; si no, el precio de la lista.
+  const precioMostrado = precio !== "" ? precio : precioLista != null ? String(precioLista) : "";
+  const canAdd = !!prodId && !disabled && !buscando;
 
   function add() {
     if (!prod) return;
@@ -490,7 +524,7 @@ function AddItem({ catalogo, showIvu, ivuId, disabled, onAdd }: { catalogo: Prod
       </label>
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
-        <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder={t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
+        <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
       </label>
       {showIvu && (
         <label className="flex flex-col gap-1">
