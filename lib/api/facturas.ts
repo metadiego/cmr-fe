@@ -10,6 +10,9 @@ export type FormaPago = components["schemas"]["FormaPagoEntity"];
 export type AgregarItemPayload = components["schemas"]["AgregarItemDto"];
 export type RegistrarPagoPayload = components["schemas"]["RegistrarPagoDto"];
 export type DescuentoGlobalPayload = components["schemas"]["DescuentoGlobalDto"];
+export type CrearFacturaPayload = components["schemas"]["CreateFacturaDto"];
+export type DescuentosGrupoPayload = components["schemas"]["DescuentosGrupoDto"];
+export type SetExentoPayload = components["schemas"]["SetExentoDto"];
 
 // Bloque fiscal por sucursal, proyectado en la factura (getById) y en
 // GET /centros/:id/datos-fiscales. Configurable/multi-tenant; campos null = sin dato.
@@ -84,6 +87,30 @@ export function listFacturas(
 // devuelve la misma). Trae la línea de consulta del producto del tipo_cita.
 export function facturarCita(citaId: string, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/cita/${citaId}`, { method: "POST" }, centroId);
+}
+
+// POS GENERAL: crear un borrador desde un paciente (sin cita). El catálogo será el general
+// (sin `contexto`). El borrador no toca stock hasta emitir.
+export function crearFactura(payload: CrearFacturaPayload, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+
+// Búsqueda de paciente para el POS (nombre/record/doc). Devuelve entidades de paciente.
+export type PacienteBusqueda = components["schemas"]["PacienteEntity"];
+export function buscarPaciente(q: string, centroId?: string): Promise<PacienteBusqueda[]> {
+  return apiFetch<PacienteBusqueda[]>(
+    `/facturas/buscar-paciente?q=${encodeURIComponent(q)}`,
+    {},
+    centroId,
+  );
+}
+
+// Descuentos nivel 2 (por grupo/categoría) y exento de cabecera (nivel factura).
+export function setDescuentosGrupo(facturaId: string, payload: DescuentosGrupoPayload, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas/${facturaId}/descuentos-grupo`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+export function setExento(facturaId: string, payload: SetExentoPayload, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas/${facturaId}/exento`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
 
 export function getFactura(id: string, centroId?: string): Promise<FacturaConItems> {

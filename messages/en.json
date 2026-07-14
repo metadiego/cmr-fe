@@ -1255,7 +1255,25 @@
     "payMethod": "Payment method",
     "cardLast4": "Card last 4 (optional)",
     "registerPayment": "Register",
-    "fullyPaid": "Fully paid"
+    "fullyPaid": "Fully paid",
+    "ivu": "Tax",
+    "ivuGravado": "Tax",
+    "ivuExento": "Exempt",
+    "ivuToggleHint": "Toggle tax/exempt for this line",
+    "exentoLabel": "Invoice tax-exempt",
+    "sesionesPorEntregar": "This sale created {n} session(s) to deliver (frontdesk).",
+    "nuevaVenta": {
+      "trigger": "New sale",
+      "title": "New general sale",
+      "help": "Search the patient to start the invoice.",
+      "searchPlaceholder": "Name, record or ID…",
+      "searching": "Searching…",
+      "hint": "Type at least 2 characters.",
+      "noResults": "No results",
+      "iniciar": "Start sale",
+      "creando": "Creating…",
+      "sinNombre": "(no name)"
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

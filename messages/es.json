@@ -1255,7 +1255,25 @@
     "payMethod": "Forma de pago",
     "cardLast4": "Últimos 4 de la tarjeta (opcional)",
     "registerPayment": "Registrar",
-    "fullyPaid": "Pagada por completo"
+    "fullyPaid": "Pagada por completo",
+    "ivu": "IVU",
+    "ivuGravado": "IVU",
+    "ivuExento": "Exento",
+    "ivuToggleHint": "Alternar IVU/Exento de esta línea",
+    "exentoLabel": "Factura exenta de IVU",
+    "sesionesPorEntregar": "Esta venta generó {n} sesión(es) por entregar (frontdesk).",
+    "nuevaVenta": {
+      "trigger": "Nueva venta",
+      "title": "Nueva venta general",
+      "help": "Busca el paciente para iniciar la factura.",
+      "searchPlaceholder": "Nombre, record o ID…",
+      "searching": "Buscando…",
+      "hint": "Escribe al menos 2 caracteres.",
+      "noResults": "Sin resultados",
+      "iniciar": "Iniciar venta",
+      "creando": "Creando…",
+      "sinNombre": "(sin nombre)"
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
