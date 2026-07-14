@@ -7,11 +7,36 @@
 > `labelKey`; `can()` por permiso; estados loading/vacío/error; **NO duplicar** (reusar `lib/api/*` y el editor de
 > factura que YA existe en `/facturacion/[id]`).
 
-## Estado BE (verificado 2026-07-14)
-- **`GET /facturas/catalogo`** (sin `contexto`) = el "un solo select": devuelve TODOS los productos de división
-  `general` (los de consulta quedan fuera). Gate RBAC `factura.division.general`.
-- `GET /facturas/catalogo?contexto=consulta` = solo Consulta/Seguimiento (pantalla aparte; NO mezclar).
-- Todo el flujo POS existe: crear→líneas(+kit)→descuentos→IVU/exento por ítem→emitir(descarga inventario)→pagos→anular/devolver.
+## Estado real (revisado con FE 2026-07-14 — corrige la v1 de este handoff)
+El editor `/facturacion/[id]` ya es ~70% el POS single-pane (grilla, totales sticky, descuento global, emitir,
+pago, y el **select de catálogo general** cuando `!citaId`). Es decir: **el "un solo select" YA EXISTE** — NO es
+el cambio principal (la v1 de este doc lo sobredimensionó). **Reusar el editor tal cual.**
+
+**El DELTA real (esto es lo que falta, todo FE sobre endpoints que YA existen — NO hay hueco de BE):**
+1. **Punto de creación (el hueco grande):** hoy NO se puede crear una factura general. Consulta se crea desde el
+   AP-board (`facturarCita`); General necesita **nueva pantalla "Venta / factura general"**: buscar paciente →
+   `POST /facturas` → abrir el editor. Faltan las funciones de cliente `crearFactura`/`buscarPaciente`.
+2. **Descuentos 3 niveles + IVU por ítem:** el editor solo tiene descuento GLOBAL. Falta cablear descuento por
+   grupo, exento de cabecera, y el **toggle IVU/exento por línea** (`gravado`) en la grilla.
+3. **Funciones de cliente faltantes** (todas contra endpoints existentes):
+
+| Función FE | Endpoint BE (verificado, existe) |
+|---|---|
+| crearFactura | `POST /facturas` |
+| buscarPaciente | `GET /facturas/buscar-paciente` |
+| setDescuentosGrupo | `PUT /facturas/:id/descuentos-grupo` |
+| setExento (cabecera) | `PUT /facturas/:id/exento` |
+| IVU/exento por línea | `gravado` en `POST/PUT /facturas/:id/items(/:itemId)` |
+| pagosMultiple | `POST /facturas/:id/pagos/multiple` |
+| devolver / devoluciones | `POST /facturas/:id/devolver` · `GET /facturas/:id/devoluciones` |
+
+- Catálogo (el select, ya en uso): `GET /facturas/catalogo` (sin `contexto` = general; consulta excluida).
+- Flujo base ya operativo: crear→líneas(+kit)→emitir(descarga inventario)→pagos→anular. Consulta NO se toca.
+
+## Plan aprobado (del FE, aditivo, sin duplicar, consulta intacta)
+(a) Nueva "Venta / factura general" desde `/facturacion` (buscar paciente → `POST /facturas` → editor existente).
+(b) Extender la grilla del editor: toggle IVU/exento por ítem + descuento por grupo + exento de cabecera (3 niveles).
+(c) Agregar las funciones de cliente faltantes (tabla de arriba). Todo directo sobre `/facturas`.
 
 ## Contrato (endpoints reales, base `/api/v1/facturas`)
 - Buscar paciente: `GET /facturas/buscar-paciente?...`
@@ -19,9 +44,11 @@
 - Catálogo (el select): `GET /facturas/catalogo?q=` (sin `contexto` = general).
 - Líneas: `POST /facturas/:id/items` `{ productoId, cantidad, ... }` · `PUT /facturas/:id/items/:itemId` ·
   `DELETE .../items/:itemId` · `PUT .../items/:itemId/kit` (editar receta del kit en la línea).
-- **Columnas de captura por producto**: `GET /facturas/columnas?productoId=` → si el producto tiene multiplicadores
-  (áreas/días/sesiones/dosis) el server los declara; el FE pinta esos campos y los manda en el item. Hoy la mayoría
-  no tiene → solo cantidad×precio. (Se agregan como dato cuando entren láser/suero; el FE ya debe leerlas genéricas.)
+- **Columnas de captura por producto** (CORREGIDO — la v1 citó mal `/facturas/columnas`): el endpoint real es
+  **`GET /facturacion/columnas?productoId=`** (→ `esquemaPorProducto`; existe HOY, no es a futuro). Devuelve el
+  esquema de columnas de línea; si el producto tiene multiplicadores (áreas/días/sesiones/dosis) el server los
+  declara y el FE los pinta + los manda en el item. Hoy la mayoría no tiene → cantidad×precio (se agregan como dato
+  cuando entren láser/suero). También `GET /facturacion/columnas?grupo=` y `GET /facturacion/divisiones`.
 - Descuentos: `PUT /facturas/:id/descuento-global` · `.../descuentos-grupo` · `.../exento` (3 niveles).
 - **Emitir** (aquí descarga inventario): `POST /facturas/:id/emitir`.
 - Pagos: `POST /facturas/:id/pagos` (+ `/multiple`) · `GET .../pagos/resumen`. Anular/devolver: `.../anular`,
