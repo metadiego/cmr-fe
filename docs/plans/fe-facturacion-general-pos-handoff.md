@@ -96,6 +96,14 @@ Campos por componente:
 Notas: se congela **al emitir** (en borrador aún no hay `componentes`). Editar el kit en la factura sigue por
 `PUT /facturas/:id/items/:itemId/kit`. El FE **no** calcula nada: solo lee/pinta `componentes`.
 
+## Precio en el catálogo + selector de lista (SIMPLE — ya resuelto en BE)
+- **`GET /facturas/catalogo`** ahora devuelve por producto: **`precio`** (ya resuelto por el centro activo; default
+  **regular**) + **`presentacionId`**. El FE **solo lo muestra** — no resuelve precio aparte. (Enviar `X-Tenant-ID`
+  del centro: los precios son por centro.)
+- **Selector de lista de precios:** **`GET /precios/tipos`** → lista de tipos (regular/mayorista/seguro…). El FE
+  arma el `<select>` con **regular por defecto**; al cambiarlo, refetch del catálogo con **`?tipoPrecioId=<id>`**.
+- Al Agregar la línea: manda `precioUnitario` SOLO si el cajero lo sobrescribe; si no, el server usa el efectivo.
+
 ## Precio de la línea + lista de precios
 - El precio se resuelve **server-side al Agregar** (`precioEfectivo` por el centro de la FACTURA; default **regular**:
   oferta→regular→base). No hace falta que el FE lo calcule; llega en la línea agregada.

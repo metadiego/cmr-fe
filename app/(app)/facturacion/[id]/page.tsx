@@ -109,6 +109,10 @@ export default function FacturacionPage() {
   if (!factura) return <p className="mx-auto max-w-5xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
 
   const estado = String(factura.estado ?? "");
+  // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
+  // El encabezado y el "Volver" deben reflejarlo (no mezclar: una venta general NO dice "Facturar consulta").
+  const esGeneral = !factura.citaId;
+  const backHref = esGeneral ? "/facturacion" : "/tablero/atencion";
   const nombre = paciente ? [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ") : "";
   const record = paciente?.record ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
@@ -117,12 +121,12 @@ export default function FacturacionPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-6">
-      <Link href="/tablero/atencion" className="text-sm text-muted-foreground hover:text-foreground">← {t("back")}</Link>
+      <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {t("back")}</Link>
 
       {/* Cabecera */}
       <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
         <div className="min-w-0 flex-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("title")}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
           <h1 className="truncate text-xl font-semibold tracking-tight">{nombre || t("patient")}</h1>
           {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
         </div>

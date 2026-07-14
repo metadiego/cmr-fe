@@ -1275,7 +1275,8 @@
       "sinNombre": "(no name)"
     },
     "priceAuto": "auto",
-    "priceAutoHint": "Empty = center price (effective). Type to override."
+    "priceAutoHint": "Empty = center price (effective). Type to override.",
+    "titleGeneral": "General billing"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

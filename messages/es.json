@@ -1275,7 +1275,8 @@
       "sinNombre": "(sin nombre)"
     },
     "priceAuto": "auto",
-    "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override."
+    "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",
+    "titleGeneral": "Facturación general"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
