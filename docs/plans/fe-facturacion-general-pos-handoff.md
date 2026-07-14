@@ -1,16 +1,29 @@
-# Handoff FE — POS de Facturación GENERAL (una pantalla, un solo select)
+# Handoff FE — POS de Facturación GENERAL
 
 > **De:** BE (cmr-be). **Para:** cmr-fe. **Fecha:** 2026-07-14. **BE en prod y funcional.**
-> Decisiones del dueño: **comisiones FUERA**; clasificaciones (producto/láser/suero) **INTERNAS** (nunca pestañas);
-> **UNA pantalla, UN solo `select`** con todo junto; **General ≠ Consultas** (mismo motor, no se mezclan).
-> Reglas: `response.data`+`meta.pagination`; `Bearer`+`X-Tenant-ID`; whitelist estricto (param no doc = 400); i18n
-> `labelKey`; `can()` por permiso; estados loading/vacío/error; **NO duplicar** (reusar `lib/api/*` y el editor de
-> factura que YA existe en `/facturacion/[id]`).
 
-## Estado real (revisado con FE 2026-07-14 — corrige la v1 de este handoff)
-El editor `/facturacion/[id]` ya es ~70% el POS single-pane (grilla, totales sticky, descuento global, emitir,
-pago, y el **select de catálogo general** cuando `!citaId`). Es decir: **el "un solo select" YA EXISTE** — NO es
-el cambio principal (la v1 de este doc lo sobredimensionó). **Reusar el editor tal cual.**
+## ⛔ LO PRIMERO — NO MEZCLAR: son DOS facturaciones SEPARADAS
+Hay **DOS flujos distintos, con DOS puntos de entrada distintos**. Comparten el **motor** (el mismo componente
+editor de factura por debajo), pero el usuario **NUNCA** los ve mezclados. No hay selector combinado, no hay una
+pantalla que haga "ambos según un flag".
+
+| | **Facturación de CONSULTAS** | **Facturación GENERAL** |
+|---|---|---|
+| Qué factura | la consulta médica (Consulta / Seguimiento) | productos + láser + suero (todo junto) |
+| Punto de entrada | AP-board → "Facturar Consulta" (`POST /facturas/cita/:citaId`) | pantalla **"Nueva venta"** → buscar paciente → `POST /facturas` |
+| Catálogo (el select) | `GET /facturas/catalogo?contexto=consulta` → **SOLO** Consulta/Seguimiento | `GET /facturas/catalogo` (sin contexto) → **SOLO** productos/láser/suero |
+| Se mezclan | **NO** | **NO** |
+
+- El catálogo de **General NUNCA** muestra Consulta/Seguimiento; el de **Consultas NUNCA** muestra productos.
+- (Clasificaciones producto/láser/suero = **internas**, no pestañas: dentro de General todo va en **un solo select**.)
+- Comisiones = **FUERA**.
+
+> Reglas: `response.data`+`meta.pagination`; `Bearer`+`X-Tenant-ID`; whitelist estricto (param no doc = 400); i18n
+> `labelKey`; `can()` por permiso; estados loading/vacío/error; **NO duplicar** (compartir el motor/componente y `lib/api/*`).
+
+## Estado real
+El editor de factura (motor) ya existe y sirve como base. **Falta la Facturación GENERAL como flujo propio**: su
+punto de entrada ("Nueva venta") y su catálogo general — SIN tocar el flujo de Consultas, que ya funciona aparte.
 
 **El DELTA real (esto es lo que falta, todo FE sobre endpoints que YA existen — NO hay hueco de BE):**
 1. **Punto de creación (el hueco grande):** hoy NO se puede crear una factura general. Consulta se crea desde el
