@@ -566,7 +566,8 @@
     "servicios": "Servicios",
     "inventario_index": "Inventario",
     "inventario_transferencias": "Transferencias",
-    "comunicaciones": "Comunicaciones"
+    "comunicaciones": "Comunicaciones",
+    "facturacion_general": "Facturación general"
   },
   "admin": {
     "title": "Administración",
@@ -1262,10 +1263,9 @@
     "ivuToggleHint": "Alternar IVU/Exento de esta línea",
     "exentoLabel": "Factura exenta de IVU",
     "sesionesPorEntregar": "Esta venta generó {n} sesión(es) por entregar (frontdesk).",
-    "nuevaVenta": {
-      "trigger": "Nueva venta",
-      "title": "Nueva venta general",
-      "help": "Busca el paciente para iniciar la factura.",
+    "general": {
+      "title": "Facturación general",
+      "help": "Venta de productos, láser y suero. Busca el paciente para iniciar la factura.",
       "searchPlaceholder": "Nombre, record o ID…",
       "searching": "Buscando…",
       "hint": "Escribe al menos 2 caracteres.",

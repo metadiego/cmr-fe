@@ -566,7 +566,8 @@
     "servicios": "Services",
     "inventario_index": "Inventory",
     "inventario_transferencias": "Transfers",
-    "comunicaciones": "Communications"
+    "comunicaciones": "Communications",
+    "facturacion_general": "General billing"
   },
   "admin": {
     "title": "Administration",
@@ -1262,10 +1263,9 @@
     "ivuToggleHint": "Toggle tax/exempt for this line",
     "exentoLabel": "Invoice tax-exempt",
     "sesionesPorEntregar": "This sale created {n} session(s) to deliver (frontdesk).",
-    "nuevaVenta": {
-      "trigger": "New sale",
-      "title": "New general sale",
-      "help": "Search the patient to start the invoice.",
+    "general": {
+      "title": "General billing",
+      "help": "Sale of products, laser and IV therapy. Search the patient to start the invoice.",
       "searchPlaceholder": "Name, record or ID…",
       "searching": "Searching…",
       "hint": "Type at least 2 characters.",

@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
-import { NuevaVentaDialog } from "@/components/facturacion/nueva-venta-dialog";
 import {
   Select,
   SelectContent,
@@ -150,10 +149,7 @@ export default function FacturasListPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <NuevaVentaDialog />
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
 
       <div className="mt-6 space-y-4">
         <ListToolbar search={q} onSearchChange={onSearch} searchPlaceholder={t("searchPlaceholder")}>
