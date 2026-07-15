@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 import {
   listProductosPaged,
-  listCompuestos,
+  listClasesProducto,
   listPresentacionesProveedor,
   listClasificaciones,
   listProveedores,
@@ -27,6 +27,8 @@ import {
   type Unidad,
   type Clasificacion,
   type CreateProductoPayload,
+  type ClaseProducto,
+  type ClaseProductoOpcion,
 } from "@/lib/api/inventario";
 import type { Paginated } from "@/lib/api/types";
 import { apiErrorMessage } from "@/lib/api/errors";
@@ -62,13 +64,16 @@ const PAGE_SIZE = 50;
 export function ProductosAdmin() {
   const t = useTranslations("inventario.prod");
   const tc = useTranslations("common");
+  const tRoot = useTranslations(); // para labelKeys completos de las clases (data-driven)
 
   // Búsqueda server-side con debounce 300ms (§1). `q` se manda en cada tecla.
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
   const [page, setPage] = React.useState(1);
-  // Filtro por tipo: "fisicos" (comprables, default) | "compuestos" (derivados/kits).
-  const [tipoFiltro, setTipoFiltro] = React.useState<"fisicos" | "compuestos">("fisicos");
+  // Filtro por CLASE (data-driven desde el BE): fisico|insumo|compuesto|servicio. Sin hardcode.
+  const [clase, setClase] = React.useState<string>("fisico");
+  const clasesRes = useResource<ClaseProductoOpcion[]>(() => listClasesProducto(), []);
+  const clases = clasesRes.state.kind === "ok" ? clasesRes.state.data : [];
   React.useEffect(() => {
     const id = setTimeout(() => {
       setDebounced(q);
@@ -79,21 +84,14 @@ export function ProductosAdmin() {
 
   const { state, reload } = useResource<Paginated<ProductoConProveedores>>(
     () =>
-      tipoFiltro === "compuestos"
-        ? // Reusa listCompuestos (sin soloFisicos, filtra tipo=compuesto). Todos caben en
-          // una página → envolvemos como Paginated para no duplicar la tabla.
-          listCompuestos(debounced).then((items) => ({
-            items: items as ProductoConProveedores[],
-            pagination: { total: items.length, page: 1, limit: items.length || 1 },
-          }))
-        : listProductosPaged({
-            soloFisicos: true,
-            conProveedores: true,
-            q: debounced,
-            page,
-            limit: PAGE_SIZE,
-          }),
-    [debounced, page, tipoFiltro],
+      listProductosPaged({
+        clase: clase as ClaseProducto,
+        conProveedores: true,
+        q: debounced,
+        page,
+        limit: PAGE_SIZE,
+      }),
+    [debounced, page, clase],
   );
 
   // Selectores para el CRUD de producto y el editor de AMP (§4).
@@ -166,15 +164,16 @@ export function ProductosAdmin() {
           className="max-w-sm"
         />
         <Select
-          value={tipoFiltro}
-          onValueChange={(v) => { setTipoFiltro(v as "fisicos" | "compuestos"); setPage(1); }}
+          value={clase}
+          onValueChange={(v) => { setClase(v); setPage(1); }}
         >
           <SelectTrigger className="w-48">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="fisicos">{t("filtro.fisicos")}</SelectItem>
-            <SelectItem value="compuestos">{t("filtro.compuestos")}</SelectItem>
+            {clases.map((c) => (
+              <SelectItem key={c.clase} value={c.clase}>{tRoot(c.labelKey)}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

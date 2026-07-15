@@ -12,8 +12,13 @@ export type ProductoConProveedores = Producto & {
 
 // Listado paginado para la pantalla Productos (§1 del hand-off). Solo params del
 // whitelist del BE: soloFisicos, conProveedores, q, incluirInactivos, page, limit.
+// Clase del catálogo (data-driven, 1:1 con producto.tipo): fisico=unico · insumo=base ·
+// compuesto=compuesto · servicio=servicio. Las pestañas salen del BE (listClasesProducto).
+export type ClaseProducto = "fisico" | "insumo" | "compuesto" | "servicio";
+
 export function listProductosPaged(opts: {
   soloFisicos?: boolean;
+  clase?: ClaseProducto;
   conProveedores?: boolean;
   q?: string;
   incluirInactivos?: boolean;
@@ -21,6 +26,7 @@ export function listProductosPaged(opts: {
   limit?: number;
 }): Promise<Paginated<ProductoConProveedores>> {
   const sp = new URLSearchParams();
+  if (opts.clase) sp.set("clase", opts.clase);
   if (opts.soloFisicos) sp.set("soloFisicos", "true");
   if (opts.conProveedores) sp.set("conProveedores", "true");
   if (opts.q?.trim()) sp.set("q", opts.q.trim());
@@ -30,6 +36,15 @@ export function listProductosPaged(opts: {
   return apiFetchPaged<ProductoConProveedores>(
     `/inventario/productos?${sp.toString()}`,
   );
+}
+
+// Clases del catálogo para las pestañas (data-driven + i18n). GET /inventario/productos/clases.
+export interface ClaseProductoOpcion {
+  clase: string;
+  labelKey: string;
+}
+export function listClasesProducto(): Promise<ClaseProductoOpcion[]> {
+  return apiFetch<ClaseProductoOpcion[]>(`/inventario/productos/clases`);
 }
 export type Unidad = components["schemas"]["UnidadEntity"];
 export type Clasificacion = components["schemas"]["ClasificacionEntity"];

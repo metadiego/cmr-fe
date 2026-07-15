@@ -1278,6 +1278,12 @@
         "facturas": "Invoices",
         "terapia": "Therapy"
       }
+    },
+    "clase": {
+      "fisico": "Physical",
+      "insumo": "Supplies",
+      "compuesto": "Bundles",
+      "servicio": "Services"
     }
   },
   "receipt": {

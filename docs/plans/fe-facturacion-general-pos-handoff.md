@@ -179,3 +179,22 @@ Refs: [shadcn/ui POS](https://adminlte.io/blog/shadcn-ui-pos-templates/) ·
 - Endpoints §1–§4: **todos existen y responden**. Migraciones aplicadas; medios (15) y columnas por grupo (37) sembrados en prod.
 - Cada capacidad tiene su tool MCP con el mismo RBAC (2ª puerta para agentes).
 - Si de verdad algo falta, es UN mini-handoff puntual al BE — pero revisa este doc primero, porque casi todo ya está.
+
+## ⚠️ BUG FE — el catálogo NO debe filtrar `tipo=servicio` (láser/suero base no aparecen)
+Síntoma: en el select de "Terapia del dolor" aparecen los packs (3/5/6/9/10/12 Sesiones = `compuesto`) pero
+NO la base **TD01 "Terapia del dolor (1 sesión)"** (`tipo=servicio`). Verificado: `GET /facturas/catalogo?q=terapia del dolor`
+devuelve **7** ítems (incluye TD01 servicio $70); el FE muestra 6 → **el FE está filtrando `tipo=servicio`**.
+- Fix: el catálogo de Facturación General debe incluir TODOS los tipos que devuelve el endpoint
+  (`unico`, `base`, `compuesto` y **`servicio`**). Láser y suero SON servicios; ocultarlos rompe el flujo.
+- No filtrar por `tipo` en el dropdown; pintar lo que devuelve `GET /facturas/catalogo` tal cual
+  (ya viene filtrado por `facturableGeneral=true` + división desde el BE).
+
+## Catálogo de INVENTARIO (gestión) — 4 categorías por `clase` (no hardcodear 2)
+`GET /inventario/productos?clase=fisico|insumo|compuesto|servicio` (omitido = todos). Las 4 categorías,
+1:1 con `producto.tipo`:
+- **Físicos** = `fisico` (unico, se vende tal cual)
+- **Insumos** = `insumo` (base: no se vende solo, lo consumen compuestos/servicios; cánula/catéter/…)
+- **Compuestos/derivados** = `compuesto` (se forman de físicos + servicios + insumos)
+- **Servicios** = `servicio` (láser/suero/consulta/seguimiento/cámaras)
+El filtro del catálogo de inventario debe ofrecer las **4** (hoy solo tiene Físicos y Compuestos). Este es el
+catálogo de GESTIÓN → sí incluye Consulta/Seguimiento (servicio); el NO-MEZCLAR es solo del POS de facturación.
