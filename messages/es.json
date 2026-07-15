@@ -1273,7 +1273,11 @@
       "iniciar": "Iniciar venta",
       "creando": "Creando…",
       "sinNombre": "(sin nombre)",
-      "lista": "Lista de precios"
+      "lista": "Lista de precios",
+      "pickCentroTitle": "Selecciona el centro",
+      "pickCentroGo": "Facturar aquí",
+      "centroLabel": "Centro:",
+      "cambiarCentro": "Cambiar centro"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",

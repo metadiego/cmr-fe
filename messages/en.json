@@ -1273,7 +1273,11 @@
       "iniciar": "Start sale",
       "creando": "Creating…",
       "sinNombre": "(no name)",
-      "lista": "Price list"
+      "lista": "Price list",
+      "pickCentroTitle": "Select the center",
+      "pickCentroGo": "Bill here",
+      "centroLabel": "Center:",
+      "cambiarCentro": "Change center"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",

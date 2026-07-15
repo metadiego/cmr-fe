@@ -4,11 +4,14 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { Search01Icon, Building01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import { buscarPaciente, crearFactura, type PacienteBusqueda } from "@/lib/api/facturas";
 import { listTiposPrecio, type TipoPrecio } from "@/lib/api/precios";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getMe } from "@/lib/api/auth";
+import type { Me } from "@/lib/api/auth";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { getActiveCentro } from "@/lib/tenant";
@@ -23,10 +26,100 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Facturación GENERAL — punto de entrada PROPIO y separado (doc §5: dos flujos, dos entradas,
-// nunca mezclados). Aquí se INICIA la venta: buscar paciente → POST /facturas (borrador,
-// catálogo general) → editor compartido /facturacion/[id]. Consultas es aparte (AP-board).
+// Facturación GENERAL — punto de entrada propio (doc §5). GATE de centro (handoff picker):
+// multi-tenant → si el admin puede ver >1 centro y no hay uno válido activo, EXIGE elegir centro
+// antes del finder, y ese centro va como X-Tenant-ID en TODA la sesión de factura (finder, crear,
+// y el editor lo hereda por ?centro=). 1 centro → auto. Consultas usará el mismo picker luego.
 export function VentaGeneral() {
+  const t = useTranslations("facturacion.general");
+  const tc = useTranslations("common");
+
+  const meRes = useResource<Me>(() => getMe(), []);
+  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
+  const centros = React.useMemo(
+    () => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []),
+    [centrosRes.state],
+  );
+  const me = meRes.state.kind === "ok" ? meRes.state.data : null;
+  const cargandoGate = meRes.state.kind === "loading" || centrosRes.state.kind === "loading";
+
+  // Centro válido pre-fijado: activo del header o del perfil, SOLO si está en los elegibles.
+  const ids = React.useMemo(() => new Set(centros.map((c) => c.id)), [centros]);
+  const validActive = React.useMemo(() => {
+    const act = getActiveCentro();
+    if (act && ids.has(act)) return act;
+    if (me?.activeClinicId && ids.has(me.activeClinicId)) return me.activeClinicId;
+    if (centros.length === 1) return centros[0].id;
+    return null;
+  }, [ids, me, centros]);
+
+  const [chosen, setChosen] = React.useState<string | null>(null);
+  const [cambiar, setCambiar] = React.useState(false);
+  const centro = chosen ?? (cambiar ? null : validActive); // centro efectivo de la sesión
+  const necesitaPicker = !cargandoGate && !centro && centros.length > 0;
+  const centroNombre = centros.find((c) => c.id === centro)?.nombre ?? "";
+
+  return (
+    <div className="mx-auto max-w-xl px-6 py-12">
+      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("help")}</p>
+
+      {cargandoGate ? (
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+      ) : necesitaPicker ? (
+        <CentroPicker
+          centros={centros}
+          onPick={(id) => { setChosen(id); setCambiar(false); }}
+        />
+      ) : (
+        <Finder
+          centro={centro ?? undefined}
+          centroNombre={centroNombre}
+          puedeCambiar={centros.length > 1}
+          onCambiarCentro={() => { setChosen(null); setCambiar(true); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function CentroPicker({ centros, onPick }: { centros: Centro[]; onPick: (id: string) => void }) {
+  const t = useTranslations("facturacion.general");
+  return (
+    <div>
+      <div className="mb-3 flex items-center gap-2">
+        <HugeiconsIcon icon={Building01Icon} className="size-5 text-primary" />
+        <h2 className="text-sm font-semibold">{t("pickCentroTitle")}</h2>
+      </div>
+      <div className="grid gap-2">
+        {centros.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => onPick(c.id)}
+            className="flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors hover:border-primary/50 hover:bg-accent/40"
+          >
+            <span className="font-medium">{c.nombre}</span>
+            <span className="text-xs text-primary">{t("pickCentroGo")} →</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// El finder + creación. TODO usa `centro` como X-Tenant-ID (no el selector global del header).
+function Finder({
+  centro,
+  centroNombre,
+  puedeCambiar,
+  onCambiarCentro,
+}: {
+  centro?: string;
+  centroNombre: string;
+  puedeCambiar: boolean;
+  onCambiarCentro: () => void;
+}) {
   const t = useTranslations("facturacion.general");
   const router = useRouter();
   const [q, setQ] = React.useState("");
@@ -35,7 +128,6 @@ export function VentaGeneral() {
   const [creating, setCreating] = React.useState(false);
   const [tipoPrecioId, setTipoPrecioId] = React.useState("");
 
-  // Lista de precios de la venta (default = esDefault). Se manda al crear; el server resuelve.
   const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
   const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
   const defaultId = (listas.find((l) => l.esDefault) ?? listas.find((l) => l.clave === "regular"))?.id ?? "";
@@ -48,14 +140,12 @@ export function VentaGeneral() {
 
   const term = debounced.trim();
   const res = useResource<PacienteBusqueda[]>(
-    () => (term.length >= 2 ? buscarPaciente(term, getActiveCentro() ?? undefined) : Promise.resolve([])),
-    [term],
+    () => (term.length >= 2 ? buscarPaciente(term, centro) : Promise.resolve([])),
+    [term, centro],
   );
   const shown = term.length >= 2 ? (res.state.kind === "ok" ? res.state.data : []) : [];
   const loading = res.state.kind === "loading" && term.length >= 2;
-
-  const nombre = (p: PacienteBusqueda) =>
-    `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim() || t("sinNombre");
+  const nombre = (p: PacienteBusqueda) => `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim() || t("sinNombre");
 
   async function iniciar() {
     if (!sel || creating) return;
@@ -63,9 +153,10 @@ export function VentaGeneral() {
     try {
       const f = await crearFactura(
         { pacienteId: sel.id, ...(listaSel ? { tipoPrecioId: listaSel } : {}) },
-        getActiveCentro() ?? undefined,
+        centro,
       );
-      router.push(`/facturacion/${f.id}`);
+      // Fija el centro para TODA la sesión del editor (se propaga a catálogo/items/emitir/pagos).
+      router.push(`/facturacion/${f.id}${centro ? `?centro=${centro}` : ""}`);
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setCreating(false);
@@ -73,43 +164,39 @@ export function VentaGeneral() {
   }
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("help")}</p>
+    <>
+      {/* Centro fijado de la sesión */}
+      <div className="mb-4 flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
+        <span className="flex items-center gap-2 text-sm">
+          <HugeiconsIcon icon={Building01Icon} className="size-4 text-primary" />
+          <span className="text-muted-foreground">{t("centroLabel")}</span>
+          <span className="font-medium">{centroNombre || "—"}</span>
+        </span>
+        {puedeCambiar && (
+          <button type="button" onClick={onCambiarCentro} className="text-xs font-medium text-primary hover:underline">
+            {t("cambiarCentro")}
+          </button>
+        )}
+      </div>
 
       <div className="mb-3 flex items-center gap-2 rounded-md border px-3">
         <HugeiconsIcon icon={Search01Icon} className="size-4 opacity-60" />
-        <Input
-          autoFocus
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          className="border-0 px-0 shadow-none focus-visible:ring-0"
-        />
+        <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPlaceholder")} className="border-0 px-0 shadow-none focus-visible:ring-0" />
       </div>
 
       <div className="mb-4 max-h-80 overflow-y-auto rounded-md border">
         {loading && <p className="px-3 py-4 text-center text-sm text-muted-foreground">{t("searching")}</p>}
-        {!loading && term.length < 2 && (
-          <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>
-        )}
-        {!loading && term.length >= 2 && shown.length === 0 && (
-          <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>
-        )}
+        {!loading && term.length < 2 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>}
+        {!loading && term.length >= 2 && shown.length === 0 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>}
         {shown.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setSel(p)}
-            className={cn(
-              "flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50",
-              sel?.id === p.id && "bg-accent",
-            )}
+            className={cn("flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50", sel?.id === p.id && "bg-accent")}
           >
             <span className="font-medium">{nombre(p)}</span>
-            {(p.docId || p.record) && (
-              <span className="text-[11px] text-muted-foreground">{p.record ?? p.docId}</span>
-            )}
+            {(p.docId || p.record) && <span className="text-[11px] text-muted-foreground">{p.record ?? p.docId}</span>}
           </button>
         ))}
       </div>
@@ -119,11 +206,7 @@ export function VentaGeneral() {
           <span className="text-xs font-medium text-muted-foreground">{t("lista")}</span>
           <Select value={listaSel} onValueChange={setTipoPrecioId}>
             <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {listas.map((l) => (
-                <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>
-              ))}
-            </SelectContent>
+            <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
           </Select>
         </label>
       )}
@@ -131,6 +214,6 @@ export function VentaGeneral() {
       <Button className="w-full" onClick={iniciar} disabled={!sel || creating}>
         {creating ? t("creando") : t("iniciar")}
       </Button>
-    </div>
+    </>
   );
 }
