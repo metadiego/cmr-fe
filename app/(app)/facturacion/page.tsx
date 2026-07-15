@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -8,6 +9,7 @@ import { listFacturas, type Factura } from "@/lib/api/facturas";
 import { useResource, type ResourceState } from "@/hooks/use-resource";
 import type { Paginated } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
@@ -149,7 +151,12 @@ export default function FacturasListPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
+        </Button>
+      </div>
 
       <div className="mt-6 space-y-4">
         <ListToolbar search={q} onSearchChange={onSearch} searchPlaceholder={t("searchPlaceholder")}>

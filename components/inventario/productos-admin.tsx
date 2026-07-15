@@ -52,6 +52,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { AmpEditorSheet } from "@/components/inventario/amp-editor-sheet";
+import { InsumosEditorSheet } from "@/components/inventario/insumos-editor-sheet";
 
 const NONE = "__none__";
 const TIPOS = ["base", "unico", "compuesto", "servicio"] as const;
@@ -131,6 +132,9 @@ export function ProductosAdmin() {
     productoNombre: string;
     amp: PresentacionProveedor | null;
   } | null>(null);
+
+  // Editor de INSUMOS estimados (PR #83) — cualquier producto, abierto desde su fila.
+  const [insumosSheet, setInsumosSheet] = React.useState<{ productoId: string; productoNombre: string } | null>(null);
 
   function afterAmpSaved() {
     setAmpReloadToken((n) => n + 1); // recarga las sub-tablas de AMP abiertas
@@ -257,6 +261,13 @@ export function ProductosAdmin() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => setInsumosSheet({ productoId: p.id, productoNombre: p.nombre })}
+                        >
+                          {t("editarInsumos")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             setEditing(p);
                             setFormOpen(true);
@@ -338,6 +349,15 @@ export function ProductosAdmin() {
           fabricantes={fabricantes}
           onOpenChange={(o) => !o && setAmpSheet(null)}
           onSaved={afterAmpSaved}
+        />
+      )}
+
+      {insumosSheet && (
+        <InsumosEditorSheet
+          open={!!insumosSheet}
+          productoId={insumosSheet.productoId}
+          productoNombre={insumosSheet.productoNombre}
+          onOpenChange={(o) => !o && setInsumosSheet(null)}
         />
       )}
     </div>

@@ -483,7 +483,8 @@
     "view": "View",
     "active": "Active",
     "inactive": "Inactive",
-    "noResults": "No results"
+    "noResults": "No results",
+    "print": "Print"
   },
   "pending": {
     "title": "Access pending",
@@ -951,7 +952,8 @@
       "anulada": "Voided",
       "devuelta_parcial": "Partially returned",
       "devuelta_total": "Fully returned"
-    }
+    },
+    "consumoInsumos": "Supply consumption"
   },
   "inventario": {
     "prov": {
@@ -1116,7 +1118,8 @@
       "filtro": {
         "fisicos": "Physical (buyable)",
         "compuestos": "Compounds / derivatives"
-      }
+      },
+      "editarInsumos": "Supplies"
     },
     "picker": {
       "placeholder": "Select a product…",
@@ -1174,7 +1177,8 @@
         "componente": "Component",
         "cantidad": "Quantity",
         "unidad": "Unit"
-      }
+      },
+      "empty": "No recipe — add components"
     },
     "index": {
       "title": "Inventory",
@@ -1209,6 +1213,50 @@
           "title": "Transfers",
           "desc": "Move stock between centers with partial reception/approval."
         }
+      }
+    },
+    "insumos": {
+      "title": "Consumable supplies",
+      "help": "Estimated supplies this product consumes per unit (cannula, catheter, base saline…). Report-only: they do NOT reduce stock or block the sale.",
+      "recipeOf": "Estimated supplies for this product (report-only, non-blocking)",
+      "empty": "No supplies — add the ones it consumes",
+      "addComponente": "Supply",
+      "selectComponente": "Search product…",
+      "add": "Add",
+      "added": "Supply added",
+      "removed": "Supply removed",
+      "updated": "Supply updated",
+      "invalidComponente": "Pick a supply and a valid quantity",
+      "unidadDefault": "Base unit",
+      "col": {
+        "componente": "Supply",
+        "cantidad": "Est. quantity",
+        "unidad": "Unit"
+      }
+    },
+    "consumoReporte": {
+      "title": "Supply consumption",
+      "help": "Supplies consumed by therapies billed in the period. Sourced from the frozen snapshot of issued invoices — reflects real consumption.",
+      "from": "From",
+      "to": "To",
+      "tipo": "Type",
+      "estimadoTrue": "Estimated supplies",
+      "estimadoFalse": "Real discharge",
+      "estimadoAll": "All",
+      "search": "Search",
+      "exportCsv": "Export CSV",
+      "empty": "No consumption in the period",
+      "footnote": "If a service has no supplies configured yet, it won't appear here. Configure them in product → Supplies.",
+      "kpi": {
+        "insumos": "Supplies",
+        "unidades": "Units",
+        "facturas": "Invoices"
+      },
+      "col": {
+        "insumo": "Supply",
+        "cantidad": "Quantity",
+        "facturas": "Invoices",
+        "terapia": "Therapy"
       }
     }
   },

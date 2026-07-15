@@ -483,7 +483,8 @@
     "view": "Ver",
     "active": "Activo",
     "inactive": "Inactivo",
-    "noResults": "Sin resultados"
+    "noResults": "Sin resultados",
+    "print": "Imprimir"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -951,7 +952,8 @@
       "anulada": "Anulada",
       "devuelta_parcial": "Devuelta parcial",
       "devuelta_total": "Devuelta total"
-    }
+    },
+    "consumoInsumos": "Consumo de insumos"
   },
   "inventario": {
     "prov": {
@@ -1116,7 +1118,8 @@
       "filtro": {
         "fisicos": "Físicos (comprables)",
         "compuestos": "Compuestos / derivados"
-      }
+      },
+      "editarInsumos": "Insumos"
     },
     "picker": {
       "placeholder": "Selecciona un producto…",
@@ -1174,7 +1177,8 @@
         "componente": "Componente",
         "cantidad": "Cantidad",
         "unidad": "Unidad"
-      }
+      },
+      "empty": "Sin receta — agrega componentes"
     },
     "index": {
       "title": "Inventario",
@@ -1209,6 +1213,50 @@
           "title": "Transferencias",
           "desc": "Mover stock entre centros con recepción/aprobación parcial."
         }
+      }
+    },
+    "insumos": {
+      "title": "Insumos de consumo",
+      "help": "Insumos estimados que consume este producto por unidad (cánula, catéter, suero base…). Solo se reportan: NO descuentan inventario ni bloquean la venta.",
+      "recipeOf": "Insumos estimados de este producto (solo reporte, no bloquean)",
+      "empty": "Sin insumos — agrega los que consume",
+      "addComponente": "Insumo",
+      "selectComponente": "Buscar producto…",
+      "add": "Agregar",
+      "added": "Insumo agregado",
+      "removed": "Insumo quitado",
+      "updated": "Insumo actualizado",
+      "invalidComponente": "Elige un insumo y una cantidad válida",
+      "unidadDefault": "Unidad base",
+      "col": {
+        "componente": "Insumo",
+        "cantidad": "Cantidad estimada",
+        "unidad": "Unidad"
+      }
+    },
+    "consumoReporte": {
+      "title": "Consumo de insumos",
+      "help": "Insumos consumidos por las terapias facturadas en el período. Sale del snapshot congelado de facturas emitidas — refleja el consumo real.",
+      "from": "Desde",
+      "to": "Hasta",
+      "tipo": "Tipo",
+      "estimadoTrue": "Insumos estimados",
+      "estimadoFalse": "Descarga real",
+      "estimadoAll": "Todos",
+      "search": "Buscar",
+      "exportCsv": "Exportar CSV",
+      "empty": "Sin consumo en el período",
+      "footnote": "Si un servicio aún no tiene insumos configurados, no aparece aquí. Configúralos en el producto → Insumos.",
+      "kpi": {
+        "insumos": "Insumos",
+        "unidades": "Unidades",
+        "facturas": "Facturas"
+      },
+      "col": {
+        "insumo": "Insumo",
+        "cantidad": "Cantidad",
+        "facturas": "Facturas",
+        "terapia": "Terapia"
       }
     }
   },
