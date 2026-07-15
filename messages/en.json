@@ -569,7 +569,8 @@
     "inventario_index": "Inventory",
     "inventario_transferencias": "Transfers",
     "comunicaciones": "Communications",
-    "facturacion_general": "General billing"
+    "facturacion_general": "General billing",
+    "consumoInsumos": "Supply consumption"
   },
   "admin": {
     "title": "Administration",
