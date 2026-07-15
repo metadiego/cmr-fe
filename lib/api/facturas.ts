@@ -46,7 +46,10 @@ export type FacturaPago = {
 
 // La factura con sus líneas + proyección enriquecida de GET /facturas/:id (BE):
 // paciente, medico, empresa (bloque fiscal), pagos[], emisor, emitidaEn, numeroDisplay.
-export type FacturaConItems = Factura & {
+// creadoPor/emitidoPor (BE PR #82): usuario que CREÓ el borrador y quien lo EMITIÓ/cobró (del
+// RequestContext, no falsificable). En la entidad base son IDs string → los sobreescribimos como
+// objeto {id,nombre} que trae la proyección de getById. `emisor`/`emisorId` quedan deprecados.
+export type FacturaConItems = Omit<Factura, "creadoPor" | "emitidoPor"> & {
   items?: FacturaItem[];
   paciente?: {
     nombres?: string;
@@ -58,6 +61,8 @@ export type FacturaConItems = Factura & {
   empresa?: FacturaEmpresa | null;
   pagos?: FacturaPago[];
   emisor?: { id?: string; nombre?: string } | null;
+  creadoPor?: { id?: string; nombre?: string } | null;
+  emitidoPor?: { id?: string; nombre?: string } | null;
   emitidaEn?: string | null;
   numeroDisplay?: string | null;
 };

@@ -123,6 +123,13 @@ if (dosis > 0 && uxe > 0 && dias > 0) {
 - La `cantidad` (envases) es lo que se manda en `POST /facturas/:id/items`; la `dosis` va en `meta.dosis`.
 - Ejemplo real: ANDROGRAPHIS 120 CAPS → uxe=120, dias=30, dosis=12 ⇒ cantidad=3 potes.
 
+## 1.ter Quién trabajó la factura — "Creada por" / "Cobrada por" (DESPLEGADO prod)
+`GET /facturas/:id` proyecta **`creadoPor {id,nombre}`** (quién creó el borrador) y **`emitidoPor {id,nombre}`**
+(quién emitió/cobró; `null` mientras es borrador). El BE los sella solo del usuario logueado (no del body).
+- Mostrar en el detalle/recibo: "Creada por: {creadoPor.nombre}" y "Cobrada por: {emitidoPor.nombre}".
+- `emisor` sigue existiendo (= `emitidoPor ?? creadoPor`) para el "Atendido por" retrocompatible.
+- El FE **no manda** estos campos; los sella el server al `POST /facturas` (crea) y `POST /facturas/:id/emitir` (cobra).
+
 ## 2. IVU por línea — el atributo del producto MANDA, el toggle es override
 - El BE ya hace: `gravado_de_la_línea = lo_que_manda_el_FE ?? producto.gravado`.
 - **Fix FE:** al agregar un producto, **inicializa el toggle IVU con `producto.gravado`** del catálogo

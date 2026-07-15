@@ -8,13 +8,15 @@ negocio registra la **cantidad estimada** por unidad — **no bloqueante**: se r
 descarga inventario ni bloquea la venta, y **NO** aparece en el catálogo de facturación (esos insumos ya
 son `facturableGeneral=false`). Sirve para el **reporte de consumo por terapia**.
 
-## 1) Editor de receta de insumos (en el CRUD de producto: servicio o compuesto)
-Reusar el mismo patrón de "componentes/receta" ya existente; agregar el toggle **`estimado`**.
+## 1) Editor de insumos — EXACTAMENTE como los kits (reusar esa UI)
+**Igual que la receta de un kit: CUALQUIER producto puede tener UNO O MÁS insumos** (lista de filas, agregar/
+quitar), **no limitativos ni bloqueantes**. Es la misma UI de componentes de kit, con el toggle **`estimado`**.
 - Listar: `GET /inventario/componentes?productoCompuestoId=<id>` → cada fila trae `estimado` (bool).
 - Agregar: `POST /inventario/componentes`
   `{ productoCompuestoId, componenteId, cantidad, unidadId?, presentacionId?, estimado? }`
-  - **Servicio**: solo admite `estimado:true` (400 si no). **Compuesto**: `estimado:false` = descarga real
-    (receta), `estimado:true` = insumo de consumo extra.
+  - **`estimado:true`** = insumo de consumo → **cualquier tipo de producto** (unico/base/servicio/compuesto)
+    lo admite; NO descarga inventario ni bloquea la venta. Un producto puede tener varios.
+  - **`estimado:false`** = componente de descarga real (receta) → **solo producto compuesto/kit** (400 si no).
 - Editar/quitar: `PUT /inventario/componentes/:id { cantidad?, unidadId?, presentacionId?, estimado?, activo? }`
   · `DELETE /inventario/componentes/:id`.
 - RBAC: admin/super_admin. i18n por `labelKey` en los rótulos del editor.

@@ -3211,6 +3211,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturacion/reportes/consumo-insumos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consumo de INSUMOS por período (del snapshot congelado): por insumo, con desglose por terapia.
+         *     estimado='true' (default: insumos estimados de consumo) | 'false' (descarga real) | 'all'.
+         */
+        get: operations["FacturasReportesController_consumoInsumos_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturacion/medios": {
         parameters: {
             query?: never;
@@ -5307,6 +5327,7 @@ export interface components {
             unidadId: string | null;
             presentacionId: string | null;
             activo: boolean;
+            estimado: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5323,6 +5344,8 @@ export interface components {
             unidadId?: string;
             /** Format: uuid */
             presentacionId?: string;
+            /** @description Insumo ESTIMADO de consumo: no descarga inventario ni bloquea la venta; solo se reporta. */
+            estimado?: boolean;
         };
         UpdateProductoComponenteDto: {
             cantidad?: number;
@@ -5330,6 +5353,7 @@ export interface components {
             unidadId?: string;
             /** Format: uuid */
             presentacionId?: string;
+            estimado?: boolean;
             activo?: boolean;
         };
         ProductoCentroEntity: {
@@ -6938,6 +6962,8 @@ export interface components {
             facturarATipo: string | null;
             medicoId: string | null;
             emisorId: string | null;
+            creadoPor: string | null;
+            emitidoPor: string | null;
             citaId: string | null;
             tipoPrecioId: string | null;
             medioId: string | null;
@@ -14201,6 +14227,27 @@ export interface operations {
             query: {
                 desde: string;
                 hasta: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FacturasReportesController_consumoInsumos_v1: {
+        parameters: {
+            query: {
+                desde: string;
+                hasta: string;
+                estimado?: string;
             };
             header?: never;
             path?: never;

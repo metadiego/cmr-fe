@@ -89,8 +89,8 @@ export function buildRecibo(f: FacturaConItems): Recibo {
       monto: num(p.monto),
       referencia: p.referencia ?? null,
     })),
-    // "Atendido por" = el usuario logueado que HIZO la factura (emisor), NO el médico.
-    // Sin fallback a médico: si no hay emisor, la línea se oculta (nunca muestra al médico).
-    atendidoPor: f.emisor?.nombre,
+    // "Atendido por" = quien COBRÓ (emitidoPor) o, si aún es borrador, quien la CREÓ (creadoPor).
+    // BE PR #82; `emisor` queda como fallback legacy. NUNCA el médico.
+    atendidoPor: f.emitidoPor?.nombre ?? f.creadoPor?.nombre ?? f.emisor?.nombre,
   };
 }
