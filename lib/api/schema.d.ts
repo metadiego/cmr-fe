@@ -2836,6 +2836,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/paciente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Corregir el paciente de un BORRADOR (sin borrarlo). Solo en estado borrador. */
+        put: operations["FacturacionController_cambiarPaciente_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/cita/{citaId}": {
         parameters: {
             query?: never;
@@ -6870,11 +6887,23 @@ export interface components {
             tipoPrecioId?: string;
             serie?: string;
             notas?: string;
+            /** @description Nombre del receptor si NO es el paciente (empresa u otra persona). Omitido = se factura al paciente. */
+            facturarANombre?: string;
+            /** @description Identificación del receptor tercero (label "ID"; registro fiscal si es empresa). */
+            facturarADocId?: string;
+            /**
+             * @description Tipo de receptor tercero: persona | empresa.
+             * @enum {string}
+             */
+            facturarATipo?: "persona" | "empresa";
         };
         FacturaEntity: {
             numero: string | null;
             serie: string | null;
             pacienteId: string;
+            facturarANombre: string | null;
+            facturarADocId: string | null;
+            facturarATipo: string | null;
             medicoId: string | null;
             emisorId: string | null;
             citaId: string | null;
@@ -6905,6 +6934,10 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        CambiarPacienteDto: {
+            /** Format: uuid */
+            pacienteId: string;
         };
         AgregarItemDto: {
             /** Format: uuid */
@@ -13553,6 +13586,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    FacturacionController_cambiarPaciente_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CambiarPacienteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaEntity"];
+                };
             };
         };
     };

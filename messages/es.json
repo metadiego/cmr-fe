@@ -1277,7 +1277,20 @@
       "pickCentroTitle": "Selecciona el centro",
       "pickCentroGo": "Facturar aquí",
       "centroLabel": "Centro:",
-      "cambiarCentro": "Cambiar centro"
+      "cambiarCentro": "Cambiar centro",
+      "medico": "Médico tratante",
+      "sinMedico": "Sin médico asociado",
+      "referencia": "Referencia / Medio",
+      "sinReferencia": "Sin referencia",
+      "terceroTitle": "Facturar a un tercero (empresa / otra persona)",
+      "terceroShow": "Agregar",
+      "terceroHide": "Ocultar",
+      "terceroNombre": "Nombre / Razón social",
+      "terceroNombrePh": "Ej. Aseguradora XYZ",
+      "terceroDoc": "ID",
+      "terceroTipo": "Tipo",
+      "terceroEmpresa": "Empresa",
+      "terceroPersona": "Persona"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",
@@ -1285,7 +1298,9 @@
     "lista": "Lista",
     "listaPlaceholder": "Regular",
     "adding": "Agregando…",
-    "listaLabel": "Lista: {lista}"
+    "listaLabel": "Lista: {lista}",
+    "descartar": "Descartar",
+    "descartarConfirm": "¿Descartar este borrador? Se elimina la factura y sus líneas."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -1517,6 +1532,23 @@
       "idioma": "Idioma",
       "asunto": "Asunto",
       "estado": "Estado"
+    }
+  },
+  "fac": {
+    "col": {
+      "producto": "Producto",
+      "lista": "Lista",
+      "cantidad": "Cant.",
+      "precio": "Precio",
+      "descuento": "Desc.",
+      "impuesto": "IVU",
+      "subtotal": "Subtotal",
+      "accion": "",
+      "dosis": "Dosis",
+      "sugerido": "Cant. sugerida",
+      "areas": "Áreas",
+      "dias": "Días",
+      "sesiones": "Sesiones"
     }
   }
 }

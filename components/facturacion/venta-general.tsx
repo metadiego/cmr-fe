@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { buscarPaciente, crearFactura, type PacienteBusqueda } from "@/lib/api/facturas";
 import { listTiposPrecio, type TipoPrecio } from "@/lib/api/precios";
+import { listMedicos, listMedios, type MedicoOpcion, type MedioFacturacion } from "@/lib/api/facturacion-config";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getMe } from "@/lib/api/auth";
 import type { Me } from "@/lib/api/auth";
@@ -127,11 +128,22 @@ function Finder({
   const [sel, setSel] = React.useState<PacienteBusqueda | null>(null);
   const [creating, setCreating] = React.useState(false);
   const [tipoPrecioId, setTipoPrecioId] = React.useState("");
+  const [medicoId, setMedicoId] = React.useState("");
+  const [medioId, setMedioId] = React.useState("");
+  // Facturar a un tercero (empresa/otra persona). Vacío = se factura al paciente.
+  const [terceroOpen, setTerceroOpen] = React.useState(false);
+  const [terceroNombre, setTerceroNombre] = React.useState("");
+  const [terceroDoc, setTerceroDoc] = React.useState("");
+  const [terceroTipo, setTerceroTipo] = React.useState<"persona" | "empresa">("empresa");
 
   const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
   const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
   const defaultId = (listas.find((l) => l.esDefault) ?? listas.find((l) => l.clave === "regular"))?.id ?? "";
   const listaSel = tipoPrecioId || defaultId;
+  const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
+  const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
+  const mediosRes = useResource<MedioFacturacion[]>(() => listMedios(centro), [centro]);
+  const medios = (mediosRes.state.kind === "ok" ? mediosRes.state.data : []).filter((m) => m.activo !== false);
 
   React.useEffect(() => {
     const id = setTimeout(() => setDebounced(q), 300);
@@ -152,7 +164,15 @@ function Finder({
     setCreating(true);
     try {
       const f = await crearFactura(
-        { pacienteId: sel.id, ...(listaSel ? { tipoPrecioId: listaSel } : {}) },
+        {
+          pacienteId: sel.id,
+          ...(listaSel ? { tipoPrecioId: listaSel } : {}),
+          ...(medicoId ? { medicoId } : {}),
+          ...(medioId ? { medioId } : {}),
+          ...(terceroNombre.trim()
+            ? { facturarANombre: terceroNombre.trim(), facturarADocId: terceroDoc.trim() || undefined, facturarATipo: terceroTipo }
+            : {}),
+        },
         centro,
       );
       // Fija el centro para TODA la sesión del editor (se propaga a catálogo/items/emitir/pagos).
@@ -201,15 +221,71 @@ function Finder({
         ))}
       </div>
 
-      {listas.length > 0 && (
-        <label className="mb-4 flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-muted-foreground">{t("lista")}</span>
-          <Select value={listaSel} onValueChange={setTipoPrecioId}>
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
-          </Select>
-        </label>
-      )}
+      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+        {listas.length > 0 && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">{t("lista")}</span>
+            <Select value={listaSel} onValueChange={setTipoPrecioId}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
+        )}
+        {medicos.length > 0 && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">{t("medico")}</span>
+            <Select value={medicoId || "__none__"} onValueChange={(v) => setMedicoId(v === "__none__" ? "" : v)}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">{t("sinMedico")}</SelectItem>
+                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </label>
+        )}
+        {medios.length > 0 && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">{t("referencia")}</span>
+            <Select value={medioId || "__none__"} onValueChange={(v) => setMedioId(v === "__none__" ? "" : v)}>
+              <SelectTrigger className="w-full"><SelectValue placeholder={t("sinReferencia")} /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">{t("sinReferencia")}</SelectItem>
+                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </label>
+        )}
+      </div>
+
+      {/* Facturar a un tercero (empresa u otra persona) */}
+      <div className="mb-4 rounded-lg border">
+        <button type="button" onClick={() => setTerceroOpen((o) => !o)} className="flex w-full items-center justify-between px-3 py-2 text-sm">
+          <span className="font-medium">{t("terceroTitle")}</span>
+          <span className="text-xs text-primary">{terceroOpen ? t("terceroHide") : t("terceroShow")}</span>
+        </button>
+        {terceroOpen && (
+          <div className="grid gap-3 border-t p-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1.5 sm:col-span-2">
+              <span className="text-xs font-medium text-muted-foreground">{t("terceroNombre")}</span>
+              <Input value={terceroNombre} onChange={(e) => setTerceroNombre(e.target.value)} placeholder={t("terceroNombrePh")} />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">{t("terceroDoc")}</span>
+              <Input value={terceroDoc} onChange={(e) => setTerceroDoc(e.target.value)} placeholder="ID" />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">{t("terceroTipo")}</span>
+              <Select value={terceroTipo} onValueChange={(v) => setTerceroTipo(v as "persona" | "empresa")}>
+                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="empresa">{t("terceroEmpresa")}</SelectItem>
+                  <SelectItem value="persona">{t("terceroPersona")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </label>
+          </div>
+        )}
+      </div>
 
       <Button className="w-full" onClick={iniciar} disabled={!sel || creating}>
         {creating ? t("creando") : t("iniciar")}

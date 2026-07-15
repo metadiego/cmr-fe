@@ -1277,7 +1277,20 @@
       "pickCentroTitle": "Select the center",
       "pickCentroGo": "Bill here",
       "centroLabel": "Center:",
-      "cambiarCentro": "Change center"
+      "cambiarCentro": "Change center",
+      "medico": "Attending physician",
+      "sinMedico": "No physician",
+      "referencia": "Referral / Source",
+      "sinReferencia": "No referral",
+      "terceroTitle": "Bill to a third party (company / other person)",
+      "terceroShow": "Add",
+      "terceroHide": "Hide",
+      "terceroNombre": "Name / Company",
+      "terceroNombrePh": "e.g. XYZ Insurance",
+      "terceroDoc": "ID",
+      "terceroTipo": "Type",
+      "terceroEmpresa": "Company",
+      "terceroPersona": "Person"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",
@@ -1285,7 +1298,9 @@
     "lista": "List",
     "listaPlaceholder": "Regular",
     "adding": "Adding…",
-    "listaLabel": "List: {lista}"
+    "listaLabel": "List: {lista}",
+    "descartar": "Discard",
+    "descartarConfirm": "Discard this draft? The invoice and its lines will be deleted."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -1517,6 +1532,23 @@
       "idioma": "Language",
       "asunto": "Subject",
       "estado": "Status"
+    }
+  },
+  "fac": {
+    "col": {
+      "producto": "Product",
+      "lista": "List",
+      "cantidad": "Qty",
+      "precio": "Price",
+      "descuento": "Disc.",
+      "impuesto": "Tax",
+      "subtotal": "Subtotal",
+      "accion": "",
+      "dosis": "Dose",
+      "sugerido": "Suggested qty",
+      "areas": "Areas",
+      "dias": "Days",
+      "sesiones": "Sessions"
     }
   }
 }

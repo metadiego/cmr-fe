@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import {
@@ -14,6 +14,7 @@ import {
   eliminarItem,
   setDescuentoGlobal,
   setExento,
+  descartarFactura,
   emitirFactura,
   registrarPago,
   type FacturaConItems,
@@ -22,6 +23,7 @@ import {
   type FormaPago,
 } from "@/lib/api/facturas";
 import { listTiposPrecio, listImpuestos, listCatalogoPrecios, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
+import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
 import { useResource } from "@/hooks/use-resource";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
@@ -45,8 +47,10 @@ const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 export default function FacturacionPage() {
   const params = useParams<{ id: string }>();
   const search = useSearchParams();
+  const router = useRouter();
   const id = String(params.id);
   const centro = search.get("centro") ?? undefined;
+  const [descartando, setDescartando] = React.useState(false);
 
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
@@ -107,6 +111,18 @@ export default function FacturacionPage() {
     [refetch, tRoot],
   );
 
+  async function descartar() {
+    if (typeof window !== "undefined" && !window.confirm(t("descartarConfirm"))) return;
+    setDescartando(true);
+    try {
+      await descartarFactura(id, centro);
+      router.push("/facturacion/general");
+    } catch (err) {
+      toastError(err, tRoot);
+      setDescartando(false);
+    }
+  }
+
   if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
   if (!factura) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
 
@@ -142,6 +158,11 @@ export default function FacturacionPage() {
             </span>
           )}
           <EstadoBadge estado={estado} />
+          {esGeneral && estado === "borrador" && (
+            <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
+              {t("descartar")}
+            </Button>
+          )}
           <Button variant="outline" size="sm" className="no-print" onClick={() => window.print()}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {tRoot("receipt.print")}
@@ -458,16 +479,29 @@ function Lbl({ children }: { children: React.ReactNode }) {
   return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
 }
 
-function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string }) => void }) {
+function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string; meta?: Record<string, number> }) => void }) {
   const t = useTranslations("facturacion");
+  const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
   const [cant, setCant] = React.useState("1");
   const [precio, setPrecio] = React.useState(""); // override manual (vacío = precio de la lista de la factura)
-  const [gravado, setGravado] = React.useState(true);
+  const [gravadoOverride, setGravadoOverride] = React.useState<boolean | null>(null); // null = default del producto
+  const [metaVals, setMetaVals] = React.useState<Record<string, string>>({}); // valores de columnas multiplicador/informativo
   const prod = catalogo.find((p) => p.id === prodId);
 
-  // PREVIEW DEL PRECIO: al elegir el producto, busca el precio de la LISTA de la factura
-  // (con el centro de la factura → robusto; fallback a efectivo). Se muestra en el campo.
+  // IVU (§2): el default nace del producto (gravado), NO fijo en ON. El cajero puede sobreescribir.
+  const gravadoEff = gravadoOverride ?? !!(prod as { gravado?: boolean } | undefined)?.gravado;
+
+  // Columnas dinámicas por producto: días/áreas/sesiones/dosis. multiplicador→total, informativo→muestra.
+  const colsRes = useResource<ColumnaFacturacion[]>(
+    () => (prodId ? listColumnasFacturacion(prodId, tenant ?? undefined) : Promise.resolve([])),
+    [prodId, tenant],
+  );
+  const capturables = (colsRes.state.kind === "ok" ? colsRes.state.data : []).filter(
+    (c) => c.rol === "multiplicador" || c.rol === "informativo",
+  );
+
+  // PREVIEW DEL PRECIO (por lista de la factura, centro de la factura; fallback efectivo).
   const precioRes = useResource<number | null>(
     () => {
       const p = catalogo.find((x) => x.id === prodId);
@@ -487,33 +521,43 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   );
   const buscando = precioRes.state.kind === "loading" && !!prodId;
   const precioLista = precioRes.state.kind === "ok" ? precioRes.state.data : null;
-  // Lo que se muestra en el campo: override si el cajero escribió; si no, el precio de la lista.
   const precioMostrado = precio !== "" ? precio : precioLista != null ? String(precioLista) : "";
   const canAdd = !!prodId && !disabled && !buscando;
 
+  function pick(v: string) {
+    setProdId(v);
+    setGravadoOverride(null); // vuelve al default del nuevo producto
+    setMetaVals({});
+    setPrecio("");
+  }
+
   function add() {
     if (!prod) return;
-    const g = showIvu ? gravado : (prod as { gravado?: boolean }).gravado;
-    // Precio VACÍO = auto: el server resuelve por la LISTA de la factura (fallback efectivo).
-    // Solo se envía si el cajero escribe un override.
+    const g = showIvu ? gravadoEff : !!(prod as { gravado?: boolean }).gravado;
     const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
+    // meta = valores de las columnas multiplicador/informativo (por su clave). El server calcula el total.
+    const meta: Record<string, number> = {};
+    capturables.forEach((c) => {
+      const raw = metaVals[c.clave];
+      if (raw != null && raw.trim() !== "" && !Number.isNaN(Number(raw))) meta[c.clave] = Number(raw);
+    });
     onAdd({
       productoId: prod.id,
       descripcion: prod.nombre,
       cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
       ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
       gravado: g,
-      // IVU: el BE calcula el monto solo si mandamos impuestoId; lo enviamos cuando es gravado.
       ...(g && ivuId ? { impuestoId: ivuId } : {}),
+      ...(Object.keys(meta).length ? { meta } : {}),
     });
-    setProdId(""); setCant("1"); setPrecio(""); setGravado(true);
+    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({});
   }
 
   return (
-    <div className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-nowrap">
+    <div className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-wrap">
       <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
         <Lbl>{t("addItem")}</Lbl>
-        <Select value={prodId} onValueChange={setProdId}>
+        <Select value={prodId} onValueChange={pick}>
           <SelectTrigger className="w-full"><SelectValue placeholder={t("selectProduct")} /></SelectTrigger>
           <SelectContent>{catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}</SelectContent>
         </Select>
@@ -522,6 +566,19 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
         <Lbl>{t("qty")}</Lbl>
         <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 text-right tabular-nums" inputMode="numeric" />
       </label>
+      {/* Columnas dinámicas del producto (días/áreas/sesiones/dosis) */}
+      {capturables.map((c) => (
+        <label key={c.clave} className="flex w-24 flex-col gap-1">
+          <Lbl>{tRoot(c.labelKey)}</Lbl>
+          <Input
+            value={metaVals[c.clave] ?? ""}
+            onChange={(e) => setMetaVals((m) => ({ ...m, [c.clave]: e.target.value }))}
+            className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80" : "")}
+            inputMode="decimal"
+            placeholder={c.rol === "multiplicador" ? "×" : ""}
+          />
+        </label>
+      ))}
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
         <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
@@ -531,11 +588,11 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
           <Lbl>{t("ivu")}</Lbl>
           <button
             type="button"
-            onClick={() => setGravado((g) => !g)}
-            className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravado ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")}
+            onClick={() => setGravadoOverride(!gravadoEff)}
+            className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravadoEff ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")}
             title={t("ivuToggleHint")}
           >
-            {gravado ? t("ivuGravado") : t("ivuExento")}
+            {gravadoEff ? t("ivuGravado") : t("ivuExento")}
           </button>
         </label>
       )}

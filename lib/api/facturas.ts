@@ -7,7 +7,11 @@ export type Factura = components["schemas"]["FacturaEntity"];
 export type FacturaItem = components["schemas"]["FacturaItemEntity"];
 export type Producto = components["schemas"]["ProductoEntity"];
 export type FormaPago = components["schemas"]["FormaPagoEntity"];
-export type AgregarItemPayload = components["schemas"]["AgregarItemDto"];
+// `meta` sale como Record<string,never> en OpenAPI (quirk) → lo tipamos usable: los
+// valores de columnas multiplicador/informativo por su clave.
+export type AgregarItemPayload = Omit<components["schemas"]["AgregarItemDto"], "meta"> & {
+  meta?: Record<string, number>;
+};
 export type RegistrarPagoPayload = components["schemas"]["RegistrarPagoDto"];
 export type DescuentoGlobalPayload = components["schemas"]["DescuentoGlobalDto"];
 export type CrearFacturaPayload = components["schemas"]["CreateFacturaDto"];
@@ -112,6 +116,21 @@ export function setDescuentosGrupo(facturaId: string, payload: DescuentosGrupoPa
 export function setExento(facturaId: string, payload: SetExentoPayload, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/exento`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
+
+// Corregir el paciente de un BORRADOR (sin borrar). Solo estado borrador.
+export function cambiarPacienteFactura(facturaId: string, pacienteId: string, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas/${facturaId}/paciente`, { method: "PUT", body: JSON.stringify({ pacienteId }) }, centroId);
+}
+// Descartar un BORRADOR (borra factura + líneas; 204). 400 si ya emitida.
+export function descartarFactura(facturaId: string, centroId?: string): Promise<void> {
+  return apiFetch<void>(`/facturas/${facturaId}`, { method: "DELETE" }, centroId);
+}
+
+// Proyección del catálogo facturable: producto + precio resuelto por centro + gravado (default IVU).
+export type CatalogoProducto = Producto & {
+  precio?: number | null;
+  presentacionId?: string | null;
+};
 
 export function getFactura(id: string, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/${id}`, {}, centroId);
