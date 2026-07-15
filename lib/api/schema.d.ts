@@ -2925,6 +2925,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/items/{itemId}/opcionales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Componentes OPCIONALES de una línea de kit (para el modal de toggle): nombre, precioIncremental, incluido. */
+        get: operations["FacturacionController_opcionalesDeLinea_v1"];
+        /** Incluir/excluir componentes OPCIONALES de una línea de kit → recomputa el precio y los totales. */
+        put: operations["FacturacionController_cambiarOpcionales_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}/items/{itemId}/kit": {
         parameters: {
             query?: never;
@@ -5111,6 +5129,7 @@ export interface components {
             unidadesPorEnvase: number | null;
             diasTratamiento: number | null;
             facturableGeneral: boolean;
+            imprimeComponentes: boolean;
             unidadContenidoId: string | null;
             tamano: string | null;
             peso: number | null;
@@ -5152,6 +5171,8 @@ export interface components {
             diasTratamiento?: number;
             /** @description Si el producto aparece en el catálogo de Facturación General (venta al público). Insumos/servicios internos = false. */
             facturableGeneral?: boolean;
+            /** @description Solo kits: si el recibo imprime el desglose de componentes (true) o solo el kit (false = compacto). */
+            imprimeComponentes?: boolean;
             tamano?: string;
             peso?: number;
             /** Format: uuid */
@@ -5186,6 +5207,7 @@ export interface components {
             unidadesPorEnvase?: number;
             diasTratamiento?: number;
             facturableGeneral?: boolean;
+            imprimeComponentes?: boolean;
             tamano?: string;
             peso?: number;
             /** Format: uuid */
@@ -5328,6 +5350,9 @@ export interface components {
             presentacionId: string | null;
             activo: boolean;
             estimado: boolean;
+            opcional: boolean;
+            precioIncremental: number | null;
+            incluidoPorDefecto: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5346,6 +5371,12 @@ export interface components {
             presentacionId?: string;
             /** @description Insumo ESTIMADO de consumo: no descarga inventario ni bloquea la venta; solo se reporta. */
             estimado?: boolean;
+            /** @description Componente OPCIONAL del kit: se incluye/excluye por línea y ajusta el total con precioIncremental. */
+            opcional?: boolean;
+            /** @description Monto que suma al total del kit cuando este opcional se incluye. */
+            precioIncremental?: number;
+            /** @description Si el opcional arranca incluido por defecto al agregar el kit. */
+            incluidoPorDefecto?: boolean;
         };
         UpdateProductoComponenteDto: {
             cantidad?: number;
@@ -5354,6 +5385,9 @@ export interface components {
             /** Format: uuid */
             presentacionId?: string;
             estimado?: boolean;
+            opcional?: boolean;
+            precioIncremental?: number;
+            incluidoPorDefecto?: boolean;
             activo?: boolean;
         };
         ProductoCentroEntity: {
@@ -7046,6 +7080,7 @@ export interface components {
             modoDescarga: string;
             personalizacion: Record<string, never> | null;
             meta: Record<string, never> | null;
+            opcionalesIncluidos: string[] | null;
             grupoFacturacionId: string | null;
             categoriaId: string | null;
             cantidadDevuelta: number;
@@ -7068,6 +7103,9 @@ export interface components {
             descuento?: number;
             /** @description Toggle IVU/exento por línea (override del gravado heredado). El impuesto se recalcula. */
             gravado?: boolean;
+        };
+        CambiarOpcionalesDto: {
+            incluidos: string[];
         };
         KitComponenteDto: {
             /** Format: uuid */
@@ -13798,6 +13836,52 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    FacturacionController_opcionalesDeLinea_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FacturacionController_cambiarOpcionales_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CambiarOpcionalesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

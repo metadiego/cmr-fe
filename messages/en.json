@@ -1132,7 +1132,9 @@
         "fisicos": "Physical (buyable)",
         "compuestos": "Compounds / derivatives"
       },
-      "editarInsumos": "Supplies"
+      "editarInsumos": "Supplies",
+      "imprimeComponentes": "Print components on receipt",
+      "imprimeComponentesHint": "Detailed (shows components) vs compact (kit only)"
     },
     "picker": {
       "placeholder": "Select a product…",
@@ -1189,9 +1191,14 @@
       "col": {
         "componente": "Component",
         "cantidad": "Quantity",
-        "unidad": "Unit"
+        "unidad": "Unit",
+        "opcional": "Optional"
       },
-      "empty": "No recipe — add components"
+      "empty": "No recipe — add components",
+      "opcional": "Optional",
+      "precioIncremental": "+Price",
+      "incluidoPorDefecto": "Included by default",
+      "porDefecto": "default"
     },
     "index": {
       "title": "Inventory",
@@ -1378,7 +1385,11 @@
     "terceroNombre": "Name (company or person)",
     "terceroDoc": "ID / Registry",
     "terceroPersona": "Person",
-    "terceroEmpresa": "Company"
+    "terceroEmpresa": "Company",
+    "opcionales": "Options",
+    "opcionalesTitle": "Kit options",
+    "opcionalesEmpty": "This kit has no options",
+    "opcionalesExtra": "Options extra"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

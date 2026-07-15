@@ -118,6 +118,12 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
             </span>
             <span className="shrink-0 tabular-nums">{money(it.total)}</span>
           </div>
+          {/* Desglose de kit (imprimeComponentes=true); en compacto no viene. */}
+          {it.componentes?.map((c, j) => (
+            <div key={j} className="pl-3 text-[0.9em] opacity-80">
+              + {c.cantidad > 1 ? `${c.cantidad} x ` : ""}{c.descripcion}
+            </div>
+          ))}
         </div>
       ))}
 

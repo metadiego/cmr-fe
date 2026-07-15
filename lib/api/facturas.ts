@@ -65,6 +65,17 @@ export type FacturaConItems = Omit<Factura, "creadoPor" | "emitidoPor"> & {
   emitidoPor?: { id?: string; nombre?: string } | null;
   emitidaEn?: string | null;
   numeroDisplay?: string | null;
+  // Snapshot congelado de componentes de kit (solo facturas EMITIDAS), agrupado por facturaItemId.
+  // Alimenta la impresión DETALLADA del recibo (kit-opcionales-y-display, BE PR #84).
+  componentes?: FacturaComponente[] | null;
+};
+
+// Componente de kit congelado en la factura (para el recibo detallado).
+export type FacturaComponente = {
+  facturaItemId: string;
+  nombre?: string | null;
+  cantidad?: number | null;
+  precioUnitario?: number | null;
 };
 
 // GET /facturas — listado paginado (findAll), filtrado server-side. Devuelve
@@ -171,6 +182,28 @@ export function actualizarItem(facturaId: string, itemId: string, payload: Parti
 
 export function eliminarItem(facturaId: string, itemId: string, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/items/${itemId}`, { method: "DELETE" }, centroId);
+}
+
+// Kits con componentes OPCIONALES (BE PR #84): el cajero incluye/excluye por línea y el BE re-precifica.
+// La respuesta del GET no está tipada en swagger → shape del handoff (kit-opcionales-y-display).
+export interface ItemOpcional {
+  componenteId: string;
+  nombre: string;
+  cantidad: number;
+  precioIncremental: number;
+  incluido: boolean;
+}
+export function getItemOpcionales(facturaId: string, itemId: string, centroId?: string): Promise<ItemOpcional[]> {
+  return apiFetch<ItemOpcional[]>(`/facturas/${facturaId}/items/${itemId}/opcionales`, {}, centroId);
+}
+// incluidos = ids de componentes que quedan marcados. El BE re-precifica la línea (base + Σ incluidos)
+// y recomputa los totales; devuelve la factura proyectada (total en vivo).
+export function setItemOpcionales(facturaId: string, itemId: string, incluidos: string[], centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(
+    `/facturas/${facturaId}/items/${itemId}/opcionales`,
+    { method: "PUT", body: JSON.stringify({ incluidos }) },
+    centroId,
+  );
 }
 
 export function setDescuentoGlobal(facturaId: string, payload: DescuentoGlobalPayload, centroId?: string): Promise<FacturaConItems> {

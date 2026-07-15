@@ -1132,7 +1132,9 @@
         "fisicos": "Físicos (comprables)",
         "compuestos": "Compuestos / derivados"
       },
-      "editarInsumos": "Insumos"
+      "editarInsumos": "Insumos",
+      "imprimeComponentes": "Imprimir componentes en el recibo",
+      "imprimeComponentesHint": "Detallado (muestra componentes) vs compacto (solo el kit)"
     },
     "picker": {
       "placeholder": "Selecciona un producto…",
@@ -1189,9 +1191,14 @@
       "col": {
         "componente": "Componente",
         "cantidad": "Cantidad",
-        "unidad": "Unidad"
+        "unidad": "Unidad",
+        "opcional": "Opcional"
       },
-      "empty": "Sin receta — agrega componentes"
+      "empty": "Sin receta — agrega componentes",
+      "opcional": "Opcional",
+      "precioIncremental": "+Precio",
+      "incluidoPorDefecto": "Incluido por defecto",
+      "porDefecto": "por defecto"
     },
     "index": {
       "title": "Inventario",
@@ -1378,7 +1385,11 @@
     "terceroNombre": "Nombre (empresa o persona)",
     "terceroDoc": "ID / Registro",
     "terceroPersona": "Persona",
-    "terceroEmpresa": "Empresa"
+    "terceroEmpresa": "Empresa",
+    "opcionales": "Opcionales",
+    "opcionalesTitle": "Opcionales del kit",
+    "opcionalesEmpty": "Este kit no tiene opcionales",
+    "opcionalesExtra": "Extra por opcionales"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

@@ -10,6 +10,8 @@ export type ReciboItem = {
   precioUnitario: number;
   descuento: number;
   total: number;
+  // Componentes del kit para impresión DETALLADA (imprimeComponentes=true). Vacío/omitido = compacto.
+  componentes?: { descripcion: string; cantidad: number }[];
 };
 
 // Presentational model consumed by <ReciboTermico>. Assembled ONCE here from the
@@ -40,13 +42,26 @@ const num = (v: unknown) => Number(v ?? 0);
 // All data travels from the BE (empresa, pagos, emisor, medico, numeroDisplay,
 // emitidaEn) — no FE fallbacks/hardcode. numeroDisplay is null on drafts → "—".
 export function buildRecibo(f: FacturaConItems): Recibo {
-  const items: ReciboItem[] = (f.items ?? []).map((it) => ({
-    cantidad: num(it.cantidad),
-    descripcion: it.descripcion ?? "—",
-    precioUnitario: num(it.precioUnitario),
-    descuento: num(it.descuento),
-    total: num(it.total) || num(it.cantidad) * num(it.precioUnitario),
-  }));
+  // Snapshot de componentes de kit congelados (solo emitidas), agrupado por facturaItemId.
+  const comps = f.componentes ?? [];
+  const items: ReciboItem[] = (f.items ?? []).map((it) => {
+    // Regla de impresión por línea: imprimeComponentes=false → compacto (sin componentes).
+    const imprime = (it as { imprimeComponentes?: boolean }).imprimeComponentes;
+    const itemComps =
+      imprime === false
+        ? []
+        : comps
+            .filter((c) => c.facturaItemId === it.id)
+            .map((c) => ({ descripcion: c.nombre ?? "—", cantidad: num(c.cantidad) }));
+    return {
+      cantidad: num(it.cantidad),
+      descripcion: it.descripcion ?? "—",
+      precioUnitario: num(it.precioUnitario),
+      descuento: num(it.descuento),
+      total: num(it.total) || num(it.cantidad) * num(it.precioUnitario),
+      ...(itemComps.length ? { componentes: itemComps } : {}),
+    };
+  });
   const subtotal = num(f.subtotal) || items.reduce((s, it) => s + it.total, 0);
   const descuento = num(f.descuento);
   const impuesto = num(f.impuesto);

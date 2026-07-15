@@ -465,6 +465,7 @@ type FormState = {
   fabricanteId: string;
   barcode: string;
   gravado: boolean;
+  imprimeComponentes: boolean;
   activo: boolean;
 };
 const EMPTY: FormState = {
@@ -480,6 +481,7 @@ const EMPTY: FormState = {
   fabricanteId: "",
   barcode: "",
   gravado: false,
+  imprimeComponentes: true,
   activo: true,
 };
 
@@ -525,6 +527,7 @@ function ProductoForm({
             fabricanteId: producto.fabricanteId ?? "",
             barcode: producto.barcode ?? "",
             gravado: producto.gravado ?? false,
+            imprimeComponentes: (producto as { imprimeComponentes?: boolean }).imprimeComponentes ?? true,
             activo: producto.activo ?? true,
           }
         : EMPTY,
@@ -558,6 +561,8 @@ function ProductoForm({
         fabricanteId: id(form.fabricanteId),
         barcode: txt(form.barcode),
         gravado: form.gravado,
+        // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
+        ...(form.tipo === "compuesto" ? { imprimeComponentes: form.imprimeComponentes } : {}),
       };
       if (isEdit && producto) {
         await updateProducto(producto.id, { ...common, activo: form.activo });
@@ -670,6 +675,9 @@ function ProductoForm({
           </div>
           <Toggle label={t("field.esInventariable")} checked={form.esInventariable} onChange={(v) => set("esInventariable", v)} />
           <Toggle label={t("field.gravado")} checked={form.gravado} onChange={(v) => set("gravado", v)} />
+          {form.tipo === "compuesto" && (
+            <Toggle label={t("imprimeComponentes")} checked={form.imprimeComponentes} onChange={(v) => set("imprimeComponentes", v)} />
+          )}
           {isEdit && (
             <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />
           )}

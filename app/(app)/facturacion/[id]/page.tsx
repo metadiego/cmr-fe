@@ -17,6 +17,9 @@ import {
   descartarFactura,
   cambiarPacienteFactura,
   editarCabeceraFactura,
+  getItemOpcionales,
+  setItemOpcionales,
+  type ItemOpcional,
   buscarPaciente,
   emitirFactura,
   registrarPago,
@@ -367,6 +370,15 @@ function Editor({
     .filter((it) => String(it.modoDescarga) === "a_la_entrega")
     .reduce((s, it) => s + (n(it.sesiones) || 0), 0);
 
+  // Kits con opcionales: la línea de un producto compuesto ofrece incluir/excluir componentes.
+  const prodById = React.useMemo(() => {
+    const m = new Map<string, Producto>();
+    catalogo.forEach((p) => m.set(p.id, p));
+    return m;
+  }, [catalogo]);
+  const esKit = (it: FacturaItem) => prodById.get(String(it.productoId))?.tipo === "compuesto";
+  const [opcItemId, setOpcItemId] = React.useState<string | null>(null);
+
   return (
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
       {/* Líneas */}
@@ -399,7 +411,18 @@ function Editor({
                 const e = edits[it.id] ?? { cantidad: n(it.cantidad), precioUnitario: n(it.precioUnitario) };
                 return (
                   <tr key={it.id}>
-                    <td className="px-3 py-2">{it.descripcion ?? "—"}</td>
+                    <td className="px-3 py-2">
+                      <span>{it.descripcion ?? "—"}</span>
+                      {esBorrador && esKit(it) && (
+                        <button
+                          type="button"
+                          onClick={() => setOpcItemId(it.id)}
+                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                        >
+                          {t("opcionales")}
+                        </button>
+                      )}
+                    </td>
                     <td className="px-3 py-2 text-right">
                       {esBorrador ? (
                         <Input
@@ -516,6 +539,18 @@ function Editor({
           <Pago formas={formas} disabled={busy} saldo={saldo} onPay={(formaPagoId, monto, notas) => run(() => registrarPago(id, { formaPagoId, monto, ...(notas ? { notas } : {}) } as never, centro))} />
         )}
       </aside>
+
+      {opcItemId && (
+        <OpcionalesDialog
+          key={opcItemId}
+          open={!!opcItemId}
+          facturaId={id}
+          itemId={opcItemId}
+          centro={centro}
+          onOpenChange={(o) => !o && setOpcItemId(null)}
+          onSaved={() => { setOpcItemId(null); run(() => Promise.resolve()); }}
+        />
+      )}
     </div>
   );
 }
@@ -540,6 +575,83 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
 
 function Lbl({ children }: { children: React.ReactNode }) {
   return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
+}
+
+// Modal de OPCIONALES de un kit: incluir/excluir componentes por línea. El BE re-precifica (base +
+// Σ incluidos) y recomputa totales; el FE solo manda la selección. Sin seedeo por effect: usamos
+// un overlay de cambios sobre lo que trae el GET (eff = override ?? incluido).
+function OpcionalesDialog({
+  open,
+  onOpenChange,
+  facturaId,
+  itemId,
+  centro,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  facturaId: string;
+  itemId: string;
+  centro?: string;
+  onSaved: () => void;
+}) {
+  const t = useTranslations("facturacion");
+  const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  const res = useResource<ItemOpcional[]>(() => getItemOpcionales(facturaId, itemId, centro), [facturaId, itemId, centro]);
+  const opcionales = res.state.kind === "ok" ? res.state.data : [];
+  const [ov, setOv] = React.useState<Record<string, boolean>>({});
+  const [saving, setSaving] = React.useState(false);
+  const eff = (o: ItemOpcional) => ov[o.componenteId] ?? o.incluido;
+  const extra = opcionales.filter(eff).reduce((s, o) => s + (o.precioIncremental ?? 0), 0);
+
+  async function guardar() {
+    setSaving(true);
+    try {
+      const incluidos = opcionales.filter(eff).map((o) => o.componenteId);
+      await setItemOpcionales(facturaId, itemId, incluidos, centro);
+      onSaved();
+    } catch (err) {
+      toastError(err, tRoot);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("opcionalesTitle")}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2">
+          {res.state.kind === "loading" && <p className="py-6 text-center text-sm text-muted-foreground">{tc("loading")}</p>}
+          {res.state.kind === "ok" && opcionales.length === 0 && (
+            <p className="py-6 text-center text-sm text-muted-foreground">{t("opcionalesEmpty")}</p>
+          )}
+          {opcionales.map((o) => (
+            <label key={o.componenteId} className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm">
+              <span className="flex items-center gap-2">
+                <input type="checkbox" checked={eff(o)} onChange={() => setOv((m) => ({ ...m, [o.componenteId]: !eff(o) }))} />
+                <span className="font-medium">{o.nombre}</span>
+                {o.cantidad > 1 && <span className="text-xs text-muted-foreground">×{o.cantidad}</span>}
+              </span>
+              <span className="tabular-nums text-muted-foreground">+{money(o.precioIncremental)}</span>
+            </label>
+          ))}
+        </div>
+        {opcionales.length > 0 && (
+          <div className="flex items-center justify-between border-t pt-3 text-sm">
+            <span className="text-muted-foreground">{t("opcionalesExtra")}</span>
+            <span className="font-semibold tabular-nums">+{money(extra)}</span>
+          </div>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
+          <Button size="sm" onClick={guardar} disabled={saving || res.state.kind !== "ok"}>{tc("save")}</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 // Diálogo para CORREGIR el paciente de un borrador sin descartar. Reusa el finder (buscarPaciente,
