@@ -570,7 +570,19 @@
     "inventario_transferencias": "Transfers",
     "comunicaciones": "Communications",
     "facturacion_general": "General billing",
-    "consumoInsumos": "Supply consumption"
+    "consumoInsumos": "Supply consumption",
+    "columnasCitas": "Appointment columns",
+    "tableroCitas": "Appointments board",
+    "productos": "Products",
+    "proveedores": "Suppliers",
+    "presentaciones": "Supplier presentations",
+    "recibirCompra": "Receive purchase",
+    "recetas": "Recipes",
+    "transferencias": "Transfers",
+    "constructorTableros": "Board builder",
+    "appearance": "Appearance",
+    "tableroModulos": "Board modules",
+    "tablerosSettings": "Board settings"
   },
   "admin": {
     "title": "Administration",

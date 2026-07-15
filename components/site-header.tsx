@@ -14,6 +14,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { isActive } from "@/lib/nav";
+import { NAV_MANIFEST } from "@/lib/nav-manifest";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { createClient } from "@/lib/supabase/client";
@@ -95,16 +96,29 @@ export function SiteHeader() {
       m.clave !== "en-desarrollo" &&
       m.clave !== "por-desarrollar",
   );
+  // Catch-all de desarrollo: completa el menú con TODAS las páginas reales que el BE aún no
+  // registró (dedup por path — los items del BE mandan). Así nada queda "escondido" mientras
+  // se organiza el menú RBAC del BE. Ver lib/nav-manifest.ts.
+  const bePaths = new Set(navItems.map((m) => m.path));
+  const manifestItems = NAV_MANIFEST.filter((r) => !bePaths.has(r.path)).map((r) => ({
+    clave: `manifest:${r.path}`,
+    labelKey: r.labelKey,
+    path: r.path,
+  }));
+  const allItems: { clave: string; labelKey: string; path: string }[] = [
+    ...navItems.map((m) => ({ clave: m.clave, labelKey: m.labelKey, path: m.path })),
+    ...manifestItems,
+  ];
   const grupos = [
     {
       clave: "en-desarrollo",
       labelKey: "nav.en_desarrollo",
-      items: navItems.filter((m) => hasPage(m.path)),
+      items: allItems.filter((m) => hasPage(m.path)),
     },
     {
       clave: "por-desarrollar",
       labelKey: "nav.por_desarrollar",
-      items: navItems.filter((m) => !hasPage(m.path)),
+      items: allItems.filter((m) => !hasPage(m.path)),
     },
   ].filter((g) => g.items.length > 0);
   // Session for the header (email + sign out). Anonymous → shows "sign in".

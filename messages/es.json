@@ -570,7 +570,19 @@
     "inventario_transferencias": "Transferencias",
     "comunicaciones": "Comunicaciones",
     "facturacion_general": "Facturación general",
-    "consumoInsumos": "Consumo de insumos"
+    "consumoInsumos": "Consumo de insumos",
+    "columnasCitas": "Columnas de citas",
+    "tableroCitas": "Tablero de citas",
+    "productos": "Productos",
+    "proveedores": "Proveedores",
+    "presentaciones": "Presentaciones de proveedor",
+    "recibirCompra": "Recibir compra",
+    "recetas": "Recetas",
+    "transferencias": "Transferencias",
+    "constructorTableros": "Constructor de tableros",
+    "appearance": "Apariencia",
+    "tableroModulos": "Módulos de tablero",
+    "tablerosSettings": "Ajustes de tableros"
   },
   "admin": {
     "title": "Administración",
