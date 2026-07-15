@@ -482,7 +482,8 @@
     "error": "Could not load",
     "view": "View",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "noResults": "No results"
   },
   "pending": {
     "title": "Access pending",
@@ -1300,7 +1301,12 @@
     "adding": "Adding…",
     "listaLabel": "List: {lista}",
     "descartar": "Discard",
-    "descartarConfirm": "Discard this draft? The invoice and its lines will be deleted."
+    "descartarConfirm": "Discard this draft? The invoice and its lines will be deleted.",
+    "cambiarPaciente": "Change",
+    "cambiarPacienteTitle": "Change patient",
+    "searchPatientPlaceholder": "Search by name, record or ID",
+    "searchHint": "Type at least 2 characters",
+    "pacienteActual": "Current"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

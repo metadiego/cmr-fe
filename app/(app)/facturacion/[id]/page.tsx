@@ -15,12 +15,15 @@ import {
   setDescuentoGlobal,
   setExento,
   descartarFactura,
+  cambiarPacienteFactura,
+  buscarPaciente,
   emitirFactura,
   registrarPago,
   type FacturaConItems,
   type FacturaItem,
   type Producto,
   type FormaPago,
+  type PacienteBusqueda,
 } from "@/lib/api/facturas";
 import { listTiposPrecio, listImpuestos, listCatalogoPrecios, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
@@ -40,6 +43,12 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -51,6 +60,7 @@ export default function FacturacionPage() {
   const id = String(params.id);
   const centro = search.get("centro") ?? undefined;
   const [descartando, setDescartando] = React.useState(false);
+  const [cambiarOpen, setCambiarOpen] = React.useState(false);
 
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
@@ -123,6 +133,18 @@ export default function FacturacionPage() {
     }
   }
 
+  // Corregir el paciente del borrador SIN descartar (PUT /facturas/:id/paciente). Refresca factura + paciente.
+  async function cambiarPaciente(nuevo: PacienteBusqueda) {
+    try {
+      await cambiarPacienteFactura(id, nuevo.id, centro);
+      setCambiarOpen(false);
+      await refetch();
+      getPaciente(nuevo.id, centro).then((p) => setPaciente(p)).catch(() => {});
+    } catch (err) {
+      toastError(err, tRoot);
+    }
+  }
+
   if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
   if (!factura) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
 
@@ -145,7 +167,19 @@ export default function FacturacionPage() {
       <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
         <div className="min-w-0 flex-1">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
-          <h1 className="truncate text-xl font-semibold tracking-tight">{nombre || t("patient")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="truncate text-xl font-semibold tracking-tight">{nombre || t("patient")}</h1>
+            {/* Corregir paciente sin descartar (solo borrador de venta general; consulta va ligada a la cita). */}
+            {esGeneral && estado === "borrador" && (
+              <button
+                type="button"
+                onClick={() => setCambiarOpen(true)}
+                className="no-print shrink-0 rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                {t("cambiarPaciente")}
+              </button>
+            )}
+          </div>
           {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
         </div>
         <div className="flex items-center gap-2">
@@ -169,6 +203,14 @@ export default function FacturacionPage() {
           </Button>
         </div>
       </div>
+
+      <CambiarPacienteDialog
+        open={cambiarOpen}
+        onOpenChange={setCambiarOpen}
+        centro={centro}
+        actualId={paciente ? String((paciente as { id?: string }).id ?? "") : ""}
+        onPick={cambiarPaciente}
+      />
 
       {/* Editor keyeado por updatedAt → tras guardar, remonta con los valores del servidor. */}
       <Editor
@@ -477,6 +519,77 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
 
 function Lbl({ children }: { children: React.ReactNode }) {
   return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
+}
+
+// Diálogo para CORREGIR el paciente de un borrador sin descartar. Reusa el finder (buscarPaciente,
+// nombre/record/doc, debounce ≥2 chars). Al elegir → PUT /facturas/:id/paciente en el padre.
+function CambiarPacienteDialog({
+  open,
+  onOpenChange,
+  centro,
+  actualId,
+  onPick,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  centro?: string;
+  actualId?: string;
+  onPick: (p: PacienteBusqueda) => void;
+}) {
+  const t = useTranslations("facturacion");
+  const tRoot = useTranslations();
+  const [q, setQ] = React.useState("");
+  const [debounced, setDebounced] = React.useState("");
+  React.useEffect(() => {
+    const h = setTimeout(() => setDebounced(q), 250);
+    return () => clearTimeout(h);
+  }, [q]);
+  const term = debounced.trim();
+  const res = useResource<PacienteBusqueda[]>(
+    () => (term.length >= 2 ? buscarPaciente(term, centro) : Promise.resolve([])),
+    [term, centro],
+  );
+  const shown = term.length >= 2 && res.state.kind === "ok" ? res.state.data : [];
+  const loading = res.state.kind === "loading" && term.length >= 2;
+  const nombre = (p: PacienteBusqueda) => `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim() || t("patient");
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t("cambiarPacienteTitle")}</DialogTitle>
+        </DialogHeader>
+        <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPatientPlaceholder")} />
+        <div className="max-h-80 space-y-1 overflow-y-auto">
+          {term.length < 2 && <p className="py-6 text-center text-sm text-muted-foreground">{t("searchHint")}</p>}
+          {loading && <p className="py-6 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>}
+          {term.length >= 2 && !loading && shown.length === 0 && (
+            <p className="py-6 text-center text-sm text-muted-foreground">{tRoot("common.noResults")}</p>
+          )}
+          {shown.map((p) => {
+            const esActual = String(p.id) === String(actualId ?? "");
+            return (
+              <button
+                key={p.id}
+                type="button"
+                disabled={esActual}
+                onClick={() => onPick(p)}
+                className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm hover:bg-accent disabled:opacity-50"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate font-medium">{nombre(p)}</span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {p.record ? `#${p.record}` : ""} {p.docId ? `· ID ${p.docId}` : ""}
+                  </span>
+                </span>
+                {esActual && <span className="shrink-0 text-xs text-muted-foreground">{t("pacienteActual")}</span>}
+              </button>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string; meta?: Record<string, number> }) => void }) {

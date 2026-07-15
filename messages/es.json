@@ -482,7 +482,8 @@
     "error": "No se pudo cargar",
     "view": "Ver",
     "active": "Activo",
-    "inactive": "Inactivo"
+    "inactive": "Inactivo",
+    "noResults": "Sin resultados"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -1300,7 +1301,12 @@
     "adding": "Agregando…",
     "listaLabel": "Lista: {lista}",
     "descartar": "Descartar",
-    "descartarConfirm": "¿Descartar este borrador? Se elimina la factura y sus líneas."
+    "descartarConfirm": "¿Descartar este borrador? Se elimina la factura y sus líneas.",
+    "cambiarPaciente": "Cambiar",
+    "cambiarPacienteTitle": "Cambiar paciente",
+    "searchPatientPlaceholder": "Buscar por nombre, record o ID",
+    "searchHint": "Escribe al menos 2 caracteres",
+    "pacienteActual": "Actual"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
