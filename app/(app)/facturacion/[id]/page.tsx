@@ -501,6 +501,30 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
     (c) => c.rol === "multiplicador" || c.rol === "informativo",
   );
 
+  // Autocálculo Dosis→Cantidad (potes/frascos): al cambiar la Dosis, Cantidad = ceil(dosis×días/capsulasPorUnidad).
+  // capsulasPorUnidad y diasTratamiento vienen del catálogo (BE); si faltan → cantidad manual, sin autocálculo.
+  const prodX = prod as
+    | { capsulasPorUnidad?: number | null; unidadesPorEnvase?: number | null; diasTratamiento?: number | null }
+    | undefined;
+  const capsUnit = prodX?.capsulasPorUnidad ?? prodX?.unidadesPorEnvase ?? null;
+  const diasTrat = prodX?.diasTratamiento ?? 30; // fallback documentado (BE debe exponer diasTratamiento)
+  const dosisClave = capturables.find((c) => /dosis/i.test(c.clave))?.clave ?? null;
+  const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.clave))?.clave ?? null;
+
+  function onMetaChange(clave: string, value: string) {
+    const dosis = Number(value);
+    const sugerida =
+      clave === dosisClave && capsUnit && capsUnit > 0 && diasTrat > 0 && dosis > 0
+        ? Math.ceil((dosis * diasTrat) / capsUnit)
+        : null;
+    setMetaVals((m) => {
+      const next = { ...m, [clave]: value };
+      if (sugerida != null && sugeridoClave) next[sugeridoClave] = String(sugerida);
+      return next;
+    });
+    if (sugerida != null) setCant(String(sugerida)); // pre-llena Cantidad, queda editable
+  }
+
   // PREVIEW DEL PRECIO (por lista de la factura, centro de la factura; fallback efectivo).
   const precioRes = useResource<number | null>(
     () => {
@@ -572,8 +596,9 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
           <Lbl>{tRoot(c.labelKey)}</Lbl>
           <Input
             value={metaVals[c.clave] ?? ""}
-            onChange={(e) => setMetaVals((m) => ({ ...m, [c.clave]: e.target.value }))}
-            className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80" : "")}
+            onChange={(e) => onMetaChange(c.clave, e.target.value)}
+            readOnly={c.clave === sugeridoClave}
+            className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80 " : "") + (c.clave === sugeridoClave ? "bg-muted" : "")}
             inputMode="decimal"
             placeholder={c.rol === "multiplicador" ? "×" : ""}
           />

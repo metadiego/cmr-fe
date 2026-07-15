@@ -107,6 +107,22 @@ POST /facturas/:id/items
 
 ---
 
+## 1.bis Autocálculo de Cantidad desde la Dosis (productos con cápsulas/tabletas) — DESPLEGADO prod
+Cuando una línea de producto tiene columna **Dosis**, al cambiar la Dosis se pre-llena la **Cantidad**
+(envases/potes) sugerida, EDITABLE. Fórmula (paridad legacy verificada):
+```js
+// GET /facturas/catalogo trae por producto: unidadesPorEnvase, diasTratamiento (pueden ser null)
+const uxe  = producto.unidadesPorEnvase;   // cáps/tabletas/comprimidos por envase
+const dias = producto.diasTratamiento;     // días de tratamiento (dato por producto)
+if (dosis > 0 && uxe > 0 && dias > 0) {
+  cantidad = Math.ceil((dosis * dias) / uxe);  // sugerida, editable
+} // si uxe/dias son null → no autocalcular; cantidad manual
+```
+- `unidadesPorEnvase` y `diasTratamiento` son campos del **producto** (CRUD de inventario), configurables,
+  y vienen en `GET /facturas/catalogo`. NO hardcodear días en el FE: usar el del producto.
+- La `cantidad` (envases) es lo que se manda en `POST /facturas/:id/items`; la `dosis` va en `meta.dosis`.
+- Ejemplo real: ANDROGRAPHIS 120 CAPS → uxe=120, dias=30, dosis=12 ⇒ cantidad=3 potes.
+
 ## 2. IVU por línea — el atributo del producto MANDA, el toggle es override
 - El BE ya hace: `gravado_de_la_línea = lo_que_manda_el_FE ?? producto.gravado`.
 - **Fix FE:** al agregar un producto, **inicializa el toggle IVU con `producto.gravado`** del catálogo
