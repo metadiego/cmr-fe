@@ -16,6 +16,7 @@ import {
   setExento,
   descartarFactura,
   cambiarPacienteFactura,
+  editarCabeceraFactura,
   buscarPaciente,
   emitirFactura,
   registrarPago,
@@ -24,7 +25,9 @@ import {
   type Producto,
   type FormaPago,
   type PacienteBusqueda,
+  type EditarCabeceraPayload,
 } from "@/lib/api/facturas";
+import { listMedicos, listMedios, type MedicoOpcion, type MedioFacturacion } from "@/lib/api/facturacion-config";
 import { listTiposPrecio, listImpuestos, listCatalogoPrecios, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
 import { useResource } from "@/hooks/use-resource";
@@ -61,6 +64,7 @@ export default function FacturacionPage() {
   const centro = search.get("centro") ?? undefined;
   const [descartando, setDescartando] = React.useState(false);
   const [cambiarOpen, setCambiarOpen] = React.useState(false);
+  const [cabeceraOpen, setCabeceraOpen] = React.useState(false);
 
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
@@ -193,6 +197,11 @@ export default function FacturacionPage() {
           )}
           <EstadoBadge estado={estado} />
           {esGeneral && estado === "borrador" && (
+            <Button variant="outline" size="sm" className="no-print" onClick={() => setCabeceraOpen(true)}>
+              {t("editarCabecera")}
+            </Button>
+          )}
+          {esGeneral && estado === "borrador" && (
             <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
               {t("descartar")}
             </Button>
@@ -210,6 +219,18 @@ export default function FacturacionPage() {
         centro={centro}
         actualId={paciente ? String((paciente as { id?: string }).id ?? "") : ""}
         onPick={cambiarPaciente}
+      />
+
+      <CabeceraDialog
+        key={`cab-${cabeceraOpen}`}
+        open={cabeceraOpen}
+        onOpenChange={setCabeceraOpen}
+        centro={centro}
+        factura={factura}
+        onSaved={async () => {
+          setCabeceraOpen(false);
+          await refetch();
+        }}
       />
 
       {/* Editor keyeado por updatedAt → tras guardar, remonta con los valores del servidor. */}
@@ -586,6 +607,115 @@ function CambiarPacienteDialog({
               </button>
             );
           })}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Editar la CABECERA de un borrador sin descartar (médico / referido / tercero) → PUT /facturas/:id/cabecera.
+// Reusa los mismos catálogos que el alta (listMedicos/listMedios). El paciente se cambia aparte (tiene buscador).
+const NONE = "__none__";
+function CabeceraDialog({
+  open,
+  onOpenChange,
+  centro,
+  factura,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  centro?: string;
+  factura: FacturaConItems;
+  onSaved: () => void | Promise<void>;
+}) {
+  const t = useTranslations("facturacion");
+  const tRoot = useTranslations();
+  const f = factura as unknown as {
+    medicoId?: string | null; medioId?: string | null;
+    facturarANombre?: string | null; facturarADocId?: string | null; facturarATipo?: string | null;
+  };
+  const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
+  const mediosRes = useResource<MedioFacturacion[]>(() => listMedios(centro), [centro]);
+  const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
+  const medios = mediosRes.state.kind === "ok" ? mediosRes.state.data : [];
+
+  // Sembrado con los valores actuales de la factura (el padre remonta por `key` al abrir → initializer fresco).
+  const [medicoId, setMedicoId] = React.useState<string>(f.medicoId ?? NONE);
+  const [medioId, setMedioId] = React.useState<string>(f.medioId ?? NONE);
+  const [terceroNombre, setTerceroNombre] = React.useState(f.facturarANombre ?? "");
+  const [terceroDoc, setTerceroDoc] = React.useState(f.facturarADocId ?? "");
+  const [terceroTipo, setTerceroTipo] = React.useState<"persona" | "empresa">(f.facturarATipo === "empresa" ? "empresa" : "persona");
+  const [saving, setSaving] = React.useState(false);
+
+  async function guardar() {
+    setSaving(true);
+    const nombre = terceroNombre.trim();
+    // ausente = no aplica; aquí somos autoritativos: null = limpiar cuando el campo va vacío.
+    const payload: EditarCabeceraPayload = {
+      medicoId: medicoId === NONE ? null : medicoId,
+      medioId: medioId === NONE ? null : medioId,
+      facturarANombre: nombre || null,
+      facturarADocId: nombre ? (terceroDoc.trim() || null) : null,
+      facturarATipo: nombre ? terceroTipo : null,
+    };
+    try {
+      await editarCabeceraFactura(String(factura.id), payload, centro);
+      await onSaved();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t("editarCabeceraTitle")}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <label className="flex flex-col gap-1">
+            <Lbl>{t("medico")}</Lbl>
+            <Select value={medicoId} onValueChange={setMedicoId}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>{t("sinMedico")}</SelectItem>
+                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </label>
+          <label className="flex flex-col gap-1">
+            <Lbl>{t("referido")}</Lbl>
+            <Select value={medioId} onValueChange={setMedioId}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>{t("sinReferido")}</SelectItem>
+                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </label>
+          <div className="space-y-2 rounded-lg border p-3">
+            <Lbl>{t("tercero")}</Lbl>
+            <Input value={terceroNombre} onChange={(e) => setTerceroNombre(e.target.value)} placeholder={t("terceroNombre")} />
+            {terceroNombre.trim() && (
+              <div className="flex gap-2">
+                <Input value={terceroDoc} onChange={(e) => setTerceroDoc(e.target.value)} placeholder={t("terceroDoc")} className="flex-1" />
+                <Select value={terceroTipo} onValueChange={(v) => setTerceroTipo(v as "persona" | "empresa")}>
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="persona">{t("terceroPersona")}</SelectItem>
+                    <SelectItem value="empresa">{t("terceroEmpresa")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tRoot("common.cancel")}</Button>
+            <Button size="sm" onClick={guardar} disabled={saving}>{tRoot("common.save")}</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

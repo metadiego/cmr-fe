@@ -2853,6 +2853,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/cabecera": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Editar la CABECERA de un BORRADOR sin descartarlo: paciente/médico/medio/receptor tercero.
+         *     Opcionales — ausente = no tocar; null = limpiar (medico/medio/facturarA*). Devuelve la factura proyectada.
+         */
+        put: operations["FacturacionController_editarCabecera_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/cita/{citaId}": {
         parameters: {
             query?: never;
@@ -5070,6 +5090,7 @@ export interface components {
             contenido: number | null;
             unidadesPorEnvase: number | null;
             diasTratamiento: number | null;
+            facturableGeneral: boolean;
             unidadContenidoId: string | null;
             tamano: string | null;
             peso: number | null;
@@ -5109,6 +5130,8 @@ export interface components {
             unidadesPorEnvase?: number;
             /** @description Días de tratamiento por defecto para sugerir la cantidad desde la dosis. */
             diasTratamiento?: number;
+            /** @description Si el producto aparece en el catálogo de Facturación General (venta al público). Insumos/servicios internos = false. */
+            facturableGeneral?: boolean;
             tamano?: string;
             peso?: number;
             /** Format: uuid */
@@ -5142,6 +5165,7 @@ export interface components {
             unidadContenidoId?: string;
             unidadesPorEnvase?: number;
             diasTratamiento?: number;
+            facturableGeneral?: boolean;
             tamano?: string;
             peso?: number;
             /** Format: uuid */
@@ -6946,6 +6970,18 @@ export interface components {
         CambiarPacienteDto: {
             /** Format: uuid */
             pacienteId: string;
+        };
+        EditarCabeceraDto: {
+            /** Format: uuid */
+            pacienteId?: string;
+            /** Format: uuid */
+            medicoId?: string | null;
+            /** Format: uuid */
+            medioId?: string | null;
+            facturarANombre?: string | null;
+            facturarADocId?: string | null;
+            /** @enum {string|null} */
+            facturarATipo?: "persona" | "empresa" | null;
         };
         AgregarItemDto: {
             /** Format: uuid */
@@ -13618,6 +13654,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacturaEntity"];
+                };
+            };
+        };
+    };
+    FacturacionController_editarCabecera_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditarCabeceraDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

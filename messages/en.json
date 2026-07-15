@@ -1306,7 +1306,18 @@
     "cambiarPacienteTitle": "Change patient",
     "searchPatientPlaceholder": "Search by name, record or ID",
     "searchHint": "Type at least 2 characters",
-    "pacienteActual": "Current"
+    "pacienteActual": "Current",
+    "editarCabecera": "Edit header",
+    "editarCabeceraTitle": "Edit invoice header",
+    "medico": "Attending physician",
+    "referido": "Referral / Source",
+    "sinMedico": "No physician",
+    "sinReferido": "No referral",
+    "tercero": "Bill to a third party",
+    "terceroNombre": "Name (company or person)",
+    "terceroDoc": "ID / Registry",
+    "terceroPersona": "Person",
+    "terceroEmpresa": "Company"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

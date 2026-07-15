@@ -1306,7 +1306,18 @@
     "cambiarPacienteTitle": "Cambiar paciente",
     "searchPatientPlaceholder": "Buscar por nombre, record o ID",
     "searchHint": "Escribe al menos 2 caracteres",
-    "pacienteActual": "Actual"
+    "pacienteActual": "Actual",
+    "editarCabecera": "Editar cabecera",
+    "editarCabeceraTitle": "Editar cabecera de la factura",
+    "medico": "Médico tratante",
+    "referido": "Referido / Medio",
+    "sinMedico": "Sin médico asociado",
+    "sinReferido": "Sin referido",
+    "tercero": "Facturar a un tercero",
+    "terceroNombre": "Nombre (empresa o persona)",
+    "terceroDoc": "ID / Registro",
+    "terceroPersona": "Persona",
+    "terceroEmpresa": "Empresa"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

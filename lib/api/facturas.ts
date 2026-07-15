@@ -15,6 +15,7 @@ export type AgregarItemPayload = Omit<components["schemas"]["AgregarItemDto"], "
 export type RegistrarPagoPayload = components["schemas"]["RegistrarPagoDto"];
 export type DescuentoGlobalPayload = components["schemas"]["DescuentoGlobalDto"];
 export type CrearFacturaPayload = components["schemas"]["CreateFacturaDto"];
+export type EditarCabeceraPayload = components["schemas"]["EditarCabeceraDto"];
 export type DescuentosGrupoPayload = components["schemas"]["DescuentosGrupoDto"];
 export type SetExentoPayload = components["schemas"]["SetExentoDto"];
 
@@ -120,6 +121,12 @@ export function setExento(facturaId: string, payload: SetExentoPayload, centroId
 // Corregir el paciente de un BORRADOR (sin borrar). Solo estado borrador.
 export function cambiarPacienteFactura(facturaId: string, pacienteId: string, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/paciente`, { method: "PUT", body: JSON.stringify({ pacienteId }) }, centroId);
+}
+// Editar la CABECERA completa de un BORRADOR sin descartar (BE PR #80): paciente/médico/medio/tercero.
+// Campo ausente = no tocar; `null` = limpiar (médico/medio/facturarA*). Solo estado borrador (400 si no).
+// Devuelve la factura proyectada (misma shape que getById).
+export function editarCabeceraFactura(facturaId: string, payload: EditarCabeceraPayload, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas/${facturaId}/cabecera`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
 // Descartar un BORRADOR (borra factura + líneas; 204). 400 si ya emitida.
 export function descartarFactura(facturaId: string, centroId?: string): Promise<void> {

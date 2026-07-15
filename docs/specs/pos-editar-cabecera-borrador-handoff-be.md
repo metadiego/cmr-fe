@@ -1,5 +1,19 @@
 # Handoff BE — Editar la cabecera de un BORRADOR sin descartar (POS Facturación General)
 
+> ## ✅ RESUELTO POR BE (2026-07-15) — desplegado (PR #80)
+> **`PUT /facturas/:id/cabecera`** — body `EditarCabeceraDto` (todos opcionales):
+> `{ pacienteId?, medicoId?, medioId?, facturarANombre?, facturarADocId?, facturarATipo? }`
+> - **AUSENTE = no tocar**; **`null` = limpiar** (medico/medio/facturarA*). `pacienteId` no admite null.
+> - **Solo en `borrador`** (400 si no). Valida centro (el paciente nuevo debe ser del mismo `clinicId`).
+> - Devuelve la factura **proyectada** (misma shape que `GET /facturas/:id`, con `items[]`/`componentes`).
+> - `PUT /facturas/:id/paciente` sigue existiendo (subconjunto). MCP: `editar_cabecera_factura`.
+> - Verificado E2E: set medioId + facturarANombre/tipo en un borrador → devuelve la proyección. 950/950 tests.
+>
+> **Acción FE:** cablear los selectores de médico/referido/tercero del header a este PUT (reusar los de VentaGeneral).
+
+---
+
+
 **Problema.** Hoy, una vez creada la factura (borrador), el FE **solo** puede corregir el paciente
 (`PUT /facturas/:id/paciente`). Si el cajero se equivocó de **médico**, **referido/medio** o del
 **tercero** a quien se factura, la única salida es **descartar** todo y empezar de cero. Es impráctico
