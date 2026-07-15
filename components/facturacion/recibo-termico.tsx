@@ -15,7 +15,8 @@ function fmtFecha(iso: string): { fecha: string; hora: string } {
   if (Number.isNaN(d.getTime())) return { fecha: iso, hora: "" };
   const p = (n: number) => String(n).padStart(2, "0");
   return {
-    fecha: `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`,
+    // PR usa formato US: MM/DD/YYYY (no DD/MM).
+    fecha: `${p(d.getMonth() + 1)}/${p(d.getDate())}/${d.getFullYear()}`,
     hora: `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,
   };
 }
