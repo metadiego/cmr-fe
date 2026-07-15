@@ -127,15 +127,11 @@ export function descartarFactura(facturaId: string, centroId?: string): Promise<
 }
 
 // Proyección del catálogo facturable: producto + precio resuelto por centro + gravado (default IVU).
-// `capsulasPorUnidad` (cápsulas/pastillas por envase, de NTPRODUCTOS.CapsulasXUni) y `diasTratamiento`
-// alimentan el autocálculo Dosis→Cantidad del POS. Ambos opcionales: null → cantidad manual, sin autocálculo.
-// Ver docs/specs/pos-dosis-autocantidad-handoff-be.md.
+// `unidadesPorEnvase` (de NTPRODUCTOS.CapsulasXUni) y `diasTratamiento` (por producto) vienen ya en
+// ProductoEntity (BE en prod) y alimentan el autocálculo Dosis→Cantidad del POS. null → cantidad manual.
 export type CatalogoProducto = Producto & {
   precio?: number | null;
   presentacionId?: string | null;
-  capsulasPorUnidad?: number | null;
-  unidadesPorEnvase?: number | null; // alias equivalente (servicios/otros envases)
-  diasTratamiento?: number | null; // periodo del tratamiento; fallback 30 si null
 };
 
 export function getFactura(id: string, centroId?: string): Promise<FacturaConItems> {

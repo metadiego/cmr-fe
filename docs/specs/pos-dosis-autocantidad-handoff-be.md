@@ -1,5 +1,23 @@
 # Handoff BE — Autocálculo Dosis→Cantidad en el POS (Facturación General)
 
+> ## ✅ RESUELTO POR BE (2026-07-15) — YA EN PROD, cero cambios pendientes
+> `GET /facturas/catalogo` ya devuelve por producto **`unidadesPorEnvase`** + **`diasTratamiento`**.
+> - `unidadesPorEnvase` = origen **`NTPRODUCTOS.CapsulasXUni`** (campo propio del producto en el CRUD de
+>   inventario; **NO** mapeado de `contenido` — hicieron bien en no asumirlo: `contenido` es mg de vial).
+> - `diasTratamiento` = **dato por producto** (configurable, editable en el CRUD; sembrado en 30 como el
+>   legacy). NO es una constante en el server → cumple "no hardcodear".
+> - El nombre final es **`unidadesPorEnvase`** (mejorado a genérico, porque no todo es cápsula). El FE ya
+>   lo aliasa (ver línea 34) → **el autocálculo enciende solo, sin tocar el FE**.
+> - Ambos campos con `COMMENT` en la entidad/DB. Migración desplegada; 33 productos sembrados en local y prod.
+> - **Verificado E2E contra prod:** `ANDROGRAPHIS PANICULATA 120 CAPS → unidadesPorEnvase:120, diasTratamiento:30`
+>   ⇒ dosis 12 = 3 potes.
+>
+> **Acción FE:** ninguna nueva. Confirmar que el alias apunta a `unidadesPorEnvase` y listo.
+> (Detalle abajo es la petición ORIGINAL del FE, ya cubierta.)
+
+---
+
+
 **Contexto.** En la grilla de Facturación General, cuando una línea de producto tiene columna **Dosis**,
 al escribir la dosis (cápsulas/pastillas por día) el sistema debe pre-llenar la **Cantidad** (potes/frascos/envases)
 sugerida, igual que el CMA/CMR viejo. La cantidad queda **editable** (el cajero la puede sobrescribir).
@@ -7,15 +25,15 @@ sugerida, igual que el CMA/CMR viejo. La cantidad queda **editable** (el cajero 
 ## Fórmula (ya implementada en el FE)
 
 ```
-cantidadSugerida = Math.ceil( (dosis × diasTratamiento) / capsulasPorUnidad )
+cantidadSugerida = Math.ceil( (dosis × diasTratamiento) / unidadesPorEnvase )
 ```
 
 - `dosis` = cápsulas/pastillas por día (la escribe el cajero; va en `item.meta.dosis`, informativo).
-- `capsulasPorUnidad` = cuántas cápsulas/pastillas trae **un envase** (en el legacy: `NTPRODUCTOS.CapsulasXUni`).
+- `unidadesPorEnvase` = cuántas cápsulas/pastillas trae **un envase** (en el legacy: `NTPRODUCTOS.CapsulasXUni`).
 - `diasTratamiento` = duración del tratamiento (legacy: constante 30). **Configurable, no hardcodear.**
 - `Math.ceil` = no se vende medio pote → redondea hacia arriba.
 
-### Verificado contra el legacy (ANDROGRAPHIS 120 CAPS, capsulasPorUnidad=120, días=30)
+### Verificado contra el legacy (ANDROGRAPHIS 120 CAPS, unidadesPorEnvase=120, días=30)
 | Dosis | ceil(dosis×30/120) | Cantidad |
 |------|--------------------|----------|
 | 1    | ceil(0.25)         | **1**    |
@@ -28,10 +46,10 @@ cantidadSugerida = Math.ceil( (dosis × diasTratamiento) / capsulasPorUnidad )
 
 | Campo | Tipo | Origen sugerido | Nota |
 |---|---|---|---|
-| `capsulasPorUnidad` | `number \| null` | `NTPRODUCTOS.CapsulasXUni` (o mapear desde `producto.contenido` si aplica) | cápsulas/pastillas por envase |
+| `unidadesPorEnvase` | `number \| null` | `NTPRODUCTOS.CapsulasXUni` (o mapear desde `producto.contenido` si aplica) | cápsulas/pastillas por envase |
 | `diasTratamiento` | `number \| null` | config de facturación (default 30) o atributo por producto | **NO** hardcodear 30 en el server como fuente única |
 
-- El FE ya lee `capsulasPorUnidad` (con alias `unidadesPorEnvase`) y `diasTratamiento` del catálogo; hoy vienen `undefined` → autocálculo inactivo (Cantidad manual). En cuanto el BE los exponga, el autocálculo se enciende solo. **No requiere cambios adicionales en el FE.**
+- El FE ya lee `unidadesPorEnvase` (con alias `unidadesPorEnvase`) y `diasTratamiento` del catálogo; hoy vienen `undefined` → autocálculo inactivo (Cantidad manual). En cuanto el BE los exponga, el autocálculo se enciende solo. **No requiere cambios adicionales en el FE.**
 - Comentar los campos en la entidad/DB (norma de comentarios en Fields/DB).
 
 ## Fuera de alcance (ya resuelto en el FE)

@@ -5068,6 +5068,8 @@ export interface components {
             reglaDefinida: boolean;
             unidadInventarioId: string | null;
             contenido: number | null;
+            unidadesPorEnvase: number | null;
+            diasTratamiento: number | null;
             unidadContenidoId: string | null;
             tamano: string | null;
             peso: number | null;
@@ -5103,6 +5105,10 @@ export interface components {
             contenido?: number;
             /** Format: uuid */
             unidadContenidoId?: string;
+            /** @description Unidades (cáps/tabletas/comprimidos) por envase vendible; base para sugerir cantidad desde la dosis. */
+            unidadesPorEnvase?: number;
+            /** @description Días de tratamiento por defecto para sugerir la cantidad desde la dosis. */
+            diasTratamiento?: number;
             tamano?: string;
             peso?: number;
             /** Format: uuid */
@@ -5134,6 +5140,8 @@ export interface components {
             contenido?: number;
             /** Format: uuid */
             unidadContenidoId?: string;
+            unidadesPorEnvase?: number;
+            diasTratamiento?: number;
             tamano?: string;
             peso?: number;
             /** Format: uuid */

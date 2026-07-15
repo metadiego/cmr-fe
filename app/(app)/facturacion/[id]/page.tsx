@@ -501,13 +501,11 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
     (c) => c.rol === "multiplicador" || c.rol === "informativo",
   );
 
-  // Autocálculo Dosis→Cantidad (potes/frascos): al cambiar la Dosis, Cantidad = ceil(dosis×días/capsulasPorUnidad).
-  // capsulasPorUnidad y diasTratamiento vienen del catálogo (BE); si faltan → cantidad manual, sin autocálculo.
-  const prodX = prod as
-    | { capsulasPorUnidad?: number | null; unidadesPorEnvase?: number | null; diasTratamiento?: number | null }
-    | undefined;
-  const capsUnit = prodX?.capsulasPorUnidad ?? prodX?.unidadesPorEnvase ?? null;
-  const diasTrat = prodX?.diasTratamiento ?? 30; // fallback documentado (BE debe exponer diasTratamiento)
+  // Autocálculo Dosis→Cantidad (potes/frascos): al cambiar la Dosis, Cantidad = ceil(dosis×días/unidadesPorEnvase).
+  // unidadesPorEnvase (de NTPRODUCTOS.CapsulasXUni) y diasTratamiento vienen del catálogo (BE, en prod);
+  // si faltan → cantidad manual, sin autocálculo.
+  const capsUnit = prod?.unidadesPorEnvase ?? null;
+  const diasTrat = prod?.diasTratamiento ?? 30; // fallback si el producto no tiene el dato
   const dosisClave = capturables.find((c) => /dosis/i.test(c.clave))?.clave ?? null;
   const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.clave))?.clave ?? null;
 
