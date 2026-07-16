@@ -136,7 +136,11 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       )}
       {recibo.impuestos.length > 0
         ? recibo.impuestos.map((im, i) => (
-            <Line key={i} label={im.nombre || t("tax")} value={money(im.monto)} />
+            <Line
+              key={i}
+              label={(im.nombre || t("tax")) + (im.tasa != null ? ` (${im.tasa}%)` : "")}
+              value={money(im.monto)}
+            />
           ))
         : recibo.impuesto > 0 && (
             <Line label={t("tax")} value={money(recibo.impuesto)} />

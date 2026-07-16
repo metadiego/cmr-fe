@@ -28,7 +28,7 @@ export type Recibo = {
   subtotal: number;
   descuento: number;
   impuesto: number;
-  impuestos: { nombre: string; monto: number }[];
+  impuestos: { nombre: string; tasa?: number; monto: number }[];
   total: number;
   montoAbonado: number;
   saldo: number;
@@ -70,10 +70,10 @@ export function buildRecibo(f: FacturaConItems): Recibo {
 
   // Tax breakdown when the BE projects it (products); consulta has none.
   const impuestosRaw =
-    (f as { impuestos?: { nombre?: string; label?: string; monto?: number }[] })
+    (f as { impuestos?: { nombre?: string; label?: string; tasa?: number; monto?: number }[] })
       .impuestos ?? [];
   const impuestos = impuestosRaw
-    .map((i) => ({ nombre: i.nombre ?? i.label ?? "", monto: num(i.monto) }))
+    .map((i) => ({ nombre: i.nombre ?? i.label ?? "", tasa: i.tasa, monto: num(i.monto) }))
     .filter((i) => i.monto > 0);
 
   const pac = f.paciente;

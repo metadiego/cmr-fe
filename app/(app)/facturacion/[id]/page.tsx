@@ -327,6 +327,10 @@ function Editor({
   const dval = n(factura.descuentoGlobalValor);
   const descuento = dtipo === "porcentaje" ? (subtotal * dval) / 100 : dtipo === "monto" ? dval : n(factura.descuento);
   const impuesto = n(factura.impuesto);
+  // Desglose de impuestos del BE (impuestos[] con nombre/tasa/monto). Data-driven: N renglones,
+  // sin hardcodear "11.5%". El total NO se recomputa aquí. Vacío → una sola línea (o exento).
+  const impuestosDesglose = ((factura as { impuestos?: { nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [])
+    .filter((im) => n(im.monto) > 0);
   const total = Math.max(0, subtotal - descuento + impuesto);
   const saldo = total - n(factura.montoAbonado);
 
@@ -498,7 +502,11 @@ function Editor({
         <div className="space-y-2 rounded-xl border p-4">
           <Row label={t("subtotal")} value={money(subtotal)} />
           <Row label={t("discount")} value={`- ${money(descuento)}`} />
-          <Row label={t("tax")} value={money(impuesto)} />
+          {impuestosDesglose.length > 0
+            ? impuestosDesglose.map((im, i) => (
+                <Row key={i} label={(im.nombre || t("tax")) + (im.tasa != null ? ` (${im.tasa}%)` : "")} value={money(im.monto)} />
+              ))
+            : <Row label={t("tax")} value={money(impuesto)} />}
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
           {n(factura.montoAbonado) > 0 && (
             <>
