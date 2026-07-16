@@ -86,9 +86,12 @@ export function SiteHeader() {
     "/configuracion/tableros",
     "/settings",
   ];
+  // Una ruta "tiene página" si está en REAL_ROUTES o en el manifiesto (que por definición son
+  // rutas reales con UI). Así los items del manifiesto caen en "En desarrollo", no en "Por desarrollar".
+  const KNOWN_ROUTES = [...REAL_ROUTES, ...NAV_MANIFEST.map((r) => r.path)];
   const hasPage = (p: string) =>
     p === "/" ||
-    REAL_ROUTES.some((r) => p === r || p.startsWith(r + "/") || p.startsWith(r));
+    KNOWN_ROUTES.some((r) => p === r || p.startsWith(r + "/") || p.startsWith(r));
   const navItems = menu.filter(
     (m) =>
       !!m.path &&
