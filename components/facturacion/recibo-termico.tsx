@@ -127,12 +127,19 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
             </span>
             <span className="shrink-0 tabular-nums">{money(it.total)}</span>
           </div>
-          {/* Desglose de kit (imprimeComponentes=true); en compacto no viene. */}
-          {it.componentes?.map((c, j) => (
-            <div key={j} className="pl-3 text-[0.9em] opacity-80">
-              + {c.cantidad > 1 ? `${c.cantidad} x ` : ""}{c.descripcion}
+          {/* "Incluye:" del kit (item.contenido); en compacto no viene. Indentado + fuente menor.
+              El precio es de REFERENCIA (no suma al total). */}
+          {it.componentes && it.componentes.length > 0 && (
+            <div className="mt-0.5 pl-3 text-[0.85em] opacity-80">
+              <div className="font-medium">{t("includes")}:</div>
+              {it.componentes.map((c, j) => (
+                <div key={j} className="flex justify-between gap-2">
+                  <span>{c.cantidad} · {c.descripcion}</span>
+                  {c.precio != null && <span className="shrink-0 tabular-nums">{money(c.precio)}</span>}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       ))}
 

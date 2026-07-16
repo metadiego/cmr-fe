@@ -10,8 +10,9 @@ export type ReciboItem = {
   precioUnitario: number;
   descuento: number;
   total: number;
-  // Componentes del kit para impresión DETALLADA (imprimeComponentes=true). Vacío/omitido = compacto.
-  componentes?: { descripcion: string; cantidad: number }[];
+  // "Incluye:" de un kit (item.contenido, disponible en borrador+emitida). Vacío = compacto.
+  // `precio` = REFERENCIA (mapeado del catálogo por productoId); NO suma al total.
+  componentes?: { descripcion: string; cantidad: number; precio?: number }[];
   // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
   multiplicadores?: Record<string, number>;
 };
@@ -43,18 +44,18 @@ const num = (v: unknown) => Number(v ?? 0);
 // Assemble the receipt model from the BE's enriched GET /facturas/:id projection.
 // All data travels from the BE (empresa, pagos, emisor, medico, numeroDisplay,
 // emitidaEn) — no FE fallbacks/hardcode. numeroDisplay is null on drafts → "—".
-export function buildRecibo(f: FacturaConItems): Recibo {
-  // Snapshot de componentes de kit congelados (solo emitidas), agrupado por facturaItemId.
-  const comps = f.componentes ?? [];
+// `precios` = mapa productoId→precio de referencia (del catálogo del POS) para el "Incluye:".
+export function buildRecibo(f: FacturaConItems, precios: Record<string, number> = {}): Recibo {
   const items: ReciboItem[] = (f.items ?? []).map((it) => {
-    // Regla de impresión por línea: imprimeComponentes=false → compacto (sin componentes).
-    const imprime = (it as { imprimeComponentes?: boolean }).imprimeComponentes;
-    const itemComps =
-      imprime === false
-        ? []
-        : comps
-            .filter((c) => c.facturaItemId === it.id)
-            .map((c) => ({ descripcion: c.nombre ?? "—", cantidad: num(c.cantidad) }));
+    // "Incluye:" del kit desde item.contenido (BE PR #96): disponible en borrador Y emitida.
+    // Compacto (imprimeComponentes=false) → contenido:[] (el BE ya lo devuelve vacío).
+    const contenido =
+      (it as { contenido?: { productoId?: string; nombre?: string; cantidad?: number }[] }).contenido ?? [];
+    const itemComps = contenido.map((c) => ({
+      descripcion: c.nombre ?? "—",
+      cantidad: num(c.cantidad),
+      ...(c.productoId && precios[c.productoId] != null ? { precio: precios[c.productoId] } : {}),
+    }));
     // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
     const mult = (it.meta as { multiplicadores?: Record<string, number> } | null | undefined)?.multiplicadores;
     const multiplicadores = mult && Object.keys(mult).length ? mult : undefined;

@@ -164,7 +164,14 @@ export default function FacturacionPage() {
   const record = paciente?.record ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
   // emisor/medico/numeroDisplay/paciente) — sin fallbacks del FE.
-  const recibo = buildRecibo(factura);
+  // Mapa productoId→precio del catálogo para el "Incluye:" del kit (precio de referencia).
+  // Const plano (no hook): estamos después de early-returns; el cálculo es barato.
+  const preciosCatalogo: Record<string, number> = {};
+  catalogo.forEach((p) => {
+    const pr = (p as { precio?: number | null }).precio;
+    if (pr != null) preciosCatalogo[p.id] = pr;
+  });
+  const recibo = buildRecibo(factura, preciosCatalogo);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">

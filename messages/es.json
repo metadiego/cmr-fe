@@ -1305,7 +1305,8 @@
     "paid": "Total pagado",
     "balance": "Saldo",
     "attendedBy": "Atendido por",
-    "thanks": "¡Gracias por su visita!"
+    "thanks": "¡Gracias por su visita!",
+    "includes": "Incluye"
   },
   "facturacion": {
     "title": "Facturar consulta",
