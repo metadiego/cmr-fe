@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -36,6 +37,9 @@ export function VentaGeneral() {
 
   return (
     <div className="mx-auto max-w-xl px-6 py-12">
+      <Link href="/facturacion" className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+        ← {t("verLista")}
+      </Link>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("help")}</p>
 

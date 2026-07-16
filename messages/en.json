@@ -966,7 +966,8 @@
       "devuelta_parcial": "Partially returned",
       "devuelta_total": "Fully returned"
     },
-    "consumoInsumos": "Supply consumption"
+    "consumoInsumos": "Supply consumption",
+    "nuevaVenta": "New sale"
   },
   "inventario": {
     "prov": {
@@ -1365,7 +1366,8 @@
       "terceroDoc": "ID",
       "terceroTipo": "Type",
       "terceroEmpresa": "Company",
-      "terceroPersona": "Person"
+      "terceroPersona": "Person",
+      "verLista": "View invoices"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",

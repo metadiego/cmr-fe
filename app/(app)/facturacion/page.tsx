@@ -162,9 +162,14 @@ export default function FacturasListPage() {
     <div className="mx-auto max-w-5xl px-6 py-12">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/facturacion/general">{t("nuevaVenta")}</Link>
+          </Button>
+        </div>
       </div>
 
       {gate.cargando ? (

@@ -966,7 +966,8 @@
       "devuelta_parcial": "Devuelta parcial",
       "devuelta_total": "Devuelta total"
     },
-    "consumoInsumos": "Consumo de insumos"
+    "consumoInsumos": "Consumo de insumos",
+    "nuevaVenta": "Nueva venta"
   },
   "inventario": {
     "prov": {
@@ -1365,7 +1366,8 @@
       "terceroDoc": "ID",
       "terceroTipo": "Tipo",
       "terceroEmpresa": "Empresa",
-      "terceroPersona": "Persona"
+      "terceroPersona": "Persona",
+      "verLista": "Ver facturas"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",
