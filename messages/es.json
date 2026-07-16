@@ -582,7 +582,8 @@
     "constructorTableros": "Constructor de tableros",
     "appearance": "Apariencia",
     "tableroModulos": "Módulos de tablero",
-    "tablerosSettings": "Ajustes de tableros"
+    "tablerosSettings": "Ajustes de tableros",
+    "configFactura": "Factura (encabezado/pie)"
   },
   "admin": {
     "title": "Administración",
@@ -1656,6 +1657,31 @@
       "total": "Total",
       "medio": "Referido",
       "acciones": "Acciones"
+    }
+  },
+  "configFactura": {
+    "title": "Factura — Encabezado y pie",
+    "help": "Datos fiscales que salen impresos en el recibo, por centro. Cada sucursal mantiene los suyos.",
+    "noCentros": "No hay centros disponibles.",
+    "centro": "Centro",
+    "headerTitle": "Encabezado",
+    "footerTitle": "Pie de factura",
+    "saved": "Datos fiscales guardados",
+    "noPermiso": "No tienes permiso para editar (centro.fiscal.write).",
+    "preview": "Vista previa",
+    "f": {
+      "logoUrl": "Logo (URL)",
+      "logoUrlHint": "URL de la imagen del logo para el encabezado.",
+      "nombreLegal": "Nombre legal / Razón social",
+      "nombreComercial": "Nombre comercial (DBA)",
+      "registroFiscal": "Registro fiscal",
+      "registroFiscalLabel": "Etiqueta",
+      "telefono": "Teléfono",
+      "web": "Web",
+      "direccionFiscal": "Dirección fiscal",
+      "zip": "Código postal",
+      "pieFactura": "Texto del pie",
+      "pieFacturaHint": "Multilínea. Aparece al final del recibo."
     }
   }
 }

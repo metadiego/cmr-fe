@@ -582,7 +582,8 @@
     "constructorTableros": "Board builder",
     "appearance": "Appearance",
     "tableroModulos": "Board modules",
-    "tablerosSettings": "Board settings"
+    "tablerosSettings": "Board settings",
+    "configFactura": "Invoice (header/footer)"
   },
   "admin": {
     "title": "Administration",
@@ -1656,6 +1657,31 @@
       "total": "Total",
       "medio": "Referral",
       "acciones": "Actions"
+    }
+  },
+  "configFactura": {
+    "title": "Invoice — Header & footer",
+    "help": "Fiscal data printed on the receipt, per center. Each branch keeps its own.",
+    "noCentros": "No centers available.",
+    "centro": "Center",
+    "headerTitle": "Header",
+    "footerTitle": "Invoice footer",
+    "saved": "Fiscal data saved",
+    "noPermiso": "You don't have permission to edit (centro.fiscal.write).",
+    "preview": "Preview",
+    "f": {
+      "logoUrl": "Logo (URL)",
+      "logoUrlHint": "Logo image URL for the header.",
+      "nombreLegal": "Legal name",
+      "nombreComercial": "Trade name (DBA)",
+      "registroFiscal": "Tax ID",
+      "registroFiscalLabel": "Label",
+      "telefono": "Phone",
+      "web": "Web",
+      "direccionFiscal": "Fiscal address",
+      "zip": "ZIP code",
+      "pieFactura": "Footer text",
+      "pieFacturaHint": "Multiline. Shows at the bottom of the receipt."
     }
   }
 }

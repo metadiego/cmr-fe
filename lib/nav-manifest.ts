@@ -36,6 +36,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/precios", labelKey: "nav.precios" },
   { path: "/servicios", labelKey: "nav.servicios" },
   // Configuración / Admin
+  { path: "/configuracion/factura", labelKey: "nav.configFactura" },
   { path: "/configuracion/tableros", labelKey: "nav.constructorTableros" },
   { path: "/admin", labelKey: "nav.admin" },
   { path: "/settings/appearance", labelKey: "nav.appearance" },
