@@ -383,6 +383,23 @@ function Editor({
   const esKit = (it: FacturaItem) => prodById.get(String(it.productoId))?.tipo === "compuesto";
   const [opcItemId, setOpcItemId] = React.useState<string | null>(null);
 
+  // Multiplicadores (láser: áreas×días). Data-driven desde meta.multiplicadores; sin asumir cuáles ni cuántos.
+  // Cantidad EFECTIVA = base × Π(multiplicadores). El label de cada clave sale de fac.col.<clave> (i18n).
+  const tRootEd = useTranslations();
+  const multsDe = (it: FacturaItem): Record<string, number> | null => {
+    const m = (it.meta as { multiplicadores?: Record<string, number> } | null | undefined)?.multiplicadores;
+    return m && Object.keys(m).length ? m : null;
+  };
+  const cantEfectiva = (it: FacturaItem): number => {
+    const m = multsDe(it);
+    const base = n(it.cantidad) || 1;
+    return m ? Object.values(m).reduce((p, v) => p * (Number(v) || 1), base) : base;
+  };
+  const multTexto = (m: Record<string, number>): string =>
+    Object.entries(m)
+      .map(([k, v]) => `${v} ${tRootEd.has(`fac.col.${k}`) ? tRootEd(`fac.col.${k}`) : k}`)
+      .join(" × ");
+
   return (
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
       {/* Líneas */}
@@ -426,9 +443,16 @@ function Editor({
                           {t("opcionales")}
                         </button>
                       )}
+                      {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
+                      {multsDe(it) && (
+                        <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      {esBorrador ? (
+                      {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
+                      {multsDe(it) ? (
+                        <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
+                      ) : esBorrador ? (
                         <Input
                           value={String(e.cantidad)}
                           onChange={(ev) => setEdit(it.id, { cantidad: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}

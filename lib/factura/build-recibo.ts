@@ -5,13 +5,15 @@ import type { FacturaConItems, FacturaEmpresa } from "@/lib/api/facturas";
 export type ReciboEmpresa = FacturaEmpresa | null;
 
 export type ReciboItem = {
-  cantidad: number;
+  cantidad: number; // EFECTIVA (base × multiplicadores). Para láser: 24, no la base 1.
   descripcion: string;
   precioUnitario: number;
   descuento: number;
   total: number;
   // Componentes del kit para impresión DETALLADA (imprimeComponentes=true). Vacío/omitido = compacto.
   componentes?: { descripcion: string; cantidad: number }[];
+  // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
+  multiplicadores?: Record<string, number>;
 };
 
 // Presentational model consumed by <ReciboTermico>. Assembled ONCE here from the
@@ -53,13 +55,21 @@ export function buildRecibo(f: FacturaConItems): Recibo {
         : comps
             .filter((c) => c.facturaItemId === it.id)
             .map((c) => ({ descripcion: c.nombre ?? "—", cantidad: num(c.cantidad) }));
+    // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
+    const mult = (it.meta as { multiplicadores?: Record<string, number> } | null | undefined)?.multiplicadores;
+    const multiplicadores = mult && Object.keys(mult).length ? mult : undefined;
+    const base = num(it.cantidad) || 1;
+    const cantEfectiva = multiplicadores
+      ? Object.values(multiplicadores).reduce((p, v) => p * (Number(v) || 1), base)
+      : num(it.cantidad);
     return {
-      cantidad: num(it.cantidad),
+      cantidad: cantEfectiva,
       descripcion: it.descripcion ?? "—",
       precioUnitario: num(it.precioUnitario),
       descuento: num(it.descuento),
       total: num(it.total) || num(it.cantidad) * num(it.precioUnitario),
       ...(itemComps.length ? { componentes: itemComps } : {}),
+      ...(multiplicadores ? { multiplicadores } : {}),
     };
   });
   const subtotal = num(f.subtotal) || items.reduce((s, it) => s + it.total, 0);

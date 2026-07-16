@@ -48,7 +48,14 @@ function Line({
 // (no empresa block / no pagos / no tax) so nothing crashes before the BE lands.
 export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   const t = useTranslations("receipt");
+  const tRoot = useTranslations();
   const { fecha, hora } = fmtFecha(recibo.fecha);
+  // Label de un multiplicador (fac.col.<clave>), data-driven; fallback a la clave.
+  const multLabel = (k: string) => (tRoot.has(`fac.col.${k}`) ? tRoot(`fac.col.${k}`) : k);
+  const multTexto = (m: Record<string, number>) =>
+    Object.entries(m).map(([k, v]) => `${v} ${multLabel(k)}`).join(" × ");
+  // Terapias con multiplicadores → leyenda al pie (una por línea).
+  const conMultiplicadores = recibo.items.filter((it) => it.multiplicadores && Object.keys(it.multiplicadores).length);
   const emp = recibo.empresa;
 
   return (
@@ -113,7 +120,9 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           <div className="uppercase">{it.descripcion}</div>
           <div className="flex justify-between gap-2">
             <span>
-              {it.cantidad} x {money(it.precioUnitario)}
+              {it.cantidad}
+              {it.multiplicadores && Object.keys(it.multiplicadores).length ? ` (${multTexto(it.multiplicadores)})` : ""}
+              {" "}x {money(it.precioUnitario)}
               {it.descuento > 0 ? ` − ${money(it.descuento)}` : ""}
             </span>
             <span className="shrink-0 tabular-nums">{money(it.total)}</span>
@@ -174,6 +183,18 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           <Dashed />
           <div>
             {t("attendedBy")}: {recibo.atendidoPor}
+          </div>
+        </>
+      )}
+
+      {/* Leyenda de terapias con multiplicadores (láser: días × áreas) — una por terapia, data-driven */}
+      {conMultiplicadores.length > 0 && (
+        <>
+          <Dashed />
+          <div className="space-y-0.5 text-[10px]">
+            {conMultiplicadores.map((it, i) => (
+              <div key={i}>* {it.descripcion} — {multTexto(it.multiplicadores!)}</div>
+            ))}
           </div>
         </>
       )}

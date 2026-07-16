@@ -1400,7 +1400,8 @@
     "opcionales": "Options",
     "opcionalesTitle": "Kit options",
     "opcionalesEmpty": "This kit has no options",
-    "opcionalesExtra": "Options extra"
+    "opcionalesExtra": "Options extra",
+    "cantEfectivaHint": "Effective quantity (base × multipliers)"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

@@ -1400,7 +1400,8 @@
     "opcionales": "Opcionales",
     "opcionalesTitle": "Opcionales del kit",
     "opcionalesEmpty": "Este kit no tiene opcionales",
-    "opcionalesExtra": "Extra por opcionales"
+    "opcionalesExtra": "Extra por opcionales",
+    "cantEfectivaHint": "Cantidad efectiva (base × multiplicadores)"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
