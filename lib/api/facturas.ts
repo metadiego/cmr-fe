@@ -106,6 +106,34 @@ export function listFacturas(
   return apiFetchPaged<Factura>(`/facturas?${sp.toString()}`, {}, centroId);
 }
 
+// Lista metadata-driven de facturación (GET /facturas/tablero): columnas RESUELTAS por el BE
+// (fac_numero/fac_fecha/fac_paciente/fac_medico/fac_estado/fac_total/fac_medio/fac_acciones) + filas
+// con esos valores YA resueltos (nombre de paciente, etc.) — a diferencia de GET /facturas (entidad cruda).
+// Es la fuente correcta para la LISTA de facturas. contexto=general excluye consultas.
+export interface FacturaTableroColumna {
+  clave: string;
+  labelKey: string;
+  rol?: string | null;
+}
+export type FacturaTableroFila = { id: string } & Record<string, unknown>;
+export interface FacturaTablero {
+  columnas: FacturaTableroColumna[];
+  filas: FacturaTableroFila[];
+}
+export function getFacturasTablero(
+  params: ListFacturasParams = {},
+  centroId?: string,
+): Promise<FacturaTablero> {
+  const { page = 1, limit = 20, q, estado, desde, hasta, contexto } = params;
+  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (q?.trim()) sp.set("q", q.trim());
+  if (estado) sp.set("estado", estado);
+  if (desde) sp.set("desde", desde);
+  if (hasta) sp.set("hasta", hasta);
+  if (contexto) sp.set("contexto", contexto);
+  return apiFetch<FacturaTablero>(`/facturas/tablero?${sp.toString()}`, {}, centroId);
+}
+
 // Crear/obtener la factura BORRADOR de una cita (idempotente: si existe activa,
 // devuelve la misma). Trae la línea de consulta del producto del tipo_cita.
 export function facturarCita(citaId: string, centroId?: string): Promise<FacturaConItems> {

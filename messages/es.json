@@ -967,7 +967,9 @@
       "devuelta_total": "Devuelta total"
     },
     "consumoInsumos": "Consumo de insumos",
-    "nuevaVenta": "Nueva venta"
+    "nuevaVenta": "Nueva venta",
+    "empty": "Sin facturas",
+    "ver": "Ver"
   },
   "inventario": {
     "prov": {
@@ -1645,7 +1647,15 @@
       "sugerido": "Cant. sugerida",
       "areas": "Áreas",
       "dias": "Días",
-      "sesiones": "Sesiones"
+      "sesiones": "Sesiones",
+      "numero": "Nº Factura",
+      "fecha": "Fecha",
+      "paciente": "Cliente",
+      "medico": "Médico",
+      "estado": "Estado",
+      "total": "Total",
+      "medio": "Referido",
+      "acciones": "Acciones"
     }
   }
 }
