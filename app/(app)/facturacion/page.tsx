@@ -7,6 +7,8 @@ import { useTranslations, useLocale } from "next-intl";
 
 import { listFacturas, type Factura } from "@/lib/api/facturas";
 import { useResource, type ResourceState } from "@/hooks/use-resource";
+import { useCentroGate } from "@/hooks/use-centro-gate";
+import { CentroPicker } from "@/components/facturacion/centro-picker";
 import type { Paginated } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,6 +59,7 @@ function EstadoBadge({ estado }: { estado: string }) {
 
 export default function FacturasListPage() {
   const t = useTranslations("facturacionList");
+  const tRoot = useTranslations();
   const router = useRouter();
   const locale = useLocale();
   const params = useSearchParams();
@@ -80,9 +83,15 @@ export default function FacturasListPage() {
     router.replace(qs ? `?${qs}` : "?", { scroll: false });
   }, [q, estado, desde, hasta, page, router]);
 
+  // Gate de centro (multi-tenant): el centro elegido va como X-Tenant-ID → la lista carga la
+  // facturación de ESE centro. contexto=general excluye las facturas de consulta médica.
+  const gate = useCentroGate();
   const { state, reload } = useResource<Paginated<Factura>>(
-    () => listFacturas({ page, limit: LIMIT, q, estado, desde, hasta }),
-    [page, q, estado, desde, hasta],
+    () =>
+      gate.centro
+        ? listFacturas({ page, limit: LIMIT, q, estado, desde, hasta, contexto: "general" }, gate.centro)
+        : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: LIMIT } }),
+    [page, q, estado, desde, hasta, gate.centro],
   );
 
   const rows: ResourceState<Factura[]> =
@@ -158,7 +167,22 @@ export default function FacturasListPage() {
         </Button>
       </div>
 
+      {gate.cargando ? (
+        <p className="mt-8 text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+      ) : gate.necesitaPicker ? (
+        <div className="mt-8 max-w-xl">
+          <CentroPicker centros={gate.centros} onPick={gate.pick} />
+        </div>
+      ) : (
       <div className="mt-6 space-y-4">
+        {gate.puedeCambiar && (
+          <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 text-sm">
+            <span className="text-muted-foreground">{tRoot("facturacion.general.centroLabel")} <span className="font-medium text-foreground">{gate.centroNombre}</span></span>
+            <button type="button" onClick={gate.cambiarCentro} className="text-xs font-medium text-primary hover:underline">
+              {tRoot("facturacion.general.cambiarCentro")}
+            </button>
+          </div>
+        )}
         <ListToolbar search={q} onSearchChange={onSearch} searchPlaceholder={t("searchPlaceholder")}>
           <Select
             value={estado || ALL}
@@ -205,10 +229,11 @@ export default function FacturasListPage() {
           columns={columns}
           state={rows}
           getRowKey={(f) => f.id}
-          onRowClick={(f) => router.push(`/facturacion/${f.id}`)}
+          onRowClick={(f) => router.push(`/facturacion/${f.id}${gate.centro ? `?centro=${gate.centro}` : ""}`)}
           pagination={pagination}
         />
       </div>
+      )}
     </div>
   );
 }

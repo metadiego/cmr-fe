@@ -10,12 +10,10 @@ import { toast } from "sonner";
 import { buscarPaciente, crearFactura, type PacienteBusqueda } from "@/lib/api/facturas";
 import { listTiposPrecio, type TipoPrecio } from "@/lib/api/precios";
 import { listMedicos, listMedios, type MedicoOpcion, type MedioFacturacion } from "@/lib/api/facturacion-config";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { getMe } from "@/lib/api/auth";
-import type { Me } from "@/lib/api/auth";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
-import { getActiveCentro } from "@/lib/tenant";
+import { useCentroGate } from "@/hooks/use-centro-gate";
+import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,77 +32,25 @@ import {
 export function VentaGeneral() {
   const t = useTranslations("facturacion.general");
   const tc = useTranslations("common");
-
-  const meRes = useResource<Me>(() => getMe(), []);
-  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
-  const centros = React.useMemo(
-    () => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []),
-    [centrosRes.state],
-  );
-  const me = meRes.state.kind === "ok" ? meRes.state.data : null;
-  const cargandoGate = meRes.state.kind === "loading" || centrosRes.state.kind === "loading";
-
-  // Centro válido pre-fijado: activo del header o del perfil, SOLO si está en los elegibles.
-  const ids = React.useMemo(() => new Set(centros.map((c) => c.id)), [centros]);
-  const validActive = React.useMemo(() => {
-    const act = getActiveCentro();
-    if (act && ids.has(act)) return act;
-    if (me?.activeClinicId && ids.has(me.activeClinicId)) return me.activeClinicId;
-    if (centros.length === 1) return centros[0].id;
-    return null;
-  }, [ids, me, centros]);
-
-  const [chosen, setChosen] = React.useState<string | null>(null);
-  const [cambiar, setCambiar] = React.useState(false);
-  const centro = chosen ?? (cambiar ? null : validActive); // centro efectivo de la sesión
-  const necesitaPicker = !cargandoGate && !centro && centros.length > 0;
-  const centroNombre = centros.find((c) => c.id === centro)?.nombre ?? "";
+  const gate = useCentroGate();
 
   return (
     <div className="mx-auto max-w-xl px-6 py-12">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("help")}</p>
 
-      {cargandoGate ? (
+      {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
-      ) : necesitaPicker ? (
-        <CentroPicker
-          centros={centros}
-          onPick={(id) => { setChosen(id); setCambiar(false); }}
-        />
+      ) : gate.necesitaPicker ? (
+        <CentroPicker centros={gate.centros} onPick={gate.pick} />
       ) : (
         <Finder
-          centro={centro ?? undefined}
-          centroNombre={centroNombre}
-          puedeCambiar={centros.length > 1}
-          onCambiarCentro={() => { setChosen(null); setCambiar(true); }}
+          centro={gate.centro}
+          centroNombre={gate.centroNombre}
+          puedeCambiar={gate.puedeCambiar}
+          onCambiarCentro={gate.cambiarCentro}
         />
       )}
-    </div>
-  );
-}
-
-function CentroPicker({ centros, onPick }: { centros: Centro[]; onPick: (id: string) => void }) {
-  const t = useTranslations("facturacion.general");
-  return (
-    <div>
-      <div className="mb-3 flex items-center gap-2">
-        <HugeiconsIcon icon={Building01Icon} className="size-5 text-primary" />
-        <h2 className="text-sm font-semibold">{t("pickCentroTitle")}</h2>
-      </div>
-      <div className="grid gap-2">
-        {centros.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => onPick(c.id)}
-            className="flex items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors hover:border-primary/50 hover:bg-accent/40"
-          >
-            <span className="font-medium">{c.nombre}</span>
-            <span className="text-xs text-primary">{t("pickCentroGo")} →</span>
-          </button>
-        ))}
-      </div>
     </div>
   );
 }

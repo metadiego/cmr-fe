@@ -89,18 +89,20 @@ export interface ListFacturasParams {
   desde?: string; // YYYY-MM-DD
   hasta?: string; // YYYY-MM-DD
   pacienteId?: string;
+  contexto?: "general" | "consulta"; // general excluye consultas médicas; omitido = todas (valor inválido → 400)
 }
 export function listFacturas(
   params: ListFacturasParams = {},
   centroId?: string,
 ): Promise<Paginated<Factura>> {
-  const { page = 1, limit = 20, q, estado, desde, hasta, pacienteId } = params;
+  const { page = 1, limit = 20, q, estado, desde, hasta, pacienteId, contexto } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
   if (estado) sp.set("estado", estado);
   if (desde) sp.set("desde", desde);
   if (hasta) sp.set("hasta", hasta);
   if (pacienteId) sp.set("pacienteId", pacienteId);
+  if (contexto) sp.set("contexto", contexto);
   return apiFetchPaged<Factura>(`/facturas?${sp.toString()}`, {}, centroId);
 }
 
