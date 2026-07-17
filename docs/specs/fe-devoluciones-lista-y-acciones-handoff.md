@@ -39,3 +39,14 @@ El modal de devolución: tabla de ítems con cantidad/sesiones a devolver + (fut
 ## Aceptación
 - Lista de devoluciones filtrable/paginada por centro; muestra nº de factura.
 - Acciones de la factura llaman los endpoints correctos; anular ≠ devolver.
+
+## Slice B (BE #103) — Política de devolución `precio_base`
+El modal de devolución ofrece la **política**: `como_facturada` (default) | `precio_base`.
+- `POST /facturas/:id/devolver` acepta `politica: 'precio_base'`.
+- **precio_base** (servicios de precio variable: láser, vit C, GLP-1): valora lo CONSUMIDO al **precio base**
+  = el más alto entre las presentaciones del producto. Reembolso = pagado − consumido×base → **puede ser
+  NEGATIVO** (el paciente termina debiendo). NO reembolsa efectivo si es negativo; se registra el saldo.
+- Consultar el precio base para preview: `GET /api/v1/facturas/precio-base?productoId=<id>` → `{ productoId, precioBase }`.
+- **Preview obligatorio en el modal:** al elegir `precio_base`, mostrar el neto calculado (puede salir
+  "el paciente debe $X") ANTES de confirmar. No bloqueante — es decisión del paciente (seguir/pagar/no volver).
+- UI: toggle de política + columna/al pie con el neto (verde=reembolso, rojo=debe).
