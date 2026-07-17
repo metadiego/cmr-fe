@@ -3130,6 +3130,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Envía la factura por email al paciente (o a `email`). Registra la notificación (canal email). */
+        post: operations["FacturacionController_enviarEmail_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}/devoluciones/{devolucionId}/anular": {
         parameters: {
             query?: never;
@@ -7263,6 +7280,7 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        EmailFacturaDto: Record<string, never>;
         AnularDevolucionDto: {
             motivo: string;
             /** Format: uuid */
@@ -14223,6 +14241,31 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    FacturacionController_enviarEmail_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailFacturaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

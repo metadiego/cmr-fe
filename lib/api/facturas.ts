@@ -259,6 +259,12 @@ export function getFormasPago(centroId?: string): Promise<FormaPago[]> {
   return apiFetch<FormaPago[]>(`/facturacion/formas-pago`, {}, centroId);
 }
 
+// Enviar la factura por email (BE PR #106). Sin `email` usa el del paciente (400 si no hay ninguno).
+// RBAC notificaciones.create. El DTO no está tipado en swagger → shape del handoff.
+export function emailFactura(facturaId: string, payload: { email?: string; cuerpo?: string }, centroId?: string): Promise<unknown> {
+  return apiFetch(`/facturas/${facturaId}/email`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+
 // ---- Devoluciones (BE PR #102) ---------------------------------------------
 // Una factura EMITIDA puede tener varias devoluciones (append-only, no bloqueante).
 // Anular (mismo día, error) ≠ Devolver (día siguiente/24h). El actor lo sella el BE (RequestContext).

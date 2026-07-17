@@ -971,7 +971,22 @@
       "returnLineRefund": "Line refund",
       "basePriceRef": "base {v}",
       "netRefund": "Net refund",
-      "netOwed": "Patient owes"
+      "netOwed": "Patient owes",
+      "email": "Send by email",
+      "emailTitle": "Email invoice",
+      "emailTo": "Email (optional)",
+      "emailPatientDefault": "Patient's email",
+      "emailBody": "Message (optional)",
+      "emailBodyPlaceholder": "Extra text for the email…",
+      "emailSend": "Send",
+      "emailSent": "Invoice emailed",
+      "returnComponents": "Kit components",
+      "returnQtyShort": "Qty",
+      "colBilled": "Billed",
+      "colAvailable": "Avail.",
+      "colReturn": "To return",
+      "colRefund": "Refund",
+      "byDelivery": "on delivery"
     },
     "columns": {
       "numero": "No.",

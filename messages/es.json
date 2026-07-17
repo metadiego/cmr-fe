@@ -971,7 +971,22 @@
       "returnLineRefund": "Reembolso de la línea",
       "basePriceRef": "base {v}",
       "netRefund": "Neto a reembolsar",
-      "netOwed": "El paciente debe"
+      "netOwed": "El paciente debe",
+      "email": "Enviar por email",
+      "emailTitle": "Enviar factura por email",
+      "emailTo": "Email (opcional)",
+      "emailPatientDefault": "Email del paciente",
+      "emailBody": "Mensaje (opcional)",
+      "emailBodyPlaceholder": "Texto adicional para el correo…",
+      "emailSend": "Enviar",
+      "emailSent": "Factura enviada por email",
+      "returnComponents": "Componentes del kit",
+      "returnQtyShort": "Cant.",
+      "colBilled": "Facturado",
+      "colAvailable": "Disp.",
+      "colReturn": "A devolver",
+      "colRefund": "Reembolso",
+      "byDelivery": "a la entrega"
     },
     "columns": {
       "numero": "N.º",
