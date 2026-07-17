@@ -64,7 +64,9 @@ export default function DevolverFacturaPage() {
   const [formaId, setFormaId] = React.useState("");
   const [busy, setBusy] = React.useState(false);
 
-  const esEntrega = (it: FacturaItem) => String(it.modoDescarga) === "a_la_entrega";
+  // a_la_entrega se devuelve por SESIONES no entregadas; el resto por cantidad. Si el ítem a_la_entrega
+  // no trae sesiones (>0), caemos a cantidad para no mostrar la línea "en cero".
+  const esEntrega = (it: FacturaItem) => String(it.modoDescarga) === "a_la_entrega" && n(it.sesiones) > 0;
   const dispCant = (it: FacturaItem) => n(it.cantidad) - n((it as { cantidadDevuelta?: number }).cantidadDevuelta);
   const dispSes = (it: FacturaItem) => n(it.sesiones) - n((it as { sesionesDevueltas?: number }).sesionesDevueltas);
   const compsDe = (it: FacturaItem): CompRow[] =>
@@ -158,6 +160,10 @@ export default function DevolverFacturaPage() {
 
       {facRes.state.kind === "loading" ? (
         <p className="mt-8 text-sm text-muted-foreground">{tc("loading")}</p>
+      ) : facRes.state.kind === "fail" ? (
+        <p className="mt-8 text-sm text-destructive">{facRes.state.message}</p>
+      ) : items.length === 0 ? (
+        <p className="mt-8 text-sm text-muted-foreground">{tf("noItems")}</p>
       ) : (
         <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
           {/* Tabla de líneas (a pantalla ancha, como la factura) */}
