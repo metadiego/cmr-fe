@@ -69,8 +69,9 @@ export default function DevolverFacturaPage() {
   const esEntrega = (it: FacturaItem) => String(it.modoDescarga) === "a_la_entrega" && n(it.sesiones) > 0;
   const dispCant = (it: FacturaItem) => n(it.cantidad) - n((it as { cantidadDevuelta?: number }).cantidadDevuelta);
   const dispSes = (it: FacturaItem) => n(it.sesiones) - n((it as { sesionesDevueltas?: number }).sesionesDevueltas);
-  const compsDe = (it: FacturaItem): CompRow[] =>
-    ((it as { contenido?: CompRow[] }).contenido ?? []).filter((c) => c.facturaItemComponenteId);
+  // Componentes internos del PC: se muestran SIEMPRE (vienen en contenido[]). El input de devolver
+  // por componente se habilita solo si el BE mandó facturaItemComponenteId (poblado en emitidas).
+  const compsDe = (it: FacturaItem): CompRow[] => (it as { contenido?: CompRow[] }).contenido ?? [];
   const ck = (itemId: string, ficId: string) => `${itemId}::${ficId}`;
 
   const defaultRefund = (it: FacturaItem) => {
@@ -80,7 +81,7 @@ export default function DevolverFacturaPage() {
     return (q / base) * (n(it.total) || n(it.cantidad) * n(it.precioUnitario));
   };
   const refundDe = (it: FacturaItem) => (precio[it.id]?.trim() ? Number(precio[it.id]) : defaultRefund(it));
-  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => Number(compCant[ck(it.id, String(c.facturaItemComponenteId))] || 0) > 0);
+  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.facturaItemComponenteId && Number(compCant[ck(it.id, String(c.facturaItemComponenteId))] || 0) > 0);
   const compRefund = (it: FacturaItem, c: CompRow) => {
     const key = ck(it.id, String(c.facturaItemComponenteId));
     if (compPrecio[key]?.trim()) return Number(compPrecio[key]);
@@ -225,18 +226,22 @@ export default function DevolverFacturaPage() {
                           />
                         </td>
                       </tr>
-                      {expanded[it.id] && comps.map((c) => {
+                      {expanded[it.id] && comps.map((c, ci) => {
+                        const puede = !!c.facturaItemComponenteId; // devolvible individualmente (id del snapshot)
                         const key = ck(it.id, String(c.facturaItemComponenteId));
                         return (
-                          <tr key={key} className="bg-muted/20 text-xs">
-                            <td className="px-3 py-1.5 pl-8">{n(c.cantidad)} · {c.nombre}</td>
+                          <tr key={puede ? key : `${it.id}::c${ci}`} className="bg-muted/20 text-xs">
+                            <td className="px-3 py-1.5 pl-8">
+                              {n(c.cantidad)} · {c.nombre}
+                              {!puede && <span className="ml-2 text-[10px] text-muted-foreground/70">({t("compNoReturnable")})</span>}
+                            </td>
                             <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.precio)}</td>
                             <td className="px-3 py-1.5 text-right tabular-nums">{n(c.cantidad)}</td>
                             <td className="px-3 py-1.5 text-right">
-                              <Input type="number" min={0} max={n(c.cantidad)} value={compCant[key] ?? ""} onChange={(e) => setCompCant((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
+                              <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => setCompCant((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
                             </td>
                             <td className="px-3 py-1.5 text-right">
-                              <Input type="number" value={compPrecio[key] ?? ""} onChange={(e) => setCompPrecio((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
+                              <Input type="number" disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => setCompPrecio((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
                             </td>
                           </tr>
                         );

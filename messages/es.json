@@ -987,7 +987,8 @@
       "colAvailable": "Disp.",
       "colReturn": "A devolver",
       "colRefund": "Reembolso",
-      "byDelivery": "a la entrega"
+      "byDelivery": "a la entrega",
+      "compNoReturnable": "no devolvible individualmente"
     },
     "columns": {
       "numero": "N.º",

@@ -987,7 +987,8 @@
       "colAvailable": "Avail.",
       "colReturn": "To return",
       "colRefund": "Refund",
-      "byDelivery": "on delivery"
+      "byDelivery": "on delivery",
+      "compNoReturnable": "not individually returnable"
     },
     "columns": {
       "numero": "No.",
