@@ -50,3 +50,14 @@ El modal de devolución ofrece la **política**: `como_facturada` (default) | `p
 - **Preview obligatorio en el modal:** al elegir `precio_base`, mostrar el neto calculado (puede salir
   "el paciente debe $X") ANTES de confirmar. No bloqueante — es decisión del paciente (seguir/pagar/no volver).
 - UI: toggle de política + columna/al pie con el neto (verde=reembolso, rojo=debe).
+
+## Slice C (BE #104) — Por-componente + precio editable
+`POST /facturas/:id/devolver` — cada item ahora acepta:
+- `precioDevuelto` (number, opcional): **override del monto** de la LÍNEA (precio editable por producto). Puede ser negativo.
+- `componentes` (opcional): devolver componentes específicos de un kit (PC):
+  `[{ facturaItemComponenteId, cantidad?, precioDevuelto? }]`. Revierte el inventario del componente
+  (si es a_la_venta) y reembolsa `precioDevuelto` (el snapshot del componente NO trae precio → el precio
+  del componente se EDITA en el modal). Los componentes del kit vienen en `GET /facturas/:id` →
+  `item.contenido[]` (con `productoId`, `nombre`, `cantidad`, `precio` de referencia).
+- UI del modal: por cada línea, permitir editar el monto a devolver; para kits, expandir sus componentes
+  (de `contenido[]`) y permitir devolver/editar cada uno. Data-grid editable (shadcn/ui + TanStack Table).
