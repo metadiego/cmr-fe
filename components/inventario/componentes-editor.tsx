@@ -68,6 +68,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
   const [nuevoOpcional, setNuevoOpcional] = React.useState(false);
   const [nuevoPrecioIncr, setNuevoPrecioIncr] = React.useState("");
   const [nuevoIncluido, setNuevoIncluido] = React.useState(false);
+  const [nuevaNota, setNuevaNota] = React.useState("");
   const [busy, setBusy] = React.useState(false);
 
   async function agregar() {
@@ -87,6 +88,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
         ...(allowOpcional && nuevoOpcional
           ? { opcional: true, precioIncremental: Number(nuevoPrecioIncr) || 0, incluidoPorDefecto: nuevoIncluido }
           : {}),
+        ...(allowOpcional && nuevaNota.trim() ? { nota: nuevaNota.trim() } : {}),
       });
       toast.success(t("added"));
       setNuevoId("");
@@ -95,6 +97,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
       setNuevoOpcional(false);
       setNuevoPrecioIncr("");
       setNuevoIncluido(false);
+      setNuevaNota("");
       reload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -126,15 +129,16 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
               <th className="px-3 py-2 font-semibold">{t("col.cantidad")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.unidad")}</th>
               {allowOpcional && <th className="px-3 py-2 font-semibold">{t("col.opcional")}</th>}
+              {allowOpcional && <th className="px-3 py-2 font-semibold">{t("col.nota")}</th>}
               <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody className="divide-y">
             {state.kind === "loading" && (
-              <tr><td colSpan={allowOpcional ? 5 : 4} className="px-3 py-6 text-center text-muted-foreground">{tc("loading")}</td></tr>
+              <tr><td colSpan={allowOpcional ? 6 : 4} className="px-3 py-6 text-center text-muted-foreground">{tc("loading")}</td></tr>
             )}
             {state.kind === "ok" && items.length === 0 && (
-              <tr><td colSpan={allowOpcional ? 5 : 4} className="px-3 py-6 text-center text-muted-foreground">{t("empty")}</td></tr>
+              <tr><td colSpan={allowOpcional ? 6 : 4} className="px-3 py-6 text-center text-muted-foreground">{t("empty")}</td></tr>
             )}
             {items.map((c) => (
               <ComponenteRow
@@ -194,6 +198,10 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
                 </label>
               </>
             )}
+            <label className="flex w-full flex-col gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">{t("nota")}</span>
+              <Input value={nuevaNota} onChange={(e) => setNuevaNota(e.target.value)} placeholder={t("notaPlaceholder")} />
+            </label>
           </div>
         )}
         <Button onClick={agregar} disabled={busy || !nuevoId}>
@@ -234,6 +242,7 @@ function ComponenteRow({
   const [opcional, setOpcional] = React.useState(!!comp.opcional);
   const [precioIncr, setPrecioIncr] = React.useState(String(comp.precioIncremental ?? ""));
   const [incluido, setIncluido] = React.useState(!!comp.incluidoPorDefecto);
+  const [nota, setNota] = React.useState((comp as { nota?: string | null }).nota ?? "");
   const [saving, setSaving] = React.useState(false);
 
   async function save() {
@@ -248,7 +257,7 @@ function ComponenteRow({
         cantidad: v,
         ...(unidad && unidad !== NONE ? { unidadId: unidad } : {}),
         ...(allowOpcional
-          ? { opcional, precioIncremental: opcional ? Number(precioIncr) || 0 : 0, incluidoPorDefecto: opcional ? incluido : false }
+          ? { opcional, precioIncremental: opcional ? Number(precioIncr) || 0 : 0, incluidoPorDefecto: opcional ? incluido : false, nota: nota.trim() }
           : {}),
       });
       toast.success(t("updated"));
@@ -310,6 +319,17 @@ function ComponenteRow({
             <span className="rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-600 dark:text-amber-400">
               {t("opcional")} +{money(comp.precioIncremental)}{comp.incluidoPorDefecto ? ` · ${t("porDefecto")}` : ""}
             </span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </td>
+      )}
+      {allowOpcional && (
+        <td className="px-3 py-2 text-xs">
+          {editing ? (
+            <Input value={nota} onChange={(e) => setNota(e.target.value)} className="h-7 w-48" placeholder={t("notaPlaceholder")} />
+          ) : comp.nota ? (
+            <span className="text-muted-foreground">{comp.nota}</span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}

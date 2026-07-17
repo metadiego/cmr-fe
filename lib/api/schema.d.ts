@@ -520,6 +520,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/productos/clases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catálogo de CLASES (para las pestañas del FE, data-driven + i18n): [{clase, labelKey}]. */
+        get: operations["ProductosController_clases_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/productos/{id}": {
         parameters: {
             query?: never;
@@ -5353,6 +5370,7 @@ export interface components {
             opcional: boolean;
             precioIncremental: number | null;
             incluidoPorDefecto: boolean;
+            nota: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5377,6 +5395,8 @@ export interface components {
             precioIncremental?: number;
             /** @description Si el opcional arranca incluido por defecto al agregar el kit. */
             incluidoPorDefecto?: boolean;
+            /** @description Programación/orden del componente en el protocolo (informativo, no afecta precio/descarga). */
+            nota?: string;
         };
         UpdateProductoComponenteDto: {
             cantidad?: number;
@@ -5388,6 +5408,8 @@ export interface components {
             opcional?: boolean;
             precioIncremental?: number;
             incluidoPorDefecto?: boolean;
+            /** @description Programación/orden del componente en el protocolo (informativo, no afecta precio/descarga). */
+            nota?: string;
             activo?: boolean;
         };
         ProductoCentroEntity: {
@@ -9191,6 +9213,13 @@ export interface operations {
             query: {
                 /** @description Solo comprables (base/unico): sin servicios ni kits. 'true' para el picker de compra/AMP. */
                 soloFisicos?: string;
+                /**
+                 * @description Clasificación del catálogo (filtros del FE), 1:1 con producto.tipo: `fisico` (unico: se vende tal cual)
+                 *     | `insumo` (base: inventariable, NO se vende solo, lo consumen compuestos/servicios) | `compuesto`
+                 *     (kits/derivados, se forman de físicos+servicios+insumos) | `servicio` (no inventariable: láser/suero/
+                 *     consulta). Omitido = todos.
+                 */
+                clase?: "fisico" | "insumo" | "compuesto" | "servicio";
                 /** @description Búsqueda por nombre o sku (ILIKE). */
                 q?: string;
                 /** @description 'true' para incluir inactivos (gestión); por defecto solo activos. */
@@ -9234,6 +9263,23 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ProductoEntity"];
                 };
+            };
+        };
+    };
+    ProductosController_clases_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -13618,6 +13664,7 @@ export interface operations {
             query?: {
                 estado?: string;
                 pacienteId?: string;
+                contexto?: string;
             };
             header?: never;
             path?: never;

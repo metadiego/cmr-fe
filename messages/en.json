@@ -1196,13 +1196,16 @@
         "componente": "Component",
         "cantidad": "Quantity",
         "unidad": "Unit",
-        "opcional": "Optional"
+        "opcional": "Optional",
+        "nota": "Note"
       },
       "empty": "No recipe — add components",
       "opcional": "Optional",
       "precioIncremental": "+Price",
       "incluidoPorDefecto": "Included by default",
-      "porDefecto": "default"
+      "porDefecto": "default",
+      "nota": "Note / Scheduling",
+      "notaPlaceholder": "e.g. Shockwave — visits 1, 7 and 10"
     },
     "index": {
       "title": "Inventory",
@@ -1306,7 +1309,8 @@
     "balance": "Balance",
     "attendedBy": "Attended by",
     "thanks": "Thanks for your visit!",
-    "includes": "Includes"
+    "includes": "Includes",
+    "protocolVisits": "{n}-visit protocol"
   },
   "facturacion": {
     "title": "Bill consultation",

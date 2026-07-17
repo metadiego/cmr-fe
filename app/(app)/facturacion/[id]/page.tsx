@@ -167,11 +167,14 @@ export default function FacturacionPage() {
   // Mapa productoId→precio del catálogo para el "Incluye:" del kit (precio de referencia).
   // Const plano (no hook): estamos después de early-returns; el cálculo es barato.
   const preciosCatalogo: Record<string, number> = {};
+  const diasCatalogo: Record<string, number> = {};
   catalogo.forEach((p) => {
     const pr = (p as { precio?: number | null }).precio;
     if (pr != null) preciosCatalogo[p.id] = pr;
+    const dt = (p as { diasTratamiento?: number | null }).diasTratamiento;
+    if (dt != null) diasCatalogo[p.id] = dt;
   });
-  const recibo = buildRecibo(factura, preciosCatalogo);
+  const recibo = buildRecibo(factura, preciosCatalogo, diasCatalogo);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">

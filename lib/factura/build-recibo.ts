@@ -12,7 +12,10 @@ export type ReciboItem = {
   total: number;
   // "Incluye:" de un kit (item.contenido, disponible en borrador+emitida). Vacío = compacto.
   // `precio` = REFERENCIA (mapeado del catálogo por productoId); NO suma al total.
-  componentes?: { descripcion: string; cantidad: number; precio?: number }[];
+  // `nota` = programación/protocolo del componente (PR #100), opcional.
+  componentes?: { descripcion: string; cantidad: number; precio?: number; nota?: string | null }[];
+  // Duración del protocolo del kit en visitas (producto.diasTratamiento), si aplica.
+  protocoloVisitas?: number;
   // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
   multiplicadores?: Record<string, number>;
 };
@@ -45,17 +48,24 @@ const num = (v: unknown) => Number(v ?? 0);
 // All data travels from the BE (empresa, pagos, emisor, medico, numeroDisplay,
 // emitidaEn) — no FE fallbacks/hardcode. numeroDisplay is null on drafts → "—".
 // `precios` = mapa productoId→precio de referencia (del catálogo del POS) para el "Incluye:".
-export function buildRecibo(f: FacturaConItems, precios: Record<string, number> = {}): Recibo {
+// `diasTratamiento` = mapa productoId→visitas del protocolo (producto.diasTratamiento).
+export function buildRecibo(
+  f: FacturaConItems,
+  precios: Record<string, number> = {},
+  diasTratamiento: Record<string, number> = {},
+): Recibo {
   const items: ReciboItem[] = (f.items ?? []).map((it) => {
     // "Incluye:" del kit desde item.contenido (BE PR #96): disponible en borrador Y emitida.
     // Compacto (imprimeComponentes=false) → contenido:[] (el BE ya lo devuelve vacío).
     const contenido =
-      (it as { contenido?: { productoId?: string; nombre?: string; cantidad?: number }[] }).contenido ?? [];
+      (it as { contenido?: { productoId?: string; nombre?: string; cantidad?: number; nota?: string | null }[] }).contenido ?? [];
     const itemComps = contenido.map((c) => ({
       descripcion: c.nombre ?? "—",
       cantidad: num(c.cantidad),
       ...(c.productoId && precios[c.productoId] != null ? { precio: precios[c.productoId] } : {}),
+      ...(c.nota ? { nota: c.nota } : {}),
     }));
+    const visitas = it.productoId ? diasTratamiento[String(it.productoId)] : undefined;
     // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
     const mult = (it.meta as { multiplicadores?: Record<string, number> } | null | undefined)?.multiplicadores;
     const multiplicadores = mult && Object.keys(mult).length ? mult : undefined;
@@ -70,6 +80,7 @@ export function buildRecibo(f: FacturaConItems, precios: Record<string, number> 
       descuento: num(it.descuento),
       total: num(it.total) || num(it.cantidad) * num(it.precioUnitario),
       ...(itemComps.length ? { componentes: itemComps } : {}),
+      ...(itemComps.length && visitas ? { protocoloVisitas: visitas } : {}),
       ...(multiplicadores ? { multiplicadores } : {}),
     };
   });

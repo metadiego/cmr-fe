@@ -1196,13 +1196,16 @@
         "componente": "Componente",
         "cantidad": "Cantidad",
         "unidad": "Unidad",
-        "opcional": "Opcional"
+        "opcional": "Opcional",
+        "nota": "Nota"
       },
       "empty": "Sin receta — agrega componentes",
       "opcional": "Opcional",
       "precioIncremental": "+Precio",
       "incluidoPorDefecto": "Incluido por defecto",
-      "porDefecto": "por defecto"
+      "porDefecto": "por defecto",
+      "nota": "Nota / Programación",
+      "notaPlaceholder": "Ej. Ondas de choque — visitas 1, 7 y 10"
     },
     "index": {
       "title": "Inventario",
@@ -1306,7 +1309,8 @@
     "balance": "Saldo",
     "attendedBy": "Atendido por",
     "thanks": "¡Gracias por su visita!",
-    "includes": "Incluye"
+    "includes": "Incluye",
+    "protocolVisits": "Protocolo de {n} visitas"
   },
   "facturacion": {
     "title": "Facturar consulta",
