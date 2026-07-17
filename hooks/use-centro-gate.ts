@@ -1,15 +1,22 @@
 "use client";
 
 import * as React from "react";
+import { useSearchParams } from "next/navigation";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getMe, type Me } from "@/lib/api/auth";
 import { useResource } from "@/hooks/use-resource";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 
-// Gate de centro reutilizable para toda la facturación (multi-tenant): si el usuario ve >1 centro y
-// no hay uno válido activo, EXIGE elegir; ese centro va como X-Tenant-ID en TODA la sesión. 1 centro
-// (o activo válido) → auto. Usado por VentaGeneral (alta) y la lista de facturación (índice).
+// Gate de centro reutilizable para toda la facturación (multi-tenant). Decisión por DATO (no por rol):
+//  - 1 centro asignado → auto (sin picker).
+//  - >1 centro y ninguno válido activo → EXIGE elegir (picker).
+//  - 0 centros → estado vacío (sinCentro).
+// Prioridad del centro efectivo: elección explícita > (si "cambiando", ninguno) > ?centro= de la URL
+// (lo pasa "Nueva venta"/row-click) > centro activo (cookie/perfil). El centro se fija como X-Tenant-ID
+// de TODA la sesión (cookie) para que client.ts lo adjunte en cada request.
 export function useCentroGate() {
+  const search = useSearchParams();
+  const urlCentro = search.get("centro");
   const meRes = useResource<Me>(() => getMe(), []);
   const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const centros = React.useMemo(
@@ -30,18 +37,27 @@ export function useCentroGate() {
 
   const [chosen, setChosen] = React.useState<string | null>(null);
   const [cambiando, setCambiando] = React.useState(false);
-  const centro = chosen ?? (cambiando ? null : validActive);
+  const centro =
+    chosen ??
+    (cambiando ? null : (urlCentro && ids.has(urlCentro) ? urlCentro : validActive));
   const necesitaPicker = !cargando && !centro && centros.length > 0;
+  const sinCentro = !cargando && centros.length === 0;
   const centroNombre = centros.find((c) => c.id === centro)?.nombre ?? "";
+
+  // Fija X-Tenant-ID (cookie) para toda la sesión cuando hay centro efectivo.
+  React.useEffect(() => {
+    if (centro) setActiveCentro(centro);
+  }, [centro]);
 
   return {
     cargando,
     centros,
     centro: centro ?? undefined,
     necesitaPicker,
+    sinCentro,
     centroNombre,
     puedeCambiar: centros.length > 1,
-    pick: (id: string) => { setChosen(id); setCambiando(false); },
+    pick: (id: string) => { setActiveCentro(id); setChosen(id); setCambiando(false); },
     cambiarCentro: () => { setChosen(null); setCambiando(true); },
   };
 }

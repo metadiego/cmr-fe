@@ -115,6 +115,8 @@ export default function FacturasListPage() {
 
       {gate.cargando ? (
         <p className="mt-8 text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+      ) : gate.sinCentro ? (
+        <p className="mt-8 text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
         <div className="mt-8 max-w-xl">
           <CentroPicker centros={gate.centros} onPick={gate.pick} />

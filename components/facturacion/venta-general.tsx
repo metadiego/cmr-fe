@@ -33,6 +33,7 @@ import {
 export function VentaGeneral() {
   const t = useTranslations("facturacion.general");
   const tc = useTranslations("common");
+  const router = useRouter();
   const gate = useCentroGate();
 
   return (
@@ -45,8 +46,12 @@ export function VentaGeneral() {
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+      ) : gate.sinCentro ? (
+        <p className="text-sm text-muted-foreground">{t("sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <CentroPicker centros={gate.centros} onPick={gate.pick} />
+        // Elegir centro → SIEMPRE la lista de ese centro (nunca directo a crear).
+        // Crear solo desde la lista con "Nueva venta".
+        <CentroPicker centros={gate.centros} onPick={(id) => router.push(`/facturacion?centro=${id}`)} />
       ) : (
         <Finder
           centro={gate.centro}

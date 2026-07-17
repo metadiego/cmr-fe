@@ -1375,7 +1375,8 @@
       "terceroTipo": "Tipo",
       "terceroEmpresa": "Empresa",
       "terceroPersona": "Persona",
-      "verLista": "Ver facturas"
+      "verLista": "Ver facturas",
+      "sinCentro": "No tienes un centro asignado. Contacta al administrador."
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",

@@ -1375,7 +1375,8 @@
       "terceroTipo": "Type",
       "terceroEmpresa": "Company",
       "terceroPersona": "Person",
-      "verLista": "View invoices"
+      "verLista": "View invoices",
+      "sinCentro": "You have no center assigned. Contact your admin."
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",
