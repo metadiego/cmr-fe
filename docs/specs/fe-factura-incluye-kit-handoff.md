@@ -1,6 +1,11 @@
 # Handoff FE — Imprimir "Incluye:" de un kit (compuesto)
 
-**BE listo (PR #96, prod).** Sin nuevos endpoints.
+**BE listo (PR #96/#99, prod).** Sin nuevos endpoints.
+
+> **⚠ FIX PRIORITARIO (2026-07-17):** el recibo muestra precio solo en algunos componentes porque los
+> toma del **catálogo** (solo precios por-centro). El BE ya manda el precio de **TODOS** en
+> `contenido[].precio` (resuelto con cascada centro→global→base). Cambio: pintar `c.precio` tal cual,
+> NO mapear del catálogo. Verificado en prod: el ULTRA devuelve los 10 con precio.
 
 ## Dato (en `GET /facturas/:id`, por ítem)
 Cada línea que es un **kit compuesto con `imprimeComponentes=true`** trae:
