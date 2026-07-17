@@ -70,3 +70,16 @@ El modal de devolución ofrece la **política**: `como_facturada` (default) | `p
 - **NO bloqueante:** la devolución se permite cualquier día. Es GUÍA — el FE resalta el botón sugerido
   (mismo día → "Anular"; después → "Devolver"), pero deja ambos disponibles.
 - MCP: `politica_devolucion`.
+
+## Huecos cerrados (BE #106)
+1. **Email de factura:** `POST /api/v1/facturas/:id/email` `{ email?, cuerpo? }` (RBAC `notificaciones.create`).
+   Envía al email del paciente (o al `email` dado; 400 si no hay ninguno). Ya puedes cablear el botón ✉.
+   MCP: `email_factura`.
+2. **Devolución por-componente:** `GET /facturas/:id/email`… → `item.contenido[]` ahora trae
+   **`facturaItemComponenteId`** (el id del snapshot). Úsalo en `DevolverComponenteDto.facturaItemComponenteId`.
+   En facturas EMITIDAS viene poblado; en borrador es `null` (no se devuelve un borrador). Ya puedes montar la sub-tabla de componentes.
+
+## Aclaración: `tipo` total vs parcial (respuesta BE)
+`devolucion.tipo` refleja si la **FACTURA quedó reconciliada** (nada pendiente por devolver NI entregar),
+no si "este retorno cubrió todo". Ej.: 2 sesiones, 1 ya entregada, devuelves la 1 pendiente → factura
+reconciliada → `total`. Si hay 2 sin usar y devuelves 1 → `parcial`. El `monto` siempre es el correcto.
