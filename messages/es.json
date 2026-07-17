@@ -484,7 +484,8 @@
     "active": "Activo",
     "inactive": "Inactivo",
     "noResults": "Sin resultados",
-    "print": "Imprimir"
+    "print": "Imprimir",
+    "rateLimited": "Demasiadas solicitudes. Espera unos segundos y reintenta."
   },
   "pending": {
     "title": "Acceso pendiente",

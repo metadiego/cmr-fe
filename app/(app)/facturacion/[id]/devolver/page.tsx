@@ -17,7 +17,7 @@ import {
   type DevolverPayload,
 } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
-import { toastError } from "@/lib/api/errors";
+import { toastError, isRateLimited } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,9 +46,9 @@ export default function DevolverFacturaPage() {
   const tc = useTranslations("common");
   const tRoot = useTranslations();
 
-  const facRes = useResource<FacturaConItems>(() => getFactura(id, centro), [id, centro]);
+  const { state: facturaState, reload: recargarFactura } = useResource<FacturaConItems>(() => getFactura(id, centro), [id, centro]);
   const formasRes = useResource<FormaPago[]>(() => getFormasPago(centro), [centro]);
-  const factura = facRes.state.kind === "ok" ? facRes.state.data : null;
+  const factura = facturaState.kind === "ok" ? facturaState.data : null;
   const items = React.useMemo<FacturaItem[]>(() => factura?.items ?? [], [factura]);
   const formas = (formasRes.state.kind === "ok" ? formasRes.state.data : []).filter((f) => f.activo !== false);
 
@@ -158,10 +158,15 @@ export default function DevolverFacturaPage() {
         )}
       </div>
 
-      {facRes.state.kind === "loading" ? (
+      {facturaState.kind === "loading" ? (
         <p className="mt-8 text-sm text-muted-foreground">{tc("loading")}</p>
-      ) : facRes.state.kind === "fail" ? (
-        <p className="mt-8 text-sm text-destructive">{facRes.state.message}</p>
+      ) : facturaState.kind === "fail" ? (
+        <div className="mt-8 flex flex-col items-start gap-3">
+          <p className="text-sm text-destructive">
+            {isRateLimited(facturaState.message) ? tRoot("common.rateLimited") : facturaState.message}
+          </p>
+          <Button variant="outline" size="sm" onClick={recargarFactura}>{tRoot("common.retry")}</Button>
+        </div>
       ) : items.length === 0 ? (
         <p className="mt-8 text-sm text-muted-foreground">{tf("noItems")}</p>
       ) : (

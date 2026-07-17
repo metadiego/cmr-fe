@@ -16,7 +16,18 @@ export function apiErrorMessage(err: unknown): string {
 // i18n-aware error string: prefer the BE's labelKey (translated) and fall back
 // to the raw message. Pass the translator for the namespace the labelKey lives
 // in (or a root translator). Without a translator, behaves like apiErrorMessage.
+// Rate limit (429/ThrottlerException): detectable por status/code o por el texto crudo.
+export function isRateLimited(err: unknown): boolean {
+  if (err instanceof ApiError) return err.status === 429 || err.code === "RATE_LIMITED";
+  const msg = err instanceof Error ? err.message : String(err);
+  return /RATE_LIMITED|Too Many Requests|ThrottlerException/i.test(msg);
+}
+
 export function apiErrorLabel(err: unknown, t?: Translate): string {
+  if (t && isRateLimited(err)) {
+    const m = t("common.rateLimited");
+    if (m && m !== "common.rateLimited") return m;
+  }
   if (err instanceof ApiError && err.labelKey && t) {
     const translated = t(err.labelKey);
     // next-intl returns the key itself on a miss → fall back to the message.
