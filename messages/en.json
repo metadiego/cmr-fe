@@ -988,7 +988,8 @@
       "colReturn": "To return",
       "colRefund": "Refund",
       "byDelivery": "on delivery",
-      "compNoReturnable": "not individually returnable"
+      "compNoReturnable": "not individually returnable",
+      "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued."
     },
     "columns": {
       "numero": "No.",

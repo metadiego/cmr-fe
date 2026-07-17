@@ -988,7 +988,8 @@
       "colReturn": "A devolver",
       "colRefund": "Reembolso",
       "byDelivery": "a la entrega",
-      "compNoReturnable": "no devolvible individualmente"
+      "compNoReturnable": "no devolvible individualmente",
+      "returnOnlyIssued": "Solo se pueden devolver facturas emitidas. Esta factura no está emitida."
     },
     "columns": {
       "numero": "N.º",

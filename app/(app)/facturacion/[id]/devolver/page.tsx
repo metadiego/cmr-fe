@@ -170,6 +170,11 @@ export default function DevolverFacturaPage() {
         </div>
       ) : items.length === 0 ? (
         <p className="mt-8 text-sm text-muted-foreground">{tf("noItems")}</p>
+      ) : !["emitida", "devuelta_parcial"].includes(String(factura?.estado)) ? (
+        <div className="mt-8 flex flex-col items-start gap-3">
+          <p className="text-sm text-muted-foreground">{t("returnOnlyIssued")}</p>
+          <Button variant="outline" size="sm" asChild><Link href={backHref}>{tf("back")}</Link></Button>
+        </div>
       ) : (
         <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
           {/* Tabla de líneas (a pantalla ancha, como la factura) */}
