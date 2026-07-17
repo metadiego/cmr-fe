@@ -960,7 +960,18 @@
       "returnRefund": "Refund method",
       "returnRefundNone": "Unspecified",
       "returnAvail": "Available: {n}",
-      "returnDone": "Return recorded"
+      "returnDone": "Return recorded",
+      "suggested": "suggested",
+      "policy": "Policy",
+      "policyAsBilled": "As billed",
+      "policyBasePrice": "Base price (consumed)",
+      "returnAvailSes": "Sessions avail.: {n}",
+      "returnQty": "Quantity to return",
+      "returnSes": "Sessions to return",
+      "returnLineRefund": "Line refund",
+      "basePriceRef": "base {v}",
+      "netRefund": "Net refund",
+      "netOwed": "Patient owes"
     },
     "columns": {
       "numero": "No.",

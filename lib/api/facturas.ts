@@ -278,6 +278,26 @@ export function anularDevolucion(facturaId: string, devolucionId: string, motivo
   return apiFetch(`/facturas/${facturaId}/devoluciones/${devolucionId}/anular`, { method: "POST", body: JSON.stringify({ motivo }) }, centroId);
 }
 
+// Guía de timing (no bloqueante): mismo día → sugiere Anular; después → Devolver. Ambos siempre disponibles.
+export interface PoliticaDevolucion {
+  accionSugerida?: "anular" | "devolver";
+  mismoDia?: boolean;
+  dentroVentanaAnulacion?: boolean;
+  config?: Record<string, unknown>;
+}
+export function getPoliticaDevolucion(facturaId: string, centroId?: string): Promise<PoliticaDevolucion> {
+  return apiFetch<PoliticaDevolucion>(`/facturas/${facturaId}/politica-devolucion`, {}, centroId);
+}
+
+// Precio base de un producto (para la política precio_base: valorar lo consumido al precio base).
+export function getPrecioBase(productoId: string, centroId?: string): Promise<{ productoId: string; precioBase: number }> {
+  return apiFetch<{ productoId: string; precioBase: number }>(
+    `/facturas/precio-base?productoId=${encodeURIComponent(productoId)}`,
+    {},
+    centroId,
+  );
+}
+
 // Lista GLOBAL de devoluciones (por centro), paginada + filtros. Cada fila = DevolucionEntity
 // (facturaNumero incluido). Multi-tenant por X-Tenant-ID.
 export interface ListDevolucionesParams {

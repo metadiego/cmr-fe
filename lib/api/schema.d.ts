@@ -2836,6 +2836,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/precio-base": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Precio BASE de un producto (el más alto entre sus presentaciones) — para la política de devolución precio_base. */
+        get: operations["FacturacionController_precioBase_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}": {
         parameters: {
             query?: never;
@@ -3088,6 +3105,23 @@ export interface paths {
             cookie?: never;
         };
         get: operations["FacturacionController_listarDevoluciones_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/politica-devolucion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Guía de tiempo (NO bloqueante): mismo día → anular; después → devolver. Configurable por centro. */
+        get: operations["FacturacionController_politicaDevolucion_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7180,15 +7214,25 @@ export interface components {
             /** Format: uuid */
             actorId?: string;
         };
+        DevolverComponenteDto: {
+            /** Format: uuid */
+            facturaItemComponenteId: string;
+            cantidad?: number;
+            precioDevuelto?: number;
+        };
         DevolverItemDto: {
             /** Format: uuid */
             facturaItemId: string;
             cantidad?: number;
             sesiones?: number;
+            precioDevuelto?: number;
+            componentes?: components["schemas"]["DevolverComponenteDto"][];
         };
         DevolverDto: {
             items: components["schemas"]["DevolverItemDto"][];
             motivo: string;
+            /** @enum {string} */
+            politica?: "como_facturada" | "precio_base";
             /** Format: uuid */
             formaReembolsoId?: string;
             /** Format: uuid */
@@ -7199,6 +7243,7 @@ export interface components {
             facturaNumero: string | null;
             /** @enum {string} */
             tipo: "total" | "parcial";
+            politica: string;
             motivo: string | null;
             montoDevuelto: number;
             impuestoDevuelto: number;
@@ -13722,6 +13767,25 @@ export interface operations {
             };
         };
     };
+    FacturacionController_precioBase_v1: {
+        parameters: {
+            query: {
+                productoId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     FacturacionController_get_v1: {
         parameters: {
             query?: never;
@@ -14140,6 +14204,25 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["DevolucionEntity"][];
                 };
+            };
+        };
+    };
+    FacturacionController_politicaDevolucion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

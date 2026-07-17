@@ -960,7 +960,18 @@
       "returnRefund": "Forma de reembolso",
       "returnRefundNone": "Sin especificar",
       "returnAvail": "Disponible: {n}",
-      "returnDone": "Devolución registrada"
+      "returnDone": "Devolución registrada",
+      "suggested": "sugerido",
+      "policy": "Política",
+      "policyAsBilled": "Como facturada",
+      "policyBasePrice": "Precio base (consumo)",
+      "returnAvailSes": "Sesiones disp.: {n}",
+      "returnQty": "Cantidad a devolver",
+      "returnSes": "Sesiones a devolver",
+      "returnLineRefund": "Reembolso de la línea",
+      "basePriceRef": "base {v}",
+      "netRefund": "Neto a reembolsar",
+      "netOwed": "El paciente debe"
     },
     "columns": {
       "numero": "N.º",
