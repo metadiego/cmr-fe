@@ -1161,7 +1161,8 @@
         "esInventariable": "Inventariable (lleva stock)",
         "gravado": "Gravado (impuesto)",
         "activo": "Activo",
-        "none": "(ninguno)"
+        "none": "(ninguno)",
+        "aplicaPrecioBaseDevolucion": "Devuelve a precio base"
       },
       "proveedorMas": "+{n}",
       "noResults": "Sin resultados para «{q}»",

@@ -1161,7 +1161,8 @@
         "esInventariable": "Inventoried (tracks stock)",
         "gravado": "Taxable",
         "activo": "Active",
-        "none": "(none)"
+        "none": "(none)",
+        "aplicaPrecioBaseDevolucion": "Refunds at base price"
       },
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",

@@ -5215,6 +5215,7 @@ export interface components {
             diasTratamiento: number | null;
             facturableGeneral: boolean;
             imprimeComponentes: boolean;
+            aplicaPrecioBaseDevolucion: boolean;
             unidadContenidoId: string | null;
             tamano: string | null;
             peso: number | null;
@@ -5258,6 +5259,8 @@ export interface components {
             facturableGeneral?: boolean;
             /** @description Solo kits: si el recibo imprime el desglose de componentes (true) o solo el kit (false = compacto). */
             imprimeComponentes?: boolean;
+            /** @description Devolución con política precio_base: valora este producto al precio base (servicios de precio variable). */
+            aplicaPrecioBaseDevolucion?: boolean;
             tamano?: string;
             peso?: number;
             /** Format: uuid */
@@ -5293,6 +5296,8 @@ export interface components {
             diasTratamiento?: number;
             facturableGeneral?: boolean;
             imprimeComponentes?: boolean;
+            /** @description Devolución con política precio_base: valora este producto al precio base (servicios de precio variable). */
+            aplicaPrecioBaseDevolucion?: boolean;
             tamano?: string;
             peso?: number;
             /** Format: uuid */

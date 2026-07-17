@@ -465,6 +465,7 @@ type FormState = {
   barcode: string;
   gravado: boolean;
   imprimeComponentes: boolean;
+  aplicaPrecioBaseDevolucion: boolean;
   activo: boolean;
 };
 const EMPTY: FormState = {
@@ -481,6 +482,7 @@ const EMPTY: FormState = {
   barcode: "",
   gravado: false,
   imprimeComponentes: true,
+  aplicaPrecioBaseDevolucion: false,
   activo: true,
 };
 
@@ -527,6 +529,7 @@ function ProductoForm({
             barcode: producto.barcode ?? "",
             gravado: producto.gravado ?? false,
             imprimeComponentes: (producto as { imprimeComponentes?: boolean }).imprimeComponentes ?? true,
+            aplicaPrecioBaseDevolucion: (producto as { aplicaPrecioBaseDevolucion?: boolean }).aplicaPrecioBaseDevolucion ?? false,
             activo: producto.activo ?? true,
           }
         : EMPTY,
@@ -560,6 +563,8 @@ function ProductoForm({
         fabricanteId: id(form.fabricanteId),
         barcode: txt(form.barcode),
         gravado: form.gravado,
+        // Devolución a precio base (láser/vit C/GLP-1…): la política precio_base solo aplica a los marcados.
+        aplicaPrecioBaseDevolucion: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
         ...(form.tipo === "compuesto" ? { imprimeComponentes: form.imprimeComponentes } : {}),
       };
@@ -674,6 +679,7 @@ function ProductoForm({
           </div>
           <Toggle label={t("field.esInventariable")} checked={form.esInventariable} onChange={(v) => set("esInventariable", v)} />
           <Toggle label={t("field.gravado")} checked={form.gravado} onChange={(v) => set("gravado", v)} />
+          <Toggle label={t("field.aplicaPrecioBaseDevolucion")} checked={form.aplicaPrecioBaseDevolucion} onChange={(v) => set("aplicaPrecioBaseDevolucion", v)} />
           {form.tipo === "compuesto" && (
             <Toggle label={t("imprimeComponentes")} checked={form.imprimeComponentes} onChange={(v) => set("imprimeComponentes", v)} />
           )}
