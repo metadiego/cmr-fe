@@ -61,3 +61,12 @@ El modal de devolución ofrece la **política**: `como_facturada` (default) | `p
   `item.contenido[]` (con `productoId`, `nombre`, `cantidad`, `precio` de referencia).
 - UI del modal: por cada línea, permitir editar el monto a devolver; para kits, expandir sus componentes
   (de `contenido[]`) y permitir devolver/editar cada uno. Data-grid editable (shadcn/ui + TanStack Table).
+
+## Slice D (BE #105) — Timing: anular vs devolver (NO bloqueante)
+`GET /api/v1/facturas/:id/politica-devolucion` →
+`{ accionSugerida: 'anular'|'devolver', mismoDia: boolean, dentroVentanaAnulacion: boolean, config }`.
+- **mismo día** de emisión → `accionSugerida: 'anular'`; **día siguiente/24h+** → `'devolver'`.
+- Configurable por centro (`preferences.anulacion`: ventana `mismo_dia`|`horas`, zonaHoraria).
+- **NO bloqueante:** la devolución se permite cualquier día. Es GUÍA — el FE resalta el botón sugerido
+  (mismo día → "Anular"; después → "Devolver"), pero deja ambos disponibles.
+- MCP: `politica_devolucion`.
