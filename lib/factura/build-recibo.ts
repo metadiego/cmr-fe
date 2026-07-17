@@ -47,22 +47,22 @@ const num = (v: unknown) => Number(v ?? 0);
 // Assemble the receipt model from the BE's enriched GET /facturas/:id projection.
 // All data travels from the BE (empresa, pagos, emisor, medico, numeroDisplay,
 // emitidaEn) — no FE fallbacks/hardcode. numeroDisplay is null on drafts → "—".
-// `precios` = mapa productoId→precio de referencia (del catálogo del POS) para el "Incluye:".
 // `diasTratamiento` = mapa productoId→visitas del protocolo (producto.diasTratamiento).
 export function buildRecibo(
   f: FacturaConItems,
-  precios: Record<string, number> = {},
   diasTratamiento: Record<string, number> = {},
 ): Recibo {
   const items: ReciboItem[] = (f.items ?? []).map((it) => {
     // "Incluye:" del kit desde item.contenido (BE PR #96): disponible en borrador Y emitida.
     // Compacto (imprimeComponentes=false) → contenido:[] (el BE ya lo devuelve vacío).
+    // El PRECIO viene RESUELTO en contenido[].precio (cascada centro→global→base, BE #99) → leerlo
+    // tal cual; NO mapear del catálogo (que solo tiene precios por-centro y omitía componentes).
     const contenido =
-      (it as { contenido?: { productoId?: string; nombre?: string; cantidad?: number; nota?: string | null }[] }).contenido ?? [];
+      (it as { contenido?: { productoId?: string; nombre?: string; cantidad?: number; precio?: number | null; nota?: string | null }[] }).contenido ?? [];
     const itemComps = contenido.map((c) => ({
       descripcion: c.nombre ?? "—",
       cantidad: num(c.cantidad),
-      ...(c.productoId && precios[c.productoId] != null ? { precio: precios[c.productoId] } : {}),
+      ...(c.precio != null ? { precio: num(c.precio) } : {}),
       ...(c.nota ? { nota: c.nota } : {}),
     }));
     const visitas = it.productoId ? diasTratamiento[String(it.productoId)] : undefined;
