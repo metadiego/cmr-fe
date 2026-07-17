@@ -42,3 +42,25 @@ Política full/precio_base, `items[].{cantidad|sesiones|precioDevuelto}`,
 `GET /facturas/:id/politica-devolucion` (timing), múltiples devoluciones append-only, anular ≠ devolver.
 
 Detalle FE: `docs/specs/fe-devoluciones-lista-y-acciones-handoff.md`.
+
+---
+## RESPUESTA BE (#107) — los 2 puntos, cerrados
+
+### 1) Precio base como atributo del producto (1 click) ✅
+- **Flag nuevo:** `producto.aplicaPrecioBaseDevolucion` (boolean, default false, con COMMENT). Está en
+  `ProductoEntity` + Create/Update DTO → editable por `PUT /inventario/productos/:id`
+  `{ aplicaPrecioBaseDevolucion: true }` o MCP `set_precio_base_devolucion`. Marca en 1 click qué
+  productos devuelven a precio base (láser, vit C, GLP-1…).
+- **De dónde sale `precioBase`:** es el **precio MÁS ALTO entre las presentaciones** del producto, de la
+  **lista regular** (derivado; `GET /facturas/precio-base?productoId=`). **NO hay campo aparte** → el FE
+  ya edita los precios en `/precios`; solo falta el toggle. Para un producto de una sola presentación,
+  ese precio ES el base.
+- **Gate:** la política `precio_base` en `devolver` ahora **solo aplica a productos con el flag=true**;
+  los demás caen a `como_facturada` (el flag es también el criterio de negocio, no solo UI).
+- FE: agrega el toggle "Devuelve a precio base" en el editor de producto (junto a Gravado/IVU). Nada más.
+
+### 2) Reintegro de inventario al devolver ✅ (YA ocurre — no tocar)
+`POST /facturas/:id/devolver` YA reintegra stock: para líneas y componentes `a_la_venta` llama
+`operaciones.revertirVenta` (entrada compensatoria, desglosa compuestos). Los `a_la_entrega` solo
+devuelven lo NO entregado (paquetes_sesiones.sesionesDevueltas). `cantidadDevuelta`/`sesionesDevueltas`
+reflejan la disponibilidad del paciente para esa factura. El FE no toca stock. Confirmado en código + tests.
