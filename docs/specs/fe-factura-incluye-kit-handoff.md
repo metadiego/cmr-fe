@@ -6,8 +6,8 @@
 Cada línea que es un **kit compuesto con `imprimeComponentes=true`** trae:
 ```jsonc
 "contenido": [
-  { "productoId": "…", "sku": "CMALA01", "nombre": "NPT Stem Cells", "cantidad": 1 },
-  { "productoId": "…", "sku": "vitacintra", "nombre": "VITAMINA C INTRAVENOSA", "cantidad": 3 },
+  { "productoId": "…", "sku": "CMALA01", "nombre": "NPT Stem Cells", "cantidad": 1, "precio": 10000 },
+  { "productoId": "…", "sku": "vitacintra", "nombre": "VITAMINA C INTRAVENOSA", "cantidad": 3, "precio": 140 },
   … (10 para el ULTRA)
 ]
 ```
@@ -17,10 +17,9 @@ Cada línea que es un **kit compuesto con `imprimeComponentes=true`** trae:
 
 ## Qué pintar
 Bajo la línea del kit, un bloque **"Incluye:"** con cada componente **indentado a la derecha y en
-fuente menor** (ya validado en el preview): `cantidad · nombre · [precio]`.
-- **Precio de referencia** de cada componente: mapearlo del catálogo por `productoId`
-  (los precios ya están cargados; ver `precios-legacy-faltantes`). No viene en `contenido` para no
-  duplicar la resolución de precio; el catálogo del POS ya lo tiene.
+fuente menor** (ya validado en el preview): `cantidad · nombre · precio`.
+- **`precio` viene en `contenido`** (resuelto por el BE con fallback a precio global) — pintar `precio`
+  tal cual; si es `null`, no mostrar monto. NO hace falta mapear del catálogo.
 - Los precios del "Incluye:" son **referencia** (NO suman al total; el total lo fija el precio del kit).
 
 ## Aceptación
