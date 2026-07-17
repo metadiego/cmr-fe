@@ -259,6 +259,45 @@ export function getFormasPago(centroId?: string): Promise<FormaPago[]> {
   return apiFetch<FormaPago[]>(`/facturacion/formas-pago`, {}, centroId);
 }
 
+// ---- Devoluciones (BE PR #102) ---------------------------------------------
+// Una factura EMITIDA puede tener varias devoluciones (append-only, no bloqueante).
+// Anular (mismo día, error) ≠ Devolver (día siguiente/24h). El actor lo sella el BE (RequestContext).
+export type Devolucion = components["schemas"]["DevolucionEntity"];
+export type DevolverPayload = components["schemas"]["DevolverDto"];
+
+// Registrar una devolución (total o parcial) de una factura. items = líneas a devolver.
+export function devolverFactura(facturaId: string, payload: DevolverPayload, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas/${facturaId}/devolver`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+// Devoluciones de UNA factura.
+export function listDevolucionesDeFactura(facturaId: string, centroId?: string): Promise<Devolucion[]> {
+  return apiFetch<Devolucion[]>(`/facturas/${facturaId}/devoluciones`, {}, centroId);
+}
+// Anular una devolución (RBAC). Motivo obligatorio; actor sellado por el BE.
+export function anularDevolucion(facturaId: string, devolucionId: string, motivo: string, centroId?: string): Promise<unknown> {
+  return apiFetch(`/facturas/${facturaId}/devoluciones/${devolucionId}/anular`, { method: "POST", body: JSON.stringify({ motivo }) }, centroId);
+}
+
+// Lista GLOBAL de devoluciones (por centro), paginada + filtros. Cada fila = DevolucionEntity
+// (facturaNumero incluido). Multi-tenant por X-Tenant-ID.
+export interface ListDevolucionesParams {
+  page?: number;
+  limit?: number;
+  q?: string; // nº de factura
+  estado?: string; // activa|anulada
+  desde?: string;
+  hasta?: string;
+}
+export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?: string): Promise<Paginated<Devolucion>> {
+  const { page = 1, limit = 20, q, estado, desde, hasta } = params;
+  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (q?.trim()) sp.set("q", q.trim());
+  if (estado) sp.set("estado", estado);
+  if (desde) sp.set("desde", desde);
+  if (hasta) sp.set("hasta", hasta);
+  return apiFetchPaged<Devolucion>(`/facturacion/devoluciones?${sp.toString()}`, {}, centroId);
+}
+
 export function registrarPago(facturaId: string, payload: RegistrarPagoPayload, centroId?: string): Promise<unknown> {
   return apiFetch(`/facturas/${facturaId}/pagos`, { method: "POST", body: JSON.stringify(payload) }, centroId);
 }

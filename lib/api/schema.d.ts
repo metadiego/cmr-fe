@@ -3385,6 +3385,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturacion/devoluciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista global de devoluciones del centro (nº factura, fecha, estado, monto). */
+        get: operations["DevolucionesController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/export": {
         parameters: {
             query?: never;
@@ -7179,6 +7196,7 @@ export interface components {
         };
         DevolucionEntity: {
             facturaId: string;
+            facturaNumero: string | null;
             /** @enum {string} */
             tipo: "total" | "parcial";
             motivo: string | null;
@@ -14638,6 +14656,26 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ColumnaFacturacionEntity"];
                 };
+            };
+        };
+    };
+    DevolucionesController_list_v1: {
+        parameters: {
+            query: {
+                page: number;
+                limit: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

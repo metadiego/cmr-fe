@@ -9,6 +9,7 @@ import { getFacturasTablero, type FacturaTablero } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListToolbar } from "@/components/kit/list-toolbar";
@@ -77,7 +78,7 @@ export default function FacturasListPage() {
   // Gate de centro (multi-tenant) → X-Tenant-ID. Lista metadata-driven del BE con columnas RESUELTAS
   // (incluye Cliente/Médico). contexto=general excluye las facturas de consulta médica.
   const gate = useCentroGate();
-  const { state } = useResource<FacturaTablero>(
+  const { state, reload } = useResource<FacturaTablero>(
     () =>
       gate.centro
         ? getFacturasTablero({ q, estado, desde, hasta, contexto: "general" }, gate.centro)
@@ -104,6 +105,9 @@ export default function FacturasListPage() {
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/facturacion/devoluciones">{t("devoluciones")}</Link>
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
           </Button>
@@ -176,13 +180,12 @@ export default function FacturasListPage() {
                       <td key={c.clave} className="px-3 py-2">{cell(c.clave, f[c.clave])}</td>
                     ))}
                     <td className="px-3 py-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); router.push(`/facturacion/${f.id}${gate.centro ? `?centro=${gate.centro}` : ""}`); }}
-                      >
-                        {t("ver")}
-                      </Button>
+                      <FacturaRowActions
+                        facturaId={f.id}
+                        estado={String(f.fac_estado ?? "")}
+                        centroId={gate.centro}
+                        onChanged={reload}
+                      />
                     </td>
                   </tr>
                 ))}

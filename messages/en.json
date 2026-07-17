@@ -583,7 +583,8 @@
     "appearance": "Appearance",
     "tableroModulos": "Board modules",
     "tablerosSettings": "Board settings",
-    "configFactura": "Invoice (header/footer)"
+    "configFactura": "Invoice (header/footer)",
+    "devoluciones": "Returns"
   },
   "admin": {
     "title": "Administration",
@@ -951,7 +952,15 @@
       "void": "Void",
       "voidTitle": "Void invoice?",
       "voidBody": "The invoice will be voided. This action is recorded under your user.",
-      "voidReason": "Reason for voiding"
+      "voidReason": "Reason for voiding",
+      "print": "Print",
+      "return": "Return",
+      "returnTitle": "Invoice return",
+      "returnReason": "Return reason",
+      "returnRefund": "Refund method",
+      "returnRefundNone": "Unspecified",
+      "returnAvail": "Available: {n}",
+      "returnDone": "Return recorded"
     },
     "columns": {
       "numero": "No.",
@@ -970,7 +979,8 @@
     "consumoInsumos": "Supply consumption",
     "nuevaVenta": "New sale",
     "empty": "No invoices",
-    "ver": "View"
+    "ver": "View",
+    "devoluciones": "Returns"
   },
   "inventario": {
     "prov": {
@@ -1689,6 +1699,38 @@
       "zip": "ZIP code",
       "pieFactura": "Footer text",
       "pieFacturaHint": "Multiline. Shows at the bottom of the receipt."
+    }
+  },
+  "devoluciones": {
+    "title": "Returns",
+    "verFacturas": "View invoices",
+    "searchPlaceholder": "Search by invoice #",
+    "allStates": "All statuses",
+    "from": "From",
+    "to": "To",
+    "empty": "No returns",
+    "verFactura": "View invoice",
+    "anular": "Void",
+    "anularTitle": "Void return",
+    "anularBody": "The return will be voided. Recorded with your user.",
+    "anularReason": "Void reason",
+    "anuladaOk": "Return voided",
+    "estado": {
+      "activa": "Active",
+      "anulada": "Voided"
+    },
+    "tipo": {
+      "total": "Full",
+      "parcial": "Partial"
+    },
+    "col": {
+      "factura": "Invoice #",
+      "fecha": "Date",
+      "tipo": "Type",
+      "monto": "Amount",
+      "estado": "Status",
+      "motivo": "Reason",
+      "acciones": "Actions"
     }
   }
 }

@@ -583,7 +583,8 @@
     "appearance": "Apariencia",
     "tableroModulos": "Módulos de tablero",
     "tablerosSettings": "Ajustes de tableros",
-    "configFactura": "Factura (encabezado/pie)"
+    "configFactura": "Factura (encabezado/pie)",
+    "devoluciones": "Devoluciones"
   },
   "admin": {
     "title": "Administración",
@@ -951,7 +952,15 @@
       "void": "Anular",
       "voidTitle": "¿Anular factura?",
       "voidBody": "La factura quedará anulada. Esta acción se registra con tu usuario.",
-      "voidReason": "Motivo de la anulación"
+      "voidReason": "Motivo de la anulación",
+      "print": "Imprimir",
+      "return": "Devolución",
+      "returnTitle": "Devolución de factura",
+      "returnReason": "Motivo de la devolución",
+      "returnRefund": "Forma de reembolso",
+      "returnRefundNone": "Sin especificar",
+      "returnAvail": "Disponible: {n}",
+      "returnDone": "Devolución registrada"
     },
     "columns": {
       "numero": "N.º",
@@ -970,7 +979,8 @@
     "consumoInsumos": "Consumo de insumos",
     "nuevaVenta": "Nueva venta",
     "empty": "Sin facturas",
-    "ver": "Ver"
+    "ver": "Ver",
+    "devoluciones": "Devoluciones"
   },
   "inventario": {
     "prov": {
@@ -1689,6 +1699,38 @@
       "zip": "Código postal",
       "pieFactura": "Texto del pie",
       "pieFacturaHint": "Multilínea. Aparece al final del recibo."
+    }
+  },
+  "devoluciones": {
+    "title": "Devoluciones",
+    "verFacturas": "Ver facturas",
+    "searchPlaceholder": "Buscar por nº de factura",
+    "allStates": "Todos los estados",
+    "from": "Desde",
+    "to": "Hasta",
+    "empty": "Sin devoluciones",
+    "verFactura": "Ver factura",
+    "anular": "Anular",
+    "anularTitle": "Anular devolución",
+    "anularBody": "La devolución quedará anulada. Se registra con tu usuario.",
+    "anularReason": "Motivo de la anulación",
+    "anuladaOk": "Devolución anulada",
+    "estado": {
+      "activa": "Activa",
+      "anulada": "Anulada"
+    },
+    "tipo": {
+      "total": "Total",
+      "parcial": "Parcial"
+    },
+    "col": {
+      "factura": "Nº Factura",
+      "fecha": "Fecha",
+      "tipo": "Tipo",
+      "monto": "Monto",
+      "estado": "Estado",
+      "motivo": "Motivo",
+      "acciones": "Acciones"
     }
   }
 }
