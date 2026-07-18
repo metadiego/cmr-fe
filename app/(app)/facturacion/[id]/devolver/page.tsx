@@ -33,14 +33,34 @@ const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
 type CompRow = { facturaItemComponenteId?: string | null; nombre?: string; cantidad?: number; precio?: number };
 
-// Devolución a PANTALLA COMPLETA (tipo factura): tabla ancha de líneas con cantidad/sesiones a
-// devolver + reembolso editable + componentes de kit expandibles; panel lateral con política, motivo,
-// forma de reembolso y NETO en vivo. Reemplaza el modal (no práctico para facturas con muchos ítems).
+// Helpers PUROS (módulo) para poder pre-llenar en los initializers de useState.
+// a_la_entrega se devuelve por SESIONES no entregadas; el resto por cantidad. Si a_la_entrega no trae
+// sesiones (>0), cae a cantidad para no mostrar la línea "en cero".
+const esEntrega = (it: FacturaItem) => String(it.modoDescarga) === "a_la_entrega" && n(it.sesiones) > 0;
+const dispCant = (it: FacturaItem) => n(it.cantidad) - n((it as { cantidadDevuelta?: number }).cantidadDevuelta);
+const dispSes = (it: FacturaItem) => n(it.sesiones) - n((it as { sesionesDevueltas?: number }).sesionesDevueltas);
+const dispDe = (it: FacturaItem) => (esEntrega(it) ? dispSes(it) : dispCant(it));
+const billedQty = (it: FacturaItem) => (esEntrega(it) ? n(it.sesiones) : n(it.cantidad)) || 0;
+const lineBilledTotal = (it: FacturaItem) => n(it.total) || n(it.cantidad) * n(it.precioUnitario);
+// Reembolso EXACTO facturado por unidad × devuelto (incluye descuento/impuesto tal como se facturó).
+const exactRefund = (it: FacturaItem, q: number) => {
+  const bq = billedQty(it);
+  return bq > 0 ? (q / bq) * lineBilledTotal(it) : 0;
+};
+const compExactRefund = (c: CompRow, q: number) => {
+  const bq = n(c.cantidad) || 0;
+  return bq > 0 ? (q / bq) * n(c.precio) : 0;
+};
+const compsDe = (it: FacturaItem): CompRow[] => (it as { contenido?: CompRow[] }).contenido ?? [];
+const ck = (itemId: string, ficId: string) => `${itemId}::${ficId}`;
+
+// Devolución a PANTALLA COMPLETA (tipo factura). La lógica/estado vive en <DevolverForm>, remontado por
+// key={factura.id} → sus initializers PRE-LLENAN "como facturada" con la factura exacta (cantidades
+// completas + reembolso = total facturado). Editable hacia abajo para parciales.
 export default function DevolverFacturaPage() {
   const params = useParams<{ id: string }>();
   const id = String(params.id);
   const centro = useSearchParams().get("centro") ?? undefined;
-  const router = useRouter();
   const t = useTranslations("facturacionList.actions");
   const tf = useTranslations("facturacion");
   const tc = useTranslations("common");
@@ -49,151 +69,10 @@ export default function DevolverFacturaPage() {
   const { state: facturaState, reload: recargarFactura } = useResource<FacturaConItems>(() => getFactura(id, centro), [id, centro]);
   const formasRes = useResource<FormaPago[]>(() => getFormasPago(centro), [centro]);
   const factura = facturaState.kind === "ok" ? facturaState.data : null;
-  const items = React.useMemo<FacturaItem[]>(() => factura?.items ?? [], [factura]);
+  const items = factura?.items ?? [];
   const formas = (formasRes.state.kind === "ok" ? formasRes.state.data : []).filter((f) => f.activo !== false);
 
-  const [politica, setPolitica] = React.useState<"como_facturada" | "precio_base">("como_facturada");
-  const [cant, setCant] = React.useState<Record<string, string>>({});
-  const [ses, setSes] = React.useState<Record<string, string>>({});
-  const [precio, setPrecio] = React.useState<Record<string, string>>({});
-  const [bases, setBases] = React.useState<Record<string, number>>({});
-  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
-  const [compCant, setCompCant] = React.useState<Record<string, string>>({});
-  const [compPrecio, setCompPrecio] = React.useState<Record<string, string>>({});
-  const [motivo, setMotivo] = React.useState("");
-  const [formaId, setFormaId] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-
-  // a_la_entrega se devuelve por SESIONES no entregadas; el resto por cantidad. Si el ítem a_la_entrega
-  // no trae sesiones (>0), caemos a cantidad para no mostrar la línea "en cero".
-  const esEntrega = (it: FacturaItem) => String(it.modoDescarga) === "a_la_entrega" && n(it.sesiones) > 0;
-  const dispCant = (it: FacturaItem) => n(it.cantidad) - n((it as { cantidadDevuelta?: number }).cantidadDevuelta);
-  const dispSes = (it: FacturaItem) => n(it.sesiones) - n((it as { sesionesDevueltas?: number }).sesionesDevueltas);
-  // Componentes internos del PC: se muestran SIEMPRE (vienen en contenido[]). El input de devolver
-  // por componente se habilita solo si el BE mandó facturaItemComponenteId (poblado en emitidas).
-  const compsDe = (it: FacturaItem): CompRow[] => (it as { contenido?: CompRow[] }).contenido ?? [];
-  const ck = (itemId: string, ficId: string) => `${itemId}::${ficId}`;
-
-  // "Como facturada": el reembolso es EXACTO al monto facturado por unidad (total de la línea /
-  // cantidad ORIGINAL facturada) × lo devuelto. Nunca inventa un proporcional sobre lo disponible.
-  const billedQty = (it: FacturaItem) => (esEntrega(it) ? n(it.sesiones) : n(it.cantidad)) || 0;
-  const lineBilledTotal = (it: FacturaItem) => n(it.total) || n(it.cantidad) * n(it.precioUnitario);
-  const exactRefund = (it: FacturaItem, q: number) => {
-    const bq = billedQty(it);
-    return bq > 0 ? (q / bq) * lineBilledTotal(it) : 0;
-  };
-  const compExactRefund = (c: CompRow, q: number) => {
-    const bq = n(c.cantidad) || 0;
-    return bq > 0 ? (q / bq) * n(c.precio) : 0;
-  };
-  const defaultRefund = (it: FacturaItem) => exactRefund(it, esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0));
-  const refundDe = (it: FacturaItem) => (precio[it.id]?.trim() ? Number(precio[it.id]) : defaultRefund(it));
-
-  // Al cambiar cantidad en "como facturada", auto-rellena el reembolso EXACTO (editable). En precio_base
-  // no lo toca (lo pone el cajero / BE). Igual para componentes.
-  function onQtyChange(it: FacturaItem, val: string) {
-    (esEntrega(it) ? setSes : setCant)((m) => ({ ...m, [it.id]: val }));
-    if (politica === "como_facturada") {
-      const q = Number(val || 0);
-      setPrecio((m) => ({ ...m, [it.id]: q > 0 ? exactRefund(it, q).toFixed(2) : "" }));
-    }
-  }
-  function onCompQtyChange(it: FacturaItem, c: CompRow, val: string) {
-    const key = ck(it.id, String(c.facturaItemComponenteId));
-    setCompCant((m) => ({ ...m, [key]: val }));
-    if (politica === "como_facturada") {
-      const q = Number(val || 0);
-      setCompPrecio((m) => ({ ...m, [key]: q > 0 ? compExactRefund(c, q).toFixed(2) : "" }));
-    }
-  }
-  // Cambio de política: "como facturada" recalcula los reembolsos exactos de lo ya seleccionado;
-  // "precio base" los limpia para que el cajero/BE ponga el valor.
-  function cambiarPolitica(v: "como_facturada" | "precio_base") {
-    setPolitica(v);
-    if (v === "como_facturada") {
-      setPrecio((m) => {
-        const next = { ...m };
-        items.forEach((it) => {
-          const q = esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0);
-          if (q > 0) next[it.id] = exactRefund(it, q).toFixed(2);
-        });
-        return next;
-      });
-      setCompPrecio((m) => {
-        const next = { ...m };
-        items.forEach((it) => compsDe(it).forEach((c) => {
-          const key = ck(it.id, String(c.facturaItemComponenteId));
-          const q = Number(compCant[key] || 0);
-          if (q > 0) next[key] = compExactRefund(c, q).toFixed(2);
-        }));
-        return next;
-      });
-    } else {
-      setPrecio({});
-      setCompPrecio({});
-    }
-  }
-  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.facturaItemComponenteId && Number(compCant[ck(it.id, String(c.facturaItemComponenteId))] || 0) > 0);
-  const compRefund = (it: FacturaItem, c: CompRow) => {
-    const key = ck(it.id, String(c.facturaItemComponenteId));
-    if (compPrecio[key]?.trim()) return Number(compPrecio[key]);
-    const total = n(c.cantidad) || 1;
-    return total > 0 ? (Number(compCant[key] || 0) / total) * n(c.precio) : 0;
-  };
-  const lineSel = (it: FacturaItem) => (esEntrega(it) ? Number(ses[it.id] || 0) > 0 : Number(cant[it.id] || 0) > 0);
-  const seleccion = items.filter((it) => lineSel(it) || compSelDe(it).length > 0);
-  const neto = seleccion.reduce((s, it) => {
-    let x = lineSel(it) ? refundDe(it) : 0;
-    compSelDe(it).forEach((c) => (x += compRefund(it, c)));
-    return s + x;
-  }, 0);
-  // El reembolso JAMÁS puede superar el total de la factura. Si se pasa, se bloquea la confirmación.
-  const excedeTotal = neto > n(factura?.total) + 0.001;
-
-  React.useEffect(() => {
-    if (politica !== "precio_base") return;
-    const faltan = Array.from(new Set(items.map((it) => String(it.productoId)))).filter((p) => p && bases[p] == null);
-    if (!faltan.length) return;
-    Promise.all(faltan.map((p) => getPrecioBase(p, centro).then((r) => [p, r.precioBase] as const).catch(() => null)))
-      .then((rs) => setBases((m) => ({ ...m, ...Object.fromEntries(rs.filter(Boolean) as [string, number][]) })));
-  }, [politica, items, centro, bases]);
-
   const backHref = `/facturacion/${id}${centro ? `?centro=${centro}` : ""}`;
-
-  async function confirmar() {
-    if (!motivo.trim() || seleccion.length === 0 || busy || excedeTotal) return;
-    setBusy(true);
-    try {
-      const payload: DevolverPayload = {
-        motivo: motivo.trim(),
-        politica,
-        ...(formaId ? { formaReembolsoId: formaId } : {}),
-        items: seleccion.map((it) => {
-          const comps = compSelDe(it).map((c) => {
-            const key = ck(it.id, String(c.facturaItemComponenteId));
-            return {
-              facturaItemComponenteId: String(c.facturaItemComponenteId),
-              cantidad: Number(compCant[key]),
-              ...(compPrecio[key]?.trim() ? { precioDevuelto: Number(compPrecio[key]) } : {}),
-            };
-          });
-          return {
-            facturaItemId: it.id,
-            ...(lineSel(it) ? (esEntrega(it) ? { sesiones: Number(ses[it.id]) } : { cantidad: Number(cant[it.id]) }) : {}),
-            ...(precio[it.id]?.trim() ? { precioDevuelto: Number(precio[it.id]) } : {}),
-            ...(comps.length ? { componentes: comps } : {}),
-          };
-        }),
-      };
-      await devolverFactura(id, payload, centro);
-      toast.success(t("returnDone"));
-      router.push(backHref);
-    } catch (err) {
-      toastError(err, tRoot);
-      setBusy(false);
-    }
-  }
-
   const pac = factura?.paciente;
   const pacNombre = pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "";
 
@@ -230,129 +109,281 @@ export default function DevolverFacturaPage() {
           <Button variant="outline" size="sm" asChild><Link href={backHref}>{tf("back")}</Link></Button>
         </div>
       ) : (
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
-          {/* Tabla de líneas (a pantalla ancha, como la factura) */}
-          <section className="overflow-x-auto rounded-xl border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/60">
-                <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-3 py-2 font-semibold">{tf("concept")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("colBilled")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("colAvailable")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("colReturn")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("colRefund")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {items.map((it) => {
-                  const entrega = esEntrega(it);
-                  const disp = entrega ? dispSes(it) : dispCant(it);
-                  const comps = compsDe(it);
-                  const base = bases[String(it.productoId)];
-                  return (
-                    <React.Fragment key={it.id}>
-                      <tr className="align-top">
-                        <td className="px-3 py-2">
-                          <span className="font-medium">{it.descripcion ?? "—"}</span>
-                          {entrega && <span className="ml-2 rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] text-sky-600 dark:text-sky-400">{t("byDelivery")}</span>}
-                          {politica === "precio_base" && base != null && (
-                            <span className="block text-[11px] text-muted-foreground">{t("basePriceRef", { v: money(base) })}</span>
-                          )}
-                          {comps.length > 0 && (
-                            <button type="button" onClick={() => setExpanded((m) => ({ ...m, [it.id]: !m[it.id] }))} className="mt-1 block text-[11px] font-medium text-primary hover:underline">
-                              {expanded[it.id] ? "▾ " : "▸ "}{t("returnComponents")} ({comps.length})
-                            </button>
-                          )}
+        <DevolverForm key={factura!.id} factura={factura!} formas={formas} id={id} centro={centro} backHref={backHref} />
+      )}
+    </div>
+  );
+}
+
+function DevolverForm({
+  factura,
+  formas,
+  id,
+  centro,
+  backHref,
+}: {
+  factura: FacturaConItems;
+  formas: FormaPago[];
+  id: string;
+  centro?: string;
+  backHref: string;
+}) {
+  const t = useTranslations("facturacionList.actions");
+  const tf = useTranslations("facturacion");
+  const router = useRouter();
+  const tRoot = useTranslations();
+  const items = React.useMemo<FacturaItem[]>(() => factura.items ?? [], [factura]);
+
+  // PRE-LLENADO "como facturada" (default): cantidades COMPLETAS + reembolso EXACTO = total facturado.
+  // Se hace en los initializers (una vez al montar, keyed por factura.id) → sin effects.
+  const [politica, setPolitica] = React.useState<"como_facturada" | "precio_base">("como_facturada");
+  const [cant, setCant] = React.useState<Record<string, string>>(() => {
+    const m: Record<string, string> = {};
+    items.forEach((it) => { if (!esEntrega(it)) { const d = dispCant(it); if (d > 0) m[it.id] = String(d); } });
+    return m;
+  });
+  const [ses, setSes] = React.useState<Record<string, string>>(() => {
+    const m: Record<string, string> = {};
+    items.forEach((it) => { if (esEntrega(it)) { const d = dispSes(it); if (d > 0) m[it.id] = String(d); } });
+    return m;
+  });
+  const [precio, setPrecio] = React.useState<Record<string, string>>(() => {
+    const m: Record<string, string> = {};
+    items.forEach((it) => { const d = dispDe(it); if (d > 0) m[it.id] = exactRefund(it, d).toFixed(2); });
+    return m;
+  });
+  const [bases, setBases] = React.useState<Record<string, number>>({});
+  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
+  const [compCant, setCompCant] = React.useState<Record<string, string>>({});
+  const [compPrecio, setCompPrecio] = React.useState<Record<string, string>>({});
+  const [motivo, setMotivo] = React.useState("");
+  const [formaId, setFormaId] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+
+  const defaultRefund = (it: FacturaItem) => exactRefund(it, esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0));
+  const refundDe = (it: FacturaItem) => (precio[it.id]?.trim() ? Number(precio[it.id]) : defaultRefund(it));
+
+  // Al cambiar cantidad en "como facturada", auto-rellena el reembolso EXACTO (editable). precio_base no toca.
+  function onQtyChange(it: FacturaItem, val: string) {
+    (esEntrega(it) ? setSes : setCant)((m) => ({ ...m, [it.id]: val }));
+    if (politica === "como_facturada") {
+      const q = Number(val || 0);
+      setPrecio((m) => ({ ...m, [it.id]: q > 0 ? exactRefund(it, q).toFixed(2) : "" }));
+    }
+  }
+  function onCompQtyChange(it: FacturaItem, c: CompRow, val: string) {
+    const key = ck(it.id, String(c.facturaItemComponenteId));
+    setCompCant((m) => ({ ...m, [key]: val }));
+    if (politica === "como_facturada") {
+      const q = Number(val || 0);
+      setCompPrecio((m) => ({ ...m, [key]: q > 0 ? compExactRefund(c, q).toFixed(2) : "" }));
+    }
+  }
+  function cambiarPolitica(v: "como_facturada" | "precio_base") {
+    setPolitica(v);
+    if (v === "como_facturada") {
+      setPrecio(() => {
+        const next: Record<string, string> = {};
+        items.forEach((it) => {
+          const q = esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0);
+          if (q > 0) next[it.id] = exactRefund(it, q).toFixed(2);
+        });
+        return next;
+      });
+      setCompPrecio(() => {
+        const next: Record<string, string> = {};
+        items.forEach((it) => compsDe(it).forEach((c) => {
+          const key = ck(it.id, String(c.facturaItemComponenteId));
+          const q = Number(compCant[key] || 0);
+          if (q > 0) next[key] = compExactRefund(c, q).toFixed(2);
+        }));
+        return next;
+      });
+    } else {
+      setPrecio({});
+      setCompPrecio({});
+    }
+  }
+
+  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.facturaItemComponenteId && Number(compCant[ck(it.id, String(c.facturaItemComponenteId))] || 0) > 0);
+  const compRefund = (it: FacturaItem, c: CompRow) => {
+    const key = ck(it.id, String(c.facturaItemComponenteId));
+    if (compPrecio[key]?.trim()) return Number(compPrecio[key]);
+    const total = n(c.cantidad) || 1;
+    return total > 0 ? (Number(compCant[key] || 0) / total) * n(c.precio) : 0;
+  };
+  const lineSel = (it: FacturaItem) => (esEntrega(it) ? Number(ses[it.id] || 0) > 0 : Number(cant[it.id] || 0) > 0);
+  const seleccion = items.filter((it) => lineSel(it) || compSelDe(it).length > 0);
+  const neto = seleccion.reduce((s, it) => {
+    let x = lineSel(it) ? refundDe(it) : 0;
+    compSelDe(it).forEach((c) => (x += compRefund(it, c)));
+    return s + x;
+  }, 0);
+  const excedeTotal = neto > n(factura.total) + 0.001;
+
+  // precio_base: trae los precios base de referencia de los productos de la factura.
+  React.useEffect(() => {
+    if (politica !== "precio_base") return;
+    const faltan = Array.from(new Set(items.map((it) => String(it.productoId)))).filter((p) => p && bases[p] == null);
+    if (!faltan.length) return;
+    Promise.all(faltan.map((p) => getPrecioBase(p, centro).then((r) => [p, r.precioBase] as const).catch(() => null)))
+      .then((rs) => setBases((m) => ({ ...m, ...Object.fromEntries(rs.filter(Boolean) as [string, number][]) })));
+  }, [politica, items, centro, bases]);
+
+  async function confirmar() {
+    if (!motivo.trim() || seleccion.length === 0 || busy || excedeTotal) return;
+    setBusy(true);
+    try {
+      const payload: DevolverPayload = {
+        motivo: motivo.trim(),
+        politica,
+        ...(formaId ? { formaReembolsoId: formaId } : {}),
+        items: seleccion.map((it) => {
+          const comps = compSelDe(it).map((c) => {
+            const key = ck(it.id, String(c.facturaItemComponenteId));
+            return {
+              facturaItemComponenteId: String(c.facturaItemComponenteId),
+              cantidad: Number(compCant[key]),
+              ...(compPrecio[key]?.trim() ? { precioDevuelto: Number(compPrecio[key]) } : {}),
+            };
+          });
+          return {
+            facturaItemId: it.id,
+            ...(lineSel(it) ? (esEntrega(it) ? { sesiones: Number(ses[it.id]) } : { cantidad: Number(cant[it.id]) }) : {}),
+            ...(precio[it.id]?.trim() ? { precioDevuelto: Number(precio[it.id]) } : {}),
+            ...(comps.length ? { componentes: comps } : {}),
+          };
+        }),
+      };
+      await devolverFactura(id, payload, centro);
+      toast.success(t("returnDone"));
+      router.push(backHref);
+    } catch (err) {
+      toastError(err, tRoot);
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
+      <section className="overflow-x-auto rounded-xl border">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/60">
+            <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2 font-semibold">{tf("concept")}</th>
+              <th className="px-3 py-2 text-right font-semibold">{t("colBilled")}</th>
+              <th className="px-3 py-2 text-right font-semibold">{t("colAvailable")}</th>
+              <th className="px-3 py-2 text-right font-semibold">{t("colReturn")}</th>
+              <th className="px-3 py-2 text-right font-semibold">{t("colRefund")}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {items.map((it) => {
+              const entrega = esEntrega(it);
+              const disp = dispDe(it);
+              const comps = compsDe(it);
+              const base = bases[String(it.productoId)];
+              return (
+                <React.Fragment key={it.id}>
+                  <tr className="align-top">
+                    <td className="px-3 py-2">
+                      <span className="font-medium">{it.descripcion ?? "—"}</span>
+                      {entrega && <span className="ml-2 rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] text-sky-600 dark:text-sky-400">{t("byDelivery")}</span>}
+                      {politica === "precio_base" && base != null && (
+                        <span className="block text-[11px] text-muted-foreground">{t("basePriceRef", { v: money(base) })}</span>
+                      )}
+                      {comps.length > 0 && (
+                        <button type="button" onClick={() => setExpanded((m) => ({ ...m, [it.id]: !m[it.id] }))} className="mt-1 block text-[11px] font-medium text-primary hover:underline">
+                          {expanded[it.id] ? "▾ " : "▸ "}{t("returnComponents")} ({comps.length})
+                        </button>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                      {entrega ? n(it.sesiones) : n(it.cantidad)} × {money(it.precioUnitario)}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{disp}</td>
+                    <td className="px-3 py-2 text-right">
+                      <Input
+                        type="number" min={0} max={disp} disabled={disp <= 0}
+                        value={(entrega ? ses[it.id] : cant[it.id]) ?? ""}
+                        onChange={(e) => onQtyChange(it, e.target.value)}
+                        className="h-8 w-20 text-right tabular-nums" placeholder="0"
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <Input
+                        type="number" placeholder={defaultRefund(it) ? defaultRefund(it).toFixed(2) : "0.00"}
+                        value={precio[it.id] ?? ""}
+                        onChange={(e) => setPrecio((m) => ({ ...m, [it.id]: e.target.value }))}
+                        className="h-8 w-24 text-right tabular-nums"
+                      />
+                    </td>
+                  </tr>
+                  {expanded[it.id] && comps.map((c, ci) => {
+                    const puede = !!c.facturaItemComponenteId;
+                    const key = ck(it.id, String(c.facturaItemComponenteId));
+                    return (
+                      <tr key={puede ? key : `${it.id}::c${ci}`} className="bg-muted/20 text-xs">
+                        <td className="px-3 py-1.5 pl-8">
+                          {n(c.cantidad)} · {c.nombre}
+                          {!puede && <span className="ml-2 text-[10px] text-muted-foreground/70">({t("compNoReturnable")})</span>}
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
-                          {entrega ? n(it.sesiones) : n(it.cantidad)} × {money(it.precioUnitario)}
+                        <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.precio)}</td>
+                        <td className="px-3 py-1.5 text-right tabular-nums">{n(c.cantidad)}</td>
+                        <td className="px-3 py-1.5 text-right">
+                          <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
                         </td>
-                        <td className="px-3 py-2 text-right tabular-nums">{disp}</td>
-                        <td className="px-3 py-2 text-right">
-                          <Input
-                            type="number" min={0} max={disp} disabled={disp <= 0}
-                            value={(entrega ? ses[it.id] : cant[it.id]) ?? ""}
-                            onChange={(e) => onQtyChange(it, e.target.value)}
-                            className="h-8 w-20 text-right tabular-nums" placeholder="0"
-                          />
-                        </td>
-                        <td className="px-3 py-2 text-right">
-                          <Input
-                            type="number" placeholder={defaultRefund(it) ? defaultRefund(it).toFixed(2) : "0.00"}
-                            value={precio[it.id] ?? ""}
-                            onChange={(e) => setPrecio((m) => ({ ...m, [it.id]: e.target.value }))}
-                            className="h-8 w-24 text-right tabular-nums"
-                          />
+                        <td className="px-3 py-1.5 text-right">
+                          <Input type="number" disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => setCompPrecio((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
                         </td>
                       </tr>
-                      {expanded[it.id] && comps.map((c, ci) => {
-                        const puede = !!c.facturaItemComponenteId; // devolvible individualmente (id del snapshot)
-                        const key = ck(it.id, String(c.facturaItemComponenteId));
-                        return (
-                          <tr key={puede ? key : `${it.id}::c${ci}`} className="bg-muted/20 text-xs">
-                            <td className="px-3 py-1.5 pl-8">
-                              {n(c.cantidad)} · {c.nombre}
-                              {!puede && <span className="ml-2 text-[10px] text-muted-foreground/70">({t("compNoReturnable")})</span>}
-                            </td>
-                            <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.precio)}</td>
-                            <td className="px-3 py-1.5 text-right tabular-nums">{n(c.cantidad)}</td>
-                            <td className="px-3 py-1.5 text-right">
-                              <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
-                            </td>
-                            <td className="px-3 py-1.5 text-right">
-                              <Input type="number" disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => setCompPrecio((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </section>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
 
-          {/* Panel lateral: política + motivo + reembolso + neto + confirmar */}
-          <aside className="space-y-4 lg:sticky lg:top-6 h-fit">
-            <div className="space-y-3 rounded-xl border p-4">
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">{t("policy")}</span>
-                <Select value={politica} onValueChange={(v) => cambiarPolitica(v as "como_facturada" | "precio_base")}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="como_facturada">{t("policyAsBilled")}</SelectItem>
-                    <SelectItem value="precio_base">{t("policyBasePrice")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">{t("returnReason")}</span>
-                <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("returnReason")} />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">{t("returnRefund")}</span>
-                <Select value={formaId} onValueChange={setFormaId}>
-                  <SelectTrigger><SelectValue placeholder={t("returnRefundNone")} /></SelectTrigger>
-                  <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}</SelectContent>
-                </Select>
-              </label>
-            </div>
-
-            <div className="rounded-xl border p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
-                <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>{money(Math.abs(neto))}</span>
-              </div>
-              {excedeTotal && (
-                <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura?.total)) })}</p>
-              )}
-              <Button className="mt-3 w-full" disabled={busy || !motivo.trim() || seleccion.length === 0 || excedeTotal} onClick={confirmar}>
-                {t("return")} ({seleccion.length})
-              </Button>
-            </div>
-          </aside>
+      <aside className="space-y-4 lg:sticky lg:top-6 h-fit">
+        <div className="space-y-3 rounded-xl border p-4">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">{t("policy")}</span>
+            <Select value={politica} onValueChange={(v) => cambiarPolitica(v as "como_facturada" | "precio_base")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="como_facturada">{t("policyAsBilled")}</SelectItem>
+                <SelectItem value="precio_base">{t("policyBasePrice")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">{t("returnReason")}</span>
+            <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("returnReason")} />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">{t("returnRefund")}</span>
+            <Select value={formaId} onValueChange={setFormaId}>
+              <SelectTrigger><SelectValue placeholder={t("returnRefundNone")} /></SelectTrigger>
+              <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}</SelectContent>
+            </Select>
+          </label>
         </div>
-      )}
+
+        <div className="rounded-xl border p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
+            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>{money(Math.abs(neto))}</span>
+          </div>
+          {excedeTotal && (
+            <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura.total)) })}</p>
+          )}
+          <Button className="mt-3 w-full" disabled={busy || !motivo.trim() || seleccion.length === 0 || excedeTotal} onClick={confirmar}>
+            {t("return")} ({seleccion.length})
+          </Button>
+        </div>
+      </aside>
     </div>
   );
 }
