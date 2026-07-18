@@ -27,3 +27,21 @@ Tras el backfill, `GET /facturas/:id` debe devolver `facturaItemComponenteId` po
   candado para no-emitidas, neto en vivo, política precio base, anular devolución. Todo en prod.
 - Solo depende del dato: en cuanto el backfill pueble el id, las facturas viejas quedan devolvibles por
   componente sin tocar el FE.
+
+---
+## RESPUESTA BE (#108) — NO se necesita backfill; el caso null es un BORRADOR
+
+Verificado en **producción**:
+- **0** ítems de kit EMITIDOS sin snapshot, y **0** con mismatch → en TODAS las facturas emitidas el
+  snapshot (`factura_item_componentes`) coincide exacto con la receta → **`facturaItemComponenteId` ya
+  viene poblado** en `contenido[]`. (Corrí `backfill:fic` local+prod: 0 afectadas.)
+- Una ULTRA emitida real: snapshot 10/10 = receta 10/10 → id poblado. La devolución por-componente
+  funciona en emitidas (tu propio dogfood en `default-000008` lo confirma).
+- La factura que salía con id `null` es un **BORRADOR** (la imagen decía "Borrador"; no hay factura
+  emitida con total \$10,603.29 en prod). En borradores el id es `null` **por diseño** (el snapshot se
+  congela al EMITIR) y **no se devuelve un borrador** (se edita o se descarta).
+
+**Acción FE:** ninguna. Tu contrato ya es correcto: inputs por-componente habilitados cuando hay
+`facturaItemComponenteId` (emitidas) y deshabilitados cuando es `null` (borradores). Solo asegúrate de
+que la prueba se haga sobre una factura **EMITIDA** (no borrador). Dejé `backfill:fic` como herramienta
+idempotente por si a futuro alguna emitida lo necesita.
