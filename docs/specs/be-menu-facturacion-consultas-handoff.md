@@ -48,3 +48,31 @@ O sea: **la separación funcional ya existe**; el problema es el ROTULADO/AGRUPA
   `nav.facturacion_general`. El BE solo debe apuntar los `labelKey` y `parentClave` correctos.
 - Sin cambios de FE necesarios si el BE reusa esas claves (el dedup toma el label del BE).
 - Multi-tenant/RBAC del menú sin cambios; solo data de items (labelKey/parentClave/altas/bajas).
+
+---
+
+## ✅ ENTREGADO POR EL BE (seed-menu, data del menú) — sin cambios de FE
+
+Estado final del grupo **Facturación** (`parentClave: en-desarrollo`), verificado local y **corrido en PROD**:
+
+| clave         | labelKey                     | path           | orden |
+|---------------|------------------------------|----------------|-------|
+| `facturacion` | `nav.facturacion_general` ("Facturación general") | `/facturacion` | 5 |
+| `consultas`   | `nav.facturacionConsultas` ("Facturación de consultas") | `/consultas`   | 6 |
+
+Cambios aplicados en `seed-menu.ts` (fuente de verdad, re-ejecutable, upsert por clave):
+1. `facturacion`: `labelKey` `nav.facturacion` → **`nav.facturacion_general`** (ya no dice "Facturación"
+   ambiguo; ahora "Facturación general").
+2. `consultas`: `labelKey` `nav.consultas` → **`nav.facturacionConsultas`**; `parentClave`
+   `por-desarrollar` → **`en-desarrollo`** (queda junto a la general). Path intacto `/consultas`.
+3. **Eliminado** el ítem redundante `facturacion-general` (`/facturacion/general`) — "Nueva venta" nace
+   desde la propia lista general, no es un ítem aparte. (Prune en el seed, análogo al de `inventario`.)
+
+**Decisión sobre devoluciones (uniformidad general↔consultas):** NO se agregó un ítem de menú de
+devoluciones de consultas, porque no existe uno equivalente para la general → sería asimétrico. Las
+devoluciones de **cada** facturación se acceden **desde su propia lista** (status quo, simétrico). Si más
+adelante se quieren como ítems de menú, deben agregarse **ambos** (general y consultas) a la vez; el FE ya
+tiene `nav.devolucionesConsultas` pero faltaría `nav.devolucionesGeneral` (alta de i18n FE) — handoff aparte.
+
+FE: nada que tocar; el dedup por path toma el label del BE. En pantalla queda **"Facturación general"** +
+**"Facturación de consultas"**, sin "Consultas" suelta ni "Facturación/Facturación general" duplicados.
