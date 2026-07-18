@@ -74,13 +74,65 @@ export default function DevolverFacturaPage() {
   const compsDe = (it: FacturaItem): CompRow[] => (it as { contenido?: CompRow[] }).contenido ?? [];
   const ck = (itemId: string, ficId: string) => `${itemId}::${ficId}`;
 
-  const defaultRefund = (it: FacturaItem) => {
-    const base = esEntrega(it) ? dispSes(it) : dispCant(it);
-    const q = esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0);
-    if (base <= 0 || q <= 0) return 0;
-    return (q / base) * (n(it.total) || n(it.cantidad) * n(it.precioUnitario));
+  // "Como facturada": el reembolso es EXACTO al monto facturado por unidad (total de la línea /
+  // cantidad ORIGINAL facturada) × lo devuelto. Nunca inventa un proporcional sobre lo disponible.
+  const billedQty = (it: FacturaItem) => (esEntrega(it) ? n(it.sesiones) : n(it.cantidad)) || 0;
+  const lineBilledTotal = (it: FacturaItem) => n(it.total) || n(it.cantidad) * n(it.precioUnitario);
+  const exactRefund = (it: FacturaItem, q: number) => {
+    const bq = billedQty(it);
+    return bq > 0 ? (q / bq) * lineBilledTotal(it) : 0;
   };
+  const compExactRefund = (c: CompRow, q: number) => {
+    const bq = n(c.cantidad) || 0;
+    return bq > 0 ? (q / bq) * n(c.precio) : 0;
+  };
+  const defaultRefund = (it: FacturaItem) => exactRefund(it, esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0));
   const refundDe = (it: FacturaItem) => (precio[it.id]?.trim() ? Number(precio[it.id]) : defaultRefund(it));
+
+  // Al cambiar cantidad en "como facturada", auto-rellena el reembolso EXACTO (editable). En precio_base
+  // no lo toca (lo pone el cajero / BE). Igual para componentes.
+  function onQtyChange(it: FacturaItem, val: string) {
+    (esEntrega(it) ? setSes : setCant)((m) => ({ ...m, [it.id]: val }));
+    if (politica === "como_facturada") {
+      const q = Number(val || 0);
+      setPrecio((m) => ({ ...m, [it.id]: q > 0 ? exactRefund(it, q).toFixed(2) : "" }));
+    }
+  }
+  function onCompQtyChange(it: FacturaItem, c: CompRow, val: string) {
+    const key = ck(it.id, String(c.facturaItemComponenteId));
+    setCompCant((m) => ({ ...m, [key]: val }));
+    if (politica === "como_facturada") {
+      const q = Number(val || 0);
+      setCompPrecio((m) => ({ ...m, [key]: q > 0 ? compExactRefund(c, q).toFixed(2) : "" }));
+    }
+  }
+  // Cambio de política: "como facturada" recalcula los reembolsos exactos de lo ya seleccionado;
+  // "precio base" los limpia para que el cajero/BE ponga el valor.
+  function cambiarPolitica(v: "como_facturada" | "precio_base") {
+    setPolitica(v);
+    if (v === "como_facturada") {
+      setPrecio((m) => {
+        const next = { ...m };
+        items.forEach((it) => {
+          const q = esEntrega(it) ? Number(ses[it.id] || 0) : Number(cant[it.id] || 0);
+          if (q > 0) next[it.id] = exactRefund(it, q).toFixed(2);
+        });
+        return next;
+      });
+      setCompPrecio((m) => {
+        const next = { ...m };
+        items.forEach((it) => compsDe(it).forEach((c) => {
+          const key = ck(it.id, String(c.facturaItemComponenteId));
+          const q = Number(compCant[key] || 0);
+          if (q > 0) next[key] = compExactRefund(c, q).toFixed(2);
+        }));
+        return next;
+      });
+    } else {
+      setPrecio({});
+      setCompPrecio({});
+    }
+  }
   const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.facturaItemComponenteId && Number(compCant[ck(it.id, String(c.facturaItemComponenteId))] || 0) > 0);
   const compRefund = (it: FacturaItem, c: CompRow) => {
     const key = ck(it.id, String(c.facturaItemComponenteId));
@@ -95,6 +147,8 @@ export default function DevolverFacturaPage() {
     compSelDe(it).forEach((c) => (x += compRefund(it, c)));
     return s + x;
   }, 0);
+  // El reembolso JAMÁS puede superar el total de la factura. Si se pasa, se bloquea la confirmación.
+  const excedeTotal = neto > n(factura?.total) + 0.001;
 
   React.useEffect(() => {
     if (politica !== "precio_base") return;
@@ -107,7 +161,7 @@ export default function DevolverFacturaPage() {
   const backHref = `/facturacion/${id}${centro ? `?centro=${centro}` : ""}`;
 
   async function confirmar() {
-    if (!motivo.trim() || seleccion.length === 0 || busy) return;
+    if (!motivo.trim() || seleccion.length === 0 || busy || excedeTotal) return;
     setBusy(true);
     try {
       const payload: DevolverPayload = {
@@ -218,7 +272,7 @@ export default function DevolverFacturaPage() {
                           <Input
                             type="number" min={0} max={disp} disabled={disp <= 0}
                             value={(entrega ? ses[it.id] : cant[it.id]) ?? ""}
-                            onChange={(e) => (entrega ? setSes : setCant)((m) => ({ ...m, [it.id]: e.target.value }))}
+                            onChange={(e) => onQtyChange(it, e.target.value)}
                             className="h-8 w-20 text-right tabular-nums" placeholder="0"
                           />
                         </td>
@@ -243,7 +297,7 @@ export default function DevolverFacturaPage() {
                             <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.precio)}</td>
                             <td className="px-3 py-1.5 text-right tabular-nums">{n(c.cantidad)}</td>
                             <td className="px-3 py-1.5 text-right">
-                              <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => setCompCant((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
+                              <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
                             </td>
                             <td className="px-3 py-1.5 text-right">
                               <Input type="number" disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => setCompPrecio((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
@@ -263,7 +317,7 @@ export default function DevolverFacturaPage() {
             <div className="space-y-3 rounded-xl border p-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-muted-foreground">{t("policy")}</span>
-                <Select value={politica} onValueChange={(v) => setPolitica(v as "como_facturada" | "precio_base")}>
+                <Select value={politica} onValueChange={(v) => cambiarPolitica(v as "como_facturada" | "precio_base")}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="como_facturada">{t("policyAsBilled")}</SelectItem>
@@ -289,7 +343,10 @@ export default function DevolverFacturaPage() {
                 <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
                 <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>{money(Math.abs(neto))}</span>
               </div>
-              <Button className="mt-3 w-full" disabled={busy || !motivo.trim() || seleccion.length === 0} onClick={confirmar}>
+              {excedeTotal && (
+                <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura?.total)) })}</p>
+              )}
+              <Button className="mt-3 w-full" disabled={busy || !motivo.trim() || seleccion.length === 0 || excedeTotal} onClick={confirmar}>
                 {t("return")} ({seleccion.length})
               </Button>
             </div>

@@ -6,12 +6,7 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
-import {
-  anularFactura,
-  emailFactura,
-  getPoliticaDevolucion,
-  type PoliticaDevolucion,
-} from "@/lib/api/facturas";
+import { anularFactura, emailFactura } from "@/lib/api/facturas";
 import { toastError } from "@/lib/api/errors";
 import { toast } from "sonner";
 import { useCan } from "@/hooks/use-can";
@@ -60,23 +55,15 @@ export function FacturaRowActions({
   const [emailOpen, setEmailOpen] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
   const [busy, setBusy] = React.useState(false);
-  const [pol, setPol] = React.useState<PoliticaDevolucion | null>(null);
 
   const esBorrador = estado === "borrador";
   const esEmitida = estado === "emitida";
   const puedeAnular = esEmitida && can("factura.anular");
   const puedeDevolver = (esEmitida || estado === "devuelta_parcial") && can("factura.devolver");
   const puedeEmail = !esBorrador && can("notificaciones.create");
-  const sugerido = pol?.accionSugerida;
 
   const href = centroId ? `/facturacion/${facturaId}?centro=${centroId}` : `/facturacion/${facturaId}`;
   const devolverHref = centroId ? `/facturacion/${facturaId}/devolver?centro=${centroId}` : `/facturacion/${facturaId}/devolver`;
-
-  function onOpenChange(open: boolean) {
-    if (open && !pol && (puedeAnular || puedeDevolver)) {
-      getPoliticaDevolucion(facturaId, centroId).then(setPol).catch(() => {});
-    }
-  }
 
   async function anular() {
     if (!motivo.trim() || busy) return;
@@ -93,11 +80,9 @@ export function FacturaRowActions({
     }
   }
 
-  const sug = (accion: "anular" | "devolver", label: string) => (sugerido === accion ? `${label} · ${t("suggested")}` : label);
-
   return (
     <div onClick={(e) => e.stopPropagation()}>
-      <DropdownMenu onOpenChange={onOpenChange}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="size-8" aria-label={t("menu")}>
             <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
@@ -111,14 +96,14 @@ export function FacturaRowActions({
           {puedeDevolver && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => router.push(devolverHref)}>{sug("devolver", t("return"))}</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => router.push(devolverHref)}>{t("return")}</DropdownMenuItem>
             </>
           )}
           {puedeAnular && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnularOpen(true); }}>
-                {sug("anular", t("void"))}
+                {t("void")}
               </DropdownMenuItem>
             </>
           )}

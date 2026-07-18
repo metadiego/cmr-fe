@@ -989,7 +989,8 @@
       "colRefund": "Refund",
       "byDelivery": "on delivery",
       "compNoReturnable": "not individually returnable",
-      "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued."
+      "returnOnlyIssued": "Only issued invoices can be returned. This invoice is not issued.",
+      "netExceeds": "The refund cannot exceed the invoice total ({total})."
     },
     "columns": {
       "numero": "No.",
