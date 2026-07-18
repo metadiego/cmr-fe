@@ -941,6 +941,24 @@
       }
     }
   },
+  "pagosFactura": {
+    "title": "Pagos",
+    "editTitle": "Editar pagos",
+    "edit": "Editar",
+    "done": "Listo",
+    "editHint": "Corregir un pago lo anula y crea el corregido (auditable). Recalcula la factura.",
+    "payment": "Pago",
+    "refund": "Reembolso",
+    "method": "Forma",
+    "amount": "Monto",
+    "save": "Guardar",
+    "void": "Anular",
+    "voidTitle": "¿Anular este pago?",
+    "voidBody": "El pago quedará anulado (auditable). No es una devolución. La factura se recalcula.",
+    "voidReason": "Motivo (opcional)",
+    "motivoCorreccion": "Corrección de forma de pago",
+    "motivoAnulacion": "Pago anulado"
+  },
   "facturacionList": {
     "title": "Facturas",
     "titleConsulta": "Facturas de consultas",

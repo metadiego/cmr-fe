@@ -40,7 +40,8 @@ export type FacturaPago = {
   formaPagoNombre?: string | null; // ya resuelto por el BE
   monto: number;
   referencia?: string | null;
-  tipo?: string;
+  tipo?: "pago" | "reembolso" | string; // pago = abono de la factura; reembolso = de una devolución
+  devolucionId?: string | null; // liga el reembolso a su devolución (solo tipo=reembolso)
   fecha?: string | null;
 };
 
@@ -328,4 +329,35 @@ export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?:
 
 export function registrarPago(facturaId: string, payload: RegistrarPagoPayload, centroId?: string): Promise<unknown> {
   return apiFetch(`/facturas/${facturaId}/pagos`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+
+// Corrección de un pago/reembolso (append-only, auditable): anula el viejo y crea el corregido
+// enlazado; recomputa la factura. Sirve tanto para pagos (tipo=pago) como para el reembolso de una
+// devolución (tipo=reembolso, conserva el tipo). RBAC `factura.pago.anular`. Ver #112.
+export type RepararPagoPayload = components["schemas"]["RepararPagoDto"];
+export function repararPago(
+  facturaId: string,
+  pagoId: string,
+  payload: RepararPagoPayload,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(
+    `/facturas/${facturaId}/pagos/${pagoId}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
+
+// Anula un pago mal capturado (sin reemplazo), soft/auditable. No es una devolución.
+export function anularPago(
+  facturaId: string,
+  pagoId: string,
+  motivo: string,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(
+    `/facturas/${facturaId}/pagos/${pagoId}`,
+    { method: "DELETE", body: JSON.stringify({ motivo }) },
+    centroId,
+  );
 }

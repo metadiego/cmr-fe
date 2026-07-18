@@ -38,6 +38,7 @@ import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
+import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon } from "@hugeicons/core-free-icons";
 import {
@@ -568,6 +569,10 @@ function Editor({
           <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-sm text-sky-700 dark:text-sky-400">
             {t("sesionesPorEntregar", { n: sesionesPorEntregar })}
           </div>
+        )}
+
+        {!esBorrador && (
+          <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} />
         )}
 
         {esBorrador ? (
