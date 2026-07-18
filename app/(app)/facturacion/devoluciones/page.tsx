@@ -16,6 +16,14 @@ import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListToolbar } from "@/components/kit/list-toolbar";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -155,11 +163,20 @@ export default function DevolucionesListPage() {
                     <td className="px-3 py-2"><EstadoBadge estado={String(d.estado ?? "")} /></td>
                     <td className="px-3 py-2 max-w-[16rem] truncate text-muted-foreground" title={d.motivo ?? ""}>{d.motivo ?? "—"}</td>
                     <td className="px-3 py-2 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => router.push(`/facturacion/${d.facturaId}${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("verFactura")}</Button>
-                        {d.estado === "activa" && can("factura.devolver") && (
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => setAnular(d)}>{t("anular")}</Button>
-                        )}
+                      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="size-8" aria-label={t("col.acciones")}>
+                              <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={() => router.push(`/facturacion/${d.facturaId}${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("verFactura")}</DropdownMenuItem>
+                            {d.estado === "activa" && can("factura.devolver") && (
+                              <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </td>
                   </tr>
