@@ -313,14 +313,16 @@ export interface ListDevolucionesParams {
   estado?: string; // activa|anulada
   desde?: string;
   hasta?: string;
+  contexto?: "general" | "consulta"; // filtra por tipo de factura de la devolución
 }
 export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?: string): Promise<Paginated<Devolucion>> {
-  const { page = 1, limit = 20, q, estado, desde, hasta } = params;
+  const { page = 1, limit = 20, q, estado, desde, hasta, contexto } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
   if (estado) sp.set("estado", estado);
   if (desde) sp.set("desde", desde);
   if (hasta) sp.set("hasta", hasta);
+  if (contexto) sp.set("contexto", contexto);
   return apiFetchPaged<Devolucion>(`/facturacion/devoluciones?${sp.toString()}`, {}, centroId);
 }
 

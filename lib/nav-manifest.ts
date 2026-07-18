@@ -25,6 +25,8 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/facturacion/general", labelKey: "nav.facturacion_general" },
   { path: "/facturacion/devoluciones", labelKey: "nav.devoluciones" },
   { path: "/facturacion/reportes/consumo-insumos", labelKey: "nav.consumoInsumos" },
+  { path: "/consultas", labelKey: "nav.facturacionConsultas" },
+  { path: "/consultas/devoluciones", labelKey: "nav.devolucionesConsultas" },
   // Inventario
   { path: "/inventario", labelKey: "nav.inventario" },
   { path: "/inventario/productos", labelKey: "nav.productos" },

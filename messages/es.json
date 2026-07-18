@@ -571,6 +571,8 @@
     "inventario_transferencias": "Transferencias",
     "comunicaciones": "Comunicaciones",
     "facturacion_general": "Facturación general",
+    "facturacionConsultas": "Facturación de consultas",
+    "devolucionesConsultas": "Devoluciones de consultas",
     "consumoInsumos": "Consumo de insumos",
     "columnasCitas": "Columnas de citas",
     "tableroCitas": "Tablero de citas",
@@ -941,6 +943,7 @@
   },
   "facturacionList": {
     "title": "Facturas",
+    "titleConsulta": "Facturas de consultas",
     "draft": "Borrador",
     "searchPlaceholder": "Buscar por n.º o record…",
     "allStates": "Todos los estados",
@@ -1734,6 +1737,7 @@
   },
   "devoluciones": {
     "title": "Devoluciones",
+    "titleConsulta": "Devoluciones de consultas",
     "verFacturas": "Ver facturas",
     "searchPlaceholder": "Buscar por nº de factura",
     "allStates": "Todos los estados",

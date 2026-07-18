@@ -571,6 +571,8 @@
     "inventario_transferencias": "Transfers",
     "comunicaciones": "Communications",
     "facturacion_general": "General billing",
+    "facturacionConsultas": "Consultation billing",
+    "devolucionesConsultas": "Consultation returns",
     "consumoInsumos": "Supply consumption",
     "columnasCitas": "Appointment columns",
     "tableroCitas": "Appointments board",
@@ -941,6 +943,7 @@
   },
   "facturacionList": {
     "title": "Invoices",
+    "titleConsulta": "Consultation invoices",
     "draft": "Draft",
     "searchPlaceholder": "Search by no. or record…",
     "allStates": "All statuses",
@@ -1734,6 +1737,7 @@
   },
   "devoluciones": {
     "title": "Returns",
+    "titleConsulta": "Consultation returns",
     "verFacturas": "View invoices",
     "searchPlaceholder": "Search by invoice #",
     "allStates": "All statuses",
