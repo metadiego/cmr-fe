@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon, Building01Icon } from "@hugeicons/core-free-icons";
@@ -34,7 +34,18 @@ export function VentaGeneral() {
   const t = useTranslations("facturacion.general");
   const tc = useTranslations("common");
   const router = useRouter();
+  const search = useSearchParams();
   const gate = useCentroGate();
+
+  // "Facturación general" (menú) NO debe abrir directo la creación. Entrar aquí sin ?nuevo=1 →
+  // se va a la LISTA (/facturacion), donde el admin ve el picker de centro y sus facturas. Crear
+  // solo con "Nueva venta" (que llega con ?nuevo=1). Preserva el centro si venía en la URL.
+  const nuevo = search.get("nuevo") === "1";
+  const centroUrl = search.get("centro");
+  React.useEffect(() => {
+    if (!nuevo) router.replace(`/facturacion${centroUrl ? `?centro=${centroUrl}` : ""}`);
+  }, [nuevo, centroUrl, router]);
+  if (!nuevo) return <p className="mx-auto max-w-xl px-6 py-12 text-sm text-muted-foreground">{tc("loading")}</p>;
 
   return (
     <div className="mx-auto max-w-xl px-6 py-12">

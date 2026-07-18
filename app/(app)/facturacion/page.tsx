@@ -112,7 +112,7 @@ export default function FacturasListPage() {
             <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/facturacion/general">{t("nuevaVenta")}</Link>
+            <Link href={`/facturacion/general?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
           </Button>
         </div>
       </div>

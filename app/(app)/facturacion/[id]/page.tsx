@@ -133,7 +133,7 @@ export default function FacturacionPage() {
     setDescartando(true);
     try {
       await descartarFactura(id, centro);
-      router.push("/facturacion/general");
+      router.push(centro ? `/facturacion?centro=${centro}` : "/facturacion");
     } catch (err) {
       toastError(err, tRoot);
       setDescartando(false);
