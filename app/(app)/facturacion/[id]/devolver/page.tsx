@@ -80,16 +80,20 @@ export default function DevolverFacturaPage() {
     <div className="mx-auto max-w-7xl px-6 py-6">
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {tf("back")}</Link>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
-        <div>
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
-          <h1 className="truncate text-xl font-semibold tracking-tight">{pacNombre || t("returnTitle")}</h1>
+      <div className="mt-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
+            <h1 className="truncate text-xl font-semibold tracking-tight">{pacNombre || t("returnTitle")}</h1>
+          </div>
+          {factura?.numero != null && (
+            <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
+              {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
+            </span>
+          )}
         </div>
-        {factura?.numero != null && (
-          <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
-            {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
-          </span>
-        )}
+        {/* Resumen de la factura (referencia): subtotal, descuento (%/$), impuesto (detalle al click), total */}
+        {factura && <ResumenFactura factura={factura} />}
       </div>
 
       {facturaState.kind === "loading" ? (
@@ -110,6 +114,57 @@ export default function DevolverFacturaPage() {
         </div>
       ) : (
         <DevolverForm key={factura!.id} factura={factura!} formas={formas} id={id} centro={centro} backHref={backHref} />
+      )}
+    </div>
+  );
+}
+
+// Resumen de la factura en la cabecera (referencia clara de lo que se está devolviendo).
+function ResumenFactura({ factura }: { factura: FacturaConItems }) {
+  const tf = useTranslations("facturacion");
+  const [verImp, setVerImp] = React.useState(false);
+  const f = factura as unknown as {
+    subtotal?: number; descuento?: number; descuentoGlobalTipo?: string; descuentoGlobalValor?: number;
+    impuesto?: number; total?: number; impuestos?: { nombre?: string; tasa?: number; monto?: number }[];
+  };
+  const desc = n(f.descuento);
+  const descTxt =
+    f.descuentoGlobalTipo === "porcentaje" && n(f.descuentoGlobalValor) > 0
+      ? `${n(f.descuentoGlobalValor)}% · ${money(desc)}`
+      : money(desc);
+  const imps = (f.impuestos ?? []).filter((i) => n(i.monto) > 0);
+
+  return (
+    <div className="mt-3 border-t pt-3">
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-2">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{tf("subtotal")}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">{money(f.subtotal)}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{tf("discount")}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">{desc > 0 ? `- ${descTxt}` : money(0)}</span>
+        </div>
+        <div className="flex flex-col">
+          <button type="button" onClick={() => setVerImp((v) => !v)} className="text-left text-[10px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground">
+            {tf("tax")} {imps.length > 0 ? (verImp ? "▾" : "▸") : ""}
+          </button>
+          <span className="text-sm font-medium tabular-nums">{money(f.impuesto)}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-primary/80">{tf("total")}</span>
+          <span className="text-base font-bold tabular-nums">{money(f.total)}</span>
+        </div>
+      </div>
+      {verImp && imps.length > 0 && (
+        <div className="mt-2 space-y-0.5">
+          {imps.map((im, i) => (
+            <div key={i} className="flex justify-between gap-4 text-xs text-muted-foreground">
+              <span>{(im.nombre || tf("tax")) + (im.tasa != null ? ` (${im.tasa}%)` : "")}</span>
+              <span className="tabular-nums">{money(im.monto)}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
