@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { Recibo } from "@/lib/factura/build-recibo";
+import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 
 const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
 
@@ -184,7 +185,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           {recibo.pagos.map((p, i) => (
             <Line
               key={i}
-              label={p.formaPagoNombre + (p.referencia ? ` ${p.referencia}` : "")}
+              label={formaPagoLabel(tRoot, p.clave, p.formaPagoNombre) + (p.referencia ? ` ${p.referencia}` : "")}
               value={money(p.monto)}
             />
           ))}

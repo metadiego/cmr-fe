@@ -40,7 +40,9 @@ export type Recibo = {
   total: number;
   montoAbonado: number;
   saldo: number;
-  pagos: { formaPagoNombre: string; monto: number; referencia?: string | null }[];
+  // `clave` = clave estable de la forma (efectivo/cheque/…) para traducir el label en el recibo; el
+  // `formaPagoNombre` (español) queda de fallback para formas personalizadas.
+  pagos: { formaPagoNombre: string; clave?: string | null; monto: number; referencia?: string | null }[];
   atendidoPor?: string;
 };
 
@@ -53,6 +55,8 @@ const num = (v: unknown) => Number(v ?? 0);
 export function buildRecibo(
   f: FacturaConItems,
   diasTratamiento: Record<string, number> = {},
+  // Mapa formaPagoId → clave (del catálogo) para traducir la forma en el recibo. Opcional.
+  clavePorFormaId: Record<string, string> = {},
 ): Recibo {
   const items: ReciboItem[] = (f.items ?? []).map((it) => {
     // "Incluye:" del kit desde item.contenido (BE PR #96): disponible en borrador Y emitida.
@@ -125,6 +129,7 @@ export function buildRecibo(
     saldo: Math.max(0, total - montoAbonado),
     pagos: (f.pagos ?? []).map((p) => ({
       formaPagoNombre: p.formaPagoNombre ?? "—",
+      clave: p.formaPagoId ? clavePorFormaId[String(p.formaPagoId)] : undefined,
       monto: num(p.monto),
       referencia: p.referencia ?? null,
     })),
@@ -141,6 +146,8 @@ export function buildRecibo(
 export function buildReciboDevolucion(
   d: ReciboDevolucion,
   nombres: Record<string, string> = {},
+  // Mapa nombre-de-forma → clave (el recibo del BE trae la forma de reembolso como nombre, no id).
+  clavePorFormaNombre: Record<string, string> = {},
 ): Recibo {
   const items: ReciboItem[] = (d.items ?? []).map((it) => {
     const base = num(it.monto);
@@ -180,7 +187,9 @@ export function buildReciboDevolucion(
     montoAbonado: 0,
     saldo: 0,
     // El reembolso se muestra como "pago" del recibo (forma + monto), si el BE ya lo resolvió.
-    pagos: d.formaReembolso ? [{ formaPagoNombre: d.formaReembolso, monto: total }] : [],
+    pagos: d.formaReembolso
+      ? [{ formaPagoNombre: d.formaReembolso, clave: clavePorFormaNombre[d.formaReembolso], monto: total }]
+      : [],
     atendidoPor: d.emisor?.nombre ?? undefined,
   };
 }

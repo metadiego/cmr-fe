@@ -171,7 +171,10 @@ export default function FacturacionPage() {
     const dt = (p as { diasTratamiento?: number | null }).diasTratamiento;
     if (dt != null) diasCatalogo[p.id] = dt;
   });
-  const recibo = buildRecibo(factura, diasCatalogo);
+  // Mapa formaPagoId → clave (del catálogo) para traducir las formas de pago en el recibo.
+  const clavePorFormaId: Record<string, string> = {};
+  formas.forEach((f) => { if (f.clave) clavePorFormaId[f.id] = f.clave; });
+  const recibo = buildRecibo(factura, diasCatalogo, clavePorFormaId);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">
