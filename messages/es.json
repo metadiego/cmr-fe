@@ -961,6 +961,15 @@
     "motivoCorreccion": "Corrección de forma de pago",
     "motivoAnulacion": "Pago anulado"
   },
+  "formasPago": {
+    "efectivo": "Efectivo",
+    "cheque": "Cheque",
+    "tarjeta": "Tarjeta",
+    "seguro": "Seguro",
+    "transferencia": "Transferencia",
+    "master": "Mastercard",
+    "visa": "Visa"
+  },
   "facturacionList": {
     "title": "Facturas",
     "titleConsulta": "Facturas de consultas",

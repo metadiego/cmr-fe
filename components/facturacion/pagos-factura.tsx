@@ -11,6 +11,7 @@ import {
   type FormaPago,
 } from "@/lib/api/facturas";
 import { useCan } from "@/hooks/use-can";
+import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -106,6 +107,7 @@ export function PagosFactura({
               <PagoViewRow
                 key={p.id}
                 pago={p}
+                formas={formas}
                 locale={locale}
                 puedeEditar={puedeEditar}
                 busy={busy}
@@ -161,6 +163,7 @@ function TipoBadge({ tipo }: { tipo?: string }) {
 
 function PagoViewRow({
   pago,
+  formas,
   locale,
   puedeEditar,
   busy,
@@ -168,6 +171,7 @@ function PagoViewRow({
   onAnular,
 }: {
   pago: FacturaPago;
+  formas: FormaPago[];
   locale: string;
   puedeEditar: boolean;
   busy: boolean;
@@ -179,12 +183,15 @@ function PagoViewRow({
   const [confirmAnular, setConfirmAnular] = React.useState(false);
   const esReembolso = pago.tipo === "reembolso";
   const fecha = fmtFecha(pago.fecha, locale);
+  // El pago sólo trae `formaPagoNombre` (español); resolvemos la `clave` por `formaPagoId` para traducir.
+  const clave = formas.find((f) => f.id === pago.formaPagoId)?.clave;
+  const label = formaPagoLabel(tRoot, clave, pago.formaPagoNombre);
 
   return (
     <li className="flex items-center gap-2 rounded-lg bg-muted/30 px-2.5 py-1.5 text-sm">
       <TipoBadge tipo={pago.tipo} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium">{pago.formaPagoNombre ?? "—"}</span>
+        <span className="block truncate font-medium">{label}</span>
         {(fecha || pago.referencia) && (
           <span className="block truncate text-xs text-muted-foreground">
             {pago.referencia ? `${pago.referencia} · ` : ""}{fecha}
@@ -249,6 +256,7 @@ function PagoEditRow({
   onDone: () => void;
 }) {
   const t = useTranslations("pagosFactura");
+  const tRoot = useTranslations();
   const [formaId, setFormaId] = React.useState(pago.formaPagoId ?? "");
   const [monto, setMonto] = React.useState(String(n(pago.monto).toFixed(2)));
   const cambio = formaId !== (pago.formaPagoId ?? "") || n(monto) !== n(pago.monto);
@@ -266,7 +274,7 @@ function PagoEditRow({
         <Select value={formaId} onValueChange={setFormaId}>
           <SelectTrigger size="sm" className="h-8 flex-1"><SelectValue placeholder={t("method")} /></SelectTrigger>
           <SelectContent>
-            {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}
+            {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.clave, f.nombre)}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -302,6 +310,7 @@ function PagoAddRow({
   onDone: () => void;
 }) {
   const t = useTranslations("pagosFactura");
+  const tRoot = useTranslations();
   const [formaId, setFormaId] = React.useState("");
   const [monto, setMonto] = React.useState(saldoSugerido > 0 ? String(saldoSugerido.toFixed(2)) : "");
   const [last4, setLast4] = React.useState("");
@@ -321,7 +330,7 @@ function PagoAddRow({
       <Select value={formaId} onValueChange={setFormaId}>
         <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>
         <SelectContent>
-          {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}
+          {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.clave, f.nombre)}</SelectItem>)}
         </SelectContent>
       </Select>
       {esTarjeta && (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 
 import {
   getFactura,
@@ -421,7 +422,7 @@ function DevolverForm({
             <span className="text-xs font-medium text-muted-foreground">{t("returnRefund")}</span>
             <Select value={formaId} onValueChange={setFormaId}>
               <SelectTrigger><SelectValue placeholder={t("returnRefundNone")} /></SelectTrigger>
-              <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}</SelectContent>
+              <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.clave, f.nombre)}</SelectItem>)}</SelectContent>
             </Select>
           </label>
         </div>

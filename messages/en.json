@@ -961,6 +961,15 @@
     "motivoCorreccion": "Payment method correction",
     "motivoAnulacion": "Payment voided"
   },
+  "formasPago": {
+    "efectivo": "Cash",
+    "cheque": "Check",
+    "tarjeta": "Card",
+    "seguro": "Insurance",
+    "transferencia": "Transfer",
+    "master": "Mastercard",
+    "visa": "Visa"
+  },
   "facturacionList": {
     "title": "Invoices",
     "titleConsulta": "Consultation invoices",
