@@ -53,6 +53,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/health/entorno": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Endpoint mínimo para saber el entorno de un vistazo (FE puede pintar un badge). */
+        get: operations["HealthController_entorno"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/permisos": {
         parameters: {
             query?: never;
@@ -3105,6 +3122,23 @@ export interface paths {
             cookie?: never;
         };
         get: operations["FacturacionController_listarDevoluciones_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/devoluciones/{devolucionId}/recibo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recibo PROPIO de una devolución (documento "Devolución #D-000001", no la factura). */
+        get: operations["FacturacionController_reciboDevolucion_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6335,7 +6369,7 @@ export interface components {
             apellidos: string | null;
             docId: string | null;
             /** @enum {string|null} */
-            sexo: "femenino" | "masculino" | "otro" | "desconocido" | null;
+            sexo: "desconocido" | "femenino" | "masculino" | "otro" | null;
             fechaNacimiento: string | null;
             telefono: string | null;
             whatsapp: string | null;
@@ -7263,6 +7297,8 @@ export interface components {
         DevolucionEntity: {
             facturaId: string;
             facturaNumero: string | null;
+            numero: number | null;
+            serie: string | null;
             /** @enum {string} */
             tipo: "total" | "parcial";
             politica: string;
@@ -8347,6 +8383,23 @@ export interface operations {
                         };
                     };
                 };
+            };
+        };
+    };
+    HealthController_entorno: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -14226,6 +14279,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DevolucionEntity"][];
+                };
+            };
+        };
+    };
+    FacturacionController_reciboDevolucion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                devolucionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

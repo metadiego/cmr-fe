@@ -269,8 +269,44 @@ export function emailFactura(facturaId: string, payload: { email?: string; cuerp
 // ---- Devoluciones (BE PR #102) ---------------------------------------------
 // Una factura EMITIDA puede tener varias devoluciones (append-only, no bloqueante).
 // Anular (mismo día, error) ≠ Devolver (día siguiente/24h). El actor lo sella el BE (RequestContext).
-export type Devolucion = components["schemas"]["DevolucionEntity"];
+// numeroDisplay = correlativo PROPIO de la devolución (p. ej. "D-000001"), secuencia independiente de
+// facturas (BE PR #113). Lo proyecta el BE en la lista/detalle aunque no esté en la entidad base.
+export type Devolucion = components["schemas"]["DevolucionEntity"] & { numeroDisplay?: string | null };
 export type DevolverPayload = components["schemas"]["DevolverDto"];
+
+// Recibo PROPIO de una devolución (documento "Devolución #D-000001", no la factura). El BE no tipó la
+// respuesta en Swagger (Record<string,never>) → tipamos aquí la forma verificada en vivo. Los ítems traen
+// `facturaItemId` (para resolver el nombre desde la factura de origen) pero no el nombre del producto.
+export type ReciboDevolucionItem = {
+  facturaItemId: string;
+  productoId: string;
+  cantidad: number;
+  sesiones: number;
+  monto: number; // base reembolsada (pre-impuesto)
+  montoImpuesto: number;
+};
+export type ReciboDevolucion = {
+  tipoDocumento: "devolucion";
+  numeroDisplay: string;
+  facturaNumero: string | null; // referencia de origen
+  fecha: string;
+  estado: string; // activa | anulada
+  montoDevuelto: number; // total con impuesto
+  impuestoDevuelto: number;
+  formaReembolso: string | null;
+  motivo: string | null;
+  items: ReciboDevolucionItem[];
+  paciente: { nombres?: string; apellidos?: string | null; record?: string | null; docId?: string | null } | null;
+  empresa: FacturaEmpresa | null;
+  emisor: { id?: string; nombre?: string | null } | null;
+};
+export function getReciboDevolucion(
+  facturaId: string,
+  devolucionId: string,
+  centroId?: string,
+): Promise<ReciboDevolucion> {
+  return apiFetch<ReciboDevolucion>(`/facturas/${facturaId}/devoluciones/${devolucionId}/recibo`, {}, centroId);
+}
 
 // Registrar una devolución (total o parcial) de una factura. items = líneas a devolver.
 export function devolverFactura(facturaId: string, payload: DevolverPayload, centroId?: string): Promise<FacturaConItems> {

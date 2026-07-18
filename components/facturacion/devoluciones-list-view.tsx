@@ -146,7 +146,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-3 py-2 font-semibold">{t("col.factura")}</th>
+                  <th className="px-3 py-2 font-semibold">{t("col.devolucion")}</th>
                   <th className="px-3 py-2 font-semibold">{t("col.fecha")}</th>
                   <th className="px-3 py-2 font-semibold">{t("col.tipo")}</th>
                   <th className="px-3 py-2 text-right font-semibold">{t("col.monto")}</th>
@@ -161,7 +161,12 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                 {state.kind === "ok" && rows.length === 0 && <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>}
                 {rows.map((d) => (
                   <tr key={d.id} className="hover:bg-muted/30">
-                    <td className="px-3 py-2 font-mono tabular-nums">{d.facturaNumero ?? "—"}</td>
+                    <td className="px-3 py-2">
+                      <span className="block font-mono font-medium tabular-nums">{d.numeroDisplay ?? "—"}</span>
+                      {d.facturaNumero && (
+                        <span className="block text-xs text-muted-foreground">{t("fromInvoice", { n: d.facturaNumero })}</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2 tabular-nums">{fmtFecha(d.fecha ?? d.createdAt, locale)}</td>
                     <td className="px-3 py-2">{t.has(`tipo.${d.tipo}`) ? t(`tipo.${d.tipo}`) : d.tipo}</td>
                     <td className="px-3 py-2 text-right font-medium tabular-nums">{money(d.montoDevuelto)}</td>
@@ -176,6 +181,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={() => router.push(`/facturacion/${d.facturaId}/devoluciones/${d.id}/recibo${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => router.push(detalleHref(d.facturaId))}>{t("verFactura")}</DropdownMenuItem>
                             {d.estado === "activa" && can("factura.devolver") && (
                               <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>

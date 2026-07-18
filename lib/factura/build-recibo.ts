@@ -1,4 +1,4 @@
-import type { FacturaConItems, FacturaEmpresa } from "@/lib/api/facturas";
+import type { FacturaConItems, FacturaEmpresa, ReciboDevolucion } from "@/lib/api/facturas";
 
 // Fiscal/branch block, projected by the BE per sucursal (getById `empresa`). NO
 // hardcoded company data here.
@@ -25,6 +25,8 @@ export type ReciboItem = {
 export type Recibo = {
   empresa: ReciboEmpresa;
   logoUrl: string | null;
+  // "factura" (por defecto) o "devolucion" → el encabezado dice "Factura #" vs "Devolución #".
+  tipoDocumento?: "factura" | "devolucion";
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -129,5 +131,56 @@ export function buildRecibo(
     // "Atendido por" = quien COBRÓ (emitidoPor) o, si aún es borrador, quien la CREÓ (creadoPor).
     // BE PR #82; `emisor` queda como fallback legacy. NUNCA el médico.
     atendidoPor: f.emitidoPor?.nombre ?? f.creadoPor?.nombre ?? f.emisor?.nombre,
+  };
+}
+
+// Recibo PROPIO de una devolución (BE PR #113), reusando <ReciboTermico>. El encabezado dice
+// "Devolución #D-000001". El BE no manda el nombre del producto en el ítem → lo resolvemos con
+// `nombres` (facturaItemId → descripción) desde la factura de origen. Los `pagos` muestran el REEMBOLSO
+// (forma + monto). Sin abonado/saldo (no aplica a una devolución).
+export function buildReciboDevolucion(
+  d: ReciboDevolucion,
+  nombres: Record<string, string> = {},
+): Recibo {
+  const items: ReciboItem[] = (d.items ?? []).map((it) => {
+    const base = num(it.monto);
+    const cant = num(it.cantidad) || 1;
+    return {
+      cantidad: num(it.cantidad),
+      descripcion: nombres[it.facturaItemId] ?? "—",
+      precioUnitario: cant ? base / cant : base,
+      descuento: 0,
+      total: base, // base pre-impuesto por línea; el impuesto va al pie, igual que la factura
+    };
+  });
+  const total = num(d.montoDevuelto);
+  const impuesto = num(d.impuestoDevuelto);
+  const subtotal = total - impuesto;
+  const pac = d.paciente;
+
+  return {
+    empresa: d.empresa ?? null,
+    logoUrl: d.empresa?.logoUrl ?? null,
+    tipoDocumento: "devolucion",
+    numeroDisplay: d.numeroDisplay ?? "—",
+    fecha: d.fecha ?? "",
+    estado: String(d.estado ?? ""),
+    anulada: String(d.estado ?? "") === "anulada",
+    paciente: {
+      nombre: pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "",
+      record: pac?.record ?? null,
+      docId: pac?.docId ?? null,
+    },
+    items,
+    subtotal,
+    descuento: 0,
+    impuesto,
+    impuestos: [],
+    total,
+    montoAbonado: 0,
+    saldo: 0,
+    // El reembolso se muestra como "pago" del recibo (forma + monto), si el BE ya lo resolvió.
+    pagos: d.formaReembolso ? [{ formaPagoNombre: d.formaReembolso, monto: total }] : [],
+    atendidoPor: d.emisor?.nombre ?? undefined,
   };
 }

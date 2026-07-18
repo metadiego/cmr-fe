@@ -94,7 +94,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
 
       <div className="flex justify-between font-bold">
         <span>
-          {t("invoice")} #{recibo.numeroDisplay}
+          {recibo.tipoDocumento === "devolucion" ? t("returnDoc") : t("invoice")} #{recibo.numeroDisplay}
         </span>
         <span className="font-normal">{fecha}</span>
       </div>
