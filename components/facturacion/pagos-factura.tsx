@@ -3,7 +3,13 @@
 import * as React from "react";
 import { useTranslations, useLocale } from "next-intl";
 
-import { repararPago, anularPago, type FacturaPago, type FormaPago } from "@/lib/api/facturas";
+import {
+  repararPago,
+  anularPago,
+  registrarPago,
+  type FacturaPago,
+  type FormaPago,
+} from "@/lib/api/facturas";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +30,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon, Add01Icon } from "@hugeicons/core-free-icons";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -39,11 +45,12 @@ function fmtFecha(v: unknown, locale: string): string {
       }).format(d);
 }
 
-// Bloque de PAGOS de una factura emitida. Dos modos DISTINTOS y explícitos (evita errores):
-//   VER  → lista de solo lectura de cada forma usada (pago / reembolso), monto y fecha.
-//   EDITAR → corrige la forma/monto de cada pago o reembolso (append-only, auditable) o lo anula.
+// Bloque de PAGOS de una factura emitida. Todo a la vista, sin modos ocultos:
+//   - cada fila (pago o reembolso) muestra su ✎ Editar y 🗑 Anular SIEMPRE visibles (gate RBAC
+//     factura.pago.anular). Editar es inline: cambia forma/monto en la misma fila.
+//   - "+ Agregar pago" vive DENTRO del bloque (no una caja suelta).
 // El reembolso de una devolución es un pago tipo=reembolso: el MISMO PUT cambia su forma (pagó tarjeta
-// → reembolsa cheque). Gate RBAC `factura.pago.anular`. Handoff fe-editar-formas-de-pago (#112).
+// → reembolsa cheque), preservando el tipo. Handoff fe-editar-formas-de-pago (#112).
 export function PagosFactura({
   pagos,
   formas,
@@ -51,6 +58,8 @@ export function PagosFactura({
   centro,
   busy,
   run,
+  saldo,
+  montoAbonado,
 }: {
   pagos: FacturaPago[];
   formas: FormaPago[];
@@ -58,50 +67,79 @@ export function PagosFactura({
   centro?: string;
   busy: boolean;
   run: (fn: () => Promise<unknown>) => Promise<void>;
+  saldo: number;
+  montoAbonado: number;
 }) {
   const t = useTranslations("pagosFactura");
   const locale = useLocale();
   const { can } = useCan();
-  const [editar, setEditar] = React.useState(false);
   const puedeEditar = can("factura.pago.anular");
 
-  if (!pagos || pagos.length === 0) return null;
+  const [editId, setEditId] = React.useState<string | null>(null);
+  const [agregando, setAgregando] = React.useState(false);
+  const pagado = saldo <= 0.001;
 
   return (
     <div className="space-y-2 rounded-xl border p-4">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          {editar ? t("editTitle") : t("title")}
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("title")}</span>
+        <span className="text-xs text-muted-foreground">
+          {t("paid")} <span className="font-semibold text-foreground tabular-nums">{money(montoAbonado)}</span>
         </span>
-        {puedeEditar &&
-          (editar ? (
-            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" disabled={busy} onClick={() => setEditar(false)}>
-              <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-              {t("done")}
-            </Button>
-          ) : (
-            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={() => setEditar(true)}>
-              <HugeiconsIcon icon={Edit02Icon} className="size-3.5" />
-              {t("edit")}
-            </Button>
-          ))}
       </div>
 
-      {editar && (
-        <p className="rounded-lg bg-amber-500/10 px-2.5 py-1.5 text-[11px] leading-snug text-amber-700 dark:text-amber-400">
-          {t("editHint")}
-        </p>
+      {pagos.length > 0 && (
+        <ul className="space-y-1.5">
+          {pagos.map((p) =>
+            puedeEditar && editId === p.id ? (
+              <PagoEditRow
+                key={p.id}
+                pago={p}
+                formas={formas}
+                id={id}
+                centro={centro}
+                busy={busy}
+                run={run}
+                onDone={() => setEditId(null)}
+              />
+            ) : (
+              <PagoViewRow
+                key={p.id}
+                pago={p}
+                locale={locale}
+                puedeEditar={puedeEditar}
+                busy={busy}
+                onEdit={() => setEditId(p.id ?? null)}
+                onAnular={() => run(() => anularPago(id, p.id!, t("motivoAnulacion"), centro))}
+              />
+            ),
+          )}
+        </ul>
       )}
 
-      <ul className="space-y-1.5">
-        {pagos.map((p) =>
-          editar ? (
-            <PagoEditRow key={p.id} pago={p} formas={formas} id={id} centro={centro} busy={busy} run={run} />
-          ) : (
-            <PagoViewRow key={p.id} pago={p} locale={locale} />
-          ),
-        )}
-      </ul>
+      {!pagado && (
+        <div className="flex items-center justify-between rounded-lg bg-amber-500/10 px-2.5 py-1.5 text-sm">
+          <span className="text-amber-700 dark:text-amber-400">{t("balance")}</span>
+          <span className="font-semibold tabular-nums text-amber-700 dark:text-amber-400">{money(saldo)}</span>
+        </div>
+      )}
+
+      {agregando ? (
+        <PagoAddRow
+          formas={formas}
+          id={id}
+          centro={centro}
+          busy={busy}
+          run={run}
+          saldoSugerido={saldo > 0.001 ? saldo : 0}
+          onDone={() => setAgregando(false)}
+        />
+      ) : (
+        <Button type="button" variant="outline" size="sm" className="w-full gap-1.5" disabled={busy} onClick={() => setAgregando(true)}>
+          <HugeiconsIcon icon={Add01Icon} className="size-4" />
+          {t("addPayment")}
+        </Button>
+      )}
     </div>
   );
 }
@@ -112,7 +150,7 @@ function TipoBadge({ tipo }: { tipo?: string }) {
   return (
     <span
       className={
-        "rounded-full px-1.5 py-0.5 text-[10px] font-semibold " +
+        "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold " +
         (esReembolso ? "bg-destructive/15 text-destructive" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400")
       }
     >
@@ -121,26 +159,78 @@ function TipoBadge({ tipo }: { tipo?: string }) {
   );
 }
 
-function PagoViewRow({ pago, locale }: { pago: FacturaPago; locale: string }) {
+function PagoViewRow({
+  pago,
+  locale,
+  puedeEditar,
+  busy,
+  onEdit,
+  onAnular,
+}: {
+  pago: FacturaPago;
+  locale: string;
+  puedeEditar: boolean;
+  busy: boolean;
+  onEdit: () => void;
+  onAnular: () => void;
+}) {
+  const t = useTranslations("pagosFactura");
+  const tRoot = useTranslations();
+  const [confirmAnular, setConfirmAnular] = React.useState(false);
   const esReembolso = pago.tipo === "reembolso";
   const fecha = fmtFecha(pago.fecha, locale);
+
   return (
-    <li className="flex items-center justify-between gap-2 rounded-lg bg-muted/30 px-2.5 py-1.5 text-sm">
-      <span className="flex min-w-0 items-center gap-1.5">
-        <TipoBadge tipo={pago.tipo} />
-        <span className="truncate font-medium">{pago.formaPagoNombre ?? "—"}</span>
-        {pago.referencia && <span className="truncate text-xs text-muted-foreground">{pago.referencia}</span>}
-        {fecha && <span className="hidden text-xs text-muted-foreground sm:inline">· {fecha}</span>}
+    <li className="flex items-center gap-2 rounded-lg bg-muted/30 px-2.5 py-1.5 text-sm">
+      <TipoBadge tipo={pago.tipo} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-medium">{pago.formaPagoNombre ?? "—"}</span>
+        {(fecha || pago.referencia) && (
+          <span className="block truncate text-xs text-muted-foreground">
+            {pago.referencia ? `${pago.referencia} · ` : ""}{fecha}
+          </span>
+        )}
       </span>
       <span className={"shrink-0 tabular-nums font-medium " + (esReembolso ? "text-destructive" : "")}>
         {esReembolso ? "−" : ""}{money(pago.monto)}
       </span>
+      {puedeEditar && (
+        <span className="flex shrink-0 items-center">
+          <Button type="button" variant="ghost" size="icon" className="size-7" disabled={busy} aria-label={t("edit")} onClick={onEdit}>
+            <HugeiconsIcon icon={Edit02Icon} className="size-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-7 text-destructive"
+            disabled={busy}
+            aria-label={t("void")}
+            onClick={() => setConfirmAnular(true)}
+          >
+            <HugeiconsIcon icon={Delete02Icon} className="size-3.5" />
+          </Button>
+        </span>
+      )}
+
+      <AlertDialog open={confirmAnular} onOpenChange={(o) => !o && setConfirmAnular(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("voidTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("voidBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
+            <Button variant="destructive" disabled={busy} onClick={() => { setConfirmAnular(false); onAnular(); }}>{t("void")}</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </li>
   );
 }
 
-// Fila EDITAR: cambiar forma (y monto) en 1-2 clics → aparece "Guardar" solo si hay cambios. Anular con
-// confirmación. Preserva el tipo (un reembolso sigue siendo reembolso). motivo obligatorio (auditable).
+// Edición INLINE de una fila: cambia forma (y monto) en la misma fila; guarda o cancela. Preserva el
+// tipo (un reembolso sigue siendo reembolso). Append-only auditable (motivo por defecto).
 function PagoEditRow({
   pago,
   formas,
@@ -148,6 +238,7 @@ function PagoEditRow({
   centro,
   busy,
   run,
+  onDone,
 }: {
   pago: FacturaPago;
   formas: FormaPago[];
@@ -155,34 +246,17 @@ function PagoEditRow({
   centro?: string;
   busy: boolean;
   run: (fn: () => Promise<unknown>) => Promise<void>;
+  onDone: () => void;
 }) {
   const t = useTranslations("pagosFactura");
-  const tRoot = useTranslations();
   const [formaId, setFormaId] = React.useState(pago.formaPagoId ?? "");
   const [monto, setMonto] = React.useState(String(n(pago.monto).toFixed(2)));
-  const [confirmAnular, setConfirmAnular] = React.useState(false);
-  const [motivoAnular, setMotivoAnular] = React.useState("");
-
   const cambio = formaId !== (pago.formaPagoId ?? "") || n(monto) !== n(pago.monto);
   const valido = !!formaId && n(monto) > 0;
 
   function guardar() {
     if (!pago.id || !cambio || !valido || busy) return;
-    run(() =>
-      repararPago(
-        id,
-        pago.id!,
-        { formaPagoId: formaId, monto: n(monto), motivo: t("motivoCorreccion") },
-        centro,
-      ),
-    );
-  }
-
-  function anular() {
-    if (!pago.id || busy) return;
-    run(() => anularPago(id, pago.id!, motivoAnular.trim() || t("motivoAnulacion"), centro)).then(() =>
-      setConfirmAnular(false),
-    );
+    run(() => repararPago(id, pago.id!, { formaPagoId: formaId, monto: n(monto), motivo: t("motivoCorreccion") }, centro)).then(onDone);
   }
 
   return (
@@ -192,50 +266,74 @@ function PagoEditRow({
         <Select value={formaId} onValueChange={setFormaId}>
           <SelectTrigger size="sm" className="h-8 flex-1"><SelectValue placeholder={t("method")} /></SelectTrigger>
           <SelectContent>
-            {formas.filter((f) => f.activo !== false).map((f) => (
-              <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>
-            ))}
+            {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
       <div className="flex items-center gap-1.5">
-        <Input
-          value={monto}
-          onChange={(e) => setMonto(e.target.value)}
-          inputMode="decimal"
-          className="h-8 flex-1 text-right tabular-nums"
-          aria-label={t("amount")}
-        />
-        <Button type="button" size="sm" className="h-8 gap-1 px-2" disabled={!cambio || !valido || busy} onClick={guardar}>
-          <HugeiconsIcon icon={Tick02Icon} className="size-3.5" />
-          {t("save")}
+        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className="h-8 flex-1 text-right tabular-nums" aria-label={t("amount")} />
+        <Button type="button" size="icon" className="size-8" disabled={!cambio || !valido || busy} aria-label={t("save")} onClick={guardar}>
+          <HugeiconsIcon icon={Tick02Icon} className="size-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-8 text-destructive"
-          disabled={busy}
-          aria-label={t("void")}
-          onClick={() => setConfirmAnular(true)}
-        >
-          <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+        <Button type="button" variant="ghost" size="icon" className="size-8" disabled={busy} aria-label={t("cancel")} onClick={onDone}>
+          <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
-
-      <AlertDialog open={confirmAnular} onOpenChange={(o) => !o && setConfirmAnular(false)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("voidTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("voidBody")}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <Input value={motivoAnular} onChange={(e) => setMotivoAnular(e.target.value)} placeholder={t("voidReason")} autoFocus />
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
-            <Button variant="destructive" disabled={busy} onClick={anular}>{t("void")}</Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </li>
+  );
+}
+
+// Alta de un pago DENTRO del bloque. Tarjeta (no efectivo) permite anotar los últimos 4 (opcional).
+function PagoAddRow({
+  formas,
+  id,
+  centro,
+  busy,
+  run,
+  saldoSugerido,
+  onDone,
+}: {
+  formas: FormaPago[];
+  id: string;
+  centro?: string;
+  busy: boolean;
+  run: (fn: () => Promise<unknown>) => Promise<void>;
+  saldoSugerido: number;
+  onDone: () => void;
+}) {
+  const t = useTranslations("pagosFactura");
+  const [formaId, setFormaId] = React.useState("");
+  const [monto, setMonto] = React.useState(saldoSugerido > 0 ? String(saldoSugerido.toFixed(2)) : "");
+  const [last4, setLast4] = React.useState("");
+  const forma = formas.find((f) => f.id === formaId);
+  const esTarjeta = !!forma && forma.esEfectivo === false;
+  const valido = !!formaId && n(monto) > 0 && !busy;
+
+  function registrar() {
+    if (!valido) return;
+    const notas = last4.length === 4 ? `•••• ${last4}` : undefined;
+    run(() => registrarPago(id, { formaPagoId: formaId, monto: n(monto), ...(notas ? { notas } : {}) } as never, centro)).then(onDone);
+  }
+
+  return (
+    <div className="space-y-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-2">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("addPayment")}</span>
+      <Select value={formaId} onValueChange={setFormaId}>
+        <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>
+        <SelectContent>
+          {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}
+        </SelectContent>
+      </Select>
+      {esTarjeta && (
+        <Input value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
+      )}
+      <div className="flex items-center gap-1.5">
+        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className="h-8 flex-1 text-right tabular-nums" aria-label={t("amount")} />
+        <Button type="button" size="sm" className="h-8" disabled={!valido} onClick={registrar}>{t("register")}</Button>
+        <Button type="button" variant="ghost" size="icon" className="size-8" disabled={busy} aria-label={t("cancel")} onClick={onDone}>
+          <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+        </Button>
+      </div>
+    </div>
   );
 }

@@ -22,7 +22,6 @@ import {
   type ItemOpcional,
   buscarPaciente,
   emitirFactura,
-  registrarPago,
   type FacturaConItems,
   type FacturaItem,
   type Producto,
@@ -540,12 +539,6 @@ function Editor({
               ))
             : <Row label={t("tax")} value={money(impuesto)} />}
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
-          {n(factura.montoAbonado) > 0 && (
-            <>
-              <Row label={t("paid")} value={money(factura.montoAbonado)} />
-              <Row label={t("balance")} value={money(saldo)} strong />
-            </>
-          )}
         </div>
 
         {esBorrador && (
@@ -571,16 +564,12 @@ function Editor({
           </div>
         )}
 
-        {!esBorrador && (
-          <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} />
-        )}
-
         {esBorrador ? (
           <Button className="w-full" disabled={busy || serverItems.length === 0} onClick={() => run(() => emitirFactura(id, centro))}>
             {t("emit")}
           </Button>
         ) : (
-          <Pago formas={formas} disabled={busy} saldo={saldo} onPay={(formaPagoId, monto, notas) => run(() => registrarPago(id, { formaPagoId, monto, ...(notas ? { notas } : {}) } as never, centro))} />
+          <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.montoAbonado)} />
         )}
       </aside>
 
@@ -1047,37 +1036,3 @@ function DescuentoGlobal({ disabled, onApply, applyLabel }: { disabled?: boolean
   );
 }
 
-function Pago({ formas, disabled, saldo, onPay }: { formas: FormaPago[]; disabled?: boolean; saldo: number; onPay: (formaPagoId: string, monto: number, notas?: string) => void }) {
-  const t = useTranslations("facturacion");
-  const [formaId, setFormaId] = React.useState("");
-  const [monto, setMonto] = React.useState(saldo > 0 ? String(saldo.toFixed(2)) : "");
-  const [last4, setLast4] = React.useState("");
-  const canPay = !!formaId && Number(monto) > 0 && !disabled;
-  // La tarjeta (forma NO efectivo) permite anotar los últimos 4 (opcional).
-  const forma = formas.find((f) => f.id === formaId);
-  const esTarjeta = !!forma && forma.esEfectivo === false;
-  if (saldo <= 0) return <p className="rounded-xl border bg-emerald-500/10 px-4 py-3 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">{t("fullyPaid")}</p>;
-  return (
-    <div className="space-y-2 rounded-xl border p-4">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("payment")}</span>
-      <Select value={formaId} onValueChange={setFormaId}>
-        <SelectTrigger className="w-full"><SelectValue placeholder={t("payMethod")} /></SelectTrigger>
-        <SelectContent>{formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{f.nombre}</SelectItem>)}</SelectContent>
-      </Select>
-      {esTarjeta && (
-        <Input
-          value={last4}
-          onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-          placeholder={t("cardLast4")}
-          className="h-9 w-full tabular-nums"
-          inputMode="numeric"
-          aria-label={t("cardLast4")}
-        />
-      )}
-      <div className="flex items-center gap-2">
-        <Input value={monto} onChange={(e) => setMonto(e.target.value)} className="h-9 flex-1 text-right tabular-nums" inputMode="decimal" />
-        <Button type="button" disabled={!canPay} onClick={() => onPay(formaId, Math.max(0, Number(monto) || 0), last4.length === 4 ? `•••• ${last4}` : undefined)}>{t("registerPayment")}</Button>
-      </div>
-    </div>
-  );
-}
