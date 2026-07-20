@@ -2976,6 +2976,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/items/{itemId}/reparar-descarga": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Repara/reclasifica el modoDescarga de una línea EMITIDA y reconcilia inventario + paquetes.
+         *     `dryRun:true` devuelve el plan sin aplicar. Reversible y auditado. Ver docs/specs/reparador-descarga.md.
+         */
+        post: operations["FacturacionController_repararDescarga_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/reparaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Traza de reparaciones de una factura (auditoría / futura reversa). */
+        get: operations["FacturacionController_listarReparaciones_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}/items/{itemId}/opcionales": {
         parameters: {
             query?: never;
@@ -3996,7 +4033,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Reporte del día: ventas/devoluciones/anulaciones + totales por método y grupo. */
+        /**
+         * Reporte del día: ventas/devoluciones/anulaciones + totales por método y grupo.
+         *     `division` (consulta|general) separa; `usuarioId` acota a un cajero. Un cajero solo
+         *     ve el suyo; ver otros/consolidado requiere gerencia.
+         */
         get: operations["CajaController_reporteDia_v1"];
         put?: never;
         post?: never;
@@ -7233,6 +7274,38 @@ export interface components {
             /** @description Toggle IVU/exento por línea (override del gravado heredado). El impuesto se recalcula. */
             gravado?: boolean;
         };
+        RepararDescargaDto: {
+            /**
+             * @description Nuevo modoDescarga objetivo de la línea (a_la_venta | a_la_entrega | no_descarga).
+             * @enum {string}
+             */
+            modoObjetivo: "a_la_venta" | "a_la_entrega" | "no_descarga";
+            /** @description Si es true, devuelve el plan de reconciliación sin aplicar cambios. */
+            dryRun?: boolean;
+            /** @description Fuerza la reparación aunque la línea tenga entregas/devoluciones (requiere admin). */
+            force?: boolean;
+            /** @description Motivo/nota de la reparación. */
+            motivo?: string;
+        };
+        ReparacionEntity: {
+            facturaId: string;
+            facturaItemId: string;
+            campo: string;
+            valorAntes: string | null;
+            valorDespues: string | null;
+            movimientosIds: string[] | null;
+            paqueteId: string | null;
+            accionPaquete: string | null;
+            usuarioId: string | null;
+            motivo: string | null;
+            revertidoDeId: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         CambiarOpcionalesDto: {
             incluidos: string[];
         };
@@ -7774,13 +7847,27 @@ export interface components {
             updatedAt: string;
         };
         AbrirCuadreDto: {
+            /**
+             * @description División del cuadre: consulta | general. Obligatoria para no mezclar ambas facturaciones.
+             * @enum {string}
+             */
+            division: "consulta" | "general";
+            /**
+             * Format: uuid
+             * @description Cajero del cuadre. Omitido = el propio usuario; null = consolidado de gerencia (todos los cajeros). Ver/abrir otro o el consolidado requiere gerencia.
+             */
+            usuarioId?: string | null;
+            /** @description Fecha del cuadre (YYYY-MM-DD). Omitido = hoy. */
             fecha?: string;
             /** Format: uuid */
             monedaId?: string;
+            /** @description Caja chica (petty) declarada. */
             pettyDeclarado?: number;
         };
         CuadreCajaEntity: {
             usuarioId: string | null;
+            /** @enum {string|null} */
+            division: "consulta" | "general" | null;
             fecha: string;
             monedaId: string | null;
             /** @enum {string} */
@@ -14044,6 +14131,53 @@ export interface operations {
             };
         };
     };
+    FacturacionController_repararDescarga_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepararDescargaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    FacturacionController_listarReparaciones_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReparacionEntity"][];
+                };
+            };
+        };
+    };
     FacturacionController_opcionalesDeLinea_v1: {
         parameters: {
             query?: never;
@@ -15809,6 +15943,8 @@ export interface operations {
         parameters: {
             query: {
                 fecha: string;
+                division?: string;
+                usuarioId?: string;
             };
             header?: never;
             path?: never;

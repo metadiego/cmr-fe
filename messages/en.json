@@ -1800,5 +1800,65 @@
       "motivo": "Reason",
       "acciones": "Actions"
     }
+  },
+  "caja": {
+    "title": "Cash count",
+    "help": "Count the cash and reconcile the day's drawer, keeping consultation and general apart.",
+    "date": "Date",
+    "loading": "Loading…",
+    "sinCentro": "You have no centers assigned.",
+    "division": {
+      "consulta": "Consultation",
+      "general": "General"
+    },
+    "scope": {
+      "label": "Cashier",
+      "mine": "My drawer",
+      "consolidated": "All (consolidated)",
+      "select": "Choose cashier"
+    },
+    "open": "Open count",
+    "openHelp": "There is no count for this selection. Open it to start counting.",
+    "reopen": "Resume open count",
+    "status": {
+      "abierto": "Open",
+      "cerrado": "Closed"
+    },
+    "closedAt": "Closed on {fecha}",
+    "readonly": "Count closed — read only.",
+    "count": {
+      "title": "Cash count",
+      "denomination": "Denomination",
+      "quantity": "Quantity",
+      "lineTotal": "Subtotal",
+      "total": "Counted total",
+      "empty": "No denominations configured.",
+      "saving": "Saving…",
+      "saved": "Count saved"
+    },
+    "petty": "Petty cash",
+    "summary": {
+      "title": "Summary",
+      "byMethod": "Totals by method",
+      "byGroup": "By group",
+      "expected": "Expected cash",
+      "counted": "Counted cash",
+      "petty": "Petty cash",
+      "variance": "Variance",
+      "over": "Over",
+      "short": "Short",
+      "ok": "Balanced"
+    },
+    "close": "Close count",
+    "closeConfirmTitle": "Close count",
+    "closeConfirmBody": "Closing seals the count and it cannot be changed. Continue?",
+    "closeConfirmOk": "Yes, close",
+    "cashiers": {
+      "title": "Breakdown by cashier",
+      "cashier": "Cashier",
+      "total": "Total",
+      "consolidated": "Consolidated",
+      "empty": "No cashier billed this division today."
+    }
   }
 }

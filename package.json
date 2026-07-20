@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --test --experimental-strip-types \"lib/**/*.test.ts\"",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "gen:api": "openapi-typescript \"${CMR_OPENAPI_URL:-http://localhost:3001/api/docs-json}\" -o lib/api/schema.d.ts"

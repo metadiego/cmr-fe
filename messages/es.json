@@ -1800,5 +1800,65 @@
       "motivo": "Motivo",
       "acciones": "Acciones"
     }
+  },
+  "caja": {
+    "title": "Cuadre de caja",
+    "help": "Cuenta el efectivo y cuadra la caja del día, separando consulta de general.",
+    "date": "Fecha",
+    "loading": "Cargando…",
+    "sinCentro": "No tienes centros asignados.",
+    "division": {
+      "consulta": "Consulta",
+      "general": "General"
+    },
+    "scope": {
+      "label": "Cajero",
+      "mine": "Mi caja",
+      "consolidated": "Todos (consolidado)",
+      "select": "Elegir cajero"
+    },
+    "open": "Abrir cuadre",
+    "openHelp": "No hay un cuadre para esta selección. Ábrelo para empezar a contar.",
+    "reopen": "Retomar cuadre abierto",
+    "status": {
+      "abierto": "Abierto",
+      "cerrado": "Cerrado"
+    },
+    "closedAt": "Cerrado el {fecha}",
+    "readonly": "Cuadre cerrado — solo lectura.",
+    "count": {
+      "title": "Conteo de efectivo",
+      "denomination": "Denominación",
+      "quantity": "Cantidad",
+      "lineTotal": "Subtotal",
+      "total": "Total contado",
+      "empty": "No hay denominaciones configuradas.",
+      "saving": "Guardando…",
+      "saved": "Conteo guardado"
+    },
+    "petty": "Caja chica (petty)",
+    "summary": {
+      "title": "Resumen",
+      "byMethod": "Totales por método",
+      "byGroup": "Por grupo",
+      "expected": "Efectivo esperado",
+      "counted": "Efectivo contado",
+      "petty": "Caja chica",
+      "variance": "Diferencia",
+      "over": "Sobra",
+      "short": "Falta",
+      "ok": "Cuadra"
+    },
+    "close": "Cerrar cuadre",
+    "closeConfirmTitle": "Cerrar cuadre",
+    "closeConfirmBody": "Al cerrar se sella el conteo y no podrá modificarse. ¿Continuar?",
+    "closeConfirmOk": "Sí, cerrar",
+    "cashiers": {
+      "title": "Desglose por cajero",
+      "cashier": "Cajero",
+      "total": "Total",
+      "consolidated": "Consolidado",
+      "empty": "Ningún cajero facturó esta división hoy."
+    }
   }
 }
