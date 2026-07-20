@@ -1859,6 +1859,7 @@
       "total": "Total",
       "consolidated": "Consolidado",
       "empty": "Ningún cajero facturó esta división hoy."
-    }
+    },
+    "historyReadonly": "Vista de solo lectura del reporte del día. Ver, editar, imprimir o enviar por email cuadres cerrados de fechas anteriores requerirá soporte del backend."
   }
 }

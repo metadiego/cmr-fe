@@ -1859,6 +1859,7 @@
       "total": "Total",
       "consolidated": "Consolidated",
       "empty": "No cashier billed this division today."
-    }
+    },
+    "historyReadonly": "Read-only view of the day's report. Viewing, editing, printing or emailing closed counts from past dates will require backend support."
   }
 }

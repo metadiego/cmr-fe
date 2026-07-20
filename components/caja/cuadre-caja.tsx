@@ -15,6 +15,8 @@ import {
 } from "@/lib/api/caja";
 import { getFormasPago, type FormaPago } from "@/lib/api/facturas";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { money } from "@/lib/caja/totales";
+import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
@@ -59,7 +61,8 @@ export function CuadreCaja() {
   const me = meState.kind === "ok" ? meState.me : null;
   const isGerencia = !!me && (me.isMaster || me.roles.some((r) => GERENCIA.includes(r)));
   const canCerrar = can("caja.cerrar");
-  const [fecha] = React.useState(() => new Date().toISOString().slice(0, 10));
+  const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const [fecha, setFecha] = React.useState(hoy);
   const [division, setDivision] = React.useState<CajaDivision>("general");
   // Default derivado (no efecto): gerencia arranca en consolidado; cajero en sí mismo. `me` se
   // resuelve antes del render principal (early-return de loading), así el default ya es correcto.
@@ -82,16 +85,32 @@ export function CuadreCaja() {
 
   return (
     <Shell centroNombre={gate.centroNombre}>
-      <Tabs value={division} onValueChange={(v) => setDivision(v as CajaDivision)}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="consulta">{t("division.consulta")}</TabsTrigger>
-          <TabsTrigger value="general">{t("division.general")}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="mb-4 flex flex-wrap items-end gap-4">
+        <Tabs value={division} onValueChange={(v) => setDivision(v as CajaDivision)}>
+          <TabsList>
+            <TabsTrigger value="consulta">{t("division.consulta")}</TabsTrigger>
+            <TabsTrigger value="general">{t("division.general")}</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="caja-fecha" className="text-sm text-muted-foreground">
+            {t("date")}
+          </Label>
+          <Input
+            id="caja-fecha"
+            type="date"
+            value={fecha}
+            max={hoy}
+            onChange={(e) => setFecha(e.target.value || hoy)}
+            className="h-9 w-40"
+          />
+        </div>
+      </div>
 
       <Panel
-        key={`${division}:${effScope}:${gate.centro}`}
+        key={`${division}:${effScope}:${gate.centro}:${fecha}`}
         fecha={fecha}
+        esHoy={fecha === hoy}
         division={division}
         scope={effScope}
         setScope={setScope}
@@ -129,6 +148,7 @@ function Shell({
 
 function Panel({
   fecha,
+  esHoy,
   division,
   scope,
   setScope,
@@ -137,6 +157,7 @@ function Panel({
   canCerrar,
 }: {
   fecha: string;
+  esHoy: boolean;
   division: CajaDivision;
   scope: Scope;
   setScope: (s: Scope) => void;
@@ -146,6 +167,7 @@ function Panel({
 }) {
   const t = useTranslations("caja");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
 
   const usuarioId = scopeUsuarioId(scope);
   const reporte = useResource(
@@ -268,26 +290,56 @@ function Panel({
           )}
 
           {!cuadre ? (
-            <div className="max-w-md space-y-3 rounded-xl border p-4">
-              <p className="text-sm text-muted-foreground">{t("openHelp")}</p>
-              <div className="space-y-1.5">
-                <Label htmlFor="petty">{t("petty")}</Label>
-                <Input
-                  id="petty"
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="0.01"
-                  value={petty}
-                  onChange={(e) => setPetty(e.target.value)}
-                  className="h-9"
-                  placeholder="0.00"
-                />
+            esHoy ? (
+              <div className="max-w-md space-y-3 rounded-xl border p-4">
+                <p className="text-sm text-muted-foreground">{t("openHelp")}</p>
+                <div className="space-y-1.5">
+                  <Label htmlFor="petty">{t("petty")}</Label>
+                  <Input
+                    id="petty"
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.01"
+                    value={petty}
+                    onChange={(e) => setPetty(e.target.value)}
+                    className="h-9"
+                    placeholder="0.00"
+                  />
+                </div>
+                <Button onClick={abrir} disabled={opening}>
+                  {t("open")}
+                </Button>
               </div>
-              <Button onClick={abrir} disabled={opening}>
-                {t("open")}
-              </Button>
-            </div>
+            ) : (
+              // Fecha anterior: reporte del día en SOLO LECTURA. Abrir/editar/imprimir/enviar
+              // cuadres cerrados anteriores requiere endpoints del BE (ver handoff).
+              <div className="max-w-md space-y-3 rounded-xl border p-4">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {t("summary.byMethod")}
+                </p>
+                {Object.entries(porMetodo).filter(([, v]) => v !== 0).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">—</p>
+                ) : (
+                  <ul className="space-y-0.5">
+                    {Object.entries(porMetodo)
+                      .filter(([, v]) => v !== 0)
+                      .map(([clave, monto]) => (
+                        <li
+                          key={clave}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <span>{formaPagoLabel(tRoot, clave)}</span>
+                          <span className="tabular-nums">{money(monto)}</span>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+                <p className="border-t pt-3 text-xs text-muted-foreground">
+                  {t("historyReadonly")}
+                </p>
+              </div>
+            )
           ) : (
             <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
               <div className="space-y-3">
