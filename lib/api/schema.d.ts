@@ -4111,6 +4111,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/caja/cajeros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Roster de cajeros del centro para el selector del cuadre. Gerencia ve TODOS; un cajero
+         *     solo a sí mismo. `usuarioId` devuelto = auth user id (el mismo que usa el cuadre).
+         */
+        get: operations["CajaController_listarCajeros_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/caja/cuadres/{id}": {
         parameters: {
             query?: never;
@@ -7885,6 +7905,14 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        CajeroDto: {
+            /** @description Auth user id del cajero (= perfiles.authUserId, el que usa el cuadre). */
+            usuarioId: string;
+            /** @description Nombre completo del cajero (fallback: email). */
+            nombre: string;
+            /** @description True si el perfil está activo/aprobado. */
+            activo: boolean;
         };
         EmailCuadreDto: {
             /**
@@ -16149,6 +16177,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    CajaController_listarCajeros_v1: {
+        parameters: {
+            query?: {
+                q?: string;
+                activo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CajeroDto"][];
                 };
             };
         };

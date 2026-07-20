@@ -9,10 +9,12 @@ import {
   cerrarCuadre,
   contarCuadre,
   enviarCuadreEmail,
+  getCajeros,
   getCuadre,
   getDenominaciones,
   getReporteDia,
   listarCuadres,
+  type Cajero,
   type CajaDivision,
   type CuadreConItems,
   type CuadreCaja as CuadreRow,
@@ -186,21 +188,23 @@ type LoaderProps = {
 function Loader(props: LoaderProps) {
   const tc = useTranslations("common");
   const t = useTranslations("caja");
-  const { division, fecha, scope } = props;
+  const { division, fecha, scope, isGerencia } = props;
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
   const usuarioIdParam = usuarioId ?? undefined;
 
   const bundle = useResource(async () => {
-    const [reporte, denoms, lista] = await Promise.all([
+    const [reporte, denoms, lista, cajeros] = await Promise.all([
       getReporteDia(fecha, division, usuarioId),
       getDenominaciones(),
       listarCuadres({ fecha, division, usuarioId: usuarioIdParam }),
+      // Roster completo de cajeros para el selector (solo gerencia lo necesita; el BE lo acota por rol).
+      isGerencia ? getCajeros() : Promise.resolve([] as Cajero[]),
     ]);
     // Cuadro editable: solo para un cajero concreto (no el consolidado). Trae su conteo detallado.
     const found = esConsolidado ? null : lista[0];
     const cuadre = found ? await getCuadre(found.id) : null;
-    return { reporte, denoms, cuadre, cuadres: lista };
+    return { reporte, denoms, cuadre, cuadres: lista, cajeros };
   }, []);
 
   if (bundle.state.kind === "loading")
@@ -208,7 +212,7 @@ function Loader(props: LoaderProps) {
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
-  const { reporte, denoms, cuadre, cuadres } = bundle.state.data;
+  const { reporte, denoms, cuadre, cuadres, cajeros } = bundle.state.data;
   return (
     <Editor
       key={cuadre?.id ?? "nuevo"}
@@ -217,6 +221,7 @@ function Loader(props: LoaderProps) {
       denoms={denoms}
       cuadreInicial={cuadre}
       cuadres={cuadres}
+      cajeros={cajeros}
       onReload={bundle.reload}
       labelHint={t("count.hint")}
     />
@@ -238,6 +243,7 @@ function Editor({
   denoms,
   cuadreInicial,
   cuadres,
+  cajeros,
   onReload,
   labelHint,
 }: LoaderProps & {
@@ -245,6 +251,7 @@ function Editor({
   denoms: Denominacion[];
   cuadreInicial: CuadreConItems | null;
   cuadres: CuadreRow[];
+  cajeros: Cajero[];
   onReload: () => void;
   labelHint: string;
 }) {
@@ -302,6 +309,19 @@ function Editor({
       ? (cuadreInicial?.diferencia ?? 0)
       : diferenciaCaja(salesCash, contado, inicio);
   const porCajero = reporte.porCajero ?? [];
+  // Opciones del selector: roster completo del BE (gerencia ve todos, cajero solo a sí mismo).
+  // Fallback si el roster viene vacío: "yo" + quienes facturaron ese día.
+  const opcionesCajero: Array<{ usuarioId: string; nombre: string }> =
+    cajeros.length > 0
+      ? cajeros.map((c) => ({ usuarioId: c.usuarioId, nombre: c.nombre }))
+      : [
+          ...(meId ? [{ usuarioId: meId, nombre: t("scope.mine") }] : []),
+          ...porCajero
+            .filter((c): c is { usuarioId: string; nombre: string | null; total: number } =>
+              !!c.usuarioId && c.usuarioId !== meId,
+            )
+            .map((c) => ({ usuarioId: c.usuarioId, nombre: c.nombre ?? c.usuarioId.slice(0, 8) })),
+        ];
 
   async function procesarCierre() {
     setProcesando(true);
@@ -391,19 +411,11 @@ function Editor({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
-              {/* Siempre "Mi caja" para gerencia (cuenta su propio cajón aunque nadie más facture). */}
-              {meId && (
-                <SelectItem value={`user:${meId}`}>{t("scope.mine")}</SelectItem>
-              )}
-              {/* Cajeros con actividad ese día (de porCajero); el roster completo con id de auth es
-                  dependencia del BE (ver handoff). Se excluye "me" para no duplicar. */}
-              {porCajero
-                .filter((c) => c.usuarioId && c.usuarioId !== meId)
-                .map((c) => (
-                  <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                    {c.nombre ?? (c.usuarioId ?? "").slice(0, 8)}
-                  </SelectItem>
-                ))}
+              {opcionesCajero.map((c) => (
+                <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
+                  {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {cerrado && (

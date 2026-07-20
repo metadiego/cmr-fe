@@ -14,6 +14,7 @@ export type AbrirCuadrePayload = components["schemas"]["AbrirCuadreDto"];
 export type ConteoLinea = components["schemas"]["ConteoLineaDto"];
 export type EmailCuadrePayload = components["schemas"]["EmailCuadreDto"];
 export type CajaDivision = "consulta" | "general";
+export type Cajero = components["schemas"]["CajeroDto"];
 
 // Línea de conteo persistida (getById devuelve CuadreCajaEntity + conteo[]). El BE no la tipa en
 // Swagger; se refleja la entidad `cuadre_conteo`.
@@ -88,6 +89,13 @@ export function getDenominaciones(monedaId?: string): Promise<Denominacion[]> {
 
 export function getGruposMetodoPago(): Promise<GrupoMetodoPago[]> {
   return apiFetch<GrupoMetodoPago[]>(`/caja/grupos`);
+}
+
+// Roster de cajeros del centro (auth user id + nombre). El BE aplica el alcance por rol: gerencia
+// ve todos; un cajero solo a sí mismo. Puebla el selector con nombres reales (no UUID).
+export function getCajeros(q?: string): Promise<Cajero[]> {
+  const qs = q ? `?q=${encodeURIComponent(q)}` : "";
+  return apiFetch<Cajero[]>(`/caja/cajeros${qs}`);
 }
 
 // ---- reporte del día (CC3) ------------------------------------------
