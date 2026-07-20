@@ -7,15 +7,20 @@ import { toast } from "sonner";
 import {
   abrirCuadre,
   cerrarCuadre,
+  contarCuadre,
   enviarCuadreEmail,
   getCuadre,
   getDenominaciones,
   getReporteDia,
+  listarCuadres,
   type CajaDivision,
   type CuadreConItems,
+  type Denominacion,
+  type ReporteDia,
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
+import { totalConteo, diferenciaCaja } from "@/lib/caja/totales";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
@@ -29,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -38,8 +44,8 @@ import {
 } from "@/components/ui/select";
 
 const GERENCIA = ["admin", "super_admin", "gerente"];
-// Default de interfaz del Inicio (fondo de apertura). Acordado con el BE (PR #120): dato del FE,
-// no hardcode de negocio en el backend. Configurable a futuro por centro si el negocio lo pide.
+// Default de INTERFAZ del Inicio (fondo de apertura). Acordado con el BE (PR #120): dato del FE,
+// el backend NO lo hardcodea. Configurable a futuro por centro si el negocio lo pide.
 const DEFAULT_INICIO = 50;
 
 // Alcance del cuadre: cajero fijo en sí mismo; gerencia elige consolidado o un cajero.
@@ -106,7 +112,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
         />
       </div>
 
-      <Panel
+      <Loader
         key={`${division}:${effScope}:${gate.centro}:${fecha}`}
         division={division}
         fecha={fecha}
@@ -155,17 +161,7 @@ function Shell({
   );
 }
 
-function Panel({
-  division,
-  fecha,
-  esHoy,
-  scope,
-  setScope,
-  isGerencia,
-  meId,
-  canCerrar,
-  centro,
-}: {
+type LoaderProps = {
   division: CajaDivision;
   fecha: string;
   esHoy: boolean;
@@ -175,90 +171,131 @@ function Panel({
   meId: string | null;
   canCerrar: boolean;
   centro?: string;
+};
+
+// Carga el reporte del día + denominaciones + el cuadre existente de esa (fecha × división × cajero),
+// para prellenar conteo/inicio. El consolidado (gerencia) no prellena un cuadre concreto.
+function Loader(props: LoaderProps) {
+  const tc = useTranslations("common");
+  const t = useTranslations("caja");
+  const { division, fecha, scope } = props;
+  const usuarioId = scopeUsuarioId(scope);
+  const esConsolidado = usuarioId === null;
+  const usuarioIdParam = usuarioId ?? undefined;
+
+  const bundle = useResource(async () => {
+    const [reporte, denoms, lista] = await Promise.all([
+      getReporteDia(fecha, division, usuarioId),
+      getDenominaciones(),
+      esConsolidado
+        ? Promise.resolve([])
+        : listarCuadres({ fecha, division, usuarioId: usuarioIdParam }),
+    ]);
+    const found = esConsolidado ? null : lista[0];
+    const cuadre = found ? await getCuadre(found.id) : null;
+    return { reporte, denoms, cuadre };
+  }, []);
+
+  if (bundle.state.kind === "loading")
+    return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
+  if (bundle.state.kind !== "ok")
+    return <p className="text-sm text-destructive">{bundle.state.message}</p>;
+
+  const { reporte, denoms, cuadre } = bundle.state.data;
+  return (
+    <Editor
+      key={cuadre?.id ?? "nuevo"}
+      {...props}
+      reporte={reporte}
+      denoms={denoms}
+      cuadreInicial={cuadre}
+      onReload={bundle.reload}
+      labelHint={t("count.hint")}
+    />
+  );
+}
+
+function Editor({
+  division,
+  fecha,
+  esHoy,
+  scope,
+  setScope,
+  isGerencia,
+  meId,
+  canCerrar,
+  centro,
+  reporte,
+  denoms,
+  cuadreInicial,
+  onReload,
+  labelHint,
+}: LoaderProps & {
+  reporte: ReporteDia;
+  denoms: Denominacion[];
+  cuadreInicial: CuadreConItems | null;
+  onReload: () => void;
+  labelHint: string;
 }) {
   const t = useTranslations("caja");
-  const tc = useTranslations("common");
 
   const usuarioId = scopeUsuarioId(scope);
-  const reporte = useResource(() => getReporteDia(fecha, division, usuarioId), []);
-  const denoms = useResource(() => getDenominaciones(), []);
+  const esConsolidado = usuarioId === null;
+  const cerrado = cuadreInicial?.estado === "cerrado";
+  // Contar habilitado: hoy, no cerrado, y con un cajero concreto (no el consolidado de gerencia).
+  const contarHabilitado = esHoy && !cerrado && !esConsolidado;
 
-  const [cuadre, setCuadre] = React.useState<CuadreConItems | null>(null);
-  // Default de INTERFAZ del Inicio (fondo de apertura), acordado con el BE (PR #120): el backend
-  // NO lo hardcodea, lo aporta el FE. Editable y sincronizable en vivo antes del cierre.
-  const [petty, setPetty] = React.useState<string>(String(DEFAULT_INICIO));
-  const [opening, setOpening] = React.useState(false);
-  const [closing, setClosing] = React.useState(false);
-  const [emailing, setEmailing] = React.useState(false);
-  const syncTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  React.useEffect(
-    () => () => {
-      if (syncTimer.current) clearTimeout(syncTimer.current);
-    },
-    [],
+  const [conteo, setConteo] = React.useState<Record<string, number>>(() => {
+    const m: Record<string, number> = {};
+    for (const c of cuadreInicial?.conteo ?? []) m[c.denominacionId] = c.cantidad;
+    return m;
+  });
+  const [inicioStr, setInicioStr] = React.useState<string>(
+    String(cuadreInicial?.pettyDeclarado ?? DEFAULT_INICIO),
   );
+  const [aplicarInicio, setAplicarInicio] = React.useState(true);
+  const [procesando, setProcesando] = React.useState(false);
+  const [emailing, setEmailing] = React.useState(false);
 
-  async function abrir() {
-    setOpening(true);
+  const inicio = aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
+  const contado = React.useMemo(
+    () => totalConteo(denoms.map((d) => ({ valor: d.valor, cantidad: conteo[d.id] ?? 0 }))),
+    [denoms, conteo],
+  );
+  const salesCash = reporte.detalle.efectivo.monto;
+  const diferencia = cerrado
+    ? (cuadreInicial?.diferencia ?? 0)
+    : diferenciaCaja(salesCash, contado, inicio);
+  const porCajero = reporte.porCajero ?? [];
+
+  async function procesarCierre() {
+    setProcesando(true);
     try {
       const abierto = await abrirCuadre({
         division,
         usuarioId,
         fecha,
-        pettyDeclarado: Math.max(0, Number(petty) || 0),
+        pettyDeclarado: inicio,
       });
-      const full = await getCuadre(abierto.id);
-      setCuadre(full);
-      // Refleja el Inicio real que quedó en el BE (retomar puede traer otro valor).
-      setPetty(String(full.pettyDeclarado));
+      const lineas = Object.entries(conteo)
+        .filter(([, c]) => c > 0)
+        .map(([denominacionId, cantidad]) => ({ denominacionId, cantidad }));
+      if (lineas.length) await contarCuadre(abierto.id, lineas);
+      await cerrarCuadre(abierto.id);
+      toast.success(t("closeConfirmOk"));
+      onReload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
-      setOpening(false);
-    }
-  }
-
-  // Inicio editable EN VIVO: el BE sincroniza el fondo al retomar un cuadre abierto (PR #120),
-  // así que re-abrimos (idempotente) con el nuevo valor y refrescamos. Debounced.
-  function onInicio(v: string) {
-    setPetty(v);
-    if (cuadre?.estado !== "abierto") return;
-    const id = cuadre.id;
-    if (syncTimer.current) clearTimeout(syncTimer.current);
-    syncTimer.current = setTimeout(async () => {
-      try {
-        await abrirCuadre({
-          division,
-          usuarioId,
-          fecha,
-          pettyDeclarado: Math.max(0, Number(v) || 0),
-        });
-        setCuadre(await getCuadre(id));
-      } catch (err) {
-        toast.error(apiErrorMessage(err));
-      }
-    }, 600);
-  }
-
-  async function cerrar() {
-    if (!cuadre) return;
-    setClosing(true);
-    try {
-      setCuadre(await cerrarCuadre(cuadre.id));
-      reporte.reload();
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setClosing(false);
+      setProcesando(false);
     }
   }
 
   async function enviarEmail(email: string) {
-    if (!cuadre) return;
+    if (!cuadreInicial) return;
     setEmailing(true);
     try {
-      await enviarCuadreEmail(cuadre.id, { email });
+      await enviarCuadreEmail(cuadreInicial.id, { email });
       toast.success(t("emailSent"));
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -268,8 +305,7 @@ function Panel({
   }
 
   function exportar() {
-    if (reporte.state.kind !== "ok") return;
-    const r = reporte.state.data;
+    const r = reporte;
     const rows: Array<Array<string | number>> = [
       [t("title"), t(`division.${division}`), fecha],
       [],
@@ -282,12 +318,15 @@ function Panel({
       ...r.detalle.otros.map((x) => [x.nombre, x.cantidad, x.monto]),
       [],
       [t("payments.general")],
-      [t("payments.cash"), r.detalle.efectivo.monto],
+      [t("payments.opening"), inicio],
+      [t("payments.salesCash"), r.detalle.efectivo.monto],
       [t("payments.electronic"), r.detalle.totalElectronicas],
-      [t("payments.totalDivision"), r.detalle.total],
+      [t("payments.totalCMA"), r.detalle.total],
+      [t("payments.grossBilling"), r.ventas.bruto],
       [t("payments.returns"), r.devoluciones.total],
-      [t("summary.counted"), cuadre?.efectivoContado ?? 0],
-      [t("summary.variance"), cuadre?.diferencia ?? 0],
+      [t("payments.netBilling"), r.ventas.neto],
+      [t("payments.cashInDrawer"), contado],
+      [t("summary.variance"), diferencia],
     ];
     const blob = new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -299,25 +338,11 @@ function Panel({
     toast.success(t("exported"));
   }
 
-  function imprimir() {
-    window.print();
-  }
-
-  const inicialConteo = React.useMemo(() => {
-    const m: Record<string, number> = {};
-    for (const c of cuadre?.conteo ?? []) m[c.denominacionId] = c.cantidad;
-    return m;
-  }, [cuadre]);
-
-  if (reporte.state.kind === "loading" || denoms.state.kind === "loading") {
-    return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
-  }
-  if (reporte.state.kind !== "ok") {
-    return <p className="text-sm text-destructive">{reporte.state.message}</p>;
-  }
-
-  const rep = reporte.state.data;
-  const porCajero = rep.porCajero ?? [];
+  const hint = !esHoy
+    ? t("historyReadonly")
+    : esConsolidado
+      ? labelHint
+      : undefined;
 
   return (
     <div className="space-y-4">
@@ -335,32 +360,54 @@ function Panel({
                 .filter((c) => c.usuarioId)
                 .map((c) => (
                   <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                    {c.nombre ?? (c.usuarioId === meId ? t("scope.mine") : (c.usuarioId ?? "").slice(0, 8))}
+                    {c.nombre ??
+                      (c.usuarioId === meId ? t("scope.mine") : (c.usuarioId ?? "").slice(0, 8))}
                   </SelectItem>
                 ))}
             </SelectContent>
           </Select>
+          {cerrado && (
+            <Badge variant="secondary">{t("status.cerrado")}</Badge>
+          )}
         </div>
       )}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
-        {/* Panel izquierdo: conteo + resumen por cajero */}
+        {/* Panel izquierdo: conteo + inicio + resumen por cajero */}
         <div className="space-y-4">
-          {cuadre?.estado === "abierto" && denoms.state.kind === "ok" ? (
-            <ConteoDenominaciones
-              cuadreId={cuadre.id}
-              denominaciones={denoms.state.data}
-              inicial={inicialConteo}
-              onSaved={setCuadre}
+          <ConteoDenominaciones
+            denominaciones={denoms}
+            cantidades={conteo}
+            disabled={!contarHabilitado}
+            hint={hint}
+            onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
+          />
+
+          {/* Inicio (fondo de apertura) — SIEMPRE input, con aplicar/limpiar (calca CMA) */}
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3">
+            <Label htmlFor="inicio" className="text-sm font-medium">
+              {t("payments.opening")}
+            </Label>
+            <Input
+              id="inicio"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              disabled={!contarHabilitado || !aplicarInicio}
+              value={inicioStr}
+              onChange={(e) => setInicioStr(e.target.value)}
+              className="h-9 w-28 text-right tabular-nums"
             />
-          ) : !cuadre ? (
-            <div className="rounded-xl border p-4">
-              <h3 className="mb-1 text-sm font-semibold">{t("count.title")}</h3>
-              <p className="text-sm text-muted-foreground">
-                {esHoy ? t("count.hint") : t("historyReadonly")}
-              </p>
-            </div>
-          ) : null}
+            <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Checkbox
+                checked={aplicarInicio}
+                disabled={!contarHabilitado}
+                onCheckedChange={(v) => setAplicarInicio(v === true)}
+              />
+              {t("applyOpening")}
+            </label>
+          </div>
 
           {isGerencia && (
             <DesgloseCajeros
@@ -375,27 +422,27 @@ function Panel({
         {/* Panel derecho: resumen de pagos + acciones */}
         <ResumenPagos
           division={division}
-          detalle={rep.detalle}
-          ventas={rep.ventas}
-          devoluciones={rep.devoluciones}
-          cuadre={cuadre}
-          esHoy={esHoy}
-          canCerrar={canCerrar}
-          petty={petty}
-          setPetty={onInicio}
-          opening={opening}
-          closing={closing}
-          emailing={emailing}
-          onOpen={abrir}
-          onClose={cerrar}
-          onEmail={enviarEmail}
+          detalle={reporte.detalle}
+          ventas={reporte.ventas}
+          devoluciones={reporte.devoluciones}
+          inicio={inicio}
+          salesCash={salesCash}
+          contado={contado}
+          diferencia={diferencia}
+          cerrado={cerrado}
+          cerradoEn={cuadreInicial?.cerradoEn ?? null}
+          canProcesar={contarHabilitado && canCerrar}
+          procesando={procesando}
+          onProcesar={procesarCierre}
           onExport={exportar}
-          onPrint={imprimir}
+          canEmail={!!cuadreInicial}
+          emailing={emailing}
+          onEmail={enviarEmail}
         />
       </div>
 
       {/* Facturas pendientes */}
-      <FacturasPendientes pendientes={rep.pendientes} centroId={centro} />
+      <FacturasPendientes pendientes={reporte.pendientes} centroId={centro} />
     </div>
   );
 }

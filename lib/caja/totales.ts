@@ -25,15 +25,18 @@ export function totalConteo(lineas: ReadonlyArray<LineaConteo>): number {
 }
 
 /**
- * Variación provisional que la UI muestra ANTES de cerrar (el cierre real lo sella el BE):
- * (efectivoContado − pettyDeclarado) − efectivoEsperado. >0 sobra, <0 falta.
+ * Diferencia de caja EN VIVO, idéntica a la CMA legacy (cuadreconsultas cash_control):
+ * `ventasEfectivo − (contado − inicio)`, con el neto contado tratado como 0 si aún no se cuenta.
+ * `inicio` (fondo de apertura) es el petty aplicado. 0 = cuadra; >0 falta; <0 sobra.
+ * Es lógica de PRESENTACIÓN (contar en vivo); el cierre definitivo lo sella el BE.
  */
-export function variacion(
-  efectivoContado: number,
-  pettyDeclarado: number,
-  efectivoEsperado: number,
+export function diferenciaCaja(
+  ventasEfectivo: number,
+  contado: number,
+  inicio: number,
 ): number {
-  return efectivoContado - pettyDeclarado - efectivoEsperado;
+  const netoContado = contado > 0 ? contado - inicio : 0;
+  return ventasEfectivo - netoContado;
 }
 
 /**

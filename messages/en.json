@@ -1904,6 +1904,7 @@
       "paid": "Paid",
       "pending": "Pending",
       "empty": "No pending invoices."
-    }
+    },
+    "applyOpening": "Apply"
   }
 }

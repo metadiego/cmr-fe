@@ -1904,6 +1904,7 @@
       "paid": "Pagado",
       "pending": "Pendiente",
       "empty": "No hay facturas pendientes."
-    }
+    },
+    "applyOpening": "Aplicar"
   }
 }
