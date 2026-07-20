@@ -218,7 +218,6 @@ function Loader(props: LoaderProps) {
 function Editor({
   division,
   fecha,
-  esHoy,
   scope,
   setScope,
   isGerencia,
@@ -242,8 +241,9 @@ function Editor({
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
   const cerrado = cuadreInicial?.estado === "cerrado";
-  // Contar habilitado: hoy, no cerrado, y con un cajero concreto (no el consolidado de gerencia).
-  const contarHabilitado = esHoy && !cerrado && !esConsolidado;
+  // Contar habilitado en CUALQUIER fecha seleccionada (como la CMA): solo se bloquea si el cuadre
+  // ya está cerrado o si es el consolidado de gerencia (sin cajero concreto → "seleccione un cajero").
+  const contarHabilitado = !cerrado && !esConsolidado;
 
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => {
     const m: Record<string, number> = {};
@@ -338,11 +338,7 @@ function Editor({
     toast.success(t("exported"));
   }
 
-  const hint = !esHoy
-    ? t("historyReadonly")
-    : esConsolidado
-      ? labelHint
-      : undefined;
+  const hint = esConsolidado ? labelHint : undefined;
 
   return (
     <div className="space-y-4">
