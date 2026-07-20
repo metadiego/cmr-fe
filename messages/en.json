@@ -1879,7 +1879,14 @@
       "cash": "Cash",
       "electronic": "Electronic",
       "totalDivision": "Total",
-      "returns": "Total returns"
+      "returns": "Total returns",
+      "opening": "Opening (float)",
+      "salesCash": "Sales cash",
+      "totalCMA": "Day total",
+      "grossBilling": "Gross billing",
+      "netBilling": "Net billing",
+      "cashInDrawer": "Cash in drawer",
+      "deposit": "To deposit"
     },
     "processClose": "Process close",
     "print": "Print",

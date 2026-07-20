@@ -12,7 +12,6 @@ export interface LineaConteo {
 
 /** Denominación mínima para ordenar la grilla (dato del catálogo, nunca hardcode). */
 export interface DenominacionOrdenable {
-  orden: number;
   valor: number;
 }
 
@@ -38,27 +37,13 @@ export function variacion(
 }
 
 /**
- * Orden de la grilla de conteo: por `orden` ASC y, a igual orden, por `valor` DESC (mayor→menor),
- * igual que el catálogo del BE y la convención de arqueo (billete mayor a la izquierda).
- * Devuelve una copia (no muta el arreglo de entrada).
+ * Orden de la grilla de conteo: por `valor` DESC (mayor→menor), la convención universal de arqueo
+ * de caja (denominación mayor primero). Devuelve una copia (no muta el arreglo de entrada).
  */
 export function ordenarDenominaciones<T extends DenominacionOrdenable>(
   denoms: ReadonlyArray<T>,
 ): T[] {
-  return [...denoms].sort((a, b) => a.orden - b.orden || b.valor - a.valor);
-}
-
-/**
- * Efectivo esperado provisional (para el panel ANTES de cerrar) = Σ de `porMetodo[clave]` de las
- * formas marcadas `esEfectivo`. Refleja el mismo cálculo del BE (`CajaService.efectivoEsperado`),
- * usando SUS datos (flags `esEfectivo` + totales por método), no una regla inventada en el cliente.
- * El cierre real lo sigue sellando el BE.
- */
-export function efectivoEsperado(
-  porMetodo: Readonly<Record<string, number>>,
-  clavesEfectivo: ReadonlyArray<string>,
-): number {
-  return clavesEfectivo.reduce((s, clave) => s + (porMetodo[clave] ?? 0), 0);
+  return [...denoms].sort((a, b) => b.valor - a.valor);
 }
 
 /** Formato de moneda de la app (mismo estilo que el recibo térmico: `$0.00`). */

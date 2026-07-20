@@ -1879,7 +1879,14 @@
       "cash": "Efectivo",
       "electronic": "Electrónicas",
       "totalDivision": "Total",
-      "returns": "Total devoluciones"
+      "returns": "Total devoluciones",
+      "opening": "Inicio (fondo)",
+      "salesCash": "Efectivo de ventas",
+      "totalCMA": "Total del día",
+      "grossBilling": "Facturación bruta",
+      "netBilling": "Facturación neta",
+      "cashInDrawer": "Efectivo en caja",
+      "deposit": "A depositar"
     },
     "processClose": "Procesar cierre",
     "print": "Imprimir",

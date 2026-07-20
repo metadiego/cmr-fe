@@ -14,7 +14,6 @@ import {
   type CajaDivision,
   type CuadreConItems,
 } from "@/lib/api/caja";
-import { getFormasPago, type FormaPago } from "@/lib/api/facturas";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
 import { useResource } from "@/hooks/use-resource";
@@ -180,21 +179,12 @@ function Panel({
   const usuarioId = scopeUsuarioId(scope);
   const reporte = useResource(() => getReporteDia(fecha, division, usuarioId), []);
   const denoms = useResource(() => getDenominaciones(), []);
-  const formas = useResource(() => getFormasPago(), []);
 
   const [cuadre, setCuadre] = React.useState<CuadreConItems | null>(null);
   const [petty, setPetty] = React.useState<string>("");
   const [opening, setOpening] = React.useState(false);
   const [closing, setClosing] = React.useState(false);
   const [emailing, setEmailing] = React.useState(false);
-
-  const clavesEfectivo = React.useMemo(
-    () =>
-      formas.state.kind === "ok"
-        ? formas.state.data.filter((f: FormaPago) => f.esEfectivo).map((f) => f.clave)
-        : [],
-    [formas.state],
-  );
 
   async function abrir() {
     setOpening(true);
@@ -281,11 +271,7 @@ function Panel({
     return m;
   }, [cuadre]);
 
-  if (
-    reporte.state.kind === "loading" ||
-    denoms.state.kind === "loading" ||
-    formas.state.kind === "loading"
-  ) {
+  if (reporte.state.kind === "loading" || denoms.state.kind === "loading") {
     return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
   }
   if (reporte.state.kind !== "ok") {
@@ -352,9 +338,8 @@ function Panel({
         <ResumenPagos
           division={division}
           detalle={rep.detalle}
+          ventas={rep.ventas}
           devoluciones={rep.devoluciones}
-          porMetodo={rep.porMetodo}
-          clavesEfectivo={clavesEfectivo}
           cuadre={cuadre}
           esHoy={esHoy}
           canCerrar={canCerrar}

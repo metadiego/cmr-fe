@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { CajaDivision, CuadreConItems, ReporteDia } from "@/lib/api/caja";
-import { efectivoEsperado, variacion, money } from "@/lib/caja/totales";
+import { variacion, money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +27,8 @@ import {
 export function ResumenPagos({
   division,
   detalle,
+  ventas,
   devoluciones,
-  porMetodo,
-  clavesEfectivo,
   cuadre,
   esHoy,
   canCerrar,
@@ -46,9 +45,8 @@ export function ResumenPagos({
 }: {
   division: CajaDivision;
   detalle: ReporteDia["detalle"];
+  ventas: ReporteDia["ventas"];
   devoluciones: ReporteDia["devoluciones"];
-  porMetodo: Record<string, number>;
-  clavesEfectivo: string[];
   cuadre: CuadreConItems | null;
   esHoy: boolean;
   canCerrar: boolean;
@@ -70,12 +68,16 @@ export function ResumenPagos({
   const [email, setEmail] = React.useState("");
 
   const cerrado = cuadre?.estado === "cerrado";
-  const esperado = efectivoEsperado(porMetodo, clavesEfectivo);
+  // El "Inicio" (fondo de apertura) es `pettyDeclarado` (confirmado con la fórmula del BE:
+  // diferencia = contado − inicio − efectivo de ventas). El efectivo esperado = efectivo de
+  // ventas del día (detalle.efectivo.monto), dato del BE — no se recalcula en el cliente.
+  const inicio = cuadre ? cuadre.pettyDeclarado : Math.max(0, Number(petty) || 0);
+  const salesCash = detalle.efectivo.monto;
   const contado = cuadre?.efectivoContado ?? 0;
-  const pettyNum = cuadre ? cuadre.pettyDeclarado : Math.max(0, Number(petty) || 0);
+  const aDepositar = contado - inicio;
   const diff = cerrado
     ? (cuadre?.diferencia ?? 0)
-    : variacion(contado, pettyNum, esperado);
+    : variacion(contado, inicio, salesCash);
 
   return (
     <div className="space-y-4 lg:sticky lg:top-20">
@@ -123,24 +125,29 @@ export function ResumenPagos({
         )}
       </section>
 
-      {/* Resumen general */}
+      {/* Resumen general (modelo CMA) */}
       <section className="space-y-1 rounded-xl border p-4">
         <h3 className="mb-2 text-sm font-semibold">{tp("general")}</h3>
-        <Row label={tp("cash")} value={money(detalle.efectivo.monto)} />
+        <Row label={tp("opening")} value={money(inicio)} />
+        <Row label={tp("salesCash")} value={money(salesCash)} />
         <Row label={tp("electronic")} value={money(detalle.totalElectronicas)} />
-        <Row label={tp("totalDivision")} value={money(detalle.total)} strong />
+        <Row label={tp("totalCards")} value={money(detalle.totalTarjetas)} />
+        <Row label={tp("totalCMA")} value={money(detalle.total)} strong />
+        <div className="my-1 border-t" />
+        <Row label={tp("grossBilling")} value={money(ventas.bruto)} />
         <Row label={tp("returns")} value={money(devoluciones.total)} />
+        <Row label={tp("netBilling")} value={money(ventas.neto)} strong />
         {cuadre && (
           <>
-            <Row label={t("summary.counted")} value={money(contado)} />
+            <div className="my-1 border-t" />
+            <Row label={tp("cashInDrawer")} value={money(contado)} />
+            <Row label={tp("deposit")} value={money(aDepositar)} />
             <div
               className={cn(
                 "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
                 diff === 0
-                  ? "bg-muted text-foreground"
-                  : diff > 0
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "bg-destructive/10 text-destructive",
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  : "bg-destructive/10 text-destructive",
               )}
             >
               <span>{t("summary.variance")}</span>
@@ -155,7 +162,7 @@ export function ResumenPagos({
         {!cuadre ? (
           esHoy ? (
             <div className="space-y-2 rounded-xl border p-4">
-              <Label htmlFor="petty">{t("petty")}</Label>
+              <Label htmlFor="petty">{tp("opening")}</Label>
               <Input
                 id="petty"
                 type="number"
