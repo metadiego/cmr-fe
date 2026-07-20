@@ -15,6 +15,7 @@ import {
   listarCuadres,
   type CajaDivision,
   type CuadreConItems,
+  type CuadreCaja as CuadreRow,
   type Denominacion,
   type ReporteDia,
 } from "@/lib/api/caja";
@@ -69,6 +70,10 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   const isGerencia =
     !!me && (me.isMaster || me.roles.some((r) => GERENCIA.includes(r)));
   const canCerrar = can("caja.cerrar");
+  // Editar fechas ANTERIORES está bloqueado por defecto (seguridad). Es CONFIGURABLE por RBAC
+  // (data-driven, lo concede el admin): el permiso `caja.retroactivo` lo habilita. Por ahora la
+  // gerencia (admin/super_admin/gerente) y el master lo tienen abierto.
+  const puedeRetroactivo = isGerencia || can("caja.retroactivo");
   const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [fecha, setFecha] = React.useState(hoy);
   const [scope, setScope] = React.useState<Scope | null>(null);
@@ -120,6 +125,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
         scope={effScope}
         setScope={setScope}
         isGerencia={isGerencia}
+        puedeRetroactivo={puedeRetroactivo}
         meId={me?.id ?? null}
         canCerrar={canCerrar}
         centro={gate.centro}
@@ -168,13 +174,15 @@ type LoaderProps = {
   scope: Scope;
   setScope: (s: Scope) => void;
   isGerencia: boolean;
+  puedeRetroactivo: boolean;
   meId: string | null;
   canCerrar: boolean;
   centro?: string;
 };
 
-// Carga el reporte del día + denominaciones + el cuadre existente de esa (fecha × división × cajero),
-// para prellenar conteo/inicio. El consolidado (gerencia) no prellena un cuadre concreto.
+// Carga el reporte del día + denominaciones + los cuadres de esa (fecha × división). Para un cajero
+// concreto prellena su cuadre (conteo/inicio); para el CONSOLIDADO trae TODOS los cuadres para unir
+// (sumar) el efectivo contado y el fondo de cada cajero.
 function Loader(props: LoaderProps) {
   const tc = useTranslations("common");
   const t = useTranslations("caja");
@@ -187,13 +195,12 @@ function Loader(props: LoaderProps) {
     const [reporte, denoms, lista] = await Promise.all([
       getReporteDia(fecha, division, usuarioId),
       getDenominaciones(),
-      esConsolidado
-        ? Promise.resolve([])
-        : listarCuadres({ fecha, division, usuarioId: usuarioIdParam }),
+      listarCuadres({ fecha, division, usuarioId: usuarioIdParam }),
     ]);
+    // Cuadro editable: solo para un cajero concreto (no el consolidado). Trae su conteo detallado.
     const found = esConsolidado ? null : lista[0];
     const cuadre = found ? await getCuadre(found.id) : null;
-    return { reporte, denoms, cuadre };
+    return { reporte, denoms, cuadre, cuadres: lista };
   }, []);
 
   if (bundle.state.kind === "loading")
@@ -201,7 +208,7 @@ function Loader(props: LoaderProps) {
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
-  const { reporte, denoms, cuadre } = bundle.state.data;
+  const { reporte, denoms, cuadre, cuadres } = bundle.state.data;
   return (
     <Editor
       key={cuadre?.id ?? "nuevo"}
@@ -209,6 +216,7 @@ function Loader(props: LoaderProps) {
       reporte={reporte}
       denoms={denoms}
       cuadreInicial={cuadre}
+      cuadres={cuadres}
       onReload={bundle.reload}
       labelHint={t("count.hint")}
     />
@@ -218,21 +226,25 @@ function Loader(props: LoaderProps) {
 function Editor({
   division,
   fecha,
+  esHoy,
   scope,
   setScope,
   isGerencia,
+  puedeRetroactivo,
   meId,
   canCerrar,
   centro,
   reporte,
   denoms,
   cuadreInicial,
+  cuadres,
   onReload,
   labelHint,
 }: LoaderProps & {
   reporte: ReporteDia;
   denoms: Denominacion[];
   cuadreInicial: CuadreConItems | null;
+  cuadres: CuadreRow[];
   onReload: () => void;
   labelHint: string;
 }) {
@@ -241,9 +253,10 @@ function Editor({
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
   const cerrado = cuadreInicial?.estado === "cerrado";
-  // Contar habilitado en CUALQUIER fecha seleccionada (como la CMA): solo se bloquea si el cuadre
-  // ya está cerrado o si es el consolidado de gerencia (sin cajero concreto → "seleccione un cajero").
-  const contarHabilitado = !cerrado && !esConsolidado;
+  // Contar habilitado: cajero concreto, no cerrado, y (hoy O permiso de retroactivo — RBAC). El
+  // consolidado NO se cuenta (es la UNIÓN de todos los cajeros); tampoco fechas pasadas sin permiso.
+  const contarHabilitado =
+    !cerrado && !esConsolidado && (esHoy || puedeRetroactivo);
 
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => {
     const m: Record<string, number> = {};
@@ -257,15 +270,37 @@ function Editor({
   const [procesando, setProcesando] = React.useState(false);
   const [emailing, setEmailing] = React.useState(false);
 
-  const inicio = aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
-  const contado = React.useMemo(
+  // Conteo/inicio por cajero (de los cuadres del día) para UNIR en el consolidado.
+  const conteoPorCajero = React.useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const c of cuadres) if (c.usuarioId) m[c.usuarioId] = c.efectivoContado;
+    return m;
+  }, [cuadres]);
+  const contadoConsolidado = React.useMemo(
+    () => cuadres.reduce((s, c) => s + (c.efectivoContado || 0), 0),
+    [cuadres],
+  );
+  const inicioConsolidado = React.useMemo(
+    () => cuadres.reduce((s, c) => s + (c.pettyDeclarado || 0), 0),
+    [cuadres],
+  );
+
+  const contadoLocal = React.useMemo(
     () => totalConteo(denoms.map((d) => ({ valor: d.valor, cantidad: conteo[d.id] ?? 0 }))),
     [denoms, conteo],
   );
+  // En consolidado: los totales son la UNIÓN de todos los cajeros (no un conteo propio).
+  const inicio = esConsolidado
+    ? inicioConsolidado
+    : aplicarInicio
+      ? Math.max(0, Number(inicioStr) || 0)
+      : 0;
+  const contado = esConsolidado ? contadoConsolidado : contadoLocal;
   const salesCash = reporte.detalle.efectivo.monto;
-  const diferencia = cerrado
-    ? (cuadreInicial?.diferencia ?? 0)
-    : diferenciaCaja(salesCash, contado, inicio);
+  const diferencia =
+    cerrado && !esConsolidado
+      ? (cuadreInicial?.diferencia ?? 0)
+      : diferenciaCaja(salesCash, contado, inicio);
   const porCajero = reporte.porCajero ?? [];
 
   async function procesarCierre() {
@@ -338,7 +373,11 @@ function Editor({
     toast.success(t("exported"));
   }
 
-  const hint = esConsolidado ? labelHint : undefined;
+  const hint = esConsolidado
+    ? labelHint
+    : !esHoy && !puedeRetroactivo
+      ? t("count.pastLocked")
+      : undefined;
 
   return (
     <div className="space-y-4">
@@ -379,35 +418,39 @@ function Editor({
             onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
           />
 
-          {/* Inicio (fondo de apertura) — SIEMPRE input, con aplicar/limpiar (calca CMA) */}
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3">
-            <Label htmlFor="inicio" className="text-sm font-medium">
-              {t("payments.opening")}
-            </Label>
-            <Input
-              id="inicio"
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              disabled={!contarHabilitado || !aplicarInicio}
-              value={inicioStr}
-              onChange={(e) => setInicioStr(e.target.value)}
-              className="h-9 w-28 text-right tabular-nums"
-            />
-            <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Checkbox
-                checked={aplicarInicio}
-                disabled={!contarHabilitado}
-                onCheckedChange={(v) => setAplicarInicio(v === true)}
+          {/* Inicio (fondo de apertura) — input con aplicar/limpiar (calca CMA). En consolidado no
+              se edita: el Inicio es la suma de los fondos de cada cajero (se ve en el resumen). */}
+          {!esConsolidado && (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3">
+              <Label htmlFor="inicio" className="text-sm font-medium">
+                {t("payments.opening")}
+              </Label>
+              <Input
+                id="inicio"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                disabled={!contarHabilitado || !aplicarInicio}
+                value={inicioStr}
+                onChange={(e) => setInicioStr(e.target.value)}
+                className="h-9 w-28 text-right tabular-nums"
               />
-              {t("applyOpening")}
-            </label>
-          </div>
+              <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Checkbox
+                  checked={aplicarInicio}
+                  disabled={!contarHabilitado}
+                  onCheckedChange={(v) => setAplicarInicio(v === true)}
+                />
+                {t("applyOpening")}
+              </label>
+            </div>
+          )}
 
           {isGerencia && (
             <DesgloseCajeros
               cajeros={porCajero}
+              conteoPorCajero={conteoPorCajero}
               meId={meId}
               activeUsuarioId={scope.startsWith("user:") ? scope.slice(5) : null}
               onPick={(uid) => setScope(uid ? (`user:${uid}` as Scope) : "consolidated")}

@@ -1837,7 +1837,8 @@
       "empty": "No hay denominaciones configuradas.",
       "saving": "Guardando…",
       "saved": "Conteo guardado",
-      "hint": "Selecciona un cajero para habilitar el conteo."
+      "hint": "Selecciona un cajero para habilitar el conteo.",
+      "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo)."
     },
     "petty": "Caja chica (petty)",
     "summary": {

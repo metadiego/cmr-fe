@@ -5,16 +5,18 @@ import { useTranslations } from "next-intl";
 import { money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
 
-// Resumen por CAJERO de la división: cada usuario que facturó + su total de ventas (de
-// `reportes/dia.porCajero`, con NOMBRE resuelto por el BE). El consolidado = Σ por-cajero.
-// Clic en una fila = ver ese cajero (drill-in). Solo tokens.
+// Resumen por CAJERO de la división: cada usuario que facturó, su CONTEO de efectivo (de su cuadre)
+// y sus VENTAS (de `reportes/dia.porCajero`, con nombre del BE). El TOTAL es la UNIÓN (Σ) de todos
+// los cajeros = la vista consolidada. Clic en una fila = ver ese cajero (drill-in). Solo tokens.
 export function DesgloseCajeros({
   cajeros,
+  conteoPorCajero,
   meId,
   activeUsuarioId,
   onPick,
 }: {
   cajeros: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
+  conteoPorCajero: Record<string, number>;
   meId: string | null;
   activeUsuarioId: string | null;
   onPick: (usuarioId: string | null) => void;
@@ -30,13 +32,18 @@ export function DesgloseCajeros({
     );
   }
 
-  const total = cajeros.reduce((s, c) => s + c.total, 0);
+  const totalVentas = cajeros.reduce((s, c) => s + c.total, 0);
+  const totalConteo = cajeros.reduce(
+    (s, c) => s + (c.usuarioId ? (conteoPorCajero[c.usuarioId] ?? 0) : 0),
+    0,
+  );
 
   return (
     <div className="rounded-xl border">
-      <div className="flex items-center justify-between border-b px-4 py-2.5">
-        <h3 className="text-sm font-semibold">{t("title")}</h3>
-        <span className="text-xs text-muted-foreground">{t("sales")}</span>
+      <div className="grid grid-cols-[1fr_7rem_7rem] gap-x-3 border-b px-4 py-2.5 text-xs font-medium text-muted-foreground">
+        <span className="text-sm font-semibold text-foreground">{t("title")}</span>
+        <span className="text-right">{t("cash")}</span>
+        <span className="text-right">{t("sales")}</span>
       </div>
       <div className="divide-y">
         {cajeros.map((c) => {
@@ -44,25 +51,28 @@ export function DesgloseCajeros({
           const label =
             c.nombre ??
             (c.usuarioId === meId ? t("cashier") : (c.usuarioId ?? "—").slice(0, 8));
+          const conteo = c.usuarioId ? (conteoPorCajero[c.usuarioId] ?? 0) : 0;
           return (
             <button
               key={c.usuarioId ?? "sin"}
               type="button"
               onClick={() => onPick(c.usuarioId)}
               className={cn(
-                "flex w-full items-center justify-between px-4 py-2 text-left text-sm transition-colors hover:bg-accent/40",
+                "grid w-full grid-cols-[1fr_7rem_7rem] gap-x-3 px-4 py-2 text-left text-sm transition-colors hover:bg-accent/40",
                 activo && "bg-accent/60",
               )}
             >
               <span className="font-medium">{label}</span>
-              <span className="tabular-nums">{money(c.total)}</span>
+              <span className="text-right tabular-nums">{money(conteo)}</span>
+              <span className="text-right tabular-nums">{money(c.total)}</span>
             </button>
           );
         })}
       </div>
-      <div className="flex items-center justify-between border-t px-4 py-2.5 text-sm font-semibold">
+      <div className="grid grid-cols-[1fr_7rem_7rem] gap-x-3 border-t px-4 py-2.5 text-sm font-semibold">
         <span>{t("consolidated")}</span>
-        <span className="tabular-nums">{money(total)}</span>
+        <span className="text-right tabular-nums">{money(totalConteo)}</span>
+        <span className="text-right tabular-nums">{money(totalVentas)}</span>
       </div>
     </div>
   );

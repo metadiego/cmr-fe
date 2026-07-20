@@ -1837,7 +1837,8 @@
       "empty": "No denominations configured.",
       "saving": "Saving…",
       "saved": "Count saved",
-      "hint": "Select a cashier to enable counting."
+      "hint": "Select a cashier to enable counting.",
+      "pastLocked": "Editing past dates requires permission (caja.retroactivo)."
     },
     "petty": "Petty cash",
     "summary": {
