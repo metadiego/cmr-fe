@@ -391,12 +391,17 @@ function Editor({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
+              {/* Siempre "Mi caja" para gerencia (cuenta su propio cajón aunque nadie más facture). */}
+              {meId && (
+                <SelectItem value={`user:${meId}`}>{t("scope.mine")}</SelectItem>
+              )}
+              {/* Cajeros con actividad ese día (de porCajero); el roster completo con id de auth es
+                  dependencia del BE (ver handoff). Se excluye "me" para no duplicar. */}
               {porCajero
-                .filter((c) => c.usuarioId)
+                .filter((c) => c.usuarioId && c.usuarioId !== meId)
                 .map((c) => (
                   <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                    {c.nombre ??
-                      (c.usuarioId === meId ? t("scope.mine") : (c.usuarioId ?? "").slice(0, 8))}
+                    {c.nombre ?? (c.usuarioId ?? "").slice(0, 8)}
                   </SelectItem>
                 ))}
             </SelectContent>
