@@ -587,7 +587,9 @@
     "tableroModulos": "Módulos de tablero",
     "tablerosSettings": "Ajustes de tableros",
     "configFactura": "Factura (encabezado/pie)",
-    "devoluciones": "Devoluciones"
+    "devoluciones": "Devoluciones",
+    "cajaConsultas": "Caja de consultas",
+    "cajaGeneral": "Caja general"
   },
   "admin": {
     "title": "Administración",
@@ -1834,7 +1836,8 @@
       "total": "Total contado",
       "empty": "No hay denominaciones configuradas.",
       "saving": "Guardando…",
-      "saved": "Conteo guardado"
+      "saved": "Conteo guardado",
+      "hint": "Selecciona un cajero para habilitar el conteo."
     },
     "petty": "Caja chica (petty)",
     "summary": {
@@ -1858,8 +1861,42 @@
       "cashier": "Cajero",
       "total": "Total",
       "consolidated": "Consolidado",
-      "empty": "Ningún cajero facturó esta división hoy."
+      "empty": "Ningún cajero facturó esta división hoy.",
+      "sales": "Ventas",
+      "cash": "Conteo efectivo"
     },
-    "historyReadonly": "Vista de solo lectura del reporte del día. Ver, editar, imprimir o enviar por email cuadres cerrados de fechas anteriores requerirá soporte del backend."
+    "historyReadonly": "Vista de solo lectura del reporte del día. Ver, editar, imprimir o enviar por email cuadres cerrados de fechas anteriores requerirá soporte del backend.",
+    "payments": {
+      "title": "Resumen de pagos",
+      "cards": "Pagos con tarjeta",
+      "type": "Tipo",
+      "qty": "Cantidad",
+      "amount": "Monto",
+      "totalCards": "Total tarjetas",
+      "otherMethods": "Otros medios de pago",
+      "noOther": "No hay otros medios.",
+      "general": "Resumen general",
+      "cash": "Efectivo",
+      "electronic": "Electrónicas",
+      "totalDivision": "Total",
+      "returns": "Total devoluciones"
+    },
+    "processClose": "Procesar cierre",
+    "print": "Imprimir",
+    "exportExcel": "Exportar Excel",
+    "email": "Enviar por email",
+    "emailPrompt": "Email destino",
+    "emailSent": "Cuadre enviado",
+    "exported": "Archivo generado",
+    "pending": {
+      "title": "Facturas pendientes de pago",
+      "invoice": "Factura",
+      "date": "Fecha",
+      "client": "Cliente",
+      "total": "Total",
+      "paid": "Pagado",
+      "pending": "Pendiente",
+      "empty": "No hay facturas pendientes."
+    }
   }
 }

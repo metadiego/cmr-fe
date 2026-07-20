@@ -47,15 +47,23 @@ formas `esEfectivo` sobre `totalesPorMetodo` (todo lo calcula el BE; el FE **no*
 | **UI moderna (2026)** | Conteo asistido por denominación (mayor→menor, `cantidad×valor` en vivo) + panel esperado-vs-contado con variación. Fuentes en el plan. |
 | **Menú** | `/caja` en `NAV_MANIFEST` → cae en el grupo **"En desarrollo"** (tiene UI). |
 
-## 4. Componentes
+## 4. Componentes (rev. 2 — dos destinos + layout rico)
 
-- `app/(app)/caja/page.tsx` — server; renderiza `<CuadreCaja/>`.
-- `components/caja/cuadre-caja.tsx` — tabs `CONSULTA|GENERAL` + selector de alcance (cajero fijo / gerencia
-  elige cajero o "Todos (consolidado)"); orquesta abrir/contar/cerrar por `(division, usuarioId|null)`.
+> El usuario exige **destinos separados** por división (no un único "Caja" con toggle). El BE se
+> amplió y hoy entrega el reporte enriquecido (`ventas/detalle/pendientes`, `porCajero` con nombre)
+> más `GET /caja/cuadres` (historial) y `POST /caja/cuadres/:id/email`.
+
+- `app/(app)/caja/[division]/page.tsx` — server; valida `division ∈ {consulta,general}` (`notFound`)
+  y monta `<CuadreCaja division/>`. Menú: `/caja/consulta` y `/caja/general` (dos entradas).
+- `components/caja/cuadre-caja.tsx` — división **fija** (sin tabs); toolbar (fecha + selector de cajero
+  para gerencia); dos paneles + facturas pendientes; acciones abrir/cerrar/exportar/imprimir/email.
 - `components/caja/conteo-denominaciones.tsx` — grilla de denominaciones, total contado en vivo.
-- `components/caja/resumen-esperado.tsx` — totales por método, esperado, petty, contado, diferencia; Cerrar.
-- `components/caja/desglose-cajeros.tsx` — solo gerencia; tabla por cajero (de `porCajero`).
-- `lib/caja/totales.ts` (+ test) — `totalConteo`, `variacion`, `ordenarDenominaciones`, `money`.
+- `components/caja/resumen-pagos.tsx` — panel derecho: tarjetas / otros medios / resumen general
+  (efectivo, electrónicas, total, devoluciones, contado, diferencia) + acciones.
+- `components/caja/desglose-cajeros.tsx` — "Resumen por cajero" (de `porCajero`, con nombre); drill-in.
+- `components/caja/facturas-pendientes.tsx` — tabla de `pendientes` (nombre de cliente best-effort).
+- `lib/caja/totales.ts` (+ test) — `totalConteo`, `variacion`, `ordenarDenominaciones`, `efectivoEsperado`, `money`.
+- `lib/caja/export.ts` (+ test) — `toCsv` (exportar a Excel, cliente).
 
 ## 5. Fuera de alcance
 

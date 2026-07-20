@@ -587,7 +587,9 @@
     "tableroModulos": "Board modules",
     "tablerosSettings": "Board settings",
     "configFactura": "Invoice (header/footer)",
-    "devoluciones": "Returns"
+    "devoluciones": "Returns",
+    "cajaConsultas": "Consultation cash",
+    "cajaGeneral": "General cash"
   },
   "admin": {
     "title": "Administration",
@@ -1834,7 +1836,8 @@
       "total": "Counted total",
       "empty": "No denominations configured.",
       "saving": "Saving…",
-      "saved": "Count saved"
+      "saved": "Count saved",
+      "hint": "Select a cashier to enable counting."
     },
     "petty": "Petty cash",
     "summary": {
@@ -1858,8 +1861,42 @@
       "cashier": "Cashier",
       "total": "Total",
       "consolidated": "Consolidated",
-      "empty": "No cashier billed this division today."
+      "empty": "No cashier billed this division today.",
+      "sales": "Sales",
+      "cash": "Cash count"
     },
-    "historyReadonly": "Read-only view of the day's report. Viewing, editing, printing or emailing closed counts from past dates will require backend support."
+    "historyReadonly": "Read-only view of the day's report. Viewing, editing, printing or emailing closed counts from past dates will require backend support.",
+    "payments": {
+      "title": "Payments summary",
+      "cards": "Card payments",
+      "type": "Type",
+      "qty": "Qty",
+      "amount": "Amount",
+      "totalCards": "Total cards",
+      "otherMethods": "Other payment methods",
+      "noOther": "No other methods.",
+      "general": "General summary",
+      "cash": "Cash",
+      "electronic": "Electronic",
+      "totalDivision": "Total",
+      "returns": "Total returns"
+    },
+    "processClose": "Process close",
+    "print": "Print",
+    "exportExcel": "Export Excel",
+    "email": "Send by email",
+    "emailPrompt": "Recipient email",
+    "emailSent": "Count sent",
+    "exported": "File generated",
+    "pending": {
+      "title": "Invoices pending payment",
+      "invoice": "Invoice",
+      "date": "Date",
+      "client": "Client",
+      "total": "Total",
+      "paid": "Paid",
+      "pending": "Pending",
+      "empty": "No pending invoices."
+    }
   }
 }

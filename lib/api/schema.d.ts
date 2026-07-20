@@ -4095,6 +4095,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/caja/cuadres": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CajaController_listarCuadres_v1"];
+        put?: never;
+        post: operations["CajaController_abrir_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/caja/cuadres/{id}": {
         parameters: {
             query?: never;
@@ -4111,7 +4127,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/caja/cuadres": {
+    "/api/v1/caja/cuadres/{id}/email": {
         parameters: {
             query?: never;
             header?: never;
@@ -4120,7 +4136,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["CajaController_abrir_v1"];
+        /** Envía un cuadre por email (archivo/compartir). Requiere email destino. */
+        post: operations["CajaController_enviarEmail_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7846,24 +7863,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        AbrirCuadreDto: {
-            /**
-             * @description División del cuadre: consulta | general. Obligatoria para no mezclar ambas facturaciones.
-             * @enum {string}
-             */
-            division: "consulta" | "general";
-            /**
-             * Format: uuid
-             * @description Cajero del cuadre. Omitido = el propio usuario; null = consolidado de gerencia (todos los cajeros). Ver/abrir otro o el consolidado requiere gerencia.
-             */
-            usuarioId?: string | null;
-            /** @description Fecha del cuadre (YYYY-MM-DD). Omitido = hoy. */
-            fecha?: string;
-            /** Format: uuid */
-            monedaId?: string;
-            /** @description Caja chica (petty) declarada. */
-            pettyDeclarado?: number;
-        };
         CuadreCajaEntity: {
             usuarioId: string | null;
             /** @enum {string|null} */
@@ -7886,6 +7885,33 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        EmailCuadreDto: {
+            /**
+             * Format: email
+             * @description Email destino (obligatorio: el cuadre no está ligado a un paciente).
+             */
+            email?: string;
+            /** @description Cuerpo del correo (opcional; por defecto un resumen del cuadre). */
+            cuerpo?: string;
+        };
+        AbrirCuadreDto: {
+            /**
+             * @description División del cuadre: consulta | general. Obligatoria para no mezclar ambas facturaciones.
+             * @enum {string}
+             */
+            division: "consulta" | "general";
+            /**
+             * Format: uuid
+             * @description Cajero del cuadre. Omitido = el propio usuario; null = consolidado de gerencia (todos los cajeros). Ver/abrir otro o el consolidado requiere gerencia.
+             */
+            usuarioId?: string | null;
+            /** @description Fecha del cuadre (YYYY-MM-DD). Omitido = hoy. */
+            fecha?: string;
+            /** Format: uuid */
+            monedaId?: string;
+            /** @description Caja chica (petty) declarada. */
+            pettyDeclarado?: number;
         };
         ConteoLineaDto: {
             /** Format: uuid */
@@ -16080,13 +16106,16 @@ export interface operations {
             };
         };
     };
-    CajaController_getCuadre_v1: {
+    CajaController_listarCuadres_v1: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
+            query?: {
+                fecha?: string;
+                division?: string;
+                usuarioId?: string;
+                estado?: string;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -16096,7 +16125,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CuadreCajaEntity"][];
                 };
             };
         };
@@ -16120,6 +16149,52 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CuadreCajaEntity"];
+                };
+            };
+        };
+    };
+    CajaController_getCuadre_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    CajaController_enviarEmail_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailCuadreDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

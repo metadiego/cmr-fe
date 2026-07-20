@@ -27,8 +27,9 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/facturacion/reportes/consumo-insumos", labelKey: "nav.consumoInsumos" },
   { path: "/consultas", labelKey: "nav.facturacionConsultas" },
   { path: "/consultas/devoluciones", labelKey: "nav.devolucionesConsultas" },
-  // Caja / Cuadre (tiene UI → cae en "En desarrollo")
-  { path: "/caja", labelKey: "nav.caja" },
+  // Cuadre de caja — destinos SEPARADOS por división (no mezclar). Tienen UI → "En desarrollo".
+  { path: "/caja/consulta", labelKey: "nav.cajaConsultas" },
+  { path: "/caja/general", labelKey: "nav.cajaGeneral" },
   // Inventario
   { path: "/inventario", labelKey: "nav.inventario" },
   { path: "/inventario/productos", labelKey: "nav.productos" },
