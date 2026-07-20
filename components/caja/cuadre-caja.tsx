@@ -12,9 +12,11 @@ import {
   getCajeros,
   getCuadre,
   getDenominaciones,
+  getGruposMetodoPago,
   getReporteDia,
   listarCuadres,
   type Cajero,
+  type GrupoMetodoPago,
   type CajaDivision,
   type CuadreConItems,
   type CuadreCaja as CuadreRow,
@@ -193,12 +195,14 @@ function Loader(props: LoaderProps) {
   const usuarioIdParam = usuarioId ?? undefined;
 
   const bundle = useResource(async () => {
-    const [reporte, denoms, lista, cajeros] = await Promise.all([
+    const [reporte, denoms, lista, cajeros, grupos] = await Promise.all([
       getReporteDia(fecha, division, usuarioId),
       getDenominaciones(),
       listarCuadres({ fecha, division, usuarioId: usuarioIdParam }),
       // Roster completo de cajeros para el selector (solo gerencia lo necesita; el BE lo acota por rol).
       isGerencia ? getCajeros() : Promise.resolve([] as Cajero[]),
+      // Grupos configurables de método de pago (para subtotales informativos, p.ej. visa_mc).
+      getGruposMetodoPago(),
     ]);
     // Cuadre editable: un cajero concreto (no el consolidado). En consolidado se traen TODOS los
     // cuadres con su conteo para UNIR (sumar) las cantidades por denominación (vista solo lectura).
@@ -214,7 +218,7 @@ function Loader(props: LoaderProps) {
     for (const d of detalles)
       for (const l of d.conteo)
         conteoInicial[l.denominacionId] = (conteoInicial[l.denominacionId] ?? 0) + l.cantidad;
-    return { reporte, denoms, cuadre, conteoInicial, cuadres: lista, cajeros };
+    return { reporte, denoms, cuadre, conteoInicial, cuadres: lista, cajeros, grupos };
   }, []);
 
   if (bundle.state.kind === "loading")
@@ -222,7 +226,7 @@ function Loader(props: LoaderProps) {
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
-  const { reporte, denoms, cuadre, conteoInicial, cuadres, cajeros } = bundle.state.data;
+  const { reporte, denoms, cuadre, conteoInicial, cuadres, cajeros, grupos } = bundle.state.data;
   return (
     <Editor
       key={cuadre?.id ?? (props.scope === "consolidated" ? "consolidado" : "nuevo")}
@@ -233,6 +237,7 @@ function Loader(props: LoaderProps) {
       conteoInicial={conteoInicial}
       cuadres={cuadres}
       cajeros={cajeros}
+      grupos={grupos}
       onReload={bundle.reload}
     />
   );
@@ -255,6 +260,7 @@ function Editor({
   conteoInicial,
   cuadres,
   cajeros,
+  grupos,
   onReload,
 }: LoaderProps & {
   reporte: ReporteDia;
@@ -263,6 +269,7 @@ function Editor({
   conteoInicial: Record<string, number>;
   cuadres: CuadreRow[];
   cajeros: Cajero[];
+  grupos: GrupoMetodoPago[];
   onReload: () => void;
 }) {
   const t = useTranslations("caja");
@@ -326,6 +333,33 @@ function Editor({
       : diferenciaCaja(contado, inicio, salesCash);
   const aDepositar = esConsolidado ? cons.aDepositar : contado - inicio;
   const porCajero = reporte.porCajero ?? [];
+
+  // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): grupos configurables cuyas
+  // formas son subconjunto ESTRICTO del grupo de tarjetas (el que suma detalle.totalTarjetas).
+  // 100% data-driven (config `grupos_metodo_pago` + `porGrupo`), sin nombres hardcodeados.
+  const subtotalesTarjeta = React.useMemo(() => {
+    const parent = grupos.find(
+      (g) =>
+        (g.formasPago?.length ?? 0) > 0 &&
+        (reporte.porGrupo[g.clave] ?? null) === reporte.detalle.totalTarjetas,
+    );
+    if (!parent) return [];
+    const parentFormas = new Set(parent.formasPago ?? []);
+    return grupos
+      .filter(
+        (g) =>
+          g.clave !== parent.clave &&
+          (g.formasPago?.length ?? 0) > 0 &&
+          (g.formasPago ?? []).every((f) => parentFormas.has(f)),
+      )
+      .map((g) => ({
+        clave: g.clave,
+        labelKey: g.labelKey,
+        nombre: g.nombre,
+        monto: reporte.porGrupo[g.clave] ?? 0,
+      }))
+      .filter((s) => s.monto !== 0);
+  }, [grupos, reporte]);
   // Opciones del selector: roster completo del BE (gerencia ve todos, cajero solo a sí mismo).
   // Fallback si el roster viene vacío: "yo" + quienes facturaron ese día.
   const opcionesCajero: Array<{ usuarioId: string; nombre: string }> =
@@ -496,6 +530,7 @@ function Editor({
         <ResumenPagos
           division={division}
           detalle={reporte.detalle}
+          subtotalesTarjeta={subtotalesTarjeta}
           ventas={reporte.ventas}
           devoluciones={reporte.devoluciones}
           inicio={inicio}

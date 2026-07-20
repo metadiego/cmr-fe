@@ -27,6 +27,7 @@ import {
 export function ResumenPagos({
   division,
   detalle,
+  subtotalesTarjeta,
   ventas,
   devoluciones,
   inicio,
@@ -46,6 +47,7 @@ export function ResumenPagos({
 }: {
   division: CajaDivision;
   detalle: ReporteDia["detalle"];
+  subtotalesTarjeta: Array<{ clave: string; labelKey: string; nombre: string; monto: number }>;
   ventas: ReporteDia["ventas"];
   devoluciones: ReporteDia["devoluciones"];
   inicio: number;
@@ -93,6 +95,16 @@ export function ResumenPagos({
             ))}
           </ul>
         )}
+        {/* Subtotales informativos configurables (p.ej. VISA + MASTERCARD), del BE. */}
+        {subtotalesTarjeta.map((s) => (
+          <div
+            key={s.clave}
+            className="flex items-center justify-between px-4 py-1.5 text-xs italic text-muted-foreground"
+          >
+            <span>{tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.nombre}</span>
+            <span className="tabular-nums">{money(s.monto)}</span>
+          </div>
+        ))}
         <div className="flex items-center justify-between border-t px-4 py-2.5 text-sm font-semibold">
           <span>{tp("totalCards")}</span>
           <span className="tabular-nums">{money(detalle.totalTarjetas)}</span>
