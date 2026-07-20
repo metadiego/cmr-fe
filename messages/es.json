@@ -1838,7 +1838,8 @@
       "saving": "Guardando…",
       "saved": "Conteo guardado",
       "hint": "Selecciona un cajero para habilitar el conteo.",
-      "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo)."
+      "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo).",
+      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros."
     },
     "petty": "Caja chica (petty)",
     "summary": {

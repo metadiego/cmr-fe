@@ -187,7 +187,6 @@ type LoaderProps = {
 // (sumar) el efectivo contado y el fondo de cada cajero.
 function Loader(props: LoaderProps) {
   const tc = useTranslations("common");
-  const t = useTranslations("caja");
   const { division, fecha, scope, isGerencia } = props;
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
@@ -201,10 +200,21 @@ function Loader(props: LoaderProps) {
       // Roster completo de cajeros para el selector (solo gerencia lo necesita; el BE lo acota por rol).
       isGerencia ? getCajeros() : Promise.resolve([] as Cajero[]),
     ]);
-    // Cuadro editable: solo para un cajero concreto (no el consolidado). Trae su conteo detallado.
+    // Cuadre editable: un cajero concreto (no el consolidado). En consolidado se traen TODOS los
+    // cuadres con su conteo para UNIR (sumar) las cantidades por denominación (vista solo lectura).
     const found = esConsolidado ? null : lista[0];
-    const cuadre = found ? await getCuadre(found.id) : null;
-    return { reporte, denoms, cuadre, cuadres: lista, cajeros };
+    const detalles = esConsolidado
+      ? await Promise.all(lista.map((c) => getCuadre(c.id)))
+      : found
+        ? [await getCuadre(found.id)]
+        : [];
+    const cuadre = esConsolidado ? null : (detalles[0] ?? null);
+    // Conteo inicial = unión de las líneas de conteo de los cuadres traídos (por denominacionId).
+    const conteoInicial: Record<string, number> = {};
+    for (const d of detalles)
+      for (const l of d.conteo)
+        conteoInicial[l.denominacionId] = (conteoInicial[l.denominacionId] ?? 0) + l.cantidad;
+    return { reporte, denoms, cuadre, conteoInicial, cuadres: lista, cajeros };
   }, []);
 
   if (bundle.state.kind === "loading")
@@ -212,18 +222,18 @@ function Loader(props: LoaderProps) {
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
-  const { reporte, denoms, cuadre, cuadres, cajeros } = bundle.state.data;
+  const { reporte, denoms, cuadre, conteoInicial, cuadres, cajeros } = bundle.state.data;
   return (
     <Editor
-      key={cuadre?.id ?? "nuevo"}
+      key={cuadre?.id ?? (props.scope === "consolidated" ? "consolidado" : "nuevo")}
       {...props}
       reporte={reporte}
       denoms={denoms}
       cuadreInicial={cuadre}
+      conteoInicial={conteoInicial}
       cuadres={cuadres}
       cajeros={cajeros}
       onReload={bundle.reload}
-      labelHint={t("count.hint")}
     />
   );
 }
@@ -242,18 +252,18 @@ function Editor({
   reporte,
   denoms,
   cuadreInicial,
+  conteoInicial,
   cuadres,
   cajeros,
   onReload,
-  labelHint,
 }: LoaderProps & {
   reporte: ReporteDia;
   denoms: Denominacion[];
   cuadreInicial: CuadreConItems | null;
+  conteoInicial: Record<string, number>;
   cuadres: CuadreRow[];
   cajeros: Cajero[];
   onReload: () => void;
-  labelHint: string;
 }) {
   const t = useTranslations("caja");
 
@@ -265,11 +275,8 @@ function Editor({
   const contarHabilitado =
     !cerrado && !esConsolidado && (esHoy || puedeRetroactivo);
 
-  const [conteo, setConteo] = React.useState<Record<string, number>>(() => {
-    const m: Record<string, number> = {};
-    for (const c of cuadreInicial?.conteo ?? []) m[c.denominacionId] = c.cantidad;
-    return m;
-  });
+  // Conteo inicial: en un cajero = su conteo; en consolidado = la UNIÓN (Σ) de todos (solo lectura).
+  const [conteo, setConteo] = React.useState<Record<string, number>>(() => ({ ...conteoInicial }));
   const [inicioStr, setInicioStr] = React.useState<string>(
     String(cuadreInicial?.pettyDeclarado ?? DEFAULT_INICIO),
   );
@@ -404,7 +411,7 @@ function Editor({
   }
 
   const hint = esConsolidado
-    ? labelHint
+    ? t("count.consolidatedHint")
     : !esHoy && !puedeRetroactivo
       ? t("count.pastLocked")
       : undefined;

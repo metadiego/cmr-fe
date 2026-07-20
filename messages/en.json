@@ -1838,7 +1838,8 @@
       "saving": "Saving…",
       "saved": "Count saved",
       "hint": "Select a cashier to enable counting.",
-      "pastLocked": "Editing past dates requires permission (caja.retroactivo)."
+      "pastLocked": "Editing past dates requires permission (caja.retroactivo).",
+      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers."
     },
     "petty": "Petty cash",
     "summary": {
