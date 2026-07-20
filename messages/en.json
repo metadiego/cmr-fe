@@ -1887,7 +1887,12 @@
       "grossBilling": "Gross billing",
       "netBilling": "Net billing",
       "cashInDrawer": "Cash in drawer",
-      "deposit": "To deposit"
+      "deposit": "To deposit",
+      "status": {
+        "ok": "balanced",
+        "short": "short",
+        "over": "over"
+      }
     },
     "processClose": "Process close",
     "print": "Print",

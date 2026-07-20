@@ -32,6 +32,7 @@ export function ResumenPagos({
   inicio,
   salesCash,
   contado,
+  aDepositar,
   diferencia,
   cerrado,
   cerradoEn,
@@ -50,6 +51,7 @@ export function ResumenPagos({
   inicio: number;
   salesCash: number;
   contado: number;
+  aDepositar: number;
   diferencia: number;
   cerrado: boolean;
   cerradoEn: string | null;
@@ -67,7 +69,9 @@ export function ResumenPagos({
   const [emailOpen, setEmailOpen] = React.useState(false);
   const [email, setEmail] = React.useState("");
 
-  const aDepositar = Math.max(0, contado - inicio);
+  // Estado del cuadre (etiqueta legacy): 0 = cuadra, < 0 = falta, > 0 = sobra.
+  const estado =
+    Math.abs(diferencia) < 0.01 ? "ok" : diferencia < 0 ? "short" : "over";
 
   return (
     <div className="space-y-4 lg:sticky lg:top-20">
@@ -133,12 +137,17 @@ export function ResumenPagos({
         <div
           className={cn(
             "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
-            Math.abs(diferencia) < 0.01
+            estado === "ok"
               ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-              : "bg-destructive/10 text-destructive",
+              : estado === "over"
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                : "bg-destructive/10 text-destructive",
           )}
         >
-          <span>{t("summary.variance")}</span>
+          <span>
+            {t("summary.variance")}
+            <span className="ml-1 font-normal">({tp(`status.${estado}`)})</span>
+          </span>
           <span className="tabular-nums">{money(diferencia)}</span>
         </div>
       </section>

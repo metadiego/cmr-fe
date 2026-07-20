@@ -283,31 +283,41 @@ function Editor({
     for (const c of cuadres) if (c.usuarioId) m[c.usuarioId] = c.efectivoContado;
     return m;
   }, [cuadres]);
-  const contadoConsolidado = React.useMemo(
-    () => cuadres.reduce((s, c) => s + (c.efectivoContado || 0), 0),
-    [cuadres],
-  );
-  const inicioConsolidado = React.useMemo(
-    () => cuadres.reduce((s, c) => s + (c.pettyDeclarado || 0), 0),
-    [cuadres],
-  );
+  // Consolidado = UNIÓN de todos los cajeros (Σ de sus cuadres del día): conteo, fondo, a depositar
+  // y diferencia SELLADA. No se recalcula el cierre en el cliente.
+  const cons = React.useMemo(() => {
+    let contado = 0;
+    let inicio = 0;
+    let aDepositar = 0;
+    let diferencia = 0;
+    for (const c of cuadres) {
+      contado += c.efectivoContado || 0;
+      inicio += c.pettyDeclarado || 0;
+      aDepositar += (c.efectivoContado || 0) - (c.pettyDeclarado || 0);
+      diferencia += c.diferencia || 0;
+    }
+    return { contado, inicio, aDepositar, diferencia };
+  }, [cuadres]);
 
   const contadoLocal = React.useMemo(
     () => totalConteo(denoms.map((d) => ({ valor: d.valor, cantidad: conteo[d.id] ?? 0 }))),
     [denoms, conteo],
   );
-  // En consolidado: los totales son la UNIÓN de todos los cajeros (no un conteo propio).
+  const salesCash = reporte.detalle.efectivo.monto;
   const inicio = esConsolidado
-    ? inicioConsolidado
+    ? cons.inicio
     : aplicarInicio
       ? Math.max(0, Number(inicioStr) || 0)
       : 0;
-  const contado = esConsolidado ? contadoConsolidado : contadoLocal;
-  const salesCash = reporte.detalle.efectivo.monto;
-  const diferencia =
-    cerrado && !esConsolidado
+  const contado = esConsolidado ? cons.contado : contadoLocal;
+  // Diferencia (fórmula legacy: contado − inicio − ventasEfectivo). En consolidado = Σ de las
+  // diferencias selladas de cada cajero (no aplica un conteo unificado).
+  const diferencia = esConsolidado
+    ? cons.diferencia
+    : cerrado
       ? (cuadreInicial?.diferencia ?? 0)
-      : diferenciaCaja(salesCash, contado, inicio);
+      : diferenciaCaja(contado, inicio, salesCash);
+  const aDepositar = esConsolidado ? cons.aDepositar : contado - inicio;
   const porCajero = reporte.porCajero ?? [];
   // Opciones del selector: roster completo del BE (gerencia ve todos, cajero solo a sí mismo).
   // Fallback si el roster viene vacío: "yo" + quienes facturaron ese día.
@@ -484,6 +494,7 @@ function Editor({
           inicio={inicio}
           salesCash={salesCash}
           contado={contado}
+          aDepositar={aDepositar}
           diferencia={diferencia}
           cerrado={cerrado}
           cerradoEn={cuadreInicial?.cerradoEn ?? null}

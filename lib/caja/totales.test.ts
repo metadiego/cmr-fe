@@ -36,17 +36,16 @@ test("totalConteo ignora cantidades no positivas o NaN (no restan)", () => {
   );
 });
 
-test("diferenciaCaja: cuadra (0) — ejemplo CMA: ventas 40, contado 90, inicio 50", () => {
-  assert.equal(diferenciaCaja(40, 90, 50), 0);
+test("diferenciaCaja: Short −50 (ejemplo CMA Laser): contado 2761.36, inicio 50, ventas 2761.36", () => {
+  assert.equal(diferenciaCaja(2761.36, 50, 2761.36), -50);
 });
 
-test("diferenciaCaja: sin contar aún (contado 0) = ventas efectivo completo", () => {
-  assert.equal(diferenciaCaja(40, 0, 50), 40);
+test("diferenciaCaja: Perfect (0) cuando contado = inicio + ventas", () => {
+  assert.equal(diferenciaCaja(2811.36, 50, 2761.36), 0);
 });
 
-test("diferenciaCaja: falta (positivo) y sobra (negativo)", () => {
-  assert.equal(diferenciaCaja(100, 120, 50), 30); // 100 − (120−50)=30 falta
-  assert.equal(diferenciaCaja(100, 200, 50), -50); // 100 − 150 = −50 sobra
+test("diferenciaCaja: Over (positivo) cuando sobra efectivo", () => {
+  assert.equal(diferenciaCaja(250, 50, 100), 100); // 250 − 50 − 100 = 100 sobra
 });
 
 test("ordenarDenominaciones: por valor DESC (mayor→menor); no muta", () => {

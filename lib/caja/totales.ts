@@ -25,18 +25,18 @@ export function totalConteo(lineas: ReadonlyArray<LineaConteo>): number {
 }
 
 /**
- * Diferencia de caja EN VIVO, idéntica a la CMA legacy (cuadreconsultas cash_control):
- * `ventasEfectivo − (contado − inicio)`, con el neto contado tratado como 0 si aún no se cuenta.
- * `inicio` (fondo de apertura) es el petty aplicado. 0 = cuadra; >0 falta; <0 sobra.
+ * Diferencia de caja EN VIVO, con la fórmula EXACTA de la CMA legacy (cuadre reporte.php,
+ * `diferenciaReal = totalConteo − pettyCash − efectivoSistema`):
+ *   diferencia = contado − inicio − ventasEfectivo
+ * 0 = Perfect (cuadra); < 0 = Short (falta); > 0 = Over (sobra). `inicio` = fondo (petty) aplicado.
  * Es lógica de PRESENTACIÓN (contar en vivo); el cierre definitivo lo sella el BE.
  */
 export function diferenciaCaja(
-  ventasEfectivo: number,
   contado: number,
   inicio: number,
+  ventasEfectivo: number,
 ): number {
-  const netoContado = contado > 0 ? contado - inicio : 0;
-  return ventasEfectivo - netoContado;
+  return contado - inicio - ventasEfectivo;
 }
 
 /**

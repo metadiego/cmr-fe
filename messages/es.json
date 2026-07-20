@@ -1887,7 +1887,12 @@
       "grossBilling": "Facturación bruta",
       "netBilling": "Facturación neta",
       "cashInDrawer": "Efectivo en caja",
-      "deposit": "A depositar"
+      "deposit": "A depositar",
+      "status": {
+        "ok": "cuadra",
+        "short": "falta",
+        "over": "sobra"
+      }
     },
     "processClose": "Procesar cierre",
     "print": "Imprimir",
