@@ -38,6 +38,9 @@ import {
 } from "@/components/ui/select";
 
 const GERENCIA = ["admin", "super_admin", "gerente"];
+// Default de interfaz del Inicio (fondo de apertura). Acordado con el BE (PR #120): dato del FE,
+// no hardcode de negocio en el backend. Configurable a futuro por centro si el negocio lo pide.
+const DEFAULT_INICIO = 50;
 
 // Alcance del cuadre: cajero fijo en sí mismo; gerencia elige consolidado o un cajero.
 type Scope = "self" | "consolidated" | `user:${string}`;
@@ -181,10 +184,20 @@ function Panel({
   const denoms = useResource(() => getDenominaciones(), []);
 
   const [cuadre, setCuadre] = React.useState<CuadreConItems | null>(null);
-  const [petty, setPetty] = React.useState<string>("");
+  // Default de INTERFAZ del Inicio (fondo de apertura), acordado con el BE (PR #120): el backend
+  // NO lo hardcodea, lo aporta el FE. Editable y sincronizable en vivo antes del cierre.
+  const [petty, setPetty] = React.useState<string>(String(DEFAULT_INICIO));
   const [opening, setOpening] = React.useState(false);
   const [closing, setClosing] = React.useState(false);
   const [emailing, setEmailing] = React.useState(false);
+  const syncTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(
+    () => () => {
+      if (syncTimer.current) clearTimeout(syncTimer.current);
+    },
+    [],
+  );
 
   async function abrir() {
     setOpening(true);
@@ -193,14 +206,39 @@ function Panel({
         division,
         usuarioId,
         fecha,
-        pettyDeclarado: petty ? Math.max(0, Number(petty) || 0) : undefined,
+        pettyDeclarado: Math.max(0, Number(petty) || 0),
       });
-      setCuadre(await getCuadre(abierto.id));
+      const full = await getCuadre(abierto.id);
+      setCuadre(full);
+      // Refleja el Inicio real que quedó en el BE (retomar puede traer otro valor).
+      setPetty(String(full.pettyDeclarado));
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
       setOpening(false);
     }
+  }
+
+  // Inicio editable EN VIVO: el BE sincroniza el fondo al retomar un cuadre abierto (PR #120),
+  // así que re-abrimos (idempotente) con el nuevo valor y refrescamos. Debounced.
+  function onInicio(v: string) {
+    setPetty(v);
+    if (cuadre?.estado !== "abierto") return;
+    const id = cuadre.id;
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(async () => {
+      try {
+        await abrirCuadre({
+          division,
+          usuarioId,
+          fecha,
+          pettyDeclarado: Math.max(0, Number(v) || 0),
+        });
+        setCuadre(await getCuadre(id));
+      } catch (err) {
+        toast.error(apiErrorMessage(err));
+      }
+    }, 600);
   }
 
   async function cerrar() {
@@ -344,7 +382,7 @@ function Panel({
           esHoy={esHoy}
           canCerrar={canCerrar}
           petty={petty}
-          setPetty={setPetty}
+          setPetty={onInicio}
           opening={opening}
           closing={closing}
           emailing={emailing}

@@ -71,7 +71,10 @@ export function ResumenPagos({
   // El "Inicio" (fondo de apertura) es `pettyDeclarado` (confirmado con la fórmula del BE:
   // diferencia = contado − inicio − efectivo de ventas). El efectivo esperado = efectivo de
   // ventas del día (detalle.efectivo.monto), dato del BE — no se recalcula en el cliente.
-  const inicio = cuadre ? cuadre.pettyDeclarado : Math.max(0, Number(petty) || 0);
+  const inicio = cerrado
+    ? (cuadre?.pettyDeclarado ?? 0)
+    : Math.max(0, Number(petty) || 0);
+  const inicioEditable = !!cuadre && !cerrado;
   const salesCash = detalle.efectivo.monto;
   const contado = cuadre?.efectivoContado ?? 0;
   const aDepositar = contado - inicio;
@@ -128,7 +131,23 @@ export function ResumenPagos({
       {/* Resumen general (modelo CMA) */}
       <section className="space-y-1 rounded-xl border p-4">
         <h3 className="mb-2 text-sm font-semibold">{tp("general")}</h3>
-        <Row label={tp("opening")} value={money(inicio)} />
+        {inicioEditable ? (
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="text-muted-foreground">{tp("opening")}</span>
+            <Input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              value={petty}
+              onChange={(e) => setPetty(e.target.value)}
+              className="h-8 w-28 text-right tabular-nums"
+              aria-label={tp("opening")}
+            />
+          </div>
+        ) : (
+          <Row label={tp("opening")} value={money(inicio)} />
+        )}
         <Row label={tp("salesCash")} value={money(salesCash)} />
         <Row label={tp("electronic")} value={money(detalle.totalElectronicas)} />
         <Row label={tp("totalCards")} value={money(detalle.totalTarjetas)} />
