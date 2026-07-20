@@ -3,6 +3,15 @@
 > **Fecha:** 2026-07-20 · **Origen:** FE cmr-fe (Cuadre de Caja) · **Destino:** cmr-be módulo `caja`
 > **Status:** SOLICITADO. Verificado contra el reporte legacy de LASER (Caguas, 2026-07-04).
 
+## CAUSA RAÍZ (verificada en los seeds del BE, 2026-07-20)
+
+`src/scripts/seed-facturacion.ts` y `seed-caja.ts` solo siembran estas formas de pago:
+`efectivo`, **`tarjeta` (GENÉRICA)**, `transferencia`, `seguro`, `visa`, `master`, `exonerada`,
+`deducible`, `prepagado`. **NO existen `ath`, `care_credit` ni `amex`.** Y el grupo `tarjetas`
+= `['visa','master','tarjeta']` (sin Care Credit). Los pagos del 04/07 se registraron TODOS bajo la
+forma genérica `tarjeta` → por eso `detalle.tarjetas` = `[{nombre:'Tarjeta', cantidad:4, monto:3260}]`
+y el FE muestra "Tarjeta ×4". **El FE no puede desglosar lo que el dato no tiene.** Es 100% BE/datos.
+
 ## Problema (verificado)
 
 El reporte legacy separa CADA tipo de tarjeta y luego totaliza. Ejemplo real (Laser, 07/04/2026):
@@ -19,13 +28,16 @@ Care Credit. El FE solo puede renderizar lo que llega en `detalle.tarjetas` / `d
 
 ## Lo que se pide (BE)
 
-1. **Diferenciar las tarjetas**: que `detalle.tarjetas` traiga **una fila por tipo real** (ATH, VISA,
-   MASTERCARD, Care Credit, AMEX…), cada una con `{ clave, nombre, cantidad, monto }` (monto NETO,
-   puede ser negativo por devoluciones, como ATH -940). Esto requiere que el pago guarde el **tipo de
-   tarjeta** (forma de pago específica), no una forma genérica "Tarjeta".
-2. **Care Credit ES tarjeta**: incluir su clave en el grupo configurable `tarjetas`
-   (`grupos_metodo_pago`), para que entre en `detalle.tarjetas` y en `detalle.totalTarjetas`
-   (hoy va en `otros`). Configurable, sin hardcode.
+0. **Sembrar las formas de pago que faltan** (configurable, i18n): `ath`, `care_credit`, `amex`
+   (y las que use el negocio). Sin esto, no hay tipos que desglosar.
+1. **Registrar el pago con la forma ESPECÍFICA**: la facturación debe guardar `formaPagoId` = ath /
+   visa / master / care_credit según corresponda, NO la genérica `tarjeta`. (Migrar/normalizar los
+   pagos históricos que quedaron como `tarjeta` genérica, si aplica.) Con eso, `detalle.tarjetas`
+   trae **una fila por tipo real** `{ clave, nombre, cantidad, monto }` (monto NETO; puede ser
+   negativo por devoluciones, como ATH -940) — `detallePagos` ya agrupa por `clave`, sale solo.
+2. **Care Credit ES tarjeta**: actualizar el grupo configurable `tarjetas` (hoy
+   `['visa','master','tarjeta']`) para incluir `ath`, `care_credit`, `amex`, para que entren en
+   `detalle.tarjetas` y en `detalle.totalTarjetas`. Configurable, sin hardcode.
 3. **Total de todas las tarjetas** (`detalle.totalTarjetas`) = Σ de todas las anteriores **incluyendo
    Care Credit** (= 3,260.00 en el ejemplo).
 4. Subtotal **VISA + MASTERCARD**: debe salir de un **grupo configurable** (`grupos_metodo_pago`,
