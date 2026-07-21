@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import {
   repararPago,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/api/facturas";
 import { useCan } from "@/hooks/use-can";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,16 +36,6 @@ import { Edit02Icon, Delete02Icon, Tick02Icon, Cancel01Icon, Add01Icon } from "@
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
-
-function fmtFecha(v: unknown, locale: string): string {
-  if (v == null || v === "") return "";
-  const d = new Date(String(v));
-  return Number.isNaN(d.getTime())
-    ? ""
-    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", {
-        month: "2-digit", day: "2-digit", year: "numeric", timeZone: "America/Puerto_Rico",
-      }).format(d);
-}
 
 // Bloque de PAGOS de una factura emitida. Todo a la vista, sin modos ocultos:
 //   - cada fila (pago o reembolso) muestra su ✎ Editar y 🗑 Anular SIEMPRE visibles (gate RBAC
@@ -72,7 +63,6 @@ export function PagosFactura({
   montoAbonado: number;
 }) {
   const t = useTranslations("pagosFactura");
-  const locale = useLocale();
   const { can } = useCan();
   const puedeEditar = can("factura.pago.anular");
 
@@ -108,7 +98,6 @@ export function PagosFactura({
                 key={p.id}
                 pago={p}
                 formas={formas}
-                locale={locale}
                 puedeEditar={puedeEditar}
                 busy={busy}
                 onEdit={() => setEditId(p.id ?? null)}
@@ -164,7 +153,6 @@ function TipoBadge({ tipo }: { tipo?: string }) {
 function PagoViewRow({
   pago,
   formas,
-  locale,
   puedeEditar,
   busy,
   onEdit,
@@ -172,7 +160,6 @@ function PagoViewRow({
 }: {
   pago: FacturaPago;
   formas: FormaPago[];
-  locale: string;
   puedeEditar: boolean;
   busy: boolean;
   onEdit: () => void;
@@ -182,7 +169,7 @@ function PagoViewRow({
   const tRoot = useTranslations();
   const [confirmAnular, setConfirmAnular] = React.useState(false);
   const esReembolso = pago.tipo === "reembolso";
-  const fecha = fmtFecha(pago.fecha, locale);
+  const fecha = formatFechaSolo(pago.fecha);
   // El pago sólo trae `formaPagoNombre` (español); resolvemos la `clave` por `formaPagoId` para traducir.
   const clave = formas.find((f) => f.id === pago.formaPagoId)?.clave;
   const label = formaPagoLabel(tRoot, clave, pago.formaPagoNombre);

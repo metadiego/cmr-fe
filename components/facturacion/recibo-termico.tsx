@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import type { Recibo } from "@/lib/factura/build-recibo";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
+import { formatFechaSolo } from "@/lib/format/fecha";
 
 const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
 
@@ -12,6 +13,9 @@ const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
 // receipt. Falls back to the raw string if unparseable.
 function fmtFecha(iso: string): { fecha: string; hora: string } {
   if (!iso) return { fecha: "—", hora: "" };
+  // Fecha SOLO-DÍA (p. ej. la devolución "2026-07-18"): formatear sin corrimiento de zona y sin hora
+  // (new Date("YYYY-MM-DD") sería UTC y en PR retrocede un día). Ver lib/format/fecha.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return { fecha: formatFechaSolo(iso), hora: "" };
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return { fecha: iso, hora: "" };
   const p = (n: number) => String(n).padStart(2, "0");

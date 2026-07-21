@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { listDevoluciones, anularDevolucion, type Devolucion } from "@/lib/api/facturas";
@@ -13,6 +13,7 @@ import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useCan } from "@/hooks/use-can";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { toastError } from "@/lib/api/errors";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListToolbar } from "@/components/kit/list-toolbar";
@@ -45,16 +46,6 @@ const ALL = "__all__";
 const ESTADOS = ["activa", "anulada"];
 const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
 
-function fmtFecha(v: unknown, locale: string): string {
-  if (v == null || v === "") return "—";
-  const d = new Date(String(v));
-  return Number.isNaN(d.getTime())
-    ? String(v)
-    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", {
-        month: "2-digit", day: "2-digit", year: "numeric", timeZone: "America/Puerto_Rico",
-      }).format(d);
-}
-
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("devoluciones.estado");
   const tone = estado === "anulada" ? "bg-destructive/15 text-destructive" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
@@ -68,7 +59,6 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
   const t = useTranslations("devoluciones");
   const tRoot = useTranslations();
   const router = useRouter();
-  const locale = useLocale();
   const { can } = useCan();
 
   const [q, setQ] = React.useState("");
@@ -167,7 +157,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                         <span className="block text-xs text-muted-foreground">{t("fromInvoice", { n: d.facturaNumero })}</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 tabular-nums">{fmtFecha(d.fecha ?? d.createdAt, locale)}</td>
+                    <td className="px-3 py-2 tabular-nums">{formatFechaSolo(d.fecha ?? d.createdAt) || "—"}</td>
                     <td className="px-3 py-2">{t.has(`tipo.${d.tipo}`) ? t(`tipo.${d.tipo}`) : d.tipo}</td>
                     <td className="px-3 py-2 text-right font-medium tabular-nums">{money(d.montoDevuelto)}</td>
                     <td className="px-3 py-2"><EstadoBadge estado={String(d.estado ?? "")} /></td>

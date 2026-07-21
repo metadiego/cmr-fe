@@ -3,13 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { getFacturasTablero, type FacturaTablero } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListToolbar } from "@/components/kit/list-toolbar";
@@ -24,16 +25,6 @@ import {
 const ALL = "__all__";
 const ESTADOS = ["borrador", "emitida", "anulada", "devuelta_parcial", "devuelta_total"];
 const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
-
-function fmtFecha(v: unknown, locale: string): string {
-  if (v == null || v === "") return "—";
-  const d = new Date(String(v));
-  return Number.isNaN(d.getTime())
-    ? String(v)
-    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", {
-        month: "2-digit", day: "2-digit", year: "numeric", timeZone: "America/Puerto_Rico",
-      }).format(d);
-}
 
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("facturacionList.estado");
@@ -54,7 +45,6 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const t = useTranslations("facturacionList");
   const tRoot = useTranslations();
   const router = useRouter();
-  const locale = useLocale();
   const params = useSearchParams();
 
   const [q, setQ] = React.useState(params.get("q") ?? "");
@@ -90,7 +80,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   function cell(clave: string, value: unknown) {
     if (clave === "fac_estado") return <EstadoBadge estado={String(value ?? "")} />;
     if (clave === "fac_total") return <span className="font-medium tabular-nums">{money(value)}</span>;
-    if (clave === "fac_fecha") return <span className="tabular-nums">{fmtFecha(value, locale)}</span>;
+    if (clave === "fac_fecha") return <span className="tabular-nums">{formatFechaSolo(value) || "—"}</span>;
     if (clave === "fac_numero")
       return <span className="font-mono tabular-nums">{value != null && value !== "" ? String(value) : t("draft")}</span>;
     return <span>{value == null || value === "" ? "—" : String(value)}</span>;
