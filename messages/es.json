@@ -171,6 +171,8 @@
     "pinned": "Fija",
     "moveUp": "Subir",
     "moveDown": "Bajar",
+    "chained": "Encadenado",
+    "chainedHint": "Estas columnas se mueven juntas.",
     "saved": "Columnas guardadas"
   },
   "tablero": {

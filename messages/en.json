@@ -171,6 +171,8 @@
     "pinned": "Pinned",
     "moveUp": "Move up",
     "moveDown": "Move down",
+    "chained": "Chained",
+    "chainedHint": "These columns move together.",
     "saved": "Columns saved"
   },
   "tablero": {
