@@ -13,6 +13,7 @@ import {
   actualizarItem,
   eliminarItem,
   setDescuentoGlobal,
+  setEnvio,
   setExento,
   descartarFactura,
   cambiarPacienteFactura,
@@ -33,6 +34,7 @@ import { listMedicos, listMedios, type MedicoOpcion, type MedioFacturacion } fro
 import { listTiposPrecio, listImpuestos, listCatalogoPrecios, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
@@ -295,6 +297,8 @@ function Editor({
   run: (fn: () => Promise<unknown>) => Promise<void>;
 }) {
   const t = useTranslations("facturacion");
+  const { can } = useCan();
+  const puedeUpdate = can("factura.update");
   const serverItems = React.useMemo(() => factura.items ?? [], [factura.items]);
   const estado = String(factura.estado ?? "");
   const esBorrador = estado === "borrador";
@@ -541,6 +545,15 @@ function Editor({
                 <Row key={i} label={(im.nombre || t("tax")) + (im.tasa != null ? ` (${im.tasa}%)` : "")} value={money(im.monto)} />
               ))
             : <Row label={t("tax")} value={money(impuesto)} />}
+          <EnvioRow
+            key={`envio-${n((factura as { envio?: number }).envio)}`}
+            envio={n((factura as { envio?: number }).envio)}
+            editable={esBorrador && puedeUpdate}
+            showWhenZero={esBorrador && puedeUpdate}
+            disabled={busy}
+            label={t("shipping")}
+            onSet={(m) => run(() => setEnvio(id, m, centro))}
+          />
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
         </div>
 
@@ -605,6 +618,59 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
     <div className="flex items-center justify-between gap-2">
       <span className={strong ? "text-sm font-semibold" : "text-sm text-muted-foreground"}>{label}</span>
       <span className={"tabular-nums " + (strong ? "text-base font-bold" : "text-sm")}>{value}</span>
+    </div>
+  );
+}
+
+// Fila de ENVÍO/flete en el resumen. Editable inline (solo borrador + factura.update): al confirmar
+// (blur/Enter) llama al BE, que recomputa el total (FE no recalcula). En emitida (o sin permiso) es de
+// solo lectura y solo aparece si hay envío (>0). 0 = sin envío. Alineada con las demás filas del resumen.
+function EnvioRow({
+  envio,
+  editable,
+  showWhenZero,
+  disabled,
+  label,
+  onSet,
+}: {
+  envio: number;
+  editable: boolean;
+  showWhenZero: boolean;
+  disabled?: boolean;
+  label: string;
+  onSet: (monto: number) => void;
+}) {
+  // El valor inicial sale del BE; el padre remonta esta fila por `key={envio}` tras recomputar, así que
+  // no hace falta sincronizar con un efecto (evita setState-in-effect y renders en cascada).
+  const [val, setVal] = React.useState(envio > 0 ? envio.toFixed(2) : "");
+
+  if (!editable) {
+    if (!showWhenZero && !(envio > 0)) return null;
+    return <Row label={label} value={money(envio)} />;
+  }
+
+  const commit = () => {
+    const m = Math.max(0, Number(val) || 0);
+    if (Math.abs(m - envio) > 0.001) onSet(m);
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <div className="flex items-center gap-1">
+        <span className="text-sm text-muted-foreground">$</span>
+        <Input
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          onBlur={commit}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
+          inputMode="decimal"
+          placeholder="0.00"
+          disabled={disabled}
+          aria-label={label}
+          className="h-7 w-24 text-right tabular-nums"
+        />
+      </div>
     </div>
   );
 }

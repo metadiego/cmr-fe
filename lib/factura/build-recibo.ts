@@ -37,6 +37,7 @@ export type Recibo = {
   descuento: number;
   impuesto: number;
   impuestos: { nombre: string; tasa?: number; monto: number }[];
+  envio: number; // envío/flete sumado al total DESPUÉS del impuesto (0 = sin envío → no se imprime)
   total: number;
   montoAbonado: number;
   saldo: number;
@@ -124,6 +125,7 @@ export function buildRecibo(
     descuento,
     impuesto,
     impuestos,
+    envio: num((f as { envio?: number }).envio),
     total,
     montoAbonado,
     saldo: Math.max(0, total - montoAbonado),
@@ -183,6 +185,7 @@ export function buildReciboDevolucion(
     descuento: 0,
     impuesto,
     impuestos: [],
+    envio: 0,
     total,
     montoAbonado: 0,
     saldo: 0,

@@ -168,6 +168,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         : recibo.impuesto > 0 && (
             <Line label={t("tax")} value={money(recibo.impuesto)} />
           )}
+      {recibo.envio > 0 && <Line label={t("shipping")} value={money(recibo.envio)} />}
       <div className="mt-0.5 border-t border-black pt-0.5">
         <Line label={t("total")} value={money(recibo.total)} bold />
       </div>

@@ -3102,6 +3102,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/envio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Fijar el envío/flete (delivery) de la factura
+         * @description Monto de cabecera que se SUMA al total DESPUÉS del impuesto (como el legacy monto_flete). Solo en borrador. No se graba por defecto; configurable por centro (facturacion.envioGravado). Devuelve la factura con totales recomputados.
+         */
+        put: operations["FacturacionController_setEnvio_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturas/{id}/emitir": {
         parameters: {
             query?: never;
@@ -7218,6 +7238,7 @@ export interface components {
             motivoExencion: string | null;
             impuesto: number;
             total: number;
+            envio: number;
             almacenId: string | null;
             montoAbonado: number;
             cancelado: boolean;
@@ -7374,6 +7395,13 @@ export interface components {
         SetExentoDto: {
             exento: boolean;
             motivo?: string;
+        };
+        SetEnvioDto: {
+            /**
+             * @description Monto de envío/flete (delivery) a sumar al total DESPUÉS del impuesto. 0 = sin envío. No se graba por defecto (configurable por centro).
+             * @example 12
+             */
+            monto: number;
         };
         AnularFacturaDto: {
             motivo: string;
@@ -7856,6 +7884,16 @@ export interface components {
         };
         AnularPrescripcionDto: {
             motivo?: string;
+        };
+        DetalleTarjetaDto: {
+            /** @description Clave de la forma de pago (ath, visa, master, care_credit, amex...). */
+            clave: string;
+            /** @description Nombre legible de la forma de pago. */
+            nombre: string;
+            /** @description Cantidad de pagos de esa forma en el día/división. */
+            cantidad: number;
+            /** @description Monto NETO (pagos − reembolsos); puede ser negativo por devoluciones. */
+            monto: number;
         };
         DenominacionEntity: {
             monedaId: string;
@@ -14366,6 +14404,31 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SetExentoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    FacturacionController_setEnvio_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetEnvioDto"];
             };
         };
         responses: {

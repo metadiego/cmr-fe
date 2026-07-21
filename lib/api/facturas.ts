@@ -241,6 +241,14 @@ export function setDescuentoGlobal(facturaId: string, payload: DescuentoGlobalPa
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/descuento-global`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
 
+// Envío/flete: monto de cabecera que el BE SUMA al total DESPUÉS del impuesto (como legacy monto_flete).
+// Solo en borrador; permiso factura.update. Devuelve la factura con totales recomputados (el BE manda; el
+// FE no recalcula). 0 = sin envío. Gravado o no lo decide config por centro `facturacion.envioGravado`.
+export type SetEnvioPayload = components["schemas"]["SetEnvioDto"];
+export function setEnvio(facturaId: string, monto: number, centroId?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/facturas/${facturaId}/envio`, { method: "PUT", body: JSON.stringify({ monto }) }, centroId);
+}
+
 // Emitir (cierra el borrador). Sin body.
 export function emitirFactura(facturaId: string, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/emitir`, { method: "POST" }, centroId);
