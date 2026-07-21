@@ -99,9 +99,11 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const [fecha, setFecha] = React.useState(todayISO());
   const [subTipo, setSubTipo] = React.useState<string>("");
 
+  // El subtipo (Nueva/Seguimiento) se filtra CLIENT-SIDE por `fila.subtipo` (BE PR #125), igual que los KPI
+  // de estado — no se manda al server (así el conteo de tabs/KPI es sobre el mismo set ya cargado).
   const filasRes = useResource<Tablero>(
-    () => (centroId ? getFilas(tablero, fecha, { centroId, subTipo: subTipo || undefined }) : Promise.resolve({ columnas: [], filas: [] })),
-    [tablero, fecha, centroId, subTipo],
+    () => (centroId ? getFilas(tablero, fecha, { centroId }) : Promise.resolve({ columnas: [], filas: [] })),
+    [tablero, fecha, centroId],
   );
   const data = filasRes.state.kind === "ok" ? filasRes.state.data : null;
 
@@ -168,17 +170,21 @@ export function GenericBoard({ tablero }: { tablero: string }) {
       )}
 
       {data && def && (() => {
+        // 1º el tab de subtipo (Nueva/Seguimiento) acota el set; los KPI de estado se cuentan sobre ese set.
+        const base = subTipo
+          ? data.filas.filter((f) => String((f as { subtipo?: unknown }).subtipo ?? "") === subTipo)
+          : data.filas;
         const counts = new Map<string, number>();
-        for (const f of data.filas) {
+        for (const f of base) {
           const e = String(f.estado ?? "");
           counts.set(e, (counts.get(e) ?? 0) + 1);
         }
         const kpiEstados = def.estados.filter((e) => (counts.get(e.clave) ?? 0) > 0);
-        const filtered = estadoFiltro ? data.filas.filter((f) => String(f.estado ?? "") === estadoFiltro) : data.filas;
+        const filtered = estadoFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
         return (
           <>
             <div className="mb-4 flex flex-wrap gap-2">
-              <KpiCard label={t("all")} count={data.filas.length} active={estadoFiltro === ""} onClick={() => setEstadoFiltro("")} />
+              <KpiCard label={t("all")} count={base.length} active={estadoFiltro === ""} onClick={() => setEstadoFiltro("")} />
               {kpiEstados.map((e) => (
                 <KpiCard
                   key={e.clave}
