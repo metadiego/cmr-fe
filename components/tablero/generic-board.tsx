@@ -99,11 +99,12 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const [fecha, setFecha] = React.useState(todayISO());
   const [subTipo, setSubTipo] = React.useState<string>("");
 
-  // El subtipo (Nueva/Seguimiento) se filtra CLIENT-SIDE por `fila.subtipo` (BE PR #125), igual que los KPI
-  // de estado — no se manda al server (así el conteo de tabs/KPI es sobre el mismo set ya cargado).
+  // subTipo va al server CUANDO está elegido (tableros como `servicios` lo EXIGEN — cada tab es un
+  // servicio) y ADEMÁS se filtra client-side por `fila.subtipo` (BE PR #125) para los tableros donde el
+  // server no lo aplica (atencion: Nueva/Seguimiento). Ambas capas son idempotentes entre sí.
   const filasRes = useResource<Tablero>(
-    () => (centroId ? getFilas(tablero, fecha, { centroId }) : Promise.resolve({ columnas: [], filas: [] })),
-    [tablero, fecha, centroId],
+    () => (centroId ? getFilas(tablero, fecha, { centroId, subTipo: subTipo || undefined }) : Promise.resolve({ columnas: [], filas: [] })),
+    [tablero, fecha, centroId, subTipo],
   );
   const data = filasRes.state.kind === "ok" ? filasRes.state.data : null;
 
@@ -114,7 +115,18 @@ export function GenericBoard({ tablero }: { tablero: string }) {
     onInvalidate: filasRes.refresh,
   });
 
-  const subTipos = def?.subTipos ?? [];
+  const subTipos = React.useMemo(() => def?.subTipos ?? [], [def]);
+
+  // Self-heal: tableros que EXIGEN subTipo (p. ej. servicios: cada tab es un servicio) responden 400 en
+  // "Todos" → auto-selecciona el primer subtipo en vez de dejar el error rojo. Data-driven por el mensaje
+  // del BE; los tableros que aceptan "Todos" (atencion) nunca entran aquí.
+  const failMsg = filasRes.state.kind === "fail" ? filasRes.state.message : "";
+  React.useEffect(() => {
+    if (!failMsg || subTipo || subTipos.length === 0) return;
+    if (!/subtipo/i.test(failMsg)) return;
+    const h = setTimeout(() => setSubTipo(subTipos[0].clave), 0);
+    return () => clearTimeout(h);
+  }, [failMsg, subTipo, subTipos]);
 
   return (
     <div className="w-full px-6 py-6">
