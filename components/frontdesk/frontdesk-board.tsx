@@ -217,10 +217,44 @@ export function FrontdeskBoard() {
   }, [q, gate.centro]);
   const dictado = useDictado(locale, (texto) => setQ(texto));
 
-  const columnas = React.useMemo(
-    () => (board?.columnas ?? []).filter((c) => c.clave !== "fd_acciones"),
+  // Toggles agrupados (render.group, p. ej. flujo_servicio) se COLAPSAN en UN solo "Flujo" en la posición
+  // del grupo — paridad con Atención; nunca se pintan además como columnas sueltas (bug del doble pintado).
+  const flujoCols = React.useMemo(
+    () =>
+      (board?.columnas ?? [])
+        .filter((c) => c.tipo === "toggle" && (c.render as { group?: string } | null)?.group)
+        .sort((a, b) => a.orden - b.orden),
     [board],
   );
+  const columnas = React.useMemo(
+    () =>
+      (board?.columnas ?? [])
+        .filter(
+          (c) =>
+            c.clave !== "fd_acciones" &&
+            !(c.tipo === "toggle" && (c.render as { group?: string } | null)?.group),
+        )
+        .sort((a, b) => a.orden - b.orden),
+    [board],
+  );
+  // Lista de render con el Flujo insertado donde estaba el grupo (o al final si no hay toggles agrupados).
+  const colsRender = React.useMemo<({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[]>(() => {
+    const out: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[] = [];
+    let puesto = false;
+    for (const c of (board?.columnas ?? []).slice().sort((a, b) => a.orden - b.orden)) {
+      if (c.clave === "fd_acciones") continue;
+      if (c.tipo === "toggle" && (c.render as { group?: string } | null)?.group) {
+        if (!puesto) {
+          out.push({ kind: "flujo" });
+          puesto = true;
+        }
+        continue;
+      }
+      out.push({ kind: "col", col: c });
+    }
+    if (!puesto) out.push({ kind: "flujo" });
+    return out;
+  }, [board]);
 
   // Opciones de las columnas `select` editables (p. ej. DOSIS = productos del grupo del servicio,
   // optionsSource productos_grupo PR #137). Tenant-scoped; el "tablero" de opciones = clave del servicio.
@@ -431,17 +465,20 @@ export function FrontdeskBoard() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/60">
                   <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                    {columnas.map((c) => (
-                      <th key={c.clave} className="px-3 py-2 font-semibold">{tRoot(c.labelKey)}</th>
-                    ))}
-                    <th className="px-3 py-2 font-semibold">{t("flujo")}</th>
+                    {colsRender.map((item, i) =>
+                      item.kind === "flujo" ? (
+                        <th key={`flujo-${i}`} className="px-3 py-2 font-semibold">{t("flujo")}</th>
+                      ) : (
+                        <th key={item.col.clave} className="px-3 py-2 font-semibold">{tRoot(item.col.labelKey)}</th>
+                      ),
+                    )}
                     <th className="px-3 py-2 text-right font-semibold">{tRoot("fd.col.acciones")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {visibles.length === 0 && (
                     <tr>
-                      <td colSpan={columnas.length + 2} className="px-3 py-10 text-center text-muted-foreground">
+                      <td colSpan={colsRender.length + 1} className="px-3 py-10 text-center text-muted-foreground">
                         {t("sinFilas")}
                       </td>
                     </tr>
@@ -451,7 +488,8 @@ export function FrontdeskBoard() {
                       key={f.id}
                       fila={f}
                       sesion={sesiones.get(f.id)}
-                      columnas={columnas}
+                      colsRender={colsRender}
+                      flujoCols={flujoCols}
                       flujo={flujo}
                       estadoDe={estadoDe}
                       servicio={servicioActivo}
@@ -510,7 +548,8 @@ function KpiTile({
 function FilaSesion({
   fila,
   sesion,
-  columnas,
+  colsRender,
+  flujoCols,
   flujo,
   estadoDe,
   servicio,
@@ -524,7 +563,8 @@ function FilaSesion({
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
-  columnas: FrontdeskColumna[];
+  colsRender: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[];
+  flujoCols: FrontdeskColumna[];
   flujo: { clave: string; labelKey: string; color?: string | null }[];
   estadoDe: (clave: string) => { labelKey: string; color?: string | null } | undefined;
   servicio?: Servicio;
@@ -619,54 +659,75 @@ function FilaSesion({
     return <span>{v == null || v === "" ? "—" : String(v)}</span>;
   }
 
+  // Pasos del flujo: PREFERIR los toggles agrupados del BE (render.group + transition + valor=sello en la
+  // fila, PR paridad-Atención); fallback a estados∩transiciones + entidad unida (tableros sin toggles).
+  const pasos = flujoCols.length
+    ? flujoCols.map((c) => {
+        const r = (c.render ?? {}) as { transition?: string; labelKey?: string };
+        const trans = r.transition ?? c.clave;
+        return {
+          key: trans,
+          labelKey: r.labelKey ?? c.labelKey,
+          color: estadoDe(trans)?.color ?? null,
+          stamp: (fila[c.clave] as string | null) ?? null,
+        };
+      })
+    : flujo.map((p) => ({
+        key: p.clave,
+        labelKey: p.labelKey,
+        color: p.color ?? null,
+        stamp: sesion ? ((sesion[STAMP_FIELD[p.clave]] as string | null) ?? null) : null,
+      }));
+
+  const flujoCell = cancelada ? (
+    <span className="text-xs text-muted-foreground">—</span>
+  ) : (
+    <div className="flex items-center gap-1">
+      {pasos.map((paso, i) => {
+        const hecho = !!paso.stamp;
+        const previo = i === 0 || !!pasos[i - 1].stamp;
+        const siguiente = !hecho && previo;
+        return (
+          <React.Fragment key={paso.key}>
+            {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
+            {hecho ? (
+              <span
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                style={paso.color ? { backgroundColor: `${paso.color}22`, color: paso.color ?? undefined } : undefined}
+                title={tRoot(paso.labelKey)}
+              >
+                <HugeiconsIcon icon={Tick02Icon} className="size-3" />
+                {fmtHora(paso.stamp)}
+              </span>
+            ) : (
+              <Button
+                type="button"
+                variant={siguiente ? "outline" : "ghost"}
+                size="sm"
+                disabled={!siguiente || busy}
+                className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
+                onClick={() =>
+                  run(() => marcarTransicion(fila.id, paso.key.replace(/_/g, "-") as never, {}, centro))
+                }
+              >
+                {tRoot(paso.labelKey)}
+              </Button>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+
   return (
     <tr className={"hover:bg-muted/30 " + (cancelada ? "opacity-50" : "")}>
-      {columnas.map((c) => (
-        <td key={c.clave} className="px-3 py-2">{celda(c)}</td>
-      ))}
-      {/* Flujo Presente → En terapia → Asistido con sello de hora (BE sella; el FE muestra) */}
-      <td className="px-3 py-2">
-        {cancelada ? (
-          <span className="text-xs text-muted-foreground">—</span>
+      {colsRender.map((item, i) =>
+        item.kind === "flujo" ? (
+          <td key={`flujo-${i}`} className="px-3 py-2">{flujoCell}</td>
         ) : (
-          <div className="flex items-center gap-1">
-            {flujo.map((paso, i) => {
-              const stamp = sesion ? (sesion[STAMP_FIELD[paso.clave]] as string | null) : null;
-              const hecho = !!stamp;
-              const previo = i === 0 || !!(sesion && sesion[STAMP_FIELD[flujo[i - 1].clave]]);
-              const siguiente = !hecho && previo;
-              return (
-                <React.Fragment key={paso.clave}>
-                  {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
-                  {hecho ? (
-                    <span
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                      style={paso.color ? { backgroundColor: `${paso.color}22`, color: paso.color ?? undefined } : undefined}
-                      title={tRoot(paso.labelKey)}
-                    >
-                      <HugeiconsIcon icon={Tick02Icon} className="size-3" />
-                      {fmtHora(stamp)}
-                    </span>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant={siguiente ? "outline" : "ghost"}
-                      size="sm"
-                      disabled={!siguiente || busy}
-                      className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
-                      onClick={() =>
-                        run(() => marcarTransicion(fila.id, paso.clave.replace(/_/g, "-") as never, {}, centro))
-                      }
-                    >
-                      {tRoot(paso.labelKey)}
-                    </Button>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        )}
-      </td>
+          <td key={item.col.clave} className="px-3 py-2">{celda(item.col)}</td>
+        ),
+      )}
       <td className="px-3 py-2 text-right">
         <RowMenu
           disabled={busy}

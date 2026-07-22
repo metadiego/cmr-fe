@@ -1002,7 +1002,12 @@
       "estado": "Status",
       "sesiones": "Session",
       "tecnico": "Technician",
-      "acciones": "Actions"
+      "acciones": "Actions",
+      "record": "Record",
+      "aplicadas": "Applied",
+      "wa": "WA",
+      "sms": "SMS",
+      "en_terapia": "In therapy"
     }
   },
   "col": {
