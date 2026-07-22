@@ -105,7 +105,11 @@ export function FrontdeskBoard() {
   const [q, setQ] = React.useState("");
 
   // Catálogos data-driven: tabs de servicios + definición del vertical (estados con color, transiciones).
-  const servRes = useResource<Servicio[]>(() => getServicios(), []);
+  // Los servicios son POR CENTRO (activo por centro) → refetch al cambiar el selector, en el acto.
+  const servRes = useResource<Servicio[]>(
+    () => (gate.centro ? getServicios(gate.centro) : Promise.resolve([])),
+    [gate.centro],
+  );
   const servicios = React.useMemo(
     () =>
       (servRes.state.kind === "ok" ? servRes.state.data : [])
@@ -129,8 +133,9 @@ export function FrontdeskBoard() {
     return estados.filter((e) => trans.has(e.clave) && STAMP_FIELD[e.clave]);
   }, [def, estados]);
 
-  // Tab efectivo derivado (primer servicio por defecto) — sin efecto, sin renders en cascada.
-  const tabEfectivo = tab || servicios[0]?.clave || "";
+  // Tab efectivo derivado (primer servicio por defecto) — sin efecto, sin renders en cascada. Si el tab
+  // elegido ya no existe en este centro (servicio apagado ahí), cae al primero disponible.
+  const tabEfectivo = servicios.some((s) => s.clave === tab) ? tab : (servicios[0]?.clave ?? "");
   const servicioActivo = servicios.find((s) => s.clave === tabEfectivo);
 
   // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
