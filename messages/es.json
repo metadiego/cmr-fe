@@ -568,7 +568,7 @@
     "caja": "Caja",
     "consultas": "Consultas",
     "facturacion": "Facturación",
-    "frontdesk": "Servicios",
+    "frontdesk": "Frontdesk",
     "en_desarrollo": "En desarrollo",
     "por_desarrollar": "Por desarrollar",
     "cupos": "Cupos",
@@ -600,7 +600,6 @@
     "consumoInsumos": "Consumo de insumos",
     "columnasCitas": "Columnas de citas",
     "tableroCitas": "Tablero de citas",
-    "frontdesk": "Frontdesk",
     "productos": "Productos",
     "proveedores": "Proveedores",
     "presentaciones": "Presentaciones de proveedor",
@@ -614,7 +613,8 @@
     "configFactura": "Factura (encabezado/pie)",
     "devoluciones": "Devoluciones",
     "cajaConsultas": "Caja de consultas",
-    "cajaGeneral": "Caja general"
+    "cajaGeneral": "Caja general",
+    "gruposFacturacion": "Grupos de facturación"
   },
   "admin": {
     "title": "Administración",
@@ -1006,7 +1006,13 @@
     "histStaff": "Staff",
     "histSesion": "Sesión",
     "histAreas": "Áreas",
-    "histEstadoVal": { "asistido": "Asistido", "presente": "Presente", "en_terapia": "En terapia", "pendiente": "Pendiente", "cancelada": "Cancelada" },
+    "histEstadoVal": {
+      "asistido": "Asistido",
+      "presente": "Presente",
+      "en_terapia": "En terapia",
+      "pendiente": "Pendiente",
+      "cancelada": "Cancelada"
+    },
     "hasta": "Hasta (rango)",
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",
@@ -2016,5 +2022,30 @@
       "empty": "No hay facturas pendientes."
     },
     "applyOpening": "Aplicar"
+  },
+  "gruposFacturacion": {
+    "title": "Grupos de facturación",
+    "help": "Crea y edita grupos (con su división) y asigna productos a cada grupo.",
+    "new": "Nuevo grupo",
+    "newHelp": "Define la clave, la etiqueta i18n y la división del grupo.",
+    "create": "Crear",
+    "clave": "Clave",
+    "labelKey": "Clave i18n (labelKey)",
+    "division": "División",
+    "active": "Activo",
+    "group": "Grupo",
+    "products": "Productos",
+    "emptyGroups": "No hay grupos.",
+    "selectGroup": "Selecciona un grupo para editarlo y asignar productos.",
+    "saveGroup": "Guardar grupo",
+    "membership": "Productos del grupo",
+    "saveMembership": "Guardar productos",
+    "members": "En el grupo",
+    "available": "Disponibles",
+    "search": "Buscar producto…",
+    "created": "Grupo creado",
+    "updated": "Grupo actualizado",
+    "membershipSaved": "Productos actualizados",
+    "denied": "No tienes permiso para administrar grupos de facturación."
   }
 }

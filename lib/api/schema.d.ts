@@ -3484,10 +3484,44 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Grupos (plantillas de columnas) — catálogo admin (no es el filtro del personal). */
+        /** Grupos (catálogo admin) con nº de productos miembros (no es el filtro del personal). */
         get: operations["ColumnasFacturacionController_grupos_v1"];
         put?: never;
         post: operations["ColumnasFacturacionController_crearGrupo_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturacion/columnas/grupos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un grupo (labelKey/división/activo). Soft; nunca borra duro. */
+        put: operations["ColumnasFacturacionController_actualizarGrupo_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturacion/columnas/grupos/{id}/productos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reemplaza la membresía de PRODUCTOS del grupo (transfer-list del admin de grupos). */
+        put: operations["ColumnasFacturacionController_setProductosDeGrupo_v1"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7573,6 +7607,14 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        UpdateGrupoFacturacionDto: {
+            /** @description Clave i18n de la etiqueta. */
+            labelKey?: string;
+            /** @description División: consulta | general. */
+            division?: string;
+            /** @description Activo (false = deshabilitado, soft). */
+            activo?: boolean;
+        };
         GrupoFacturacionEntity: {
             clave: string;
             labelKey: string;
@@ -7583,6 +7625,10 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        GrupoProductosDto: {
+            /** @description IDs de productos que QUEDAN en el grupo; los que estaban y no vienen se desasignan. */
+            productoIds: string[];
         };
         ColumnaFacturacionEntity: {
             grupoClave: string;
@@ -7604,8 +7650,12 @@ export interface components {
             updatedAt: string;
         };
         CrearGrupoFacturacionDto: {
+            /** @description Clave única del grupo (suero, laser, …). */
             clave: string;
+            /** @description Clave i18n de la etiqueta (el FE la traduce). */
             labelKey: string;
+            /** @description División de facturación del grupo: consulta | general. Omitida = general (default de la entidad). */
+            division?: string;
         };
         CrearColumnaFacturacionDto: {
             grupoClave: string;
@@ -15079,7 +15129,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GrupoFacturacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -15104,6 +15154,54 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["GrupoFacturacionEntity"];
                 };
+            };
+        };
+    };
+    ColumnasFacturacionController_actualizarGrupo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGrupoFacturacionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrupoFacturacionEntity"];
+                };
+            };
+        };
+    };
+    ColumnasFacturacionController_setProductosDeGrupo_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrupoProductosDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
