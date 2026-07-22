@@ -28,4 +28,14 @@ de facturación anclado al servicio.
   servicio; elegir + asistir descarga la fracción del vial y fija `productoAplicadoId`.
 - Crear un producto-dosis nuevo en el grupo → aparece en el select SIN tocar código FE (data-driven).
 
+## Requisito de AUTOSERVICIO (dueño, 2026-07-22 — prioridad)
+La pieza `productos_grupo` debe ser **GENÉRICA**, no por servicio: el dueño creará él mismo servicios
+nuevos por dosis (GLP-1, BPC-157, Sermorelin, etc.) SIN ingeniero. Flujo objetivo, todo por UI:
+1. Crear el grupo de facturación (o reusar uno) y sus productos-DOSIS (catálogo).
+2. Crear el servicio anclado al grupo (ya se puede en el FE).
+3. → el select de DOSIS aparece SOLO en la pestaña del Frontdesk (optionsSource resuelve los productos
+   del grupo del servicio en runtime). Cero código por servicio nuevo.
+Referencia del legacy que se quiere superar: `dynamic_services.coditems` (1 código por servicio) — el
+grupo es el reemplazo correcto y ya está anclado desde el FE.
+
 **FE detenido en la parte de DOSIS hasta este contrato.** (norma: BE = handoff + parar)
