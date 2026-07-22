@@ -65,7 +65,7 @@ export function setProductosDeGrupo(
 export async function listTodosProductos(): Promise<Producto[]> {
   const out: Producto[] = [];
   let page = 1;
-  const limit = 200;
+  const limit = 100; // máximo permitido por el BE (PaginationQueryDto @Max(100))
   for (;;) {
     const { items, pagination } = await apiFetchPaged<Producto>(
       `/inventario/productos?incluirInactivos=false&page=${page}&limit=${limit}`,
