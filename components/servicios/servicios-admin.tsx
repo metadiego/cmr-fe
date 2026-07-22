@@ -69,8 +69,9 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
   const [centroSel, setCentroSel] = React.useState("");
   const centro = centroSel || centros[0]?.id || "";
 
+  // Config = ver TODOS (incl. apagados) para poder reactivarlos con 1 clic; apagar NO desaparece la fila.
   const { state, reload } = useResource<Servicio[]>(
-    () => (centro ? getServicios(centro) : Promise.resolve([])),
+    () => (centro ? getServicios(centro, { includeInactive: true }) : Promise.resolve([])),
     [centro],
   );
   const servicios = state.kind === "ok" ? state.data : [];

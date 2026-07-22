@@ -22,9 +22,14 @@ export async function getGruposFacturacion(centroId?: string): Promise<GrupoFact
 }
 
 // Los servicios son POR CENTRO (fila propia por clínica). centroId opcional = X-Tenant-ID explícito;
-// sin él aplica el centro activo (cookie).
-export async function getServicios(centroId?: string): Promise<Servicio[]> {
-  return asArray<Servicio>(await apiFetch(`/servicios`, {}, centroId));
+// sin él aplica el centro activo (cookie). includeInactive=true (config) trae TAMBIÉN los apagados para
+// poder reactivarlos con el switch — el Frontdesk usa el default (solo activos).
+export async function getServicios(
+  centroId?: string,
+  opts: { includeInactive?: boolean } = {},
+): Promise<Servicio[]> {
+  const qs = opts.includeInactive ? `?includeInactive=true` : "";
+  return asArray<Servicio>(await apiFetch(`/servicios${qs}`, {}, centroId));
 }
 
 // Crear un servicio = crear una PESTAÑA. El BE le pone las columnas por defecto → nace
