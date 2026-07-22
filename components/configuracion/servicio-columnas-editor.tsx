@@ -26,36 +26,66 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const TODOS = "__all__";
+
+// Un servicio agrupado por CLAVE con su fila (id) en cada centro donde existe activo.
+type ServicioMulti = {
+  clave: string;
+  nombre: string;
+  color: string | null;
+  filas: { centroId: string; id: string }[];
+};
+
 // Columnas POR SERVICIO (pedido del dueño): eliges el servicio PRIMERO y editas SUS columnas — nada de
-// aplicar a todos. Encender/apagar y reordenar guardan al instante vía POST /servicios/:id/columnas
-// (ComponerColumnaDto). El catálogo de columnas elegibles viene del vertical `servicios` (data-driven).
+// aplicar a todos los servicios. El selector de centro arranca en "Todos los centros": el cambio se aplica
+// a la fila del servicio en CADA centro (fan-out por API); si eliges un centro, solo a ese.
 export function ServicioColumnasEditor() {
   const t = useTranslations("configuracion.tableros");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
 
-  // Centro (los servicios y su composición son por centro) + servicio (obligatorio antes de tocar nada).
   const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const centros = React.useMemo(
     () => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []),
     [centrosRes.state],
   );
-  const [centroSel, setCentroSel] = React.useState("");
-  const centro = centroSel || centros[0]?.id || "";
+  const [centroSel, setCentroSel] = React.useState(TODOS);
+  const centrosKey = centros.map((c) => c.id).join(",");
 
-  const servRes = useResource<Servicio[]>(
-    () => (centro ? getServicios(centro) : Promise.resolve([])),
-    [centro],
-  );
-  const servicios = React.useMemo(
+  // Servicios de TODOS los centros (para agrupar por clave y poder abanicar el cambio).
+  const servAllRes = useResource<{ centroId: string; servicios: Servicio[] }[]>(
     () =>
-      (servRes.state.kind === "ok" ? servRes.state.data : [])
-        .filter((s) => s.activo !== false)
-        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre)),
-    [servRes.state],
+      centros.length
+        ? Promise.all(
+            centros.map((c) =>
+              getServicios(c.id)
+                .then((servicios) => ({ centroId: c.id, servicios }))
+                .catch(() => ({ centroId: c.id, servicios: [] as Servicio[] })),
+            ),
+          )
+        : Promise.resolve([]),
+    [centrosKey],
   );
+
+  const grupos = React.useMemo<ServicioMulti[]>(() => {
+    const all = servAllRes.state.kind === "ok" ? servAllRes.state.data : [];
+    const fuentes = centroSel === TODOS ? all : all.filter((x) => x.centroId === centroSel);
+    const map = new Map<string, ServicioMulti>();
+    for (const { centroId, servicios } of fuentes) {
+      for (const s of servicios) {
+        if (s.activo === false) continue;
+        const g = map.get(s.clave) ?? { clave: s.clave, nombre: s.nombre, color: s.color ?? null, filas: [] };
+        g.filas.push({ centroId, id: s.id });
+        map.set(s.clave, g);
+      }
+    }
+    return [...map.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [servAllRes.state, centroSel]);
+
   const [servicioSel, setServicioSel] = React.useState("");
-  const servicio = servicios.find((s) => s.id === servicioSel);
+  const sel = grupos.find((g) => g.clave === servicioSel);
+  // La vista lee las columnas de la PRIMERA fila (los centros comparten composición al editarse desde aquí).
+  const primera = sel?.filas[0];
 
   const catRes = useResource<ColumnaCatalogo[]>(() => getColumnasCatalogo("servicios"), []);
   const catalogo = React.useMemo(
@@ -63,8 +93,8 @@ export function ServicioColumnasEditor() {
     [catRes.state],
   );
   const colsRes = useResource<ServicioColumna[]>(
-    () => (servicio ? getServicioColumnas(servicio.id, centro) : Promise.resolve([])),
-    [servicio?.id, centro],
+    () => (primera ? getServicioColumnas(primera.id, primera.centroId) : Promise.resolve([])),
+    [primera?.id, primera?.centroId],
   );
   const activas = React.useMemo(
     () => (colsRes.state.kind === "ok" ? [...colsRes.state.data].sort((a, b) => a.orden - b.orden) : []),
@@ -74,33 +104,31 @@ export function ServicioColumnasEditor() {
   const idPorClave = React.useMemo(() => new Map(catalogo.map((c) => [c.clave, c.id])), [catalogo]);
 
   const [busy, setBusy] = React.useState(false);
-  async function componer(payload: Parameters<typeof componerServicioColumna>[1]) {
-    if (!servicio) return;
-    setBusy(true);
-    try {
-      await componerServicioColumna(servicio.id, payload, centro);
-      colsRes.reload();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
+
+  // Aplica un cambio de composición a la fila del servicio en CADA centro seleccionado (fan-out).
+  async function componerEnTodos(payload: Parameters<typeof componerServicioColumna>[1]) {
+    if (!sel) return;
+    const resultados = await Promise.allSettled(
+      sel.filas.map((f) => componerServicioColumna(f.id, payload, f.centroId)),
+    );
+    const fallos = resultados.filter((r) => r.status === "rejected");
+    if (fallos.length === resultados.length) throw (fallos[0] as PromiseRejectedResult).reason;
+    if (fallos.length > 0) toast.warning(t("colParcial", { n: fallos.length }));
   }
 
-  // Encender/apagar la columna EN ESTE SERVICIO.
   function toggle(clave: string, on: boolean) {
     const columnaId = idPorClave.get(clave);
-    if (!columnaId) {
-      toast.error(tc("error"));
-      return;
-    }
+    if (!columnaId || !sel) return;
     const actual = activaPorClave.get(clave);
-    void componer({ columnaId, visible: on, activo: on, orden: actual?.orden ?? activas.length + 1 });
+    setBusy(true);
+    componerEnTodos({ columnaId, visible: on, activo: on, orden: actual?.orden ?? activas.length + 1 })
+      .then(() => colsRes.reload())
+      .catch((err) => toastError(err, tRoot))
+      .finally(() => setBusy(false));
   }
 
-  // Reordenar dentro de las activas: intercambia `orden` con la vecina (2 POST).
   async function mover(clave: string, dir: -1 | 1) {
-    if (!servicio) return;
+    if (!sel) return;
     const i = activas.findIndex((c) => c.clave === clave);
     const j = i + dir;
     if (i < 0 || j < 0 || j >= activas.length) return;
@@ -111,8 +139,8 @@ export function ServicioColumnasEditor() {
     if (!aId || !bId) return;
     setBusy(true);
     try {
-      await componerServicioColumna(servicio.id, { columnaId: aId, orden: b.orden, visible: true, activo: true }, centro);
-      await componerServicioColumna(servicio.id, { columnaId: bId, orden: a.orden, visible: true, activo: true }, centro);
+      await componerEnTodos({ columnaId: aId, orden: b.orden, visible: true, activo: true });
+      await componerEnTodos({ columnaId: bId, orden: a.orden, visible: true, activo: true });
       colsRes.reload();
     } catch (err) {
       toastError(err, tRoot);
@@ -125,9 +153,10 @@ export function ServicioColumnasEditor() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {centros.length > 1 && (
-          <Select value={centro} onValueChange={(v) => { setCentroSel(v); setServicioSel(""); }}>
-            <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
+          <Select value={centroSel} onValueChange={(v) => { setCentroSel(v); setServicioSel(""); }}>
+            <SelectTrigger className="h-9 w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value={TODOS}>{t("colTodosCentros")}</SelectItem>
               {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -135,19 +164,25 @@ export function ServicioColumnasEditor() {
         <Select value={servicioSel} onValueChange={setServicioSel}>
           <SelectTrigger className="h-9 w-56"><SelectValue placeholder={t("colElegirServicio")} /></SelectTrigger>
           <SelectContent>
-            {servicios.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
+            {grupos.map((g) => (
+              <SelectItem key={g.clave} value={g.clave}>
                 <span className="inline-flex items-center gap-2">
-                  {s.color && <span className="size-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />}
-                  {s.nombre}
+                  {g.color && <span className="size-2 rounded-full" style={{ backgroundColor: g.color }} aria-hidden />}
+                  {g.nombre}
+                  {centroSel === TODOS && g.filas.length < centros.length && (
+                    <span className="text-xs text-muted-foreground">({g.filas.length}/{centros.length})</span>
+                  )}
                 </span>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {sel && centroSel === TODOS && (
+          <span className="text-xs text-muted-foreground">{t("colAplicaEn", { n: sel.filas.length })}</span>
+        )}
       </div>
 
-      {!servicio ? (
+      {!sel ? (
         <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
           {t("colElegirServicioHint")}
         </p>

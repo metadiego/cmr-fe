@@ -44,3 +44,17 @@ El editor de servicios queda limpio solo (data-driven), sin tocar FE.
 - ⚠️ `acciones`, `canal`, `centro` (binding `cita.*`) siguen listadas para `servicios` — sus ambitos
   declaran `servicios` pero su binding no resuelve para `sesion`. Confirmar si es intencional o quitarles
   el ámbito `servicios`.
+
+---
+
+## ✅ RESUELTO EL RESTO (BE, 2026-07-22 — verificado EN VIVO en prod)
+- **fd_enfermera / fd_paciente**: estaban `activo:false` en prod y el endpoint estricto YA las excluye —
+  la verificación FE corrió ANTES de que el deploy del PR #142 terminara (timing, no bug). Confirmado en
+  vivo: ya NO aparecen.
+- **acciones / canal / centro**: sus `ambitos` en prod sí declaraban `servicios` (data vieja) — NO era
+  intencional (binding `cita.*` no resuelve para `sesion`). Corregidas POR API → `["atencion","agenda"]`.
+- **Resultado en vivo** `GET /tablero/columnas?tablero=servicios` (prod): **14 columnas**, todas de
+  servicios: enfermera, paciente, record, telefono, fd_acciones, fd_dosis, fd_estado, fd_sesiones,
+  fd_tecnico, med_dosis, med_frecuencia, med_minutos, med_nivel, med_pulsos. Catálogo limpio.
+- Regla permanente ya en código (PR #142): estricto + solo activas; toda columna nueva debe declarar
+  `ambitos` (fd_dosis/med_* ya los llevan). "De una vez y para siempre": el filtro es del motor, no data-fix.
