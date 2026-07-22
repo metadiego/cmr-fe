@@ -110,6 +110,20 @@ export function FrontdeskBoard() {
     () => (gate.centro ? getServicios(gate.centro) : Promise.resolve([])),
     [gate.centro],
   );
+  // Self-heal de tabs: al volver a la pestaña del navegador (p. ej. después de crear un servicio en
+  // Configuración) la lista se refresca sola — sin exigir recarga manual. Igual que el board con SSE.
+  const refreshServicios = servRes.refresh;
+  React.useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refreshServicios();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [refreshServicios]);
   const servicios = React.useMemo(
     () =>
       (servRes.state.kind === "ok" ? servRes.state.data : [])
