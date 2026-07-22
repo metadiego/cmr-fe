@@ -205,6 +205,7 @@ function DetalleGrupo({
   onChanged: () => void;
 }) {
   const t = useTranslations("gruposFacturacion");
+  const [labelKey, setLabelKey] = React.useState(grupo.labelKey);
   const [division, setDivision] = React.useState(grupo.division);
   const [activo, setActivo] = React.useState(grupo.activo);
   const [savingGrupo, setSavingGrupo] = React.useState(false);
@@ -241,7 +242,11 @@ function DetalleGrupo({
   async function guardarGrupo() {
     setSavingGrupo(true);
     try {
-      await actualizarGrupoFacturacion(grupo.id, { division, activo });
+      await actualizarGrupoFacturacion(grupo.id, {
+        labelKey: labelKey.trim() || grupo.labelKey,
+        division,
+        activo,
+      });
       toast.success(t("updated"));
       onChanged();
     } catch (err) {
@@ -273,6 +278,17 @@ function DetalleGrupo({
           <span className="text-xs text-muted-foreground">{grupo.clave}</span>
         </div>
         <div className="flex flex-wrap items-end gap-4">
+          <div className="space-y-1">
+            <Label htmlFor="g-labelkey" className="text-xs text-muted-foreground">
+              {t("labelKey")}
+            </Label>
+            <Input
+              id="g-labelkey"
+              value={labelKey}
+              onChange={(e) => setLabelKey(e.target.value)}
+              className="h-9 w-56"
+            />
+          </div>
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">{t("division")}</Label>
             <Select value={division} onValueChange={setDivision}>
