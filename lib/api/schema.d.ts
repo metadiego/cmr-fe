@@ -3823,6 +3823,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/pacientes/{pacienteId}/historial": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de terapias de un paciente para un servicio (proyectado para el modal). */
+        get: operations["FrontdeskController_historialPaciente_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/sesiones/{id}/historial": {
         parameters: {
             query?: never;
@@ -6634,6 +6651,7 @@ export interface components {
             telefono?: string;
             /** Format: email */
             email?: string;
+            codigoLegacy?: string;
         };
         UpdatePersonalDto: {
             nombre?: string;
@@ -7770,6 +7788,7 @@ export interface components {
             paqueteId: string | null;
             tecnicoId: string | null;
             enfermeraId: string | null;
+            medicoId: string | null;
             fecha: string;
             /** @enum {string} */
             estado: "pendiente" | "cancelada" | "presente" | "en_terapia" | "asistido";
@@ -15646,6 +15665,8 @@ export interface operations {
     FrontdeskController_listarSesiones_v1: {
         parameters: {
             query: {
+                /** @description Filtra las sesiones de un paciente (historial). */
+                pacienteId?: string;
                 desde: string;
                 hasta: string;
                 servicioId?: string;
@@ -15708,6 +15729,28 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
                 };
+            };
+        };
+    };
+    FrontdeskController_historialPaciente_v1: {
+        parameters: {
+            query?: {
+                /** @description Acota el historial a un servicio (recomendado para el modal). */
+                servicioId?: string;
+            };
+            header?: never;
+            path: {
+                pacienteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

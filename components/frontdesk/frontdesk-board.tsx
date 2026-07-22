@@ -12,9 +12,11 @@ import {
   cancelarSesion,
   repararSesion,
   getDisponibilidadServicio,
+  getHistorialPaciente,
   getNurseStatusTipos,
   getNurseStatusActuales,
   setNurseStatus,
+  type HistorialSesion,
   type FrontdeskColumna,
   type FrontdeskFila,
   type FrontdeskTablero,
@@ -42,7 +44,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -584,6 +588,7 @@ function FilaSesion({
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
+  const [historialOpen, setHistorialOpen] = React.useState(false);
   const estadoActual = String(fila.fd_estado ?? sesion?.estado ?? "");
   const cancelada = estadoActual === "cancelada";
 
@@ -768,9 +773,22 @@ function FilaSesion({
           cancelada={cancelada}
           canReparar={canReparar}
           estados={estados}
+          conHistorial={!!sesion?.pacienteId}
+          onHistorial={() => setHistorialOpen(true)}
           onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
+        {sesion?.pacienteId && (
+          <HistorialModal
+            open={historialOpen}
+            onOpenChange={setHistorialOpen}
+            pacienteId={sesion.pacienteId}
+            pacienteNombre={String(fila.paciente ?? "")}
+            servicioId={servicio?.id}
+            servicioNombre={servicio?.nombre}
+            centro={centro}
+          />
+        )}
       </td>
     </tr>
   );
@@ -889,14 +907,18 @@ function RowMenu({
   disabled,
   cancelada,
   canReparar,
+  conHistorial,
   estados,
+  onHistorial,
   onCancelar,
   onReparar,
 }: {
   disabled: boolean;
   cancelada: boolean;
   canReparar: boolean;
+  conHistorial: boolean;
   estados: { clave: string; label: string }[];
+  onHistorial: () => void;
   onCancelar: (motivo: string) => void;
   onReparar: (payload: { motivo: string; estado?: string }) => void;
 }) {
@@ -907,8 +929,6 @@ function RowMenu({
   const [motivo, setMotivo] = React.useState("");
   const [estadoNuevo, setEstadoNuevo] = React.useState("");
 
-  if (cancelada && !canReparar) return null;
-
   return (
     <>
       <DropdownMenu>
@@ -918,6 +938,11 @@ function RowMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {conHistorial && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onHistorial(); }}>
+              {t("historial")}
+            </DropdownMenuItem>
+          )}
           {!cancelada && (
             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen(true); }}>
               {t("cancelar")}
@@ -1050,5 +1075,111 @@ function NurseStatusButton({ fecha, centro }: { fecha: string; centro?: string }
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// ————— Modal "Historial de terapias" del paciente por servicio (BE PR #148, paridad legacy) —————
+// Nivel mega-pro: tabla limpia con fecha, estado (badge), Sesión X/Y + Áreas, y staff. El BE lo proyecta
+// todo (migradas viejas pueden traer X/Y y staff en null → se muestra "—"). Se abre desde el menú Acciones.
+function HistorialModal({
+  open,
+  onOpenChange,
+  pacienteId,
+  pacienteNombre,
+  servicioId,
+  servicioNombre,
+  centro,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  pacienteId: string;
+  pacienteNombre: string;
+  servicioId?: string;
+  servicioNombre?: string;
+  centro?: string;
+}) {
+  const t = useTranslations("frontdesk");
+  const tc = useTranslations("common");
+  // Estado atado a la petición (key): evita setState síncrono en el efecto (solo se setea en el async).
+  const key = open ? `${pacienteId}|${servicioId ?? ""}|${centro ?? ""}` : "";
+  const [data, setData] = React.useState<{ key: string; rows: HistorialSesion[] } | null>(null);
+  const [failKey, setFailKey] = React.useState("");
+
+  React.useEffect(() => {
+    if (!open) return;
+    let cancel = false;
+    getHistorialPaciente(pacienteId, servicioId, centro)
+      .then((r) => {
+        if (!cancel) setData({ key, rows: r.slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))) });
+      })
+      .catch(() => {
+        if (!cancel) setFailKey(key);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [open, pacienteId, servicioId, centro, key]);
+
+  const rows = data && data.key === key ? data.rows : null;
+  const fallo = failKey === key && key !== "";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="border-b bg-muted/40 px-5 py-4">
+          <DialogTitle>{t("histTitle")}</DialogTitle>
+          <DialogDescription>
+            {pacienteNombre}{servicioNombre ? ` · ${servicioNombre}` : ""}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="max-h-[70vh] overflow-y-auto">
+          {rows == null && !fallo && <p className="px-5 py-10 text-center text-sm text-muted-foreground">{tc("loading")}</p>}
+          {fallo && <p className="px-5 py-10 text-center text-sm text-destructive">{tc("error")}</p>}
+          {rows != null && rows.length === 0 && <p className="px-5 py-10 text-center text-sm text-muted-foreground">{t("histEmpty")}</p>}
+          {rows != null && rows.length > 0 && (
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-muted/60">
+                <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <th className="px-5 py-2 font-semibold">{t("histFecha")}</th>
+                  <th className="px-3 py-2 font-semibold">{t("histEstado")}</th>
+                  <th className="px-3 py-2 font-semibold">{t("histDetalle")}</th>
+                  <th className="px-5 py-2 font-semibold">{t("histStaff")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {rows.map((r) => (
+                  <tr key={r.id} className="hover:bg-muted/30">
+                    <td className="whitespace-nowrap px-5 py-2.5 tabular-nums">{formatFechaSolo(r.fecha) || "—"}</td>
+                    <td className="px-3 py-2.5">
+                      <Badge
+                        variant="secondary"
+                        className={r.estado === "asistido" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : undefined}
+                      >
+                        {t.has(`histEstadoVal.${r.estado}`) ? t(`histEstadoVal.${r.estado}`) : (r.estado || "—")}
+                      </Badge>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className="font-medium">{r.servicioNombre ?? "—"}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {t("histSesion")}: {r.sesionNumero != null && r.sesionesTotales != null ? `${r.sesionNumero}/${r.sesionesTotales}` : "—"}
+                        {r.areas != null ? ` · ${t("histAreas")}: ${r.areas}` : ""}
+                      </span>
+                    </td>
+                    <td className="px-5 py-2.5">
+                      {r.staffNombre ? (
+                        <Badge variant="secondary" className="bg-sky-500/15 text-sky-700 dark:text-sky-300">{r.staffNombre}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -167,6 +167,30 @@ export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[
 export function getNurseStatusActuales(fecha: string, centroId?: string): Promise<NurseStatusActual[]> {
   return apiFetch<NurseStatusActual[]>(`/frontdesk/nurse-status?fecha=${fecha}`, {}, centroId);
 }
+// Historial de terapias del paciente por servicio (PR #148) — alimenta el modal "Historial de terapias".
+// Todo proyectado por el BE (X/Y, áreas, staff); el FE solo pinta. Migradas viejas → sesionNumero/staff null.
+export type HistorialSesion = {
+  id: string;
+  fecha: string;
+  estado: string;
+  servicioId: string;
+  servicioNombre: string | null;
+  sesionNumero: number | null;
+  sesionesTotales: number | null;
+  areas: number | null;
+  staffNombre: string | null;
+};
+export function getHistorialPaciente(
+  pacienteId: string,
+  servicioId?: string,
+  centroId?: string,
+): Promise<HistorialSesion[]> {
+  const qs = servicioId ? `?servicioId=${encodeURIComponent(servicioId)}` : "";
+  return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/historial${qs}`, {}, centroId).then((r) =>
+    Array.isArray(r) ? (r as HistorialSesion[]) : (((r as { items?: HistorialSesion[] })?.items) ?? []),
+  );
+}
+
 export function setNurseStatus(payload: SetNurseStatusPayload, centroId?: string): Promise<unknown> {
   return apiFetch(
     `/frontdesk/nurse-status`,
