@@ -7726,6 +7726,18 @@ export interface components {
             fijo?: boolean;
             activo?: boolean;
         };
+        SetNurseStatusDto: {
+            /**
+             * Format: uuid
+             * @description Personal (enfermera) al que se le fija el estatus.
+             */
+            personalId: string;
+            /**
+             * Format: uuid
+             * @description Tipo de estatus (nurse_status_tipos.id); null/omitido = reset (disponible).
+             */
+            statusTipoId?: string | null;
+        };
         NurseStatusLogEntity: {
             personalId: string;
             fecha: string;
@@ -7797,7 +7809,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sesionId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "en_terapia" | "asistido" | "datos" | "entrega_sin_saldo";
+            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "campo_editado" | "en_terapia" | "asistido" | "datos" | "entrega_sin_saldo";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -15515,7 +15527,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetNurseStatusDto"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -15570,6 +15586,8 @@ export interface operations {
             query: {
                 servicio: string;
                 fecha: string;
+                desde?: string;
+                hasta?: string;
             };
             header?: never;
             path?: never;

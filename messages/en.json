@@ -987,7 +987,12 @@
     "repararTitle": "Repair session (admin)",
     "estadoNuevo": "New status (optional)",
     "nurseTitle": "Nursing",
-    "nurseEmpty": "No statuses recorded today"
+    "nurseEmpty": "No statuses recorded today",
+    "nurseSinStatus": "No status",
+    "hasta": "Until (range)",
+    "rangoHint": "Date range (management): leave empty for a single day.",
+    "elegir": "Pick…",
+    "sinOpciones": "No options"
   },
   "fd": {
     "col": {
@@ -996,6 +1001,9 @@
       "tecnico": "Technician",
       "acciones": "Actions"
     }
+  },
+  "col": {
+    "dosis": "Dose"
   },
   "pagosFactura": {
     "title": "Payments",

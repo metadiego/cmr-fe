@@ -39,3 +39,30 @@ Referencia del legacy que se quiere superar: `dynamic_services.coditems` (1 cód
 grupo es el reemplazo correcto y ya está anclado desde el FE.
 
 **FE detenido en la parte de DOSIS hasta este contrato.** (norma: BE = handoff + parar)
+
+---
+
+## ✅ ENTREGADO POR EL BE (2026-07-22) — DOSIS desbloqueada de punta a punta
+
+1. **optionsSource `productos_grupo`** — EN PROD (PR #137). `GET /tableros/:clave/columnas/:col/opciones`
+   (el mismo endpoint de opciones data-driven) devuelve los productos ACTIVOS del grupo anclado al
+   servicio dueño del tablero. Sin grupo → `[]` sin error.
+2. **Elegir dosis → `productoAplicadoId`** — EN PROD (PR #138). `editarCelda` del dispatch ya soporta
+   entidad `sesion` (mismo mecanismo writeBinding que citas): el select DOSIS escribe
+   `sesion.productoAplicadoId` con evento append-only `campo_editado` (antes/después + actor).
+   Al asistir, `consumir()` descarga el producto elegido (vial abierto/fracciones incluidas).
+   `sesion.datos.<clave>` (mediciones) se enruta a guardarDatos con su validación min/max/escala.
+3. **Semillas por API (nunca SQL)** — HECHO en local y PROD vía POST /tablero/columnas + composición:
+   - `fd_dosis` (select productos_grupo, writeBinding sesion.productoAplicadoId) — creada y COMPUESTA en
+     TODOS los tabs de servicio (13 local / 26 prod).
+   - `med_minutos`, `med_nivel`, `med_pulsos`, `med_frecuencia`, `med_dosis` (tipo `medicion`) — creadas
+     en el CATÁLOGO (local+prod); la composición por tab la decide el dueño desde el constructor.
+   - **AUTOSERVICIO** (PR #139/#140): `fd_dosis` entró al set DEFAULT — un servicio nuevo anclado a un
+     grupo nace con el select de DOSIS funcionando, cero código (reemplaza dynamic_services.coditems).
+4. **F4 pendientes** — EN PROD (PR #141): `GET /frontdesk/tablero?desde=&hasta=` (rango 2 fechas, manda
+   sobre `fecha`); `POST /frontdesk/nurse-status` con `SetNurseStatusDto` tipado en Swagger
+   (personalId + statusTipoId?; null = reset).
+   **QUEDA PENDIENTE:** tab "Todos" (vista por paciente) — requiere diseño propio (spec corto) antes de BE.
+
+Aceptación cumplida: pestaña Vit C con select DOSIS por grupo; producto-dosis nuevo en el grupo aparece
+sin tocar código. FE puede continuar.

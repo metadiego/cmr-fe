@@ -66,8 +66,14 @@ export function getFrontdeskTablero(
   servicio: string,
   fecha: string,
   centroId?: string,
+  // Rango (2 fechas, solo gerente — PR #141): desde/hasta mandan sobre `fecha`.
+  rango?: { desde: string; hasta: string },
 ): Promise<FrontdeskTablero> {
   const sp = new URLSearchParams({ servicio, fecha });
+  if (rango) {
+    sp.set("desde", rango.desde);
+    sp.set("hasta", rango.hasta);
+  }
   return apiFetch<FrontdeskTablero>(`/frontdesk/tablero?${sp.toString()}`, {}, centroId);
 }
 
@@ -145,9 +151,10 @@ export function getDisponibilidadServicio(
   );
 }
 
-// Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey).
-// NOTA: el POST de set no tiene DTO en Swagger (gap BE) → panel read-only por ahora.
+// Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey) +
+// set tipado (PR #141: SetNurseStatusDto — statusTipoId null = reset).
 export type NurseStatusTipo = components["schemas"]["NurseStatusTipoEntity"];
+export type SetNurseStatusPayload = components["schemas"]["SetNurseStatusDto"];
 export type NurseStatusActual = {
   personalId: string;
   personalNombre?: string | null;
@@ -159,4 +166,11 @@ export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[
 }
 export function getNurseStatusActuales(fecha: string, centroId?: string): Promise<NurseStatusActual[]> {
   return apiFetch<NurseStatusActual[]>(`/frontdesk/nurse-status?fecha=${fecha}`, {}, centroId);
+}
+export function setNurseStatus(payload: SetNurseStatusPayload, centroId?: string): Promise<unknown> {
+  return apiFetch(
+    `/frontdesk/nurse-status`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
 }

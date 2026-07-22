@@ -987,7 +987,12 @@
     "repararTitle": "Reparar sesión (admin)",
     "estadoNuevo": "Nuevo estado (opcional)",
     "nurseTitle": "Enfermería",
-    "nurseEmpty": "Sin estatus registrados hoy"
+    "nurseEmpty": "Sin estatus registrados hoy",
+    "nurseSinStatus": "Sin estatus",
+    "hasta": "Hasta (rango)",
+    "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
+    "elegir": "Elegir…",
+    "sinOpciones": "Sin opciones"
   },
   "fd": {
     "col": {
@@ -996,6 +1001,9 @@
       "tecnico": "Técnico",
       "acciones": "Acciones"
     }
+  },
+  "col": {
+    "dosis": "Dosis"
   },
   "pagosFactura": {
     "title": "Pagos",

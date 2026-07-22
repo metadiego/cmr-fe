@@ -11,10 +11,10 @@ import {
   marcarTransicion,
   cancelarSesion,
   repararSesion,
-  guardarDatosSesion,
   getDisponibilidadServicio,
   getNurseStatusTipos,
   getNurseStatusActuales,
+  setNurseStatus,
   type FrontdeskColumna,
   type FrontdeskFila,
   type FrontdeskTablero,
@@ -24,7 +24,7 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
+import { getDefinicion, getOpciones, editarCelda, type TableroDefinicion, type Opcion } from "@/lib/api/tablero";
 import { buscarPaciente } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { useResource } from "@/hooks/use-resource";
@@ -100,6 +100,10 @@ export function FrontdeskBoard() {
   const gate = useCentroGate();
 
   const [fecha, setFecha] = React.useState(todayISO());
+  // Rango 2 fechas (PR #141) — SOLO gerente (RBAC cosmético; el BE es la autoridad). Vacío = un día.
+  const [hasta, setHasta] = React.useState("");
+  const puedeRango = can("frontdesk.rango");
+  const rango = puedeRango && hasta && hasta > fecha ? { desde: fecha, hasta } : undefined;
   const [tab, setTab] = React.useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = React.useState("");
   const [q, setQ] = React.useState("");
@@ -157,16 +161,16 @@ export function FrontdeskBoard() {
   const boardRes = useResource<FrontdeskTablero>(
     () =>
       gate.centro && tabEfectivo
-        ? getFrontdeskTablero(tabEfectivo, fecha, gate.centro)
+        ? getFrontdeskTablero(tabEfectivo, fecha, gate.centro, rango)
         : Promise.resolve({ columnas: [], filas: [] }),
-    [gate.centro, tabEfectivo, fecha],
+    [gate.centro, tabEfectivo, fecha, rango?.hasta],
   );
   const sesRes = useResource<Sesion[]>(
     () =>
       gate.centro && servicioActivo
-        ? listSesionesRango({ desde: fecha, hasta: fecha, servicioId: servicioActivo.id })
+        ? listSesionesRango({ desde: fecha, hasta: rango?.hasta ?? fecha, servicioId: servicioActivo.id })
         : Promise.resolve([]),
-    [gate.centro, servicioActivo?.id, fecha],
+    [gate.centro, servicioActivo?.id, fecha, rango?.hasta],
   );
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
   const sesiones = React.useMemo(
@@ -217,6 +221,27 @@ export function FrontdeskBoard() {
     () => (board?.columnas ?? []).filter((c) => c.clave !== "fd_acciones"),
     [board],
   );
+
+  // Opciones de las columnas `select` editables (p. ej. DOSIS = productos del grupo del servicio,
+  // optionsSource productos_grupo PR #137). Tenant-scoped; el "tablero" de opciones = clave del servicio.
+  const [optionsByCol, setOptionsByCol] = React.useState<Record<string, Opcion[]>>({});
+  React.useEffect(() => {
+    const selects = (board?.columnas ?? []).filter((c) => c.tipo === "select" && c.editable);
+    if (!selects.length || !tabEfectivo || !gate.centro) return;
+    let active = true;
+    Promise.all(
+      selects.map((c) =>
+        getOpciones(tabEfectivo, c.clave, gate.centro)
+          .then((ops) => [c.clave, ops] as const)
+          .catch(() => [c.clave, []] as const),
+      ),
+    ).then((pairs) => {
+      if (active) setOptionsByCol(Object.fromEntries(pairs));
+    });
+    return () => {
+      active = false;
+    };
+  }, [board, tabEfectivo, gate.centro]);
 
   // Filtro compuesto: búsqueda (texto de fila O pacienteId) → luego KPI de estado.
   const visibles = React.useMemo(() => {
@@ -269,6 +294,17 @@ export function FrontdeskBoard() {
             onChange={(e) => setFecha(e.target.value)}
             aria-label={t("fecha")}
           />
+          {puedeRango && (
+            <Input
+              type="date"
+              className="h-9 w-40"
+              value={hasta}
+              min={fecha}
+              onChange={(e) => setHasta(e.target.value)}
+              aria-label={t("hasta")}
+              title={t("rangoHint")}
+            />
+          )}
           {gate.puedeCambiar && gate.centro && (
             <Select value={gate.centro} onValueChange={gate.pick}>
               <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
@@ -419,6 +455,8 @@ export function FrontdeskBoard() {
                       flujo={flujo}
                       estadoDe={estadoDe}
                       servicio={servicioActivo}
+                      tablero={tabEfectivo}
+                      optionsByCol={optionsByCol}
                       centro={gate.centro}
                       sinSaldo={sinSaldoIds.has(f.id)}
                       canReparar={can("frontdesk.reparar")}
@@ -476,6 +514,8 @@ function FilaSesion({
   flujo,
   estadoDe,
   servicio,
+  tablero,
+  optionsByCol,
   centro,
   sinSaldo,
   canReparar,
@@ -488,6 +528,8 @@ function FilaSesion({
   flujo: { clave: string; labelKey: string; color?: string | null }[];
   estadoDe: (clave: string) => { labelKey: string; color?: string | null } | undefined;
   servicio?: Servicio;
+  tablero: string;
+  optionsByCol: Record<string, Opcion[]>;
   centro?: string;
   sinSaldo: boolean;
   canReparar: boolean;
@@ -539,13 +581,38 @@ function FilaSesion({
         />
       );
     }
+    // Select editable (p. ej. DOSIS): opciones data-driven del grupo del servicio; escribe vía
+    // editarCelda (writeBinding sesion.productoAplicadoId, evento auditable, PR #138).
+    if (c.tipo === "select" && c.editable) {
+      const ops = optionsByCol[c.clave] ?? [];
+      const actual = v == null ? "" : String(v);
+      const label = ops.find((o) => o.value === actual)?.label ?? (actual || undefined);
+      return (
+        <Select
+          value={actual || undefined}
+          disabled={busy || cancelada || ops.length === 0}
+          onValueChange={(valor) =>
+            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))
+          }
+        >
+          <SelectTrigger size="sm" className="h-8 w-40">
+            <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {ops.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
     if (c.tipo === "medicion" && c.render) {
       return (
         <MedicionCell
           col={c}
           sesion={sesion}
           disabled={busy || cancelada}
-          onSave={(datos) => run(() => guardarDatosSesion(fila.id, datos, centro))}
+          onSave={(valor) => run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))}
         />
       );
     }
@@ -677,7 +744,7 @@ function SesionesCell({
   );
 }
 
-// ————— Medición (PR #136): input numérico con unidad, valida el BE —————
+// ————— Medición (PR #136/#138): input numérico con unidad; escribe vía editarCelda (BE valida rango) —————
 function MedicionCell({
   col,
   sesion,
@@ -687,7 +754,7 @@ function MedicionCell({
   col: FrontdeskColumna;
   sesion?: Sesion;
   disabled: boolean;
-  onSave: (datos: Record<string, unknown>) => void;
+  onSave: (valor: number) => void;
 }) {
   const tRoot = useTranslations();
   const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
@@ -699,7 +766,7 @@ function MedicionCell({
     const n = Number(val);
     if (val === "" || Number.isNaN(n)) return;
     if (actual != null && Number(actual) === n) return;
-    onSave({ ...((sesion?.datos as Record<string, unknown>) ?? {}), [dato]: n });
+    onSave(n);
   };
 
   return (
@@ -816,20 +883,34 @@ function RowMenu({
   );
 }
 
-// ————— Estatus de enfermeras (triage/vitales) — panel read-only (POST sin DTO en Swagger: gap BE) —————
+// ————— Estatus de enfermeras (triage/vitales) — ver + CAMBIAR (PR #141: SetNurseStatusDto) —————
 function NurseStatusButton({ fecha, centro }: { fecha: string; centro?: string }) {
   const t = useTranslations("frontdesk");
+  const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
   const [tipos, setTipos] = React.useState<NurseStatusTipo[] | null>(null);
   const [actuales, setActuales] = React.useState<NurseStatusActual[] | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [gen, setGen] = React.useState(0); // bump para recargar tras un set
 
   React.useEffect(() => {
     if (!open || !centro) return;
     getNurseStatusTipos(centro).then(setTipos).catch(() => setTipos([]));
     getNurseStatusActuales(fecha, centro).then(setActuales).catch(() => setActuales([]));
-  }, [open, fecha, centro]);
+  }, [open, fecha, centro, gen]);
 
-  const tipoDe = (id: string | null) => tipos?.find((x) => x.id === id);
+  const NONE = "__none__";
+  async function cambiar(personalId: string, statusTipoId: string | null) {
+    setBusy(true);
+    try {
+      await setNurseStatus({ personalId, statusTipoId: statusTipoId ?? undefined } as never, centro);
+      setGen((g) => g + 1);
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -848,24 +929,29 @@ function NurseStatusButton({ fecha, centro }: { fecha: string; centro?: string }
           {actuales != null && actuales.length === 0 && (
             <p className="text-sm text-muted-foreground">{t("nurseEmpty")}</p>
           )}
-          {(actuales ?? []).map((a, i) => {
-            const tipo = tipoDe(a.statusTipoId);
-            return (
-              <div key={i} className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
-                <span className="truncate font-medium">{a.personalNombre ?? a.personalId.slice(0, 8)}</span>
-                {tipo ? (
-                  <Badge
-                    variant="secondary"
-                    style={tipo.color ? { backgroundColor: `${tipo.color}22`, color: tipo.color } : undefined}
-                  >
-                    {tipo.nombre}
-                  </Badge>
-                ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
-                )}
-              </div>
-            );
-          })}
+          {(actuales ?? []).map((a, i) => (
+            <div key={i} className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm">
+              <span className="min-w-0 truncate font-medium">{a.personalNombre ?? a.personalId.slice(0, 8)}</span>
+              <Select
+                value={a.statusTipoId ?? NONE}
+                disabled={busy}
+                onValueChange={(v) => cambiar(a.personalId, v === NONE ? null : v)}
+              >
+                <SelectTrigger size="sm" className="h-8 w-36"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>{t("nurseSinStatus")}</SelectItem>
+                  {(tipos ?? []).filter((x) => x.activo !== false).map((x) => (
+                    <SelectItem key={x.id} value={x.id}>
+                      <span className="inline-flex items-center gap-2">
+                        {x.color && <span className="size-2 rounded-full" style={{ backgroundColor: x.color }} aria-hidden />}
+                        {x.nombre}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
       </SheetContent>
     </Sheet>
