@@ -31,6 +31,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { MetaCrud, type Draft } from "@/components/configuracion/meta-crud";
 import { ColumnasTab } from "@/components/configuracion/columnas-tab";
+import { ServicioColumnasEditor } from "@/components/configuracion/servicio-columnas-editor";
 import { ServiciosAdmin } from "@/components/servicios/servicios-admin";
 import { Field } from "@/components/kit/form-dialog";
 import { Button } from "@/components/ui/button";
@@ -86,8 +87,18 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
         )}
 
         <TabsContent value="columnas">
-          <IntroCard title={t("introColumnasTitle")} body={t("introColumnasBody")} />
-          <ColumnasTab clave={clave} />
+          {esServicios ? (
+            <>
+              {/* Columnas POR SERVICIO: se elige el servicio primero; nada se aplica "a todos". */}
+              <IntroCard title={t("introColumnasServicioTitle")} body={t("introColumnasServicioBody")} />
+              <ServicioColumnasEditor />
+            </>
+          ) : (
+            <>
+              <IntroCard title={t("introColumnasTitle")} body={t("introColumnasBody")} />
+              <ColumnasTab clave={clave} />
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="avanzado">
@@ -96,6 +107,13 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           <Seccion titulo={t("tabGeneral")}>
             <GeneralTab registro={registro} onSaved={regRes.reload} />
           </Seccion>
+
+          {esServicios && (
+            <Seccion titulo={t("colDefaultsTitle")}>
+              <p className="mb-3 text-sm text-muted-foreground">{t("colDefaultsHint")}</p>
+              <ColumnasTab clave={clave} />
+            </Seccion>
+          )}
 
           <Seccion titulo={t("tabEstados")}>
           <MetaCrud<EstadoCitaCatalogo>

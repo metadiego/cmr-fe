@@ -14,6 +14,37 @@ function asArray<T>(res: unknown): T[] {
 export type CreateServicioPayload = components["schemas"]["CreateServicioDto"];
 export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"];
 
+// Columnas POR SERVICIO (cada pestaña del Frontdesk tiene las suyas — no se aplican a todos):
+// GET = columnas efectivas del servicio (resueltas); POST = componer una columna del catálogo en ESTE
+// servicio ({columnaId, orden, visible, fijo, activo}).
+export type ServicioColumna = {
+  clave: string;
+  labelKey: string;
+  tipo: string;
+  binding: string;
+  editable: boolean;
+  permiso: string | null;
+  render: Record<string, unknown> | null;
+  orden: number;
+  fijo: boolean;
+  color: string | null;
+};
+export type ComponerColumnaPayload = components["schemas"]["ComponerColumnaDto"];
+export async function getServicioColumnas(servicioId: string, centroId?: string): Promise<ServicioColumna[]> {
+  return asArray<ServicioColumna>(await apiFetch(`/servicios/${servicioId}/columnas`, {}, centroId));
+}
+export function componerServicioColumna(
+  servicioId: string,
+  payload: ComponerColumnaPayload,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(
+    `/servicios/${servicioId}/columnas`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
+
 // Grupos de facturación (ancla CORRECTA del servicio): servicio↔grupo 1:1; cualquier producto del grupo
 // cuenta para paquetes/disponibilidad y la DOSIS sale de los productos del grupo (no un producto fijo).
 export type GrupoFacturacion = components["schemas"]["GrupoFacturacionEntity"];
