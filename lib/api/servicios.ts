@@ -14,6 +14,13 @@ function asArray<T>(res: unknown): T[] {
 export type CreateServicioPayload = components["schemas"]["CreateServicioDto"];
 export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"];
 
+// Grupos de facturación (ancla CORRECTA del servicio): servicio↔grupo 1:1; cualquier producto del grupo
+// cuenta para paquetes/disponibilidad y la DOSIS sale de los productos del grupo (no un producto fijo).
+export type GrupoFacturacion = components["schemas"]["GrupoFacturacionEntity"];
+export async function getGruposFacturacion(centroId?: string): Promise<GrupoFacturacion[]> {
+  return asArray<GrupoFacturacion>(await apiFetch(`/facturacion/columnas/grupos`, {}, centroId));
+}
+
 // Los servicios son POR CENTRO (fila propia por clínica). centroId opcional = X-Tenant-ID explícito;
 // sin él aplica el centro activo (cookie).
 export async function getServicios(centroId?: string): Promise<Servicio[]> {

@@ -10,8 +10,10 @@ import {
   getServicios,
   createServicio,
   updateServicio,
+  getGruposFacturacion,
   type Servicio,
   type CreateServicioPayload,
+  type GrupoFacturacion,
 } from "@/lib/api/servicios";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
@@ -195,6 +197,7 @@ type FormState = {
   nombre: string;
   color: string;
   orden: string;
+  grupoFacturacionId: string;
   productoId: string;
   requiereTecnico: boolean;
   requiereEnfermera: boolean;
@@ -206,6 +209,7 @@ const EMPTY: FormState = {
   nombre: "",
   color: "#3b82f6",
   orden: "",
+  grupoFacturacionId: "",
   productoId: "",
   requiereTecnico: false,
   requiereEnfermera: false,
@@ -246,6 +250,7 @@ function ServicioForm({
             nombre: servicio.nombre,
             color: servicio.color ?? "#3b82f6",
             orden: servicio.orden != null ? String(servicio.orden) : "",
+            grupoFacturacionId: servicio.grupoFacturacionId ?? "",
             productoId: servicio.productoId ?? "",
             requiereTecnico: servicio.requiereTecnico,
             requiereEnfermera: servicio.requiereEnfermera,
@@ -274,6 +279,7 @@ function ServicioForm({
           nombre: form.nombre.trim(),
           color: form.color,
           orden: form.orden.trim() ? Number(form.orden) : undefined,
+          grupoFacturacionId: form.grupoFacturacionId || undefined,
           productoId: form.productoId || undefined,
           requiereTecnico: form.requiereTecnico,
           requiereEnfermera: form.requiereEnfermera,
@@ -289,6 +295,7 @@ function ServicioForm({
           nombre: form.nombre.trim(),
           color: form.color,
           orden: form.orden.trim() ? Number(form.orden) : undefined,
+          grupoFacturacionId: form.grupoFacturacionId || undefined,
           productoId: form.productoId || undefined,
           requiereTecnico: form.requiereTecnico,
           requiereEnfermera: form.requiereEnfermera,
@@ -355,7 +362,13 @@ function ServicioForm({
             />
           </Field>
 
-          {/* Eje 2 — producto vinculado (descarga por sesión) o servicio puro */}
+          {/* Ancla CORRECTA: GRUPO de facturación (servicio↔grupo). Los productos-dosis viven en el
+              grupo (Vit C 10…75); paquetes/disponibilidad y la DOSIS se resuelven por grupo. */}
+          <Field label={t("field.grupo")} hint={t("field.grupoHint")}>
+            <GrupoSelect value={form.grupoFacturacionId} onChange={(id) => set("grupoFacturacionId", id)} />
+          </Field>
+
+          {/* Legado (retro-compat): producto único 1:1 — solo si el servicio NO tiene grupo. */}
           <Field label={t("field.producto")} hint={t("field.productoHint")}>
             <ProductoPicker value={form.productoId} onChange={(id) => set("productoId", id)} placeholder={t("field.productoNone")} />
           </Field>
@@ -372,6 +385,26 @@ function ServicioForm({
         </SheetFooter>
       </SheetContent>
     </Sheet>
+  );
+}
+
+// Selector de grupo de facturación (catálogo del BE, data-driven). "" = sin grupo.
+function GrupoSelect({ value, onChange }: { value: string; onChange: (id: string) => void }) {
+  const t = useTranslations("servicios");
+  const tRoot = useTranslations();
+  const { state } = useResource<GrupoFacturacion[]>(() => getGruposFacturacion(), []);
+  const grupos = (state.kind === "ok" ? state.data : []).filter((g) => g.activo !== false);
+  const NONE = "__none__";
+  return (
+    <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
+      <SelectTrigger className="w-full"><SelectValue placeholder={t("field.grupoNone")} /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NONE}>{t("field.grupoNone")}</SelectItem>
+        {grupos.map((g) => (
+          <SelectItem key={g.id} value={g.id}>{tRoot(g.labelKey)}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 
