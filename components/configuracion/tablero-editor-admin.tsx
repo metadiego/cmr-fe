@@ -31,6 +31,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { MetaCrud, type Draft } from "@/components/configuracion/meta-crud";
 import { ColumnasTab } from "@/components/configuracion/columnas-tab";
+import { ServiciosAdmin } from "@/components/servicios/servicios-admin";
 import { Field } from "@/components/kit/form-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,8 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
 
   const regRes = useResource<TableroRegistro[]>(() => getTableros());
   const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === clave);
+  // El vertical de servicios (Frontdesk) gestiona sus PESTAÑAS (servicios) aquí mismo.
+  const esServicios = clave === "servicios";
   // Estados list feeds the transitions form (desdeEstados / aEstado options).
   const estadosRes = useResource<EstadoCitaCatalogo[]>(() => getEstadosAdmin(clave), [clave]);
   const estados = estadosRes.state.kind === "ok" ? estadosRes.state.data : [];
@@ -66,25 +69,35 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
         <Badge variant="secondary" className="font-mono">{clave}</Badge>
       </div>
 
-      <Tabs defaultValue="columnas">
+      {/* Simplificación (pedido del dueño 2026-07-22): 3 pestañas claras — lo que el negocio usa a diario
+          (Servicios/Columnas) al frente, y TODO lo técnico del motor en un solo "Avanzado". */}
+      <Tabs defaultValue={esServicios ? "servicios" : "columnas"}>
         <TabsList className="mb-4 flex flex-wrap">
-          <TabsTrigger value="general">{t("tabGeneral")}</TabsTrigger>
+          {esServicios && <TabsTrigger value="servicios">{t("tabServicios")}</TabsTrigger>}
           <TabsTrigger value="columnas">{t("tabColumnas")}</TabsTrigger>
-          <TabsTrigger value="estados">{t("tabEstados")}</TabsTrigger>
-          <TabsTrigger value="transiciones">{t("tabTransiciones")}</TabsTrigger>
-          <TabsTrigger value="subtipos">{t("tabSubtipos")}</TabsTrigger>
-          <TabsTrigger value="publicar">{t("tabPublicar")}</TabsTrigger>
+          <TabsTrigger value="avanzado">{t("tabAvanzado")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general">
-          <GeneralTab registro={registro} onSaved={regRes.reload} />
-        </TabsContent>
+        {esServicios && (
+          <TabsContent value="servicios">
+            <IntroCard title={t("introServiciosTitle")} body={t("introServiciosBody")} />
+            <ServiciosAdmin embedded />
+          </TabsContent>
+        )}
 
         <TabsContent value="columnas">
+          <IntroCard title={t("introColumnasTitle")} body={t("introColumnasBody")} />
           <ColumnasTab clave={clave} />
         </TabsContent>
 
-        <TabsContent value="estados">
+        <TabsContent value="avanzado">
+          <IntroCard warning title={t("introAvanzadoTitle")} body={t("introAvanzadoBody")} />
+
+          <Seccion titulo={t("tabGeneral")}>
+            <GeneralTab registro={registro} onSaved={regRes.reload} />
+          </Seccion>
+
+          <Seccion titulo={t("tabEstados")}>
           <MetaCrud<EstadoCitaCatalogo>
             title={t("tabEstados")}
             addLabel={t("addEstado")}
@@ -119,9 +132,9 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
               </>
             )}
           />
-        </TabsContent>
+          </Seccion>
 
-        <TabsContent value="transiciones">
+          <Seccion titulo={t("tabTransiciones")}>
           <MetaCrud<Transicion>
             title={t("tabTransiciones")}
             addLabel={t("addTransicion")}
@@ -168,9 +181,9 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
               </>
             )}
           />
-        </TabsContent>
+          </Seccion>
 
-        <TabsContent value="subtipos">
+          <Seccion titulo={t("tabSubtipos")}>
           <MetaCrud<SubTipo>
             title={t("tabSubtipos")}
             addLabel={t("addSubtipo")}
@@ -196,13 +209,39 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
               </>
             )}
           />
-        </TabsContent>
+          </Seccion>
 
-        <TabsContent value="publicar">
-          <PublicarTab clave={clave} labelKey={registro?.labelKey ?? `nav.${clave}`} icon={registro?.icon ?? null} />
+          <Seccion titulo={t("tabPublicar")}>
+            <PublicarTab clave={clave} labelKey={registro?.labelKey ?? `nav.${clave}`} icon={registro?.icon ?? null} />
+          </Seccion>
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+// Cabecera explicativa de cada pestaña: qué es y cómo se usa (pedido del dueño: claro para cualquiera).
+function IntroCard({ title, body, warning }: { title: string; body: string; warning?: boolean }) {
+  return (
+    <div
+      className={
+        "mb-4 rounded-xl border px-4 py-3 " +
+        (warning ? "border-amber-500/30 bg-amber-500/5" : "bg-muted/30")
+      }
+    >
+      <p className={"text-sm font-semibold " + (warning ? "text-amber-700 dark:text-amber-400" : "")}>{title}</p>
+      <p className="mt-0.5 text-sm text-muted-foreground">{body}</p>
+    </div>
+  );
+}
+
+// Sección apilada dentro de "Avanzado" (Estados/Transiciones/… dejan de ser pestañas sueltas).
+function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-8 rounded-xl border p-4">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{titulo}</h2>
+      {children}
+    </section>
   );
 }
 
