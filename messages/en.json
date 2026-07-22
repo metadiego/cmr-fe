@@ -578,6 +578,7 @@
     "consumoInsumos": "Supply consumption",
     "columnasCitas": "Appointment columns",
     "tableroCitas": "Appointments board",
+    "frontdesk": "Frontdesk",
     "productos": "Products",
     "proveedores": "Suppliers",
     "presentaciones": "Supplier presentations",
@@ -943,6 +944,43 @@
       "prescripcion": {
         "desc": "Show the prescription grid inside the attention modal."
       }
+    }
+  },
+  "frontdesk": {
+    "title": "Frontdesk",
+    "live": "Live",
+    "fecha": "Date",
+    "citar": "Book",
+    "todosTab": "All",
+    "todosTooltip": "Per-patient view — pending server support",
+    "buscar": "Search",
+    "buscarPlaceholder": "Name, record or phone…",
+    "dictado": "Dictate search by voice",
+    "todos": "All",
+    "flujo": "Flow",
+    "sinFilas": "No sessions for this day",
+    "sinSaldo": "No balance",
+    "entregaSinSaldo": "Delivery recorded WITHOUT patient balance",
+    "saldoTitle": "Patient balance",
+    "saldoError": "Could not load availability",
+    "sinPaquetes": "No pending packages",
+    "pendienteTotal": "Total pending",
+    "acciones": "Actions",
+    "cancelar": "Cancel session",
+    "cancelarTitle": "Cancel this session?",
+    "motivo": "Reason",
+    "reparar": "Repair",
+    "repararTitle": "Repair session (admin)",
+    "estadoNuevo": "New status (optional)",
+    "nurseTitle": "Nursing",
+    "nurseEmpty": "No statuses recorded today"
+  },
+  "fd": {
+    "col": {
+      "estado": "Status",
+      "sesiones": "Session",
+      "tecnico": "Technician",
+      "acciones": "Actions"
     }
   },
   "pagosFactura": {
@@ -1600,6 +1638,13 @@
   },
   "servicios": {
     "title": "Services",
+    "estado": {
+      "pendiente": "Pending",
+      "presente": "Present",
+      "en_terapia": "In therapy",
+      "asistido": "Attended",
+      "cancelada": "Cancelled"
+    },
     "help": "Each service is a tab on the frontdesk board. Link a product so every session discounts stock; leave it without a product for a pure service (counts sessions only, e.g. Shock Wave). On create, the tab is born ready.",
     "new": "New service",
     "empty": "No services",

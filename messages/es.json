@@ -578,6 +578,7 @@
     "consumoInsumos": "Consumo de insumos",
     "columnasCitas": "Columnas de citas",
     "tableroCitas": "Tablero de citas",
+    "frontdesk": "Frontdesk",
     "productos": "Productos",
     "proveedores": "Proveedores",
     "presentaciones": "Presentaciones de proveedor",
@@ -943,6 +944,43 @@
       "prescripcion": {
         "desc": "Muestra la grilla de prescripción dentro del modal de atención."
       }
+    }
+  },
+  "frontdesk": {
+    "title": "Frontdesk",
+    "live": "En vivo",
+    "fecha": "Fecha",
+    "citar": "Citar",
+    "todosTab": "Todos",
+    "todosTooltip": "Vista por paciente — pendiente de soporte del servidor",
+    "buscar": "Buscar",
+    "buscarPlaceholder": "Nombre, record o teléfono…",
+    "dictado": "Dictar búsqueda por voz",
+    "todos": "Todos",
+    "flujo": "Flujo",
+    "sinFilas": "Sin sesiones para este día",
+    "sinSaldo": "Sin saldo",
+    "entregaSinSaldo": "Entrega registrada SIN saldo del paciente",
+    "saldoTitle": "Saldo del paciente",
+    "saldoError": "No se pudo cargar la disponibilidad",
+    "sinPaquetes": "Sin paquetes pendientes",
+    "pendienteTotal": "Pendiente total",
+    "acciones": "Acciones",
+    "cancelar": "Cancelar sesión",
+    "cancelarTitle": "¿Cancelar esta sesión?",
+    "motivo": "Motivo",
+    "reparar": "Reparar",
+    "repararTitle": "Reparar sesión (admin)",
+    "estadoNuevo": "Nuevo estado (opcional)",
+    "nurseTitle": "Enfermería",
+    "nurseEmpty": "Sin estatus registrados hoy"
+  },
+  "fd": {
+    "col": {
+      "estado": "Estado",
+      "sesiones": "Sesión",
+      "tecnico": "Técnico",
+      "acciones": "Acciones"
     }
   },
   "pagosFactura": {
@@ -1600,6 +1638,13 @@
   },
   "servicios": {
     "title": "Servicios",
+    "estado": {
+      "pendiente": "Pendiente",
+      "presente": "Presente",
+      "en_terapia": "En terapia",
+      "asistido": "Asistido",
+      "cancelada": "Cancelada"
+    },
     "help": "Cada servicio es una pestaña del tablero de frontdesk. Vincula un producto para que cada sesión descuente stock; déjalo sin producto para un servicio puro (solo cuenta sesiones, p. ej. Shock Wave). Al crear, la pestaña nace lista.",
     "new": "Nuevo servicio",
     "empty": "Sin servicios",

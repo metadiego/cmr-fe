@@ -3753,6 +3753,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/servicios/{servicioId}/disponibilidad": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Disponibilidad del paciente para un servicio
+         * @description Paquetes pendientes del paciente resueltos por el GRUPO de facturación anclado al servicio (servicio↔grupo 1:1; cualquier producto del grupo cuenta). Sin grupo, cae al productoId directo (retro-compat); sin ninguno → vacío.
+         */
+        get: operations["FrontdeskController_disponibilidadServicio_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/stream": {
         parameters: {
             query?: never;
@@ -6885,7 +6905,7 @@ export interface components {
             clave: string;
             labelKey: string;
             /** @enum {string} */
-            tipo: "accion" | "fecha" | "hora" | "texto" | "select" | "toggle" | "badge" | "derivado";
+            tipo: "accion" | "fecha" | "hora" | "texto" | "select" | "toggle" | "badge" | "derivado" | "medicion";
             binding: string;
             editable: boolean;
             permiso: string | null;
@@ -6928,7 +6948,7 @@ export interface components {
             clave: string;
             labelKey: string;
             /** @enum {string} */
-            tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado";
+            tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado" | "medicion";
             binding: string;
             editable?: boolean;
             permiso?: string;
@@ -6940,7 +6960,7 @@ export interface components {
             render?: components["schemas"]["ColumnaRenderDto"];
             labelKey?: string;
             /** @enum {string} */
-            tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado";
+            tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado" | "medicion";
             binding?: string;
             editable?: boolean;
             permiso?: string;
@@ -7217,6 +7237,8 @@ export interface components {
         FacturaEntity: {
             numero: string | null;
             serie: string | null;
+            numeroLegacy: string | null;
+            origenLegacy: string | null;
             pacienteId: string;
             facturarANombre: string | null;
             facturarADocId: string | null;
@@ -7649,6 +7671,7 @@ export interface components {
             color: string | null;
             icon: string | null;
             orden: number;
+            grupoFacturacionId: string | null;
             productoId: string | null;
             codigo: string | null;
             requiereTecnico: boolean;
@@ -7670,6 +7693,8 @@ export interface components {
             icon?: string;
             orden?: number;
             /** Format: uuid */
+            grupoFacturacionId?: string;
+            /** Format: uuid */
             productoId?: string;
             codigo?: string;
             requiereTecnico?: boolean;
@@ -7682,6 +7707,8 @@ export interface components {
             color?: string;
             icon?: string;
             orden?: number;
+            /** Format: uuid */
+            grupoFacturacionId?: string;
             /** Format: uuid */
             productoId?: string;
             codigo?: string;
@@ -7770,7 +7797,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sesionId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "en_terapia" | "asistido" | "datos";
+            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "en_terapia" | "asistido" | "datos" | "entrega_sin_saldo";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -13983,6 +14010,9 @@ export interface operations {
                 estado?: string;
                 pacienteId?: string;
                 contexto?: string;
+                desde?: string;
+                hasta?: string;
+                fecha?: string;
             };
             header?: never;
             path?: never;
@@ -15543,6 +15573,27 @@ export interface operations {
             };
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FrontdeskController_disponibilidadServicio_v1: {
+        parameters: {
+            query: {
+                pacienteId: string;
+            };
+            header?: never;
+            path: {
+                servicioId: string;
+            };
             cookie?: never;
         };
         requestBody?: never;

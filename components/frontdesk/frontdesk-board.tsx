@@ -1,0 +1,854 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
+import { toast } from "sonner";
+
+import {
+  getFrontdeskTablero,
+  listSesionesRango,
+  marcarTransicion,
+  cancelarSesion,
+  repararSesion,
+  guardarDatosSesion,
+  getDisponibilidadServicio,
+  getNurseStatusTipos,
+  getNurseStatusActuales,
+  type FrontdeskColumna,
+  type FrontdeskFila,
+  type FrontdeskTablero,
+  type Sesion,
+  type DisponibilidadServicio,
+  type NurseStatusTipo,
+  type NurseStatusActual,
+} from "@/lib/api/frontdesk";
+import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
+import { buscarPaciente } from "@/lib/api/facturas";
+import { coincide } from "@/lib/frontdesk/search";
+import { useResource } from "@/hooks/use-resource";
+import { useCentroGate } from "@/hooks/use-centro-gate";
+import { useCitaStream } from "@/hooks/use-cita-stream";
+import { useCan } from "@/hooks/use-can";
+import { useDictado } from "@/hooks/use-dictado";
+import { toastError } from "@/lib/api/errors";
+import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Mic01Icon,
+  MicOff01Icon,
+  Search01Icon,
+  StethoscopeIcon,
+  MoreHorizontalIcon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+function fmtHora(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+// Sello de hora por estado del flujo — mapeo del contrato del BE (FrontdeskSesionEntity), único punto.
+const STAMP_FIELD: Record<string, keyof Sesion> = {
+  presente: "presenteEn",
+  en_terapia: "terapiaInEn",
+  asistido: "asistidoEn",
+};
+
+// ————————————————————————————————————————————————————————————————————————————
+// Frontdesk del día (F4): tabs por servicio (data-driven /servicios) + KPIs-filtro + tabla dinámica
+// (columnas del BE) con flujo Presente→En terapia→Asistido con sello de hora, búsqueda con dictado,
+// disponibilidad por paciente, mediciones, SSE en vivo y reparación admin. docs/plans/fe-frontdesk-dia.md
+// ————————————————————————————————————————————————————————————————————————————
+export function FrontdeskBoard() {
+  const t = useTranslations("frontdesk");
+  const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  const locale = useLocale();
+  const { can } = useCan();
+  const gate = useCentroGate();
+
+  const [fecha, setFecha] = React.useState(todayISO());
+  const [tab, setTab] = React.useState<string>("");
+  const [estadoFiltro, setEstadoFiltro] = React.useState("");
+  const [q, setQ] = React.useState("");
+
+  // Catálogos data-driven: tabs de servicios + definición del vertical (estados con color, transiciones).
+  const servRes = useResource<Servicio[]>(() => getServicios(), []);
+  const servicios = React.useMemo(
+    () =>
+      (servRes.state.kind === "ok" ? servRes.state.data : [])
+        .filter((s) => s.activo !== false)
+        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre)),
+    [servRes.state],
+  );
+  const defRes = useResource<TableroDefinicion>(
+    () => (gate.centro ? getDefinicion("servicios", gate.centro) : Promise.resolve({ estados: [], transiciones: [], columnas: [], subTipos: [] } as unknown as TableroDefinicion)),
+    [gate.centro],
+  );
+  const def = defRes.state.kind === "ok" ? defRes.state.data : null;
+  const estados = React.useMemo(() => def?.estados ?? [], [def]);
+  const estadoDe = React.useCallback(
+    (clave: string) => estados.find((e) => e.clave === clave),
+    [estados],
+  );
+  // Pasos del flujo = estados (en su orden) que tienen transición homónima (presente/en_terapia/asistido).
+  const flujo = React.useMemo(() => {
+    const trans = new Set((def?.transiciones ?? []).map((x) => x.clave));
+    return estados.filter((e) => trans.has(e.clave) && STAMP_FIELD[e.clave]);
+  }, [def, estados]);
+
+  // Tab efectivo derivado (primer servicio por defecto) — sin efecto, sin renders en cascada.
+  const tabEfectivo = tab || servicios[0]?.clave || "";
+  const servicioActivo = servicios.find((s) => s.clave === tabEfectivo);
+
+  // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
+  // pacienteId, datos) unidas por id. El FE solo une; no recalcula.
+  const boardRes = useResource<FrontdeskTablero>(
+    () =>
+      gate.centro && tabEfectivo
+        ? getFrontdeskTablero(tabEfectivo, fecha, gate.centro)
+        : Promise.resolve({ columnas: [], filas: [] }),
+    [gate.centro, tabEfectivo, fecha],
+  );
+  const sesRes = useResource<Sesion[]>(
+    () =>
+      gate.centro && servicioActivo
+        ? listSesionesRango({ desde: fecha, hasta: fecha, servicioId: servicioActivo.id })
+        : Promise.resolve([]),
+    [gate.centro, servicioActivo?.id, fecha],
+  );
+  const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
+  const sesiones = React.useMemo(
+    () => new Map((sesRes.state.kind === "ok" ? sesRes.state.data : []).map((s) => [s.id, s])),
+    [sesRes.state],
+  );
+  const refetch = React.useCallback(() => {
+    boardRes.refresh();
+    sesRes.refresh();
+  }, [boardRes, sesRes]);
+
+  // En vivo (bus único /tablero/stream, entidad sesion). entrega_sin_saldo → alerta roja persistente.
+  const [sinSaldoIds, setSinSaldoIds] = React.useState<Set<string>>(new Set());
+  const { live } = useCitaStream({
+    centroId: gate.centro ?? null,
+    entidad: "sesion",
+    enabled: !!gate.centro,
+    onInvalidate: refetch,
+    onEvent: (e) => {
+      if (String(e.accion ?? "").includes("sin_saldo")) {
+        setSinSaldoIds((prev) => new Set(prev).add(e.id));
+        toast.error(t("entregaSinSaldo"));
+      }
+    },
+  });
+
+  // Búsqueda nombre/record/tel: nombre contra los textos de la fila; record/tel vía buscar-paciente
+  // (server-side) → set de pacienteIds que se cruza con la sesión unida. Debounced.
+  const [pacienteIds, setPacienteIds] = React.useState<Set<string> | null>(null);
+  React.useEffect(() => {
+    const query = q.trim();
+    const centro = gate.centro;
+    // Todo el setState va DENTRO del timeout (callback async) — nunca síncrono en el cuerpo del efecto.
+    const h = setTimeout(() => {
+      if (query.length < 2 || !centro) {
+        setPacienteIds(null);
+        return;
+      }
+      buscarPaciente(query, centro)
+        .then((r) => setPacienteIds(new Set(r.map((p) => p.id))))
+        .catch(() => setPacienteIds(null));
+    }, 300);
+    return () => clearTimeout(h);
+  }, [q, gate.centro]);
+  const dictado = useDictado(locale, (texto) => setQ(texto));
+
+  const columnas = React.useMemo(
+    () => (board?.columnas ?? []).filter((c) => c.clave !== "fd_acciones"),
+    [board],
+  );
+
+  // Filtro compuesto: búsqueda (texto de fila O pacienteId) → luego KPI de estado.
+  const visibles = React.useMemo(() => {
+    const filas = board?.filas ?? [];
+    const conBusqueda = filas.filter((f) => {
+      const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
+      const porTexto = coincide(textos, q);
+      const ses = sesiones.get(f.id);
+      const porPaciente = !!pacienteIds && !!ses && pacienteIds.has(String(ses.pacienteId));
+      return q.trim().length >= 2 ? porTexto || porPaciente : porTexto;
+    });
+    return estadoFiltro
+      ? conBusqueda.filter((f) => String(f.fd_estado ?? "") === estadoFiltro)
+      : conBusqueda;
+  }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro]);
+
+  // KPIs sobre el set buscado (sin el filtro de estado, para que los conteos guíen).
+  const kpis = React.useMemo(() => {
+    const filas = board?.filas ?? [];
+    const counts = new Map<string, number>();
+    for (const f of filas) {
+      const e = String(f.fd_estado ?? "");
+      counts.set(e, (counts.get(e) ?? 0) + 1);
+    }
+    return { counts, total: filas.length };
+  }, [board]);
+
+  const cargando = boardRes.state.kind === "loading" || defRes.state.kind === "loading";
+
+  return (
+    <div className="w-full px-6 py-6">
+      {/* Header */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
+        {live && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            </span>
+            {t("live")}
+          </span>
+        )}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <NurseStatusButton fecha={fecha} centro={gate.centro} />
+          <Input
+            type="date"
+            className="h-9 w-40"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+            aria-label={t("fecha")}
+          />
+          {gate.puedeCambiar && gate.centro && (
+            <Select value={gate.centro} onValueChange={gate.pick}>
+              <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {gate.centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {can("citas.create") && (
+            <Button size="sm" asChild>
+              <Link href="/citas?tab=servicios">{t("citar")}</Link>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {gate.cargando ? (
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+      ) : gate.sinCentro ? (
+        <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
+      ) : gate.necesitaPicker ? (
+        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+      ) : (
+        <>
+          {/* Tabs por servicio (color del dato) + "Todos" (GAP BE: vista por paciente) */}
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              disabled
+              title={t("todosTooltip")}
+              className="cursor-not-allowed rounded-full border border-dashed px-3 py-1.5 text-sm text-muted-foreground opacity-60"
+            >
+              {t("todosTab")}
+            </button>
+            {servicios.map((s) => {
+              const activo = s.clave === tabEfectivo;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => { setTab(s.clave); setEstadoFiltro(""); }}
+                  className={
+                    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors " +
+                    (activo
+                      ? "border-transparent bg-primary text-primary-foreground shadow-sm"
+                      : "bg-background text-foreground hover:bg-muted")
+                  }
+                >
+                  {s.color && (
+                    <span
+                      className="size-2 shrink-0 rounded-full"
+                      style={{ backgroundColor: s.color }}
+                      aria-hidden
+                    />
+                  )}
+                  {s.nombre}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Búsqueda con dictado */}
+          <div className="mb-4 flex items-center gap-2">
+            <div className="relative w-full max-w-md">
+              <HugeiconsIcon icon={Search01Icon} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={t("buscarPlaceholder")}
+                className="h-9 pl-8 pr-9"
+                aria-label={t("buscar")}
+              />
+              {dictado.soportado && (
+                <button
+                  type="button"
+                  onClick={dictado.toggle}
+                  aria-label={t("dictado")}
+                  className={
+                    "absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors " +
+                    (dictado.escuchando
+                      ? "bg-destructive/15 text-destructive animate-pulse"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground")
+                  }
+                >
+                  <HugeiconsIcon icon={dictado.escuchando ? MicOff01Icon : Mic01Icon} className="size-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* KPIs = filtros */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            <KpiTile
+              label={t("todos")}
+              count={kpis.total}
+              active={estadoFiltro === ""}
+              onClick={() => setEstadoFiltro("")}
+            />
+            {estados
+              .filter((e) => (kpis.counts.get(e.clave) ?? 0) > 0)
+              .map((e) => (
+                <KpiTile
+                  key={e.clave}
+                  label={tRoot(e.labelKey)}
+                  count={kpis.counts.get(e.clave) ?? 0}
+                  color={e.color}
+                  active={estadoFiltro === e.clave}
+                  onClick={() => setEstadoFiltro(estadoFiltro === e.clave ? "" : e.clave)}
+                />
+              ))}
+          </div>
+
+          {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
+          {boardRes.state.kind === "fail" && (
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {boardRes.state.message}
+            </p>
+          )}
+
+          {board && !cargando && (
+            <div className="overflow-x-auto rounded-xl border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/60">
+                  <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                    {columnas.map((c) => (
+                      <th key={c.clave} className="px-3 py-2 font-semibold">{tRoot(c.labelKey)}</th>
+                    ))}
+                    <th className="px-3 py-2 font-semibold">{t("flujo")}</th>
+                    <th className="px-3 py-2 text-right font-semibold">{tRoot("fd.col.acciones")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {visibles.length === 0 && (
+                    <tr>
+                      <td colSpan={columnas.length + 2} className="px-3 py-10 text-center text-muted-foreground">
+                        {t("sinFilas")}
+                      </td>
+                    </tr>
+                  )}
+                  {visibles.map((f) => (
+                    <FilaSesion
+                      key={f.id}
+                      fila={f}
+                      sesion={sesiones.get(f.id)}
+                      columnas={columnas}
+                      flujo={flujo}
+                      estadoDe={estadoDe}
+                      servicio={servicioActivo}
+                      centro={gate.centro}
+                      sinSaldo={sinSaldoIds.has(f.id)}
+                      canReparar={can("frontdesk.reparar")}
+                      estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
+                      onChanged={refetch}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ————— KPI tile (stat-card filtro, casa: KPIs=filtros) —————
+function KpiTile({
+  label,
+  count,
+  color,
+  active,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  color?: string | null;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        "flex min-w-24 flex-col items-start rounded-xl border px-3 py-2 text-left transition-all " +
+        (active ? "border-primary ring-1 ring-primary/40 bg-primary/5" : "hover:bg-muted/50")
+      }
+    >
+      <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        {color && <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />}
+        {label}
+      </span>
+      <span className="text-xl font-bold tabular-nums">{count}</span>
+    </button>
+  );
+}
+
+// ————— Fila: celdas dinámicas + flujo con sello + acciones —————
+function FilaSesion({
+  fila,
+  sesion,
+  columnas,
+  flujo,
+  estadoDe,
+  servicio,
+  centro,
+  sinSaldo,
+  canReparar,
+  estados,
+  onChanged,
+}: {
+  fila: FrontdeskFila;
+  sesion?: Sesion;
+  columnas: FrontdeskColumna[];
+  flujo: { clave: string; labelKey: string; color?: string | null }[];
+  estadoDe: (clave: string) => { labelKey: string; color?: string | null } | undefined;
+  servicio?: Servicio;
+  centro?: string;
+  sinSaldo: boolean;
+  canReparar: boolean;
+  estados: { clave: string; label: string }[];
+  onChanged: () => void;
+}) {
+  const t = useTranslations("frontdesk");
+  const tRoot = useTranslations();
+  const [busy, setBusy] = React.useState(false);
+  const estadoActual = String(fila.fd_estado ?? sesion?.estado ?? "");
+  const cancelada = estadoActual === "cancelada";
+
+  async function run(fn: () => Promise<unknown>) {
+    setBusy(true);
+    try {
+      await fn();
+      onChanged();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function celda(c: FrontdeskColumna) {
+    const v = fila[c.clave];
+    if (c.clave === "fd_estado") {
+      const e = estadoDe(String(v ?? ""));
+      return (
+        <span className="inline-flex items-center gap-1.5">
+          <Badge
+            variant="secondary"
+            className="gap-1.5 font-medium"
+            style={e?.color ? { backgroundColor: `${e.color}22`, color: e.color } : undefined}
+          >
+            {e ? tRoot(e.labelKey) : String(v ?? "—")}
+          </Badge>
+          {sinSaldo && <Badge variant="destructive" className="text-[10px]">{t("sinSaldo")}</Badge>}
+        </span>
+      );
+    }
+    if (c.clave === "fd_sesiones") {
+      return (
+        <SesionesCell
+          display={v == null || v === "" ? "—" : String(v)}
+          servicioId={servicio?.id}
+          pacienteId={sesion?.pacienteId}
+          centro={centro}
+        />
+      );
+    }
+    if (c.tipo === "medicion" && c.render) {
+      return (
+        <MedicionCell
+          col={c}
+          sesion={sesion}
+          disabled={busy || cancelada}
+          onSave={(datos) => run(() => guardarDatosSesion(fila.id, datos, centro))}
+        />
+      );
+    }
+    return <span>{v == null || v === "" ? "—" : String(v)}</span>;
+  }
+
+  return (
+    <tr className={"hover:bg-muted/30 " + (cancelada ? "opacity-50" : "")}>
+      {columnas.map((c) => (
+        <td key={c.clave} className="px-3 py-2">{celda(c)}</td>
+      ))}
+      {/* Flujo Presente → En terapia → Asistido con sello de hora (BE sella; el FE muestra) */}
+      <td className="px-3 py-2">
+        {cancelada ? (
+          <span className="text-xs text-muted-foreground">—</span>
+        ) : (
+          <div className="flex items-center gap-1">
+            {flujo.map((paso, i) => {
+              const stamp = sesion ? (sesion[STAMP_FIELD[paso.clave]] as string | null) : null;
+              const hecho = !!stamp;
+              const previo = i === 0 || !!(sesion && sesion[STAMP_FIELD[flujo[i - 1].clave]]);
+              const siguiente = !hecho && previo;
+              return (
+                <React.Fragment key={paso.clave}>
+                  {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
+                  {hecho ? (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                      style={paso.color ? { backgroundColor: `${paso.color}22`, color: paso.color ?? undefined } : undefined}
+                      title={tRoot(paso.labelKey)}
+                    >
+                      <HugeiconsIcon icon={Tick02Icon} className="size-3" />
+                      {fmtHora(stamp)}
+                    </span>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant={siguiente ? "outline" : "ghost"}
+                      size="sm"
+                      disabled={!siguiente || busy}
+                      className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
+                      onClick={() =>
+                        run(() => marcarTransicion(fila.id, paso.clave.replace(/_/g, "-") as never, {}, centro))
+                      }
+                    >
+                      {tRoot(paso.labelKey)}
+                    </Button>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
+      </td>
+      <td className="px-3 py-2 text-right">
+        <RowMenu
+          disabled={busy}
+          cancelada={cancelada}
+          canReparar={canReparar}
+          estados={estados}
+          onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
+          onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
+        />
+      </td>
+    </tr>
+  );
+}
+
+// ————— X/Y + disponibilidad del paciente (lazy, al abrir) —————
+function SesionesCell({
+  display,
+  servicioId,
+  pacienteId,
+  centro,
+}: {
+  display: string;
+  servicioId?: string;
+  pacienteId?: string;
+  centro?: string;
+}) {
+  const t = useTranslations("frontdesk");
+  const [open, setOpen] = React.useState(false);
+  const [disp, setDisp] = React.useState<DisponibilidadServicio | null>(null);
+  const [fallo, setFallo] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!open || disp || fallo || !servicioId || !pacienteId) return;
+    getDisponibilidadServicio(servicioId, pacienteId, centro)
+      .then(setDisp)
+      .catch(() => setFallo(true));
+  }, [open, disp, fallo, servicioId, pacienteId, centro]);
+
+  if (!servicioId || !pacienteId) return <span className="tabular-nums">{display}</span>;
+  const agotado = disp != null && Number(disp.pendienteTotal ?? 0) <= 0;
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <button type="button" className="cursor-pointer rounded px-1 tabular-nums underline decoration-dotted underline-offset-4 hover:bg-muted">
+          {display}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-72 p-3">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("saldoTitle")}</p>
+        {!disp && !fallo && <p className="text-sm text-muted-foreground">…</p>}
+        {fallo && <p className="text-sm text-destructive">{t("saldoError")}</p>}
+        {disp && (
+          <div className="space-y-1.5">
+            {(disp.paquetes ?? []).length === 0 && <p className="text-sm text-muted-foreground">{t("sinPaquetes")}</p>}
+            {(disp.paquetes ?? []).map((p, i) => (
+              <div key={i} className="flex items-center justify-between gap-2 text-sm">
+                <span className="truncate">{p.productoNombre ?? "—"}</span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">
+                  {Number(p.entregadas ?? 0)}/{Number(p.total ?? 0)}
+                </span>
+              </div>
+            ))}
+            <div className="mt-1 flex items-center justify-between border-t pt-1.5 text-sm font-semibold">
+              <span>{t("pendienteTotal")}</span>
+              <span className={"tabular-nums " + (agotado ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}>
+                {Number(disp.pendienteTotal ?? 0)}
+              </span>
+            </div>
+            {agotado && <Badge variant="destructive" className="mt-1">{t("sinSaldo")}</Badge>}
+          </div>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+// ————— Medición (PR #136): input numérico con unidad, valida el BE —————
+function MedicionCell({
+  col,
+  sesion,
+  disabled,
+  onSave,
+}: {
+  col: FrontdeskColumna;
+  sesion?: Sesion;
+  disabled: boolean;
+  onSave: (datos: Record<string, unknown>) => void;
+}) {
+  const tRoot = useTranslations();
+  const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
+  const dato = r.dato ?? col.clave;
+  const actual = (sesion?.datos as Record<string, unknown> | null | undefined)?.[dato];
+  const [val, setVal] = React.useState(actual != null ? String(actual) : "");
+
+  const commit = () => {
+    const n = Number(val);
+    if (val === "" || Number.isNaN(n)) return;
+    if (actual != null && Number(actual) === n) return;
+    onSave({ ...((sesion?.datos as Record<string, unknown>) ?? {}), [dato]: n });
+  };
+
+  return (
+    <span className="inline-flex items-center gap-1">
+      <Input
+        type="number"
+        value={val}
+        min={r.min}
+        max={r.max}
+        step={r.paso ?? 1}
+        disabled={disabled}
+        onChange={(e) => setVal(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
+        className="h-7 w-20 text-right tabular-nums"
+        aria-label={tRoot(col.labelKey)}
+      />
+      {r.unidadKey && <span className="text-xs text-muted-foreground">{tRoot(r.unidadKey)}</span>}
+    </span>
+  );
+}
+
+// ————— Menú por fila: Cancelar + Reparar (RBAC admin) —————
+function RowMenu({
+  disabled,
+  cancelada,
+  canReparar,
+  estados,
+  onCancelar,
+  onReparar,
+}: {
+  disabled: boolean;
+  cancelada: boolean;
+  canReparar: boolean;
+  estados: { clave: string; label: string }[];
+  onCancelar: (motivo: string) => void;
+  onReparar: (payload: { motivo: string; estado?: string }) => void;
+}) {
+  const t = useTranslations("frontdesk");
+  const tc = useTranslations("common");
+  const [cancelOpen, setCancelOpen] = React.useState(false);
+  const [repararOpen, setRepararOpen] = React.useState(false);
+  const [motivo, setMotivo] = React.useState("");
+  const [estadoNuevo, setEstadoNuevo] = React.useState("");
+
+  if (cancelada && !canReparar) return null;
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="size-8" disabled={disabled} aria-label={t("acciones")}>
+            <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {!cancelada && (
+            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setMotivo(""); setCancelOpen(true); }}>
+              {t("cancelar")}
+            </DropdownMenuItem>
+          )}
+          {canReparar && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setMotivo(""); setEstadoNuevo(""); setRepararOpen(true); }}>
+              {t("reparar")}
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader><DialogTitle>{t("cancelarTitle")}</DialogTitle></DialogHeader>
+          <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setCancelOpen(false)}>{tc("cancel")}</Button>
+            <Button
+              variant="destructive"
+              disabled={!motivo.trim()}
+              onClick={() => { setCancelOpen(false); onCancelar(motivo.trim()); }}
+            >
+              {t("cancelar")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={repararOpen} onOpenChange={setRepararOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader><DialogTitle>{t("repararTitle")}</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivo")} autoFocus />
+            <Select value={estadoNuevo} onValueChange={setEstadoNuevo}>
+              <SelectTrigger className="w-full"><SelectValue placeholder={t("estadoNuevo")} /></SelectTrigger>
+              <SelectContent>
+                {estados.map((e) => <SelectItem key={e.clave} value={e.clave}>{e.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setRepararOpen(false)}>{tc("cancel")}</Button>
+            <Button
+              disabled={!motivo.trim()}
+              onClick={() => {
+                setRepararOpen(false);
+                onReparar({ motivo: motivo.trim(), ...(estadoNuevo ? { estado: estadoNuevo } : {}) });
+              }}
+            >
+              {t("reparar")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ————— Estatus de enfermeras (triage/vitales) — panel read-only (POST sin DTO en Swagger: gap BE) —————
+function NurseStatusButton({ fecha, centro }: { fecha: string; centro?: string }) {
+  const t = useTranslations("frontdesk");
+  const [open, setOpen] = React.useState(false);
+  const [tipos, setTipos] = React.useState<NurseStatusTipo[] | null>(null);
+  const [actuales, setActuales] = React.useState<NurseStatusActual[] | null>(null);
+
+  React.useEffect(() => {
+    if (!open || !centro) return;
+    getNurseStatusTipos(centro).then(setTipos).catch(() => setTipos([]));
+    getNurseStatusActuales(fecha, centro).then(setActuales).catch(() => setActuales([]));
+  }, [open, fecha, centro]);
+
+  const tipoDe = (id: string | null) => tipos?.find((x) => x.id === id);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-1.5">
+          <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
+          {t("nurseTitle")}
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-80 p-4">
+        <SheetHeader className="p-0">
+          <SheetTitle>{t("nurseTitle")}</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4 space-y-2">
+          {actuales == null && <p className="text-sm text-muted-foreground">…</p>}
+          {actuales != null && actuales.length === 0 && (
+            <p className="text-sm text-muted-foreground">{t("nurseEmpty")}</p>
+          )}
+          {(actuales ?? []).map((a, i) => {
+            const tipo = tipoDe(a.statusTipoId);
+            return (
+              <div key={i} className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
+                <span className="truncate font-medium">{a.personalNombre ?? a.personalId.slice(0, 8)}</span>
+                {tipo ? (
+                  <Badge
+                    variant="secondary"
+                    style={tipo.color ? { backgroundColor: `${tipo.color}22`, color: tipo.color } : undefined}
+                  >
+                    {tipo.nombre}
+                  </Badge>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
