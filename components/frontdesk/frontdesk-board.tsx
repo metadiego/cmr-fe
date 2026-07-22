@@ -252,7 +252,10 @@ export function FrontdeskBoard() {
       }
       out.push({ kind: "col", col: c });
     }
-    if (!puesto) out.push({ kind: "flujo" });
+    // Fallback (tableros SIN columnas toggle): flujo derivado de la definición. Si hay toggles —
+    // agrupados o sueltos — el flujo ya vive en ellos y NO se agrega columna extra (evita doble pintado).
+    const hayToggles = (board?.columnas ?? []).some((c) => c.tipo === "toggle");
+    if (!puesto && !hayToggles) out.push({ kind: "flujo" });
     return out;
   }, [board]);
 
@@ -469,7 +472,9 @@ export function FrontdeskBoard() {
                       item.kind === "flujo" ? (
                         <th key={`flujo-${i}`} className="px-3 py-2 font-semibold">{t("flujo")}</th>
                       ) : (
-                        <th key={item.col.clave} className="px-3 py-2 font-semibold">{tRoot(item.col.labelKey)}</th>
+                        <th key={item.col.clave} className="px-3 py-2 font-semibold">
+                          {tRoot(((item.col.render as { labelKey?: string } | null)?.labelKey) ?? item.col.labelKey)}
+                        </th>
                       ),
                     )}
                     <th className="px-3 py-2 text-right font-semibold">{tRoot("fd.col.acciones")}</th>
@@ -654,6 +659,35 @@ function FilaSesion({
           disabled={busy || cancelada}
           onSave={(valor) => run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))}
         />
+      );
+    }
+    // Toggle SUELTO (sin group): badge HH:MM si está sellado; si no, botón que dispara su transición
+    // (render.transition). Los agrupados no llegan aquí (colapsan en el Flujo).
+    if (c.tipo === "toggle") {
+      const r = (c.render ?? {}) as { transition?: string; labelKey?: string };
+      const stamp = (v as string | null) ?? null;
+      if (cancelada) return <span className="text-xs text-muted-foreground">—</span>;
+      if (stamp) {
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <HugeiconsIcon icon={Tick02Icon} className="size-3" />
+            {fmtHora(stamp)}
+          </span>
+        );
+      }
+      return (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={busy}
+          className="h-6 rounded-full px-2 text-[11px]"
+          onClick={() =>
+            run(() => marcarTransicion(fila.id, (r.transition ?? c.clave).replace(/_/g, "-") as never, {}, centro))
+          }
+        >
+          {tRoot(r.labelKey ?? c.labelKey)}
+        </Button>
       );
     }
     return <span>{v == null || v === "" ? "—" : String(v)}</span>;

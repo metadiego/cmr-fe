@@ -190,6 +190,22 @@ export function getOpciones(tablero: string, columna: string, centroId?: string)
   );
 }
 
+// POST /tablero/composicion — upsert de UNA columna en un tablero; `render` SE FUSIONA sobre
+// columnas.render (p. ej. {group} para agrupar/desagrupar toggles sin tocar transition/estampa).
+export function setComposicion(
+  payload: {
+    tablero: string;
+    columnaId: string;
+    orden?: number;
+    visible?: boolean;
+    activo?: boolean;
+    render?: Record<string, unknown>;
+  },
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(`/tablero/composicion`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+
 // POST /tablero/composicion — set one column's placement/color in a board (admin
 // pre-personalization). `color` (null clears). Single-column upsert; does NOT
 // touch the rest of the composition.

@@ -11,7 +11,10 @@ import {
   type Servicio,
   type ServicioColumna,
 } from "@/lib/api/servicios";
-import { getColumnasCatalogo, type ColumnaCatalogo } from "@/lib/api/tablero";
+import { getColumnasCatalogo, setComposicion, type ColumnaCatalogo } from "@/lib/api/tablero";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -104,6 +107,53 @@ export function ServicioColumnasEditor() {
   const idPorClave = React.useMemo(() => new Map(catalogo.map((c) => [c.clave, c.id])), [catalogo]);
 
   const [busy, setBusy] = React.useState(false);
+  // Selección múltiple (2+) para Agrupar / Dejar sueltas (render.group compartido → se mueven juntas).
+  // La selección se ata a la clave servicio|centro: si cambian, se ignora sola (sin efecto ni ref).
+  const selKey = `${servicioSel}|${centroSel}`;
+  const [selState, setSelState] = React.useState<{ key: string; set: Set<string> }>({ key: selKey, set: new Set() });
+  const seleccion = selState.key === selKey ? selState.set : (new Set<string>() as Set<string>);
+
+  function toggleSeleccion(clave: string) {
+    setSelState((prev) => {
+      const base = prev.key === selKey ? prev.set : new Set<string>();
+      const next = new Set(base);
+      if (next.has(clave)) next.delete(clave);
+      else next.add(clave);
+      return { key: selKey, set: next };
+    });
+  }
+  const clearSeleccion = () => setSelState({ key: selKey, set: new Set() });
+
+  // Agrupar (group compartido, autogenerado con la 1ª clave) o dejar sueltas (group null). Solo toca
+  // render.group (el BE fusiona; transition/estampa/labelKey intactos). Fan-out a los centros elegidos:
+  // la composición es por tenant, con el tablero = clave del servicio.
+  async function agrupar(group: string | null) {
+    if (!sel || seleccion.size < 2) return;
+    const claves = [...seleccion];
+    const nombre = group === null ? null : `grupo_${claves[0]}`;
+    setBusy(true);
+    try {
+      const centrosDestino = sel.filas.map((f) => f.centroId);
+      const jobs: Promise<unknown>[] = [];
+      for (const clave of claves) {
+        const columnaId = idPorClave.get(clave);
+        if (!columnaId) continue;
+        for (const centroId of centrosDestino) {
+          jobs.push(setComposicion({ tablero: sel.clave, columnaId, render: { group: nombre } }, centroId));
+        }
+      }
+      const resultados = await Promise.allSettled(jobs);
+      const fallos = resultados.filter((r) => r.status === "rejected");
+      if (fallos.length === resultados.length) throw (fallos[0] as PromiseRejectedResult).reason;
+      if (fallos.length > 0) toast.warning(t("colParcial", { n: fallos.length }));
+      clearSeleccion();
+      colsRes.reload();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Aplica un cambio de composición a la fila del servicio en CADA centro seleccionado (fan-out).
   async function componerEnTodos(payload: Parameters<typeof componerServicioColumna>[1]) {
@@ -189,12 +239,21 @@ export function ServicioColumnasEditor() {
       ) : colsRes.state.kind === "loading" || catRes.state.kind === "loading" ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : (
-        <ul className="space-y-1.5">
+        <>
+          {seleccion.size >= 2 && (
+            <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+              <span className="text-sm text-muted-foreground">{t("colSeleccion", { n: seleccion.size })}</span>
+              <Button size="sm" disabled={busy} onClick={() => agrupar("auto")}>{t("colAgrupar")}</Button>
+              <Button size="sm" variant="outline" disabled={busy} onClick={() => agrupar(null)}>{t("colSueltas")}</Button>
+            </div>
+          )}
+          <ul className="space-y-1.5">
           {/* Activas primero (en su orden), luego las disponibles apagadas. */}
           {[...activas.map((c) => c.clave), ...catalogo.map((c) => c.clave).filter((k) => !activaPorClave.has(k))].map((clave) => {
             const activa = activaPorClave.get(clave);
             const cat = catalogo.find((c) => c.clave === clave);
             const labelKey = activa?.labelKey ?? cat?.labelKey ?? clave;
+            const grupo = (activa?.render as { group?: string | null } | null)?.group ?? null;
             const idx = activas.findIndex((c) => c.clave === clave);
             return (
               <li
@@ -223,9 +282,21 @@ export function ServicioColumnasEditor() {
                     <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
                   </button>
                 </div>
+                {/* Selección para Agrupar/Sueltas (solo columnas activas). */}
+                {activa && (
+                  <Checkbox
+                    checked={seleccion.has(clave)}
+                    disabled={busy}
+                    onCheckedChange={() => toggleSeleccion(clave)}
+                    aria-label={t("colSeleccionar", { col: tRoot(labelKey) })}
+                  />
+                )}
                 <span className="flex-1 text-sm font-medium">
                   {tRoot(labelKey)}
                   <span className="ml-2 font-mono text-xs text-muted-foreground">· {clave}</span>
+                  {grupo && (
+                    <Badge variant="secondary" className="ml-2 text-[10px]">{t("colEncadenada")}</Badge>
+                  )}
                 </span>
                 <Switch
                   checked={!!activa}
@@ -236,7 +307,8 @@ export function ServicioColumnasEditor() {
               </li>
             );
           })}
-        </ul>
+          </ul>
+        </>
       )}
     </div>
   );
