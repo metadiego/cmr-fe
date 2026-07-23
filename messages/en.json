@@ -1025,7 +1025,11 @@
     "calSinCitas": "No upcoming appointments",
     "calVacios": "{vacios}/{cupo} free",
     "desasistirPregunta": "Undo attended?",
-    "desasistir": "Undo attended"
+    "desasistir": "Undo attended",
+    "aviso": {
+      "cupo_excedido": "Day capacity exceeded (booked {agendadas} / capacity {cupo}).",
+      "sin_cupo_configurado": "No capacity configured for this date."
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",

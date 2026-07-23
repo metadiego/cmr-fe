@@ -1,5 +1,10 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import type { ApiWarning } from "./types";
+import { apiFetch, apiFetchEnvelope } from "./client";
+
+// Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
+// `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
+export type ConWarnings<T> = { data: T; warnings: ApiWarning[] };
 
 // Service session (frontdesk). Unlike medical citas, sessions are per-DAY
 // (no hora/horaFin) — the service calendar schedules by date only.
@@ -32,15 +37,17 @@ export function getSesion(id: string): Promise<Sesion> {
 }
 
 // POST /frontdesk/sesiones — schedule a service session on a date (no time).
-export function crearSesion(
+// Devuelve la sesión + los `warnings` del BE (cupo excedido / sin cupo) — no bloqueante.
+export async function crearSesion(
   payload: CreateSesionPayload,
   centroId?: string,
-): Promise<Sesion> {
-  return apiFetch<Sesion>(`/frontdesk/sesiones`, {
+): Promise<ConWarnings<Sesion>> {
+  const env = await apiFetchEnvelope<Sesion>(`/frontdesk/sesiones`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
+  return { data: env.data, warnings: env.meta.warnings ?? [] };
 }
 
 // ——— AGENDAR (programar citas de servicio) — BE en prod 2026-07-23 ———
@@ -48,12 +55,16 @@ export function crearSesion(
 // Agenda VARIAS fechas de un servicio para un paciente (una cita por fecha). El BE avisa si excede la
 // disponibilidad (no bloquea). Devuelve las sesiones creadas (o un resumen).
 export type AgendarMultiplePayload = components["schemas"]["AgendarMultipleDto"];
-export function agendarMultiple(payload: AgendarMultiplePayload, centroId?: string): Promise<unknown> {
-  return apiFetch(
-    `/frontdesk/sesiones/agendar-multiple`,
-    { method: "POST", body: JSON.stringify(payload) },
-    centroId,
-  );
+export async function agendarMultiple(
+  payload: AgendarMultiplePayload,
+  centroId?: string,
+): Promise<ConWarnings<unknown>> {
+  const env = await apiFetchEnvelope<unknown>(`/frontdesk/sesiones/agendar-multiple`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+  return { data: env.data, warnings: env.meta.warnings ?? [] };
 }
 
 // Reagendar una sesión a otra fecha (fechas flexibles).

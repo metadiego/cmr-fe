@@ -18,6 +18,7 @@ import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,12 +167,12 @@ export function ProgramarCitasModal({
     if (!puedeGuardar) return;
     setBusy(true);
     try {
-      if (fechas.length > 1) {
-        await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas }, centro);
-      } else {
-        await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechas[0] } as never, centro);
-      }
+      const { warnings } =
+        fechas.length > 1
+          ? await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas }, centro)
+          : await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechas[0] } as never, centro);
       toast.success(t("agendadoOk", { n: fechas.length }));
+      mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo — no bloquea
       onOpenChange(false);
       setFechas([]);
       setSel(null);

@@ -7,7 +7,17 @@ export interface ApiMeta {
   pagination?: { total: number; page: number; limit: number };
   // Non-fatal warnings the BE attaches to a successful write (e.g. an
   // appointment created despite an overlap when the policy is "advertir").
-  advertencias?: Array<{ code: string; labelKey?: string; [k: string]: unknown }>;
+  advertencias?: ApiWarning[];
+  // Avisos no bloqueantes de una escritura exitosa (p. ej. cupo excedido al agendar,
+  // BE PR #168). El FE los muestra como toast traducido por `labelKey`.
+  warnings?: ApiWarning[];
+}
+
+export interface ApiWarning {
+  code: string;
+  labelKey?: string;
+  message?: string;
+  [k: string]: unknown;
 }
 
 export interface ApiEnvelope<T> {

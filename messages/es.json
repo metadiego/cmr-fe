@@ -1025,7 +1025,11 @@
     "calSinCitas": "Sin citas próximas",
     "calVacios": "{vacios}/{cupo} libres",
     "desasistirPregunta": "¿Desea desasistir?",
-    "desasistir": "Desasistir"
+    "desasistir": "Desasistir",
+    "aviso": {
+      "cupo_excedido": "Se superó el cupo del día (agendadas {agendadas} / cupo {cupo}).",
+      "sin_cupo_configurado": "No hay cupos configurados para esta fecha."
+    }
   },
   "programarCitas": {
     "title": "Programar citas",

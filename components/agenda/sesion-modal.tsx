@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { crearSesion } from "@/lib/api/frontdesk";
+import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import type { Servicio } from "@/lib/api/servicios";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
@@ -72,7 +73,7 @@ export function SesionModal({
     if (!paciente || !servicioId) return;
     setSubmitting(true);
     try {
-      await crearSesion(
+      const { warnings } = await crearSesion(
         {
           pacienteId: paciente.id,
           servicioId,
@@ -83,6 +84,7 @@ export function SesionModal({
       );
       if (effectiveCentro) setActiveCentro(effectiveCentro);
       toast.success(t("created"));
+      mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo — no bloquea
       onSaved();
       onOpenChange(false);
     } catch (err) {
