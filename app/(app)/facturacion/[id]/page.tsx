@@ -970,7 +970,9 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
   const isArea = (c: string) => /[aá]rea/i.test(c);
   const isDias = (c: string) => /d[ií]a/i.test(c) && !/dosis/i.test(c);
-  const defMeta = (c: string) => (isArea(c) ? "1" : isDias(c) ? cant : "");
+  // áreas = preset del producto (areasDefault ?? 1); días = cantidad (mismas visitas). Data-driven (PR #158).
+  const areasDefault = (prod as { areasDefault?: number | null } | undefined)?.areasDefault ?? 1;
+  const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? cant : "");
   const metaShown = (c: string) => metaVals[c] ?? defMeta(c);
 
   // Flujo con Enter: cantidad → columnas (áreas, días…) → Enter en la última confirma la línea. La
