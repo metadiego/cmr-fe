@@ -406,20 +406,31 @@ export function FrontdeskBoard() {
               </SelectContent>
             </Select>
           )}
-          {/* Barra de acciones enchufables (data-driven, registro.acciones — estilo hooks) */}
-          {acciones.map((a) => (
-            <Button
-              key={a.clave}
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => dispatchAccion(a)}
-              title={tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave}
-            >
-              {ACCION_ICON[a.icon ?? ""] && <HugeiconsIcon icon={ACCION_ICON[a.icon ?? ""]} className="size-4" />}
-              {tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave}
-            </Button>
-          ))}
+          {/* Barra de acciones enchufables (data-driven, registro.acciones — estilo hooks).
+              COMPACTA: un solo grupo, ícono + tooltip; el texto solo aparece en pantallas anchas
+              (xl). Con ícono conocido no ocupa media barra; sin ícono cae al label. */}
+          {acciones.length > 0 && (
+            <div className="flex items-center gap-0.5 rounded-full border border-border/60 bg-background/40 p-0.5">
+              {acciones.map((a) => {
+                const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
+                const icon = ACCION_ICON[a.icon ?? ""];
+                return (
+                  <Button
+                    key={a.clave}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1.5 rounded-full px-2.5"
+                    onClick={() => dispatchAccion(a)}
+                    title={label}
+                    aria-label={label}
+                  >
+                    {icon && <HugeiconsIcon icon={icon} className="size-4" />}
+                    <span className={icon ? "hidden xl:inline" : undefined}>{label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          )}
           {can("citas.create") && (
             <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
               {t("citar")}
