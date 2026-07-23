@@ -24,8 +24,7 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro } from "@/lib/api/tablero";
-import { useRouter } from "next/navigation";
+import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, type TableroDefinicion, type Opcion } from "@/lib/api/tablero";
 import { buscarPaciente } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { useResource } from "@/hooks/use-resource";
@@ -69,20 +68,7 @@ import {
   StethoscopeIcon,
   MoreHorizontalIcon,
   Tick02Icon,
-  ArrowLeft01Icon,
-  Calendar01Icon,
-  Calendar03Icon,
-  UserSearch01Icon,
 } from "@hugeicons/core-free-icons";
-import { CalendarioModal } from "@/components/frontdesk/calendario-modal";
-
-// Mapa icono (string del BE) → hugeicon. Data-driven con fallback (icono ausente → sin icono, solo label).
-const ACCION_ICON: Record<string, typeof Calendar01Icon> = {
-  "arrow-left": ArrowLeft01Icon,
-  calendar: Calendar01Icon,
-  "calendar-days": Calendar03Icon,
-  "user-search": UserSearch01Icon,
-};
 
 const todayISO = () => {
   const d = new Date();
@@ -119,7 +105,6 @@ export function FrontdeskBoard() {
   const locale = useLocale();
   const { can } = useCan();
   const gate = useCentroGate();
-  const router = useRouter();
 
   const [fecha, setFecha] = React.useState(todayISO());
   // Rango 2 fechas (PR #141) — SOLO gerente (RBAC cosmético; el BE es la autoridad). Vacío = un día.
@@ -132,35 +117,6 @@ export function FrontdeskBoard() {
   // Modal "Programar citas": disparado por Citar (sin paciente) o por render.postAccion de una columna
   // del tablero (con paciente de la sesión). Data-driven, sin hardcode del estado que lo abre.
   const [programar, setProgramar] = React.useState<{ open: boolean; pacienteId?: string; pacienteNombre?: string; servicioId?: string }>({ open: false });
-  // Calendario (handler abrir_calendario, params.modo; filtrar_paciente reusa modo "paciente").
-  const [calendario, setCalendario] = React.useState<{ open: boolean; modo: string; rangoDias?: number }>({ open: false, modo: "paciente" });
-
-  // Despacho de handlers de la barra (data-driven). Handler desconocido = no-op (el BE puede declarar más).
-  function dispatchAccion(a: AccionTablero) {
-    const params = (a.params ?? {}) as { modo?: string; rangoDias?: number };
-    switch (a.handler) {
-      case "volver":
-        router.back();
-        break;
-      case "abrir_calendario":
-        setCalendario({ open: true, modo: params.modo ?? "paciente", rangoDias: Number(params.rangoDias) || 90 });
-        break;
-      case "filtrar_paciente":
-        setCalendario({ open: true, modo: "paciente", rangoDias: 90 });
-        break;
-      default:
-        break;
-    }
-  }
-
-  // Barra de acciones enchufables del vertical servicios (registro; slot toolbar), gate por permiso/orden.
-  const regRes = useResource<TableroRegistro[]>(() => getTableros(), []);
-  const acciones = React.useMemo(() => {
-    const reg = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === "servicios");
-    return (reg?.acciones ?? [])
-      .filter((a) => a.visible !== false && (a.slot ?? "toolbar") === "toolbar" && (!a.requierePermiso || can(a.requierePermiso)))
-      .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
-  }, [regRes.state, can]);
 
   // Catálogos data-driven: tabs de servicios + definición del vertical (estados con color, transiciones).
   // Los servicios son POR CENTRO (activo por centro) → refetch al cambiar el selector, en el acto.
@@ -406,31 +362,6 @@ export function FrontdeskBoard() {
               </SelectContent>
             </Select>
           )}
-          {/* Barra de acciones enchufables (data-driven, registro.acciones — estilo hooks).
-              COMPACTA: un solo grupo, ícono + tooltip; el texto solo aparece en pantallas anchas
-              (xl). Con ícono conocido no ocupa media barra; sin ícono cae al label. */}
-          {acciones.length > 0 && (
-            <div className="flex items-center gap-0.5 rounded-full border border-border/60 bg-background/40 p-0.5">
-              {acciones.map((a) => {
-                const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
-                const icon = ACCION_ICON[a.icon ?? ""];
-                return (
-                  <Button
-                    key={a.clave}
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-1.5 rounded-full px-2.5"
-                    onClick={() => dispatchAccion(a)}
-                    title={label}
-                    aria-label={label}
-                  >
-                    {icon && <HugeiconsIcon icon={icon} className="size-4" />}
-                    <span className={icon ? "hidden xl:inline" : undefined}>{label}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          )}
           {can("citas.create") && (
             <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
               {t("citar")}
@@ -603,15 +534,6 @@ export function FrontdeskBoard() {
         pacienteNombre={programar.pacienteNombre}
         defaultServicioId={programar.servicioId}
         onDone={refetch}
-      />
-      <CalendarioModal
-        open={calendario.open}
-        onOpenChange={(o) => setCalendario((c) => ({ ...c, open: o }))}
-        modo={calendario.modo}
-        centro={gate.centro}
-        servicioClave={tabEfectivo}
-        fecha={fecha}
-        rangoDias={calendario.rangoDias}
       />
     </div>
   );
