@@ -1043,7 +1043,10 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   function add() {
     if (!prod) return;
     const g = showIvu ? gravadoEff : !!(prod as { gravado?: boolean }).gravado;
+    // Enviar SIEMPRE el precioUnitario resuelto (override del cajero ?? precio del catálogo por-sesión).
+    // Si no se envía, el compuesto cae al precio-base (TD12=70) en vez del combo (50) → BE PR láser/precio.
     const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
+    const precioUnitarioEff = precioOverride ?? (precioLista != null ? precioLista : undefined);
     // meta = valores de las columnas multiplicador/informativo (por su clave). El server calcula el total.
     const meta: Record<string, number> = {};
     capturables.forEach((c) => {
@@ -1054,7 +1057,7 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
       productoId: prod.id,
       descripcion: prod.nombre,
       cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
-      ...(precioOverride !== undefined ? { precioUnitario: precioOverride } : {}),
+      ...(precioUnitarioEff !== undefined ? { precioUnitario: precioUnitarioEff } : {}),
       gravado: g,
       ...(g && ivuId ? { impuestoId: ivuId } : {}),
       ...(Object.keys(meta).length ? { meta } : {}),
