@@ -15,7 +15,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/citas/agenda/cupos", labelKey: "nav.cupos" },
   { path: "/citas/config/columnas", labelKey: "nav.columnasCitas" },
   { path: "/tablero/citas", labelKey: "nav.tableroCitas" },
-  { path: "/frontdesk", labelKey: "nav.frontdesk" },
+  { path: "/tablero/frontdesk", labelKey: "nav.frontdesk" },
   { path: "/atencion", labelKey: "nav.atencion" },
   // Clientes
   { path: "/clientes", labelKey: "nav.clientes" },
