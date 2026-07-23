@@ -55,3 +55,23 @@ Al `POST /api/v1/frontdesk/sesiones` (crear sesión de servicio):
 - Leer `meta.warnings` de la respuesta de crear y mostrarlos como alerta no bloqueante (toast) en el
   modal de "Nueva sesión de servicio" (`components/agenda/sesion-modal.tsx`). Cero regla de cupos en
   el cliente. Avisar al FE cuando esté desplegado para conectar el aviso.
+
+---
+
+## 6. RESPUESTA BE (2026-07-23) — ✅ IMPLEMENTADO Y DESPLEGADO (PR be#168)
+
+- La regla vive UNA vez en el BE (`horasCupos`, el mismo núcleo de `GET /frontdesk/agenda`;
+  precedencia fecha > diaSemana > default y centro > global vía `resolverCupos`).
+- Aplica a TODAS las entradas que crean/mueven citas de servicio:
+  `POST /frontdesk/sesiones`, `POST /frontdesk/sesiones/agendar-multiple` (aviso por cada fecha),
+  `PATCH /frontdesk/sesiones/:id/agenda` (reagendar → avisa la NUEVA fecha) y la tool MCP `crear_sesion`.
+- NUNCA bloquea: crea/mueve igual y devuelve `meta.warnings[]`:
+  ```jsonc
+  { "code": "cupo_excedido", "labelKey": "frontdesk.aviso.cupo_excedido",
+    "message": "Se superó el cupo del día (agendadas 3 / cupo 2).",
+    "fecha": "2026-07-24", "servicioId": "…", "cupo": 2, "agendadas": 3 }
+  // o { "code": "sin_cupo_configurado", "labelKey": "frontdesk.aviso.sin_cupo_configurado", … }
+  ```
+- El envelope soporta `{ data, warnings }` → `meta.warnings` de forma genérica (con tests).
+- **FE:** leer `meta.warnings` en la respuesta de crear/reagendar y mostrar toast; traducir por
+  `labelKey` (agregar `frontdesk.aviso.cupo_excedido` / `sin_cupo_configurado` a messages es/en).
