@@ -186,19 +186,6 @@ export function FrontdeskBoard() {
     sesRes.refresh();
   }, [boardRes, sesRes]);
 
-  // Superposición OPTIMISTA de celdas editadas (fila → columna → valor). El board del BE puede tardar
-  // 1-3s en reflejar una edición (p.ej. asignar técnico) y un refetch en vivo (stream) traería el valor
-  // aún vacío, "borrando" lo recién guardado. Mantenemos el valor editado hasta que el board coincida.
-  const [overrides, setOverrides] = React.useState<Record<string, Record<string, string>>>({});
-  const aplicarOverride = React.useCallback(
-    (filaId: string, columna: string, valor: string) =>
-      setOverrides((prev) => ({
-        ...prev,
-        [filaId]: { ...prev[filaId], [columna]: valor },
-      })),
-    [],
-  );
-
   // En vivo (bus único /tablero/stream, entidad sesion). entrega_sin_saldo → alerta roja persistente.
   const [sinSaldoIds, setSinSaldoIds] = React.useState<Set<string>>(new Set());
   const { live } = useCitaStream({
@@ -299,11 +286,7 @@ export function FrontdeskBoard() {
 
   // Filtro compuesto: búsqueda (texto de fila O pacienteId) → luego KPI de estado.
   const visibles = React.useMemo(() => {
-    // Aplica la superposición optimista: si el board aún no refleja un valor editado, se mantiene el
-    // valor local (una vez que el board coincide, el spread es un no-op y queda consistente).
-    const filas = (board?.filas ?? []).map((f) =>
-      overrides[f.id] ? { ...f, ...overrides[f.id] } : f,
-    );
+    const filas = board?.filas ?? [];
     const conBusqueda = filas.filter((f) => {
       const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
       const porTexto = coincide(textos, q);
@@ -314,7 +297,7 @@ export function FrontdeskBoard() {
     return estadoFiltro
       ? conBusqueda.filter((f) => String(f.fd_estado ?? "") === estadoFiltro)
       : conBusqueda;
-  }, [board, overrides, columnas, q, pacienteIds, sesiones, estadoFiltro]);
+  }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro]);
 
   // KPIs sobre el set buscado (sin el filtro de estado, para que los conteos guíen).
   const kpis = React.useMemo(() => {
@@ -526,7 +509,6 @@ export function FrontdeskBoard() {
                       canReparar={can("frontdesk.reparar")}
                       estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
                       onChanged={refetch}
-                      onOptimistic={(columna, valor) => aplicarOverride(f.id, columna, valor)}
                     />
                   ))}
                 </tbody>
@@ -587,7 +569,6 @@ function FilaSesion({
   canReparar,
   estados,
   onChanged,
-  onOptimistic,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -603,7 +584,6 @@ function FilaSesion({
   canReparar: boolean;
   estados: { clave: string; label: string }[];
   onChanged: () => void;
-  onOptimistic: (columna: string, valor: string) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -661,10 +641,9 @@ function FilaSesion({
         <Select
           value={actual || undefined}
           disabled={busy || cancelada || ops.length === 0}
-          onValueChange={(valor) => {
-            onOptimistic(c.clave, valor); // pinta ya y NO se borra aunque el board tarde en reflejarlo
-            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro));
-          }}
+          onValueChange={(valor) =>
+            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))
+          }
         >
           <SelectTrigger size="sm" className="h-8 w-40">
             <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
