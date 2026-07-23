@@ -1017,7 +1017,13 @@
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",
     "sinOpciones": "Sin opciones",
-    "faltanCampos": "Falta completar: {campos}"
+    "faltanCampos": "Falta completar: {campos}",
+    "calDiaTitle": "Calendario del día",
+    "calPacienteTitle": "Calendario del paciente",
+    "calElegirPaciente": "Busca el paciente para ver su agenda",
+    "calSinHoras": "Sin horas configuradas",
+    "calSinCitas": "Sin citas próximas",
+    "calVacios": "{vacios}/{cupo} libres"
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -2075,5 +2081,13 @@
     "updated": "Grupo actualizado",
     "membershipSaved": "Productos actualizados",
     "denied": "No tienes permiso para administrar grupos de facturación."
+  },
+  "tb": {
+    "acc": {
+      "volver": "Volver",
+      "calendario_paciente": "Calendario paciente",
+      "calendario_dia": "Calendario del día",
+      "filtrar_paciente": "Filtrar por paciente"
+    }
   }
 }

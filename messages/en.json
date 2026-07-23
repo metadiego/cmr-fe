@@ -1017,7 +1017,13 @@
     "rangoHint": "Date range (management): leave empty for a single day.",
     "elegir": "Pick…",
     "sinOpciones": "No options",
-    "faltanCampos": "Missing: {campos}"
+    "faltanCampos": "Missing: {campos}",
+    "calDiaTitle": "Day calendar",
+    "calPacienteTitle": "Patient calendar",
+    "calElegirPaciente": "Search the patient to see their agenda",
+    "calSinHoras": "No hours configured",
+    "calSinCitas": "No upcoming appointments",
+    "calVacios": "{vacios}/{cupo} free"
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -2075,5 +2081,13 @@
     "updated": "Group updated",
     "membershipSaved": "Products updated",
     "denied": "You don't have permission to manage billing groups."
+  },
+  "tb": {
+    "acc": {
+      "volver": "Back",
+      "calendario_paciente": "Patient calendar",
+      "calendario_dia": "Day calendar",
+      "filtrar_paciente": "Filter by patient"
+    }
   }
 }

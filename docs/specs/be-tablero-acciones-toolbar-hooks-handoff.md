@@ -46,3 +46,17 @@ Se pueden declarar DOS acciones (una por modo) o una con selector. El filtro por
 "solo este paciente / todos". Ambos endpoints ya existen; solo falta el registro `acciones[]`.
 
 **FE detenido en esta pieza hasta el contrato `acciones[]`.** Lo demás del frontdesk sigue igual.
+
+---
+
+## LISTO (BE, prod 2026-07-23): contrato acciones[] + sembradas
+`GET /tablero/definicion?tablero=<clave>` → `tablero.acciones[]` (jsonb `tableros.acciones`, editable por
+`PUT /tableros/:id`). Sembradas para el board servicios (aparecen en laser y demás servicios):
+- `volver` (handler volver, orden 0)
+- `calendario_paciente` (handler `abrir_calendario`, params {modo:"paciente", rangoDias:90}, permiso frontdesk.read)
+- `calendario_dia` (handler `abrir_calendario`, params {modo:"dia"})
+- `filtrar_paciente` (handler `filtrar_paciente`)
+El FE registra los handlers por clave y pinta el slot "toolbar" por orden, gate por `requierePermiso`.
+Enchufar/quitar botón = editar el arreglo por `PUT /tableros/:id` (sin código). Confirmado que persiste
+tipado (AccionTableroDto). Endpoints de calendario ya en prod: paciente `GET /frontdesk/pacientes/:id/agenda`,
+día `GET /frontdesk/agenda?servicio&fecha`.

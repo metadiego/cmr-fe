@@ -76,6 +76,21 @@ export function personalizarColumna(payload: {
 
 // A registered vertical (GET /tableros). `entidad` = event entity for SSE
 // filtering; `filtros` = server-side scope (e.g. {soloAtencion:true} for AP).
+// Botón enchufable de la barra del tablero (estilo hooks). Editable por PUT /tableros/:id, sin código:
+// el FE registra HANDLERS por clave y pinta el `slot` por `orden`, gate por `requierePermiso`. Ver
+// docs/specs/be-tablero-acciones-toolbar-hooks-handoff.md.
+export interface AccionTablero {
+  clave: string;
+  labelKey: string;
+  icon?: string | null;
+  slot?: string; // "toolbar" | "row" | …
+  orden?: number;
+  handler: string; // clave del handler que el FE sabe ejecutar (volver, abrir_calendario, filtrar_paciente…)
+  params?: Record<string, unknown> | null; // p. ej. { modo: "paciente" | "dia", rangoDias: 90 }
+  requierePermiso?: string | null; // RBAC cosmético
+  visible?: boolean;
+}
+
 export interface TableroRegistro {
   id: string;
   clave: string;
@@ -87,6 +102,7 @@ export interface TableroRegistro {
   ruta: string; // ruta del board del vertical, ej. "/tablero/atencion"
   entidad: string; // "cita" | "sesion" | ...
   filtros: Record<string, unknown> | null;
+  acciones?: AccionTablero[] | null; // barra de botones enchufables (BE PR #165/#166)
   esVertical?: boolean; // true → aparece en /tableros (menú); false → consultable (citas_cc)
   activo: boolean;
 }
