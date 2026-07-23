@@ -966,6 +966,30 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   const dosisClave = capturables.find((c) => /dosis/i.test(c.clave))?.clave ?? null;
   const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.clave))?.clave ?? null;
 
+  // Defaults por columna (modelo del dueño): áreas = 1; días = cantidad (mismas visitas); resto vacío.
+  // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
+  const isArea = (c: string) => /[aá]rea/i.test(c);
+  const isDias = (c: string) => /d[ií]a/i.test(c) && !/dosis/i.test(c);
+  const defMeta = (c: string) => (isArea(c) ? "1" : isDias(c) ? cant : "");
+  const metaShown = (c: string) => metaVals[c] ?? defMeta(c);
+
+  // Flujo con Enter: cantidad → columnas (áreas, días…) → Enter en la última confirma la línea. La
+  // navegación se resuelve por DOM DENTRO del handler (marca `data-flow`), sin refs leídos en render.
+  const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) => e.target.select();
+  const onFlowKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const cont = e.currentTarget.closest("[data-addline]");
+    const inputs = cont ? Array.from(cont.querySelectorAll<HTMLInputElement>("[data-flow]")) : [];
+    const next = inputs[inputs.indexOf(e.currentTarget) + 1];
+    if (next) {
+      next.focus();
+      next.select();
+    } else {
+      add();
+    }
+  };
+
   function onMetaChange(clave: string, value: string) {
     const dosis = Number(value);
     const sugerida =
@@ -1008,6 +1032,10 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
     setGravadoOverride(null); // vuelve al default del nuevo producto
     setMetaVals({});
     setPrecio("");
+    // Cantidad = diasTratamiento del pack (TD12→12…). Si el producto no lo trae → campo VACÍO (no 1).
+    const p = catalogo.find((x) => x.id === v);
+    const dt = (p as { diasTratamiento?: number | null } | undefined)?.diasTratamiento;
+    setCant(dt != null ? String(dt) : "");
   }
 
   function add() {
@@ -1017,7 +1045,7 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
     // meta = valores de las columnas multiplicador/informativo (por su clave). El server calcula el total.
     const meta: Record<string, number> = {};
     capturables.forEach((c) => {
-      const raw = metaVals[c.clave];
+      const raw = metaShown(c.clave); // override del usuario o el default (áreas=1, días=cantidad)
       if (raw != null && raw.trim() !== "" && !Number.isNaN(Number(raw))) meta[c.clave] = Number(raw);
     });
     onAdd({
@@ -1033,7 +1061,7 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   }
 
   return (
-    <div className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-wrap">
+    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-wrap">
       <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
         <Lbl>{t("addItem")}</Lbl>
         <Select value={prodId} onValueChange={pick}>
@@ -1043,15 +1071,26 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
       </label>
       <label className="flex w-20 flex-col gap-1">
         <Lbl>{t("qty")}</Lbl>
-        <Input value={cant} onChange={(e) => setCant(e.target.value)} className="h-9 text-right tabular-nums" inputMode="numeric" />
+        <Input
+          data-flow
+          value={cant}
+          onChange={(e) => setCant(e.target.value)}
+          onFocus={selectOnFocus}
+          onKeyDown={onFlowKey}
+          className="h-9 text-right tabular-nums"
+          inputMode="numeric"
+        />
       </label>
       {/* Columnas dinámicas del producto (días/áreas/sesiones/dosis) */}
       {capturables.map((c) => (
         <label key={c.clave} className="flex w-24 flex-col gap-1">
           <Lbl>{tRoot(c.labelKey)}</Lbl>
           <Input
-            value={metaVals[c.clave] ?? ""}
+            data-flow={c.clave === sugeridoClave ? undefined : true}
+            value={metaShown(c.clave)}
             onChange={(e) => onMetaChange(c.clave, e.target.value)}
+            onFocus={selectOnFocus}
+            onKeyDown={onFlowKey}
             readOnly={c.clave === sugeridoClave}
             className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80 " : "") + (c.clave === sugeridoClave ? "bg-muted" : "")}
             inputMode="decimal"
