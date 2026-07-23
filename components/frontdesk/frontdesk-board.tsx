@@ -588,6 +588,9 @@ function FilaSesion({
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
   const [historialOpen, setHistorialOpen] = React.useState(false);
+  // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
+  // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
+  const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
   const estadoActual = String(fila.fd_estado ?? sesion?.estado ?? "");
   const cancelada = estadoActual === "cancelada";
 
@@ -640,16 +643,33 @@ function FilaSesion({
       // el Select queda SIEMPRE controlado (evita el bug uncontrolled↔controlled que lo dejaba EN
       // BLANCO al asignar en vivo). Verificado con logs 2026-07-23.
       const raw = v == null ? "" : String(v);
-      const opt = ops.find((o) => o.value === raw || o.label === raw);
-      const actual = opt?.value ?? "";
-      const label = opt?.label ?? (raw || undefined);
+      const delBoard = ops.find((o) => o.value === raw || o.label === raw)?.value ?? "";
+      // El valor MOSTRADO: el optimista local si existe, si no el del board (normalizado a opción).
+      const shown = pendSelect[c.clave] ?? delBoard;
+      const label = ops.find((o) => o.value === shown)?.label ?? (raw || undefined);
       return (
         <Select
-          value={actual}
+          value={shown}
           disabled={busy || cancelada || ops.length === 0}
-          onValueChange={(valor) =>
-            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))
-          }
+          onValueChange={(valor) => {
+            setPendSelect((p) => ({ ...p, [c.clave]: valor })); // reflejo instantáneo
+            run(async () => {
+              try {
+                return await editarCelda(
+                  { tablero, entidadId: fila.id, columna: c.clave, valor },
+                  centro,
+                );
+              } catch (e) {
+                // Si falla la escritura, revierte el reflejo optimista.
+                setPendSelect((p) => {
+                  const n = { ...p };
+                  delete n[c.clave];
+                  return n;
+                });
+                throw e;
+              }
+            });
+          }}
         >
           <SelectTrigger size="sm" className="h-8 w-40">
             <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
