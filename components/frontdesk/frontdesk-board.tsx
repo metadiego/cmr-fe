@@ -24,7 +24,8 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, type TableroDefinicion, type Opcion } from "@/lib/api/tablero";
+import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro } from "@/lib/api/tablero";
+import { useRouter, usePathname } from "next/navigation";
 import { buscarPaciente } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { useResource } from "@/hooks/use-resource";
@@ -68,7 +69,18 @@ import {
   StethoscopeIcon,
   MoreHorizontalIcon,
   Tick02Icon,
+  Calendar01Icon,
 } from "@hugeicons/core-free-icons";
+
+// Íconos disponibles para las acciones enchufables del tablero (mapa string→hugeicon, data-driven).
+const ACCION_ICON: Record<string, typeof Calendar01Icon> = {
+  calendar: Calendar01Icon,
+};
+
+// Handlers de acciones (hooks) que el FE SABE ejecutar. El BE declara las acciones por dato
+// (tableros.acciones, editable por PUT /tableros/:id); el FE solo pinta las de handler conocido, así
+// enchufar/quitar es por dato y nunca aparecen botones que el FE no puede despachar.
+const HANDLERS_FE = new Set(["abrir_citas_servicio"]);
 
 const todayISO = () => {
   const d = new Date();
@@ -105,6 +117,30 @@ export function FrontdeskBoard() {
   const locale = useLocale();
   const { can } = useCan();
   const gate = useCentroGate();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Acciones enchufables (hooks) del tablero servicios (data-driven, tableros.acciones). Se pintan en
+  // el slot toolbar SOLO las de handler que el FE sabe ejecutar (HANDLERS_FE) → enchufar/quitar por dato.
+  const regRes = useResource<TableroRegistro[]>(() => getTableros(), []);
+  const acciones = React.useMemo(() => {
+    const reg = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === "servicios");
+    return (reg?.acciones ?? [])
+      .filter(
+        (a) =>
+          a.visible !== false &&
+          (a.slot ?? "toolbar") === "toolbar" &&
+          HANDLERS_FE.has(a.handler) &&
+          (!a.requierePermiso || can(a.requierePermiso)),
+      )
+      .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+  }, [regRes.state, can]);
+  function dispatchAccion(a: AccionTablero) {
+    if (a.handler === "abrir_citas_servicio") {
+      // Abre la vista de Citas de Servicio (consultar/crear) y le pasa el origen para "Volver".
+      router.push(`/citas?tab=servicios&volver=${encodeURIComponent(pathname)}`);
+    }
+  }
 
   const [fecha, setFecha] = React.useState(todayISO());
   // Rango 2 fechas (PR #141) — SOLO gerente (RBAC cosmético; el BE es la autoridad). Vacío = un día.
@@ -361,6 +397,29 @@ export function FrontdeskBoard() {
                 ))}
               </SelectContent>
             </Select>
+          )}
+          {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
+              y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
+              las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
+          {acciones.length > 0 && (
+            <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {acciones.map((a) => {
+                const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
+                const icon = ACCION_ICON[a.icon ?? ""];
+                return (
+                  <Button
+                    key={a.clave}
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 gap-1.5"
+                    onClick={() => dispatchAccion(a)}
+                  >
+                    {icon && <HugeiconsIcon icon={icon} className="size-4" />}
+                    {label}
+                  </Button>
+                );
+              })}
+            </div>
           )}
           {can("citas.create") && (
             <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>

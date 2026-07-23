@@ -2093,7 +2093,8 @@
       "volver": "Back",
       "calendario_paciente": "Patient calendar",
       "calendario_dia": "Day calendar",
-      "filtrar_paciente": "Filter by patient"
+      "filtrar_paciente": "Filter by patient",
+      "citas_servicio": "Service appointments"
     }
   }
 }

@@ -2093,7 +2093,8 @@
       "volver": "Volver",
       "calendario_paciente": "Calendario paciente",
       "calendario_dia": "Calendario del día",
-      "filtrar_paciente": "Filtrar por paciente"
+      "filtrar_paciente": "Filtrar por paciente",
+      "citas_servicio": "Citas de servicio"
     }
   }
 }
