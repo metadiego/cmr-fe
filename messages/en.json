@@ -1016,7 +1016,8 @@
     "hasta": "Until (range)",
     "rangoHint": "Date range (management): leave empty for a single day.",
     "elegir": "Pick…",
-    "sinOpciones": "No options"
+    "sinOpciones": "No options",
+    "faltanCampos": "Missing: {campos}"
   },
   "programarCitas": {
     "title": "Schedule sessions",

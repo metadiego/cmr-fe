@@ -667,10 +667,14 @@ function FilaSesion({
       // El valor MOSTRADO: el optimista local si existe, si no el del board (normalizado a opción).
       const shown = pendSelect[c.clave] ?? delBoard;
       const label = ops.find((o) => o.value === shown)?.label ?? (raw || undefined);
+      // Gate data-driven: si la columna declara render.requiereEstado, el select se deshabilita hasta que
+      // la sesión alcanzó ese estado (p. ej. técnico bloqueado hasta 'presente'). Genérico, sin hardcode.
+      const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado;
+      const estadoNoCumplido = !!reqEstado && !(sesion && STAMP_FIELD[reqEstado] && sesion[STAMP_FIELD[reqEstado]]);
       return (
         <Select
           value={shown}
-          disabled={busy || cancelada || ops.length === 0}
+          disabled={busy || cancelada || ops.length === 0 || estadoNoCumplido}
           onValueChange={(valor) => {
             setPendSelect((p) => ({ ...p, [c.clave]: valor })); // reflejo instantáneo
             run(async () => {
@@ -754,6 +758,7 @@ function FilaSesion({
         const trans = r.transition ?? c.clave;
         return {
           key: trans,
+          estado: c.clave, // estado destino (clave de la columna) → matchea formAcciones.campos[].en
           labelKey: r.labelKey ?? c.labelKey,
           color: estadoDe(trans)?.color ?? null,
           stamp: (fila[c.clave] as string | null) ?? null,
@@ -762,11 +767,23 @@ function FilaSesion({
       })
     : flujo.map((p) => ({
         key: p.clave,
+        estado: p.clave,
         labelKey: p.labelKey,
         color: p.color ?? null,
         stamp: sesion ? ((sesion[STAMP_FIELD[p.clave]] as string | null) ?? null) : null,
         postAccion: null as string | null,
       }));
+
+  // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
+  // faltan por llenar en la sesión (sesion.datos[clave]) → bloquean esa transición (p. ej. áreas para asistir).
+  const camposReq = ((servicio as { formAcciones?: { campos?: { clave: string; labelKey?: string; en?: string; requerido?: boolean }[] } } | undefined)?.formAcciones?.campos ?? []);
+  const faltantesPara = (estado: string): string[] => {
+    const datos = (sesion?.datos as Record<string, unknown> | null | undefined) ?? {};
+    return camposReq
+      .filter((c) => c.requerido && c.en === estado)
+      .filter((c) => { const val = datos[c.clave]; return val == null || val === ""; }) // vacío = sin valor
+      .map((c) => (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave));
+  };
 
   const flujoCell = cancelada ? (
     <span className="text-xs text-muted-foreground">—</span>
@@ -775,7 +792,8 @@ function FilaSesion({
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
         const previo = i === 0 || !!pasos[i - 1].stamp;
-        const siguiente = !hecho && previo;
+        const faltan = faltantesPara(paso.estado); // campos requeridos aún vacíos para este estado
+        const siguiente = !hecho && previo && faltan.length === 0;
         return (
           <React.Fragment key={paso.key}>
             {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
@@ -794,6 +812,7 @@ function FilaSesion({
                 variant={siguiente ? "outline" : "ghost"}
                 size="sm"
                 disabled={!siguiente || busy}
+                title={faltan.length > 0 ? t("faltanCampos", { campos: faltan.join(", ") }) : undefined}
                 className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
                 onClick={() =>
                   run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then(() => {

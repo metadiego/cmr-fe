@@ -1016,7 +1016,8 @@
     "hasta": "Hasta (rango)",
     "rangoHint": "Rango de fechas (gerencia): deja vacío para ver un solo día.",
     "elegir": "Elegir…",
-    "sinOpciones": "Sin opciones"
+    "sinOpciones": "Sin opciones",
+    "faltanCampos": "Falta completar: {campos}"
   },
   "programarCitas": {
     "title": "Programar citas",
