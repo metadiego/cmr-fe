@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 
@@ -34,6 +33,7 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { useDictado } from "@/hooks/use-dictado";
 import { toastError } from "@/lib/api/errors";
+import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,6 +82,10 @@ function fmtHora(iso: string | null | undefined): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+// Valor de `render.postAccion` que abre el modal "Programar citas" (convención compartida con el BE;
+// el BE lo declara en la columna/estado que debe dispararlo — data-driven, sin hardcodear el estado).
+const POSTACCION_PROGRAMAR = "programar_citas";
+
 // Sello de hora por estado del flujo — mapeo del contrato del BE (FrontdeskSesionEntity), único punto.
 const STAMP_FIELD: Record<string, keyof Sesion> = {
   presente: "presenteEn",
@@ -110,6 +114,9 @@ export function FrontdeskBoard() {
   const [tab, setTab] = React.useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = React.useState("");
   const [q, setQ] = React.useState("");
+  // Modal "Programar citas": disparado por Citar (sin paciente) o por render.postAccion de una columna
+  // del tablero (con paciente de la sesión). Data-driven, sin hardcode del estado que lo abre.
+  const [programar, setProgramar] = React.useState<{ open: boolean; pacienteId?: string; pacienteNombre?: string; servicioId?: string }>({ open: false });
 
   // Catálogos data-driven: tabs de servicios + definición del vertical (estados con color, transiciones).
   // Los servicios son POR CENTRO (activo por centro) → refetch al cambiar el selector, en el acto.
@@ -356,8 +363,8 @@ export function FrontdeskBoard() {
             </Select>
           )}
           {can("citas.create") && (
-            <Button size="sm" asChild>
-              <Link href="/citas?tab=servicios">{t("citar")}</Link>
+            <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
+              {t("citar")}
             </Button>
           )}
         </div>
@@ -508,6 +515,7 @@ export function FrontdeskBoard() {
                       canReparar={can("frontdesk.reparar")}
                       estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
                       onChanged={refetch}
+                      onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
                     />
                   ))}
                 </tbody>
@@ -516,6 +524,16 @@ export function FrontdeskBoard() {
           )}
         </>
       )}
+
+      <ProgramarCitasModal
+        open={programar.open}
+        onOpenChange={(o) => setProgramar((p) => ({ ...p, open: o }))}
+        centro={gate.centro}
+        pacienteId={programar.pacienteId}
+        pacienteNombre={programar.pacienteNombre}
+        defaultServicioId={programar.servicioId}
+        onDone={refetch}
+      />
     </div>
   );
 }
@@ -568,6 +586,7 @@ function FilaSesion({
   canReparar,
   estados,
   onChanged,
+  onProgramar,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -583,6 +602,7 @@ function FilaSesion({
   canReparar: boolean;
   estados: { clave: string; label: string }[];
   onChanged: () => void;
+  onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -730,13 +750,14 @@ function FilaSesion({
   // fila, PR paridad-Atención); fallback a estados∩transiciones + entidad unida (tableros sin toggles).
   const pasos = flujoCols.length
     ? flujoCols.map((c) => {
-        const r = (c.render ?? {}) as { transition?: string; labelKey?: string };
+        const r = (c.render ?? {}) as { transition?: string; labelKey?: string; postAccion?: string };
         const trans = r.transition ?? c.clave;
         return {
           key: trans,
           labelKey: r.labelKey ?? c.labelKey,
           color: estadoDe(trans)?.color ?? null,
           stamp: (fila[c.clave] as string | null) ?? null,
+          postAccion: r.postAccion ?? null, // data-driven: qué abrir tras la acción (p. ej. programar citas)
         };
       })
     : flujo.map((p) => ({
@@ -744,6 +765,7 @@ function FilaSesion({
         labelKey: p.labelKey,
         color: p.color ?? null,
         stamp: sesion ? ((sesion[STAMP_FIELD[p.clave]] as string | null) ?? null) : null,
+        postAccion: null as string | null,
       }));
 
   const flujoCell = cancelada ? (
@@ -774,7 +796,13 @@ function FilaSesion({
                 disabled={!siguiente || busy}
                 className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
                 onClick={() =>
-                  run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro))
+                  run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then(() => {
+                    // Post-acción DATA-DRIVEN: si la columna declara render.postAccion de programar citas
+                    // y hay paciente, abre el modal (no hardcodeamos "asistido"). El BE decide qué estado lo dispara.
+                    if (paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
+                      onProgramar({ pacienteId: sesion.pacienteId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
+                    }
+                  })
                 }
               >
                 {tRoot(paso.labelKey)}

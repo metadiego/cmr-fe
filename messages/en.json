@@ -1018,6 +1018,23 @@
     "elegir": "Pick…",
     "sinOpciones": "No options"
   },
+  "programarCitas": {
+    "title": "Schedule sessions",
+    "elegirPaciente": "Pick the patient and dates",
+    "buscarPh": "Name, record or phone…",
+    "sinResultados": "No results",
+    "recordLabel": "Record",
+    "cambiar": "Change",
+    "servicio": "Service",
+    "elegirServicio": "Pick a service…",
+    "fechas": "Dates",
+    "agregarFecha": "Add date",
+    "pendientes": "Pending to schedule: {n}",
+    "excede": "Exceeds availability",
+    "agendar": "Schedule",
+    "agendando": "Scheduling…",
+    "agendadoOk": "{n} session(s) scheduled"
+  },
   "fd": {
     "col": {
       "estado": "Status",

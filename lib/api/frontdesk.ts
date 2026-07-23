@@ -43,6 +43,48 @@ export function crearSesion(
   });
 }
 
+// ——— AGENDAR (programar citas de servicio) — BE en prod 2026-07-23 ———
+
+// Agenda VARIAS fechas de un servicio para un paciente (una cita por fecha). El BE avisa si excede la
+// disponibilidad (no bloquea). Devuelve las sesiones creadas (o un resumen).
+export type AgendarMultiplePayload = components["schemas"]["AgendarMultipleDto"];
+export function agendarMultiple(payload: AgendarMultiplePayload, centroId?: string): Promise<unknown> {
+  return apiFetch(
+    `/frontdesk/sesiones/agendar-multiple`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
+
+// Reagendar una sesión a otra fecha (fechas flexibles).
+export function reagendarSesion(sesionId: string, fecha: string, centroId?: string): Promise<Sesion> {
+  return apiFetch<Sesion>(
+    `/frontdesk/sesiones/${sesionId}/agenda`,
+    { method: "PATCH", body: JSON.stringify({ fecha }) },
+    centroId,
+  );
+}
+
+// Calendario del paciente (coloreado por tipo de servicio) para un rango.
+export type AgendaItem = {
+  fecha: string;
+  estado: string;
+  servicioNombre: string | null;
+  servicioClave: string | null;
+  color: string | null;
+};
+export function getAgendaPaciente(
+  pacienteId: string,
+  desde: string,
+  hasta: string,
+  centroId?: string,
+): Promise<AgendaItem[]> {
+  const sp = new URLSearchParams({ desde, hasta });
+  return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, {}, centroId).then((r) =>
+    Array.isArray(r) ? (r as AgendaItem[]) : (((r as { items?: AgendaItem[] })?.items) ?? []),
+  );
+}
+
 // ——— Vista diaria del frontdesk (F4) — ver docs/plans/fe-frontdesk-dia.md ———
 
 // Proyección del día por servicio: columnas efectivas del tablero + filas ya resueltas por el BE

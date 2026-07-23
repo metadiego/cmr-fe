@@ -3770,6 +3770,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vista-día del frontdesk: por hora, cupo del servicio + agendadas + vacíos (cupos por terapia). */
+        get: operations["FrontdeskController_agendaDia_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/tablero": {
         parameters: {
             query?: never;
@@ -3841,6 +3858,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/sesiones/agendar-multiple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Agendar VARIAS citas de un servicio (una por fecha; el usuario elige cada fecha). Alerta si excede disponibilidad. */
+        post: operations["FrontdeskController_agendarMultiple_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sesiones/{id}/agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Reagendar una cita de servicio (cambiar su fecha). Fechas flexibles; evento reagendada. */
+        patch: operations["FrontdeskController_reagendar_v1"];
+        trace?: never;
+    };
     "/api/v1/frontdesk/sesiones/{id}": {
         parameters: {
             query?: never;
@@ -3849,6 +3900,23 @@ export interface paths {
             cookie?: never;
         };
         get: operations["FrontdeskController_get_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{pacienteId}/agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Calendario/agenda de un paciente: todas sus citas de servicio (coloreadas por servicio). */
+        get: operations["FrontdeskController_agendaPaciente_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5424,6 +5492,7 @@ export interface components {
             contenido: number | null;
             unidadesPorEnvase: number | null;
             diasTratamiento: number | null;
+            areasDefault: number | null;
             facturableGeneral: boolean;
             imprimeComponentes: boolean;
             aplicaPrecioBaseDevolucion: boolean;
@@ -5466,6 +5535,8 @@ export interface components {
             unidadesPorEnvase?: number;
             /** @description Días de tratamiento por defecto para sugerir la cantidad desde la dosis. */
             diasTratamiento?: number;
+            /** @description Áreas por defecto por visita (preset de captura al facturar; null = el FE usa 1). */
+            areasDefault?: number;
             /** @description Si el producto aparece en el catálogo de Facturación General (venta al público). Insumos/servicios internos = false. */
             facturableGeneral?: boolean;
             /** @description Solo kits: si el recibo imprime el desglose de componentes (true) o solo el kit (false = compacto). */
@@ -5505,6 +5576,7 @@ export interface components {
             unidadContenidoId?: string;
             unidadesPorEnvase?: number;
             diasTratamiento?: number;
+            areasDefault?: number;
             facturableGeneral?: boolean;
             imprimeComponentes?: boolean;
             /** @description Devolución con política precio_base: valora este producto al precio base (servicios de precio variable). */
@@ -6729,7 +6801,8 @@ export interface components {
             fecha: string | null;
             diaSemana: number | null;
             hora: string;
-            tipoCitaId: string;
+            tipoCitaId: string | null;
+            servicioId: string | null;
             cantidad: number;
             activo: boolean;
             id: string;
@@ -6743,8 +6816,16 @@ export interface components {
             /** @description Override SOLO para esta fecha ("YYYY-MM-DD"); si se omite aplica por diaSemana/default. */
             fecha?: string;
             hora: string;
-            /** Format: uuid */
-            tipoCitaId: string;
+            /**
+             * Format: uuid
+             * @description Tipo de cita (citas médicas). Exclusivo con `servicioId`: una fila es de tipo-cita O de servicio.
+             */
+            tipoCitaId?: string;
+            /**
+             * Format: uuid
+             * @description Servicio de frontdesk (cupo por hora por terapia). Exclusivo con `tipoCitaId`.
+             */
+            servicioId?: string;
             cantidad: number;
             activo?: boolean;
             /**
@@ -6759,6 +6840,8 @@ export interface components {
             hora?: string;
             /** Format: uuid */
             tipoCitaId?: string;
+            /** Format: uuid */
+            servicioId?: string;
             cantidad?: number;
             activo?: boolean;
             /**
@@ -7848,6 +7931,7 @@ export interface components {
             enfermeraId: string | null;
             medicoId: string | null;
             fecha: string;
+            hora: string | null;
             /** @enum {string} */
             estado: "pendiente" | "cancelada" | "presente" | "en_terapia" | "asistido";
             cantidad: number;
@@ -7883,10 +7967,25 @@ export interface components {
             /** Format: uuid */
             actorId?: string;
         };
+        AgendarMultipleDto: {
+            /** @description Fechas (YYYY-MM-DD) a agendar; una cita por fecha. */
+            fechas: string[];
+            /** Format: uuid */
+            pacienteId: string;
+            /** Format: uuid */
+            servicioId: string;
+            /** Format: uuid */
+            actorId?: string;
+        };
+        ReagendarSesionDto: {
+            fecha: string;
+            /** Format: uuid */
+            actorId?: string;
+        };
         FrontdeskEventoEntity: {
             sesionId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "campo_editado" | "en_terapia" | "asistido" | "datos" | "entrega_sin_saldo";
+            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "en_terapia" | "asistido" | "datos" | "entrega_sin_saldo";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -15706,6 +15805,26 @@ export interface operations {
             };
         };
     };
+    FrontdeskController_agendaDia_v1: {
+        parameters: {
+            query: {
+                servicio: string;
+                fecha: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     FrontdeskController_tablero_v1: {
         parameters: {
             query: {
@@ -15817,6 +15936,52 @@ export interface operations {
             };
         };
     };
+    FrontdeskController_agendarMultiple_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgendarMultipleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FrontdeskController_reagendar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReagendarSesionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
     FrontdeskController_get_v1: {
         parameters: {
             query?: never;
@@ -15835,6 +16000,30 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
                 };
+            };
+        };
+    };
+    FrontdeskController_agendaPaciente_v1: {
+        parameters: {
+            query?: {
+                /** @description Rango desde (YYYY-MM-DD); si falta, sin límite inferior. */
+                desde?: string;
+                /** @description Rango hasta (YYYY-MM-DD); requiere `desde` para acotar. */
+                hasta?: string;
+            };
+            header?: never;
+            path: {
+                pacienteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

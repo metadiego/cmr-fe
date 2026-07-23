@@ -1018,6 +1018,23 @@
     "elegir": "Elegir…",
     "sinOpciones": "Sin opciones"
   },
+  "programarCitas": {
+    "title": "Programar citas",
+    "elegirPaciente": "Elige el paciente y las fechas",
+    "buscarPh": "Nombre, record o teléfono…",
+    "sinResultados": "Sin resultados",
+    "recordLabel": "Record",
+    "cambiar": "Cambiar",
+    "servicio": "Servicio",
+    "elegirServicio": "Elegir servicio…",
+    "fechas": "Fechas",
+    "agregarFecha": "Agregar fecha",
+    "pendientes": "Pendientes por agendar: {n}",
+    "excede": "Excede la disponibilidad",
+    "agendar": "Agendar",
+    "agendando": "Agendando…",
+    "agendadoOk": "{n} cita(s) agendada(s)"
+  },
   "fd": {
     "col": {
       "estado": "Estado",
