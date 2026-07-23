@@ -1023,7 +1023,9 @@
     "calElegirPaciente": "Search the patient to see their agenda",
     "calSinHoras": "No hours configured",
     "calSinCitas": "No upcoming appointments",
-    "calVacios": "{vacios}/{cupo} free"
+    "calVacios": "{vacios}/{cupo} free",
+    "desasistirPregunta": "Undo attended?",
+    "desasistir": "Undo attended"
   },
   "programarCitas": {
     "title": "Schedule sessions",

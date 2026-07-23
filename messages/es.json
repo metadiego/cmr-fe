@@ -1023,7 +1023,9 @@
     "calElegirPaciente": "Busca el paciente para ver su agenda",
     "calSinHoras": "Sin horas configuradas",
     "calSinCitas": "Sin citas próximas",
-    "calVacios": "{vacios}/{cupo} libres"
+    "calVacios": "{vacios}/{cupo} libres",
+    "desasistirPregunta": "¿Desea desasistir?",
+    "desasistir": "Desasistir"
   },
   "programarCitas": {
     "title": "Programar citas",

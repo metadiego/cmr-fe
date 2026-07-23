@@ -574,6 +574,7 @@ export function FrontdeskBoard() {
                       estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
                       onChanged={refetch}
                       onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
+                      puedeDesasistir={(def?.transiciones ?? []).some((x) => x.clave === "desasistir")}
                     />
                   ))}
                 </tbody>
@@ -654,6 +655,7 @@ function FilaSesion({
   estados,
   onChanged,
   onProgramar,
+  puedeDesasistir,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -670,6 +672,7 @@ function FilaSesion({
   estados: { clave: string; label: string }[];
   onChanged: () => void;
   onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
+  puedeDesasistir: boolean;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -865,14 +868,31 @@ function FilaSesion({
           <React.Fragment key={paso.key}>
             {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
             {hecho ? (
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+              // MISMO botón como toggle: si es el paso ASISTIDO (y la transición declarativa
+              // `desasistir` existe), el chip sellado pregunta "¿desea desasistir?" (toast) y al
+              // confirmar el BE revierte consumo+sello (reutilizable por todos los servicios).
+              <button
+                type="button"
+                disabled={busy || cancelada || !(paso.key === "asistido" && puedeDesasistir)}
+                className={
+                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold " +
+                  (paso.key === "asistido" && puedeDesasistir && !cancelada ? "cursor-pointer" : "cursor-default")
+                }
                 style={paso.color ? { backgroundColor: `${paso.color}22`, color: paso.color ?? undefined } : undefined}
-                title={tRoot(paso.labelKey)}
+                title={paso.key === "asistido" && puedeDesasistir ? t("desasistirPregunta") : tRoot(paso.labelKey)}
+                onClick={() => {
+                  if (!(paso.key === "asistido" && puedeDesasistir) || cancelada) return;
+                  toast(t("desasistirPregunta"), {
+                    action: {
+                      label: t("desasistir"),
+                      onClick: () => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: "desasistir" }, centro)),
+                    },
+                  });
+                }}
               >
                 <HugeiconsIcon icon={Tick02Icon} className="size-3" />
                 {fmtHora(paso.stamp)}
-              </span>
+              </button>
             ) : (
               <Button
                 type="button"
