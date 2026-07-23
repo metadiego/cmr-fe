@@ -5275,6 +5275,8 @@ export interface components {
             zip: string | null;
             web: string | null;
             pieFactura: string | null;
+            piePresupuesto: string | null;
+            email: string | null;
             logoUrl: string | null;
             id: string;
             /** Format: date-time */
@@ -5297,8 +5299,12 @@ export interface components {
             direccion: string | null;
             /** @description Nombre de la sucursal (= nombre del centro). */
             sucursal: string;
-            /** @description Pie de factura (multilínea). */
+            /** @description Pie de la FACTURA emitida (multilínea, bilingüe EN/ES). */
             pieFactura: string | null;
+            /** @description Pie del PRESUPUESTO/borrador (multilínea, bilingüe EN/ES). El FE usa este mientras el documento NO es factura emitida. */
+            piePresupuesto: string | null;
+            /** @description Email del centro para la factura. */
+            email: string | null;
             /** @description Web del centro. */
             web: string | null;
             /** @description URL del logo para el encabezado. */
@@ -5314,6 +5320,8 @@ export interface components {
             zip?: string;
             web?: string;
             pieFactura?: string;
+            piePresupuesto?: string;
+            email?: string;
             logoUrl?: string;
         };
         UpsertPreferenceDto: {

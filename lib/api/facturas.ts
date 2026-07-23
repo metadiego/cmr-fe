@@ -29,7 +29,9 @@ export type FacturaEmpresa = {
   telefono: string | null;
   direccion: string | null;
   sucursal: string | null;
-  pieFactura: string | null;
+  pieFactura: string | null; // pie de EMITIDA (factura)
+  piePresupuesto: string | null; // pie de BORRADOR (presupuesto) — BE PR #157
+  email: string | null; // correo del centro para el encabezado
   web: string | null;
   logoUrl: string | null;
 };

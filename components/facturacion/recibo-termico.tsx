@@ -87,6 +87,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           <div className="whitespace-pre-line">{emp.direccion}</div>
         )}
         {emp?.telefono && <div>{emp.telefono}</div>}
+        {emp?.email && <div>{emp.email}</div>}
         {emp?.registroFiscal && (
           <div>
             {emp.registroFiscalLabel ? `${emp.registroFiscalLabel}: ` : ""}
@@ -218,13 +219,15 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         </>
       )}
 
-      {/* Pie */}
+      {/* Pie — depende del ESTADO: borrador = presupuesto (piePresupuesto); emitida/pagada/… = pieFactura.
+          Todo sale de `empresa` (multilínea); nada hardcodeado, sin URLs viejas. */}
       <Dashed />
       <div className="text-center">
         <div>{t("thanks")}</div>
-        {emp?.pieFactura && (
-          <div className="mt-0.5 whitespace-pre-line">{emp.pieFactura}</div>
-        )}
+        {(() => {
+          const pie = recibo.estado === "borrador" ? (emp?.piePresupuesto ?? null) : (emp?.pieFactura ?? null);
+          return pie ? <div className="mt-0.5 whitespace-pre-line">{pie}</div> : null;
+        })()}
         {emp?.web && <div className="mt-0.5">{emp.web}</div>}
         {hora && (
           <div className="mt-0.5">
