@@ -9,8 +9,10 @@ import {
   crearSesion,
   getDisponibilidadServicio,
   getAgendaPaciente,
+  getAgendaHoras,
   type DisponibilidadServicio,
   type AgendaItem,
+  type AgendaHora,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
@@ -102,6 +104,7 @@ export function ProgramarCitasModal({
   );
   const [servicioId, setServicioId] = React.useState(defaultServicioId ?? "");
   const servicioEff = servicios.some((s) => s.id === servicioId) ? servicioId : (defaultServicioId ?? servicios[0]?.id ?? "");
+  const servicioClave = servicios.find((s) => s.id === servicioEff)?.clave ?? "";
 
   // Fechas a agendar (una cita por fecha).
   const [fechas, setFechas] = React.useState<string[]>([]);
@@ -141,6 +144,20 @@ export function ProgramarCitasModal({
     return () => { cancel = true; };
   }, [agKey, pacienteId, hoy, centro]);
   const agenda = agData && agData.key === agKey ? agData.items : [];
+
+  // Cupos por HORA del servicio en la fecha que se está por agregar (vista-día). Informativa: muestra
+  // vacíos por hora para elegir un día con espacio. Data-driven (BE /frontdesk/agenda). Patrón por-key.
+  const horaKey = open && servicioClave && nuevaFecha ? `${servicioClave}|${nuevaFecha}|${centro ?? ""}` : "";
+  const [horaData, setHoraData] = React.useState<{ key: string; horas: AgendaHora[] } | null>(null);
+  React.useEffect(() => {
+    if (!horaKey) return;
+    let cancel = false;
+    getAgendaHoras(servicioClave, nuevaFecha, centro)
+      .then((r) => !cancel && setHoraData({ key: horaKey, horas: r.horas ?? [] }))
+      .catch(() => {});
+    return () => { cancel = true; };
+  }, [horaKey, servicioClave, nuevaFecha, centro]);
+  const horas = horaData && horaData.key === horaKey ? horaData.horas : [];
 
   const [busy, setBusy] = React.useState(false);
   const puedeGuardar = !!pacienteId && !!servicioEff && fechas.length > 0 && !busy;
@@ -251,6 +268,31 @@ export function ProgramarCitasModal({
                 {t("agregarFecha")}
               </Button>
             </div>
+            {/* Cupos por hora del día elegido (vacíos por hora): ayuda a ver si hay espacio. Informativo. */}
+            {nuevaFecha && horas.length > 0 && (
+              <div className="mt-1 rounded-lg border bg-muted/20 p-2">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("cuposDia")}</p>
+                <div className="flex flex-wrap gap-1">
+                  {horas.map((h) => {
+                    const lleno = h.vacios <= 0;
+                    return (
+                      <span
+                        key={h.hora}
+                        title={t("cupoTitle", { vacios: h.vacios, cupo: h.cupo })}
+                        className={
+                          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums " +
+                          (lleno
+                            ? "bg-destructive/10 text-destructive line-through"
+                            : "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400")
+                        }
+                      >
+                        {h.hora}<span className="opacity-70">·{h.vacios}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {fechas.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1.5">
                 {fechas.map((f) => (

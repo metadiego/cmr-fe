@@ -1034,7 +1034,9 @@
     "agendar": "Schedule",
     "agendando": "Scheduling…",
     "agendadoOk": "{n} session(s) scheduled",
-    "proximas": "Upcoming appointments"
+    "proximas": "Upcoming appointments",
+    "cuposDia": "Slots per hour",
+    "cupoTitle": "{vacios} free of {cupo}"
   },
   "fd": {
     "col": {

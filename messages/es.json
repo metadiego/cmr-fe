@@ -1034,7 +1034,9 @@
     "agendar": "Agendar",
     "agendando": "Agendando…",
     "agendadoOk": "{n} cita(s) agendada(s)",
-    "proximas": "Próximas citas"
+    "proximas": "Próximas citas",
+    "cuposDia": "Cupos por hora",
+    "cupoTitle": "{vacios} libres de {cupo}"
   },
   "fd": {
     "col": {
