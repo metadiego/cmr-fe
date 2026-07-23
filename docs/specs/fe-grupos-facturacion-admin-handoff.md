@@ -19,14 +19,19 @@ la DOSIS se lista por los productos del grupo (`optionsSource: 'productos_grupo'
 el servicio "Sueroterapia Vit C" estaba SIN ancla y el grupo `suero` tiene 14 dosis (faltan 80–100g del
 legacy) — nadie puede corregirlo sin un ingeniero.
 
-## 2. Contrato BE actual (VERIFICADO — no asumir otros campos)
+## 2. Contrato BE (CORREGIDO 2026-07-21 y DESPLEGADO — verificado contra prod con 200)
 
-- `GET /api/v1/facturas/grupos` → lista de grupos (catálogo admin).
-- `POST /api/v1/facturas/grupos` (`@Roles admin/super_admin` + `@Permissions('factura.columnas')`) con DTO
-  **actual** `{ clave, labelKey }` (SIN division/nombre — ver §4).
-- `GET /api/v1/facturacion/formas-pago`-style patterns aplican (envelope `{data, meta}`).
-- Productos: `productos.grupoFacturacionId` existe en la entidad, pero el DTO de update de inventario **NO lo
-  acepta hoy** (ver §4).
+> ⚠️ **FE DE ERRATAS (culpa del BE):** la versión anterior de este handoff decía `/facturas/grupos` — RUTA
+> EQUIVOCADA (cae en `GET /facturas/:id` que espera UUID → `VALIDATION_ERROR: Validation failed (uuid is
+> expected)`). El path correcto es bajo **`facturacion/columnas`**:
+
+- `GET  /api/v1/facturacion/columnas/grupos` → grupos **con `productosCount`** (verificado 200 en prod).
+- `POST /api/v1/facturacion/columnas/grupos` — `{ clave, labelKey, division? }` (división opcional,
+  default `general`). `@Roles admin/super_admin` + `@Permissions('factura.columnas')`.
+- `PUT  /api/v1/facturacion/columnas/grupos/:id` — `{ labelKey?, division?, activo? }` (soft).
+- `PUT  /api/v1/facturacion/columnas/grupos/:id/productos` — `{ productoIds: string[] }` reemplaza la
+  MEMBRESÍA (asigna los dados, desasigna los que salen; devuelve `{grupoId, productosCount}`).
+- Envelope `{data, meta}` como el resto. Todo YA DESPLEGADO (PR #152); regenerar `schema.d.ts`.
 
 ## 3. UI requerida (FE) — pantalla "Grupos de facturación"
 
@@ -44,15 +49,14 @@ data-table shadcn + sheet/drawer para forms):
    nada inventado en cliente. Tokens-only. Tipos desde el schema OpenAPI regenerado.
 4. Confirmaciones para quitar un producto de un grupo (afecta dosis/disponibilidad del servicio anclado).
 
-## 4. Lo que el BE COMPLETARÁ para esto (compromiso, con TDD/Swagger/MCP; sin migración — columnas ya existen)
+## 4. Lo que el BE completó (✅ DESPLEGADO 2026-07-21, PR #152 — rutas exactas en §2)
 
-1. `CrearGrupoFacturacionDto` + `division` (`@IsIn(['consulta','general'])`) y opcional `nombre`.
-2. `PUT /api/v1/facturas/grupos/:id` — editar `labelKey`/`division`/`activo` (soft; nunca borrar duro).
-3. **Membresía**: `PUT /api/v1/facturas/grupos/:id/productos` `{ productoIds: string[] }` (reemplaza la
-   membresía; el service asigna/limpia `productos.grupoFacturacionId` en bloque, tenant-aware) **y/o**
-   `PATCH` de producto aceptando `grupoFacturacionId`. Swagger tipado + tools MCP equivalentes.
-4. `GET grupos` enriquecido con `productosCount` (para la columna de la lista).
-Avisar al FE cuando esté desplegado para regenerar `schema.d.ts` (mismo flujo que caja/cajeros).
+1. ✅ `CrearGrupoFacturacionDto` + `division` opcional (default `general`).
+2. ✅ `PUT …/columnas/grupos/:id` — editar `labelKey`/`division`/`activo` (soft).
+3. ✅ Membresía bulk: `PUT …/columnas/grupos/:id/productos` `{ productoIds[] }`.
+4. ✅ `GET …/columnas/grupos` con `productosCount`. + MCP `actualizar_grupo_facturacion` /
+   `set_productos_grupo_facturacion`. Swagger tipado. Suite 1090 verde. **Regenerar `schema.d.ts` y
+   apuntar el cliente a las rutas de §2.**
 
 ## 5. Criterios de aceptación (E2E, contra prod)
 
