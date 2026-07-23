@@ -38,7 +38,11 @@ definición/registro del tablero (`GET /tablero/definicion` o `/tableros`):
    documentadas y configurables por API, no seed fijo).
 2. Confirmar el catálogo de `handler` soportados que quieres para arrancar (calendario, volver, filtro).
 
-## Pendiente decisión del dueño
-- ¿El "Calendario" es del PACIENTE (sus citas) o del DÍA (todas)? El filtro "individual vs conjuntas"
-  sugiere ambos → un handler con param `modo: "paciente" | "dia"`.
+## Decisión del dueño (2026-07-23): AMBOS calendarios
+El handler `abrir_calendario` acepta `params.modo`:
+- `"paciente"` → calendario del paciente (sus citas; `GET /frontdesk/pacientes/:id/agenda`, ya en prod).
+- `"dia"` → calendario/vista del día (todas; `GET /frontdesk/agenda?servicio&fecha`, ya en prod).
+Se pueden declarar DOS acciones (una por modo) o una con selector. El filtro por paciente alterna
+"solo este paciente / todos". Ambos endpoints ya existen; solo falta el registro `acciones[]`.
+
 **FE detenido en esta pieza hasta el contrato `acciones[]`.** Lo demás del frontdesk sigue igual.
