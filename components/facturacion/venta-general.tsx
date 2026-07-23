@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Search01Icon, Building01Icon } from "@hugeicons/core-free-icons";
+import { Search01Icon, Building01Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import { buscarPaciente, crearFactura, type PacienteBusqueda } from "@/lib/api/facturas";
@@ -15,7 +15,6 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -159,22 +158,44 @@ function Finder({
         <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPlaceholder")} className="border-0 px-0 shadow-none focus-visible:ring-0" />
       </div>
 
-      <div className="mb-4 max-h-80 overflow-y-auto rounded-md border">
-        {loading && <p className="px-3 py-4 text-center text-sm text-muted-foreground">{t("searching")}</p>}
-        {!loading && term.length < 2 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>}
-        {!loading && term.length >= 2 && shown.length === 0 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>}
-        {shown.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => setSel(p)}
-            className={cn("flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50", sel?.id === p.id && "bg-accent")}
-          >
-            <span className="font-medium">{nombre(p)}</span>
-            {(p.docId || p.record) && <span className="text-[11px] text-muted-foreground">{p.record ?? p.docId}</span>}
+      {/* Paciente SELECCIONADO: banner claro (no queda duda de que el clic funcionó) con acción a la vista. */}
+      {sel ? (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2.5">
+          <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-primary" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-medium">{nombre(sel)}</div>
+            <div className="truncate text-xs text-muted-foreground">
+              {[sel.record && `${t("recordLabel")} ${sel.record}`, sel.telefono ?? sel.whatsapp].filter(Boolean).join(" · ") || sel.docId}
+            </div>
+          </div>
+          <button type="button" onClick={() => setSel(null)} className="shrink-0 text-xs font-medium text-primary hover:underline">
+            {t("cambiarPaciente")}
           </button>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="mb-4 max-h-80 overflow-y-auto rounded-md border">
+          {loading && <p className="px-3 py-4 text-center text-sm text-muted-foreground">{t("searching")}</p>}
+          {!loading && term.length < 2 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>}
+          {!loading && term.length >= 2 && shown.length === 0 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>}
+          {shown.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setSel(p)}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent/50"
+            >
+              <div className="min-w-0 flex-1">
+                <span className="block font-medium">{nombre(p)}</span>
+                {(p.record || p.telefono || p.whatsapp || p.docId) && (
+                  <span className="block text-[11px] text-muted-foreground">
+                    {[p.record && `${t("recordLabel")} ${p.record}`, p.telefono ?? p.whatsapp].filter(Boolean).join(" · ") || p.docId}
+                  </span>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
         {listas.length > 0 && (

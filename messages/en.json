@@ -1531,6 +1531,8 @@
       "iniciar": "Start sale",
       "creando": "Creating…",
       "sinNombre": "(no name)",
+      "recordLabel": "Record",
+      "cambiarPaciente": "Change",
       "lista": "Price list",
       "pickCentroTitle": "Select the center",
       "pickCentroGo": "Bill here",

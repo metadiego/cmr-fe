@@ -1531,6 +1531,8 @@
       "iniciar": "Iniciar venta",
       "creando": "Creando…",
       "sinNombre": "(sin nombre)",
+      "recordLabel": "Record",
+      "cambiarPaciente": "Cambiar",
       "lista": "Lista de precios",
       "pickCentroTitle": "Selecciona el centro",
       "pickCentroGo": "Facturar aquí",
