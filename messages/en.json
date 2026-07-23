@@ -1291,7 +1291,8 @@
         "gravado": "Taxable",
         "activo": "Active",
         "none": "(none)",
-        "aplicaPrecioBaseDevolucion": "Refunds at base price"
+        "aplicaPrecioBaseDevolucion": "Refunds at base price",
+        "grupoFacturacion": "Billing group"
       },
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",
@@ -1304,7 +1305,11 @@
       },
       "editarInsumos": "Supplies",
       "imprimeComponentes": "Print components on receipt",
-      "imprimeComponentesHint": "Detailed (shows components) vs compact (kit only)"
+      "imprimeComponentesHint": "Detailed (shows components) vs compact (kit only)",
+      "grupoNuevo": "+ New group",
+      "grupoCrear": "Create group",
+      "grupoClave": "Group key",
+      "grupoCreado": "Group created"
     },
     "picker": {
       "placeholder": "Select a product…",

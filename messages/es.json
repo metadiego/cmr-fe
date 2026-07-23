@@ -1291,7 +1291,8 @@
         "gravado": "Gravado (impuesto)",
         "activo": "Activo",
         "none": "(ninguno)",
-        "aplicaPrecioBaseDevolucion": "Devuelve a precio base"
+        "aplicaPrecioBaseDevolucion": "Devuelve a precio base",
+        "grupoFacturacion": "Grupo de facturación"
       },
       "proveedorMas": "+{n}",
       "noResults": "Sin resultados para «{q}»",
@@ -1304,7 +1305,11 @@
       },
       "editarInsumos": "Insumos",
       "imprimeComponentes": "Imprimir componentes en el recibo",
-      "imprimeComponentesHint": "Detallado (muestra componentes) vs compacto (solo el kit)"
+      "imprimeComponentesHint": "Detallado (muestra componentes) vs compacto (solo el kit)",
+      "grupoNuevo": "+ Nuevo grupo",
+      "grupoCrear": "Crear grupo",
+      "grupoClave": "Clave del grupo",
+      "grupoCreado": "Grupo creado"
     },
     "picker": {
       "placeholder": "Selecciona un producto…",

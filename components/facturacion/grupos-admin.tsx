@@ -71,14 +71,14 @@ export function GruposAdmin() {
 
   if (!puede) {
     return (
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="w-full px-6 py-8">
         <p className="text-sm text-muted-foreground">{t("denied")}</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="w-full px-6 py-8">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         {bundle.state.kind === "ok" && (
@@ -368,7 +368,7 @@ function TransferColumna({
       <ul className="max-h-80 divide-y overflow-y-auto">
         {productos.map((p) => (
           <li key={p.id} className="flex items-center justify-between gap-2 px-3 py-1.5 text-sm">
-            <span className="truncate">
+            <span className="truncate" title={`${p.nombre}${p.sku ? ` · ${p.sku}` : ""}`}>
               {p.nombre}
               <span className="ml-1 text-xs text-muted-foreground">{p.sku}</span>
             </span>

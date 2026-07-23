@@ -31,6 +31,13 @@ import {
   type ClaseProductoOpcion,
 } from "@/lib/api/inventario";
 import type { Paginated } from "@/lib/api/types";
+import {
+  listGruposFacturacion,
+  listDivisiones,
+  crearGrupoFacturacion,
+  setProductosDeGrupo,
+  listTodosProductos,
+} from "@/lib/api/grupos-facturacion";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -467,6 +474,7 @@ type FormState = {
   imprimeComponentes: boolean;
   aplicaPrecioBaseDevolucion: boolean;
   activo: boolean;
+  grupoFacturacionId: string;
 };
 const EMPTY: FormState = {
   sku: "",
@@ -484,6 +492,7 @@ const EMPTY: FormState = {
   imprimeComponentes: true,
   aplicaPrecioBaseDevolucion: false,
   activo: true,
+  grupoFacturacionId: "",
 };
 
 function ProductoForm({
@@ -531,6 +540,7 @@ function ProductoForm({
             imprimeComponentes: (producto as { imprimeComponentes?: boolean }).imprimeComponentes ?? true,
             aplicaPrecioBaseDevolucion: (producto as { aplicaPrecioBaseDevolucion?: boolean }).aplicaPrecioBaseDevolucion ?? false,
             activo: producto.activo ?? true,
+            grupoFacturacionId: producto.grupoFacturacionId ?? "",
           }
         : EMPTY,
     );
@@ -538,6 +548,43 @@ function ProductoForm({
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((prev) => ({ ...prev, [k]: v }));
+  }
+
+  // Grupo de facturación: asignar a uno existente o crear uno nuevo AL VUELO (sin salir del form).
+  // El BE no acepta grupoFacturacionId en el producto; se asigna por la membresía del grupo tras guardar.
+  const tRoot = useTranslations();
+  const gruposRes = useResource(() => listGruposFacturacion(), []);
+  const divisionesRes = useResource(() => listDivisiones(), []);
+  const grupos = gruposRes.state.kind === "ok" ? gruposRes.state.data : [];
+  const divisiones = divisionesRes.state.kind === "ok" ? divisionesRes.state.data : [];
+  const grupoLabel = (labelKey: string, fallback: string) =>
+    labelKey && tRoot.has(labelKey) ? tRoot(labelKey) : fallback;
+  const [nuevoGrupo, setNuevoGrupo] = React.useState(false);
+  const [ngClave, setNgClave] = React.useState("");
+  const [ngLabel, setNgLabel] = React.useState("");
+  const [ngDivision, setNgDivision] = React.useState("");
+  const [creandoGrupo, setCreandoGrupo] = React.useState(false);
+
+  async function crearGrupoInline() {
+    if (!ngClave.trim()) return;
+    setCreandoGrupo(true);
+    try {
+      const g = await crearGrupoFacturacion({
+        clave: ngClave.trim(),
+        labelKey: ngLabel.trim() || `fac.grupo.${ngClave.trim()}`,
+        division: ngDivision || divisiones[0]?.clave || "general",
+      });
+      gruposRes.reload();
+      set("grupoFacturacionId", g.id);
+      setNuevoGrupo(false);
+      setNgClave("");
+      setNgLabel("");
+      toast.success(t("grupoCreado"));
+    } catch (err) {
+      toast.error(apiErrorMessage(err));
+    } finally {
+      setCreandoGrupo(false);
+    }
   }
 
   const canSubmit =
@@ -568,10 +615,34 @@ function ProductoForm({
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
         ...(form.tipo === "compuesto" ? { imprimeComponentes: form.imprimeComponentes } : {}),
       };
+      let savedId: string;
       if (isEdit && producto) {
         await updateProducto(producto.id, { ...common, activo: form.activo });
+        savedId = producto.id;
       } else {
-        await createProducto({ sku: form.sku.trim(), ...common } as CreateProductoPayload);
+        const creado = await createProducto({
+          sku: form.sku.trim(),
+          ...common,
+        } as CreateProductoPayload);
+        savedId = creado.id;
+      }
+      // Asignación de grupo por MEMBRESÍA (el producto no lleva grupoFacturacionId en su DTO): si
+      // cambió respecto al actual, se reemplaza la membresía del grupo destino (y se saca del anterior).
+      const targetGrupo = id(form.grupoFacturacionId);
+      const prevGrupo = producto?.grupoFacturacionId ?? undefined;
+      if (targetGrupo !== prevGrupo && (targetGrupo || prevGrupo)) {
+        const all = await listTodosProductos();
+        if (targetGrupo) {
+          const miembros = all
+            .filter((p) => p.grupoFacturacionId === targetGrupo && p.id !== savedId)
+            .map((p) => p.id);
+          await setProductosDeGrupo(targetGrupo, [...miembros, savedId]);
+        } else if (prevGrupo) {
+          const miembros = all
+            .filter((p) => p.grupoFacturacionId === prevGrupo && p.id !== savedId)
+            .map((p) => p.id);
+          await setProductosDeGrupo(prevGrupo, miembros);
+        }
       }
       toast.success(isEdit ? t("updated") : t("created"));
       onOpenChange(false);
@@ -595,6 +666,82 @@ function ProductoForm({
           <Field label={t("field.nombre")}>
             <Input value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
           </Field>
+
+          {/* Grupo de facturación: elegir uno existente o CREAR uno nuevo al vuelo (no salir del form). */}
+          <Field label={t("field.grupoFacturacion")}>
+            <div className="space-y-2">
+              <Select
+                value={form.grupoFacturacionId || NONE}
+                onValueChange={(v) => set("grupoFacturacionId", v === NONE ? "" : v)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>{t("field.none")}</SelectItem>
+                  {grupos.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>
+                      {grupoLabel(g.labelKey, g.clave)} ·{" "}
+                      {grupoLabel(`fac.division.${g.division}`, g.division)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {nuevoGrupo ? (
+                <div className="space-y-2 rounded-lg border p-2">
+                  <Input
+                    placeholder={t("grupoClave")}
+                    value={ngClave}
+                    onChange={(e) => setNgClave(e.target.value)}
+                    className="h-8"
+                  />
+                  <Input
+                    placeholder={ngClave ? `fac.grupo.${ngClave}` : "labelKey"}
+                    value={ngLabel}
+                    onChange={(e) => setNgLabel(e.target.value)}
+                    className="h-8"
+                  />
+                  <Select
+                    value={ngDivision || divisiones[0]?.clave || "general"}
+                    onValueChange={setNgDivision}
+                  >
+                    <SelectTrigger className="h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {divisiones.map((d) => (
+                        <SelectItem key={d.clave} value={d.clave}>
+                          {grupoLabel(d.labelKey, d.clave)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={crearGrupoInline}
+                      disabled={creandoGrupo || !ngClave.trim()}
+                    >
+                      {t("grupoCrear")}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setNuevoGrupo(false)}>
+                      {tc("cancel")}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setNuevoGrupo(true)}
+                >
+                  {t("grupoNuevo")}
+                </Button>
+              )}
+            </div>
+          </Field>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("field.sku")}>
               <Input
