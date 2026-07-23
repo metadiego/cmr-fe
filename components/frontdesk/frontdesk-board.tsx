@@ -186,18 +186,6 @@ export function FrontdeskBoard() {
     sesRes.refresh();
   }, [boardRes, sesRes]);
 
-  // Pin OPTIMISTA de celdas editadas (fila → columna → valor). El refresh en vivo (stream) puede
-  // llegar con una respuesta que aún no refleja la edición (carrera de simultaneidad) y dejar la
-  // celda EN BLANCO. Se mantiene el valor recién elegido SOLO mientras el board devuelva esa celda
-  // vacía; en cuanto el board trae el dato (no vacío), manda el board. Verificado: el técnico escribe
-  // sesion.tecnicoId (id) y el board resuelve el nombre → el pin se muestra vía las opciones (value=id).
-  const [pins, setPins] = React.useState<Record<string, Record<string, string>>>({});
-  const pinCelda = React.useCallback(
-    (filaId: string, columna: string, valor: string) =>
-      setPins((prev) => ({ ...prev, [filaId]: { ...prev[filaId], [columna]: valor } })),
-    [],
-  );
-
   // En vivo (bus único /tablero/stream, entidad sesion). entrega_sin_saldo → alerta roja persistente.
   const [sinSaldoIds, setSinSaldoIds] = React.useState<Set<string>>(new Set());
   const { live } = useCitaStream({
@@ -298,17 +286,7 @@ export function FrontdeskBoard() {
 
   // Filtro compuesto: búsqueda (texto de fila O pacienteId) → luego KPI de estado.
   const visibles = React.useMemo(() => {
-    // Aplica el pin optimista SOLO en columnas que el board aún devuelve vacías (una vez que el board
-    // trae el dato, se ignora el pin → manda el board). Evita el "parpadeo a blanco" del refresh en vivo.
-    const filas = (board?.filas ?? []).map((f) => {
-      const pin = pins[f.id];
-      if (!pin) return f;
-      const pend: Record<string, string> = {};
-      for (const [col, val] of Object.entries(pin)) {
-        if (!String(f[col] ?? "").trim()) pend[col] = val;
-      }
-      return Object.keys(pend).length ? { ...f, ...pend } : f;
-    });
+    const filas = board?.filas ?? [];
     const conBusqueda = filas.filter((f) => {
       const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
       const porTexto = coincide(textos, q);
@@ -319,7 +297,7 @@ export function FrontdeskBoard() {
     return estadoFiltro
       ? conBusqueda.filter((f) => String(f.fd_estado ?? "") === estadoFiltro)
       : conBusqueda;
-  }, [board, pins, columnas, q, pacienteIds, sesiones, estadoFiltro]);
+  }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro]);
 
   // KPIs sobre el set buscado (sin el filtro de estado, para que los conteos guíen).
   const kpis = React.useMemo(() => {
@@ -531,7 +509,6 @@ export function FrontdeskBoard() {
                       canReparar={can("frontdesk.reparar")}
                       estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
                       onChanged={refetch}
-                      onPin={(columna, valor) => pinCelda(f.id, columna, valor)}
                     />
                   ))}
                 </tbody>
@@ -592,7 +569,6 @@ function FilaSesion({
   canReparar,
   estados,
   onChanged,
-  onPin,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -608,7 +584,6 @@ function FilaSesion({
   canReparar: boolean;
   estados: { clave: string; label: string }[];
   onChanged: () => void;
-  onPin: (columna: string, valor: string) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -666,10 +641,9 @@ function FilaSesion({
         <Select
           value={actual || undefined}
           disabled={busy || cancelada || ops.length === 0}
-          onValueChange={(valor) => {
-            onPin(c.clave, valor); // fija el valor elegido: no se borra aunque el refresh en vivo tarde
-            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro));
-          }}
+          onValueChange={(valor) =>
+            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))
+          }
         >
           <SelectTrigger size="sm" className="h-8 w-40">
             <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
