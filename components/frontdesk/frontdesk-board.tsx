@@ -94,15 +94,6 @@ const STAMP_FIELD: Record<string, keyof Sesion> = {
 // (columnas del BE) con flujo Presente→En terapia→Asistido con sello de hora, búsqueda con dictado,
 // disponibilidad por paciente, mediciones, SSE en vivo y reparación admin. docs/plans/fe-frontdesk-dia.md
 // ————————————————————————————————————————————————————————————————————————————
-// ── DIAGNÓSTICO TEMPORAL (fd-dbg) ─────────────────────────────────────────────
-// Instrumenta el ciclo del técnico: click → envío/respuesta de editarCelda (con tiempos),
-// eventos SSE en vivo, cada refetch y el valor de fd_tecnico que devuelve el board por fila.
-// QUITAR cuando se resuelva el bug del técnico que "queda en blanco".
-const FD_DBG = true;
-function fdlog(...args: unknown[]) {
-  if (FD_DBG) console.log(`[fd-dbg ${new Date().toISOString().slice(11, 23)}]`, ...args);
-}
-
 export function FrontdeskBoard() {
   const t = useTranslations("frontdesk");
   const tc = useTranslations("common");
@@ -190,19 +181,9 @@ export function FrontdeskBoard() {
     [sesRes.state],
   );
   const refetch = React.useCallback(() => {
-    fdlog("refetch() → board.refresh + ses.refresh");
     boardRes.refresh();
     sesRes.refresh();
   }, [boardRes, sesRes]);
-
-  // fd-dbg: cada vez que el board resuelve, muestra fd_tecnico por fila (para ver cuándo llega vacío).
-  React.useEffect(() => {
-    if (!board) return;
-    fdlog(
-      "board RESUELTO → fd_tecnico por fila:",
-      (board.filas ?? []).map((f) => ({ id: String(f.id).slice(0, 8), fd_tecnico: f["fd_tecnico"] ?? null })),
-    );
-  }, [board]);
 
   // En vivo (bus único /tablero/stream, entidad sesion). entrega_sin_saldo → alerta roja persistente.
   const [sinSaldoIds, setSinSaldoIds] = React.useState<Set<string>>(new Set());
@@ -212,13 +193,6 @@ export function FrontdeskBoard() {
     enabled: !!gate.centro,
     onInvalidate: refetch,
     onEvent: (e) => {
-      fdlog("SSE evento", {
-        accion: e.accion,
-        id: String(e.id).slice(0, 8),
-        estado: e.estado,
-        version: (e as { version?: number }).version,
-        ts: e.ts,
-      });
       if (String(e.accion ?? "").includes("sin_saldo")) {
         setSinSaldoIds((prev) => new Set(prev).add(e.id));
         toast.error(t("entregaSinSaldo"));
@@ -660,28 +634,21 @@ function FilaSesion({
     // editarCelda (writeBinding sesion.productoAplicadoId, evento auditable, PR #138).
     if (c.tipo === "select" && c.editable) {
       const ops = optionsByCol[c.clave] ?? [];
-      const actual = v == null ? "" : String(v);
-      const label = ops.find((o) => o.value === actual)?.label ?? (actual || undefined);
+      // El board puede devolver el VALOR (id, p.ej. dosis) o el NOMBRE resuelto (p.ej. técnico
+      // = tecnico.nombre). Se normaliza al `value` de la opción (matcheando por value O por label)
+      // para que el Select (radix) lo muestre. `value` SIEMPRE definido (string "" si no hay) →
+      // el Select queda SIEMPRE controlado (evita el bug uncontrolled↔controlled que lo dejaba EN
+      // BLANCO al asignar en vivo). Verificado con logs 2026-07-23.
+      const raw = v == null ? "" : String(v);
+      const opt = ops.find((o) => o.value === raw || o.label === raw);
+      const actual = opt?.value ?? "";
+      const label = opt?.label ?? (raw || undefined);
       return (
         <Select
-          value={actual || undefined}
+          value={actual}
           disabled={busy || cancelada || ops.length === 0}
           onValueChange={(valor) =>
-            run(async () => {
-              const t0 = Date.now();
-              fdlog("CLICK select", {
-                columna: c.clave,
-                valorEnviado: valor,
-                label: ops.find((o) => o.value === valor)?.label,
-                fila: String(fila.id).slice(0, 8),
-              });
-              const r = await editarCelda(
-                { tablero, entidadId: fila.id, columna: c.clave, valor },
-                centro,
-              );
-              fdlog("editarCelda RESPUESTA", { ms: Date.now() - t0, respuesta: r });
-              return r;
-            })
+            run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))
           }
         >
           <SelectTrigger size="sm" className="h-8 w-40">
