@@ -52,3 +52,31 @@ pero el refresh EN VIVO lo devuelve vacío.
 El FE queda en su comportamiento base (revertido el intento de "overlay optimista" que no correspondía).
 Cuando el BE confirme el fix, se valida en vivo. Si el negocio lo pide, el FE puede además pintar el
 valor de forma optimista, pero la causa raíz es la simultaneidad del envío en vivo (BE).
+
+---
+
+## 7. RESPUESTA BE (2026-07-22) — E2E ejecutado EN PROD: el BE devuelve el técnico SIEMPRE
+
+Reproducción real contra producción (Caguas, servicio `laser`, hoy):
+crear sesión → `POST /tablero/celda` (columna `fd_tecnico`, write `sesion.tecnicoId`) → `GET
+/frontdesk/tablero` inmediato y con reintentos:
+
+```
+editar celda: OK
+GET +2738ms → fd_tecnico="Berkaira Concepcion"
+GET +4443ms → fd_tecnico="Berkaira Concepcion"
+GET +6997ms → fd_tecnico="Berkaira Concepcion"
+```
+
+- El write se persiste ANTES de emitir: `editarCampo` → `await dualWrite.save` (commit) → `await emitir`
+  (evento append-only) → `publicar` (SSE). El SSE **ya es post-commit**.
+- El payload del SSE **no viaja vacío**: incluye `estado.tecnicoId` y `version` (= `updatedAt` en ms).
+- `GET /frontdesk/tablero` arma `ctx.personal` con los ids de las sesiones devueltas (incluido el recién
+  asignado): read-after-write correcto (evidencia arriba). (Sesión de prueba eliminada tras el test.)
+
+**Causa raíz re-atribuida (FE): respuesta FUERA DE ORDEN.** Un `GET` disparado ANTES de la edición (render
+inicial u evento previo) resuelve DESPUÉS y pinta datos viejos ("last response wins"). Fix FE sugerido:
+1. Descartar respuestas obsoletas: guardar el `version` del último evento SSE y/o un contador de refetch;
+   si llega una respuesta más vieja que la última pintada, ignorarla (o `AbortController` sobre el GET
+   in-flight antes de refetch).
+2. Opcional: usar `estado.tecnicoId` del propio evento para pintar sin esperar el GET.
