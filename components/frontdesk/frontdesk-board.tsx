@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import {
   getFrontdeskTablero,
   listSesionesRango,
-  marcarTransicion,
   cancelarSesion,
   repararSesion,
   getDisponibilidadServicio,
@@ -26,7 +25,7 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { getDefinicion, getOpciones, editarCelda, type TableroDefinicion, type Opcion } from "@/lib/api/tablero";
+import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, type TableroDefinicion, type Opcion } from "@/lib/api/tablero";
 import { buscarPaciente } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { useResource } from "@/hooks/use-resource";
@@ -688,7 +687,9 @@ function FilaSesion({
           disabled={busy}
           className="h-6 rounded-full px-2 text-[11px]"
           onClick={() =>
-            run(() => marcarTransicion(fila.id, (r.transition ?? c.clave).replace(/_/g, "-") as never, {}, centro))
+            // Vía CANÓNICA del builder: POST /tablero/accion (la entidad es implícita en el tablero;
+            // acepta claves reusadas de Atención como 'consulta'/'atender').
+            run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: r.transition ?? c.clave }, centro))
           }
         >
           {tRoot(r.labelKey ?? c.labelKey)}
@@ -746,7 +747,7 @@ function FilaSesion({
                 disabled={!siguiente || busy}
                 className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
                 onClick={() =>
-                  run(() => marcarTransicion(fila.id, paso.key.replace(/_/g, "-") as never, {}, centro))
+                  run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro))
                 }
               >
                 {tRoot(paso.labelKey)}
