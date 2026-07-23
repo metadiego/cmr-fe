@@ -330,22 +330,27 @@ function Editor({
     Object.fromEntries(serverItems.map((it) => [it.id, { cantidad: n(it.cantidad) || 1, precioUnitario: n(it.precioUnitario) }])),
   );
 
+  // Importe de LÍNEA = el del BE (`item.total`, ya incluye la cantidad EFECTIVA × precio con sus
+  // multiplicadores). Regla dura: el recibo/detalle NUNCA recalcula; lo mostrado === lo cobrado.
+  // Solo durante una edición ACTIVA en borrador mostramos un preview que respeta el multiplicador
+  // (efectiva/base) para que "24 × 70" lea coherente; al salir del campo el BE recomputa el total real.
   const lineTotal = (it: FacturaItem) => {
-    const e = edits[it.id] ?? { cantidad: n(it.cantidad), precioUnitario: n(it.precioUnitario) };
-    return e.cantidad * e.precioUnitario;
+    const e = edits[it.id];
+    const editing = e && (e.cantidad !== n(it.cantidad) || e.precioUnitario !== n(it.precioUnitario));
+    if (!editing) return n(it.total);
+    const base = n(it.cantidad) || 1;
+    const mult = base ? cantEfectiva(it) / base : 1;
+    return e.cantidad * mult * e.precioUnitario;
   };
-  // Totales EN VIVO (cliente): subtotal = Σ líneas; descuento global desde tipo/valor;
-  // impuesto del servidor (0 en consulta). total = subtotal − descuento + impuesto.
-  const subtotal = serverItems.reduce((s, it) => s + lineTotal(it), 0);
-  const dtipo = String(factura.descuentoGlobalTipo ?? "");
-  const dval = n(factura.descuentoGlobalValor);
-  const descuento = dtipo === "porcentaje" ? (subtotal * dval) / 100 : dtipo === "monto" ? dval : n(factura.descuento);
+  // Totales de CABECERA = los del BE (subtotal/descuento/impuesto/total). No se recalculan en el cliente.
+  const subtotal = n(factura.subtotal) || serverItems.reduce((s, it) => s + n(it.total), 0);
+  const descuento = n(factura.descuento);
   const impuesto = n(factura.impuesto);
   // Desglose de impuestos del BE (impuestos[] con nombre/tasa/monto). Data-driven: N renglones,
   // sin hardcodear "11.5%". El total NO se recomputa aquí. Vacío → una sola línea (o exento).
   const impuestosDesglose = ((factura as { impuestos?: { nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [])
     .filter((im) => n(im.monto) > 0);
-  const total = Math.max(0, subtotal - descuento + impuesto);
+  const total = n(factura.total) || Math.max(0, subtotal - descuento + impuesto);
   const saldo = total - n(factura.montoAbonado);
 
   function setEdit(itemId: string, p: Partial<Edit>) {
