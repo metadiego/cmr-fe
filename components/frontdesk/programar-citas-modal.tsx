@@ -8,7 +8,9 @@ import {
   agendarMultiple,
   crearSesion,
   getDisponibilidadServicio,
+  getAgendaPaciente,
   type DisponibilidadServicio,
+  type AgendaItem,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
@@ -34,6 +36,18 @@ import {
 } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon, CheckmarkCircle02Icon, Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+// Suma días a un "YYYY-MM-DD" sin corrimiento de zona (parseo por partes, aritmética en UTC).
+function addDaysISO(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
 
 // Modal "Programar citas" (dominio AGENDAR, BE prod 2026-07-23). Dos disparadores (data-driven, no
 // hardcode): el botón Citar y el `render.postAccion` de una columna del tablero (p. ej. al Asistir).
@@ -112,6 +126,21 @@ export function ProgramarCitasModal({
     return () => { cancel = true; };
   }, [dispKey, servicioEff, pacienteId, centro]);
   const disp = dispData && dispData.key === dispKey ? dispData.d : null;
+
+  // Agenda existente del paciente (coloreada por servicio) para VER lo ya agendado y no doblar. Rango
+  // hoy → +90d. Mismo patrón por-key (setState solo en el async).
+  const hoy = todayISO();
+  const agKey = open && pacienteId ? `${pacienteId}|${centro ?? ""}` : "";
+  const [agData, setAgData] = React.useState<{ key: string; items: AgendaItem[] } | null>(null);
+  React.useEffect(() => {
+    if (!agKey) return;
+    let cancel = false;
+    getAgendaPaciente(pacienteId, hoy, addDaysISO(hoy, 90), centro)
+      .then((items) => !cancel && setAgData({ key: agKey, items }))
+      .catch(() => {});
+    return () => { cancel = true; };
+  }, [agKey, pacienteId, hoy, centro]);
+  const agenda = agData && agData.key === agKey ? agData.items : [];
 
   const [busy, setBusy] = React.useState(false);
   const puedeGuardar = !!pacienteId && !!servicioEff && fechas.length > 0 && !busy;
@@ -235,6 +264,25 @@ export function ProgramarCitasModal({
               </div>
             )}
           </div>
+
+          {/* Agenda existente del paciente (próximas), coloreada por servicio — para no doblar citas */}
+          {pacienteId && agenda.length > 0 && (
+            <div className="rounded-lg border bg-muted/20 p-2.5">
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("proximas")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {agenda.map((a, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] tabular-nums"
+                    style={a.color ? { backgroundColor: `${a.color}22`, color: a.color } : { backgroundColor: "var(--muted)" }}
+                    title={a.servicioNombre ?? ""}
+                  >
+                    {formatFechaSolo(a.fecha)}{a.servicioNombre ? ` · ${a.servicioNombre}` : ""}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Disponibilidad (informativa) */}
           {disp != null && (

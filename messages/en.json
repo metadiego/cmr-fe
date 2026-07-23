@@ -1033,7 +1033,8 @@
     "excede": "Exceeds availability",
     "agendar": "Schedule",
     "agendando": "Scheduling…",
-    "agendadoOk": "{n} session(s) scheduled"
+    "agendadoOk": "{n} session(s) scheduled",
+    "proximas": "Upcoming appointments"
   },
   "fd": {
     "col": {

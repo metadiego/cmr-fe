@@ -1033,7 +1033,8 @@
     "excede": "Excede la disponibilidad",
     "agendar": "Agendar",
     "agendando": "Agendando…",
-    "agendadoOk": "{n} cita(s) agendada(s)"
+    "agendadoOk": "{n} cita(s) agendada(s)",
+    "proximas": "Próximas citas"
   },
   "fd": {
     "col": {
