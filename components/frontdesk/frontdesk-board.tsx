@@ -584,7 +584,6 @@ export function FrontdeskBoard() {
                       estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
                       onChanged={refetch}
                       onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
-                      puedeDesasistir={(def?.transiciones ?? []).some((x) => x.clave === "desasistir")}
                     />
                   ))}
                 </tbody>
@@ -656,7 +655,6 @@ function FilaSesion({
   estados,
   onChanged,
   onProgramar,
-  puedeDesasistir,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -673,7 +671,6 @@ function FilaSesion({
   estados: { clave: string; label: string }[];
   onChanged: () => void;
   onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
-  puedeDesasistir: boolean;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -825,7 +822,7 @@ function FilaSesion({
   // fila, PR paridad-Atención); fallback a estados∩transiciones + entidad unida (tableros sin toggles).
   const pasos = flujoCols.length
     ? flujoCols.map((c) => {
-        const r = (c.render ?? {}) as { transition?: string; labelKey?: string; postAccion?: string };
+        const r = (c.render ?? {}) as { transition?: string; labelKey?: string; postAccion?: string; revert?: string };
         const trans = r.transition ?? c.clave;
         return {
           key: trans,
@@ -834,6 +831,10 @@ function FilaSesion({
           color: estadoDe(trans)?.color ?? null,
           stamp: (fila[c.clave] as string | null) ?? null,
           postAccion: r.postAccion ?? null, // data-driven: qué abrir tras la acción (p. ej. programar citas)
+          // Reversa data-driven del MISMO board: clave de acción para deshacer este sello (p. ej.
+          // desasistir → devolver consumo). El BE la declara en el render de la columna, igual que
+          // `transition` para el avance. Si no la declara, el sello no es reversible (no hay afordancia).
+          revert: r.revert ?? null,
         };
       })
     : flujo.map((p) => ({
@@ -843,6 +844,7 @@ function FilaSesion({
         color: p.color ?? null,
         stamp: sesion ? ((sesion[STAMP_FIELD[p.clave]] as string | null) ?? null) : null,
         postAccion: null as string | null,
+        revert: null as string | null,
       }));
 
   // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
@@ -860,6 +862,7 @@ function FilaSesion({
     <span className="text-xs text-muted-foreground">—</span>
   ) : (
     <div className="flex items-center gap-1">
+      {/* Solo el ÚLTIMO paso sellado se puede deshacer (uno a la vez, como el BE exige). */}
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
         const previo = i === 0 || !!pasos[i - 1].stamp;
@@ -869,28 +872,32 @@ function FilaSesion({
         // sin disparar la acción. El disabled real queda para `busy` o pasos fuera de orden (sin previo).
         const bloqueadoPorCampos = !hecho && previo && faltan.length > 0;
         const siguiente = listo;
+        // Reversa DATA-DRIVEN: solo el ÚLTIMO paso sellado, y solo si el board declara `render.revert`
+        // (clave de acción para deshacer). Nada hardcodeado: si el BE no la declara, no hay reversa.
+        const esUltimoHecho = hecho && !(pasos[i + 1] && pasos[i + 1].stamp);
+        const reversa = esUltimoHecho ? paso.revert : null;
+        const puedeDeshacer = !!reversa && !busy && !cancelada;
         return (
           <React.Fragment key={paso.key}>
             {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
             {hecho ? (
-              // MISMO botón como toggle: si es el paso ASISTIDO (y la transición declarativa
-              // `desasistir` existe), el chip sellado pregunta "¿desea desasistir?" (toast) y al
-              // confirmar el BE revierte consumo+sello (reutilizable por todos los servicios).
+              // Chip sellado. Si hay transición de reversa (data-driven) y es el último paso, pregunta y al
+              // confirmar el BE revierte consumo+sello+sesiones (reutilizable por todos los servicios).
               <button
                 type="button"
-                disabled={busy || cancelada || !(paso.key === "asistido" && puedeDesasistir)}
+                disabled={!puedeDeshacer}
                 className={
                   "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold " +
-                  (paso.key === "asistido" && puedeDesasistir && !cancelada ? "cursor-pointer" : "cursor-default")
+                  (puedeDeshacer ? "cursor-pointer" : "cursor-default")
                 }
                 style={paso.color ? { backgroundColor: `${paso.color}22`, color: paso.color ?? undefined } : undefined}
-                title={paso.key === "asistido" && puedeDesasistir ? t("desasistirPregunta") : tRoot(paso.labelKey)}
+                title={puedeDeshacer ? t("deshacerPregunta", { paso: tRoot(paso.labelKey) }) : tRoot(paso.labelKey)}
                 onClick={() => {
-                  if (!(paso.key === "asistido" && puedeDesasistir) || cancelada) return;
-                  toast(t("desasistirPregunta"), {
+                  if (!puedeDeshacer || !reversa) return;
+                  toast(t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), {
                     action: {
-                      label: t("desasistir"),
-                      onClick: () => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: "desasistir" }, centro)),
+                      label: t("deshacer"),
+                      onClick: () => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: reversa }, centro)),
                     },
                   });
                 }}

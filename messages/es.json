@@ -1024,8 +1024,8 @@
     "calSinHoras": "Sin horas configuradas",
     "calSinCitas": "Sin citas próximas",
     "calVacios": "{vacios}/{cupo} libres",
-    "desasistirPregunta": "¿Desea desasistir?",
-    "desasistir": "Desasistir",
+    "deshacerPregunta": "¿Deshacer «{paso}»?",
+    "deshacer": "Deshacer",
     "aviso": {
       "cupo_excedido": "Se superó el cupo del día (agendadas {agendadas} / cupo {cupo}).",
       "sin_cupo_configurado": "No hay cupos configurados para esta fecha."
