@@ -257,7 +257,8 @@
       "hour": "Hora",
       "addHour": "Añadir hora",
       "empty": "Sin cupos aquí. Añade una hora para empezar.",
-      "saved": "Cupos guardados"
+      "saved": "Cupos guardados",
+      "serviceTab": "Servicios"
     },
     "festivos": {
       "tab": "Feriados",
@@ -620,7 +621,6 @@
     "tableroModulos": "Módulos de tablero",
     "tablerosSettings": "Ajustes de tableros",
     "configFactura": "Factura (encabezado/pie)",
-    "configCupos": "Cupos por hora (servicios)",
     "devoluciones": "Devoluciones",
     "cajaConsultas": "Caja de consultas",
     "cajaGeneral": "Caja general",
@@ -1000,7 +1000,12 @@
     "sinPaquetes": "Sin paquetes pendientes",
     "pendienteTotal": "Pendiente total",
     "sesionXdeN": "Sesión {x} de {n}",
-    "mult": { "dias": "días", "areas": "áreas", "dosis": "dosis", "sesiones": "sesiones" },
+    "mult": {
+      "dias": "días",
+      "areas": "áreas",
+      "dosis": "dosis",
+      "sesiones": "sesiones"
+    },
     "corregirDisponibilidad": "Corregir disponibilidad",
     "corregirTitulo": "Corregir disponibilidad",
     "corregirDesc": "Corrige un error de facturación en sesiones o áreas. Actualiza el saldo; no reescribe la factura.",

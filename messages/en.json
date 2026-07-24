@@ -257,7 +257,8 @@
       "hour": "Hour",
       "addHour": "Add hour",
       "empty": "No slots here. Add an hour to get started.",
-      "saved": "Slots saved"
+      "saved": "Slots saved",
+      "serviceTab": "Services"
     },
     "festivos": {
       "tab": "Holidays",
@@ -620,7 +621,6 @@
     "tableroModulos": "Board modules",
     "tablerosSettings": "Board settings",
     "configFactura": "Invoice (header/footer)",
-    "configCupos": "Slots per hour (services)",
     "devoluciones": "Returns",
     "cajaConsultas": "Consultation cash",
     "cajaGeneral": "General cash",
@@ -1000,7 +1000,12 @@
     "sinPaquetes": "No pending packages",
     "pendienteTotal": "Total pending",
     "sesionXdeN": "Session {x} of {n}",
-    "mult": { "dias": "days", "areas": "areas", "dosis": "doses", "sesiones": "sessions" },
+    "mult": {
+      "dias": "days",
+      "areas": "areas",
+      "dosis": "doses",
+      "sesiones": "sessions"
+    },
     "corregirDisponibilidad": "Correct availability",
     "corregirTitulo": "Correct availability",
     "corregirDesc": "Fix a billing mistake in sessions or areas. It updates the balance; it does not rewrite the invoice.",
