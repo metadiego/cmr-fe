@@ -45,9 +45,17 @@ no tiene nada que disparar. **Es competencia del BE.**
    servicio), aceptadas por `POST /tablero/accion` con `tablero:"<servicio>"`. Mínimo: deshacer el último
    sello. Sugerencia de claves simétricas a las de avance (o una genérica `revertir`), a tu criterio —
    el FE es agnóstico a la clave.
-2. **Efectos de la reversa de `atender`/asistido (crítico):** devolver el consumo al inventario y
-   restaurar unidades/sesiones del paquete (`disponibilidad` del paciente vuelve a subir). Auditable
-   (actor + motivo), igual que `reparar`.
+2. **Efectos de la reversa de `atender`/asistido (crítico — decisión del dueño 2026-07-24):** la reversa
+   debe **RESETEAR la sesión por completo**, dejando SOLO el paciente:
+   - **Borrar en blanco TODOS los campos/sellos del flujo**: `llegadaEn`, `horaInEn`, `horaOutEn`
+     (presente, en_consulta/en_terapia, asistido) y las mediciones/datos capturados (`datos.aplicadas`,
+     áreas, dosis/`productoAplicadoId`, técnico/enfermera, etc.). Quitar **hasta el sello de `presente`**.
+   - **Estado final = `pendiente`** (como recién agendada). Solo se conserva el paciente (y la fecha/servicio
+     de la cita).
+   - **Devolver el consumo al inventario** y **restaurar unidades/sesiones del paquete**
+     (`disponibilidad` del paciente vuelve a subir).
+   - Auditable (actor + motivo), igual que `reparar`.
+   En una palabra: desasistir = "como si nunca hubiera llegado", conservando solo la cita del paciente.
 3. **Declarar la reversa en el render de la columna de flujo** para que el FE la enchufe solo:
    ```jsonc
    // en GET /frontdesk/tablero → columnas[].render de la columna de flujo:
