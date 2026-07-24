@@ -141,6 +141,15 @@ export function FrontdeskBoard() {
       router.push(`/citas?tab=servicios&volver=${encodeURIComponent(pathname)}`);
     }
   }
+  // Acción DEFAULT del FE: "Citas de servicio" siempre disponible en el riel aunque el BE aún no la
+  // registre. Si el BE la declara en el registro, la suya manda (dedupe por handler).
+  const accionesEfectivas = React.useMemo<AccionTablero[]>(() => {
+    if (acciones.some((a) => a.handler === "abrir_citas_servicio")) return acciones;
+    return [
+      { clave: "citas_servicio", labelKey: "tb.acc.citas_servicio", icon: "calendar", slot: "toolbar", orden: 0, handler: "abrir_citas_servicio" },
+      ...acciones,
+    ];
+  }, [acciones]);
 
   const [fecha, setFecha] = React.useState(todayISO());
   // Rango 2 fechas (PR #141) — SOLO gerente (RBAC cosmético; el BE es la autoridad). Vacío = un día.
@@ -401,9 +410,9 @@ export function FrontdeskBoard() {
           {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
               y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
               las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
-          {acciones.length > 0 && (
+          {accionesEfectivas.length > 0 && (
             <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {acciones.map((a) => {
+              {accionesEfectivas.map((a) => {
                 const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
                 const icon = ACCION_ICON[a.icon ?? ""];
                 return (
