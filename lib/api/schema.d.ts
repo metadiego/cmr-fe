@@ -7989,6 +7989,8 @@ export interface components {
             updatedAt: string;
         };
         CreateSesionDto: {
+            /** @description Franja horaria "HH:mm" (p. ej. "08:00") elegida por el usuario; descuenta el cupo de esa hora (NO bloqueante). Omitir/null = agenda por día, sin tocar cupos por hora. */
+            hora?: string;
             /** Format: uuid */
             pacienteId: string;
             /** Format: uuid */
@@ -8007,6 +8009,8 @@ export interface components {
         AgendarMultipleDto: {
             /** @description Fechas (YYYY-MM-DD) a agendar; una cita por fecha. */
             fechas: string[];
+            /** @description Franja horaria "HH:mm" aplicada a TODAS las fechas agendadas; descuenta cupo por hora (NO bloqueante). Omitir = por día. */
+            hora?: string;
             /** Format: uuid */
             pacienteId: string;
             /** Format: uuid */

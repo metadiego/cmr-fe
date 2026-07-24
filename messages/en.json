@@ -1062,7 +1062,8 @@
     "agendadoOk": "{n} session(s) scheduled",
     "proximas": "Upcoming appointments",
     "cuposDia": "Slots per hour",
-    "cupoTitle": "{vacios} free of {cupo}"
+    "cupoTitle": "{vacios} free of {cupo}",
+    "horaElegida": "Chosen time: {hora}"
   },
   "fd": {
     "col": {

@@ -160,6 +160,12 @@ export function ProgramarCitasModal({
   }, [horaKey, servicioClave, nuevaFecha, centro]);
   const horas = horaData && horaData.key === horaKey ? horaData.horas : [];
 
+  // Hora elegida (opcional, "HH:mm"). Clic en un cupo la fija; NO bloquea (se puede elegir una franja
+  // llena y el BE avisa). Se resetea al cambiar de día (los cupos son por fecha). Patrón "ajustar en render".
+  const [horaSel, setHoraSel] = React.useState("");
+  const [prevHoraKey, setPrevHoraKey] = React.useState(horaKey);
+  if (horaKey !== prevHoraKey) { setPrevHoraKey(horaKey); setHoraSel(""); }
+
   const [busy, setBusy] = React.useState(false);
   // Fechas EFECTIVAS: incluye la fecha del picker aunque el usuario no haya pulsado "Agregar fecha"
   // (evita la trampa de UX de un botón deshabilitado con una fecha ya elegida). "Agregar fecha" sigue
@@ -174,15 +180,17 @@ export function ProgramarCitasModal({
     if (!puedeGuardar) return;
     setBusy(true);
     try {
+      const hora = horaSel || undefined; // opcional; el BE descuenta el cupo de esa franja (no bloquea)
       const { warnings } =
         fechasEff.length > 1
-          ? await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas: fechasEff }, centro)
-          : await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechasEff[0] } as never, centro);
+          ? await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas: fechasEff, hora }, centro)
+          : await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechasEff[0], hora } as never, centro);
       toast.success(t("agendadoOk", { n: fechasEff.length }));
       mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo — no bloquea
       onOpenChange(false);
       setFechas([]);
       setNuevaFecha("");
+      setHoraSel("");
       setSel(null);
       setQ("");
       onDone?.();
@@ -284,22 +292,36 @@ export function ProgramarCitasModal({
                 <div className="flex flex-wrap gap-1">
                   {horas.map((h) => {
                     const lleno = h.vacios <= 0;
+                    const activa = horaSel === h.hora;
                     return (
-                      <span
+                      <button
                         key={h.hora}
+                        type="button"
+                        // Clic = elegir/soltar la hora (opcional). Franja llena también es elegible (no bloquea).
+                        onClick={() => setHoraSel((prev) => (prev === h.hora ? "" : h.hora))}
                         title={t("cupoTitle", { vacios: h.vacios, cupo: h.cupo })}
+                        aria-pressed={activa}
                         className={
-                          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums " +
+                          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums transition ring-offset-1 hover:brightness-110 " +
+                          (activa ? "ring-2 ring-primary " : "") +
                           (lleno
                             ? "bg-destructive/10 text-destructive line-through"
                             : "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400")
                         }
                       >
                         {h.hora}<span className="opacity-70">·{h.vacios}</span>
-                      </span>
+                      </button>
                     );
                   })}
                 </div>
+                {horaSel && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {t("horaElegida", { hora: horaSel })}
+                    <button type="button" onClick={() => setHoraSel("")} className="ml-1 underline hover:text-foreground">
+                      {tc("remove")}
+                    </button>
+                  </p>
+                )}
               </div>
             )}
             {fechas.length > 0 && (

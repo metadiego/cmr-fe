@@ -1062,7 +1062,8 @@
     "agendadoOk": "{n} cita(s) agendada(s)",
     "proximas": "Próximas citas",
     "cuposDia": "Cupos por hora",
-    "cupoTitle": "{vacios} libres de {cupo}"
+    "cupoTitle": "{vacios} libres de {cupo}",
+    "horaElegida": "Hora elegida: {hora}"
   },
   "fd": {
     "col": {
