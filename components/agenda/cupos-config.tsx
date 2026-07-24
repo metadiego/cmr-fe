@@ -115,10 +115,11 @@ export function CuposConfig() {
   const globalCupos = globalRes.state.kind === "ok" ? globalRes.state.data : [];
 
   const inView = (c: Cupo) =>
-    mode === "fecha"
+    c.tipoCitaId != null && // esta grilla es de tipos de cita; los cupos de servicio se gestionan aparte
+    (mode === "fecha"
       ? c.fecha === fecha
       : c.fecha == null &&
-        (daySel === DEFAULT_DAY ? c.diaSemana == null : c.diaSemana === Number(daySel));
+        (daySel === DEFAULT_DAY ? c.diaSemana == null : c.diaSemana === Number(daySel)));
 
   const viewCupos = allCupos.filter(inView);
   // Inheritance only applies to a center's DEFAULT view (inherits the global default).
@@ -264,6 +265,7 @@ function buildRows(cupos: Cupo[], inherited: Cupo[], tipos: TipoCita[]): Row[] {
     });
   }
   for (const c of inherited) {
+    if (!c.tipoCitaId) continue; // esta grilla es de tipos de cita; ignora cupos de servicio
     const cell = rows.get(c.hora)?.cells[c.tipoCitaId];
     if (cell) {
       cell.inherited = c.cantidad;
@@ -271,6 +273,7 @@ function buildRows(cupos: Cupo[], inherited: Cupo[], tipos: TipoCita[]): Row[] {
     }
   }
   for (const c of cupos) {
+    if (!c.tipoCitaId) continue;
     const cell = rows.get(c.hora)?.cells[c.tipoCitaId];
     if (cell) {
       cell.id = c.id;

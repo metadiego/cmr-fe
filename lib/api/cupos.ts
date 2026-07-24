@@ -14,7 +14,9 @@ export interface Cupo {
   diaSemana: number | null; // 0=Sun..6=Sat, null = default (any day)
   fecha: string | null; // "YYYY-MM-DD" one-off override, null = recurring
   hora: string; // "HH:mm"
-  tipoCitaId: string;
+  // Un cupo es de un TIPO DE CITA (consulta…) o de un SERVICIO de frontdesk (laser, vitc…), no ambos.
+  tipoCitaId?: string | null;
+  servicioId?: string | null;
   cantidad: number;
   activo: boolean;
   clinicId: string | null; // null = global
@@ -24,7 +26,8 @@ export interface CupoInput {
   diaSemana?: number; // omit → default (BE stores null)
   fecha?: string; // "YYYY-MM-DD" → one-off override for that date
   hora: string;
-  tipoCitaId: string;
+  tipoCitaId?: string; // exclusivo con servicioId
+  servicioId?: string; // exclusivo con tipoCitaId
   cantidad: number;
   activo?: boolean;
   scope?: Scope; // default "centro"; "global" writes clinicId=null (needs citas.config.global)
