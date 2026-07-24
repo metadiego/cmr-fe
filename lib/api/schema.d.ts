@@ -2769,6 +2769,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/paquetes/{id}/ajuste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Ajustar disponibilidad de un paquete (corregir sesiones/áreas) */
+        patch: operations["FacturacionController_ajustarDisponibilidad_v1"];
+        trace?: never;
+    };
     "/api/v1/facturas": {
         parameters: {
             query?: never;
@@ -3851,6 +3868,7 @@ export interface paths {
         /** Sesiones por rango (calendario mensual): mismo contrato que GET /citas?desde&hasta. */
         get: operations["FrontdeskController_listarSesiones_v1"];
         put?: never;
+        /** Crea la cita de servicio y devuelve avisos de cupos NO bloqueantes en meta.warnings. */
         post: operations["FrontdeskController_crear_v1"];
         delete?: never;
         options?: never;
@@ -3867,7 +3885,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Agendar VARIAS citas de un servicio (una por fecha; el usuario elige cada fecha). Alerta si excede disponibilidad. */
+        /** Agendar VARIAS citas de un servicio (una por fecha). Alerta si excede disponibilidad Y cupos (meta.warnings). */
         post: operations["FrontdeskController_agendarMultiple_v1"];
         delete?: never;
         options?: never;
@@ -3888,7 +3906,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Reagendar una cita de servicio (cambiar su fecha). Fechas flexibles; evento reagendada. */
+        /** Reagendar una cita de servicio (cambiar su fecha). Avisa cupos de la NUEVA fecha (meta.warnings). */
         patch: operations["FrontdeskController_reagendar_v1"];
         trace?: never;
     };
@@ -5346,6 +5364,7 @@ export interface components {
             piePresupuesto: string | null;
             email: string | null;
             logoUrl: string | null;
+            frontdeskAutopresente: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5377,6 +5396,8 @@ export interface components {
             web: string | null;
             /** @description URL del logo para el encabezado. */
             logoUrl: string | null;
+            /** @description Enganche factura→frontdesk: true = al saldar una factura del mismo día, cada línea a_la_entrega entra automáticamente PRESENTE al tablero de su servicio. false = desconectado. Configurable por centro. */
+            frontdeskAutopresente: boolean;
         };
         UpdateDatosFiscalesDto: {
             nombreLegal?: string;
@@ -5391,6 +5412,7 @@ export interface components {
             piePresupuesto?: string;
             email?: string;
             logoUrl?: string;
+            frontdeskAutopresente?: boolean;
         };
         UpsertPreferenceDto: {
             config: Record<string, never>;
@@ -7348,6 +7370,19 @@ export interface components {
             /** Format: uuid */
             actorId?: string;
         };
+        AjusteDisponibilidadDto: {
+            /** @description Nuevo total de sesiones del paquete (p.ej. corregir 12→10 días). Debe ser ≥ lo ya consumido. */
+            sesionesTotales?: number;
+            /** @description Nuevos multiplicadores a congelar (p.ej. { "dias": 10, "areas": 2 }). Si se envían, el total se recalcula (cantidad × Π multiplicadores) salvo que `sesionesTotales` lo fije explícito. */
+            multiplicadores?: {
+                [key: string]: number;
+            };
+            /**
+             * Format: uuid
+             * @description Actor que hace el ajuste (auditoría).
+             */
+            actorId?: string;
+        };
         CreateFacturaDto: {
             /** Format: uuid */
             pacienteId: string;
@@ -7942,6 +7977,8 @@ export interface components {
             /** Format: date-time */
             asistidoEn: string | null;
             datos: Record<string, never> | null;
+            /** @enum {string} */
+            origen: "manual" | "autopresente" | "agendada";
             productoAplicadoId: string | null;
             vialAbiertoId: string | null;
             id: string;
@@ -7985,7 +8022,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sesionId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "en_terapia" | "asistido" | "datos" | "entrega_sin_saldo";
+            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "en_terapia" | "asistido" | "autopresente" | "datos" | "entrega_sin_saldo";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -8313,6 +8350,17 @@ export interface components {
              */
             valor: Record<string, never>;
         };
+        AccionTableroDto: {
+            clave: string;
+            labelKey?: string;
+            icon?: string;
+            slot?: string;
+            orden?: number;
+            handler: string;
+            requierePermiso?: string;
+            visible?: boolean;
+            params?: Record<string, never>;
+        };
         CreateTableroDto: {
             clave: string;
             labelKey: string;
@@ -8324,6 +8372,8 @@ export interface components {
             /** @description Ruta del FE (null = convención /tablero/<clave>). */
             ruta?: string;
             filtros?: Record<string, never>;
+            /** @description Barra de acciones (toolbar) data-driven; cada item {clave,labelKey,icon,slot,orden,handler,...}. */
+            acciones?: components["schemas"]["AccionTableroDto"][];
             esVertical?: boolean;
             activo?: boolean;
         };
@@ -8337,6 +8387,7 @@ export interface components {
             ruta: string | null;
             entidad: string;
             filtros: Record<string, never> | null;
+            acciones: Record<string, never>[] | null;
             esVertical: boolean;
             activo: boolean;
             id: string;
@@ -8354,6 +8405,7 @@ export interface components {
             entidad?: string;
             ruta?: string;
             filtros?: Record<string, never>;
+            acciones?: components["schemas"]["AccionTableroDto"][];
             esVertical?: boolean;
             activo?: boolean;
         };
@@ -14110,6 +14162,31 @@ export interface operations {
             };
         };
     };
+    FacturacionController_ajustarDisponibilidad_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AjusteDisponibilidadDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     FacturacionController_list_v1: {
         parameters: {
             query: {
@@ -14188,7 +14265,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };
@@ -15930,9 +16009,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
-                };
+                content?: never;
             };
         };
     };
@@ -15976,9 +16053,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
-                };
+                content?: never;
             };
         };
     };

@@ -194,17 +194,63 @@ export function guardarDatosSesion(
   );
 }
 
-// Disponibilidad del paciente para el GRUPO del servicio (PR #134): paquetes pendientes + saldo total.
+// Disponibilidad del paciente para el GRUPO del servicio (PR #134 + enriquecido en PR #172).
+// El BE ahora devuelve el total FIEL (láser: cantidad × áreas × días), el desglose de
+// `multiplicadores` (claves dinámicas del grupo — NO asumir), el `sku` estable y el grupo.
+// Los campos viejos (total/entregadas/pendientes) se conservan como alias durante la transición.
+export type PaqueteDisponibilidad = {
+  id?: string; // id del paquete_sesiones (para PATCH …/paquetes/:id/ajuste)
+  facturaItemId?: string;
+  sku?: string | null; // código ESTABLE del producto (ubicar/agrupar; no el nombre)
+  productoNombre?: string | null;
+  grupoClave?: string | null;
+  grupoFacturacionId?: string | null;
+  // Totales fieles (nuevos) + alias viejos.
+  sesionesTotales?: number;
+  sesionesEntregadas?: number;
+  pendiente?: number;
+  total?: number; // alias viejo de sesionesTotales
+  entregadas?: number; // alias viejo de sesionesEntregadas
+  pendientes?: number; // alias viejo de pendiente
+  // Desglose multiplicador del grupo, p.ej. { dias: 12, areas: 1 }. Claves dinámicas.
+  multiplicadores?: Record<string, number> | null;
+};
 export type DisponibilidadServicio = {
-  paquetes: {
-    facturaItemId?: string;
-    productoNombre?: string | null;
-    total?: number;
-    entregadas?: number;
-    pendientes?: number;
-  }[];
+  paquetes: PaqueteDisponibilidad[];
   pendienteTotal: number;
 };
+
+// Normaliza un paquete a los campos fieles (tolera el payload viejo y el nuevo).
+export function paqueteTotales(p: PaqueteDisponibilidad): {
+  totales: number;
+  entregadas: number;
+  pendiente: number;
+} {
+  const totales = Number(p.sesionesTotales ?? p.total ?? 0);
+  const entregadas = Number(p.sesionesEntregadas ?? p.entregadas ?? 0);
+  const pendiente = Number(p.pendiente ?? p.pendientes ?? Math.max(0, totales - entregadas));
+  return { totales, entregadas, pendiente };
+}
+
+// PATCH /facturas/paquetes/:id/ajuste — corrige la disponibilidad si facturación se equivocó.
+// Manda `sesionesTotales` explícito o `multiplicadores` (el BE recalcula N = cantidad × Π).
+// RBAC: `frontdesk.disponibilidad.editar`. El BE valida no bajar de lo ya consumido (400).
+export type AjustarDisponibilidadPayload = {
+  sesionesTotales?: number;
+  multiplicadores?: Record<string, number>;
+  actorId?: string;
+};
+export function ajustarDisponibilidad(
+  paqueteId: string,
+  payload: AjustarDisponibilidadPayload,
+  centroId?: string,
+): Promise<PaqueteDisponibilidad> {
+  return apiFetch<PaqueteDisponibilidad>(
+    `/facturas/paquetes/${encodeURIComponent(paqueteId)}/ajuste`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
 export function getDisponibilidadServicio(
   servicioId: string,
   pacienteId: string,

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ type Form = {
   web: string;
   pieFactura: string;
   logoUrl: string;
+  frontdeskAutopresente: boolean;
 };
 
 function fromCentro(c: Centro): Form {
@@ -50,6 +52,8 @@ function fromCentro(c: Centro): Form {
     web: c.web ?? "",
     pieFactura: c.pieFactura ?? "",
     logoUrl: c.logoUrl ?? "",
+    // Default true si el BE aún no lo devuelve (comportamiento de fábrica del enganche).
+    frontdeskAutopresente: c.frontdeskAutopresente ?? true,
   };
 }
 
@@ -89,12 +93,16 @@ export function DatosFiscalesDialog({
     if (!centro) return;
     setSubmitting(true);
     try {
-      // Enviar solo campos con contenido; trim. (Patch parcial: lo vacío no se toca.)
+      // Enviar solo campos string con contenido; trim. (Patch parcial: lo vacío no se toca.)
       const payload: DatosFiscalesPayload = {};
       (Object.keys(form) as (keyof Form)[]).forEach((k) => {
-        const v = form[k].trim();
+        const val = form[k];
+        if (typeof val !== "string") return; // el boolean se maneja aparte
+        const v = val.trim();
         if (v) (payload as Record<string, string>)[k] = v;
       });
+      // Enganche autopresente (boolean): siempre se envía su estado explícito.
+      (payload as Record<string, unknown>).frontdeskAutopresente = form.frontdeskAutopresente;
       await updateDatosFiscales(centro.id, payload);
       toast.success(t("saved"));
       onOpenChange(false);
@@ -106,7 +114,9 @@ export function DatosFiscalesDialog({
     }
   }
 
-  const FIELDS: { key: keyof Form; area?: boolean }[] = [
+  // Solo campos de texto (el boolean autopresente se pinta aparte con un Switch).
+  type StrKey = Exclude<keyof Form, "frontdeskAutopresente">;
+  const FIELDS: { key: StrKey; area?: boolean }[] = [
     { key: "nombreLegal" },
     { key: "nombreComercial" },
     { key: "registroFiscal" },
@@ -148,6 +158,18 @@ export function DatosFiscalesDialog({
               )}
             </div>
           ))}
+        </div>
+
+        <div className="mt-4 flex items-start justify-between gap-4 rounded-lg border p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="frontdesk-autopresente">{t("autopresenteLabel")}</Label>
+            <p className="text-xs text-muted-foreground">{t("autopresenteHelp")}</p>
+          </div>
+          <Switch
+            id="frontdesk-autopresente"
+            checked={form.frontdeskAutopresente}
+            onCheckedChange={(v) => setForm((prev) => ({ ...prev, frontdeskAutopresente: v }))}
+          />
         </div>
 
         <DialogFooter>

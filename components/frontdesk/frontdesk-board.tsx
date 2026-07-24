@@ -14,12 +14,15 @@ import {
   getNurseStatusTipos,
   getNurseStatusActuales,
   setNurseStatus,
+  ajustarDisponibilidad,
+  paqueteTotales,
   type HistorialSesion,
   type FrontdeskColumna,
   type FrontdeskFila,
   type FrontdeskTablero,
   type Sesion,
   type DisponibilidadServicio,
+  type PaqueteDisponibilidad,
   type NurseStatusTipo,
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
@@ -39,6 +42,7 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -70,6 +74,7 @@ import {
   MoreHorizontalIcon,
   Tick02Icon,
   Calendar01Icon,
+  PencilEdit01Icon,
 } from "@hugeicons/core-free-icons";
 
 // Íconos disponibles para las acciones enchufables del tablero (mapa string→hugeicon, data-driven).
@@ -973,6 +978,100 @@ function FilaSesion({
   );
 }
 
+// Leyenda del desglose multiplicador, p.ej. "12 días × 1 área". Claves DINÁMICAS del grupo
+// (nunca asumir cuáles ni cuántas); los labels salen de i18n (`mult.<clave>`, con fallback).
+function legendMultiplicadores(
+  mult: Record<string, number> | null | undefined,
+  label: (clave: string) => string,
+): string {
+  if (!mult) return "";
+  const partes = Object.entries(mult)
+    .filter(([, v]) => Number(v) > 0)
+    .map(([k, v]) => `${Number(v)} ${label(k)}`);
+  return partes.join(" × ");
+}
+
+// ————— Modal "Corregir disponibilidad" (GAP C) — PATCH …/paquetes/:id/ajuste —————
+// Corrige sesiones cuando facturación se equivocó; actualiza el saldo (no reescribe la factura).
+// RBAC: quien lo abre ya pasó el gate `frontdesk.disponibilidad.editar`.
+function CorregirDisponibilidadDialog({
+  paquete,
+  centro,
+  onClose,
+  onDone,
+}: {
+  paquete: PaqueteDisponibilidad | null; // null = cerrado (diálogo controlado por el padre)
+  centro?: string;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const t = useTranslations("frontdesk");
+  const { entregadas, totales } = paquete ? paqueteTotales(paquete) : { entregadas: 0, totales: 0 };
+  const [valor, setValor] = React.useState<string>("");
+  const [guardando, setGuardando] = React.useState(false);
+  // Reinicia el input al abrir/cambiar de paquete (patrón "ajustar estado en render", sin efecto).
+  const pid = paquete?.id ?? null;
+  const [prevPid, setPrevPid] = React.useState<string | null>(null);
+  if (pid !== prevPid) {
+    setPrevPid(pid);
+    setValor(paquete ? String(totales) : "");
+  }
+  const n = Number(valor);
+  const invalido = !Number.isFinite(n) || n < entregadas;
+  async function guardar() {
+    if (invalido || !paquete?.id) return;
+    setGuardando(true);
+    try {
+      await ajustarDisponibilidad(paquete.id, { sesionesTotales: n }, centro);
+      toast.success(t("corregirOk"));
+      onClose();
+      onDone();
+    } catch (e) {
+      toastError(e, t);
+    } finally {
+      setGuardando(false);
+    }
+  }
+  return (
+    <Dialog open={paquete != null} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{t("corregirTitulo")}</DialogTitle>
+          <DialogDescription>{t("corregirDesc")}</DialogDescription>
+        </DialogHeader>
+        {paquete && (
+          <div className="space-y-3">
+            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+              <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
+              {paquete.multiplicadores && (
+                <span className="ml-2 text-muted-foreground">
+                  {legendMultiplicadores(paquete.multiplicadores, (k) => (t.has(`mult.${k}`) ? t(`mult.${k}`) : k))}
+                </span>
+              )}
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="corregir-sesiones">{t("corregirSesiones")}</Label>
+              <Input
+                id="corregir-sesiones"
+                type="number"
+                min={entregadas}
+                value={valor}
+                onChange={(e) => setValor(e.target.value)}
+              />
+              {invalido && <p className="text-xs text-destructive">{t("corregirMenorConsumido", { n: entregadas })}</p>}
+            </div>
+            <div className="flex justify-end">
+              <Button onClick={guardar} disabled={invalido || guardando || !paquete.id}>
+                {t("corregirGuardar")}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ————— X/Y + disponibilidad del paciente (lazy, al abrir) —————
 function SesionesCell({
   display,
@@ -986,9 +1085,12 @@ function SesionesCell({
   centro?: string;
 }) {
   const t = useTranslations("frontdesk");
+  const { can } = useCan();
+  const puedeCorregir = can("frontdesk.disponibilidad.editar");
   const [open, setOpen] = React.useState(false);
   const [disp, setDisp] = React.useState<DisponibilidadServicio | null>(null);
   const [fallo, setFallo] = React.useState(false);
+  const [corrigiendo, setCorrigiendo] = React.useState<PaqueteDisponibilidad | null>(null);
 
   React.useEffect(() => {
     if (!open || disp || fallo || !servicioId || !pacienteId) return;
@@ -999,29 +1101,49 @@ function SesionesCell({
 
   if (!servicioId || !pacienteId) return <span className="tabular-nums">{display}</span>;
   const agotado = disp != null && Number(disp.pendienteTotal ?? 0) <= 0;
+  const recargar = () => setDisp(null); // dispara el refetch (el efecto corre con disp=null)
 
   return (
+    <>
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button type="button" className="cursor-pointer rounded px-1 tabular-nums underline decoration-dotted underline-offset-4 hover:bg-muted">
           {display}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-72 p-3">
+      <DropdownMenuContent align="start" className="w-80 p-3">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("saldoTitle")}</p>
         {!disp && !fallo && <p className="text-sm text-muted-foreground">…</p>}
         {fallo && <p className="text-sm text-destructive">{t("saldoError")}</p>}
         {disp && (
           <div className="space-y-1.5">
             {(disp.paquetes ?? []).length === 0 && <p className="text-sm text-muted-foreground">{t("sinPaquetes")}</p>}
-            {(disp.paquetes ?? []).map((p, i) => (
-              <div key={i} className="flex items-center justify-between gap-2 text-sm">
-                <span className="truncate">{p.productoNombre ?? "—"}</span>
-                <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {Number(p.entregadas ?? 0)}/{Number(p.total ?? 0)}
-                </span>
-              </div>
-            ))}
+            {(disp.paquetes ?? []).map((p, i) => {
+              const { entregadas, totales } = paqueteTotales(p);
+              const leyenda = legendMultiplicadores(p.multiplicadores, (k) => (t.has(`mult.${k}`) ? t(`mult.${k}`) : k));
+              return (
+                <div key={p.id ?? p.facturaItemId ?? i} className="flex items-start justify-between gap-2 text-sm">
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{p.productoNombre ?? p.sku ?? "—"}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {t("sesionXdeN", { x: Math.min(entregadas + 1, Math.max(totales, 1)), n: totales })}
+                      {leyenda && <span className="ml-1">({leyenda})</span>}
+                    </div>
+                  </div>
+                  {puedeCorregir && p.id && (
+                    <button
+                      type="button"
+                      onClick={() => setCorrigiendo(p)}
+                      className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      aria-label={t("corregirDisponibilidad")}
+                      title={t("corregirDisponibilidad")}
+                    >
+                      <HugeiconsIcon icon={PencilEdit01Icon} className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
             <div className="mt-1 flex items-center justify-between border-t pt-1.5 text-sm font-semibold">
               <span>{t("pendienteTotal")}</span>
               <span className={"tabular-nums " + (agotado ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}>
@@ -1033,6 +1155,15 @@ function SesionesCell({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+    {puedeCorregir && (
+      <CorregirDisponibilidadDialog
+        paquete={corrigiendo}
+        centro={centro}
+        onClose={() => setCorrigiendo(null)}
+        onDone={recargar}
+      />
+    )}
+    </>
   );
 }
 

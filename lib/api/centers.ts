@@ -20,6 +20,9 @@ export interface Centro {
   web?: string | null;
   pieFactura?: string | null;
   logoUrl?: string | null;
+  // Enganche facturación↔frontdesk: al saldar una factura del día, cada línea a_la_entrega
+  // entra sola al frontdesk marcada "presente". Default true; se apaga por centro (PR #172).
+  frontdeskAutopresente?: boolean | null;
 }
 
 // PUT /centros/:id/datos-fiscales — patch parcial (todos opcionales). La dirección
