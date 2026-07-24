@@ -17,6 +17,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const GLOBAL = "__global__";
@@ -151,19 +152,25 @@ function columnas(): { key: ColKey; dia: number | null }[] {
 }
 
 type Cell = { id?: string; value: string };
-type Row = { hora: string; cells: Record<ColKey, Cell> };
+// `todos` = la fila aplica a TODOS los días (se guarda como Default, diaSemana null). Atajo del usuario.
+type Row = { hora: string; cells: Record<ColKey, Cell>; todos: boolean };
 
 function buildRows(cupos: Cupo[]): Row[] {
   const cols = columnas();
   const horas = [...new Set(cupos.map((c) => c.hora))].sort();
   const rows = new Map<string, Row>();
   for (const hora of horas) {
-    rows.set(hora, { hora, cells: Object.fromEntries(cols.map((c) => [c.key, { value: "" } as Cell])) });
+    rows.set(hora, { hora, todos: false, cells: Object.fromEntries(cols.map((c) => [c.key, { value: "" } as Cell])) });
   }
   for (const c of cupos) {
     const colKey = c.diaSemana == null ? DEFAULT_COL : String(c.diaSemana);
     const cell = rows.get(c.hora)?.cells[colKey];
     if (cell) { cell.id = c.id; cell.value = String(c.cantidad); }
+  }
+  // "Todos" = la hora solo tiene Default y ningún valor por día (aplica a todos por igual).
+  for (const r of rows.values()) {
+    const soloDefault = !!r.cells[DEFAULT_COL].value && WEEKDAYS_MON_FIRST.every((d) => !r.cells[String(d)].value);
+    r.todos = soloDefault;
   }
   return [...rows.values()];
 }
@@ -192,33 +199,54 @@ function SemanaGrid({
   function setCell(hora: string, col: ColKey, value: string) {
     setRows((rs) => rs.map((r) => (r.hora === hora ? { ...r, cells: { ...r.cells, [col]: { ...r.cells[col], value } } } : r)));
   }
+  // Marca/desmarca "todos los días". Al marcar, si Default está vacío, toma el primer valor por día
+  // (el que el usuario haya escrito) y lo vuelve el Default → aplica a lunes-domingo.
+  function toggleTodos(hora: string, checked: boolean) {
+    setRows((rs) =>
+      rs.map((r) => {
+        if (r.hora !== hora) return r;
+        if (!checked) return { ...r, todos: false };
+        let def = r.cells[DEFAULT_COL].value;
+        if (!def) {
+          const primer = WEEKDAYS_MON_FIRST.map((d) => r.cells[String(d)].value).find((v) => v.trim() !== "");
+          if (primer) def = primer;
+        }
+        return { ...r, todos: true, cells: { ...r.cells, [DEFAULT_COL]: { ...r.cells[DEFAULT_COL], value: def } } };
+      }),
+    );
+  }
   function addRow() {
     const hora = newHora.trim();
     if (!hora || rows.some((r) => r.hora === hora)) return;
-    setRows((rs) => [...rs, { hora, cells: Object.fromEntries(cols.map((c) => [c.key, { value: "" } as Cell])) }].sort((a, b) => a.hora.localeCompare(b.hora)));
+    setRows((rs) => [...rs, { hora, todos: true, cells: Object.fromEntries(cols.map((c) => [c.key, { value: "" } as Cell])) }].sort((a, b) => a.hora.localeCompare(b.hora)));
     setNewHora("");
   }
 
   async function save() {
     setSaving(true);
     const ops: Promise<unknown>[] = [];
+    const upsertCol = (r: Row, col: { key: ColKey; dia: number | null }) => {
+      const cell = r.cells[col.key];
+      const raw = cell.value.trim();
+      const n = raw === "" ? 0 : Number(raw);
+      const valid = Number.isFinite(n) && n > 0;
+      if (cell.id) {
+        if (!valid) ops.push(deleteCupo(cell.id, { scope, centroId }));
+        else ops.push(updateCupo(cell.id, { cantidad: n, scope }, centroId));
+      } else if (valid) {
+        ops.push(createCupo({ hora: r.hora, servicioId, cantidad: n, scope, ...(col.dia != null ? { diaSemana: col.dia } : {}) }, centroId));
+      }
+    };
     for (const r of rows) {
-      for (const col of cols) {
-        const cell = r.cells[col.key];
-        const raw = cell.value.trim();
-        const n = raw === "" ? 0 : Number(raw);
-        const valid = Number.isFinite(n) && n > 0;
-        if (cell.id) {
-          if (!valid) ops.push(deleteCupo(cell.id, { scope, centroId }));
-          else ops.push(updateCupo(cell.id, { cantidad: n, scope }, centroId));
-        } else if (valid) {
-          ops.push(
-            createCupo(
-              { hora: r.hora, servicioId, cantidad: n, scope, ...(col.dia != null ? { diaSemana: col.dia } : {}) },
-              centroId,
-            ),
-          );
+      if (r.todos) {
+        // "Todos los días" → guarda SOLO el Default (diaSemana null) y borra los cupos por día de esa hora.
+        upsertCol(r, { key: DEFAULT_COL, dia: null });
+        for (const d of WEEKDAYS_MON_FIRST) {
+          const cell = r.cells[String(d)];
+          if (cell.id) ops.push(deleteCupo(cell.id, { scope, centroId }));
         }
+      } else {
+        for (const col of cols) upsertCol(r, col);
       }
     }
     if (ops.length === 0) { setSaving(false); return; }
@@ -253,19 +281,32 @@ function SemanaGrid({
             )}
             {rows.map((r) => (
               <tr key={r.hora} className="border-t">
-                <td className="px-3 py-1.5 font-mono">{r.hora}</td>
-                {cols.map((c) => (
-                  <td key={c.key} className="px-1.5 py-1.5">
-                    <Input
-                      type="number"
-                      min={0}
-                      inputMode="numeric"
-                      className="h-8 w-14 text-center"
-                      value={r.cells[c.key]?.value ?? ""}
-                      onChange={(e) => setCell(r.hora, c.key, e.target.value)}
-                    />
-                  </td>
-                ))}
+                <td className="px-3 py-1.5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono">{r.hora}</span>
+                    <span className="inline-flex items-center gap-1.5" title={t("cupos.todosHint")}>
+                      <Switch checked={r.todos} onCheckedChange={(v) => toggleTodos(r.hora, v)} aria-label={t("cupos.todos")} />
+                      <span className="text-[11px] text-muted-foreground">{t("cupos.todos")}</span>
+                    </span>
+                  </div>
+                </td>
+                {cols.map((c) => {
+                  const esDia = c.dia != null;
+                  const mirror = r.todos && esDia;
+                  return (
+                    <td key={c.key} className="px-1.5 py-1.5">
+                      <Input
+                        type="number"
+                        min={0}
+                        inputMode="numeric"
+                        disabled={mirror}
+                        className={"h-8 w-14 text-center" + (mirror ? " border-dashed text-muted-foreground" : "")}
+                        value={mirror ? r.cells[DEFAULT_COL]?.value ?? "" : r.cells[c.key]?.value ?? ""}
+                        onChange={(e) => setCell(r.hora, c.key, e.target.value)}
+                      />
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>

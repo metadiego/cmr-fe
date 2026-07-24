@@ -258,7 +258,9 @@
       "addHour": "Add hour",
       "empty": "No slots here. Add an hour to get started.",
       "saved": "Slots saved",
-      "serviceTab": "Services"
+      "serviceTab": "Services",
+      "todos": "All days",
+      "todosHint": "Apply this hour's capacity to every day (Mon–Sun); saved as the base default."
     },
     "festivos": {
       "tab": "Holidays",

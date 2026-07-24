@@ -258,7 +258,9 @@
       "addHour": "Añadir hora",
       "empty": "Sin cupos aquí. Añade una hora para empezar.",
       "saved": "Cupos guardados",
-      "serviceTab": "Servicios"
+      "serviceTab": "Servicios",
+      "todos": "Todos los días",
+      "todosHint": "Aplica la capacidad de esta hora a todos los días (Lun–Dom); se guarda como default base."
     },
     "festivos": {
       "tab": "Feriados",
