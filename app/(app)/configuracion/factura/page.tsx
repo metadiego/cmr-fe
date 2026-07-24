@@ -11,6 +11,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -71,6 +72,7 @@ type FormState = {
   zip: string;
   web: string;
   pieFactura: string;
+  frontdeskAutopresente: boolean;
 };
 
 function seed(c: Centro): FormState {
@@ -85,6 +87,8 @@ function seed(c: Centro): FormState {
     zip: c.zip ?? "",
     web: c.web ?? "",
     pieFactura: c.pieFactura ?? "",
+    // Enganche facturación↔frontdesk (auto-presente al saldar). Default true si el BE aún no lo trae.
+    frontdeskAutopresente: c.frontdeskAutopresente ?? true,
   };
 }
 
@@ -112,6 +116,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
       zip: form.zip.trim(),
       web: form.web.trim(),
       pieFactura: form.pieFactura,
+      frontdeskAutopresente: form.frontdeskAutopresente,
     };
     try {
       await updateDatosFiscales(centro.id, payload);
@@ -157,6 +162,22 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
           <Field label={t("f.pieFactura")} hint={t("f.pieFacturaHint")}>
             <Textarea rows={4} value={form.pieFactura} onChange={(e) => set("pieFactura", e.target.value)} />
           </Field>
+        </section>
+
+        {/* Enganche facturación ↔ frontdesk */}
+        <section className="space-y-3 rounded-xl border p-5">
+          <h2 className="text-sm font-semibold">{t("autopresenteTitle")}</h2>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-sm font-medium">{t("autopresenteLabel")}</span>
+              <p className="text-xs text-muted-foreground">{t("autopresenteHelp")}</p>
+            </div>
+            <Switch
+              checked={form.frontdeskAutopresente}
+              disabled={!canWrite}
+              onCheckedChange={(v) => setForm((p) => ({ ...p, frontdeskAutopresente: v }))}
+            />
+          </div>
         </section>
 
         <div className="flex items-center gap-3">

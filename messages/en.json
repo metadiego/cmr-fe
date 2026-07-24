@@ -1913,6 +1913,9 @@
     "saved": "Fiscal data saved",
     "noPermiso": "You don't have permission to edit (centro.fiscal.write).",
     "preview": "Preview",
+    "autopresenteTitle": "Frontdesk",
+    "autopresenteLabel": "Auto check-in on payment",
+    "autopresenteHelp": "When an invoice is settled the same day (including 100% courtesy at total 0), each service line enters the frontdesk marked present.",
     "f": {
       "logoUrl": "Logo (URL)",
       "logoUrlHint": "Logo image URL for the header.",
