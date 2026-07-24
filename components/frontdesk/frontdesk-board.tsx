@@ -1046,8 +1046,19 @@ function MedicionCell({
   const dato = r.dato ?? col.clave;
   const actual = (sesion?.datos as Record<string, unknown> | null | undefined)?.[dato];
   const [val, setVal] = React.useState(actual != null ? String(actual) : "");
+  // SINCRONIZAR con el valor persistido cuando cambia (la sesión llega tarde por el fetch, o el board
+  // se refresca tras guardar) — patrón "ajustar estado al cambiar la prop". Antes `val` se fijaba una
+  // sola vez y quedaba vacío aunque el BE tuviera el dato → parecía que "no persistía". No se pisa lo
+  // que el usuario está escribiendo (solo si el input NO está enfocado).
+  const [visto, setVisto] = React.useState(actual);
+  const [focused, setFocused] = React.useState(false);
+  if (actual !== visto && !focused) {
+    setVisto(actual);
+    setVal(actual != null ? String(actual) : "");
+  }
 
   const commit = () => {
+    setFocused(false);
     const n = Number(val);
     if (val === "" || Number.isNaN(n)) return;
     if (actual != null && Number(actual) === n) return;
@@ -1063,6 +1074,7 @@ function MedicionCell({
         max={r.max}
         step={r.paso ?? 1}
         disabled={disabled}
+        onFocus={() => setFocused(true)}
         onChange={(e) => setVal(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
