@@ -161,20 +161,28 @@ export function ProgramarCitasModal({
   const horas = horaData && horaData.key === horaKey ? horaData.horas : [];
 
   const [busy, setBusy] = React.useState(false);
-  const puedeGuardar = !!pacienteId && !!servicioEff && fechas.length > 0 && !busy;
+  // Fechas EFECTIVAS: incluye la fecha del picker aunque el usuario no haya pulsado "Agregar fecha"
+  // (evita la trampa de UX de un botón deshabilitado con una fecha ya elegida). "Agregar fecha" sigue
+  // sirviendo para acumular VARIAS fechas.
+  const fechasEff = React.useMemo(() => {
+    const f = nuevaFecha.trim();
+    return f && !fechas.includes(f) ? [...fechas, f].sort() : fechas;
+  }, [fechas, nuevaFecha]);
+  const puedeGuardar = !!pacienteId && !!servicioEff && fechasEff.length > 0 && !busy;
 
   async function guardar() {
     if (!puedeGuardar) return;
     setBusy(true);
     try {
       const { warnings } =
-        fechas.length > 1
-          ? await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas }, centro)
-          : await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechas[0] } as never, centro);
-      toast.success(t("agendadoOk", { n: fechas.length }));
+        fechasEff.length > 1
+          ? await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas: fechasEff }, centro)
+          : await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechasEff[0] } as never, centro);
+      toast.success(t("agendadoOk", { n: fechasEff.length }));
       mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo — no bloquea
       onOpenChange(false);
       setFechas([]);
+      setNuevaFecha("");
       setSel(null);
       setQ("");
       onDone?.();
@@ -185,7 +193,7 @@ export function ProgramarCitasModal({
     }
   }
 
-  const excede = disp != null && fechas.length > Number(disp.pendienteTotal ?? 0);
+  const excede = disp != null && fechasEff.length > Number(disp.pendienteTotal ?? 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
