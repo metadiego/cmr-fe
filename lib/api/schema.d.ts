@@ -4488,6 +4488,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/laser/parametros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lista los parámetros del catálogo (opcional filtro por tipo hilt|mls). */
+        get: operations["LaserController_list_v1"];
+        put?: never;
+        post: operations["LaserController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/laser/formato/{tipo}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Formato armado (print-ready) para el FE: HILT por región, MLS por lado. */
+        get: operations["LaserController_formato_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/laser/parametros/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["LaserController_update_v1"];
+        post?: never;
+        delete: operations["LaserController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tableros": {
         parameters: {
             query?: never;
@@ -8336,6 +8386,77 @@ export interface components {
         VincularMedicionDto: {
             /** Format: uuid */
             citaId: string;
+        };
+        LaserParametroEntity: {
+            patologia: string;
+            /** @enum {string} */
+            tipo: "hilt" | "mls";
+            area: string;
+            orden: number;
+            orden2: number;
+            stp1Mjcm: number | null;
+            stp1Hz: number | null;
+            stp2Mjcm: number | null;
+            stp2Hz: number | null;
+            stp3Mjcm: number | null;
+            stp3Hz: number | null;
+            energy: number | null;
+            frecuencia: string | null;
+            tiempo: string | null;
+            intensidad: string | null;
+            activo: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateLaserParametroDto: {
+            /** @description Nombre de la patología. */
+            patologia: string;
+            /**
+             * @description hilt | mls.
+             * @enum {string}
+             */
+            tipo: "hilt" | "mls";
+            /** @description HILT: región corporal; MLS: lado l | r. */
+            area: string;
+            orden?: number;
+            orden2?: number;
+            /** @description HILT paso 1 mJ/cm². */
+            stp1Mjcm?: number;
+            /** @description HILT paso 1 Hz. */
+            stp1Hz?: number;
+            stp2Mjcm?: number;
+            stp2Hz?: number;
+            stp3Mjcm?: number;
+            stp3Hz?: number;
+            /** @description HILT energía total (J). */
+            energy?: number;
+            /** @description MLS frecuencia (texto). */
+            frecuencia?: string;
+            /** @description MLS tiempo (texto). */
+            tiempo?: string;
+            /** @description MLS intensidad (texto). */
+            intensidad?: string;
+            activo?: boolean;
+        };
+        UpdateLaserParametroDto: {
+            patologia?: string;
+            area?: string;
+            orden?: number;
+            orden2?: number;
+            stp1Mjcm?: number;
+            stp1Hz?: number;
+            stp2Mjcm?: number;
+            stp2Hz?: number;
+            stp3Mjcm?: number;
+            stp3Hz?: number;
+            energy?: number;
+            frecuencia?: string;
+            tiempo?: string;
+            intensidad?: string;
+            activo?: boolean;
         };
         TableroAccionDto: {
             tablero: string;
@@ -16986,6 +17107,114 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LaserController_list_v1: {
+        parameters: {
+            query?: {
+                /** @description Formato: hilt | mls. */
+                tipo?: "hilt" | "mls";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LaserParametroEntity"][];
+                };
+            };
+        };
+    };
+    LaserController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLaserParametroDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LaserParametroEntity"];
+                };
+            };
+        };
+    };
+    LaserController_formato_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tipo: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LaserController_update_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLaserParametroDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LaserParametroEntity"];
+                };
+            };
+        };
+    };
+    LaserController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

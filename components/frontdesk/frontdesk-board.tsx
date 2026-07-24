@@ -38,6 +38,8 @@ import { useCan } from "@/hooks/use-can";
 import { useDictado } from "@/hooks/use-dictado";
 import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
+import { FormatosModal } from "@/components/frontdesk/formatos-modal";
+import { serviceHasReports } from "@/lib/frontdesk/acciones";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -681,6 +683,8 @@ function FilaSesion({
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
   const [historialOpen, setHistorialOpen] = React.useState(false);
+  const [formatosOpen, setFormatosOpen] = React.useState(false);
+  const tieneFormatos = serviceHasReports(servicio?.formAcciones);
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
   const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
@@ -959,6 +963,7 @@ function FilaSesion({
           estados={estados}
           conHistorial={!!sesion?.pacienteId}
           onHistorial={() => setHistorialOpen(true)}
+          onFormatos={tieneFormatos && sesion?.pacienteId ? () => setFormatosOpen(true) : undefined}
           onProgramar={
             sesion?.pacienteId
               ? () => onProgramar({ pacienteId: sesion.pacienteId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
@@ -976,6 +981,19 @@ function FilaSesion({
             servicioId={servicio?.id}
             servicioNombre={servicio?.nombre}
             centro={centro}
+          />
+        )}
+        {tieneFormatos && sesion?.pacienteId && servicio && (
+          <FormatosModal
+            open={formatosOpen}
+            onOpenChange={setFormatosOpen}
+            servicioNombre={servicio.nombre}
+            formAcciones={servicio.formAcciones}
+            pacienteNombre={String(fila.paciente ?? "")}
+            sesionDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
+            areasDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
+            centro={centro}
+            onHistorial={() => setHistorialOpen(true)}
           />
         )}
       </td>
@@ -1250,6 +1268,7 @@ function RowMenu({
   conHistorial,
   estados,
   onHistorial,
+  onFormatos,
   onProgramar,
   onCancelar,
   onReparar,
@@ -1260,6 +1279,7 @@ function RowMenu({
   conHistorial: boolean;
   estados: { clave: string; label: string }[];
   onHistorial: () => void;
+  onFormatos?: () => void; // abrir "Formatos" del servicio (data-driven desde formAcciones)
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
   onCancelar: (motivo: string) => void;
   onReparar: (payload: { motivo: string; estado?: string }) => void;
@@ -1280,6 +1300,11 @@ function RowMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {onFormatos && !cancelada && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onFormatos(); }}>
+              {t("formatos")}
+            </DropdownMenuItem>
+          )}
           {onProgramar && !cancelada && (
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onProgramar(); }}>
               {t("programarCitas")}

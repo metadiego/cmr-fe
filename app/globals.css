@@ -186,3 +186,32 @@
     margin: 2mm;
   }
 }
+/* Impresión del FORMATO médico de láser (HILT/MLS) en tamaño carta. Aísla `.formato-print`:
+   oculta el resto y dimensiona a carta. La firma (canvas→img) y las tablas se imprimen en negro. */
+@media print {
+  body:has(.formato-print) * {
+    visibility: hidden !important;
+  }
+  .formato-print,
+  .formato-print * {
+    visibility: visible !important;
+  }
+  .formato-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 8mm;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .formato-print .no-print {
+    display: none !important;
+  }
+  @page {
+    size: letter;
+    margin: 10mm;
+  }
+}
