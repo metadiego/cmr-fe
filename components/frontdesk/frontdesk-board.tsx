@@ -1065,6 +1065,19 @@ function MedicionCell({
     onSave(n);
   };
 
+  // Auto-guardado (debounced) MIENTRAS se edita: el valor persiste sin depender del blur, así "escribo el
+  // número y ya queda guardado" (y Asistido deja de bloquear por un dato que el usuario sí puso). onSave por
+  // ref para no re-disparar el efecto en cada render. Solo si cambió y es válido.
+  const onSaveRef = React.useRef(onSave);
+  React.useEffect(() => { onSaveRef.current = onSave; });
+  React.useEffect(() => {
+    if (!focused) return;
+    const n = Number(val);
+    if (val === "" || Number.isNaN(n) || (actual != null && Number(actual) === n)) return;
+    const h = setTimeout(() => onSaveRef.current(n), 700);
+    return () => clearTimeout(h);
+  }, [val, focused, actual]);
+
   return (
     <span className="inline-flex items-center gap-1">
       <Input
