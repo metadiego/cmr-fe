@@ -72,13 +72,6 @@ import {
   Calendar01Icon,
 } from "@hugeicons/core-free-icons";
 
-// DIAGNÓSTICO TEMPORAL (fd-dbg-aplicadas): rastrea el ciclo de la celda de medición (aplicadas).
-// QUITAR cuando se resuelva la persistencia. Loguea qué ve/envía/recibe y el valor del board.
-const FD_DBG = true;
-function fdlog(...args: unknown[]) {
-  if (FD_DBG) console.log(`[fd-dbg ${new Date().toISOString().slice(11, 23)}]`, ...args);
-}
-
 // Íconos disponibles para las acciones enchufables del tablero (mapa string→hugeicon, data-driven).
 const ACCION_ICON: Record<string, typeof Calendar01Icon> = {
   calendar: Calendar01Icon,
@@ -790,14 +783,7 @@ function FilaSesion({
           col={c}
           sesion={sesion}
           disabled={busy || cancelada}
-          onSave={(valor) =>
-            run(async () => {
-              fdlog("editarCelda → ENVÍO", { tablero, entidadId: String(fila.id).slice(0, 8), columna: c.clave, valor });
-              const r = await editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro);
-              fdlog("editarCelda ← RESPUESTA", r);
-              return r;
-            })
-          }
+          onSave={(valor) => run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))}
         />
       );
     }
@@ -1059,14 +1045,6 @@ function MedicionCell({
   const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
   const dato = r.dato ?? col.clave;
   const actual = (sesion?.datos as Record<string, unknown> | null | undefined)?.[dato];
-  fdlog("MedicionCell render", {
-    columna: col.clave,
-    dato,
-    sesionId: sesion?.id ? String(sesion.id).slice(0, 8) : null,
-    hayCesion: !!sesion,
-    datos: sesion?.datos ?? null,
-    actual,
-  });
   const [val, setVal] = React.useState(actual != null ? String(actual) : "");
   // SINCRONIZAR con el valor persistido cuando cambia (la sesión llega tarde por el fetch, o el board
   // se refresca tras guardar) — patrón "ajustar estado al cambiar la prop". Antes `val` se fijaba una
@@ -1082,9 +1060,8 @@ function MedicionCell({
   const commit = () => {
     setFocused(false);
     const n = Number(val);
-    fdlog("MedicionCell commit", { val, n, actual, dato });
-    if (val === "" || Number.isNaN(n)) { fdlog("commit ABORTA vacio/NaN"); return; }
-    if (actual != null && Number(actual) === n) { fdlog("commit ABORTA: igual al actual"); return; }
+    if (val === "" || Number.isNaN(n)) return;
+    if (actual != null && Number(actual) === n) return;
     onSave(n);
   };
 
