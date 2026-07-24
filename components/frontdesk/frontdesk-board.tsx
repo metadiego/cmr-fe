@@ -864,7 +864,11 @@ function FilaSesion({
         const hecho = !!paso.stamp;
         const previo = i === 0 || !!pasos[i - 1].stamp;
         const faltan = faltantesPara(paso.estado); // campos requeridos aún vacíos para este estado
-        const siguiente = !hecho && previo && faltan.length === 0;
+        const listo = !hecho && previo && faltan.length === 0; // se puede ejecutar
+        // Bloqueado SOLO por campos requeridos: el botón queda CLICABLE (atenuado) y avisa con toast,
+        // sin disparar la acción. El disabled real queda para `busy` o pasos fuera de orden (sin previo).
+        const bloqueadoPorCampos = !hecho && previo && faltan.length > 0;
+        const siguiente = listo;
         return (
           <React.Fragment key={paso.key}>
             {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
@@ -899,18 +903,23 @@ function FilaSesion({
                 type="button"
                 variant={siguiente ? "outline" : "ghost"}
                 size="sm"
-                disabled={!siguiente || busy}
+                disabled={busy || (!listo && !bloqueadoPorCampos)}
                 title={faltan.length > 0 ? t("faltanCampos", { campos: faltan.join(", ") }) : undefined}
                 className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
-                onClick={() =>
+                onClick={() => {
+                  // Bloqueado solo por campos requeridos → avisa cuáles faltan y NO dispara la acción.
+                  if (bloqueadoPorCampos) {
+                    toast.warning(t("faltanCampos", { campos: faltan.join(", ") }));
+                    return;
+                  }
                   run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then(() => {
                     // Post-acción DATA-DRIVEN: si la columna declara render.postAccion de programar citas
                     // y hay paciente, abre el modal (no hardcodeamos "asistido"). El BE decide qué estado lo dispara.
                     if (paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
                       onProgramar({ pacienteId: sesion.pacienteId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
                     }
-                  })
-                }
+                  });
+                }}
               >
                 {tRoot(paso.labelKey)}
               </Button>
