@@ -959,6 +959,11 @@ function FilaSesion({
           estados={estados}
           conHistorial={!!sesion?.pacienteId}
           onHistorial={() => setHistorialOpen(true)}
+          onProgramar={
+            sesion?.pacienteId
+              ? () => onProgramar({ pacienteId: sesion.pacienteId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
+              : undefined
+          }
           onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
@@ -1245,6 +1250,7 @@ function RowMenu({
   conHistorial,
   estados,
   onHistorial,
+  onProgramar,
   onCancelar,
   onReparar,
 }: {
@@ -1254,6 +1260,7 @@ function RowMenu({
   conHistorial: boolean;
   estados: { clave: string; label: string }[];
   onHistorial: () => void;
+  onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
   onCancelar: (motivo: string) => void;
   onReparar: (payload: { motivo: string; estado?: string }) => void;
 }) {
@@ -1273,6 +1280,11 @@ function RowMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {onProgramar && !cancelada && (
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onProgramar(); }}>
+              {t("programarCitas")}
+            </DropdownMenuItem>
+          )}
           {conHistorial && (
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onHistorial(); }}>
               {t("historial")}
