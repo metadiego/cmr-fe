@@ -602,15 +602,20 @@ export function FrontdeskBoard() {
         </>
       )}
 
-      {/* Leyenda de estados (data-driven): punto de color + nombre, como el mockup del AP-Board. */}
-      {estados.length > 0 && (
+      {/* Leyenda del flujo (data-driven): sale del NOMBRE de las columnas del flujo (configurable) +
+          el color de su estado destino. Como el mockup del AP-Board. */}
+      {flujoCols.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground">
-          {estados.map((e) => (
-            <span key={e.clave} className="inline-flex items-center gap-1.5">
-              <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: e.color ?? "var(--muted-foreground)" }} aria-hidden />
-              {tRoot(e.labelKey)}
-            </span>
-          ))}
+          {flujoCols.map((c) => {
+            const r = (c.render ?? {}) as { transition?: string; labelKey?: string };
+            const color = estadoDe(r.transition ?? c.clave)?.color;
+            return (
+              <span key={c.clave} className="inline-flex items-center gap-1.5">
+                <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
+                {tRoot(r.labelKey ?? c.labelKey)}
+              </span>
+            );
+          })}
         </div>
       )}
 
