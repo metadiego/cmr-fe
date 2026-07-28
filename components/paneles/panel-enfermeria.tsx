@@ -163,12 +163,15 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           </div>
         )}
 
-        {/* Aviso entrante a pantalla completa */}
-        {actual && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: (actual.color ?? "#111") + "F2" }}>
-            <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">
-              {actual.seccion && tRoot.has(`panel.seccion.${actual.seccion}`) ? tRoot(`panel.seccion.${actual.seccion}`) : actual.seccion}
-            </p>
+        {/* Aviso entrante a pantalla completa. La sección (color/nombre) se resuelve de la definición
+            por seccionId; el nombre/récord del paciente y el servicio los enriquece el BE en el payload. */}
+        {actual && (() => {
+          const sec = secciones.find((s) => s.id === actual.seccionId) ?? secciones.find((s) => s.clave === actual.seccion);
+          const color = actual.color ?? sec?.color ?? "#111827";
+          const secLabel = sec ? tRoot(sec.labelKey) : (actual.seccion ?? "");
+          return (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: color + "F2" }}>
+            <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">{secLabel}</p>
             <h2 className="mt-2 text-center text-5xl font-black text-white md:text-6xl">{actual.pacienteNombre ?? "—"}</h2>
             {actual.record && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.record}</p>}
             {actual.servicioNombre && <p className="text-lg text-white/80">{actual.servicioNombre}</p>}
@@ -187,7 +190,8 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
             </div>
             {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
           </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

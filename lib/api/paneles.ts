@@ -34,16 +34,19 @@ export type PanelDefinicion = {
 
 export type PanelNotificacion = {
   id: string;
-  seccion: string;
-  color?: string | null;
-  audio?: string | null;
+  seccionId?: string | null; // el BE devuelve el id; la sección (clave/color/audio) se resuelve con la definición
   sesionId?: string | null;
   pacienteId?: string | null;
+  aceptadaPorId?: string | null;
+  estado?: string;
+  createdAt?: string;
+  // Campos de DISPLAY — el BE debería enriquecerlos (hoy no vienen); ver handoff panel-aviso-enriquecido.
+  seccion?: string | null;
+  color?: string | null;
+  audio?: string | null;
   pacienteNombre?: string | null;
   record?: string | null;
   servicioNombre?: string | null;
-  aceptadaPorId?: string | null;
-  createdAt?: string;
 };
 
 export type PanelContador = { personalId: string; total: number; porSeccion: Record<string, number> };
