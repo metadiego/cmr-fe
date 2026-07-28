@@ -87,3 +87,29 @@ export function updateServicio(
 export function deleteServicio(id: string, centroId?: string): Promise<void> {
   return apiFetch<void>(`/servicios/${id}`, { method: "DELETE" }, centroId);
 }
+
+// Un campo de `formAcciones.campos`: qué se exige y DÓNDE vive su valor.
+// `binding` presente → el valor vive en la entidad/paquete (no en el form); ausente → se captura en el form.
+export type ServicioCampo = {
+  clave: string;
+  labelKey?: string;
+  tipo?: string; // texto | numero | fecha | bool | select
+  requerido?: boolean;
+  en?: string; // acción donde se exige (p. ej. "asistido")
+  binding?: string; // p. ej. sesion.productoAplicadoId | disponibilidad; ausente = form
+  opciones?: unknown;
+};
+export type ServicioFormAcciones = {
+  title?: string;
+  titleKey?: string;
+  campos?: ServicioCampo[];
+  reports?: unknown[];
+  additional_actions?: unknown[];
+  [k: string]: unknown;
+};
+
+// Catálogo de destinos válidos para un requerido (GET /servicios/catalogos/requeridos-bindings).
+export type RequeridoBinding = { binding: string; labelKey: string; grupo: string };
+export async function getRequeridosBindings(centroId?: string): Promise<RequeridoBinding[]> {
+  return asArray<RequeridoBinding>(await apiFetch(`/servicios/catalogos/requeridos-bindings`, {}, centroId));
+}

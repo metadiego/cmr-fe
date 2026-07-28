@@ -627,7 +627,8 @@
     "cajaConsultas": "Caja de consultas",
     "cajaGeneral": "Caja general",
     "gruposFacturacion": "Grupos de facturación",
-    "panelEnfermeria": "Panel de Enfermería"
+    "panelEnfermeria": "Panel de Enfermería",
+    "requeridos": "Campos requeridos"
   },
   "admin": {
     "title": "Administración",
@@ -1131,6 +1132,13 @@
       "dosis": "Dosis",
       "enfermera": "Enfermera",
       "cantidad": "Cantidad"
+    },
+    "binding": {
+      "dosis": "Dosis (producto aplicado)",
+      "enfermera": "Enfermera",
+      "tecnico": "Técnico",
+      "medico": "Médico",
+      "disponibilidad": "Disponibilidad (sesiones pendientes)"
     }
   },
   "col": {
@@ -2182,5 +2190,32 @@
     "record": "Récord",
     "soloEnfermeria": "Solo Enfermería puede tomar el aviso.",
     "sinPermiso": "No tienes acceso a este panel (panel.read)."
+  },
+  "requeridos": {
+    "title": "Campos requeridos por servicio",
+    "help": "Elige qué campos deben estar llenos antes de una acción (p. ej. asistido) y DÓNDE vive cada valor.",
+    "servicio": "Servicio",
+    "guardado": "Guardado",
+    "guardando": "Guardando…",
+    "guardar": "Guardar",
+    "etiqueta": "Etiqueta (clave i18n)",
+    "clave": "Clave",
+    "tipo": "Tipo",
+    "requerido": "Requerido",
+    "en": "En la acción",
+    "dondeVive": "Dónde vive el valor",
+    "enFormulario": "En el formulario",
+    "sinCampos": "Sin campos.",
+    "agregarCampo": "Agregar campo",
+    "quitar": "Quitar",
+    "ayudaBinding": "Con un binding, el valor sale de la columna del tablero (dosis, enfermera…) y NO se captura en el formulario. Sin binding, se captura en el formulario de acciones.",
+    "tipos": {
+      "texto": "Texto",
+      "numero": "Número",
+      "fecha": "Fecha",
+      "bool": "Sí/No",
+      "select": "Selección"
+    },
+    "sinPermiso": "No tienes acceso (servicios.update)."
   }
 }

@@ -627,7 +627,8 @@
     "cajaConsultas": "Consultation cash",
     "cajaGeneral": "General cash",
     "gruposFacturacion": "Billing groups",
-    "panelEnfermeria": "Nursing panel"
+    "panelEnfermeria": "Nursing panel",
+    "requeridos": "Required fields"
   },
   "admin": {
     "title": "Administration",
@@ -1131,6 +1132,13 @@
       "dosis": "Dose",
       "enfermera": "Nurse",
       "cantidad": "Quantity"
+    },
+    "binding": {
+      "dosis": "Dose (applied product)",
+      "enfermera": "Nurse",
+      "tecnico": "Technician",
+      "medico": "Doctor",
+      "disponibilidad": "Availability (pending sessions)"
     }
   },
   "col": {
@@ -2182,5 +2190,32 @@
     "record": "Record",
     "soloEnfermeria": "Only Nursing can take the alert.",
     "sinPermiso": "You don't have access to this panel (panel.read)."
+  },
+  "requeridos": {
+    "title": "Required fields per service",
+    "help": "Choose which fields must be filled before an action (e.g. asistido) and WHERE each value lives.",
+    "servicio": "Service",
+    "guardado": "Saved",
+    "guardando": "Saving…",
+    "guardar": "Save",
+    "etiqueta": "Label (i18n key)",
+    "clave": "Key",
+    "tipo": "Type",
+    "requerido": "Required",
+    "en": "On action",
+    "dondeVive": "Where the value lives",
+    "enFormulario": "In the form",
+    "sinCampos": "No fields.",
+    "agregarCampo": "Add field",
+    "quitar": "Remove",
+    "ayudaBinding": "With a binding, the value comes from the board column (dose, nurse…) and is NOT captured in the form. Without a binding, it is captured in the actions form.",
+    "tipos": {
+      "texto": "Text",
+      "numero": "Number",
+      "fecha": "Date",
+      "bool": "Yes/No",
+      "select": "Select"
+    },
+    "sinPermiso": "You don't have access (servicios.update)."
   }
 }
