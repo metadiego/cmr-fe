@@ -612,7 +612,7 @@ export function FrontdeskBoard() {
             return (
               <span key={c.clave} className="inline-flex items-center gap-1.5">
                 <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
-                {tRoot(r.labelKey ?? c.labelKey)}
+                {tRoot(flujo[i]?.labelKey ?? r.labelKey ?? c.labelKey)}
               </span>
             );
           })}
@@ -877,7 +877,9 @@ function FilaSesion({
         return {
           key: trans,
           estado: c.clave, // estado destino (clave de la columna) → matchea formAcciones.campos[].en
-          labelKey: r.labelKey ?? c.labelKey,
+          // Etiqueta: la del ESTADO del flujo (Presente/En terapia/Asistido) — en frontdesk todo es
+          // terapia; "consulta" es de Atención (médicos). Fallback a la etiqueta de la columna.
+          labelKey: flujo[i]?.labelKey ?? r.labelKey ?? c.labelKey,
           // Color del paso (data-driven): el flujo (`flujo`) son los estados del flujo EN ORDEN
           // (presente/en_terapia/asistido) con su color; `flujoCols` van en el mismo orden, así que el
           // color del paso i = flujo[i].color. Evita el gris cuando la clave/transición de la columna no
