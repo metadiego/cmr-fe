@@ -606,9 +606,9 @@ export function FrontdeskBoard() {
           el color de su estado destino. Como el mockup del AP-Board. */}
       {flujoCols.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground">
-          {flujoCols.map((c) => {
-            const r = (c.render ?? {}) as { transition?: string; labelKey?: string };
-            const color = estadoDe(r.transition ?? c.clave)?.color;
+          {flujoCols.map((c, i) => {
+            const r = (c.render ?? {}) as { transition?: string; labelKey?: string; color?: string };
+            const color = r.color ?? flujo[i]?.color ?? estadoDe(r.transition ?? c.clave)?.color;
             return (
               <span key={c.clave} className="inline-flex items-center gap-1.5">
                 <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
@@ -871,14 +871,18 @@ function FilaSesion({
   // Pasos del flujo: PREFERIR los toggles agrupados del BE (render.group + transition + valor=sello en la
   // fila, PR paridad-Atención); fallback a estados∩transiciones + entidad unida (tableros sin toggles).
   const pasos = flujoCols.length
-    ? flujoCols.map((c) => {
-        const r = (c.render ?? {}) as { transition?: string; labelKey?: string; postAccion?: string; revert?: string };
+    ? flujoCols.map((c, i) => {
+        const r = (c.render ?? {}) as { transition?: string; labelKey?: string; postAccion?: string; revert?: string; color?: string };
         const trans = r.transition ?? c.clave;
         return {
           key: trans,
           estado: c.clave, // estado destino (clave de la columna) → matchea formAcciones.campos[].en
           labelKey: r.labelKey ?? c.labelKey,
-          color: estadoDe(trans)?.color ?? null,
+          // Color del paso (data-driven): el flujo (`flujo`) son los estados del flujo EN ORDEN
+          // (presente/en_terapia/asistido) con su color; `flujoCols` van en el mismo orden, así que el
+          // color del paso i = flujo[i].color. Evita el gris cuando la clave/transición de la columna no
+          // matchea el nombre del estado (p. ej. en_consulta vs en_terapia). Fallbacks por si acaso.
+          color: r.color ?? flujo[i]?.color ?? estadoDe(c.clave)?.color ?? estadoDe(trans)?.color ?? null,
           stamp: (fila[c.clave] as string | null) ?? null,
           postAccion: r.postAccion ?? null, // data-driven: qué abrir tras la acción (p. ej. programar citas)
           // Reversa data-driven del MISMO board: clave de acción para deshacer este sello (p. ej.
@@ -923,76 +927,66 @@ function FilaSesion({
   const flujoCell = cancelada ? (
     <span className="text-xs text-muted-foreground">—</span>
   ) : (
-    <div className="flex items-center gap-1">
-      {/* Solo el ÚLTIMO paso sellado se puede deshacer (uno a la vez, como el BE exige). */}
+    // Flujo estilo AP-Board: por paso, un pill (hora si está sellado; acción si es el siguiente; punto si
+    // futuro) coloreado por el estado, con la ETIQUETA del estado debajo, y conectores entre pasos.
+    <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
         const previo = i === 0 || !!pasos[i - 1].stamp;
-        const faltan = faltantesPara(paso.estado); // campos requeridos aún vacíos para este estado
-        const listo = !hecho && previo && faltan.length === 0; // se puede ejecutar
-        // Bloqueado SOLO por campos requeridos: el botón queda CLICABLE (atenuado) y avisa con toast,
-        // sin disparar la acción. El disabled real queda para `busy` o pasos fuera de orden (sin previo).
+        const faltan = faltantesPara(paso.estado);
+        const listo = !hecho && previo && faltan.length === 0;
         const bloqueadoPorCampos = !hecho && previo && faltan.length > 0;
-        const siguiente = listo;
-        // Reversa DATA-DRIVEN: solo el ÚLTIMO paso sellado, y solo si el board declara `render.revert`
-        // (clave de acción para deshacer). Nada hardcodeado: si el BE no la declara, no hay reversa.
+        const siguiente = listo || bloqueadoPorCampos; // es el paso "accionable" ahora
         const esUltimoHecho = hecho && !(pasos[i + 1] && pasos[i + 1].stamp);
         const reversa = esUltimoHecho ? paso.revert : null;
         const puedeDeshacer = !!reversa && !busy && !cancelada;
+        const col = paso.color ?? undefined;
+        const avanzar = () => {
+          if (bloqueadoPorCampos) { toast.warning(t("faltanCampos", { campos: faltan.join(", ") })); return; }
+          run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then(() => {
+            if (paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
+              onProgramar({ pacienteId: sesion.pacienteId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
+            }
+          });
+        };
+        const deshacer = () => {
+          if (!puedeDeshacer || !reversa) return;
+          toast(t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), {
+            action: { label: t("deshacer"), onClick: () => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: reversa }, centro)) },
+          });
+        };
         return (
           <React.Fragment key={paso.key}>
-            {i > 0 && <span className="h-px w-3 bg-border" aria-hidden />}
-            {hecho ? (
-              // Chip sellado. Si hay transición de reversa (data-driven) y es el último paso, pregunta y al
-              // confirmar el BE revierte consumo+sello+sesiones (reutilizable por todos los servicios).
-              <button
-                type="button"
-                disabled={!puedeDeshacer}
-                className={
-                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold " +
-                  (puedeDeshacer ? "cursor-pointer" : "cursor-default")
-                }
-                style={paso.color ? { backgroundColor: `${paso.color}22`, color: paso.color ?? undefined } : undefined}
-                title={puedeDeshacer ? t("deshacerPregunta", { paso: tRoot(paso.labelKey) }) : tRoot(paso.labelKey)}
-                onClick={() => {
-                  if (!puedeDeshacer || !reversa) return;
-                  toast(t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), {
-                    action: {
-                      label: t("deshacer"),
-                      onClick: () => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: reversa }, centro)),
-                    },
-                  });
-                }}
-              >
-                <HugeiconsIcon icon={Tick02Icon} className="size-3" />
-                {fmtHora(paso.stamp)}
-              </button>
-            ) : (
-              <Button
-                type="button"
-                variant={siguiente ? "outline" : "ghost"}
-                size="sm"
-                disabled={busy || (!listo && !bloqueadoPorCampos)}
-                title={faltan.length > 0 ? t("faltanCampos", { campos: faltan.join(", ") }) : undefined}
-                className={"h-6 rounded-full px-2 text-[11px] " + (!siguiente ? "opacity-40" : "")}
-                onClick={() => {
-                  // Bloqueado solo por campos requeridos → avisa cuáles faltan y NO dispara la acción.
-                  if (bloqueadoPorCampos) {
-                    toast.warning(t("faltanCampos", { campos: faltan.join(", ") }));
-                    return;
-                  }
-                  run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then(() => {
-                    // Post-acción DATA-DRIVEN: si la columna declara render.postAccion de programar citas
-                    // y hay paciente, abre el modal (no hardcodeamos "asistido"). El BE decide qué estado lo dispara.
-                    if (paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
-                      onProgramar({ pacienteId: sesion.pacienteId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
-                    }
-                  });
-                }}
-              >
-                {tRoot(paso.labelKey)}
-              </Button>
-            )}
+            {i > 0 && <span className="mt-3 h-px w-4 shrink-0" style={{ backgroundColor: hecho && col ? col : "var(--border)" }} aria-hidden />}
+            <div className="flex min-w-16 flex-col items-center gap-1">
+              {hecho ? (
+                <button
+                  type="button"
+                  disabled={!puedeDeshacer}
+                  onClick={deshacer}
+                  title={puedeDeshacer ? t("deshacerPregunta", { paso: tRoot(paso.labelKey) }) : tRoot(paso.labelKey)}
+                  className={"inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold tabular-nums " + (puedeDeshacer ? "cursor-pointer" : "cursor-default")}
+                  style={col ? { backgroundColor: col, color: "#fff" } : undefined}
+                >
+                  <HugeiconsIcon icon={Tick02Icon} className="size-3" />
+                  {fmtHora(paso.stamp)}
+                </button>
+              ) : siguiente ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={avanzar}
+                  title={faltan.length > 0 ? t("faltanCampos", { campos: faltan.join(", ") }) : tRoot(paso.labelKey)}
+                  className="inline-flex items-center rounded-full border-2 border-dashed px-2.5 py-1 text-[11px] font-semibold"
+                  style={col ? { borderColor: col, color: col } : undefined}
+                >
+                  {tRoot(paso.labelKey)}
+                </button>
+              ) : (
+                <span className="inline-flex size-6 items-center justify-center rounded-full bg-muted text-muted-foreground" aria-hidden>·</span>
+              )}
+              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{tRoot(paso.labelKey)}</span>
+            </div>
           </React.Fragment>
         );
       })}
