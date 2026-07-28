@@ -760,7 +760,10 @@ function FilaSesion({
       // para que el Select (radix) lo muestre. `value` SIEMPRE definido (string "" si no hay) →
       // el Select queda SIEMPRE controlado (evita el bug uncontrolled↔controlled que lo dejaba EN
       // BLANCO al asignar en vivo). Verificado con logs 2026-07-23.
-      const raw = v == null ? "" : String(v);
+      // Preferir el VALOR crudo (`<col>__valor`, el id que persiste la entidad, p. ej. dosis→
+      // productoAplicadoId) sobre el label (`<col>`), que puede venir null si el BE no resuelve el nombre.
+      const rawVal = fila[`${c.clave}__valor`] ?? v;
+      const raw = rawVal == null ? "" : String(rawVal);
       const delBoard = ops.find((o) => o.value === raw || o.label === raw)?.value ?? "";
       // El valor MOSTRADO: el optimista local si existe, si no el del board (normalizado a opción).
       const shown = pendSelect[c.clave] ?? delBoard;
@@ -886,7 +889,12 @@ function FilaSesion({
     // en un SELECT sobre la sesión resuelto en la fila (fd_<clave>, p. ej. dosis→fd_dosis,
     // enfermera→fd_enfermera, sesiones→fd_sesiones). Se considera lleno si CUALQUIERA tiene valor.
     const lleno = (clave: string): boolean => {
-      const fuentes = [datos[clave], fila[clave], fila[`fd_${clave}`]];
+      // Un select editable persiste el id en `<col>__valor` (p. ej. fd_dosis__valor); el label
+      // (`fd_dosis`) puede venir null. Se considera lleno si CUALQUIER fuente tiene valor.
+      const fuentes = [
+        datos[clave], fila[clave], fila[`fd_${clave}`],
+        fila[`${clave}__valor`], fila[`fd_${clave}__valor`],
+      ];
       return fuentes.some((v) => v != null && v !== "" && v !== "—");
     };
     return camposReq
