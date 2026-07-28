@@ -1127,7 +1127,10 @@
       "aplicadas": "Applied",
       "wa": "WA",
       "sms": "SMS",
-      "en_terapia": "In therapy"
+      "en_terapia": "In therapy",
+      "dosis": "Dose",
+      "enfermera": "Nurse",
+      "cantidad": "Quantity"
     }
   },
   "col": {

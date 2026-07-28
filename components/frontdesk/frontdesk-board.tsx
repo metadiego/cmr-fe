@@ -882,9 +882,16 @@ function FilaSesion({
   const camposReq = ((servicio as { formAcciones?: { campos?: { clave: string; labelKey?: string; en?: string; requerido?: boolean }[] } } | undefined)?.formAcciones?.campos ?? []);
   const faltantesPara = (estado: string): string[] => {
     const datos = (sesion?.datos as Record<string, unknown> | null | undefined) ?? {};
+    // Un campo requerido puede vivir en la MEDICIÓN (sesion.datos[clave], p. ej. aplicadas/cantidad) o
+    // en un SELECT sobre la sesión resuelto en la fila (fd_<clave>, p. ej. dosis→fd_dosis,
+    // enfermera→fd_enfermera, sesiones→fd_sesiones). Se considera lleno si CUALQUIERA tiene valor.
+    const lleno = (clave: string): boolean => {
+      const fuentes = [datos[clave], fila[clave], fila[`fd_${clave}`]];
+      return fuentes.some((v) => v != null && v !== "" && v !== "—");
+    };
     return camposReq
       .filter((c) => c.requerido && c.en === estado)
-      .filter((c) => { const val = datos[c.clave]; return val == null || val === ""; }) // vacío = sin valor
+      .filter((c) => !lleno(c.clave))
       .map((c) => (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave));
   };
 
