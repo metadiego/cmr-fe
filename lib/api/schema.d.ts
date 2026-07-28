@@ -4074,6 +4074,160 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/paneles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Paneles del centro activo. */
+        get: operations["PanelesController_list_v1"];
+        put?: never;
+        /** Crea un panel EN BLANCO (sin secciones); las secciones se agregan después. */
+        post: operations["PanelesController_crear_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Renombra o reconfigura un panel. */
+        put: operations["PanelesController_actualizar_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/definicion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Todo lo que el panel necesita en UNA llamada: panel + secciones + personal elegible + su estatus vivo. */
+        get: operations["PanelesController_definicion_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/secciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Agrega una sección al panel (Enfermería, Intravenoso, …) con su color, orden, sonido, capacidad y destino de asignación. */
+        post: operations["PanelesController_agregarSeccion_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/secciones/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita, reordena, oculta o desactiva una sección. */
+        put: operations["PanelesController_actualizarSeccion_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/notificar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Levanta un aviso al panel (campana de la fila). Idempotente: si esa fila ya tiene un aviso pendiente en la sección, lo reusa. */
+        post: operations["PanelesController_notificar_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/notificaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Avisos del panel (por defecto los pendientes). */
+        get: operations["PanelesController_notificaciones_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/notificaciones/{id}/aceptar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** La persona toma el aviso desde el panel: se asigna al paciente según seccion.asignaA. Idempotente si ya lo tomaron. */
+        post: operations["PanelesController_aceptar_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/paneles/{clave}/contadores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). */
+        get: operations["PanelesController_contadores_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/consultas/reportes/productividad": {
         parameters: {
             query?: never;
@@ -8121,6 +8275,126 @@ export interface components {
             motivo: string;
             /** Format: uuid */
             actorId?: string;
+        };
+        PanelEntity: {
+            clave: string;
+            labelKey: string;
+            layout: string;
+            config: Record<string, never> | null;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreatePanelDto: {
+            /** @description Pista de presentación para el FE (por defecto "tarjetas"). */
+            layout?: string;
+            /** @description Opciones declarativas del panel (audio por defecto, tema, refresco). */
+            config?: Record<string, never>;
+            clave: string;
+            /** @description i18n: el FE traduce; nunca se guarda el texto visible. */
+            labelKey: string;
+        };
+        UpdatePanelDto: {
+            labelKey?: string;
+            layout?: string;
+            config?: Record<string, never>;
+            activo?: boolean;
+        };
+        CreatePanelSeccionDto: {
+            /** @description False = no se pinta pero SIGUE contando (franja de color, paridad legacy). */
+            visible?: boolean;
+            /** @description Origen de los avisos: { tipo: 'servicio', servicioId } o { tipo: 'cita' }. */
+            origen?: Record<string, never>;
+            /**
+             * @description Campo que se escribe al aceptar el aviso. Permitidos: sesion.enfermeraId, sesion.tecnicoId, sesion.medicoId.
+             * @enum {string}
+             */
+            asignaA?: "sesion.enfermeraId" | "sesion.tecnicoId" | "sesion.medicoId";
+            /**
+             * @description Capacidad del personal que puede tomar la sección: enfermera, tecnico, medico.
+             * @enum {string}
+             */
+            capacidad?: "enfermera" | "tecnico" | "medico";
+            /** @description Nombre lógico del sonido de alarma (el FE resuelve el archivo). */
+            audio?: string;
+            clave: string;
+            labelKey: string;
+            orden?: number;
+            color?: string;
+        };
+        PanelSeccionEntity: {
+            panelId: string;
+            clave: string;
+            labelKey: string;
+            orden: number;
+            color: string | null;
+            visible: boolean;
+            origen: Record<string, never> | null;
+            asignaA: string;
+            capacidad: string;
+            audio: string | null;
+            activo: boolean;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UpdatePanelSeccionDto: {
+            labelKey?: string;
+            orden?: number;
+            color?: string;
+            visible?: boolean;
+            origen?: Record<string, never>;
+            /** @enum {string} */
+            asignaA?: "sesion.enfermeraId" | "sesion.tecnicoId" | "sesion.medicoId";
+            /** @enum {string} */
+            capacidad?: "enfermera" | "tecnico" | "medico";
+            audio?: string;
+            activo?: boolean;
+        };
+        NotificarPanelDto: {
+            /** @description Clave de la sección del panel (p. ej. vitales). */
+            seccion?: string;
+            /**
+             * Format: uuid
+             * @description Sesión del frontdesk que origina el aviso.
+             */
+            sesionId?: string;
+            /**
+             * Format: uuid
+             * @description Cita que origina el aviso (alternativa a sesionId).
+             */
+            citaId?: string;
+        };
+        PanelNotificacionEntity: {
+            panelId: string;
+            seccionId: string;
+            sesionId: string | null;
+            citaId: string | null;
+            pacienteId: string | null;
+            /** @enum {string} */
+            estado: "pendiente" | "cancelada" | "aceptada";
+            notificadaPorId: string | null;
+            aceptadaPorId: string | null;
+            /** Format: date-time */
+            aceptadaEn: string | null;
+            meta: Record<string, never> | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AceptarPanelDto: {
+            /** Format: uuid */
+            personalId: string;
         };
         ConsultaEntity: {
             citaId: string;
@@ -16416,6 +16690,242 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_list_v1: {
+        parameters: {
+            query?: {
+                includeInactive?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelEntity"][];
+                };
+            };
+        };
+    };
+    PanelesController_crear_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePanelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_actualizar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePanelDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_definicion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    PanelesController_agregarSeccion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePanelSeccionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelSeccionEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_actualizarSeccion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePanelSeccionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelSeccionEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_notificar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NotificarPanelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelNotificacionEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_notificaciones_v1: {
+        parameters: {
+            query?: {
+                estado?: string;
+            };
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelNotificacionEntity"][];
+                };
+            };
+        };
+    };
+    PanelesController_aceptar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AceptarPanelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PanelNotificacionEntity"];
+                };
+            };
+        };
+    };
+    PanelesController_contadores_v1: {
+        parameters: {
+            query?: {
+                fecha?: string;
+            };
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
                 };
             };
         };

@@ -626,7 +626,8 @@
     "devoluciones": "Devoluciones",
     "cajaConsultas": "Caja de consultas",
     "cajaGeneral": "Caja general",
-    "gruposFacturacion": "Grupos de facturación"
+    "gruposFacturacion": "Grupos de facturación",
+    "panelEnfermeria": "Panel de Enfermería"
   },
   "admin": {
     "title": "Administración",
@@ -1088,7 +1089,12 @@
     "ladoDerecho": "Lado derecho",
     "imprimirPdf": "Imprimir / PDF",
     "firmaPaciente": "Firma del paciente",
-    "firmaLimpiar": "Limpiar"
+    "firmaLimpiar": "Limpiar",
+    "notificado": "Notificado",
+    "notificando": "Notificando…",
+    "notificarAlPanel": "Notificar al Panel",
+    "seleccionarEnfermera": "Seleccionar enfermera(o)",
+    "asignarSinAvisar": "Asigna la enfermera sin enviar aviso."
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -2159,5 +2165,19 @@
       "filtrar_paciente": "Filtrar por paciente",
       "citas_servicio": "Citas de servicio"
     }
+  },
+  "panel": {
+    "enfermeria": "Panel de Enfermería",
+    "seccion": {
+      "vitales": "Vitales",
+      "intravenoso": "Intravenoso"
+    },
+    "activarSonido": "Activar sonido",
+    "tema": "Tema",
+    "sinSecciones": "Sin secciones configuradas.",
+    "enCola": "{n} en cola",
+    "record": "Récord",
+    "soloEnfermeria": "Solo Enfermería puede tomar el aviso.",
+    "sinPermiso": "No tienes acceso a este panel (panel.read)."
   }
 }

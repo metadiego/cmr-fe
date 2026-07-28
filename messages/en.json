@@ -626,7 +626,8 @@
     "devoluciones": "Returns",
     "cajaConsultas": "Consultation cash",
     "cajaGeneral": "General cash",
-    "gruposFacturacion": "Billing groups"
+    "gruposFacturacion": "Billing groups",
+    "panelEnfermeria": "Nursing panel"
   },
   "admin": {
     "title": "Administration",
@@ -1088,7 +1089,12 @@
     "ladoDerecho": "Right side",
     "imprimirPdf": "Print / PDF",
     "firmaPaciente": "Patient signature",
-    "firmaLimpiar": "Clear"
+    "firmaLimpiar": "Clear",
+    "notificado": "Notified",
+    "notificando": "Notifying…",
+    "notificarAlPanel": "Notify the panel",
+    "seleccionarEnfermera": "Select nurse",
+    "asignarSinAvisar": "Assigns the nurse without sending an alert."
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -2159,5 +2165,19 @@
       "filtrar_paciente": "Filter by patient",
       "citas_servicio": "Service appointments"
     }
+  },
+  "panel": {
+    "enfermeria": "Nursing panel",
+    "seccion": {
+      "vitales": "Vitals",
+      "intravenoso": "IV"
+    },
+    "activarSonido": "Enable sound",
+    "tema": "Theme",
+    "sinSecciones": "No sections configured.",
+    "enCola": "{n} in queue",
+    "record": "Record",
+    "soloEnfermeria": "Only Nursing can take the alert.",
+    "sinPermiso": "You don't have access to this panel (panel.read)."
   }
 }

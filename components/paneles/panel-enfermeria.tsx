@@ -1,0 +1,194 @@
+"use client";
+
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Sun01Icon, Moon02Icon, VolumeHighIcon } from "@hugeicons/core-free-icons";
+
+import {
+  getPanelDefinicion,
+  getPanelNotificaciones,
+  getPanelContadores,
+  aceptarNotificacion,
+  type PanelDefinicion,
+  type PanelNotificacion,
+  type PanelContador,
+} from "@/lib/api/paneles";
+import { toastError } from "@/lib/api/errors";
+import { useResource } from "@/hooks/use-resource";
+import { useCitaStream } from "@/hooks/use-cita-stream";
+import { useCan } from "@/hooks/use-can";
+import { colorForName } from "@/lib/frontdesk/color";
+
+const CLAVE = "enfermeria";
+const THEME_KEY = "cmr_panel_theme";
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+// Alarma sin assets: beep en loop con WebAudio (requiere un primer gesto por autoplay del navegador).
+function useAlarma() {
+  const ctxRef = React.useRef<AudioContext | null>(null);
+  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const armado = React.useRef(false);
+  const armar = () => {
+    if (armado.current) return;
+    try { ctxRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); armado.current = true; } catch { /* noop */ }
+  };
+  const beep = () => {
+    const ctx = ctxRef.current; if (!ctx) return;
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.frequency.value = 880; o.type = "sine"; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    o.start(); o.stop(ctx.currentTime + 0.42);
+  };
+  const start = () => { if (timerRef.current || !armado.current) return; beep(); timerRef.current = setInterval(beep, 1200); };
+  const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
+  React.useEffect(() => () => stop(), []);
+  return { armar, armado, start, stop };
+}
+
+export function PanelEnfermeria({ centro }: { centro?: string }) {
+  const t = useTranslations("panel");
+  const tRoot = useTranslations();
+  const { can } = useCan();
+  const puedeAceptar = can("panel.aceptar");
+
+  const [dark, setDark] = React.useState(false);
+  const [restored, setRestored] = React.useState(false);
+  if (!restored && typeof window !== "undefined") { setRestored(true); setDark(window.localStorage.getItem(THEME_KEY) === "dark"); }
+  const toggleTheme = () => setDark((d) => { const n = !d; if (typeof window !== "undefined") window.localStorage.setItem(THEME_KEY, n ? "dark" : "light"); return n; });
+
+  const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
+  const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
+  const [contadores, setContadores] = React.useState<PanelContador[]>([]);
+  const alarma = useAlarma();
+
+  const refetch = React.useCallback(() => {
+    getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
+    getPanelContadores(CLAVE, todayISO(), centro).then(setContadores).catch(() => {});
+  }, [centro]);
+  // Carga inicial (una vez montado, patrón sin setState-en-render).
+  React.useEffect(() => { refetch(); }, [refetch]);
+
+  const { live } = useCitaStream({ centroId: centro ?? null, entidad: "panel_notificacion", onInvalidate: refetch });
+
+  // Cola: la más antigua primero. La alarma suena mientras haya avisos pendientes.
+  const pendientes = notifs;
+  const actual = pendientes[0] ?? null;
+  React.useEffect(() => {
+    if (actual && alarma.armado.current) alarma.start(); else alarma.stop();
+  }, [actual, alarma]);
+
+  const def = defRes.state.kind === "ok" ? defRes.state.data : null;
+  const secciones = (def?.secciones ?? []).slice().sort((a, b) => a.orden - b.orden);
+  const personal = def?.personal ?? [];
+  const estatusById = new Map((def?.estatus ?? []).map((e) => [e.personalId, e]));
+  const contByPersona = new Map(contadores.map((c) => [c.personalId, c]));
+
+  async function aceptar(notifId: string, personalId: string) {
+    try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
+    catch (e) { toastError(e, tRoot); }
+  }
+
+  return (
+    <div className={dark ? "dark" : ""}>
+      <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
+        {/* Barra */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight">{tRoot(def?.panel.labelKey ?? "panel.enfermeria")}</h1>
+            <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-emerald-500" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
+          </div>
+          <div className="flex items-center gap-2">
+            {!alarma.armado.current && (
+              <button type="button" onClick={alarma.armar} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium" title={t("activarSonido")}>
+                <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
+              </button>
+            )}
+            <button type="button" onClick={toggleTheme} className="rounded-md border p-2" aria-label={t("tema")}>
+              <HugeiconsIcon icon={dark ? Sun01Icon : Moon02Icon} className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Secciones + muro de tarjetas por enfermera */}
+        {defRes.state.kind === "loading" && <p className="text-muted-foreground">…</p>}
+        {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
+        <div className="space-y-5">
+          {secciones.map((s) => (
+            <section key={s.id}>
+              <div className="mb-2 flex items-center gap-2">
+                <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color }} aria-hidden />
+                <h2 className="text-lg font-semibold">{tRoot(s.labelKey)}</h2>
+              </div>
+              {s.visible ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  {personal.map((p) => {
+                    const cont = contByPersona.get(p.id);
+                    const nSec = cont?.porSeccion?.[s.clave] ?? 0;
+                    const est = estatusById.get(p.id);
+                    const pc = colorForName(p.nombre);
+                    return (
+                      <div key={p.id} className="rounded-xl border p-3" style={{ borderLeftColor: pc, borderLeftWidth: 4 }}>
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="truncate text-base font-semibold">{p.nombre}</span>
+                          <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-lg font-bold tabular-nums" style={{ color: s.color }}>{nSec}</span>
+                        </div>
+                        {cont && Object.keys(cont.porSeccion || {}).length > 1 && (
+                          <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
+                            {secciones.map((sx) => <span key={sx.clave}>{tRoot(sx.labelKey)} {cont.porSeccion?.[sx.clave] ?? 0}</span>)}
+                          </div>
+                        )}
+                        {est && (est.labelKey || est.label) && (
+                          <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
+                            {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="h-3 w-full rounded" style={{ backgroundColor: s.color }} aria-hidden />
+              )}
+            </section>
+          ))}
+        </div>
+
+        {/* Cola */}
+        {pendientes.length > 1 && (
+          <div className="fixed bottom-4 right-4 rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
+            {t("enCola", { n: pendientes.length - 1 })}
+          </div>
+        )}
+
+        {/* Aviso entrante a pantalla completa */}
+        {actual && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: (actual.color ?? "#111") + "F2" }}>
+            <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">
+              {actual.seccion && tRoot.has(`panel.seccion.${actual.seccion}`) ? tRoot(`panel.seccion.${actual.seccion}`) : actual.seccion}
+            </p>
+            <h2 className="mt-2 text-center text-5xl font-black text-white md:text-6xl">{actual.pacienteNombre ?? "—"}</h2>
+            {actual.record && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.record}</p>}
+            {actual.servicioNombre && <p className="text-lg text-white/80">{actual.servicioNombre}</p>}
+            <div className="mt-8 grid w-full max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
+              {personal.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  disabled={!puedeAceptar}
+                  onClick={() => aceptar(actual.id, p.id)}
+                  className="min-h-[88px] rounded-2xl bg-white/95 p-4 text-xl font-bold text-neutral-900 shadow-lg transition-transform active:scale-95 disabled:opacity-60"
+                >
+                  {p.nombre}
+                </button>
+              ))}
+            </div>
+            {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -39,6 +39,7 @@ import { useDictado } from "@/hooks/use-dictado";
 import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
+import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 import { serviceHasReports } from "@/lib/frontdesk/acciones";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,7 @@ import {
   Tick02Icon,
   Calendar01Icon,
   PencilEdit01Icon,
+  Notification03Icon,
 } from "@hugeicons/core-free-icons";
 
 // Íconos disponibles para las acciones enchufables del tablero (mapa string→hugeicon, data-driven).
@@ -684,6 +686,7 @@ function FilaSesion({
   const [busy, setBusy] = React.useState(false);
   const [historialOpen, setHistorialOpen] = React.useState(false);
   const [formatosOpen, setFormatosOpen] = React.useState(false);
+  const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
   const tieneFormatos = serviceHasReports(servicio?.formAcciones);
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
@@ -705,6 +708,24 @@ function FilaSesion({
 
   function celda(c: FrontdeskColumna) {
     const v = fila[c.clave];
+    // Campana data-driven (columna fd_notificar): abre el modal para avisar al panel. panel/sección
+    // salen del render de la columna (sin hardcode). Solo si hay sesión con paciente.
+    const rk = (c.render as { kind?: string } | null)?.kind;
+    if (rk === "notificar") {
+      if (!sesion?.pacienteId) return <span className="text-muted-foreground">—</span>;
+      const rc = (c.render ?? {}) as { panel?: string; seccion?: string };
+      return (
+        <button
+          type="button"
+          onClick={() => setNotificarCfg({ panel: rc.panel ?? "enfermeria", seccion: rc.seccion ?? "" })}
+          className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label={t("notificarAlPanel")}
+          title={t("notificarAlPanel")}
+        >
+          <HugeiconsIcon icon={Notification03Icon} className="size-4" />
+        </button>
+      );
+    }
     if (c.clave === "fd_estado") {
       const e = estadoDe(String(v ?? ""));
       return (
@@ -994,6 +1015,21 @@ function FilaSesion({
             areasDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
             centro={centro}
             onHistorial={() => setHistorialOpen(true)}
+          />
+        )}
+        {notificarCfg && sesion?.pacienteId && (
+          <PanelNotificarModal
+            open={!!notificarCfg}
+            onOpenChange={(o) => !o && setNotificarCfg(null)}
+            panelClave={notificarCfg.panel}
+            seccion={notificarCfg.seccion}
+            sesionId={fila.id}
+            servicioNombre={servicio?.nombre ?? ""}
+            pacienteNombre={String(fila.paciente ?? "")}
+            enfermeras={optionsByCol["fd_enfermera"] ?? []}
+            enfermeraActual={(() => { const raw = fila["fd_enfermera"]; const ops = optionsByCol["fd_enfermera"] ?? []; return ops.find((o) => o.value === raw || o.label === raw)?.value; })()}
+            onAsignarEnfermera={(pid) => run(() => editarCelda({ tablero, entidadId: fila.id, columna: "fd_enfermera", valor: pid }, centro))}
+            centro={centro}
           />
         )}
       </td>
