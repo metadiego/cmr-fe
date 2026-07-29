@@ -342,7 +342,11 @@ export function FrontdeskBoard() {
     return () => {
       active = false;
     };
-  }, [board, tabEfectivo, gate.centro]);
+    // Deps SIN tabEfectivo a propósito: al cambiar de pestaña, `board` se recarga (nueva ref) y el efecto
+    // corre con el board FRESCO + la pestaña ya actualizada. Incluir tabEfectivo disparaba una corrida con
+    // el board VIEJO (láser tiene fd_tecnico) contra la pestaña nueva (vitc sin fd_tecnico) → 404 espurio.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, gate.centro]);
 
   // Filtro compuesto: búsqueda (texto de fila O pacienteId) → luego KPI de estado.
   const visibles = React.useMemo(() => {
