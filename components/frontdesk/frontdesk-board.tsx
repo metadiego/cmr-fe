@@ -1010,11 +1010,12 @@ function FilaSesion({
       .map((c) => (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave));
   };
 
-  const flujoCell = cancelada ? (
-    <span className="text-xs text-muted-foreground">—</span>
-  ) : (
-    // Flujo estilo AP-Board: por paso, un pill (hora si está sellado; acción si es el siguiente; punto si
-    // futuro) coloreado por el estado, con la ETIQUETA del estado debajo, y conectores entre pasos.
+  // Flujo estilo AP-Board: por paso, un pill (hora si está sellado; acción si es el siguiente; punto si
+  // futuro) coloreado por el estado, con la ETIQUETA del estado debajo, y conectores entre pasos.
+  // Se muestra SIEMPRE, también en CANCELADA (sus sellos son historia): en cancelada no hay paso
+  // accionable ni deshacer, solo se ven las horas ya selladas y puntos grises. (Regresión del commit
+  // 7310358 que pintaba "—"; restaurado.)
+  const flujoCell = (
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
@@ -1022,7 +1023,7 @@ function FilaSesion({
         const faltan = faltantesPara(paso.estado);
         const listo = !hecho && previo && faltan.length === 0;
         const bloqueadoPorCampos = !hecho && previo && faltan.length > 0;
-        const siguiente = listo || bloqueadoPorCampos; // es el paso "accionable" ahora
+        const siguiente = !cancelada && (listo || bloqueadoPorCampos); // accionable ahora (nunca si cancelada)
         const esUltimoHecho = hecho && !(pasos[i + 1] && pasos[i + 1].stamp);
         const reversa = esUltimoHecho ? paso.revert : null;
         const puedeDeshacer = !!reversa && !busy && !cancelada;
