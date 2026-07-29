@@ -645,7 +645,7 @@ export function FrontdeskBoard() {
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground">
           {flujoCols.map((c, i) => {
             const r = (c.render ?? {}) as { transition?: string; labelKey?: string; color?: string };
-            const color = r.color ?? flujo[i]?.color ?? estadoDe(r.transition ?? c.clave)?.color;
+            const color = (c as { color?: string | null }).color ?? r.color ?? flujo[i]?.color ?? estadoDe(r.transition ?? c.clave)?.color;
             return (
               <span key={c.clave} className="inline-flex items-center gap-1.5">
                 <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
@@ -917,11 +917,10 @@ function FilaSesion({
           // Etiqueta: la del ESTADO del flujo (Presente/En terapia/Asistido) — en frontdesk todo es
           // terapia; "consulta" es de Atención (médicos). Fallback a la etiqueta de la columna.
           labelKey: flujo[i]?.labelKey ?? r.labelKey ?? c.labelKey,
-          // Color del paso (data-driven): el flujo (`flujo`) son los estados del flujo EN ORDEN
-          // (presente/en_terapia/asistido) con su color; `flujoCols` van en el mismo orden, así que el
-          // color del paso i = flujo[i].color. Evita el gris cuando la clave/transición de la columna no
-          // matchea el nombre del estado (p. ej. en_consulta vs en_terapia). Fallbacks por si acaso.
-          color: r.color ?? flujo[i]?.color ?? estadoDe(c.clave)?.color ?? estadoDe(trans)?.color ?? null,
+          // Color del paso (data-driven). Prioridad: color EXPLÍCITO de la columna (`c.color`, configurable
+          // por API cuando el BE lo persista/exponga) → render.color → color del estado del flujo por
+          // orden (flujo[i]) → por clave/transición. Evita el gris con el desajuste en_consulta/en_terapia.
+          color: (c as { color?: string | null }).color ?? r.color ?? flujo[i]?.color ?? estadoDe(c.clave)?.color ?? estadoDe(trans)?.color ?? null,
           stamp: (fila[c.clave] as string | null) ?? null,
           postAccion: r.postAccion ?? null, // data-driven: qué abrir tras la acción (p. ej. programar citas)
           // Reversa data-driven del MISMO board: clave de acción para deshacer este sello (p. ej.
