@@ -1096,7 +1096,8 @@
     "notificando": "Notificando…",
     "notificarAlPanel": "Notificar al Panel",
     "seleccionarEnfermera": "Seleccionar enfermera(o)",
-    "asignarSinAvisar": "Asigna la enfermera sin enviar aviso."
+    "asignarSinAvisar": "Asigna la enfermera sin enviar aviso.",
+    "ordenarTurno": "Ordenar por turno (llegada)"
   },
   "programarCitas": {
     "title": "Programar citas",

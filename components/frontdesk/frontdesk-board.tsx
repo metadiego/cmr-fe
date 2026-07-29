@@ -359,6 +359,35 @@ export function FrontdeskBoard() {
       : conBusqueda;
   }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro]);
 
+  // Orden del board. Natural (sort=null): por PRESENTE (hora de llegada) asc = orden de TURNO; los que
+  // aún no están presentes van al final. Clic en un encabezado ordena por esa columna (asc/desc). Clic en
+  // el encabezado del Flujo vuelve al orden natural. Todo del lado del cliente sobre la página cargada.
+  const [sort, setSort] = React.useState<{ col: string; dir: "asc" | "desc" } | null>(null);
+  const ordenadas = React.useMemo(() => {
+    const arr = [...visibles];
+    if (!sort) {
+      arr.sort((a, b) => {
+        const pa = a["presente"] as string | undefined, pb = b["presente"] as string | undefined;
+        if (pa && pb) return String(pa).localeCompare(String(pb));
+        if (pa) return -1;
+        if (pb) return 1;
+        return 0;
+      });
+      return arr;
+    }
+    const s = sort.dir === "asc" ? 1 : -1;
+    arr.sort((a, b) => {
+      const va = a[sort.col] ?? "", vb = b[sort.col] ?? "";
+      const na = Number(va), nb = Number(vb);
+      const numerico = va !== "" && vb !== "" && Number.isFinite(na) && Number.isFinite(nb);
+      const cmp = numerico ? na - nb : String(va).localeCompare(String(vb), undefined, { numeric: true });
+      return cmp * s;
+    });
+    return arr;
+  }, [visibles, sort]);
+  const toggleSort = (col: string) =>
+    setSort((prev) => (prev?.col === col ? (prev.dir === "asc" ? { col, dir: "desc" } : null) : { col, dir: "asc" }));
+
   // KPIs sobre el set buscado (sin el filtro de estado, para que los conteos guíen).
   const kpis = React.useMemo(() => {
     const filas = board?.filas ?? [];
@@ -557,10 +586,18 @@ export function FrontdeskBoard() {
                   <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                     {colsRender.map((item, i) =>
                       item.kind === "flujo" ? (
-                        <th key={`flujo-${i}`} className="px-3 py-2 font-semibold">{t("flujo")}</th>
+                        // Clic en Flujo → orden natural por presente (turno).
+                        <th key={`flujo-${i}`} className="px-3 py-2 font-semibold">
+                          <button type="button" onClick={() => setSort(null)} className="inline-flex items-center gap-1 hover:text-foreground" title={t("ordenarTurno")}>
+                            {t("flujo")}{!sort && <span aria-hidden>•</span>}
+                          </button>
+                        </th>
                       ) : (
                         <th key={item.col.clave} className="px-3 py-2 font-semibold">
-                          {tRoot(((item.col.render as { labelKey?: string } | null)?.labelKey) ?? item.col.labelKey)}
+                          <button type="button" onClick={() => toggleSort(item.col.clave)} className="inline-flex items-center gap-1 hover:text-foreground">
+                            {tRoot(((item.col.render as { labelKey?: string } | null)?.labelKey) ?? item.col.labelKey)}
+                            {sort?.col === item.col.clave && <span aria-hidden>{sort.dir === "asc" ? "▲" : "▼"}</span>}
+                          </button>
                         </th>
                       ),
                     )}
@@ -568,14 +605,14 @@ export function FrontdeskBoard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {visibles.length === 0 && (
+                  {ordenadas.length === 0 && (
                     <tr>
                       <td colSpan={colsRender.length + 1} className="px-3 py-10 text-center text-muted-foreground">
                         {t("sinFilas")}
                       </td>
                     </tr>
                   )}
-                  {visibles.map((f) => (
+                  {ordenadas.map((f) => (
                     <FilaSesion
                       key={f.id}
                       fila={f}
