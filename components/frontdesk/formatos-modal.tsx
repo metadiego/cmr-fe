@@ -20,25 +20,28 @@ import { SignaturePad } from "@/components/frontdesk/signature-pad";
 // estilos externos ni de que el otro lado tenga el diccionario.
 const PRINT_CSS = `
 *{box-sizing:border-box}
-@page{size:letter;margin:12mm}
-body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:12px}
+@page{size:letter;margin:9mm}
+body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:11px}
 .no-print{display:none!important}
-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
-th,td{border:1px solid #888;padding:4px 8px;text-align:left;vertical-align:top}
-img{max-width:100%;max-height:40px;object-fit:contain}
+h2{font-size:15px;margin:0}
+table{width:100%;border-collapse:collapse;font-size:9.5px;margin-top:3px}
+th,td{border:1px solid #999;padding:1.5px 5px;text-align:left;vertical-align:top;line-height:1.2}
+img{max-width:100%;max-height:38px;object-fit:contain}
 .text-center{text-align:center}.text-right{text-align:right}
 .font-bold{font-weight:700}.font-semibold{font-weight:600}.font-medium{font-weight:500}
 .uppercase{text-transform:uppercase}.tracking-wide{letter-spacing:.04em}
-.text-lg{font-size:18px}.text-base{font-size:15px}.text-sm{font-size:13px}.text-xs{font-size:11px}
+.text-lg{font-size:15px}.text-base{font-size:13px}.text-sm{font-size:12px}.text-xs{font-size:10px}
 .flex{display:flex}.items-end{align-items:flex-end}.items-start{align-items:flex-start}
-.justify-between{justify-content:space-between}.gap-4{gap:16px}
-.border-b{border-bottom:1px solid #000}.pb-2{padding-bottom:6px}.pb-3{padding-bottom:8px}.pt-2{padding-top:6px}
-.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}
+.justify-between{justify-content:space-between}.gap-3{gap:10px}.gap-4{gap:12px}
+.border-b{border-bottom:1px solid #000}.pb-2{padding-bottom:4px}.pb-3{padding-bottom:5px}.pt-2{padding-top:3px}.pt-3{padding-top:4px}
+.mt-1{margin-top:3px}.mt-2{margin-top:5px}.mt-3{margin-top:6px}.mb-1{margin-bottom:2px}.mb-2{margin-bottom:4px}
 .ml-2{margin-left:8px}.ml-3{margin-left:12px}
 .tabular-nums{font-variant-numeric:tabular-nums}
 .bg-neutral-100{background:#f2f2f2}.text-neutral-500{color:#666}
-.space-y-3>*+*{margin-top:12px}.space-y-4>*+*{margin-top:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.space-y-2>*+*{margin-top:5px}.space-y-3>*+*{margin-top:6px}.space-y-4>*+*{margin-top:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* Cada región/tabla no se parte entre páginas si cabe */
+section, .region { break-inside: avoid; }
 `;
 
 // Imprime un elemento en una VENTANA propia (evita el recorte del Dialog/Radix que dejaba la hoja en
@@ -305,7 +308,7 @@ function HiltTabla({ secciones, t }: { secciones: { region: string; filas: Laser
   return (
     <div className="space-y-3">
       {secciones.map((s) => (
-        <div key={s.region}>
+        <div key={s.region} className="region">
           <div className="mb-1 text-xs font-semibold uppercase tracking-wide">{s.region}</div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-[11px]">
