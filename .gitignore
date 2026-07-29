@@ -38,3 +38,6 @@ next-env.d.ts
 
 # Notas y planes personales (no versionar)
 .personal/
+
+# gstack QA reports/capturas
+.gstack/
