@@ -29,6 +29,7 @@ export function FormatosModal({
   tecnicoNombre,
   proximaCita,
   sesionId,
+  initialReport,
   centro,
   onHistorial,
 }: {
@@ -43,6 +44,7 @@ export function FormatosModal({
   tecnicoNombre?: string | null;
   proximaCita?: string | null;
   sesionId?: string; // fila/sesión → arma el formato genérico con sus datos (membrete/paciente/fecha)
+  initialReport?: ReportAccion; // report elegido desde el menú de Acciones → se preselecciona (salta la lista)
   centro?: string;
   onHistorial?: () => void;
 }) {
@@ -53,12 +55,6 @@ export function FormatosModal({
   const [sesion, setSesion] = React.useState<string>("");
   const [areas, setAreas] = React.useState<string>("");
 
-  // Reset al abrir/cerrar (patrón ajustar-en-render).
-  const [prevOpen, setPrevOpen] = React.useState(open);
-  if (open !== prevOpen) {
-    setPrevOpen(open);
-    if (!open) { setReport(null); setGenerado(false); }
-  }
   function elegir(r: ReportAccion) {
     const f = r.editable_fields ?? [];
     const dSes = f.find((x) => x.name === "session" || x.name === "sesion")?.default;
@@ -67,6 +63,14 @@ export function FormatosModal({
     setAreas(String(areasDefault ?? dAre ?? ""));
     setReport(r);
     setGenerado(false);
+  }
+  // Reset al abrir/cerrar (patrón ajustar-en-render). Al abrir con un report preseleccionado (desde el
+  // menú de Acciones), se elige directo y se salta la lista.
+  const [prevOpen, setPrevOpen] = React.useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (!open) { setReport(null); setGenerado(false); }
+    else if (initialReport) elegir(initialReport);
   }
   const tipo = ((report?.id || report?.function || report?.action || "") as string).toLowerCase() as LaserTipo;
   const esFormato = tipo === "hilt" || tipo === "mls";

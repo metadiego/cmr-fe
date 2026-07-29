@@ -40,7 +40,7 @@ import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
-import { serviceHasReports } from "@/lib/frontdesk/acciones";
+import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -747,9 +747,11 @@ function FilaSesion({
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
   const [historialOpen, setHistorialOpen] = React.useState(false);
-  const [formatosOpen, setFormatosOpen] = React.useState(false);
   const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
-  const tieneFormatos = serviceHasReports(servicio?.formAcciones);
+  // Reports del servicio (HILT/MLS, o formatos genéricos): se listan PLANOS en el menú de Acciones,
+  // cada uno abre su documento imprimible. Handoff HANDOFF-formato-laser-hilt-mls (§3).
+  const reportsAcc = React.useMemo(() => (parseAcciones(servicio?.formAcciones).reports ?? []), [servicio]);
+  const [formatoReport, setFormatoReport] = React.useState<ReportAccion | null>(null);
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
   const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
@@ -1094,7 +1096,8 @@ function FilaSesion({
           estados={estados}
           conHistorial={!!sesion?.pacienteId}
           onHistorial={() => setHistorialOpen(true)}
-          onFormatos={tieneFormatos && sesion?.pacienteId ? () => setFormatosOpen(true) : undefined}
+          reports={sesion?.pacienteId ? reportsAcc.map((r) => ({ id: r.id, label: r.labelKey && tRoot.has(r.labelKey) ? tRoot(r.labelKey) : (r.name ?? r.id) })) : []}
+          onReport={(id) => { const r = reportsAcc.find((x) => x.id === id); if (r) setFormatoReport(r); }}
           onProgramar={
             sesion?.pacienteId
               ? () => onProgramar({ pacienteId: sesion.pacienteId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
@@ -1114,10 +1117,11 @@ function FilaSesion({
             centro={centro}
           />
         )}
-        {tieneFormatos && sesion?.pacienteId && servicio && (
+        {sesion?.pacienteId && servicio && (
           <FormatosModal
-            open={formatosOpen}
-            onOpenChange={setFormatosOpen}
+            open={!!formatoReport}
+            onOpenChange={(o) => !o && setFormatoReport(null)}
+            initialReport={formatoReport ?? undefined}
             servicioNombre={servicio.nombre}
             formAcciones={servicio.formAcciones}
             pacienteNombre={String(fila.paciente ?? "")}
@@ -1416,7 +1420,8 @@ function RowMenu({
   conHistorial,
   estados,
   onHistorial,
-  onFormatos,
+  reports,
+  onReport,
   onProgramar,
   onCancelar,
   onReparar,
@@ -1427,7 +1432,8 @@ function RowMenu({
   conHistorial: boolean;
   estados: { clave: string; label: string }[];
   onHistorial: () => void;
-  onFormatos?: () => void; // abrir "Formatos" del servicio (data-driven desde formAcciones)
+  reports?: { id: string; label: string }[]; // formatos del servicio, PLANOS en el menú (cada uno abre su doc)
+  onReport?: (id: string) => void;
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
   onCancelar: (motivo: string) => void;
   onReparar: (payload: { motivo: string; estado?: string }) => void;
@@ -1448,11 +1454,11 @@ function RowMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {onFormatos && !cancelada && (
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onFormatos(); }}>
-              {t("formatos")}
+          {!cancelada && (reports ?? []).map((r) => (
+            <DropdownMenuItem key={r.id} onSelect={(e) => { e.preventDefault(); onReport?.(r.id); }}>
+              {r.label}
             </DropdownMenuItem>
-          )}
+          ))}
           {onProgramar && !cancelada && (
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onProgramar(); }}>
               {t("programarCitas")}
