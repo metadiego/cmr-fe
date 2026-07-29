@@ -331,7 +331,8 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const d = res.state.data;
   const cols = d.columnas ?? [];
   const filas = d.filas ?? [];
-  const colLabel = (c: FormatoColumnaLite) => (c.labelKey && t.has(c.labelKey) ? t(c.labelKey) : (c.labelKey ?? c.clave));
+  // Etiqueta de columna: traducción del labelKey si existe; si no, la clave legible (NO el labelKey crudo).
+  const colLabel = (c: FormatoColumnaLite) => (c.labelKey && t.has(c.labelKey) ? t(c.labelKey) : c.clave);
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">

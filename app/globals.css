@@ -196,6 +196,20 @@
   .formato-print * {
     visibility: visible !important;
   }
+  /* El formato vive dentro de un Dialog (Radix): su transform + overflow/max-height + posición fija
+     recortan/desplazan el contenido en impresión y salía en BLANCO. Neutralizar el contenedor del
+     diálogo y sus ancestros para que el documento se imprima desde el origen de la página. */
+  body:has(.formato-print) [role="dialog"],
+  body:has(.formato-print) [data-radix-popper-content-wrapper],
+  body:has(.formato-print) [data-radix-dialog-content] {
+    position: static !important;
+    transform: none !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+    inset: auto !important;
+    width: auto !important;
+  }
   .formato-print {
     position: absolute;
     left: 0;
