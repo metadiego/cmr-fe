@@ -235,6 +235,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   const printRef = React.useRef<HTMLDivElement>(null);
   const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const centroSel = centrosRes.state.kind === "ok" ? centrosRes.state.data.find((c) => c.id === centro) : undefined;
+  // Logo de la EMPRESA (mismo para todos los centros): el del centro o, si no tiene, el de cualquiera.
+  const logoUrl = centroSel?.logoUrl ?? (centrosRes.state.kind === "ok" ? centrosRes.state.data.find((c) => c.logoUrl)?.logoUrl ?? null : null);
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
@@ -252,7 +254,7 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         <div className="flex items-start justify-between border-b pb-3">
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {centroSel?.logoUrl && <img src={centroSel.logoUrl} alt="" className="max-h-10 object-contain" />}
+            {logoUrl && <img src={logoUrl} alt="" className="max-h-10 object-contain" />}
             <div>
               {centroSel?.nombre && <div className="text-xs font-semibold uppercase tracking-wide">{centroSel.nombre}</div>}
               <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
@@ -387,7 +389,10 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
   const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const printRef = React.useRef<HTMLDivElement>(null);
-  const logoUrl = centrosRes.state.kind === "ok" ? (centrosRes.state.data.find((c) => c.id === centro)?.logoUrl ?? null) : null;
+  // Logo: el del centro; si no tiene, el de CUALQUIER centro (misma empresa → mismo logo).
+  const logoUrl = centrosRes.state.kind === "ok"
+    ? (centrosRes.state.data.find((c) => c.id === centro)?.logoUrl ?? centrosRes.state.data.find((c) => c.logoUrl)?.logoUrl ?? null)
+    : null;
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
   const d = res.state.data;
