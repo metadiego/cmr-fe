@@ -1123,6 +1123,8 @@ function FilaSesion({
             pacienteNombre={String(fila.paciente ?? "")}
             sesionDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
             areasDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
+            record={fila.fd_record != null ? String(fila.fd_record) : undefined}
+            sesionId={fila.id}
             centro={centro}
             onHistorial={() => setHistorialOpen(true)}
           />

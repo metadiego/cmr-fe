@@ -1097,7 +1097,8 @@
     "notificarAlPanel": "Notify the panel",
     "seleccionarEnfermera": "Select nurse",
     "asignarSinAvisar": "Assigns the nurse without sending an alert.",
-    "ordenarTurno": "Sort by turn (arrival)"
+    "ordenarTurno": "Sort by turn (arrival)",
+    "impresoEl": "Printed"
   },
   "programarCitas": {
     "title": "Schedule sessions",

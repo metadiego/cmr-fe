@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
+import { getFormatoArmado, type FormatoArmado } from "@/lib/api/formatos";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
@@ -27,6 +28,7 @@ export function FormatosModal({
   areasDefault,
   tecnicoNombre,
   proximaCita,
+  sesionId,
   centro,
   onHistorial,
 }: {
@@ -40,6 +42,7 @@ export function FormatosModal({
   areasDefault?: number;
   tecnicoNombre?: string | null;
   proximaCita?: string | null;
+  sesionId?: string; // fila/sesión → arma el formato genérico con sus datos (membrete/paciente/fecha)
   centro?: string;
   onHistorial?: () => void;
 }) {
@@ -138,7 +141,7 @@ export function FormatosModal({
           </div>
         )}
 
-        {/* 3) Render del formato médico */}
+        {/* 3) Render del formato médico de LÁSER (HILT/MLS, ruta propia con parámetros) */}
         {report && generado && esFormato && (
           <FormatoRender
             tipo={tipo}
@@ -153,6 +156,11 @@ export function FormatosModal({
             }}
             onVolver={() => setGenerado(false)}
           />
+        )}
+
+        {/* 3b) Formato GENÉRICO (data-driven): documento imprimible armado por el BE. Sin subform. */}
+        {report && !esFormato && (
+          <GenericFormatoRender clave={report.id} sesionId={sesionId} centro={centro} onVolver={() => setReport(null)} />
         )}
       </DialogContent>
     </Dialog>
@@ -307,3 +315,59 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
     </div>
   );
 }
+
+// Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
+// del BE armado (membrete/título/paciente/columnas/filas). Papel A4/Letter, tinta negra, @media print
+// via .formato-print. Los encabezados se traducen por labelKey; el `titulo` va tal cual (es del documento).
+function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: string; sesionId?: string; centro?: string; onVolver: () => void }) {
+  const t = useTranslations("frontdesk");
+  const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
+  if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
+  if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
+  const d = res.state.data;
+  const cols = d.columnas ?? [];
+  const filas = d.filas ?? [];
+  const colLabel = (c: FormatoColumnaLite) => (c.labelKey && t.has(c.labelKey) ? t(c.labelKey) : (c.labelKey ?? c.clave));
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between no-print">
+        <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
+        <Button size="sm" onClick={() => window.print()}>{t("imprimirPdf")}</Button>
+      </div>
+      <div className="formato-print space-y-4 rounded-lg border bg-white p-6 text-black">
+        {/* Membrete + título */}
+        <div className="text-center">
+          {d.membrete?.centro && <div className="text-sm font-semibold uppercase tracking-wide">{d.membrete.centro}</div>}
+          <h2 className="mt-1 text-lg font-bold">{d.titulo}</h2>
+        </div>
+        {/* Paciente + récord + fecha */}
+        <div className="flex items-end justify-between border-b pb-2 text-sm">
+          <div>
+            <span className="text-base font-bold">{d.paciente?.nombre ?? "—"}</span>
+            {d.paciente?.record && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.paciente.record}</span>}
+          </div>
+          <div className="tabular-nums">{d.fecha ?? ""}</div>
+        </div>
+        {/* Tabla con filas en blanco */}
+        <table className="w-full border-collapse text-[11px]">
+          <thead>
+            <tr className="bg-neutral-100 text-left">
+              {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1 font-semibold">{colLabel(c)}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {filas.map((f, i) => (
+              <tr key={i} style={{ height: 30 }}>
+                {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 align-top">{f?.[c.clave] ?? ""}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* Pie: fecha/hora de impresión */}
+        <div className="pt-2 text-right text-[10px] text-neutral-500">{t("impresoEl")}: {new Date().toLocaleString()}</div>
+      </div>
+    </div>
+  );
+}
+
+type FormatoColumnaLite = { clave: string; labelKey?: string | null };

@@ -3643,6 +3643,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/servicios/catalogos/requeridos-bindings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Catálogo de `binding` que un campo REQUERIDO puede usar (dosis, enfermera, técnico, médico,
+         *     disponibilidad). La UI lo pinta como desplegable: así los requeridos se configuran desde la
+         *     pantalla, sin escribir claves a mano y sin código.
+         */
+        get: operations["ServiciosController_catalogoRequeridosBindings_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/servicios": {
         parameters: {
             query?: never;
@@ -4221,6 +4242,58 @@ export interface paths {
         /** Contadores del día por persona × sección, DERIVADOS de los avisos aceptados (nunca a mano). */
         get: operations["PanelesController_contadores_v1"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Formatos de un servicio (lo que ofrece el botón ACCIONES). */
+        get: operations["FormatosController_listar_v1"];
+        put?: never;
+        /** Crea un formato (columnas, filas, título, membrete). */
+        post: operations["FormatosController_crear_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos/{clave}/armado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Documento LISTO para imprimir: membrete del centro, paciente, récord, fecha, columnas y filas en blanco. */
+        get: operations["FormatosController_armado_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/formatos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un formato: columnas, filas, orden, o lo desactiva. */
+        put: operations["FormatosController_actualizar_v1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -8074,6 +8147,7 @@ export interface components {
             codigo: string | null;
             requiereTecnico: boolean;
             requiereEnfermera: boolean;
+            consumoPaquetes: string;
             badge: boolean;
             formAcciones: Record<string, never> | null;
             activo: boolean;
@@ -8099,6 +8173,11 @@ export interface components {
             requiereEnfermera?: boolean;
             badge?: boolean;
             formAcciones?: Record<string, never>;
+            /**
+             * @description Cómo consume el asistido (dato, no código): ver docs/specs/consumo-paquetes-simultaneo.md.
+             * @enum {string}
+             */
+            consumoPaquetes?: "fila" | "simultaneo";
         };
         UpdateServicioDto: {
             nombre?: string;
@@ -8114,6 +8193,11 @@ export interface components {
             requiereEnfermera?: boolean;
             badge?: boolean;
             formAcciones?: Record<string, never>;
+            /**
+             * @description Cómo consume el asistido (dato, no código): ver docs/specs/consumo-paquetes-simultaneo.md.
+             * @enum {string}
+             */
+            consumoPaquetes?: "fila" | "simultaneo";
             activo?: boolean;
         };
         ComponerColumnaDto: {
@@ -8165,6 +8249,7 @@ export interface components {
         FrontdeskSesionEntity: {
             pacienteId: string;
             servicioId: string;
+            paquetesConsumidos: string[] | null;
             paqueteId: string | null;
             tecnicoId: string | null;
             enfermeraId: string | null;
@@ -8372,19 +8457,22 @@ export interface components {
              */
             citaId?: string;
         };
-        PanelNotificacionEntity: {
-            panelId: string;
-            seccionId: string;
-            sesionId: string | null;
-            citaId: string | null;
-            pacienteId: string | null;
-            /** @enum {string} */
-            estado: "pendiente" | "cancelada" | "aceptada";
-            notificadaPorId: string | null;
-            aceptadaPorId: string | null;
-            /** Format: date-time */
-            aceptadaEn: string | null;
-            meta: Record<string, never> | null;
+        AceptarPanelDto: {
+            /** Format: uuid */
+            personalId: string;
+        };
+        FormatoTerapiaEntity: {
+            clave: string;
+            labelKey: string;
+            titulo: string;
+            servicioClave: string;
+            layout: string;
+            columnas: Record<string, never>[] | null;
+            filas: number;
+            secciones: Record<string, never>[] | null;
+            membrete: boolean;
+            orden: number;
+            activo: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8392,9 +8480,40 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        AceptarPanelDto: {
-            /** Format: uuid */
-            personalId: string;
+        ColumnaFormatoDto: {
+            /** @description Ancho sugerido de la columna al imprimir. */
+            ancho?: number;
+            clave: string;
+            /** @description i18n: el FE traduce el encabezado impreso. */
+            labelKey: string;
+        };
+        CreateFormatoDto: {
+            /** @description Filas en blanco a imprimir bajo el encabezado. */
+            filas?: number;
+            clave: string;
+            labelKey: string;
+            /** @description Texto IMPRESO en el documento (no es de la UI). */
+            titulo: string;
+            servicioClave: string;
+            /** @enum {string} */
+            layout?: "tabla" | "campos";
+            columnas?: components["schemas"]["ColumnaFormatoDto"][];
+            secciones?: Record<string, never>[];
+            membrete?: boolean;
+            orden?: number;
+        };
+        UpdateFormatoDto: {
+            labelKey?: string;
+            titulo?: string;
+            servicioClave?: string;
+            /** @enum {string} */
+            layout?: "tabla" | "campos";
+            columnas?: components["schemas"]["ColumnaFormatoDto"][];
+            filas?: number;
+            secciones?: Record<string, never>[];
+            membrete?: boolean;
+            orden?: number;
+            activo?: boolean;
         };
         ConsultaEntity: {
             citaId: string;
@@ -15966,6 +16085,23 @@ export interface operations {
             };
         };
     };
+    ServiciosController_catalogoRequeridosBindings_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ServiciosController_list_v1: {
         parameters: {
             query?: {
@@ -16854,7 +16990,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelNotificacionEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -16877,7 +17013,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelNotificacionEntity"][];
+                    "application/json": Record<string, never>[];
                 };
             };
         };
@@ -16902,7 +17038,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PanelNotificacionEntity"];
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -16926,6 +17062,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    FormatosController_listar_v1: {
+        parameters: {
+            query?: {
+                /** @description Clave del servicio (p. ej. amnisome). Sin él, todos los del centro. */
+                servicio?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormatoTerapiaEntity"][];
+                };
+            };
+        };
+    };
+    FormatosController_crear_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFormatoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormatoTerapiaEntity"];
+                };
+            };
+        };
+    };
+    FormatosController_armado_v1: {
+        parameters: {
+            query?: {
+                /** @description Sesión del frontdesk: rellena paciente, récord y fecha. Sin ella sale en blanco. */
+                sesionId?: string;
+            };
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    FormatosController_actualizar_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFormatoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FormatoTerapiaEntity"];
                 };
             };
         };

@@ -1097,7 +1097,8 @@
     "notificarAlPanel": "Notificar al Panel",
     "seleccionarEnfermera": "Seleccionar enfermera(o)",
     "asignarSinAvisar": "Asigna la enfermera sin enviar aviso.",
-    "ordenarTurno": "Ordenar por turno (llegada)"
+    "ordenarTurno": "Ordenar por turno (llegada)",
+    "impresoEl": "Impreso"
   },
   "programarCitas": {
     "title": "Programar citas",
