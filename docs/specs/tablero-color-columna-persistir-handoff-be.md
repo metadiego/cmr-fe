@@ -1,23 +1,18 @@
-# HANDOFF BE — Persistir y exponer el COLOR por columna del tablero
+# RESUELTO — Color por columna del tablero (diagnóstico corregido)
 
-> Competencia BE. El FE ya lo consume (pinta `columna.color` en pills y leyenda del flujo). Falta que el
-> BE lo guarde y lo devuelva en la definición.
+> ⚠️ El diagnóstico original de este handoff era INCORRECTO. Lo dejó claro el dueño (2026-07-29):
+> el BE **sí persistía y sí exponía** el color. Se verificó en producción.
 
-## Síntoma (verificado en prod)
-- `POST /api/v1/tablero/composicion` con `{ tablero:"servicios", columnaId, color:"#3b82f6" }` responde **ok**,
-  pero `GET /api/v1/tablero/definicion?tablero=vitc` devuelve la columna con `color: null` (no persistió),
-  y tampoco aparece en `render.color`.
-- Por eso el color del flujo hoy se resuelve en el FE desde la paleta de estados (no configurable por columna).
+## Causa real
+El FE escribió el color en el tablero **`servicios`** (el vertical) pero lo leyó en **`vitc`**, que es
+**otra composición**. Por eso `GET /tablero/definicion?tablero=vitc` no mostraba el color: no era el mismo
+scope donde se escribió. No fue un fallo de persistencia del BE.
 
-## Pedido
-1. **Persistir** el `color` por columna del tablero (composición por tablero y/o por servicio) cuando llega en
-   `POST /tablero/composicion` (y en la composición por servicio `POST /servicios/:id/columnas` si aplica).
-   `null` = limpiar (heredar). Multi-tenant / por centro como el resto de la composición.
-2. **Exponer** ese `color` en `GET /tablero/definicion` (y en `GET /servicios/:id/columnas`) como campo de la
-   columna (`columna.color`) — no solo aceptarlo.
-3. Idempotente; no romper composición existente (orden/visible/render intactos).
+## Solución (BE, en rama, sin mezclar — pasa review de gstack antes)
+El color ahora se declara **una sola vez en el catálogo de la columna** y lo **heredan los ~20 tableros**,
+con posibilidad de **pisarlo por tablero**. Así no hay que repetir el color en cada composición.
 
 ## FE (ya listo)
-El FE pinta con prioridad `columna.color` → `render.color` → color del estado del flujo. En cuanto el BE
-persista y devuelva `columna.color`, los colores del flujo pasan a ser **configurables por API por columna**
-(pills + leyenda), sin tocar código. Commit FE que lo consume: board `frontdesk-board.tsx`.
+El board pinta con prioridad `columna.color → render.color → color del estado del flujo` (pills + leyenda).
+En cuanto la rama del BE se mezcle, **re-verificar** que `GET /tablero/definicion?tablero=vitc` devuelve el
+`columna.color` heredado del catálogo, y que los colores del flujo salen de ahí (configurables por API, sin código).
