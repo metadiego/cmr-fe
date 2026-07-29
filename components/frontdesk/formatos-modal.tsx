@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
 import { getFormatoArmado, type FormatoArmado } from "@/lib/api/formatos";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
@@ -24,7 +25,7 @@ body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:
 .no-print{display:none!important}
 table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
 th,td{border:1px solid #888;padding:4px 8px;text-align:left;vertical-align:top}
-img{max-width:100%;max-height:70px}
+img{max-width:100%;max-height:40px;object-fit:contain}
 .text-center{text-align:center}.text-right{text-align:right}
 .font-bold{font-weight:700}.font-semibold{font-weight:600}.font-medium{font-weight:500}
 .uppercase{text-transform:uppercase}.tracking-wide{letter-spacing:.04em}
@@ -232,6 +233,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   const [dolor, setDolor] = React.useState("");
   const nTerapias = header.sesion * header.areas;
   const printRef = React.useRef<HTMLDivElement>(null);
+  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
+  const centroSel = centrosRes.state.kind === "ok" ? centrosRes.state.data.find((c) => c.id === centro) : undefined;
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
@@ -245,11 +248,16 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
       </div>
 
       <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-5 text-black">
-        {/* Encabezado */}
+        {/* Encabezado: membrete (logo pequeño + centro) + título; a la derecha fecha/sesión/áreas */}
         <div className="flex items-start justify-between border-b pb-3">
-          <div>
-            <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
-            <p className="text-sm">{header.paciente}{header.record ? ` · ${t("recordLabel")} ${header.record}` : ""}</p>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {centroSel?.logoUrl && <img src={centroSel.logoUrl} alt="" className="max-h-10 object-contain" />}
+            <div>
+              {centroSel?.nombre && <div className="text-xs font-semibold uppercase tracking-wide">{centroSel.nombre}</div>}
+              <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
+              <p className="text-sm">{header.paciente}{header.record ? ` · ${t("recordLabel")} ${header.record}` : ""}</p>
+            </div>
           </div>
           <div className="text-right text-xs">
             <div>{formatFechaSolo(new Date().toISOString().slice(0, 10))}</div>
@@ -377,7 +385,9 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
 function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: string; sesionId?: string; centro?: string; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
   const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
+  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const printRef = React.useRef<HTMLDivElement>(null);
+  const logoUrl = centrosRes.state.kind === "ok" ? (centrosRes.state.data.find((c) => c.id === centro)?.logoUrl ?? null) : null;
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
   const d = res.state.data;
@@ -392,8 +402,10 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
         <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.titulo || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
       </div>
       <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-6 text-black">
-        {/* Membrete + título */}
+        {/* Membrete (logo del centro + nombre) + título */}
         <div className="text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {logoUrl && <img src={logoUrl} alt="" className="mx-auto mb-2 max-h-10 object-contain" />}
           {d.membrete?.centro && <div className="text-sm font-semibold uppercase tracking-wide">{d.membrete.centro}</div>}
           <h2 className="mt-1 text-lg font-bold">{d.titulo}</h2>
         </div>
