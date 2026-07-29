@@ -42,6 +42,10 @@ img{max-width:100%;max-height:38px;object-fit:contain}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 /* Cada región/tabla no se parte entre páginas si cabe */
 section, .region { break-inside: avoid; }
+/* Formatos GENÉRICOS (rejillas en blanco para llenar a mano): filas ALTAS y aireadas, que llenen la hoja
+   (no amontonadas arriba). No aplica a las tablas densas de láser (HILT/MLS). */
+.formato-grid td { height: 46px; padding: 8px 8px; vertical-align: top; }
+.formato-grid th { padding: 5px 8px; }
 `;
 
 // Imprime un elemento en una VENTANA propia (evita el recorte del Dialog/Radix que dejaba la hoja en
@@ -425,17 +429,17 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
           </div>
           <div className="tabular-nums">{d.fecha ?? ""}</div>
         </div>
-        {/* Tabla con filas en blanco */}
-        <table className="w-full border-collapse text-[11px]">
+        {/* Tabla con filas en blanco (aireadas, para llenar a mano) */}
+        <table className="formato-grid w-full border-collapse text-[11px]">
           <thead>
             <tr className="bg-neutral-100 text-left">
-              {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1 font-semibold">{colLabel(c)}</th>)}
+              {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{colLabel(c)}</th>)}
             </tr>
           </thead>
           <tbody>
             {filas.map((f, i) => (
-              <tr key={i} style={{ height: 30 }}>
-                {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 align-top">{f?.[c.clave] ?? ""}</td>)}
+              <tr key={i} style={{ height: 46 }}>
+                {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
               </tr>
             ))}
           </tbody>
