@@ -327,7 +327,11 @@ export function FrontdeskBoard() {
   // optionsSource productos_grupo PR #137). Tenant-scoped; el "tablero" de opciones = clave del servicio.
   const [optionsByCol, setOptionsByCol] = React.useState<Record<string, Opcion[]>>({});
   React.useEffect(() => {
-    const selects = (board?.columnas ?? []).filter((c) => c.tipo === "select" && c.editable);
+    // Columnas con opciones: selects editables + inputs con datalist (texto editable con optionsSource,
+    // p. ej. fd_protocolo). Ambos consumen GET /tablero/opciones.
+    const selects = (board?.columnas ?? []).filter(
+      (c) => c.editable && (c.tipo === "select" || !!(c.render as { optionsSource?: string } | null)?.optionsSource),
+    );
     if (!selects.length || !tabEfectivo || !gate.centro) return;
     let active = true;
     Promise.all(
@@ -904,6 +908,44 @@ function FilaSesion({
         >
           {tRoot(r.labelKey ?? c.labelKey)}
         </Button>
+      );
+    }
+    // Texto editable con DATALIST (render.datalist + optionsSource, p. ej. fd_protocolo): input con
+    // sugerencias del endpoint PERO texto libre permitido (un valor nuevo es válido). Guarda al blur/Enter
+    // vía editarCelda; la lista de opciones crece sola con el uso. Contrato: HANDOFF-columna-datalist-protocolo.
+    if (c.tipo === "texto" && c.editable && (c.render as { datalist?: boolean } | null)?.datalist) {
+      const r = (c.render ?? {}) as { placeholder?: string };
+      const ops = optionsByCol[c.clave] ?? [];
+      const listId = `dl-${c.clave}-${fila.id}`;
+      const actualRaw = v == null ? "" : String(v);
+      const guardar = (valor: string) => {
+        const nuevo = valor.trim();
+        if (nuevo === actualRaw) return; // sin cambios
+        setPendSelect((p) => ({ ...p, [c.clave]: nuevo }));
+        run(async () => {
+          try {
+            return await editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor: nuevo }, centro);
+          } catch (e) {
+            setPendSelect((p) => { const n = { ...p }; delete n[c.clave]; return n; });
+            throw e;
+          }
+        });
+      };
+      return (
+        <>
+          <Input
+            list={listId}
+            defaultValue={pendSelect[c.clave] ?? actualRaw}
+            placeholder={r.placeholder ?? t("elegir")}
+            disabled={busy || cancelada}
+            className="h-8 w-44"
+            onBlur={(e) => guardar(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
+          />
+          <datalist id={listId}>
+            {ops.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </datalist>
+        </>
       );
     }
     return <span>{v == null || v === "" ? "—" : String(v)}</span>;
