@@ -454,7 +454,8 @@
       "phone": "Teléfono",
       "email": "Email",
       "status": "Estado",
-      "centro": "Centro"
+      "centro": "Centro",
+      "record": "Récord"
     },
     "form": {
       "createTitle": "Nuevo paciente",

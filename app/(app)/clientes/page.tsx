@@ -93,6 +93,20 @@ export default function ClientesPage() {
 
   const columns: Column<Paciente>[] = [
     {
+      // Número indexado (posición en la lista): (página-1)*límite + fila + 1. A la izquierda del récord.
+      key: "index",
+      header: "#",
+      align: "right",
+      className: "w-10 tabular-nums text-muted-foreground",
+      cell: (_p, i) => (page - 1) * LIMIT + i + 1,
+    },
+    {
+      key: "record",
+      header: t("columns.record"),
+      className: "tabular-nums",
+      cell: (p) => p.record ?? "—",
+    },
+    {
       key: "name",
       header: t("columns.name"),
       cell: (p) => (

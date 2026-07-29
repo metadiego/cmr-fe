@@ -21,7 +21,7 @@ import {
 export interface Column<T> {
   key: string;
   header: React.ReactNode;
-  cell: (row: T) => React.ReactNode;
+  cell: (row: T, index: number) => React.ReactNode; // index = posición 0-based dentro de la página
   align?: "left" | "right" | "center";
   className?: string;
 }
@@ -98,7 +98,7 @@ export function DataTable<T>({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {state.data.map((row) => (
+          {state.data.map((row, rowIndex) => (
             <TableRow
               key={getRowKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -106,7 +106,7 @@ export function DataTable<T>({
             >
               {columns.map((col) => (
                 <TableCell key={col.key} className={cn(alignClass(col.align), col.className)}>
-                  {col.cell(row)}
+                  {col.cell(row, rowIndex)}
                 </TableCell>
               ))}
             </TableRow>
