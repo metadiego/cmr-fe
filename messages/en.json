@@ -1133,7 +1133,8 @@
       "en_terapia": "In therapy",
       "dosis": "Dose",
       "enfermera": "Nurse",
-      "cantidad": "Quantity"
+      "cantidad": "Quantity",
+      "protocolo": "Protocol"
     },
     "binding": {
       "dosis": "Dose (applied product)",

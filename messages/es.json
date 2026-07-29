@@ -1133,7 +1133,8 @@
       "en_terapia": "En terapia",
       "dosis": "Dosis",
       "enfermera": "Enfermera",
-      "cantidad": "Cantidad"
+      "cantidad": "Cantidad",
+      "protocolo": "Protocolo"
     },
     "binding": {
       "dosis": "Dosis (producto aplicado)",
