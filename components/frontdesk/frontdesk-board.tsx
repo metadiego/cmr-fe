@@ -1454,7 +1454,9 @@ function RowMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {!cancelada && (reports ?? []).map((r) => (
+          {/* Los formatos son documentos de SOLO LECTURA: se pueden ver/imprimir incluso en una sesión
+              cancelada (a diferencia de Cancelar/Programar, que sí requieren sesión activa). */}
+          {(reports ?? []).map((r) => (
             <DropdownMenuItem key={r.id} onSelect={(e) => { e.preventDefault(); onReport?.(r.id); }}>
               {r.label}
             </DropdownMenuItem>
