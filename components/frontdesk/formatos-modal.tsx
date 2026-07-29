@@ -14,6 +14,56 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
 
+// CSS autocontenido para la ventana de impresión (el documento NO hereda Tailwind ahí). Incluye las
+// utilidades que usa el documento + tablas/tamaño carta. Un formato es un PAPEL: no puede depender de
+// estilos externos ni de que el otro lado tenga el diccionario.
+const PRINT_CSS = `
+*{box-sizing:border-box}
+@page{size:letter;margin:12mm}
+body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:12px}
+.no-print{display:none!important}
+table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
+th,td{border:1px solid #888;padding:4px 8px;text-align:left;vertical-align:top}
+img{max-width:100%;max-height:70px}
+.text-center{text-align:center}.text-right{text-align:right}
+.font-bold{font-weight:700}.font-semibold{font-weight:600}.font-medium{font-weight:500}
+.uppercase{text-transform:uppercase}.tracking-wide{letter-spacing:.04em}
+.text-lg{font-size:18px}.text-base{font-size:15px}.text-sm{font-size:13px}.text-xs{font-size:11px}
+.flex{display:flex}.items-end{align-items:flex-end}.items-start{align-items:flex-start}
+.justify-between{justify-content:space-between}.gap-4{gap:16px}
+.border-b{border-bottom:1px solid #000}.pb-2{padding-bottom:6px}.pb-3{padding-bottom:8px}.pt-2{padding-top:6px}
+.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}
+.ml-2{margin-left:8px}.ml-3{margin-left:12px}
+.tabular-nums{font-variant-numeric:tabular-nums}
+.bg-neutral-100{background:#f2f2f2}.text-neutral-500{color:#666}
+.space-y-3>*+*{margin-top:12px}.space-y-4>*+*{margin-top:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+`;
+
+// Imprime un elemento en una VENTANA propia (evita el recorte del Dialog/Radix que dejaba la hoja en
+// blanco). Clona el nodo, convierte cualquier <canvas> (firma) en <img> para que sí salga impreso.
+function imprimirFormato(el: HTMLElement | null, titulo: string) {
+  if (!el || typeof window === "undefined") return;
+  const clone = el.cloneNode(true) as HTMLElement;
+  const canvasOrig = el.querySelectorAll("canvas");
+  const canvasClone = clone.querySelectorAll("canvas");
+  canvasOrig.forEach((c, i) => {
+    try {
+      const img = document.createElement("img");
+      img.src = (c as HTMLCanvasElement).toDataURL("image/png");
+      canvasClone[i]?.replaceWith(img);
+    } catch { /* canvas vacío/tainted: se omite */ }
+  });
+  const w = window.open("", "_blank", "width=900,height=1100");
+  if (!w) return; // bloqueado por popup: el usuario debe permitir ventanas emergentes
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title><style>${PRINT_CSS}</style></head><body>${clone.innerHTML}</body></html>`);
+  w.document.close();
+  w.focus();
+  const go = () => { w.print(); };
+  // Espera a que carguen imágenes (logo/firma) antes de imprimir.
+  if (w.document.images.length) setTimeout(go, 400); else setTimeout(go, 150);
+}
+
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
 // subform (Sesión + Áreas precargados) → render del formato médico imprimible con firma.
@@ -181,6 +231,7 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   const [horaOut, setHoraOut] = React.useState("");
   const [dolor, setDolor] = React.useState("");
   const nTerapias = header.sesion * header.areas;
+  const printRef = React.useRef<HTMLDivElement>(null);
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
@@ -190,10 +241,10 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
         <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
-        <Button size="sm" onClick={() => window.print()}>{t("imprimirPdf")}</Button>
+        <Button size="sm" onClick={() => imprimirFormato(printRef.current, t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle"))}>{t("imprimirPdf")}</Button>
       </div>
 
-      <div className="formato-print space-y-4 rounded-lg border bg-white p-5 text-black">
+      <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-5 text-black">
         {/* Encabezado */}
         <div className="flex items-start justify-between border-b pb-3">
           <div>
@@ -326,6 +377,7 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
 function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: string; sesionId?: string; centro?: string; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
   const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
+  const printRef = React.useRef<HTMLDivElement>(null);
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
   const d = res.state.data;
@@ -337,9 +389,9 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
         <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
-        <Button size="sm" onClick={() => window.print()}>{t("imprimirPdf")}</Button>
+        <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.titulo || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
       </div>
-      <div className="formato-print space-y-4 rounded-lg border bg-white p-6 text-black">
+      <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-6 text-black">
         {/* Membrete + título */}
         <div className="text-center">
           {d.membrete?.centro && <div className="text-sm font-semibold uppercase tracking-wide">{d.membrete.centro}</div>}
