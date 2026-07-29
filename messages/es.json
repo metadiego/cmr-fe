@@ -629,7 +629,8 @@
     "cajaGeneral": "Caja general",
     "gruposFacturacion": "Grupos de facturación",
     "panelEnfermeria": "Panel de Enfermería",
-    "requeridos": "Campos requeridos"
+    "requeridos": "Campos requeridos",
+    "configFormatos": "Formatos de terapia"
   },
   "admin": {
     "title": "Administración",
@@ -2221,5 +2222,32 @@
       "select": "Selección"
     },
     "sinPermiso": "No tienes acceso (servicios.update)."
+  },
+  "formatosAdmin": {
+    "title": "Formatos de terapia",
+    "help": "Crea y edita los formatos imprimibles de terapia por servicio (columnas, filas en blanco, membrete, orden). Data-driven, sin código.",
+    "servicio": "Servicio",
+    "titulo": "Título",
+    "clave": "Clave",
+    "labelKey": "Clave i18n",
+    "columnas": "Columnas",
+    "colClave": "Clave de columna",
+    "filas": "Filas en blanco",
+    "membrete": "Membrete",
+    "orden": "Orden",
+    "activo": "Activo",
+    "si": "Sí",
+    "no": "No",
+    "nuevo": "Nuevo formato",
+    "sinFormatos": "Sin formatos para este servicio.",
+    "agregarColumna": "Agregar columna",
+    "subir": "Subir",
+    "bajar": "Bajar",
+    "quitar": "Quitar",
+    "volver": "Volver",
+    "guardar": "Guardar",
+    "guardando": "Guardando…",
+    "guardado": "Guardado",
+    "sinPermiso": "No tienes acceso (formatos.config)."
   }
 }

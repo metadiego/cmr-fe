@@ -629,7 +629,8 @@
     "cajaGeneral": "General cash",
     "gruposFacturacion": "Billing groups",
     "panelEnfermeria": "Nursing panel",
-    "requeridos": "Required fields"
+    "requeridos": "Required fields",
+    "configFormatos": "Therapy formats"
   },
   "admin": {
     "title": "Administration",
@@ -2221,5 +2222,32 @@
       "select": "Select"
     },
     "sinPermiso": "You don't have access (servicios.update)."
+  },
+  "formatosAdmin": {
+    "title": "Therapy formats",
+    "help": "Create and edit the printable therapy formats per service (columns, blank rows, letterhead, order). Data-driven, no code.",
+    "servicio": "Service",
+    "titulo": "Title",
+    "clave": "Key",
+    "labelKey": "Label key (i18n)",
+    "columnas": "Columns",
+    "colClave": "Column key",
+    "filas": "Blank rows",
+    "membrete": "Letterhead",
+    "orden": "Order",
+    "activo": "Active",
+    "si": "Yes",
+    "no": "No",
+    "nuevo": "New format",
+    "sinFormatos": "No formats for this service.",
+    "agregarColumna": "Add column",
+    "subir": "Up",
+    "bajar": "Down",
+    "quitar": "Remove",
+    "volver": "Back",
+    "guardar": "Save",
+    "guardando": "Saving…",
+    "guardado": "Saved",
+    "sinPermiso": "You don't have access (formatos.config)."
   }
 }
