@@ -1042,10 +1042,12 @@ function FilaSesion({
         tr.activo !== false &&
         // Solo transiciones SIN payload extra: el menú plano no recoge formularios. Esto excluye el
         // cancelar/anular dedicado (que exige `motivo` → tiene su propio diálogo) sin hardcodear su nombre,
-        // y deja pasar recuperaciones como `reactivar` (requiere vacío). Criterio semántico, no por clave.
-        tr.requiere.length === 0 &&
+        // y deja pasar recuperaciones como `reactivar`. `requiere`/`desdeEstados` pueden venir NULL del BE
+        // (p. ej. reactivar.requiere=null) → coerción a arreglo antes de leer .length/.includes (sin
+        // asumir el shape del BE; evita el crash "Cannot read properties of null (reading 'length')").
+        (tr.requiere?.length ?? 0) === 0 &&
         !pasoKeys.has(tr.clave) &&
-        (tr.desdeEstados.length === 0 || tr.desdeEstados.includes(estadoActual)) &&
+        ((tr.desdeEstados?.length ?? 0) === 0 || (tr.desdeEstados ?? []).includes(estadoActual)) &&
         (!tr.permiso || can(tr.permiso)),
     )
     .map((tr) => ({
@@ -1082,17 +1084,19 @@ function FilaSesion({
   // Se muestra SIEMPRE, también en CANCELADA (sus sellos son historia): en cancelada no hay paso
   // accionable ni deshacer, solo se ven las horas ya selladas y puntos grises. (Regresión del commit
   // 7310358 que pintaba "—"; restaurado.)
-  // Paso accionable = el SIGUIENTE cuya TRANSICIÓN aplica desde el `estado` actual del BE (handoff §3:
-  // comparar transicion.desdeEstados con el estado de la fila), NO deducido de los sellos ni del orden de
-  // `flujo`. Se recorre `pasos` en su propio orden y se toma el primer paso sin sello cuya transición
-  // aplique — robusto aunque `flujoCols` y `flujo` no coincidan en orden/tamaño, y para estados terminales
-  // desconocidos no ofrece nada (ninguna transición aplica). `pasos[i].key` = clave de la transición.
-  const transPorClave = new Map(transiciones.map((tr) => [tr.clave, tr]));
-  const aplicaDesde = (clave: string) => {
-    const tr = transPorClave.get(clave);
-    return !!tr && (tr.desdeEstados.length === 0 || tr.desdeEstados.includes(estadoActual));
-  };
-  const nextIdx = cancelada ? -1 : pasos.findIndex((p) => !p.stamp && aplicaDesde(p.key));
+  // Paso accionable = el SIGUIENTE según el `estado` del BE (handoff §2), NO deducido de los sellos. Se
+  // ubica el estado actual en la secuencia del flujo (`flujo`, orden presente→en_terapia→asistido) y el
+  // punteado va en la posición siguiente. `pasos[i]` corresponde a `flujo[i]` por construcción, así que la
+  // posición sirve de índice de `pasos`. NO se usa la clave de transición de la columna para decidir el
+  // siguiente: en frontdesk esas claves son reusadas de Atención ('consulta'/'atender') y no casan con las
+  // claves de la definición ('en_terapia'/'asistido'); la posición por estado es la señal fiable.
+  //   pendiente/'' (pre-flujo) → primer paso · asistido (último) → ninguno · cancelada → ninguno ·
+  //   estado fuera del flujo (terminal desconocido) → ninguno (no ofrece 'Presente' por error).
+  const curIdx = flujo.findIndex((f) => f.clave === estadoActual);
+  const preFlujo = curIdx === -1 && (estadoActual === "" || estadoActual === "pendiente");
+  const nextPos = cancelada ? -1 : preFlujo ? 0 : curIdx >= 0 && curIdx + 1 < flujo.length ? curIdx + 1 : -1;
+  // Solo si la posición cae dentro de `pasos` (guarda ante un eventual desajuste flujo/columnas del BE).
+  const nextIdx = nextPos >= 0 && nextPos < pasos.length ? nextPos : -1;
   const flujoCell = (
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
