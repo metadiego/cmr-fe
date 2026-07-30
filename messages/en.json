@@ -858,6 +858,7 @@
   "login": {
     "title": "Sign in",
     "subtitle": "Regenerative Medicine Center",
+    "sessionExpired": "Your session expired. Please sign in again.",
     "email": "Email",
     "password": "Password",
     "emailPlaceholder": "you@email.com",

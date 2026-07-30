@@ -858,6 +858,7 @@
   "login": {
     "title": "Iniciar sesión",
     "subtitle": "Centro de Medicina Regenerativa",
+    "sessionExpired": "Tu sesión expiró. Vuelve a iniciar sesión.",
     "email": "Email",
     "password": "Contraseña",
     "emailPlaceholder": "tu@correo.com",

@@ -1,12 +1,16 @@
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { getActiveCentro } from "@/lib/tenant";
+import { handleSessionExpired } from "@/lib/auth/session-expired";
 import {
   ApiError,
   type ApiEnvelope,
   type ApiErrorShape,
   type Paginated,
 } from "./types";
+
+// Margen para considerar un access token "por vencer" y refrescarlo ANTES de la llamada (segundos).
+const REFRESH_MARGEN_S = 60;
 
 // Reads the current Supabase session (browser) and builds auth + tenant headers.
 // No session → no headers (the BE will respond 401, surfaced as an ApiError).
@@ -18,9 +22,26 @@ async function authHeaders(
   tenant?: string | null,
 ): Promise<Record<string, string>> {
   const supabase = createClient();
-  const {
+  let {
     data: { session },
   } = await supabase.auth.getSession();
+
+  // Refresh PROACTIVO: si el token ya venció o le quedan <60s, refrescarlo antes de mandar la llamada para
+  // no enviar un token muerto (raíz del 401 tras ~15 min, QA-001). Solo cuando hace falta; si el refresh
+  // token también murió, se envía lo que haya y el 401 se maneja abajo (aviso claro).
+  if (session?.expires_at) {
+    const restanteS = session.expires_at - Math.floor(Date.now() / 1000);
+    if (restanteS < REFRESH_MARGEN_S) {
+      // Con try/catch: si el refresh proactivo falla por red, seguimos con el token actual (aún puede
+      // servir unos segundos) y, si el BE lo rechaza, lo maneja el path del 401. No romper la petición aquí.
+      try {
+        const { data } = await supabase.auth.refreshSession();
+        if (data.session) session = data.session;
+      } catch {
+        /* red caída: seguir con la sesión actual */
+      }
+    }
+  }
 
   const headers: Record<string, string> = {};
   if (session?.access_token) {
@@ -44,20 +65,41 @@ async function rawRequest<T>(
   init: RequestInit = {},
   tenant?: string | null,
 ): Promise<ApiEnvelope<T> | null> {
-  const auth = await authHeaders(tenant);
+  // Una corrida de la petición con los headers de auth frescos del momento.
+  const doFetch = async () => {
+    const auth = await authHeaders(tenant);
+    const res = await fetch(`${env.API_BASE_URL}${path}`, {
+      // Datos siempre frescos: el BE manda ETag y sin no-store el navegador servía
+      // respuestas cacheadas (menú/tablero viejos aunque el dato ya cambió). Esta app
+      // es data-driven/en-vivo → nunca queremos caché HTTP de la API.
+      cache: "no-store",
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...auth,
+        ...init.headers,
+      },
+    });
+    return { res, teniaToken: !!auth["Authorization"] };
+  };
 
-  const res = await fetch(`${env.API_BASE_URL}${path}`, {
-    // Datos siempre frescos: el BE manda ETag y sin no-store el navegador servía
-    // respuestas cacheadas (menú/tablero viejos aunque el dato ya cambió). Esta app
-    // es data-driven/en-vivo → nunca queremos caché HTTP de la API.
-    cache: "no-store",
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...auth,
-      ...init.headers,
-    },
-  });
+  let { res, teniaToken } = await doFetch();
+
+  // 401 con token adjunto = el BE rechazó nuestra sesión. Intentar UN refresh y reintentar (recuperación
+  // silenciosa cuando el refresh token sigue vivo). Solo si el REFRESH FALLA se considera la sesión muerta
+  // → aviso CLARO + login (QA-001). Si el refresh funciona pero el reintento SIGUE en 401, NO es sesión
+  // caducada (p. ej. 401 de recurso/tenant): se deja surgir como ApiError normal y NO se expulsa al usuario.
+  if (res.status === 401 && teniaToken) {
+    const refreshed = await createClient()
+      .auth.refreshSession()
+      .then(({ data }) => !!data.session)
+      .catch(() => false);
+    if (refreshed) {
+      ({ res, teniaToken } = await doFetch());
+    } else {
+      handleSessionExpired();
+    }
+  }
 
   const body: unknown =
     res.status === 204 ? null : await res.json().catch(() => null);

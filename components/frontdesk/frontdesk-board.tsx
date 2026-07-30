@@ -799,13 +799,19 @@ function FilaSesion({
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.estado ?? "");
   const cancelada = estadoActual === "cancelada";
 
-  async function run(fn: () => Promise<unknown>) {
+  // Devuelve true SOLO si la acción tuvo éxito. Así quien encadena un postAccion (p. ej. abrir "Programar
+  // citas" tras Asistido) no lo dispara cuando la acción falló (sesión caducada, requerido faltante): antes
+  // el `.then` corría igual y parecía que había asistido sin haberlo hecho (QA-002). El error se avisa con
+  // un toast (mensaje del BE, i18n); si la sesión expiró, el cliente muestra el aviso y va al login.
+  async function run(fn: () => Promise<unknown>): Promise<boolean> {
     setBusy(true);
     try {
       await fn();
       onChanged();
+      return true;
     } catch (err) {
       toastError(err, tRoot);
+      return false;
     } finally {
       setBusy(false);
     }
@@ -1110,8 +1116,10 @@ function FilaSesion({
         const col = paso.color ?? undefined;
         const avanzar = () => {
           if (bloqueadoPorCampos) { toast.warning(t("faltanCampos", { campos: faltan.join(", ") })); return; }
-          run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then(() => {
-            if (paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
+          run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then((ok) => {
+            // Solo tras un avance EXITOSO se dispara el postAccion (p. ej. abrir "Programar citas"); si
+            // falló, ya se mostró el toast de error y NO se simula que la acción ocurrió.
+            if (ok && paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
               onProgramar({ pacienteId: sesion.pacienteId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
             }
           });

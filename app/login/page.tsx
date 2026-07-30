@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { login, type LoginState } from "./actions";
@@ -13,8 +14,20 @@ import { ForgotPasswordDialog } from "@/components/auth/forgot-password-dialog";
 const initialState: LoginState = {};
 
 export default function LoginPage() {
+  // useSearchParams exige un límite de Suspense; el contenido real vive en LoginForm.
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const [state, formAction, pending] = useActionState(login, initialState);
   const t = useTranslations("login");
+  // Aviso cuando el usuario llega aquí porque su sesión expiró (redirigido con ?expired=1). Refuerza el
+  // toast del cliente de API para que el motivo quede claro también en la pantalla de login (QA-001).
+  const expirada = useSearchParams().has("expired");
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-6 py-16">
@@ -23,6 +36,12 @@ export default function LoginPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           {t("subtitle")}
         </p>
+
+        {expirada && (
+          <p className="mt-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning-foreground">
+            {t("sessionExpired")}
+          </p>
+        )}
 
         <form action={formAction} className="mt-6 space-y-4">
           <div className="space-y-1.5">
