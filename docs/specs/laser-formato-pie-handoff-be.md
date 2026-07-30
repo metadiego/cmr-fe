@@ -27,3 +27,21 @@ final de la hoja (idéntico al legacy `f-b/ usuario - 2026-07-30 16:41`).
 El componente de láser (`FormatoRender` en `components/frontdesk/formatos-modal.tsx`) pintará el pie igual
 que el genérico; es un cambio de ~3 líneas en el FE en cuanto el `pie` venga en la respuesta. Sin el dato,
 el FE no lo puede fabricar (prefijo/usuario/login/fechaHora son del BE/legacy, no del cliente).
+
+---
+
+## RESUELTO EN EL BE — 2026-07-30, ya en producción (PR #201)
+
+`GET /laser/formato/hilt` y `/mls` ya devuelven `pie`, con el mismo shape que el genérico:
+
+```json
+"pie": { "prefijo": "f-b/", "usuario": "Glorimar Lebron", "login": "<authUserId>", "fechaHora": "2026-07-30 17:10" }
+```
+
+**Cambio respecto a lo que pediste:** `usuario` ahora trae el **nombre real del perfil**, no el uuid.
+Lo detectó `/review`: el token solo lleva el `id`, así que el genérico venía imprimiendo
+`f-b/ fcdc1ccc-8cd6-… - fecha`. El BE lo resuelve contra el perfil (misma fuente que el cuadre de
+caja). `login` es el authUserId. Si quien imprime es una API key, `usuario` dice `api-key`.
+
+Sigue valiendo lo del handoff principal: píntalo como `{prefijo}{login || usuario} - {fechaHora}`,
+pero **prefiere `usuario`** ahora que es legible: `f-b/ Glorimar Lebron - 2026-07-30 17:10`.
