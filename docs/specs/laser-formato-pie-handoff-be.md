@@ -1,0 +1,29 @@
+# HANDOFF BE — Incluir `pie` en el payload de `/laser/formato/:tipo` (HILT/MLS)
+
+> Competencia BE. Contexto: el handoff `HANDOFF-formato-campos-secciones-pie` (§5) pide el **pie del
+> legacy en TODOS los formatos, también HILT/MLS**. El FE ya lo pinta en el documento genérico
+> (`/formatos/:clave/armado` sí trae `pie`), pero **`/laser/formato/:tipo` NO lo devuelve**.
+
+## Estado hoy
+`GET /api/v1/laser/formato/hilt` (y `mls`) devuelve solo:
+```json
+{ "tipo": "hilt", "secciones": [ … ] }
+```
+No trae `pie` (ni `membrete`, pero eso el FE ya lo resuelve por su lado). El genérico sí:
+```json
+{ "pie": { "prefijo": "f-b/", "usuario": "<uuid>", "login": "", "fechaHora": "2026-07-30 16:41" }, … }
+```
+
+## Qué se necesita
+Agregar el mismo objeto `pie` al payload de `/laser/formato/:tipo`, con el MISMO shape y semántica que en
+`/formatos/:clave/armado` (para que el FE lo pinte con el mismo código):
+```jsonc
+"pie": { "prefijo": "f-b/", "usuario": "<uuid del usuario>", "login": "<login o vacío>", "fechaHora": "YYYY-MM-DD HH:mm" }
+```
+El FE lo imprime como `{prefijo}{login || usuario} - {fechaHora}`, pequeño y alineado a la izquierda al
+final de la hoja (idéntico al legacy `f-b/ usuario - 2026-07-30 16:41`).
+
+## Efecto en el FE (una vez llegue el dato)
+El componente de láser (`FormatoRender` en `components/frontdesk/formatos-modal.tsx`) pintará el pie igual
+que el genérico; es un cambio de ~3 líneas en el FE en cuanto el `pie` venga en la respuesta. Sin el dato,
+el FE no lo puede fabricar (prefijo/usuario/login/fechaHora son del BE/legacy, no del cliente).
