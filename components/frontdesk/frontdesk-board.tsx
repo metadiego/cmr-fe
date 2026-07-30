@@ -27,7 +27,7 @@ import {
   type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro } from "@/lib/api/tablero";
+import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
 import { useRouter, usePathname } from "next/navigation";
 import { buscarPaciente } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
@@ -46,6 +46,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -96,11 +97,20 @@ const todayISO = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+// El BE sella en UTC (p. ej. "2026-07-30T14:29:31Z"). SIEMPRE mostrar en la zona de la clínica
+// (América/Puerto_Rico), no en la del navegador: pintar el ISO crudo salían 4 horas de más (14:29→debe
+// verse 10:29). Zona fija del negocio, no `getHours()` (que depende de la máquina). Contrato del handoff.
+const HORA_FMT = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "America/Puerto_Rico",
+});
 function fmtHora(iso: string | null | undefined): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return HORA_FMT.format(d);
 }
 
 // Valor de `render.postAccion` que abre el modal "Programar citas" (convención compartida con el BE;
@@ -167,6 +177,10 @@ export function FrontdeskBoard() {
   const rango = puedeRango && hasta && hasta > fecha ? { desde: fecha, hasta } : undefined;
   const [tab, setTab] = React.useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = React.useState("");
+  // Ocultar canceladas: ENCENDIDO por defecto (la jornada se recarga y las anteriores quedan canceladas
+  // como borrado lógico; no son bug, pero estorban el día). Filtro de cliente sobre estado==='cancelada'.
+  // Se ignora cuando el usuario filtra explícitamente por el KPI "Cancelada" (quiere verlas para reactivar).
+  const [ocultarCanceladas, setOcultarCanceladas] = React.useState(true);
   const [q, setQ] = React.useState("");
   // Modal "Programar citas": disparado por Citar (sin paciente) o por render.postAccion de una columna
   // del tablero (con paciente de la sesión). Data-driven, sin hardcode del estado que lo abre.
@@ -352,7 +366,14 @@ export function FrontdeskBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, gate.centro]);
 
-  // Filtro compuesto: búsqueda (texto de fila O pacienteId) → luego KPI de estado.
+  // Estado de una fila: PREFERIR el `estado` top-level que ahora manda el BE en cada fila (PR #195, la
+  // verdad del flujo), con respaldo a la columna proyectada `fd_estado` y a la entidad de sesión.
+  const estadoFila = React.useCallback(
+    (f: FrontdeskFila) => String(f.estado ?? f.fd_estado ?? sesiones.get(f.id)?.estado ?? ""),
+    [sesiones],
+  );
+
+  // Filtro compuesto: búsqueda (texto de fila O pacienteId) → ocultar canceladas → KPI de estado.
   const visibles = React.useMemo(() => {
     const filas = board?.filas ?? [];
     const conBusqueda = filas.filter((f) => {
@@ -362,10 +383,15 @@ export function FrontdeskBoard() {
       const porPaciente = !!pacienteIds && !!ses && pacienteIds.has(String(ses.pacienteId));
       return q.trim().length >= 2 ? porTexto || porPaciente : porTexto;
     });
+    // Ocultar canceladas (salvo que el filtro explícito sea justamente "cancelada").
+    const conVisibilidad =
+      ocultarCanceladas && estadoFiltro !== "cancelada"
+        ? conBusqueda.filter((f) => estadoFila(f) !== "cancelada")
+        : conBusqueda;
     return estadoFiltro
-      ? conBusqueda.filter((f) => String(f.fd_estado ?? "") === estadoFiltro)
-      : conBusqueda;
-  }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro]);
+      ? conVisibilidad.filter((f) => estadoFila(f) === estadoFiltro)
+      : conVisibilidad;
+  }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila]);
 
   // Orden del board. Natural (sort=null): por PRESENTE (hora de llegada) asc = orden de TURNO; los que
   // aún no están presentes van al final. Clic en un encabezado ordena por esa columna (asc/desc). Clic en
@@ -401,11 +427,14 @@ export function FrontdeskBoard() {
     const filas = board?.filas ?? [];
     const counts = new Map<string, number>();
     for (const f of filas) {
-      const e = String(f.fd_estado ?? "");
+      const e = estadoFila(f);
       counts.set(e, (counts.get(e) ?? 0) + 1);
     }
-    return { counts, total: filas.length };
-  }, [board]);
+    // "Todos" refleja lo VISIBLE: si se ocultan canceladas, no las cuenta (evita "Todos: 25" con 22 filas).
+    // Los `counts` quedan completos para que la ficha "Cancelada" siga mostrando su número y poder revelarlas.
+    const ocultas = ocultarCanceladas && estadoFiltro !== "cancelada" ? (counts.get("cancelada") ?? 0) : 0;
+    return { counts, total: filas.length - ocultas };
+  }, [board, estadoFila, ocultarCanceladas, estadoFiltro]);
 
   const cargando = boardRes.state.kind === "loading" || defRes.state.kind === "loading";
 
@@ -556,6 +585,12 @@ export function FrontdeskBoard() {
                 </button>
               )}
             </div>
+            {/* Ocultar canceladas: encendido por defecto. Las canceladas del día (recargas de jornada) se
+                esconden; apagarlo las trae de vuelta con su menú de Reactivar. */}
+            <label className="ml-auto inline-flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+              <Switch checked={ocultarCanceladas} onCheckedChange={setOcultarCanceladas} aria-label={t("ocultarCanceladas")} />
+              {t("ocultarCanceladas")}
+            </label>
           </div>
 
           {/* KPIs = filtros */}
@@ -628,6 +663,7 @@ export function FrontdeskBoard() {
                       colsRender={colsRender}
                       flujoCols={flujoCols}
                       flujo={flujo}
+                      transiciones={def?.transiciones ?? []}
                       estadoDe={estadoDe}
                       servicio={servicioActivo}
                       tablero={tabEfectivo}
@@ -716,6 +752,7 @@ function FilaSesion({
   colsRender,
   flujoCols,
   flujo,
+  transiciones,
   estadoDe,
   servicio,
   tablero,
@@ -732,6 +769,7 @@ function FilaSesion({
   colsRender: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[];
   flujoCols: FrontdeskColumna[];
   flujo: { clave: string; labelKey: string; color?: string | null }[];
+  transiciones: Transicion[];
   estadoDe: (clave: string) => { labelKey: string; color?: string | null } | undefined;
   servicio?: Servicio;
   tablero: string;
@@ -745,6 +783,7 @@ function FilaSesion({
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
+  const { can } = useCan();
   const [busy, setBusy] = React.useState(false);
   const [historialOpen, setHistorialOpen] = React.useState(false);
   const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
@@ -755,7 +794,9 @@ function FilaSesion({
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
   const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
-  const estadoActual = String(fila.fd_estado ?? sesion?.estado ?? "");
+  // Verdad del flujo: el `estado` top-level que ahora manda el BE en cada fila (PR #195). Antes el FE lo
+  // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
+  const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.estado ?? "");
   const cancelada = estadoActual === "cancelada";
 
   async function run(fn: () => Promise<unknown>) {
@@ -987,6 +1028,32 @@ function FilaSesion({
         revert: null as string | null,
       }));
 
+  // Acciones de MENÚ data-driven: transiciones que aplican desde el estado actual y que NO son parte del
+  // flujo (avance/reversa ya viven en los pills) ni el Cancelar dedicado. Aquí cae `reactivar` desde
+  // 'cancelada' (segunda oportunidad, PR #195): el FE la pinta sola sin hardcode. RBAC = BE (permiso).
+  const pasoKeys = new Set<string>();
+  for (const p of pasos) {
+    pasoKeys.add(p.key);
+    if (p.revert) pasoKeys.add(p.revert);
+  }
+  const accionesMenu = transiciones
+    .filter(
+      (tr) =>
+        tr.activo !== false &&
+        // Solo transiciones SIN payload extra: el menú plano no recoge formularios. Esto excluye el
+        // cancelar/anular dedicado (que exige `motivo` → tiene su propio diálogo) sin hardcodear su nombre,
+        // y deja pasar recuperaciones como `reactivar` (requiere vacío). Criterio semántico, no por clave.
+        tr.requiere.length === 0 &&
+        !pasoKeys.has(tr.clave) &&
+        (tr.desdeEstados.length === 0 || tr.desdeEstados.includes(estadoActual)) &&
+        (!tr.permiso || can(tr.permiso)),
+    )
+    .map((tr) => ({
+      clave: tr.clave,
+      label: tr.labelKey && tRoot.has(tr.labelKey) ? tRoot(tr.labelKey) : (t.has(tr.clave) ? t(tr.clave) : tr.clave),
+      confirmar: tr.confirmar,
+    }));
+
   // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
   // faltan por llenar en la sesión (sesion.datos[clave]) → bloquean esa transición (p. ej. áreas para asistir).
   const camposReq = ((servicio as { formAcciones?: { campos?: { clave: string; labelKey?: string; en?: string; requerido?: boolean }[] } } | undefined)?.formAcciones?.campos ?? []);
@@ -1015,15 +1082,24 @@ function FilaSesion({
   // Se muestra SIEMPRE, también en CANCELADA (sus sellos son historia): en cancelada no hay paso
   // accionable ni deshacer, solo se ven las horas ya selladas y puntos grises. (Regresión del commit
   // 7310358 que pintaba "—"; restaurado.)
+  // Paso accionable = el SIGUIENTE cuya TRANSICIÓN aplica desde el `estado` actual del BE (handoff §3:
+  // comparar transicion.desdeEstados con el estado de la fila), NO deducido de los sellos ni del orden de
+  // `flujo`. Se recorre `pasos` en su propio orden y se toma el primer paso sin sello cuya transición
+  // aplique — robusto aunque `flujoCols` y `flujo` no coincidan en orden/tamaño, y para estados terminales
+  // desconocidos no ofrece nada (ninguna transición aplica). `pasos[i].key` = clave de la transición.
+  const transPorClave = new Map(transiciones.map((tr) => [tr.clave, tr]));
+  const aplicaDesde = (clave: string) => {
+    const tr = transPorClave.get(clave);
+    return !!tr && (tr.desdeEstados.length === 0 || tr.desdeEstados.includes(estadoActual));
+  };
+  const nextIdx = cancelada ? -1 : pasos.findIndex((p) => !p.stamp && aplicaDesde(p.key));
   const flujoCell = (
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
         const hecho = !!paso.stamp;
-        const previo = i === 0 || !!pasos[i - 1].stamp;
-        const faltan = faltantesPara(paso.estado);
-        const listo = !hecho && previo && faltan.length === 0;
-        const bloqueadoPorCampos = !hecho && previo && faltan.length > 0;
-        const siguiente = !cancelada && (listo || bloqueadoPorCampos); // accionable ahora (nunca si cancelada)
+        const siguiente = i === nextIdx; // accionable ahora, según el estado del BE (nunca si cancelada)
+        const faltan = siguiente ? faltantesPara(paso.estado) : [];
+        const bloqueadoPorCampos = siguiente && faltan.length > 0;
         const esUltimoHecho = hecho && !(pasos[i + 1] && pasos[i + 1].stamp);
         const reversa = esUltimoHecho ? paso.revert : null;
         const puedeDeshacer = !!reversa && !busy && !cancelada;
@@ -1099,6 +1175,8 @@ function FilaSesion({
           onHistorial={() => setHistorialOpen(true)}
           reports={sesion?.pacienteId ? reportsAcc.map((r) => ({ id: r.id, label: r.labelKey && tRoot.has(r.labelKey) ? tRoot(r.labelKey) : (r.name ?? r.id) })) : []}
           onReport={(id) => { const r = reportsAcc.find((x) => x.id === id); if (r) setFormatoReport(r); }}
+          accionesMenu={accionesMenu}
+          onAccion={(clave) => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: clave }, centro))}
           onProgramar={
             sesion?.pacienteId
               ? () => onProgramar({ pacienteId: sesion.pacienteId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
@@ -1423,6 +1501,8 @@ function RowMenu({
   onHistorial,
   reports,
   onReport,
+  accionesMenu,
+  onAccion,
   onProgramar,
   onCancelar,
   onReparar,
@@ -1435,6 +1515,10 @@ function RowMenu({
   onHistorial: () => void;
   reports?: { id: string; label: string }[]; // formatos del servicio, PLANOS en el menú (cada uno abre su doc)
   onReport?: (id: string) => void;
+  // Acciones data-driven aplicables desde el estado actual (p. ej. reactivar una cancelada). El BE es la
+  // autoridad (transiciones + permiso); el FE solo las pinta y confirma si la transición lo pide.
+  accionesMenu?: { clave: string; label: string; confirmar?: boolean }[];
+  onAccion?: (clave: string) => void;
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
   onCancelar: (motivo: string) => void;
   onReparar: (payload: { motivo: string; estado?: string }) => void;
@@ -1460,6 +1544,25 @@ function RowMenu({
           {(reports ?? []).map((r) => (
             <DropdownMenuItem key={r.id} onSelect={(e) => { e.preventDefault(); onReport?.(r.id); }}>
               {r.label}
+            </DropdownMenuItem>
+          ))}
+          {/* Acciones data-driven desde el estado actual (p. ej. Reactivar una cancelada → segunda
+              oportunidad). Confirmación con toast cuando la transición del BE la exige. */}
+          {(accionesMenu ?? []).map((a) => (
+            <DropdownMenuItem
+              key={a.clave}
+              onSelect={(e) => {
+                e.preventDefault();
+                if (a.confirmar) {
+                  toast(t("confirmarAccion", { accion: a.label }), {
+                    action: { label: a.label, onClick: () => onAccion?.(a.clave) },
+                  });
+                } else {
+                  onAccion?.(a.clave);
+                }
+              }}
+            >
+              {a.label}
             </DropdownMenuItem>
           ))}
           {onProgramar && !cancelada && (

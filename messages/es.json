@@ -1099,7 +1099,10 @@
     "seleccionarEnfermera": "Seleccionar enfermera(o)",
     "asignarSinAvisar": "Asigna la enfermera sin enviar aviso.",
     "ordenarTurno": "Ordenar por turno (llegada)",
-    "impresoEl": "Impreso"
+    "impresoEl": "Impreso",
+    "ocultarCanceladas": "Ocultar canceladas",
+    "confirmarAccion": "¿{accion}?",
+    "reactivar": "Reactivar"
   },
   "programarCitas": {
     "title": "Programar citas",

@@ -1099,7 +1099,10 @@
     "seleccionarEnfermera": "Select nurse",
     "asignarSinAvisar": "Assigns the nurse without sending an alert.",
     "ordenarTurno": "Sort by turn (arrival)",
-    "impresoEl": "Printed"
+    "impresoEl": "Printed",
+    "ocultarCanceladas": "Hide cancelled",
+    "confirmarAccion": "{accion}?",
+    "reactivar": "Reactivate"
   },
   "programarCitas": {
     "title": "Schedule sessions",
