@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
-import { getFormatoArmado, type FormatoArmado } from "@/lib/api/formatos";
+import { getFormatoArmado, type FormatoArmado, type FormatoPie } from "@/lib/api/formatos";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -292,9 +292,23 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         <div className="pt-2">
           <SignaturePad height={110} />
         </div>
+
+        {/* Pie del legacy (BE PR #201): mismo componente que el genérico. */}
+        <PieFormato pie={data.pie} />
       </div>
     </div>
   );
+}
+
+// Pie del legacy, compartido por TODOS los formatos (genérico + láser HILT/MLS): pequeño, a la izquierda,
+// al final de la hoja. Formato `{prefijo}{usuario||login} - {fechaHora}`. Se PREFIERE `usuario` porque el
+// BE ahora resuelve el nombre real del perfil (antes salía el uuid); `login` (authUserId) es el respaldo.
+function PieFormato({ pie }: { pie?: FormatoPie }) {
+  if (!pie) return null;
+  const quien = pie.usuario || pie.login || "";
+  const txt = `${pie.prefijo ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
+  if (!txt.trim()) return null;
+  return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
 }
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
@@ -417,9 +431,6 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
     const seg = (key ?? "").split(".").pop() ?? "";
     return (fallback ?? seg.replace(/_/g, " ")).toUpperCase();
   };
-  // Pie del legacy en TODOS los formatos: `{prefijo}{login||usuario} - {fechaHora}`.
-  const pie = d.pie;
-  const pieTexto = pie ? `${pie.prefijo ?? ""}${pie.login || pie.usuario || ""} - ${pie.fechaHora ?? ""}` : "";
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
@@ -496,7 +507,7 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
         ))}
 
         {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
-        {pieTexto.trim() && <div className="mt-4 text-left text-[10px] text-neutral-500">{pieTexto}</div>}
+        <PieFormato pie={d.pie} />
       </div>
     </div>
   );

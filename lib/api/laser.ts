@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import type { FormatoPie } from "./formatos";
 
 // Catálogo de parámetros de terapia láser (HILT/MLS) + formato print-ready.
 // El BE entrega DATOS + estructura (no PDF): el render/print es del FE. Catálogo
@@ -34,12 +35,14 @@ export interface LaserParametro {
 export interface FormatoHilt {
   tipo: "hilt";
   secciones: { region: string; orden: number; filas: LaserParametro[] }[];
+  pie?: FormatoPie; // pie del legacy (BE PR #201) — mismo shape que el genérico
 }
 // MLS: dos columnas (izquierda/derecha).
 export interface FormatoMls {
   tipo: "mls";
   izquierda: LaserParametro[];
   derecha: LaserParametro[];
+  pie?: FormatoPie;
 }
 export type Formato = FormatoHilt | FormatoMls;
 
