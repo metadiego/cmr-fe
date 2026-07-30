@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
 import { getFormatoArmado, type FormatoArmado, type FormatoPie } from "@/lib/api/formatos";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
@@ -22,7 +21,7 @@ const PRINT_CSS = `
 *{box-sizing:border-box}
 @page{size:letter;margin:9mm}
 html,body{height:100%}
-body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:11px}
+body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .no-print{display:none!important}
 /* El documento LLENA la hoja (no amontonado arriba): columna flex de altura completa; la zona marcada
    .formato-grow (p. ej. OBSERVACIONES, o un espaciador) crece para empujar firmas/pie al fondo. */
@@ -248,10 +247,6 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   const [dolor, setDolor] = React.useState("");
   const nTerapias = header.sesion * header.areas;
   const printRef = React.useRef<HTMLDivElement>(null);
-  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
-  const centroSel = centrosRes.state.kind === "ok" ? centrosRes.state.data.find((c) => c.id === centro) : undefined;
-  // Logo de la EMPRESA (mismo para todos los centros): el del centro o, si no tiene, el de cualquiera.
-  const logoUrl = centroSel?.logoUrl ?? (centrosRes.state.kind === "ok" ? centrosRes.state.data.find((c) => c.logoUrl)?.logoUrl ?? null : null);
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
@@ -268,10 +263,9 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         {/* Encabezado: membrete (logo pequeño + centro) + título; a la derecha fecha/sesión/áreas */}
         <div className="flex items-start justify-between border-b pb-3">
           <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {logoUrl && <img src={logoUrl} alt="" className="max-h-10 object-contain" />}
+            <LogoFormato logoUrl={data.membrete?.logoUrl} />
             <div>
-              {centroSel?.nombre && <div className="text-xs font-semibold uppercase tracking-wide">{centroSel.nombre}</div>}
+              {data.membrete?.centro && <div className="text-xs font-semibold uppercase tracking-wide">{data.membrete.centro}</div>}
               <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
               <p className="text-sm">{header.paciente}{header.record ? ` · ${t("recordLabel")} ${header.record}` : ""}</p>
             </div>
@@ -317,6 +311,25 @@ function PieFormato({ pie }: { pie?: FormatoPie }) {
   const txt = `${pie.prefijo ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
   if (!txt.trim()) return null;
   return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
+}
+
+// Logo del membrete, compartido por los tres formatos (campos, rejilla, láser HILT/MLS). Data-driven:
+// `logoUrl` del centro (membrete.logoUrl); si viene null (caso de hoy), el asset por defecto del legacy.
+// Altura FIJA (nunca ancho 100%) para no mover el layout; en rejillas apretadas se pasa 32px (el reporte
+// manda, el logo cede). `maxHeight` inline pisa el `img{max-height}` del CSS de impresión. Decorativo (alt
+// vacío) y eager porque se imprime. Contrato: HANDOFF-logo-en-formatos.
+function LogoFormato({ logoUrl, size = 42, className }: { logoUrl?: string | null; size?: number; className?: string }) {
+  const src = logoUrl || "/img/logo_cmr.png";
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      loading="eager"
+      style={{ height: size, maxHeight: size, width: "auto" }}
+      className={"object-contain " + (className ?? "")}
+    />
+  );
 }
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
@@ -416,12 +429,7 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
 function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: string; sesionId?: string; centro?: string; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
   const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
-  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const printRef = React.useRef<HTMLDivElement>(null);
-  // Logo: el del centro; si no tiene, el de CUALQUIER centro (misma empresa → mismo logo).
-  const logoUrl = centrosRes.state.kind === "ok"
-    ? (centrosRes.state.data.find((c) => c.id === centro)?.logoUrl ?? centrosRes.state.data.find((c) => c.logoUrl)?.logoUrl ?? null)
-    : null;
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
   const d = res.state.data;
@@ -453,10 +461,13 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
           arriba. Norma repetida del dueño: los reportes ocupan toda la página con aire. */}
       <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
         <div className="formato-doc flex min-h-[70vh] flex-col">
-          {/* Membrete: logo (empresa) + nombre de la empresa + centro + título del documento (3 líneas). */}
-          <div className="text-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {logoUrl && <img src={logoUrl} alt="" className="mx-auto mb-2 max-h-10 object-contain" />}
+          {/* Membrete: el bloque de títulos (empresa / centro / título) queda CENTRADO e intacto; el logo va
+              ARRIBA-IZQUIERDA en posición absoluta para no empujar ni una línea (regla dura del handoff:
+              si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
+          <div className="relative text-center">
+            <div className="absolute left-0 top-0">
+              <LogoFormato logoUrl={d.membrete?.logoUrl} size={esCampos ? 42 : 32} />
+            </div>
             <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>
             {d.membrete?.centro && <div className="text-sm font-semibold uppercase">{d.membrete.centro}</div>}
             <h2 className="mt-1 text-lg font-bold uppercase">{d.titulo}</h2>

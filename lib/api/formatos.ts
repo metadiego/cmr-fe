@@ -39,7 +39,8 @@ export type FormatoArmado = {
   titulo: string;
   labelKey?: string | null;
   layout?: string;
-  membrete?: { centro?: string } | null;
+  // Membrete (BE PR #207): centro + logo del centro (null → el FE usa el asset por defecto).
+  membrete?: { centro?: string; logoUrl?: string | null } | null;
   paciente?: { nombre?: string | null; record?: string | null } | null;
   fecha?: string | null;
   campos?: FormatoCampo[]; // layout "campos"

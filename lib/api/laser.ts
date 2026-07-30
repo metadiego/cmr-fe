@@ -31,11 +31,17 @@ export interface LaserParametro {
   activo: boolean;
 }
 
+// Membrete del formato (BE PR #207): centro + logo del centro (null → asset por defecto en el FE).
+export interface FormatoMembrete {
+  centro?: string | null;
+  logoUrl?: string | null;
+}
 // HILT: secciones por región, en orden (10 regiones).
 export interface FormatoHilt {
   tipo: "hilt";
   secciones: { region: string; orden: number; filas: LaserParametro[] }[];
   pie?: FormatoPie; // pie del legacy (BE PR #201) — mismo shape que el genérico
+  membrete?: FormatoMembrete;
 }
 // MLS: dos columnas (izquierda/derecha).
 export interface FormatoMls {
@@ -43,6 +49,7 @@ export interface FormatoMls {
   izquierda: LaserParametro[];
   derecha: LaserParametro[];
   pie?: FormatoPie;
+  membrete?: FormatoMembrete;
 }
 export type Formato = FormatoHilt | FormatoMls;
 
