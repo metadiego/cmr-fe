@@ -1124,7 +1124,23 @@
     "impresoEl": "Printed",
     "ocultarCanceladas": "Hide cancelled",
     "confirmarAccion": "{accion}?",
-    "reactivar": "Reactivate"
+    "reactivar": "Reactivate",
+    "compras": {
+      "titulo": "Purchases",
+      "delDia": "Purchased that day",
+      "historial": "Purchase history",
+      "sinCompras": "No purchases that day",
+      "pendientes": "Pending",
+      "entregadas": "Delivered",
+      "sesiones": "Sessions",
+      "producto": "Product",
+      "factura": "Invoice",
+      "importe": "Amount",
+      "fecha": "Date",
+      "totCompras": "Purchases",
+      "totComprado": "Purchased",
+      "totEntregadas": "Delivered"
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -1161,7 +1177,8 @@
       "dosis": "Dose",
       "enfermera": "Nurse",
       "cantidad": "Quantity",
-      "protocolo": "Protocol"
+      "protocolo": "Protocol",
+      "compras": "Purchases"
     },
     "binding": {
       "dosis": "Dose (applied product)",

@@ -1124,7 +1124,23 @@
     "impresoEl": "Impreso",
     "ocultarCanceladas": "Ocultar canceladas",
     "confirmarAccion": "¿{accion}?",
-    "reactivar": "Reactivar"
+    "reactivar": "Reactivar",
+    "compras": {
+      "titulo": "Compras",
+      "delDia": "Comprado ese día",
+      "historial": "Historial de compras",
+      "sinCompras": "Sin compras ese día",
+      "pendientes": "Pendientes",
+      "entregadas": "Entregadas",
+      "sesiones": "Sesiones",
+      "producto": "Producto",
+      "factura": "Factura",
+      "importe": "Importe",
+      "fecha": "Fecha",
+      "totCompras": "Compras",
+      "totComprado": "Compradas",
+      "totEntregadas": "Entregadas"
+    }
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -1161,7 +1177,8 @@
       "dosis": "Dosis",
       "enfermera": "Enfermera",
       "cantidad": "Cantidad",
-      "protocolo": "Protocolo"
+      "protocolo": "Protocolo",
+      "compras": "Compras"
     },
     "binding": {
       "dosis": "Dosis (producto aplicado)",

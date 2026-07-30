@@ -303,6 +303,49 @@ export function getHistorialPaciente(
   );
 }
 
+// Carrito de compras de la fila (columna fd_compras). Una línea de compra (paquete de sesiones facturado);
+// `entregadas`/`pendientes` = cuánto le queda al paciente (clave en frontdesk). Contrato:
+// HANDOFF-columna-carrito-compras / cmr-be/docs/specs/frontdesk-columna-compras.md.
+export type CompraLinea = {
+  id?: string;
+  fecha?: string | null;
+  facturaId?: string | null;
+  facturaNumero?: string | null;
+  sku?: string | null;
+  producto?: string | null;
+  cantidad?: number | null;
+  sesiones?: number | null;
+  entregadas?: number | null;
+  pendientes?: number | null;
+  total?: number | null;
+};
+export type ComprasPaciente = {
+  // Compras EMITIDAS el día del tablero (no "hoy"): número que muestra la celda + su desglose.
+  delDia?: { fecha?: string | null; sesiones?: number | null; items?: CompraLinea[] } | null;
+  // Historial completo (cualquier fecha), de la más reciente a la más antigua.
+  historial?: CompraLinea[];
+  totales?: {
+    compras?: number | null;
+    sesionesCompradas?: number | null;
+    sesionesEntregadas?: number | null;
+    sesionesPendientes?: number | null;
+  } | null;
+};
+// GET /frontdesk/pacientes/{id}/compras?servicioId&fecha — servicioId acota al grupo del servicio de la
+// fila (pásalo siempre); fecha = la del tablero (acota el bloque "del día").
+export function getComprasPaciente(
+  pacienteId: string,
+  servicioId?: string,
+  fecha?: string,
+  centroId?: string,
+): Promise<ComprasPaciente> {
+  const sp = new URLSearchParams();
+  if (servicioId) sp.set("servicioId", servicioId);
+  if (fecha) sp.set("fecha", fecha);
+  const qs = sp.toString() ? `?${sp.toString()}` : "";
+  return apiFetch<ComprasPaciente>(`/frontdesk/pacientes/${pacienteId}/compras${qs}`, {}, centroId);
+}
+
 export function setNurseStatus(payload: SetNurseStatusPayload, centroId?: string): Promise<unknown> {
   return apiFetch(
     `/frontdesk/nurse-status`,
