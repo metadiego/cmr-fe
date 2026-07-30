@@ -21,8 +21,16 @@ import { SignaturePad } from "@/components/frontdesk/signature-pad";
 const PRINT_CSS = `
 *{box-sizing:border-box}
 @page{size:letter;margin:9mm}
+html,body{height:100%}
 body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:11px}
 .no-print{display:none!important}
+/* El documento LLENA la hoja (no amontonado arriba): columna flex de altura completa; la zona marcada
+   .formato-grow (p. ej. OBSERVACIONES, o un espaciador) crece para empujar firmas/pie al fondo. */
+.formato-doc{display:flex;flex-direction:column;min-height:100vh}
+.formato-grow{flex:1 1 auto}
+/* Campos (layout "campos"): aireados, una línea por campo con buen espacio. */
+.formato-campos{display:flex;flex-direction:column;gap:16px;font-size:13px;margin-top:16px}
+.formato-campos .campo{display:flex;gap:8px}
 h2{font-size:15px;margin:0}
 table{width:100%;border-collapse:collapse;font-size:9.5px;margin-top:3px}
 th,td{border:1px solid #999;padding:1.5px 5px;text-align:left;vertical-align:top;line-height:1.2}
@@ -421,6 +429,9 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const filas = d.filas ?? [];
   const campos = d.campos ?? [];
   const secciones = d.secciones ?? [];
+  // ¿Hay un área de OBSERVACIONES (texto_libre) que pueda crecer para llenar la hoja? Si no, se usa un
+  // espaciador flexible para que firmas/pie caigan al fondo y el reporte no quede amontonado arriba.
+  const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre");
   // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
   // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
   const esCampos = (d.layout ?? (cols.length ? "tabla" : "campos")) === "campos";
@@ -437,77 +448,92 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
         <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
         <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.titulo || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
       </div>
+      {/* .formato-doc = columna flex que LLENA la hoja (min-height:100vh en impresión): la zona de
+          OBSERVACIONES (o un espaciador si no hay) crece y empuja firmas/pie al fondo → nada amontonado
+          arriba. Norma repetida del dueño: los reportes ocupan toda la página con aire. */}
       <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
-        {/* Membrete: logo (empresa) + nombre de la empresa + centro + título del documento (3 líneas). */}
-        <div className="text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {logoUrl && <img src={logoUrl} alt="" className="mx-auto mb-2 max-h-10 object-contain" />}
-          <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>
-          {d.membrete?.centro && <div className="text-sm font-semibold uppercase">{d.membrete.centro}</div>}
-          <h2 className="mt-1 text-lg font-bold uppercase">{d.titulo}</h2>
-        </div>
-
-        {esCampos ? (
-          /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : ` valor.
-             Nada de rejilla ni columnas inventadas. */
-          <div className="mt-4 space-y-2 text-sm">
-            {campos.map((c) => (
-              <div key={c.clave} style={{ display: "flex", gap: "6px" }}>
-                <span className="font-bold">{label(c.labelKey)} :</span>
-                <span>{c.valor ?? ""}</span>
-              </div>
-            ))}
+        <div className="formato-doc flex min-h-[70vh] flex-col">
+          {/* Membrete: logo (empresa) + nombre de la empresa + centro + título del documento (3 líneas). */}
+          <div className="text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {logoUrl && <img src={logoUrl} alt="" className="mx-auto mb-2 max-h-10 object-contain" />}
+            <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>
+            {d.membrete?.centro && <div className="text-sm font-semibold uppercase">{d.membrete.centro}</div>}
+            <h2 className="mt-1 text-lg font-bold uppercase">{d.titulo}</h2>
           </div>
-        ) : (
-          <>
-            {/* Paciente + récord + fecha (solo rejilla; en "campos" ya van dentro de los campos). */}
-            <div className="mt-4 flex items-end justify-between border-b pb-2 text-sm">
-              <div>
-                <span className="text-base font-bold">{d.paciente?.nombre ?? "—"}</span>
-                {d.paciente?.record && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.paciente.record}</span>}
-              </div>
-              <div className="tabular-nums">{d.fecha ?? ""}</div>
+
+          {esCampos ? (
+            /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
+               valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
+            <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
+              {campos.map((c) => (
+                <div key={c.clave} className="campo flex gap-2">
+                  <span className="font-bold">{label(c.labelKey)} :</span>
+                  <span>{c.valor ?? ""}</span>
+                </div>
+              ))}
             </div>
-            {/* Rejilla con filas en blanco (aireadas, para llenar a mano). */}
-            <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
-              <thead>
-                <tr className="bg-neutral-100 text-left">
-                  {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{label(c.labelKey, c.clave)}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                {filas.map((f, i) => (
-                  <tr key={i} style={{ height: 46 }}>
-                    {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
-
-        {/* Secciones (observaciones / firmas), en cualquier layout. */}
-        {secciones.map((s) => (
-          <div key={s.clave} className="region mt-4" style={{ breakInside: "avoid" }}>
-            <div className="mb-1 text-sm font-bold uppercase">{label(s.labelKey)}</div>
-            {s.tipo === "texto_libre" ? (
-              // Recuadro con `alto` líneas en blanco (≈22px por línea) para escribir a mano.
-              <div style={{ border: "1px solid #999", minHeight: `${Math.max(1, s.alto ?? 3) * 22}px` }} />
-            ) : s.tipo === "firmas" ? (
-              // Una línea horizontal por cada entrada, con su etiqueta debajo.
-              <div style={{ display: "flex", gap: "24px", marginTop: "26px" }}>
-                {(s.lineas ?? []).map((linea, i) => (
-                  <div key={i} style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{ borderTop: "1px solid #000", paddingTop: "3px", fontSize: "10px" }}>{label(linea)}</div>
-                  </div>
-                ))}
+          ) : (
+            <>
+              {/* Paciente + récord + fecha (solo rejilla; en "campos" ya van dentro de los campos). */}
+              <div className="mt-4 flex items-end justify-between border-b pb-2 text-sm">
+                <div>
+                  <span className="text-base font-bold">{d.paciente?.nombre ?? "—"}</span>
+                  {d.paciente?.record && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.paciente.record}</span>}
+                </div>
+                <div className="tabular-nums">{d.fecha ?? ""}</div>
               </div>
-            ) : null}
-          </div>
-        ))}
+              {/* Rejilla con filas en blanco (aireadas, para llenar a mano). */}
+              <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
+                <thead>
+                  <tr className="bg-neutral-100 text-left">
+                    {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{label(c.labelKey, c.clave)}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filas.map((f, i) => (
+                    <tr key={i} style={{ height: 46 }}>
+                      {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
 
-        {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
-        <PieFormato pie={d.pie} />
+          {/* Si NO hay área de observaciones que crezca, un espaciador flexible empuja firmas/pie al fondo. */}
+          {!tieneTextoLibre && <div className="formato-grow" aria-hidden style={{ flex: "1 1 auto", minHeight: "24px" }} />}
+
+          {/* Secciones (observaciones / firmas), en cualquier layout. */}
+          {secciones.map((s) => {
+            const esTexto = s.tipo === "texto_libre";
+            return (
+              <div
+                key={s.clave}
+                className={"region mt-6" + (esTexto ? " formato-grow" : "")}
+                style={esTexto ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
+              >
+                <div className="mb-1 text-sm font-bold uppercase">{label(s.labelKey)}</div>
+                {esTexto ? (
+                  // Recuadro de OBSERVACIONES que CRECE para llenar el espacio sobrante de la hoja.
+                  <div style={{ border: "1px solid #999", flex: "1 1 auto", minHeight: `${Math.max(3, s.alto ?? 3) * 30}px` }} />
+                ) : s.tipo === "firmas" ? (
+                  // Una línea horizontal por cada entrada, con su etiqueta debajo (con aire arriba).
+                  <div style={{ display: "flex", gap: "24px", marginTop: "48px" }}>
+                    {(s.lineas ?? []).map((linea, i) => (
+                      <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                        <div style={{ borderTop: "1px solid #000", paddingTop: "4px", fontSize: "10px" }}>{label(linea)}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+
+          {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
+          <PieFormato pie={d.pie} />
+        </div>
       </div>
     </div>
   );
