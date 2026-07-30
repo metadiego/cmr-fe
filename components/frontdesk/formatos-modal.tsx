@@ -405,50 +405,99 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const d = res.state.data;
   const cols = d.columnas ?? [];
   const filas = d.filas ?? [];
-  // Etiqueta de columna: traducción del labelKey si existe; si no, la clave legible (NO el labelKey crudo).
-  const colLabel = (c: FormatoColumnaLite) => (c.labelKey && t.has(c.labelKey) ? t(c.labelKey) : c.clave);
+  const campos = d.campos ?? [];
+  const secciones = d.secciones ?? [];
+  // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
+  // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
+  const esCampos = (d.layout ?? (cols.length ? "tabla" : "campos")) === "campos";
+  // Etiqueta por labelKey: traducción si existe; si no, el ÚLTIMO segmento en MAYÚSCULAS (nunca la clave
+  // cruda en el papel). Handoff §"Claves i18n": el FE solo traduce; si falta, cae al segmento.
+  const label = (key?: string | null, fallback?: string) => {
+    if (key && t.has(key)) return t(key);
+    const seg = (key ?? "").split(".").pop() ?? "";
+    return (fallback ?? seg.replace(/_/g, " ")).toUpperCase();
+  };
+  // Pie del legacy en TODOS los formatos: `{prefijo}{login||usuario} - {fechaHora}`.
+  const pie = d.pie;
+  const pieTexto = pie ? `${pie.prefijo ?? ""}${pie.login || pie.usuario || ""} - ${pie.fechaHora ?? ""}` : "";
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
         <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
         <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.titulo || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
       </div>
-      <div ref={printRef} className="formato-print space-y-4 rounded-lg border bg-white p-6 text-black">
-        {/* Membrete (logo del centro + nombre) + título */}
+      <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
+        {/* Membrete: logo (empresa) + nombre de la empresa + centro + título del documento (3 líneas). */}
         <div className="text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {logoUrl && <img src={logoUrl} alt="" className="mx-auto mb-2 max-h-10 object-contain" />}
-          {d.membrete?.centro && <div className="text-sm font-semibold uppercase tracking-wide">{d.membrete.centro}</div>}
-          <h2 className="mt-1 text-lg font-bold">{d.titulo}</h2>
+          <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>
+          {d.membrete?.centro && <div className="text-sm font-semibold uppercase">{d.membrete.centro}</div>}
+          <h2 className="mt-1 text-lg font-bold uppercase">{d.titulo}</h2>
         </div>
-        {/* Paciente + récord + fecha */}
-        <div className="flex items-end justify-between border-b pb-2 text-sm">
-          <div>
-            <span className="text-base font-bold">{d.paciente?.nombre ?? "—"}</span>
-            {d.paciente?.record && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.paciente.record}</span>}
-          </div>
-          <div className="tabular-nums">{d.fecha ?? ""}</div>
-        </div>
-        {/* Tabla con filas en blanco (aireadas, para llenar a mano) */}
-        <table className="formato-grid w-full border-collapse text-[11px]">
-          <thead>
-            <tr className="bg-neutral-100 text-left">
-              {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{colLabel(c)}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {filas.map((f, i) => (
-              <tr key={i} style={{ height: 46 }}>
-                {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
-              </tr>
+
+        {esCampos ? (
+          /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : ` valor.
+             Nada de rejilla ni columnas inventadas. */
+          <div className="mt-4 space-y-2 text-sm">
+            {campos.map((c) => (
+              <div key={c.clave} style={{ display: "flex", gap: "6px" }}>
+                <span className="font-bold">{label(c.labelKey)} :</span>
+                <span>{c.valor ?? ""}</span>
+              </div>
             ))}
-          </tbody>
-        </table>
-        {/* Pie: fecha/hora de impresión */}
-        <div className="pt-2 text-right text-[10px] text-neutral-500">{t("impresoEl")}: {new Date().toLocaleString()}</div>
+          </div>
+        ) : (
+          <>
+            {/* Paciente + récord + fecha (solo rejilla; en "campos" ya van dentro de los campos). */}
+            <div className="mt-4 flex items-end justify-between border-b pb-2 text-sm">
+              <div>
+                <span className="text-base font-bold">{d.paciente?.nombre ?? "—"}</span>
+                {d.paciente?.record && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.paciente.record}</span>}
+              </div>
+              <div className="tabular-nums">{d.fecha ?? ""}</div>
+            </div>
+            {/* Rejilla con filas en blanco (aireadas, para llenar a mano). */}
+            <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
+              <thead>
+                <tr className="bg-neutral-100 text-left">
+                  {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{label(c.labelKey, c.clave)}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {filas.map((f, i) => (
+                  <tr key={i} style={{ height: 46 }}>
+                    {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+
+        {/* Secciones (observaciones / firmas), en cualquier layout. */}
+        {secciones.map((s) => (
+          <div key={s.clave} className="region mt-4" style={{ breakInside: "avoid" }}>
+            <div className="mb-1 text-sm font-bold uppercase">{label(s.labelKey)}</div>
+            {s.tipo === "texto_libre" ? (
+              // Recuadro con `alto` líneas en blanco (≈22px por línea) para escribir a mano.
+              <div style={{ border: "1px solid #999", minHeight: `${Math.max(1, s.alto ?? 3) * 22}px` }} />
+            ) : s.tipo === "firmas" ? (
+              // Una línea horizontal por cada entrada, con su etiqueta debajo.
+              <div style={{ display: "flex", gap: "24px", marginTop: "26px" }}>
+                {(s.lineas ?? []).map((linea, i) => (
+                  <div key={i} style={{ flex: 1, textAlign: "center" }}>
+                    <div style={{ borderTop: "1px solid #000", paddingTop: "3px", fontSize: "10px" }}>{label(linea)}</div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ))}
+
+        {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
+        {pieTexto.trim() && <div className="mt-4 text-left text-[10px] text-neutral-500">{pieTexto}</div>}
       </div>
     </div>
   );
 }
-
-type FormatoColumnaLite = { clave: string; labelKey?: string | null };

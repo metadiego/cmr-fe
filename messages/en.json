@@ -1075,6 +1075,27 @@
     "formatoError": "Could not load the format",
     "formatoHiltTitle": "HILT therapy",
     "formatoMlsTitle": "MLS therapy",
+    "formatoEmpresa": "Centro de Medicina Regenerativa",
+    "formato": {
+      "campo": {
+        "fecha": "DATE",
+        "paciente": "PATIENT NAME",
+        "record": "RECORD #",
+        "sesion": "SESSION #",
+        "dosis_gm": "DOSE (GM)",
+        "peso": "WEIGHT"
+      },
+      "seccion": {
+        "observaciones": "NOTES",
+        "firmas": "SIGNATURES"
+      },
+      "firma": {
+        "enfermera": "NURSE",
+        "hora": "TIME",
+        "paciente": "PATIENT SIGNATURE",
+        "tecnico": "TECHNICIAN"
+      }
+    },
     "recordLabel": "Record",
     "triggerPoint": "Trigger point",
     "nTerapias": "No. therapies",

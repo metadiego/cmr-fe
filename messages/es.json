@@ -1075,6 +1075,27 @@
     "formatoError": "No se pudo cargar el formato",
     "formatoHiltTitle": "Terapia HILT",
     "formatoMlsTitle": "Terapia MLS",
+    "formatoEmpresa": "Centro de Medicina Regenerativa",
+    "formato": {
+      "campo": {
+        "fecha": "FECHA",
+        "paciente": "NOMBRE DEL PACIENTE",
+        "record": "RECORD #",
+        "sesion": "SESION #",
+        "dosis_gm": "DOSIS (GM)",
+        "peso": "PESO"
+      },
+      "seccion": {
+        "observaciones": "OBSERVACIONES",
+        "firmas": "FIRMAS"
+      },
+      "firma": {
+        "enfermera": "ENFERMERO(A)",
+        "hora": "HORA",
+        "paciente": "FIRMA DEL PACIENTE",
+        "tecnico": "TÉCNICO(A)"
+      }
+    },
     "recordLabel": "Récord",
     "triggerPoint": "Trigger point",
     "nTerapias": "Nº terapias",

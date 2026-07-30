@@ -23,7 +23,17 @@ export type Formato = {
   activo?: boolean;
 };
 
-// Documento ARMADO (print-ready) para una sesión.
+// Par etiqueta/valor del encabezado (layout "campos", p. ej. Vit C: FECHA, NOMBRE, RECORD, SESION, DOSIS).
+export type FormatoCampo = { clave: string; labelKey?: string | null; valor?: string | null; origen?: string };
+// Sección del documento: texto_libre (recuadro de N líneas para escribir a mano) o firmas (líneas a firmar).
+export type FormatoSeccion =
+  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; alto?: number }
+  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: string[] };
+// Pie del legacy: `{prefijo}{login||usuario} - {fechaHora}` (p. ej. "f-b/ usuario - 2026-07-30 16:17").
+export type FormatoPie = { prefijo?: string; usuario?: string; login?: string; fechaHora?: string } | null;
+
+// Documento ARMADO (print-ready) para una sesión. El `layout` es el discriminador:
+// "campos" = encabezado de pares etiqueta/valor (no rejilla); "tabla" = rejilla de columnas/filas.
 export type FormatoArmado = {
   clave: string;
   titulo: string;
@@ -32,9 +42,11 @@ export type FormatoArmado = {
   membrete?: { centro?: string } | null;
   paciente?: { nombre?: string | null; record?: string | null } | null;
   fecha?: string | null;
+  campos?: FormatoCampo[]; // layout "campos"
   columnas: FormatoColumna[];
   filas: FormatoFila[]; // filas (en blanco, una celda por columna) para llenar a mano
-  secciones?: unknown[];
+  secciones?: FormatoSeccion[]; // observaciones/firmas (en cualquier layout)
+  pie?: FormatoPie; // en TODOS los formatos
 };
 
 // GET /formatos?servicio=<clave> — lista de formatos del servicio (para el menú / admin).
