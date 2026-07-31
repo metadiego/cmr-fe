@@ -70,6 +70,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/centros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CentrosController_findAll_v1"];
+        put?: never;
+        post: operations["CentrosController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/centros/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["CentrosController_findOne_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/centros/{id}/datos-fiscales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Datos fiscales del centro para la impresión de factura (encabezado + pie). */
+        get: operations["CentrosController_datosFiscales_v1"];
+        /** Edita los datos fiscales/branding del centro (RBAC centro.fiscal.write). */
+        put: operations["CentrosController_updateDatosFiscales_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/permisos": {
         parameters: {
             query?: never;
@@ -289,56 +339,6 @@ export interface paths {
         put?: never;
         post: operations["StreamableHttpController_handlePostRequest"];
         delete: operations["StreamableHttpController_handleDeleteRequest"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/centros": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["CentrosController_findAll_v1"];
-        put?: never;
-        post: operations["CentrosController_create_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/centros/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["CentrosController_findOne_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/centros/{id}/datos-fiscales": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Datos fiscales del centro para la impresión de factura (encabezado + pie). */
-        get: operations["CentrosController_datosFiscales_v1"];
-        /** Edita los datos fiscales/branding del centro (RBAC centro.fiscal.write). */
-        put: operations["CentrosController_updateDatosFiscales_v1"];
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3712,6 +3712,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/servicios/por-clave/{clave}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edición "Todos los centros": aplica los cambios a la fila del servicio en
+         *     CADA centro (misma clave) y devuelve el diff por centro. `activo` queda
+         *     fuera (por centro). Declarada ANTES de `PUT :id` para que el router no la
+         *     capture como uuid.
+         */
+        put: operations["ServiciosController_updatePorClave_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/reportes/resumen": {
         parameters: {
             query?: never;
@@ -3941,7 +3963,8 @@ export interface paths {
         get: operations["FrontdeskController_get_v1"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Borra de verdad una sesión y su historial. 'cancelada' es un estado del negocio; esto es limpieza. No aplica a una sesión asistida (desasistir primero). */
+        delete: operations["FrontdeskController_eliminarSesion_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -3973,6 +3996,23 @@ export interface paths {
         };
         /** Historial de terapias de un paciente para un servicio (proyectado para el modal). */
         get: operations["FrontdeskController_historialPaciente_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{pacienteId}/compras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Compras del paciente: lo comprado en una fecha (celda del carrito) + el historial completo (modal). */
+        get: operations["FrontdeskController_comprasPaciente_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5511,6 +5551,79 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CreateCentroDto: {
+            nombre: string;
+            codigo: string;
+            direccion?: string;
+            activo?: boolean;
+        };
+        CentroEntity: {
+            nombre: string;
+            codigo: string;
+            direccion: string | null;
+            activo: boolean;
+            nombreLegal: string | null;
+            nombreComercial: string | null;
+            registroFiscal: string | null;
+            registroFiscalLabel: string | null;
+            telefono: string | null;
+            direccionFiscal: string | null;
+            zip: string | null;
+            web: string | null;
+            pieFactura: string | null;
+            piePresupuesto: string | null;
+            email: string | null;
+            logoUrl: string | null;
+            frontdeskAutopresente: boolean;
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DatosFiscalesDto: {
+            /** @description Razón social / nombre legal. */
+            nombreLegal: string | null;
+            /** @description Nombre comercial (DBA). */
+            nombreComercial: string | null;
+            /** @description Número de registro fiscal (tax id). */
+            registroFiscal: string | null;
+            /** @description Etiqueta del registro fiscal (p.ej. MN, RIF); default "MN". */
+            registroFiscalLabel: string;
+            /** @description Teléfono del centro. */
+            telefono: string | null;
+            /** @description Dirección fiscal (o la física de fallback). */
+            direccion: string | null;
+            /** @description Nombre de la sucursal (= nombre del centro). */
+            sucursal: string;
+            /** @description Pie de la FACTURA emitida (multilínea, bilingüe EN/ES). */
+            pieFactura: string | null;
+            /** @description Pie del PRESUPUESTO/borrador (multilínea, bilingüe EN/ES). El FE usa este mientras el documento NO es factura emitida. */
+            piePresupuesto: string | null;
+            /** @description Email del centro para la factura. */
+            email: string | null;
+            /** @description Web del centro. */
+            web: string | null;
+            /** @description URL del logo para el encabezado. */
+            logoUrl: string | null;
+            /** @description Enganche factura→frontdesk: true = al saldar una factura del mismo día, cada línea a_la_entrega entra automáticamente PRESENTE al tablero de su servicio. false = desconectado. Configurable por centro. */
+            frontdeskAutopresente: boolean;
+        };
+        UpdateDatosFiscalesDto: {
+            nombreLegal?: string;
+            nombreComercial?: string;
+            registroFiscal?: string;
+            registroFiscalLabel?: string;
+            telefono?: string;
+            direccionFiscal?: string;
+            zip?: string;
+            web?: string;
+            pieFactura?: string;
+            piePresupuesto?: string;
+            email?: string;
+            logoUrl?: string;
+            frontdeskAutopresente?: boolean;
+        };
         PermisoEntity: {
             clave: string;
             descripcion: string | null;
@@ -5617,79 +5730,6 @@ export interface components {
             visible?: boolean;
             /** Format: uuid */
             centroId?: string | null;
-        };
-        CreateCentroDto: {
-            nombre: string;
-            codigo: string;
-            direccion?: string;
-            activo?: boolean;
-        };
-        CentroEntity: {
-            nombre: string;
-            codigo: string;
-            direccion: string | null;
-            activo: boolean;
-            nombreLegal: string | null;
-            nombreComercial: string | null;
-            registroFiscal: string | null;
-            registroFiscalLabel: string | null;
-            telefono: string | null;
-            direccionFiscal: string | null;
-            zip: string | null;
-            web: string | null;
-            pieFactura: string | null;
-            piePresupuesto: string | null;
-            email: string | null;
-            logoUrl: string | null;
-            frontdeskAutopresente: boolean;
-            id: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        DatosFiscalesDto: {
-            /** @description Razón social / nombre legal. */
-            nombreLegal: string | null;
-            /** @description Nombre comercial (DBA). */
-            nombreComercial: string | null;
-            /** @description Número de registro fiscal (tax id). */
-            registroFiscal: string | null;
-            /** @description Etiqueta del registro fiscal (p.ej. MN, RIF); default "MN". */
-            registroFiscalLabel: string;
-            /** @description Teléfono del centro. */
-            telefono: string | null;
-            /** @description Dirección fiscal (o la física de fallback). */
-            direccion: string | null;
-            /** @description Nombre de la sucursal (= nombre del centro). */
-            sucursal: string;
-            /** @description Pie de la FACTURA emitida (multilínea, bilingüe EN/ES). */
-            pieFactura: string | null;
-            /** @description Pie del PRESUPUESTO/borrador (multilínea, bilingüe EN/ES). El FE usa este mientras el documento NO es factura emitida. */
-            piePresupuesto: string | null;
-            /** @description Email del centro para la factura. */
-            email: string | null;
-            /** @description Web del centro. */
-            web: string | null;
-            /** @description URL del logo para el encabezado. */
-            logoUrl: string | null;
-            /** @description Enganche factura→frontdesk: true = al saldar una factura del mismo día, cada línea a_la_entrega entra automáticamente PRESENTE al tablero de su servicio. false = desconectado. Configurable por centro. */
-            frontdeskAutopresente: boolean;
-        };
-        UpdateDatosFiscalesDto: {
-            nombreLegal?: string;
-            nombreComercial?: string;
-            registroFiscal?: string;
-            registroFiscalLabel?: string;
-            telefono?: string;
-            direccionFiscal?: string;
-            zip?: string;
-            web?: string;
-            pieFactura?: string;
-            piePresupuesto?: string;
-            email?: string;
-            logoUrl?: string;
-            frontdeskAutopresente?: boolean;
         };
         UpsertPreferenceDto: {
             config: Record<string, never>;
@@ -8179,6 +8219,26 @@ export interface components {
              */
             consumoPaquetes?: "fila" | "simultaneo";
         };
+        UpdateServicioPorClaveDto: {
+            nombre?: string;
+            color?: string | null;
+            icon?: string | null;
+            orden?: number;
+            /** Format: uuid */
+            grupoFacturacionId?: string | null;
+            /** Format: uuid */
+            productoId?: string | null;
+            codigo?: string | null;
+            requiereTecnico?: boolean;
+            requiereEnfermera?: boolean;
+            badge?: boolean;
+            formAcciones?: Record<string, never> | null;
+            /**
+             * @description Cómo consume el asistido (dato, no código): ver docs/specs/consumo-paquetes-simultaneo.md.
+             * @enum {string}
+             */
+            consumoPaquetes?: "fila" | "simultaneo";
+        };
         UpdateServicioDto: {
             nombre?: string;
             color?: string;
@@ -8469,6 +8529,7 @@ export interface components {
             layout: string;
             columnas: Record<string, never>[] | null;
             filas: number;
+            campos: Record<string, never>[] | null;
             secciones: Record<string, never>[] | null;
             membrete: boolean;
             orden: number;
@@ -8487,9 +8548,35 @@ export interface components {
             /** @description i18n: el FE traduce el encabezado impreso. */
             labelKey: string;
         };
+        CampoFormatoDto: {
+            /**
+             * @description Origen del valor: paciente.nombre | paciente.record | sesion.fecha | sesion.sesiones (X/Y) | sesion.dosis (producto aplicado).
+             * @enum {string}
+             */
+            origen?: "paciente.nombre" | "paciente.record" | "sesion.fecha" | "sesion.sesiones" | "sesion.dosis";
+            clave: string;
+            labelKey: string;
+        };
+        SeccionFormatoDto: {
+            /**
+             * @description 'texto_libre' = área en blanco para escribir (OBSERVACIONES); 'firmas' = líneas de firma.
+             * @enum {string}
+             */
+            tipo?: "texto_libre" | "firmas";
+            /** @description Alto del área en líneas (solo texto_libre). */
+            alto?: number;
+            /** @description Claves i18n de cada línea de firma (solo tipo firmas). */
+            lineas?: string[];
+            clave: string;
+            labelKey: string;
+        };
         CreateFormatoDto: {
+            /** @description Rejilla; null/omitido en un formato de solo campos. */
+            columnas?: components["schemas"]["ColumnaFormatoDto"][] | null;
             /** @description Filas en blanco a imprimir bajo el encabezado. */
             filas?: number;
+            /** @description Campos del encabezado del documento. */
+            campos?: components["schemas"]["CampoFormatoDto"][];
             clave: string;
             labelKey: string;
             /** @description Texto IMPRESO en el documento (no es de la UI). */
@@ -8497,20 +8584,22 @@ export interface components {
             servicioClave: string;
             /** @enum {string} */
             layout?: "tabla" | "campos";
-            columnas?: components["schemas"]["ColumnaFormatoDto"][];
-            secciones?: Record<string, never>[];
+            secciones?: components["schemas"]["SeccionFormatoDto"][];
             membrete?: boolean;
             orden?: number;
         };
         UpdateFormatoDto: {
+            /** @description Rejilla; null/omitido en un formato de solo campos. */
+            columnas?: components["schemas"]["ColumnaFormatoDto"][] | null;
+            /** @description Campos del encabezado del documento. */
+            campos?: components["schemas"]["CampoFormatoDto"][];
             labelKey?: string;
             titulo?: string;
             servicioClave?: string;
             /** @enum {string} */
             layout?: "tabla" | "campos";
-            columnas?: components["schemas"]["ColumnaFormatoDto"][];
             filas?: number;
-            secciones?: Record<string, never>[];
+            secciones?: components["schemas"]["SeccionFormatoDto"][];
             membrete?: boolean;
             orden?: number;
             activo?: boolean;
@@ -9367,6 +9456,115 @@ export interface operations {
             };
         };
     };
+    CentrosController_findAll_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"][];
+                };
+            };
+        };
+    };
+    CentrosController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCentroDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"];
+                };
+            };
+        };
+    };
+    CentrosController_findOne_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"];
+                };
+            };
+        };
+    };
+    CentrosController_datosFiscales_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatosFiscalesDto"];
+                };
+            };
+        };
+    };
+    CentrosController_updateDatosFiscales_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDatosFiscalesDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatosFiscalesDto"];
+                };
+            };
+        };
+    };
     RbacController_permisos_v1: {
         parameters: {
             query?: never;
@@ -9790,115 +9988,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    CentrosController_findAll_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"][];
-                };
-            };
-        };
-    };
-    CentrosController_create_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCentroDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"];
-                };
-            };
-        };
-    };
-    CentrosController_findOne_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"];
-                };
-            };
-        };
-    };
-    CentrosController_datosFiscales_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DatosFiscalesDto"];
-                };
-            };
-        };
-    };
-    CentrosController_updateDatosFiscales_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateDatosFiscalesDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DatosFiscalesDto"];
-                };
             };
         };
     };
@@ -16257,6 +16346,29 @@ export interface operations {
             };
         };
     };
+    ServiciosController_updatePorClave_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                clave: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateServicioPorClaveDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     FrontdeskController_repResumen_v1: {
         parameters: {
             query: {
@@ -16613,6 +16725,25 @@ export interface operations {
             };
         };
     };
+    FrontdeskController_eliminarSesion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     FrontdeskController_agendaPaciente_v1: {
         parameters: {
             query?: {
@@ -16656,6 +16787,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    FrontdeskController_comprasPaciente_v1: {
+        parameters: {
+            query?: {
+                /** @description Acota al grupo de facturación de este servicio (el carrito de láser no muestra sueroterapia). */
+                servicioId?: string;
+                /** @description Día del TABLERO (YYYY-MM-DD), no "hoy": define lo comprado ESE día. Sin él solo viene el historial. */
+                fecha?: string;
+            };
+            header?: never;
+            path: {
+                pacienteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

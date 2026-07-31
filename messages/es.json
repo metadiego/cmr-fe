@@ -1901,7 +1901,21 @@
       "requiereEnfermera": "Requiere enfermera",
       "badge": "Mostrar contador",
       "activo": "Activo"
-    }
+    },
+    "centro": {
+      "todos": "Todos los centros"
+    },
+    "helpTodos": "Editas la MISMA clave de servicio en todos los centros a la vez. 'Activo' es por centro (no se edita aquí). Los campos que difieren muestran '≠ por centro'.",
+    "difPorCentro": "≠ por centro",
+    "activoPorCentro": "por centro",
+    "editTitleTodos": "Editar servicio (todos los centros)",
+    "formHelpTodos": "Los cambios se aplican a esta clave en TODOS los centros. 'Activo' no se toca aquí (es por centro).",
+    "aplicarTodos": "Aplicar a todos",
+    "multiConfirmTitle": "Aplicar a todos los centros",
+    "multiConfirmBody": "Se aplicará a {n} centros: {centros}.",
+    "multiConfirmOk": "Sí, aplicar",
+    "multiAplicado": "Aplicado en {n} centro(s)",
+    "multiSinCambios": "Sin cambios (todos los centros ya estaban iguales)"
   },
   "transferencias": {
     "title": "Transferencias",
