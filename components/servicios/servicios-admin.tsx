@@ -19,8 +19,10 @@ import {
 } from "@/lib/api/servicios";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { payloadBulkDirty } from "@/lib/servicios/bulk-diff";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { useMe, isAdmin } from "@/hooks/use-me";
 import {
   Select,
   SelectContent,
@@ -116,7 +118,10 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
   const t = useTranslations("servicios");
   const tc = useTranslations("common");
   const { can } = useCan();
-  const puedeMulti = can("servicios.multicentro");
+  const meState = useMe();
+  // Espejo del contrato BE: rol admin + permiso fino (con solo el perm, el BE responde 403).
+  const puedeMulti =
+    can("servicios.multicentro") && meState.kind === "ok" && isAdmin(meState.me);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
   const centros = React.useMemo(
@@ -125,21 +130,29 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
   );
   const [centroSel, setCentroSel] = React.useState("");
   const esTodos = centroSel === TODOS && puedeMulti;
-  const centro = esTodos ? "" : centroSel || centros[0]?.id || "";
+  // El sentinela __todos__ JAMÁS puede caer como id de centro (se enviaría como X-Tenant-ID).
+  const centro =
+    centroSel === TODOS ? (esTodos ? "" : centros[0]?.id || "") : centroSel || centros[0]?.id || "";
 
   // Config = ver TODOS (incl. apagados). En "Todos" se une la lista de cada centro por clave.
   const { state, reload } = useResource<FilaServicio[]>(
     async () => {
       if (esTodos) {
         if (!centros.length) return [];
-        const listas = await Promise.all(
+        const resultados = await Promise.all(
           centros.map((c) =>
             getServicios(c.id, { includeInactive: true })
-              .then((ss) => ({ centro: c, ss }))
-              .catch(() => ({ centro: c, ss: [] as Servicio[] })),
+              .then((ss) => ({ centro: c, ss, ok: true }))
+              .catch(() => ({ centro: c, ss: [] as Servicio[], ok: false })),
           ),
         );
-        return unir(listas);
+        // Un centro que no cargó NO desaparece en silencio: se avisa (la unión quedaría incompleta
+        // y un guardado bulk igual tocaría ese centro en el BE).
+        const fallidos = resultados.filter((r) => !r.ok).map((r) => r.centro.nombre);
+        if (fallidos.length > 0) {
+          toast.warning(t("cargaParcial", { centros: fallidos.join(", ") }));
+        }
+        return unir(resultados);
       }
       if (!centro) return [];
       const uno = centros.find((c) => c.id === centro) ?? ({ id: centro, nombre: "" } as Centro);
@@ -367,37 +380,44 @@ function ServicioForm({
   const editandoTodos = isEdit && esTodos; // editar la clave en todos los centros
 
   const [form, setForm] = React.useState<FormState>(EMPTY);
+  const [inicial, setInicial] = React.useState<FormState>(EMPTY);
   const [claveTouched, setClaveTouched] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [prevId, setPrevId] = React.useState<string | undefined>(undefined);
-  if (open && servicio?.id !== prevId) {
+  const [prevOpen, setPrevOpen] = React.useState(false);
+  // Re-sync en CADA apertura (no solo al cambiar de id): una edición cancelada
+  // no puede reaparecer y colarse a todos los centros con "Aplicar a todos".
+  if (open && (!prevOpen || servicio?.id !== prevId)) {
     setPrevId(servicio?.id);
     setClaveTouched(!!servicio);
-    setForm(
-      servicio
-        ? {
-            clave: servicio.clave,
-            nombre: servicio.nombre,
-            color: servicio.color ?? "#3b82f6",
-            orden: servicio.orden != null ? String(servicio.orden) : "",
-            grupoFacturacionId: servicio.grupoFacturacionId ?? "",
-            productoId: servicio.productoId ?? "",
-            requiereTecnico: servicio.requiereTecnico,
-            requiereEnfermera: servicio.requiereEnfermera,
-            badge: servicio.badge,
-            activo: servicio.activo,
-          }
-        : EMPTY,
-    );
+    const inicialForm: FormState = servicio
+      ? {
+          clave: servicio.clave,
+          nombre: servicio.nombre,
+          color: servicio.color ?? "#3b82f6",
+          orden: servicio.orden != null ? String(servicio.orden) : "",
+          grupoFacturacionId: servicio.grupoFacturacionId ?? "",
+          productoId: servicio.productoId ?? "",
+          requiereTecnico: servicio.requiereTecnico,
+          requiereEnfermera: servicio.requiereEnfermera,
+          badge: servicio.badge,
+          activo: servicio.activo,
+        }
+      : EMPTY;
+    setForm(inicialForm);
+    setInicial(inicialForm);
   }
+  if (open !== prevOpen) setPrevOpen(open);
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((p) => ({ ...p, [k]: v }));
   }
 
   const claveEff = isEdit || claveTouched ? form.clave : slugify(form.nombre);
-  const canSubmit = form.nombre.trim().length > 0 && claveEff.trim().length > 0 && !submitting;
+  const ordenValido = !form.orden.trim() || Number.isFinite(Number(form.orden));
+  const canSubmit =
+    form.nombre.trim().length > 0 && claveEff.trim().length > 0 && ordenValido && !submitting;
 
   // Payload común (sin activo ni clave) para editar la fila (un centro o multicentro).
   function payloadComun() {
@@ -451,11 +471,24 @@ function ServicioForm({
 
   // Multicentro: usa el endpoint CORRECTO por-clave (no itera updateServicio). Confirmación previa
   // con los centros afectados; luego toast con el resumen del diff que devuelve el BE.
+  // SOLO viajan los campos que el usuario CAMBIÓ (dirty vs `inicial`): cambiar el color no arrastra
+  // nombre/orden/grupo del centro representativo a los demás. Ver lib/servicios/bulk-diff.ts.
   async function guardarTodos() {
     if (!servicio) return;
+    const payload = payloadBulkDirty(inicial, form);
+    if (Object.keys(payload).length === 0) {
+      toast.success(t("multiSinCambios"));
+      setConfirmOpen(false);
+      onOpenChange(false);
+      return;
+    }
     setSubmitting(true);
     try {
-      const res = await updateServicioPorClave(servicio.clave, payloadComun() as UpdateServicioPorClavePayload, centro || undefined);
+      const res = await updateServicioPorClave(
+        servicio.clave,
+        payload as UpdateServicioPorClavePayload,
+        centro || undefined,
+      );
       const conCambios = res.actualizados.filter((a) => Object.keys(a.cambios).length > 0).length;
       toast.success(conCambios > 0 ? t("multiAplicado", { n: conCambios }) : t("multiSinCambios"));
       setConfirmOpen(false);
@@ -475,7 +508,10 @@ function ServicioForm({
     return void guardarAlta();
   }
 
-  const nombresCentros = centros.map((c) => c.nombre).join(", ");
+  // El alcance REAL del bulk: los centros donde la clave EXISTE (fila.entradas),
+  // no todos mis centros — el BE actualiza solo filas con esa clave.
+  const afectados = editandoTodos && fila?.entradas?.length ? fila.entradas.map((e) => e.centro) : centros;
+  const nombresCentros = afectados.map((c) => c.nombre).filter(Boolean).join(", ");
 
   return (
     <>
@@ -540,7 +576,7 @@ function ServicioForm({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("multiConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("multiConfirmBody", { n: centros.length, centros: nombresCentros })}
+              {t("multiConfirmBody", { n: afectados.length, centros: nombresCentros })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
