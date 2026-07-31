@@ -13,6 +13,34 @@ function asArray<T>(res: unknown): T[] {
 
 export type CreateServicioPayload = components["schemas"]["CreateServicioDto"];
 export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"];
+export type UpdateServicioPorClavePayload = components["schemas"]["UpdateServicioPorClaveDto"];
+
+// Diff por centro que devuelve la edición "Todos los centros" (BE 2026-07-30). El BE aplica los
+// cambios a la fila del servicio de CADA centro (misma clave) y devuelve, por centro, qué cambió.
+export interface ServicioActualizadoPorCentro {
+  id: string;
+  clinicId: string | null;
+  cambios: Record<string, { antes: unknown; despues: unknown }>;
+}
+export interface UpdateServicioPorClaveResult {
+  clave: string;
+  actualizados: ServicioActualizadoPorCentro[];
+}
+
+// Edición MULTICENTRO por clave — endpoint CORRECTO para "Todos los centros" (NO iterar updateServicio
+// por centro). `activo` NO va aquí (encender/apagar es por centro). RBAC: admin / servicios.multicentro
+// (el BE es la autoridad). PUT /api/v1/servicios/por-clave/:clave.
+export function updateServicioPorClave(
+  clave: string,
+  payload: UpdateServicioPorClavePayload,
+  centroId?: string,
+): Promise<UpdateServicioPorClaveResult> {
+  return apiFetch<UpdateServicioPorClaveResult>(
+    `/servicios/por-clave/${encodeURIComponent(clave)}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
 
 // Columnas POR SERVICIO (cada pestaña del Frontdesk tiene las suyas — no se aplican a todos):
 // GET = columnas efectivas del servicio (resueltas); POST = componer una columna del catálogo en ESTE

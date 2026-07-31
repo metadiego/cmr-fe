@@ -1901,7 +1901,21 @@
       "requiereEnfermera": "Requires nurse",
       "badge": "Show counter",
       "activo": "Active"
-    }
+    },
+    "centro": {
+      "todos": "All centers"
+    },
+    "helpTodos": "You edit the SAME service key across all centers at once. 'Active' is per center (not edited here). Fields that differ show '≠ per center'.",
+    "difPorCentro": "≠ per center",
+    "activoPorCentro": "per center",
+    "editTitleTodos": "Edit service (all centers)",
+    "formHelpTodos": "Changes apply to this key in ALL centers. 'Active' is not touched here (it's per center).",
+    "aplicarTodos": "Apply to all",
+    "multiConfirmTitle": "Apply to all centers",
+    "multiConfirmBody": "Will apply to {n} centers: {centros}.",
+    "multiConfirmOk": "Yes, apply",
+    "multiAplicado": "Applied to {n} center(s)",
+    "multiSinCambios": "No changes (all centers were already the same)"
   },
   "transferencias": {
     "title": "Transfers",
