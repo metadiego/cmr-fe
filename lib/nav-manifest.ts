@@ -14,9 +14,8 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/citas", labelKey: "nav.citas" },
   { path: "/citas/agenda/cupos", labelKey: "nav.cupos" },
   { path: "/citas/config/columnas", labelKey: "nav.columnasCitas" },
-  { path: "/tablero/frontdesk", labelKey: "nav.frontdesk" },
-  // "Atención" lo sirve el BE (clave atencion → /tablero/atencion). NO declarar aquí `/tablero/citas`
-  // (tablero inexistente) ni `/atencion` (alias): duplicaban el ítem "Atención" en el menú.
+  // "Frontdesk" (/tablero/frontdesk) y "Atención" (/tablero/atencion) los sirve el BE en /me/menu; NO se
+  // declaran aquí. Tampoco `/tablero/citas` (tablero inexistente) ni `/atencion` (alias): duplicaban ítems.
   // Clientes
   { path: "/clientes", labelKey: "nav.clientes" },
   // Comunicaciones
@@ -44,7 +43,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/inventario/transferencias", labelKey: "nav.transferencias" },
   // Precios / Servicios
   { path: "/precios", labelKey: "nav.precios" },
-  { path: "/servicios", labelKey: "nav.servicios" },
+  { path: "/servicios", labelKey: "nav.servicios_config" },
   // Configuración / Admin
   { path: "/panel/enfermeria", labelKey: "nav.panelEnfermeria" },
   { path: "/configuracion/factura", labelKey: "nav.configFactura" },
