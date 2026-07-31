@@ -229,3 +229,8 @@
     margin: 10mm;
   }
 }
+/* Bloques SOLO para impresión (membrete/pie de reportes): ocultos en pantalla; la ventana de impresión de
+   cada reporte los muestra con su propio CSS. Ver estadísticas de servicios. */
+.solo-print {
+  display: none;
+}

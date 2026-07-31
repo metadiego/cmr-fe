@@ -630,7 +630,8 @@
     "gruposFacturacion": "Grupos de facturación",
     "panelEnfermeria": "Panel de Enfermería",
     "requeridos": "Campos requeridos",
-    "configFormatos": "Formatos de terapia"
+    "configFormatos": "Formatos de terapia",
+    "estadisticas_servicios": "Estadísticas de Servicios"
   },
   "admin": {
     "title": "Administración",
@@ -985,6 +986,34 @@
       "prescripcion": {
         "desc": "Muestra la grilla de prescripción dentro del modal de atención."
       }
+    }
+  },
+  "estadisticasServicios": {
+    "title": "Estadísticas de Servicios",
+    "help": "Participaciones del personal por servicio en el periodo. Elige el rango y pulsa Generar.",
+    "from": "Desde",
+    "to": "Hasta",
+    "generate": "Generar",
+    "exportCsv": "Exportar CSV",
+    "general": "General",
+    "empresa": "Centro de Medicina Regenerativa",
+    "impresoPor": "Impreso por",
+    "sinDatos": "Sin datos en el periodo.",
+    "sinRoles": "Sin roles registrados en el periodo (solo resumen).",
+    "totSesiones": "Sesiones",
+    "totPacientes": "Pacientes",
+    "totParticipaciones": "Participaciones",
+    "totServicios": "Servicios activos",
+    "colNombre": "Nombre",
+    "colTotal": "Total",
+    "colParticipaciones": "Participaciones",
+    "colPacientes": "Pacientes",
+    "resumenServicio": "{sesiones} sesiones · {participaciones} participaciones · {pacientes} pacientes",
+    "participacionesDivisor": "{n} participaciones",
+    "rol": {
+      "enfermera": "Enfermería",
+      "tecnico": "Técnico",
+      "medico": "Médico"
     }
   },
   "frontdesk": {

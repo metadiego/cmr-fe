@@ -630,7 +630,8 @@
     "gruposFacturacion": "Billing groups",
     "panelEnfermeria": "Nursing panel",
     "requeridos": "Required fields",
-    "configFormatos": "Therapy formats"
+    "configFormatos": "Therapy formats",
+    "estadisticas_servicios": "Service Statistics"
   },
   "admin": {
     "title": "Administration",
@@ -985,6 +986,34 @@
       "prescripcion": {
         "desc": "Show the prescription grid inside the attention modal."
       }
+    }
+  },
+  "estadisticasServicios": {
+    "title": "Service Statistics",
+    "help": "Staff participations per service in the period. Pick the range and press Generate.",
+    "from": "From",
+    "to": "To",
+    "generate": "Generate",
+    "exportCsv": "Export CSV",
+    "general": "General",
+    "empresa": "Centro de Medicina Regenerativa",
+    "impresoPor": "Printed by",
+    "sinDatos": "No data in the period.",
+    "sinRoles": "No roles recorded in the period (summary only).",
+    "totSesiones": "Sessions",
+    "totPacientes": "Patients",
+    "totParticipaciones": "Participations",
+    "totServicios": "Active services",
+    "colNombre": "Name",
+    "colTotal": "Total",
+    "colParticipaciones": "Participations",
+    "colPacientes": "Patients",
+    "resumenServicio": "{sesiones} sessions · {participaciones} participations · {pacientes} patients",
+    "participacionesDivisor": "{n} participations",
+    "rol": {
+      "enfermera": "Nursing",
+      "tecnico": "Technician",
+      "medico": "Physician"
     }
   },
   "frontdesk": {
