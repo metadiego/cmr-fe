@@ -1944,7 +1944,8 @@
     "multiConfirmBody": "Will apply to {n} centers: {centros}.",
     "multiConfirmOk": "Yes, apply",
     "multiAplicado": "Applied to {n} center(s)",
-    "multiSinCambios": "No changes (all centers were already the same)"
+    "multiSinCambios": "No changes (all centers were already the same)",
+    "cargaParcial": "Could not load services from: {centros}. The view may be incomplete."
   },
   "transferencias": {
     "title": "Transfers",

@@ -1944,7 +1944,8 @@
     "multiConfirmBody": "Se aplicará a {n} centros: {centros}.",
     "multiConfirmOk": "Sí, aplicar",
     "multiAplicado": "Aplicado en {n} centro(s)",
-    "multiSinCambios": "Sin cambios (todos los centros ya estaban iguales)"
+    "multiSinCambios": "Sin cambios (todos los centros ya estaban iguales)",
+    "cargaParcial": "No se pudieron cargar los servicios de: {centros}. La vista puede estar incompleta."
   },
   "transferencias": {
     "title": "Transferencias",
