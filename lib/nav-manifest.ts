@@ -14,9 +14,9 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/citas", labelKey: "nav.citas" },
   { path: "/citas/agenda/cupos", labelKey: "nav.cupos" },
   { path: "/citas/config/columnas", labelKey: "nav.columnasCitas" },
-  { path: "/tablero/citas", labelKey: "nav.tableroCitas" },
   { path: "/tablero/frontdesk", labelKey: "nav.frontdesk" },
-  { path: "/atencion", labelKey: "nav.atencion" },
+  // "Atención" lo sirve el BE (clave atencion → /tablero/atencion). NO declarar aquí `/tablero/citas`
+  // (tablero inexistente) ni `/atencion` (alias): duplicaban el ítem "Atención" en el menú.
   // Clientes
   { path: "/clientes", labelKey: "nav.clientes" },
   // Comunicaciones

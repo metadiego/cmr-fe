@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
-// Back-compat alias: Atención al Paciente = the "citas" vertical of the generic
-// board. Once the BE menu points to /tablero/citas this alias is unused.
+// Alias de retrocompatibilidad: el vertical de Atención al Paciente vive en /tablero/atencion (clave
+// `atencion` del motor de tableros, que es lo que sirve el menú del BE). Esta ruta /atencion ya NO
+// aparece en el menú (se quitó del manifiesto); se conserva solo por si alguien tiene la URL guardada,
+// redirigiendo al destino correcto. Antes redirigía a /tablero/citas, un tablero que no existe.
 export default function AtencionPage() {
-  redirect("/tablero/citas");
+  redirect("/tablero/atencion");
 }
