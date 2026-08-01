@@ -36,37 +36,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-// Árbol del menú del BE anidado por `parentClave` (soporta 3–4 niveles). El BE ya devuelve los
-// ítems ordenados por `orden`, así que preservamos el orden de llegada. `path "#"`/null = contenedor.
-type MenuNode = {
-  clave: string;
-  labelKey: string;
-  path: string;
-  children: MenuNode[];
-};
-function buildMenuTree(
-  items: { clave: string; labelKey: string; path: string; parentClave?: string | null }[],
-): MenuNode[] {
-  const byClave = new Map<string, MenuNode>();
-  for (const i of items) {
-    byClave.set(i.clave, { clave: i.clave, labelKey: i.labelKey, path: i.path, children: [] });
-  }
-  const roots: MenuNode[] = [];
-  for (const i of items) {
-    const node = byClave.get(i.clave)!;
-    const parent = i.parentClave ? byClave.get(i.parentClave) : undefined;
-    if (parent) parent.children.push(node);
-    else roots.push(node);
-  }
-  return roots;
-}
 
 function Brand({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -153,58 +124,6 @@ export function SiteHeader() {
       items: allItems.filter((m) => !hasPage(m.path)),
     },
   ].filter((g) => g.items.length > 0);
-  // Grupos de dominio del BE (Entrega A del handoff Menú-Grupos): raíces `g-*` de /me/menu con sus
-  // hijos anidados por `parentClave`. SE SUMAN a los dos menús de desarrollo (que quedan tal cual).
-  // 100% data-driven: si el BE no envía raíces `g-*`, no se pinta nada extra (sin regresión).
-  const domainGroups = buildMenuTree(menu).filter((r) => r.clave.startsWith("g-"));
-  const nodeActive = (n: MenuNode): boolean =>
-    (!!n.path && n.path !== "#" && isActive(pathname, n.path)) || n.children.some(nodeActive);
-  // Ítems del dropdown de escritorio, recursivo: hoja = enlace; rama = submenú (soporta 3–4 niveles).
-  const renderDesktopNodes = (nodes: MenuNode[]): React.ReactNode =>
-    nodes.map((n) =>
-      n.children.length > 0 ? (
-        <DropdownMenuSub key={n.clave}>
-          <DropdownMenuSubTrigger>{tRoot(n.labelKey)}</DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="max-h-[70vh] overflow-y-auto">
-            {renderDesktopNodes(n.children)}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-      ) : (
-        <DropdownMenuItem key={n.clave} asChild>
-          <Link href={n.path}>{tRoot(n.labelKey)}</Link>
-        </DropdownMenuItem>
-      ),
-    );
-  // Ítems del menú móvil (acordeón), recursivo: indentación por nivel; rama = encabezado + hijos.
-  const renderMobileNodes = (nodes: MenuNode[], level = 0): React.ReactNode =>
-    nodes.map((n) =>
-      n.children.length > 0 ? (
-        <div key={n.clave} className="flex flex-col gap-0.5">
-          <span
-            className="px-3 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
-            style={{ marginLeft: level * 12 }}
-          >
-            {tRoot(n.labelKey)}
-          </span>
-          {renderMobileNodes(n.children, level + 1)}
-        </div>
-      ) : (
-        <Link
-          key={n.clave}
-          href={n.path}
-          onClick={() => setOpen(false)}
-          style={{ marginLeft: (level + 1) * 12 }}
-          className={cn(
-            "rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
-            isActive(pathname, n.path)
-              ? "bg-accent text-accent-foreground"
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-          )}
-        >
-          {tRoot(n.labelKey)}
-        </Link>
-      ),
-    );
   // Session for the header (email + sign out). Anonymous → shows "sign in".
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
@@ -242,14 +161,6 @@ export function SiteHeader() {
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
-              {domainGroups.map((g) => (
-                <div key={g.clave} className="flex flex-col gap-0.5">
-                  <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tRoot(g.labelKey)}
-                  </span>
-                  {renderMobileNodes(g.children, 1)}
-                </div>
-              ))}
               {grupos.map((g) => (
                 <div key={g.clave} className="flex flex-col gap-0.5">
                   <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -307,28 +218,6 @@ export function SiteHeader() {
             can be registered, so the row scrolls horizontally instead of
             clipping items off the right edge. */}
         <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {domainGroups.map((g) => {
-            const active = nodeActive(g);
-            return (
-              <DropdownMenu key={g.clave}>
-                <DropdownMenuTrigger
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
-                    active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {tRoot(g.labelKey)}
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
-                  <DropdownMenuLabel>{tRoot(g.labelKey)}</DropdownMenuLabel>
-                  {renderDesktopNodes(g.children)}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          })}
           {grupos.map((g) => {
             const active = g.items.some((c) => isActive(pathname, c.path));
             return (

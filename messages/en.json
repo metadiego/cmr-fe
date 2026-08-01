@@ -584,14 +584,6 @@
     "frontdesk": "Frontdesk",
     "en_desarrollo": "In development",
     "por_desarrollar": "To be developed",
-    "grupo": {
-      "agenda": "Scheduling & patients",
-      "facturacion": "Billing & register",
-      "servicios": "Services",
-      "inventario": "Inventory",
-      "configuracion": "Settings",
-      "monitoreo": "Monitoring"
-    },
     "cupos": "Slots",
     "columnas": "Board columns",
     "mis_tableros": "My boards",

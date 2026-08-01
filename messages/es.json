@@ -584,14 +584,6 @@
     "frontdesk": "Frontdesk",
     "en_desarrollo": "En desarrollo",
     "por_desarrollar": "Por desarrollar",
-    "grupo": {
-      "agenda": "Agenda y pacientes",
-      "facturacion": "Facturación y caja",
-      "servicios": "Servicios",
-      "inventario": "Inventario",
-      "configuracion": "Configuración",
-      "monitoreo": "Monitoreo"
-    },
     "cupos": "Cupos",
     "columnas": "Columnas del tablero",
     "mis_tableros": "Mis tableros",
