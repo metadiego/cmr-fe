@@ -43,3 +43,20 @@ Toggles de notificaciones por canal/tipo, data-driven:
 3) Notificaciones (#3) y Avatar (#4) — cuando haya espacio.
 
 Gracias 🙏 — con esto el menú del avatar queda completo y todo data-driven.
+
+---
+
+## Respuesta BE (2026-07-31)
+
+1. **Nombre — HECHO (cmr-be PR #221, en prod).** `GET /auth/me` ahora trae `nombre` y `apellido`
+   (del perfil; `null` → sigan cayendo al email). OJO: si el login no tiene perfil enlazado
+   (`perfilId: null`, p. ej. cuentas master por app_metadata), ambos llegan `null`.
+2. **Preferencias — YA EXISTÍA (no se duplica).** `GET /me/preferences` devuelve la config
+   efectiva por capas y `PUT /me/preferences` guarda la capa del USUARIO (body
+   `{ config: { ... } }`, JSON libre). Persistan `theme` y `locale` como claves de ese config y
+   quedan atados al usuario multi-dispositivo. No hay endpoint de opciones: los valores válidos
+   los define el FE (si de verdad lo necesitan como dato, pídanlo y lo agregamos).
+3. **Notificaciones — PLANIFICADO.** No existe aún catálogo de ajustes por usuario; queda
+   registrado para una próxima entrega (tabla + GET/PUT data-driven como pidieron).
+4. **Avatar — YA EXISTÍA.** `PUT /me/avatar` está implementado (ver `me-avatar.controller` y su
+   spec); `avatarUrl` ya viaja en `/auth/me`.
