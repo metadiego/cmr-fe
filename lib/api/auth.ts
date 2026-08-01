@@ -16,6 +16,10 @@ export interface Me {
   // callcenterId on create and actorId on reschedule for the audit trail.
   personalId?: string | null;
   email: string | null;
+  // Nombre/apellido del perfil enlazado (cmr-be PR #221). null si el login no tiene perfil
+  // (p. ej. cuentas master por app_metadata) → el FE cae al email.
+  nombre?: string | null;
+  apellido?: string | null;
   estado: PerfilEstado | null;
   roles: string[];
   permissions: string[];
