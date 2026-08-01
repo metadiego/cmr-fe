@@ -10,7 +10,7 @@ import {
   ArrowDown01Icon,
 } from "@hugeicons/core-free-icons";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import { isActive } from "@/lib/nav";
@@ -205,6 +205,89 @@ export function SiteHeader() {
         </Link>
       ),
     );
+  // Barra superior unificada: guía de desarrollo (primero) + grupos de dominio. La barra MIDE el
+  // ancho disponible y las opciones que no caben se colapsan en "Más" — nada se corta ni se oculta.
+  const locale = useLocale();
+  type TopItem = {
+    key: string;
+    labelKey: string;
+    active: boolean;
+    kind: "dev" | "domain";
+    devItems?: { clave: string; labelKey: string; path: string }[];
+    node?: MenuNode;
+  };
+  const topItems: TopItem[] = [
+    ...grupos.map((g) => ({
+      key: g.clave,
+      labelKey: g.labelKey,
+      active: g.items.some((c) => isActive(pathname, c.path)),
+      kind: "dev" as const,
+      devItems: g.items,
+    })),
+    ...domainGroups.map((g) => ({
+      key: g.clave,
+      labelKey: g.labelKey,
+      active: nodeActive(g),
+      kind: "domain" as const,
+      node: g,
+    })),
+  ];
+  const triggerCls = (active: boolean) =>
+    cn(
+      "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
+      active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+    );
+  // Contenido del dropdown de un ítem superior (reutilizado inline y dentro de "Más").
+  const renderTopContent = (it: TopItem): React.ReactNode =>
+    it.kind === "dev" ? (
+      it.devItems!.map((c) => (
+        <DropdownMenuItem key={c.clave} asChild>
+          <Link href={c.path}>{tRoot(c.labelKey)}</Link>
+        </DropdownMenuItem>
+      ))
+    ) : (
+      <>
+        <DropdownMenuLabel>{tRoot(it.labelKey)}</DropdownMenuLabel>
+        {renderDesktopNodes(it.node!.children)}
+      </>
+    );
+  // Medición del ancho: cuántos ítems caben; el resto va a "Más". Recalcula al cambiar ancho/ítems/idioma.
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const measRef = React.useRef<HTMLDivElement>(null);
+  const [fit, setFit] = React.useState(topItems.length);
+  const topKeys = topItems.map((i) => i.key).join("|");
+  React.useLayoutEffect(() => {
+    const bar = barRef.current;
+    const meas = measRef.current;
+    if (!bar || !meas) return;
+    const compute = () => {
+      const avail = bar.clientWidth - 8; // pequeño colchón
+      const kids = Array.from(meas.querySelectorAll<HTMLElement>("[data-top]"));
+      const moreW = meas.querySelector<HTMLElement>("[data-more]")?.offsetWidth ?? 84;
+      const w = (el: HTMLElement) => el.offsetWidth + 4; // + gap
+      let sum = 0;
+      let n = 0;
+      for (const el of kids) {
+        sum += w(el);
+        if (sum <= avail) n += 1;
+        else break;
+      }
+      if (n < kids.length) {
+        sum = 0;
+        n = 0;
+        for (const el of kids) {
+          sum += w(el);
+          if (sum + moreW <= avail) n += 1;
+          else break;
+        }
+      }
+      setFit(n);
+    };
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(bar);
+    return () => ro.disconnect();
+  }, [topKeys, locale]);
   // Session for the header (email + sign out). Anonymous → shows "sign in".
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
@@ -218,7 +301,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="flex h-16 w-full items-center gap-4 px-4 sm:px-6 lg:px-8">
         {/* Mobile menu trigger (hidden on md+) */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
@@ -307,66 +390,61 @@ export function SiteHeader() {
         {/* Brand */}
         <Brand />
 
-        {/* Desktop nav — dynamic, RBAC-filtered from the BE (#6). Many verticals
-            can be registered, so the row scrolls horizontally instead of
-            clipping items off the right edge. */}
-        <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {/* Guía de desarrollo PRIMERO — nunca se oculta (posición fija a la izquierda). */}
-          {grupos.map((g) => {
-            const active = g.items.some((c) => isActive(pathname, c.path));
-            return (
-              <DropdownMenu key={g.clave}>
-                <DropdownMenuTrigger
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
-                    active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {tRoot(g.labelKey)}
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
-                  {g.items.map((c) => (
-                    <DropdownMenuItem key={c.clave} asChild>
-                      <Link href={c.path}>{tRoot(c.labelKey)}</Link>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          })}
-          {/* Separador entre la guía de desarrollo y los grupos de dominio. */}
-          {grupos.length > 0 && domainGroups.length > 0 ? (
-            <span
-              aria-hidden
-              className="mx-1 h-5 w-px shrink-0 self-center bg-border/70"
-            />
+        {/* Desktop nav — barra medida: muestra los ítems que caben y colapsa el resto en "Más".
+            Orden: guía de desarrollo primero (nunca se oculta), luego los grupos de dominio. */}
+        <nav
+          ref={barRef}
+          className="hidden min-w-0 flex-1 items-center gap-1 overflow-hidden md:flex"
+        >
+          {topItems.slice(0, fit).map((it) => (
+            <DropdownMenu key={it.key}>
+              <DropdownMenuTrigger className={triggerCls(it.active)}>
+                {tRoot(it.labelKey)}
+                <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
+                {renderTopContent(it)}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ))}
+          {fit < topItems.length ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={triggerCls(topItems.slice(fit).some((i) => i.active))}
+              >
+                {t("mas")}
+                <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
+                {topItems.slice(fit).map((it) => (
+                  <DropdownMenuSub key={it.key}>
+                    <DropdownMenuSubTrigger>{tRoot(it.labelKey)}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="max-h-[70vh] overflow-y-auto">
+                      {renderTopContent(it)}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : null}
-          {domainGroups.map((g) => {
-            const active = nodeActive(g);
-            return (
-              <DropdownMenu key={g.clave}>
-                <DropdownMenuTrigger
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
-                    active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {tRoot(g.labelKey)}
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
-                  <DropdownMenuLabel>{tRoot(g.labelKey)}</DropdownMenuLabel>
-                  {renderDesktopNodes(g.children)}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          })}
         </nav>
+        {/* Medidor oculto — replica los triggers para medir sus anchos sin afectar el layout. */}
+        <div
+          ref={measRef}
+          aria-hidden
+          className="pointer-events-none absolute top-0 -left-[9999px] hidden items-center gap-1 opacity-0 md:flex"
+        >
+          {topItems.map((it) => (
+            <span key={it.key} data-top className={triggerCls(false)}>
+              {tRoot(it.labelKey)}
+              <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
+            </span>
+          ))}
+          <span data-more className={triggerCls(false)}>
+            {t("mas")}
+            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
+          </span>
+        </div>
 
         {/* Right cluster: search, theme, primary action */}
         <div className="ml-auto flex items-center gap-2">
@@ -377,7 +455,7 @@ export function SiteHeader() {
           <LanguageToggle />
           {session ? (
             <div className="hidden items-center gap-2 sm:flex">
-              <Avatar className="size-7">
+              <Avatar className="size-7" title={session.email ?? undefined}>
                 {session.avatarUrl ? (
                   <AvatarImage src={session.avatarUrl} alt="" />
                 ) : null}
@@ -385,9 +463,6 @@ export function SiteHeader() {
                   {(session.email ?? "?").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="max-w-[12rem] truncate text-sm text-muted-foreground">
-                {session.email}
-              </span>
               <Button
                 size="sm"
                 variant="outline"
