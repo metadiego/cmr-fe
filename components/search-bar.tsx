@@ -23,7 +23,7 @@ export function SearchBar({ className }: { className?: string }) {
         type="search"
         placeholder={t("searchPlaceholder")}
         aria-label={t("search")}
-        className="h-9 w-56 border-transparent bg-muted/60 pr-12 pl-9 hover:bg-muted focus-visible:bg-background lg:w-72"
+        className="h-9 w-40 border-transparent bg-muted/60 pr-12 pl-9 hover:bg-muted focus-visible:bg-background lg:w-56 xl:w-72"
       />
       <kbd className="pointer-events-none absolute top-1/2 right-2.5 hidden -translate-y-1/2 items-center gap-1 rounded border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground select-none sm:flex">
         ⌘K
