@@ -242,14 +242,7 @@ export function SiteHeader() {
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-2 flex flex-col gap-1 px-2">
-              {domainGroups.map((g) => (
-                <div key={g.clave} className="flex flex-col gap-0.5">
-                  <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tRoot(g.labelKey)}
-                  </span>
-                  {renderMobileNodes(g.children, 1)}
-                </div>
-              ))}
+              {/* Guía de desarrollo PRIMERO (igual que en escritorio). */}
               {grupos.map((g) => (
                 <div key={g.clave} className="flex flex-col gap-0.5">
                   <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -270,6 +263,17 @@ export function SiteHeader() {
                       {tRoot(c.labelKey)}
                     </Link>
                   ))}
+                </div>
+              ))}
+              {grupos.length > 0 && domainGroups.length > 0 ? (
+                <div aria-hidden className="my-2 h-px bg-border/60" />
+              ) : null}
+              {domainGroups.map((g) => (
+                <div key={g.clave} className="flex flex-col gap-0.5">
+                  <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {tRoot(g.labelKey)}
+                  </span>
+                  {renderMobileNodes(g.children, 1)}
                 </div>
               ))}
             </nav>
@@ -307,28 +311,7 @@ export function SiteHeader() {
             can be registered, so the row scrolls horizontally instead of
             clipping items off the right edge. */}
         <nav className="hidden min-w-0 flex-1 items-center gap-1 overflow-x-auto md:flex [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {domainGroups.map((g) => {
-            const active = nodeActive(g);
-            return (
-              <DropdownMenu key={g.clave}>
-                <DropdownMenuTrigger
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
-                    active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {tRoot(g.labelKey)}
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
-                  <DropdownMenuLabel>{tRoot(g.labelKey)}</DropdownMenuLabel>
-                  {renderDesktopNodes(g.children)}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            );
-          })}
+          {/* Guía de desarrollo PRIMERO — nunca se oculta (posición fija a la izquierda). */}
           {grupos.map((g) => {
             const active = g.items.some((c) => isActive(pathname, c.path));
             return (
@@ -350,6 +333,35 @@ export function SiteHeader() {
                       <Link href={c.path}>{tRoot(c.labelKey)}</Link>
                     </DropdownMenuItem>
                   ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            );
+          })}
+          {/* Separador entre la guía de desarrollo y los grupos de dominio. */}
+          {grupos.length > 0 && domainGroups.length > 0 ? (
+            <span
+              aria-hidden
+              className="mx-1 h-5 w-px shrink-0 self-center bg-border/70"
+            />
+          ) : null}
+          {domainGroups.map((g) => {
+            const active = nodeActive(g);
+            return (
+              <DropdownMenu key={g.clave}>
+                <DropdownMenuTrigger
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors",
+                    active
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tRoot(g.labelKey)}
+                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
+                  <DropdownMenuLabel>{tRoot(g.labelKey)}</DropdownMenuLabel>
+                  {renderDesktopNodes(g.children)}
                 </DropdownMenuContent>
               </DropdownMenu>
             );
