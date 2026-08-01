@@ -561,6 +561,22 @@
     "es": "Español",
     "en": "Inglés"
   },
+  "userMenu": {
+    "account": "Cuenta",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Saliendo…",
+    "theme": "Tema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeSystem": "Sistema",
+    "language": "Idioma",
+    "lang_es": "Español",
+    "lang_en": "English",
+    "appSettings": "Configuración de la app",
+    "boardModules": "Módulos de tablero",
+    "profileSoon": "Perfil y preferencias (próximamente)"
+  },
   "nav": {
     "home": "Inicio",
     "clients": "Clientes",
