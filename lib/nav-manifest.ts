@@ -50,6 +50,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/configuracion/requeridos", labelKey: "nav.requeridos" },
   { path: "/configuracion/formatos", labelKey: "nav.configFormatos" },
   { path: "/configuracion/tableros", labelKey: "nav.constructorTableros" },
+  { path: "/configuracion/menu", labelKey: "nav.menuEditor" },
   { path: "/admin", labelKey: "nav.admin" },
   { path: "/settings/appearance", labelKey: "nav.appearance" },
   { path: "/settings/tablero-modulos", labelKey: "nav.tableroModulos" },

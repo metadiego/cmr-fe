@@ -61,9 +61,17 @@ export function UserMenu() {
   }
 
   const email = session.email ?? "";
-  // Nombre visible: por ahora la parte antes de @ (el BE aún no expone un nombre propio).
-  const displayName = email ? email.split("@")[0] : t("account");
-  const initials = (email || "?").slice(0, 2).toUpperCase();
+  // Nombre visible: nombre/apellido del perfil (cmr-be PR #221); si el login no tiene perfil
+  // (nombre null, p. ej. cuentas master), cae a la parte antes de @ del email.
+  const fullName = [session.nombre, session.apellido].filter(Boolean).join(" ").trim();
+  const displayName = fullName || (email ? email.split("@")[0] : t("account"));
+  const initials = (
+    fullName
+      ? `${session.nombre?.[0] ?? ""}${session.apellido?.[0] ?? ""}`
+      : email || "?"
+  )
+    .slice(0, 2)
+    .toUpperCase();
 
   function changeLocale(next: string) {
     if (next === locale) return;

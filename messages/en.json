@@ -561,6 +561,29 @@
     "es": "Spanish",
     "en": "English"
   },
+  "menuEditor": {
+    "title": "Menu editor",
+    "help": "Drag to reorder and nest (up to 4 levels). Drop above/below to move at the same level, or in the middle to nest it inside. Changes save automatically.",
+    "noPermission": "You don't have permission to edit the menu.",
+    "loading": "Loading…",
+    "retry": "Retry",
+    "saving": "Saving…",
+    "saved": "Menu updated",
+    "undo": "Undo",
+    "undone": "Change undone",
+    "visible": "Visible",
+    "add": "Add to menu",
+    "added": "Route added to menu",
+    "delete": "Remove",
+    "deleted": "Item removed from menu",
+    "deleteTitle": "Remove from menu",
+    "deleteBody": "Remove “{name}” from the menu? This does not delete the page, only removes it from the menu.",
+    "cancel": "Cancel",
+    "depthError": "Maximum {n} levels.",
+    "availableTitle": "Available routes",
+    "availableHelp": "App pages not yet in the menu. Press + to add them.",
+    "availableEmpty": "All routes are already in the menu."
+  },
   "userMenu": {
     "account": "Account",
     "signIn": "Sign in",
@@ -601,6 +624,7 @@
     "en_desarrollo": "In development",
     "por_desarrollar": "To be developed",
     "mas": "More",
+    "menuEditor": "Menu editor",
     "grupo": {
       "agenda": "Scheduling & patients",
       "facturacion": "Billing & register",

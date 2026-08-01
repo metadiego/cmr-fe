@@ -561,6 +561,29 @@
     "es": "Español",
     "en": "Inglés"
   },
+  "menuEditor": {
+    "title": "Editor del menú",
+    "help": "Arrastra para reordenar y anidar (hasta 4 niveles). Suelta arriba/abajo para mover al mismo nivel, o en el centro para meterlo dentro. Los cambios se guardan solos.",
+    "noPermission": "No tienes permiso para editar el menú.",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "saving": "Guardando…",
+    "saved": "Menú actualizado",
+    "undo": "Deshacer",
+    "undone": "Cambio deshecho",
+    "visible": "Visible",
+    "add": "Agregar al menú",
+    "added": "Ruta agregada al menú",
+    "delete": "Quitar",
+    "deleted": "Ítem quitado del menú",
+    "deleteTitle": "Quitar del menú",
+    "deleteBody": "¿Quitar «{name}» del menú? No borra la página, solo la saca del menú.",
+    "cancel": "Cancelar",
+    "depthError": "Máximo {n} niveles.",
+    "availableTitle": "Rutas disponibles",
+    "availableHelp": "Páginas de la app que aún no están en el menú. Pulsa + para agregarlas.",
+    "availableEmpty": "Todas las rutas ya están en el menú."
+  },
   "userMenu": {
     "account": "Cuenta",
     "signIn": "Iniciar sesión",
@@ -601,6 +624,7 @@
     "en_desarrollo": "En desarrollo",
     "por_desarrollar": "Por desarrollar",
     "mas": "Más",
+    "menuEditor": "Editor del menú",
     "grupo": {
       "agenda": "Agenda y pacientes",
       "facturacion": "Facturación y caja",
