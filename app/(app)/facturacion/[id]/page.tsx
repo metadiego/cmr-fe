@@ -941,7 +941,7 @@ function CabeceraDialog({
   );
 }
 
-function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string; meta?: Record<string, number> }) => void }) {
+function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string; meta?: Record<string, number | string> }) => void }) {
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
@@ -962,6 +962,14 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   const capturables = (colsRes.state.kind === "ok" ? colsRes.state.data : []).filter(
     (c) => c.rol === "multiplicador" || c.rol === "informativo",
   );
+  // Opciones INLINE de un select de captura (nuevo: `render.opciones` en la propia columna; antes los
+  // select sacaban sus opciones de un catálogo). Sirve para cualquier select así declarado (p. ej. la ZONA
+  // del Protocolo Articular: rodilla|codo|cadera|hombro). Contrato: HANDOFF-zona-protocolo-articular.
+  const opcionesDe = (c: ColumnaFacturacion): { value: string; labelKey?: string }[] => {
+    const r = c.render as { opciones?: { value: string; labelKey?: string }[] } | null;
+    return Array.isArray(r?.opciones) ? r!.opciones : [];
+  };
+  const esSelectCaptura = (c: ColumnaFacturacion) => c.tipo === "select" && opcionesDe(c).length > 0;
 
   // Autocálculo Dosis→Cantidad (potes/frascos): al cambiar la Dosis, Cantidad = ceil(dosis×días/unidadesPorEnvase).
   // unidadesPorEnvase (de NTPRODUCTOS.CapsulasXUni) y diasTratamiento vienen del catálogo (BE, en prod);
@@ -1032,7 +1040,9 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
   const buscando = precioRes.state.kind === "loading" && !!prodId;
   const precioLista = precioRes.state.kind === "ok" ? precioRes.state.data : null;
   const precioMostrado = precio !== "" ? precio : precioLista != null ? String(precioLista) : "";
-  const canAdd = !!prodId && !disabled && !buscando;
+  // Requeridos SIN llenar (p. ej. zona): bloquean agregar la línea → el aviso se ve ANTES de guardar.
+  const faltanRequeridos = capturables.filter((c) => c.requerido && String(metaShown(c.clave)).trim() === "");
+  const canAdd = !!prodId && !disabled && !buscando && faltanRequeridos.length === 0;
 
   function pick(v: string) {
     setProdId(v);
@@ -1052,11 +1062,14 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
     // Si no se envía, el compuesto cae al precio-base (TD12=70) en vez del combo (50) → BE PR láser/precio.
     const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
     const precioUnitarioEff = precioOverride ?? (precioLista != null ? precioLista : undefined);
-    // meta = valores de las columnas multiplicador/informativo (por su clave). El server calcula el total.
-    const meta: Record<string, number> = {};
+    // meta = valores de las columnas de captura (por su clave). Número para multiplicador/informativo
+    // (áreas, días…, el server calcula el total) y STRING para los select (p. ej. zona=rodilla).
+    const meta: Record<string, number | string> = {};
     capturables.forEach((c) => {
       const raw = metaShown(c.clave); // override del usuario o el default (áreas=1, días=cantidad)
-      if (raw != null && raw.trim() !== "" && !Number.isNaN(Number(raw))) meta[c.clave] = Number(raw);
+      if (raw == null || raw.trim() === "") return;
+      if (esSelectCaptura(c)) { meta[c.clave] = raw; return; } // valor de opción (string)
+      if (!Number.isNaN(Number(raw))) meta[c.clave] = Number(raw);
     });
     onAdd({
       productoId: prod.id,
@@ -1091,23 +1104,43 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
           inputMode="numeric"
         />
       </label>
-      {/* Columnas dinámicas del producto (días/áreas/sesiones/dosis) */}
-      {capturables.map((c) => (
-        <label key={c.clave} className="flex w-24 flex-col gap-1">
-          <Lbl>{tRoot(c.labelKey)}</Lbl>
-          <Input
-            data-flow={c.clave === sugeridoClave ? undefined : true}
-            value={metaShown(c.clave)}
-            onChange={(e) => onMetaChange(c.clave, e.target.value)}
-            onFocus={selectOnFocus}
-            onKeyDown={onFlowKey}
-            readOnly={c.clave === sugeridoClave}
-            className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80 " : "") + (c.clave === sugeridoClave ? "bg-muted" : "")}
-            inputMode="decimal"
-            placeholder={c.rol === "multiplicador" ? "×" : ""}
-          />
-        </label>
-      ))}
+      {/* Columnas dinámicas del producto (días/áreas/sesiones/dosis) + selects declarados (p. ej. ZONA). */}
+      {capturables.map((c) => {
+        const requeridoVacio = c.requerido && String(metaShown(c.clave)).trim() === "";
+        if (esSelectCaptura(c)) {
+          return (
+            <label key={c.clave} className="flex w-32 flex-col gap-1">
+              <Lbl>{tRoot(c.labelKey)}{c.requerido && <span className="text-destructive"> *</span>}</Lbl>
+              <Select value={metaShown(c.clave) || undefined} onValueChange={(v) => setMetaVals((m) => ({ ...m, [c.clave]: v }))}>
+                <SelectTrigger className={"h-9 w-full " + (requeridoVacio ? "border-destructive" : "")}>
+                  <SelectValue placeholder={t("selectPlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {opcionesDe(c).map((o) => (
+                    <SelectItem key={o.value} value={o.value}>{o.labelKey && tRoot.has(o.labelKey) ? tRoot(o.labelKey) : o.value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </label>
+          );
+        }
+        return (
+          <label key={c.clave} className="flex w-24 flex-col gap-1">
+            <Lbl>{tRoot(c.labelKey)}</Lbl>
+            <Input
+              data-flow={c.clave === sugeridoClave ? undefined : true}
+              value={metaShown(c.clave)}
+              onChange={(e) => onMetaChange(c.clave, e.target.value)}
+              onFocus={selectOnFocus}
+              onKeyDown={onFlowKey}
+              readOnly={c.clave === sugeridoClave}
+              className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80 " : "") + (c.clave === sugeridoClave ? "bg-muted" : "")}
+              inputMode="decimal"
+              placeholder={c.rol === "multiplicador" ? "×" : ""}
+            />
+          </label>
+        );
+      })}
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
         <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />

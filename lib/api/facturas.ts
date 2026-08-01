@@ -8,9 +8,10 @@ export type FacturaItem = components["schemas"]["FacturaItemEntity"];
 export type Producto = components["schemas"]["ProductoEntity"];
 export type FormaPago = components["schemas"]["FormaPagoEntity"];
 // `meta` sale como Record<string,never> en OpenAPI (quirk) → lo tipamos usable: los
-// valores de columnas multiplicador/informativo por su clave.
+// valores de columnas por su clave. NÚMERO para multiplicador/informativo (áreas, días…) y STRING para
+// los select de captura (p. ej. zona = rodilla|codo|cadera|hombro del Protocolo Articular).
 export type AgregarItemPayload = Omit<components["schemas"]["AgregarItemDto"], "meta"> & {
-  meta?: Record<string, number>;
+  meta?: Record<string, number | string>;
 };
 export type RegistrarPagoPayload = components["schemas"]["RegistrarPagoDto"];
 export type DescuentoGlobalPayload = components["schemas"]["DescuentoGlobalDto"];

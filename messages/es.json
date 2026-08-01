@@ -1037,6 +1037,17 @@
       }
     }
   },
+  "factura": {
+    "col": {
+      "zona": "Zona"
+    }
+  },
+  "zona": {
+    "rodilla": "Rodilla",
+    "codo": "Codo",
+    "cadera": "Cadera",
+    "hombro": "Hombro"
+  },
   "estadisticasServicios": {
     "title": "Estadísticas de Servicios",
     "help": "Participaciones del personal por servicio en el periodo. Elige el rango y pulsa Generar.",
@@ -1767,6 +1778,7 @@
     "remove": "Quitar",
     "addItem": "Agregar línea",
     "selectProduct": "Seleccionar producto/servicio",
+    "selectPlaceholder": "Elegir…",
     "add": "Agregar",
     "subtotal": "Subtotal",
     "discount": "Descuento",

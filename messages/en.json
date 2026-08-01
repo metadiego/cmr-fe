@@ -1037,6 +1037,17 @@
       }
     }
   },
+  "factura": {
+    "col": {
+      "zona": "Zone"
+    }
+  },
+  "zona": {
+    "rodilla": "Knee",
+    "codo": "Elbow",
+    "cadera": "Hip",
+    "hombro": "Shoulder"
+  },
   "estadisticasServicios": {
     "title": "Service Statistics",
     "help": "Staff participations per service in the period. Pick the range and press Generate.",
@@ -1767,6 +1778,7 @@
     "remove": "Remove",
     "addItem": "Add line",
     "selectProduct": "Select product/service",
+    "selectPlaceholder": "Choose…",
     "add": "Add",
     "subtotal": "Subtotal",
     "discount": "Discount",
