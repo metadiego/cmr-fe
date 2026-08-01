@@ -19,11 +19,9 @@ import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ModeToggle } from "@/components/mode-toggle";
-import { LanguageToggle } from "@/components/language-toggle";
 import { CenterSelector } from "@/components/center-selector";
 import { SearchBar } from "@/components/search-bar";
+import { UserMenu } from "@/components/user-menu";
 import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
 import {
   Sheet,
@@ -446,37 +444,13 @@ export function SiteHeader() {
           </span>
         </div>
 
-        {/* Right cluster: search, theme, primary action */}
+        {/* Cluster derecho: selector de centro, buscador retráctil, campana y menú del avatar
+            (tema, idioma, ajustes, cerrar sesión — todo dentro del avatar). */}
         <div className="ml-auto flex items-center gap-2">
           <CenterSelector />
           <SearchBar />
           {session ? <AlertasBell /> : null}
-          <ModeToggle />
-          <LanguageToggle />
-          {session ? (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Avatar className="size-7" title={session.email ?? undefined}>
-                {session.avatarUrl ? (
-                  <AvatarImage src={session.avatarUrl} alt="" />
-                ) : null}
-                <AvatarFallback className="text-xs">
-                  {(session.email ?? "?").slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={signOut}
-                disabled={signingOut}
-              >
-                {signingOut ? t("signingOut") : t("signOut")}
-              </Button>
-            </div>
-          ) : (
-            <Button size="sm" className="hidden sm:inline-flex" asChild>
-              <Link href="/login">{t("signIn")}</Link>
-            </Button>
-          )}
+          <UserMenu />
         </div>
       </div>
     </header>
