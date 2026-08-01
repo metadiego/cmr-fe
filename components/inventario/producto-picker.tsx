@@ -136,7 +136,12 @@ export function ProductoPicker({
                     p.id === value && "bg-accent/60",
                   )}
                 >
-                  <span className="font-medium">{p.nombre}</span>
+                  <span className="font-medium">
+                    {p.nombre}
+                    {(p as { nombreTecnico?: string | null }).nombreTecnico && (
+                      <span className="ml-2 text-[11px] font-normal text-muted-foreground">· {(p as { nombreTecnico?: string | null }).nombreTecnico}</span>
+                    )}
+                  </span>
                   {(p.sku || p.tipo) && (
                     <span className="text-[11px] text-muted-foreground">
                       {[p.sku, p.tipo].filter(Boolean).join(" · ")}

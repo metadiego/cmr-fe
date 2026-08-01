@@ -40,6 +40,7 @@ import {
 } from "@/lib/api/grupos-facturacion";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { DescargaSimuladaPanel } from "@/components/inventario/descarga-simulada";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -242,7 +243,10 @@ export function ProductosAdmin() {
                         />
                       </button>
                     </td>
-                    <td className="px-3 py-2 font-medium">{p.nombre}</td>
+                    <td className="px-3 py-2 font-medium">
+                      {p.nombre}
+                      {p.nombreTecnico && <span className="ml-2 text-xs font-normal text-muted-foreground">· {p.nombreTecnico}</span>}
+                    </td>
                     <td className="px-3 py-2 font-mono text-xs">{p.sku ?? "—"}</td>
                     <td className="px-3 py-2">
                       <Badge variant="outline">{t(`tipo.${p.tipo}`)}</Badge>
@@ -462,6 +466,7 @@ type FormState = {
   sku: string;
   nombre: string;
   nombreCorto: string;
+  nombreTecnico: string;
   descripcion: string;
   tipo: (typeof TIPOS)[number];
   esInventariable: boolean;
@@ -471,6 +476,8 @@ type FormState = {
   fabricanteId: string;
   barcode: string;
   gravado: boolean;
+  facturableGeneral: boolean;
+  costoReferencia: string;
   imprimeComponentes: boolean;
   aplicaPrecioBaseDevolucion: boolean;
   activo: boolean;
@@ -480,6 +487,7 @@ const EMPTY: FormState = {
   sku: "",
   nombre: "",
   nombreCorto: "",
+  nombreTecnico: "",
   descripcion: "",
   tipo: "unico",
   esInventariable: false,
@@ -489,6 +497,8 @@ const EMPTY: FormState = {
   fabricanteId: "",
   barcode: "",
   gravado: false,
+  facturableGeneral: true,
+  costoReferencia: "",
   imprimeComponentes: true,
   aplicaPrecioBaseDevolucion: false,
   activo: true,
@@ -527,6 +537,7 @@ function ProductoForm({
             sku: producto.sku ?? "",
             nombre: producto.nombre ?? "",
             nombreCorto: producto.nombreCorto ?? "",
+            nombreTecnico: producto.nombreTecnico ?? "",
             descripcion: producto.descripcion ?? "",
             tipo: (producto.tipo as FormState["tipo"]) ?? "unico",
             esInventariable: producto.esInventariable ?? false,
@@ -537,6 +548,9 @@ function ProductoForm({
             fabricanteId: producto.fabricanteId ?? "",
             barcode: producto.barcode ?? "",
             gravado: producto.gravado ?? false,
+            facturableGeneral: (producto as { facturableGeneral?: boolean }).facturableGeneral ?? true,
+            costoReferencia:
+              producto.costoReferencia != null ? String(producto.costoReferencia) : "",
             imprimeComponentes: (producto as { imprimeComponentes?: boolean }).imprimeComponentes ?? true,
             aplicaPrecioBaseDevolucion: (producto as { aplicaPrecioBaseDevolucion?: boolean }).aplicaPrecioBaseDevolucion ?? false,
             activo: producto.activo ?? true,
@@ -598,9 +612,12 @@ function ProductoForm({
     try {
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const id = (s: string) => (s && s !== NONE ? s : undefined);
+      const costo = form.costoReferencia.trim() === "" ? undefined : Number(form.costoReferencia);
       const common = {
         nombre: form.nombre.trim(),
         nombreCorto: txt(form.nombreCorto),
+        // Nombre de almacén/técnico: el MISMO frasco con su nombre interno (evita partir el stock en dos).
+        nombreTecnico: txt(form.nombreTecnico),
         descripcion: txt(form.descripcion),
         tipo: form.tipo,
         esInventariable: form.esInventariable,
@@ -610,6 +627,8 @@ function ProductoForm({
         fabricanteId: id(form.fabricanteId),
         barcode: txt(form.barcode),
         gravado: form.gravado,
+        // Costo estable de la unidad (el costo real de cada compra sigue viniendo del lote).
+        ...(costo != null && Number.isFinite(costo) ? { costoReferencia: costo } : {}),
         // Devolución a precio base (láser/vit C/GLP-1…): la política precio_base solo aplica a los marcados.
         aplicaPrecioBaseDevolucion: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
@@ -617,7 +636,8 @@ function ProductoForm({
       };
       let savedId: string;
       if (isEdit && producto) {
-        await updateProducto(producto.id, { ...common, activo: form.activo });
+        // facturableGeneral (¿se vende suelto?) solo lo acepta el UPDATE del BE.
+        await updateProducto(producto.id, { ...common, facturableGeneral: form.facturableGeneral, activo: form.activo });
         savedId = producto.id;
       } else {
         const creado = await createProducto({
@@ -758,6 +778,26 @@ function ProductoForm({
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
+            <Field label={t("field.nombreTecnico")}>
+              <Input
+                value={form.nombreTecnico}
+                onChange={(e) => set("nombreTecnico", e.target.value)}
+                placeholder={t("field.nombreTecnicoPh")}
+              />
+            </Field>
+            <Field label={t("field.costoReferencia")}>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                value={form.costoReferencia}
+                onChange={(e) => set("costoReferencia", e.target.value)}
+                placeholder={t("field.opcional")}
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <Field label={t("field.tipo")}>
               <Select
                 value={form.tipo}
@@ -826,12 +866,28 @@ function ProductoForm({
           </div>
           <Toggle label={t("field.esInventariable")} checked={form.esInventariable} onChange={(v) => set("esInventariable", v)} />
           <Toggle label={t("field.gravado")} checked={form.gravado} onChange={(v) => set("gravado", v)} />
+          {/* ¿Se vende suelto? = facturableGeneral. Si NO, avisar que su precio no se usa (en el legado
+              había que inventarle un precio para que apareciera en la factura; aquí no hace falta). */}
+          <div className="space-y-1">
+            <Toggle label={t("field.facturableGeneral")} checked={form.facturableGeneral} onChange={(v) => set("facturableGeneral", v)} />
+            {!form.facturableGeneral && (
+              <p className="px-1 text-xs text-muted-foreground">{t("field.facturableGeneralNo")}</p>
+            )}
+          </div>
           <Toggle label={t("field.aplicaPrecioBaseDevolucion")} checked={form.aplicaPrecioBaseDevolucion} onChange={(v) => set("aplicaPrecioBaseDevolucion", v)} />
           {form.tipo === "compuesto" && (
             <Toggle label={t("imprimeComponentes")} checked={form.imprimeComponentes} onChange={(v) => set("imprimeComponentes", v)} />
           )}
           {isEdit && (
             <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />
+          )}
+
+          {/* El árbol "¿qué se descuenta?" — solo para kits ya guardados (necesita id). Es lo que caza el
+              duplicado que dejó existencias en negativo. */}
+          {isEdit && producto && form.tipo === "compuesto" && (
+            <div className="pt-1">
+              <DescargaSimuladaPanel productoId={producto.id} />
+            </div>
           )}
         </div>
 

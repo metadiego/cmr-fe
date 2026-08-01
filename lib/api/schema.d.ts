@@ -120,6 +120,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/estadisticas/servicios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cuánto trabajó cada persona por servicio en un periodo: general (Personal × Servicio) + detalle por servicio y rol. */
+        get: operations["EstadisticasController_porServicio_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/permisos": {
         parameters: {
             query?: never;
@@ -546,6 +563,26 @@ export interface paths {
         };
         /** Catálogo de CLASES (para las pestañas del FE, data-driven + i18n): [{clase, labelKey}]. */
         get: operations["ProductosController_clases_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/productos/{id}/descarga-simulada": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * ¿Qué se descuenta si facturo esto?
+         * @description Desglose YA EXPANDIDO de un producto: abre los kits ANIDADOS (un kit dentro de otro kit) hasta llegar a los productos con existencia, con las cantidades multiplicadas por el camino. Usa la MISMA función que la descarga real, no una copia. Devuelve además los consumos `estimados` (se reportan pero no descargan) y los `avisos`: `duplicado` (el mismo producto cuelga por dos caminos y se descontaría dos veces — el fallo que originó esto), `ciclo` y `profundidad`. Es lo que pinta el árbol de la pantalla y permite comprobar antes de vender. Ver docs/specs/producto-kit-anidado-y-doble-nombre.md.
+         */
+        get: operations["ProductosController_descargaSimulada_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2041,6 +2078,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProfilesController_findAll_v1"];
+        put?: never;
+        post: operations["ProfilesController_create_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProfilesController_invite_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ProfilesController_findPending_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProfilesController_approve_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProfilesController_reject_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profiles/{id}/asignaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ProfilesController_assign_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AuthController_me_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/password-changed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AuthController_passwordChanged_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/centros": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AuthController_meCentros_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["MeAvatarController_put_v1"];
+        post?: never;
+        delete: operations["MeAvatarController_remove_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/tipos": {
         parameters: {
             query?: never;
@@ -2326,6 +2523,26 @@ export interface paths {
         put?: never;
         /** Dry-run: valida solapamiento SIN crear (el FE advierte antes de Guardar). */
         post: operations["CitasController_validar_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/retroactiva": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registrar una visita ya ocurrida
+         * @description Para cuando el paciente vino, lo atendieron y NADIE lo registró. Bastan la `fecha` y el `record`: el médico se resuelve solo (el que venga → el último que lo atendió antes de esa fecha → el de cabecera → ninguno) y nunca bloquea. Crea la cita en estado `atendida` con la FECHA REAL, así que aparece en el tablero del día en que faltaba, y emite los cuatro eventos del recorrido marcados `esRetroactivo` y firmados por quien la registra hoy. Deja `registradaTardeEn`, que el tablero convierte en la marca de "N días tarde" (`computed.diasDeRetraso`). Devuelve también `medicoResuelto.origen` para que la pantalla diga POR QUÉ eligió a ese médico. Ver docs/specs/cita-retroactiva.md.
+         */
+        post: operations["CitasController_retroactiva_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3266,6 +3483,23 @@ export interface paths {
         put?: never;
         /** Anula una devolución (solo dentro de la ventana configurable; revierte su cascada). */
         post: operations["FacturacionController_anularDevolucion_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/pagos/reparar-huerfanos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Anula los pagos que siguen activos en facturas ANULADAS (limpieza del cuadre). Idempotente. */
+        post: operations["FacturacionController_repararPagosHuerfanos_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4850,7 +5084,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Definición efectiva de un tablero (columnas + estados + transiciones + subtipos). */
+        /**
+         * Definición efectiva de un tablero
+         * @description Registro + columnas efectivas (centro/usuario) + estados + transiciones + subtipos, en una sola llamada. `tablero.acciones` es la barra: lo que el tablero declara MÁS las acciones de SISTEMA que no haya declarado (hoy `columnas`, que exige el permiso `tablero.config`), para que un tablero nuevo nazca con lo común. Para apagar una en un tablero concreto, declararla con `visible:false` vía PUT /tableros/:id. Ver docs/specs/tablero-acciones-sistema.md.
+         */
         get: operations["TablerosController_definicion_v1"];
         put?: never;
         post?: never;
@@ -5157,166 +5394,6 @@ export interface paths {
         /** Marca/desmarca "no se prescribió nada al paciente". */
         post: operations["PrescripcionController_noPrescripcion_v1"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/profiles": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["ProfilesController_findAll_v1"];
-        put?: never;
-        post: operations["ProfilesController_create_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/profiles/invite": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["ProfilesController_invite_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/profiles/pending": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["ProfilesController_findPending_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/profiles/{id}/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["ProfilesController_approve_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/profiles/{id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["ProfilesController_reject_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/profiles/{id}/asignaciones": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["ProfilesController_assign_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AuthController_me_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/me/password-changed": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["AuthController_passwordChanged_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/me/centros": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["AuthController_meCentros_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/avatar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["MeAvatarController_put_v1"];
-        post?: never;
-        delete: operations["MeAvatarController_remove_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5663,10 +5740,36 @@ export interface components {
             /** Format: uuid */
             centroId?: string;
         };
+        PerfilEntity: {
+            authUserId: string;
+            email: string;
+            nombre: string;
+            apellido: string | null;
+            /** @enum {string} */
+            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
+            esMaster: boolean;
+            mustChangePassword: boolean;
+            /** @enum {string} */
+            accessMode: "operativo" | "gerencial";
+            aprobadoPor: string | null;
+            /** Format: date-time */
+            aprobadoEn: string | null;
+            rechazadoMotivo: string | null;
+            avatarUrl: string | null;
+            aprobador?: components["schemas"]["PerfilEntity"];
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         PerfilRolEntity: {
             perfilId: string;
             rolId: string;
             centroId: string | null;
+            perfil?: components["schemas"]["PerfilEntity"];
+            rol?: components["schemas"]["RolEntity"];
+            centro?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5686,6 +5789,9 @@ export interface components {
             /** @enum {string} */
             efecto: "grant" | "deny";
             centroId: string | null;
+            perfil?: components["schemas"]["PerfilEntity"];
+            permiso?: components["schemas"]["PermisoEntity"];
+            centro?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5702,6 +5808,7 @@ export interface components {
             permisoClave: string | null;
             visible: boolean;
             centroId: string | null;
+            centro?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5821,6 +5928,8 @@ export interface components {
             nombre: string;
             descripcion: string | null;
             nombreCorto: string | null;
+            nombreTecnico: string | null;
+            costoReferencia: number | null;
             /** @enum {string} */
             tipo: "base" | "unico" | "compuesto" | "servicio";
             esInventariable: boolean;
@@ -5856,6 +5965,13 @@ export interface components {
             updatedAt: string;
         };
         CreateProductoDto: {
+            /** @description Nombre TÉCNICO/de almacén del mismo producto, si difiere del comercial (ej.: NANO DPM para la GELATINA DE WHARTON). Es el MISMO producto y el mismo stock: no se crea otra ficha. El buscador encuentra por los dos nombres. */
+            nombreTecnico?: string;
+            /**
+             * @description Costo unitario de REFERENCIA. El costo real de cada compra vive en el lote; este es el respaldo y sirve para estimar el margen de un kit.
+             * @example 155
+             */
+            costoReferencia?: number;
             sku: string;
             nombre: string;
             descripcion?: string;
@@ -5900,6 +6016,13 @@ export interface components {
             barcode?: string;
         };
         UpdateProductoDto: {
+            /** @description Nombre TÉCNICO/de almacén del mismo producto. */
+            nombreTecnico?: string;
+            /**
+             * @description Costo unitario de REFERENCIA (el real por compra vive en el lote).
+             * @example 155
+             */
+            costoReferencia?: number;
             nombre?: string;
             descripcion?: string;
             nombreCorto?: string;
@@ -6506,7 +6629,7 @@ export interface components {
             proveedorId: string;
             almacenId: string;
             /** @enum {string} */
-            estado: "borrador" | "enviada" | "recibida" | "cancelada";
+            estado: "cancelada" | "borrador" | "enviada" | "recibida";
             total: number | null;
             notas: string | null;
             id: string;
@@ -6615,7 +6738,7 @@ export interface components {
             almacenOrigenId: string;
             almacenDestinoId: string;
             /** @enum {string} */
-            estado: "pendiente" | "recibida" | "cancelada" | "recibida_parcial" | "rechazada";
+            estado: "pendiente" | "cancelada" | "recibida" | "recibida_parcial" | "rechazada";
             requiereRecepcion: boolean;
             motivo: string | null;
             creadoPor: string | null;
@@ -6686,7 +6809,7 @@ export interface components {
             /** @enum {string} */
             modoAcuse: "compartido" | "por_usuario";
             /** @enum {string} */
-            alcance: "centro" | "usuario" | "rol";
+            alcance: "centro" | "rol" | "usuario";
             targets: Record<string, never> | null;
             /** @enum {string} */
             estado: "activa" | "resuelta" | "descartada";
@@ -7119,6 +7242,95 @@ export interface components {
             email?: string;
             activo?: boolean;
         };
+        CreatePerfilDto: {
+            authUserId: string;
+            /** Format: email */
+            email: string;
+            nombre: string;
+            apellido?: string;
+            /** @enum {string} */
+            accessMode?: "operativo" | "gerencial";
+        };
+        PerfilResponseDto: {
+            id: string;
+            email: string;
+            nombre: string;
+            apellido: string | null;
+            /** @enum {string} */
+            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
+            /** @enum {string} */
+            accessMode: "operativo" | "gerencial";
+            isMaster: boolean;
+            avatarUrl: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        InvitePerfilDto: {
+            /** Format: email */
+            email: string;
+            nombre: string;
+            apellido?: string;
+            /** @enum {string} */
+            accessMode?: "operativo" | "gerencial";
+            password?: string;
+            /**
+             * Format: uri
+             * @description Where the invite magic link should land (the FE set-password page). The FE
+             *     sends its own origin so dev (localhost:8080) and prod (Vercel) each land
+             *     correctly; when omitted the BE falls back to INVITE_REDIRECT_URL. Supabase's
+             *     Redirect URLs allowlist is the security gate. `require_tld:false` allows
+             *     localhost. See docs/specs/invite-email.md.
+             */
+            redirectTo?: string;
+        };
+        InvitePerfilResponseDto: {
+            id: string;
+            email: string;
+            nombre: string;
+            apellido: string | null;
+            /** @enum {string} */
+            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
+            /** @enum {string} */
+            accessMode: "operativo" | "gerencial";
+            isMaster: boolean;
+            avatarUrl: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            tempPassword?: string;
+            emailSent?: boolean;
+        };
+        RejectPerfilDto: {
+            motivo: string;
+        };
+        CreateAsignacionDto: {
+            /** Format: uuid */
+            centroId: string;
+            /** @enum {string} */
+            tipo?: "base" | "temporal" | "fijo";
+            vigenteDesde?: string;
+            vigenteHasta?: string;
+            forzado?: boolean;
+        };
+        AsignacionEntity: {
+            perfilId: string;
+            centroId: string;
+            /** @enum {string} */
+            tipo: "base" | "temporal" | "fijo";
+            vigenteDesde: string;
+            vigenteHasta: string | null;
+            forzado: boolean;
+            activo: boolean;
+            perfil?: components["schemas"]["PerfilEntity"];
+            centro?: components["schemas"]["CentroEntity"];
+            id: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SetAvatarDto: {
+            avatarUrl: string;
+        };
         TipoCitaEntity: {
             clave: string;
             nombre: string;
@@ -7237,7 +7449,7 @@ export interface components {
             hora: string | null;
             horaFin: string | null;
             /** @enum {string} */
-            estado: "cancelada" | "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
+            estado: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
             esPrimeraVez: boolean;
             /** @enum {string} */
             canal: "atencion" | "callcenter" | "webhook" | "ia";
@@ -7258,6 +7470,8 @@ export interface components {
             horaInEn: string | null;
             /** Format: date-time */
             horaOutEn: string | null;
+            /** Format: date-time */
+            registradaTardeEn: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7316,6 +7530,58 @@ export interface components {
             horaFin?: string;
             motivo?: string;
             notas?: string;
+        };
+        RegistrarCitaRetroactivaDto: {
+            /**
+             * @description Día en que el paciente vino de verdad. La cita aparece en el tablero de ESE día.
+             * @example 2026-07-28
+             */
+            fecha: string;
+            /**
+             * @description Número de récord del paciente, tal como lo manejan en el mostrador.
+             * @example 5856
+             */
+            record: string;
+            /**
+             * Format: uuid
+             * @description Médico que lo atendió. Si no viene: el último que atendió a ese paciente, luego su médico de cabecera, y si tampoco hay, se registra sin médico. NUNCA bloquea.
+             */
+            medicoId?: string;
+            /**
+             * Format: uuid
+             * @description Personal que agendó la cita (call center).
+             */
+            callcenterId?: string;
+            /**
+             * Format: uuid
+             * @description Personal que atendió al paciente en recepción.
+             */
+            atencionId?: string;
+            /**
+             * Format: uuid
+             * @description Enfermera que tomó los signos vitales.
+             */
+            enfermeraVitalesId?: string;
+            /**
+             * Format: uuid
+             * @description Centro donde ocurrió la visita. Por defecto el centro activo. OBLIGATORIO para un admin sin centro activo: el mismo récord existe en los dos centros y son personas distintas.
+             */
+            centroId?: string;
+            /**
+             * Format: uuid
+             * @description Tipo de cita, si se sabe.
+             */
+            tipoCitaId?: string;
+            /**
+             * @description Canal por el que llegó; por defecto, atención.
+             * @enum {string}
+             */
+            canal?: "atencion" | "callcenter" | "webhook" | "ia";
+            /**
+             * @description Por qué se registra tarde. Queda en los cuatro eventos del historial.
+             * @example no se registró el día de la visita; detectado el 31
+             */
+            motivo?: string;
         };
         ReagendarCitaDto: {
             fecha: string;
@@ -7387,7 +7653,7 @@ export interface components {
             clave: string;
             labelKey: string;
             /** @enum {string} */
-            tipo: "accion" | "fecha" | "hora" | "texto" | "select" | "toggle" | "badge" | "derivado" | "medicion";
+            tipo: "accion" | "fecha" | "hora" | "badge" | "texto" | "select" | "toggle" | "derivado" | "medicion";
             binding: string;
             editable: boolean;
             permiso: string | null;
@@ -8072,6 +8338,11 @@ export interface components {
         GrupoProductosDto: {
             /** @description IDs de productos que QUEDAN en el grupo; los que estaban y no vienen se desasignan. */
             productoIds: string[];
+            /**
+             * @description Un producto pertenece a UN grupo: asignarlo aquí se lo QUITA al grupo donde esté. Sin esta bandera la llamada falla (409 PRODUCTO_EN_OTRO_GRUPO) diciendo qué producto y de qué grupo, para que robar miembros a otro grupo nunca ocurra en silencio.
+             * @default false
+             */
+            mover: boolean;
         };
         ColumnaFacturacionEntity: {
             grupoClave: string;
@@ -8080,7 +8351,7 @@ export interface components {
             /** @enum {string} */
             tipo: "readonly" | "numero" | "texto" | "select" | "calculado";
             /** @enum {string} */
-            rol: "accion" | "cantidad" | "precio" | "subtotal" | "descuento" | "impuesto" | "producto" | "tarifa" | "multiplicador" | "informativo";
+            rol: "accion" | "cantidad" | "producto" | "precio" | "subtotal" | "descuento" | "impuesto" | "tarifa" | "multiplicador" | "informativo";
             orden: number;
             requerido: boolean;
             visible: boolean;
@@ -8317,7 +8588,7 @@ export interface components {
             fecha: string;
             hora: string | null;
             /** @enum {string} */
-            estado: "pendiente" | "cancelada" | "presente" | "en_terapia" | "asistido";
+            estado: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
             cantidad: number;
             /** Format: date-time */
             presenteEn: string | null;
@@ -8375,7 +8646,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sesionId: string;
             /** @enum {string} */
-            tipo: "cancelada" | "creada" | "presente" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "en_terapia" | "asistido" | "autopresente" | "datos" | "entrega_sin_saldo";
+            tipo: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo";
             actorId: string | null;
             motivo: string | null;
             payload: Record<string, never> | null;
@@ -9144,93 +9415,6 @@ export interface components {
             /** @description true = marca "no se prescribió nada"; false = lo quita. */
             on: boolean;
         };
-        CreatePerfilDto: {
-            authUserId: string;
-            /** Format: email */
-            email: string;
-            nombre: string;
-            apellido?: string;
-            /** @enum {string} */
-            accessMode?: "operativo" | "gerencial";
-        };
-        PerfilResponseDto: {
-            id: string;
-            email: string;
-            nombre: string;
-            apellido: string | null;
-            /** @enum {string} */
-            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
-            /** @enum {string} */
-            accessMode: "operativo" | "gerencial";
-            isMaster: boolean;
-            avatarUrl: string | null;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        InvitePerfilDto: {
-            /** Format: email */
-            email: string;
-            nombre: string;
-            apellido?: string;
-            /** @enum {string} */
-            accessMode?: "operativo" | "gerencial";
-            password?: string;
-            /**
-             * Format: uri
-             * @description Where the invite magic link should land (the FE set-password page). The FE
-             *     sends its own origin so dev (localhost:8080) and prod (Vercel) each land
-             *     correctly; when omitted the BE falls back to INVITE_REDIRECT_URL. Supabase's
-             *     Redirect URLs allowlist is the security gate. `require_tld:false` allows
-             *     localhost. See docs/specs/invite-email.md.
-             */
-            redirectTo?: string;
-        };
-        InvitePerfilResponseDto: {
-            id: string;
-            email: string;
-            nombre: string;
-            apellido: string | null;
-            /** @enum {string} */
-            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
-            /** @enum {string} */
-            accessMode: "operativo" | "gerencial";
-            isMaster: boolean;
-            avatarUrl: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            tempPassword?: string;
-            emailSent?: boolean;
-        };
-        RejectPerfilDto: {
-            motivo: string;
-        };
-        CreateAsignacionDto: {
-            /** Format: uuid */
-            centroId: string;
-            /** @enum {string} */
-            tipo?: "base" | "temporal" | "fijo";
-            vigenteDesde?: string;
-            vigenteHasta?: string;
-            forzado?: boolean;
-        };
-        AsignacionEntity: {
-            perfilId: string;
-            centroId: string;
-            /** @enum {string} */
-            tipo: "base" | "temporal" | "fijo";
-            vigenteDesde: string;
-            vigenteHasta: string | null;
-            forzado: boolean;
-            activo: boolean;
-            id: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        SetAvatarDto: {
-            avatarUrl: string;
-        };
         CreateApiKeyDto: {
             name: string;
             permissions: string[];
@@ -9561,6 +9745,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DatosFiscalesDto"];
+                };
+            };
+        };
+    };
+    EstadisticasController_porServicio_v1: {
+        parameters: {
+            query: {
+                /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
+                desde: string;
+                /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
+                hasta: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -10463,6 +10671,30 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductosController_descargaSimulada_v1: {
+        parameters: {
+            query?: {
+                /** @description Unidades del producto; por defecto 1. */
+                cantidad?: string;
+                /** @description Ids de componentes OPCIONALES incluidos, separados por coma (ej.: el INFILTRA01 que convierte el Protocolo Rodilla en "full"). */
+                incluirOpcionales?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -13467,6 +13699,258 @@ export interface operations {
             };
         };
     };
+    ProfilesController_findAll_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"][];
+                };
+            };
+        };
+    };
+    ProfilesController_create_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePerfilDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"];
+                };
+            };
+        };
+    };
+    ProfilesController_invite_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitePerfilDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitePerfilResponseDto"];
+                };
+            };
+        };
+    };
+    ProfilesController_findPending_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"][];
+                };
+            };
+        };
+    };
+    ProfilesController_approve_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"];
+                };
+            };
+        };
+    };
+    ProfilesController_reject_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectPerfilDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"];
+                };
+            };
+        };
+    };
+    ProfilesController_assign_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAsignacionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AsignacionEntity"];
+                };
+            };
+        };
+    };
+    AuthController_me_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_passwordChanged_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"];
+                };
+            };
+        };
+    };
+    AuthController_meCentros_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CentroEntity"][];
+                };
+            };
+        };
+    };
+    MeAvatarController_put_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAvatarDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"];
+                };
+            };
+        };
+    };
+    MeAvatarController_remove_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerfilResponseDto"];
+                };
+            };
+        };
+    };
     TiposCitaController_list_v1: {
         parameters: {
             query?: {
@@ -13995,6 +14479,27 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["ValidarCitaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CitasController_retroactiva_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegistrarCitaRetroactivaDto"];
             };
         };
         responses: {
@@ -15527,6 +16032,23 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["DevolucionEntity"];
                 };
+            };
+        };
+    };
+    FacturacionController_repararPagosHuerfanos_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -18777,258 +19299,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PrescripcionRegistroEntity"];
-                };
-            };
-        };
-    };
-    ProfilesController_findAll_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"][];
-                };
-            };
-        };
-    };
-    ProfilesController_create_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePerfilDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"];
-                };
-            };
-        };
-    };
-    ProfilesController_invite_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InvitePerfilDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitePerfilResponseDto"];
-                };
-            };
-        };
-    };
-    ProfilesController_findPending_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"][];
-                };
-            };
-        };
-    };
-    ProfilesController_approve_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"];
-                };
-            };
-        };
-    };
-    ProfilesController_reject_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RejectPerfilDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"];
-                };
-            };
-        };
-    };
-    ProfilesController_assign_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAsignacionDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AsignacionEntity"];
-                };
-            };
-        };
-    };
-    AuthController_me_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AuthController_passwordChanged_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"];
-                };
-            };
-        };
-    };
-    AuthController_meCentros_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CentroEntity"][];
-                };
-            };
-        };
-    };
-    MeAvatarController_put_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetAvatarDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"];
-                };
-            };
-        };
-    };
-    MeAvatarController_remove_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PerfilResponseDto"];
                 };
             };
         };

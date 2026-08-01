@@ -1508,16 +1508,22 @@
         "servicio": "Service"
       },
       "modo": {
-        "a_la_venta": "On sale",
-        "a_la_entrega": "On delivery",
-        "no_descarga": "No discharge"
+        "a_la_venta": "When billed",
+        "a_la_entrega": "When delivered",
+        "no_descarga": "Doesn't leave"
       },
       "field": {
         "nombre": "Name",
         "sku": "SKU",
         "nombreCorto": "Short name",
+        "nombreTecnico": "Technical name (warehouse)",
+        "nombreTecnicoPh": "The same item with its internal name",
+        "costoReferencia": "How much does the unit cost us?",
+        "opcional": "(optional)",
+        "facturableGeneral": "Sold on its own?",
+        "facturableGeneralNo": "This product is not sold on its own; its price won't be used.",
         "tipo": "Type",
-        "modoDescarga": "Discharge mode",
+        "modoDescarga": "When does it leave inventory?",
         "categoria": "Category",
         "marca": "Brand",
         "fabricante": "Manufacturer",
@@ -1545,6 +1551,33 @@
       "grupoCrear": "Create group",
       "grupoClave": "Group key",
       "grupoCreado": "Group created"
+    },
+    "descarga": {
+      "titulo": "What gets deducted if I bill this?",
+      "incluirOpcionales": "Include optionals (full)",
+      "recalcular": "Recalculate",
+      "calculando": "Calculating…",
+      "error": "Could not calculate",
+      "sinLineas": "Deducts nothing from inventory",
+      "estimadosTitulo": "Estimated (reported, not deducted)",
+      "esteProducto": "this product",
+      "duplicadoBadge": "duplicate ×{veces}",
+      "col": {
+        "producto": "Product",
+        "cantidad": "Quantity",
+        "sale": "Leaves inventory",
+        "costo": "Cost"
+      },
+      "modo": {
+        "a_la_venta": "When billed",
+        "a_la_entrega": "When delivered",
+        "no_descarga": "Doesn't leave"
+      },
+      "aviso": {
+        "duplicado": "{nombre} would be deducted {veces} times (it arrives via more than one path).",
+        "ciclo": "There is a cycle in the components (a kit contains itself). Broken configuration.",
+        "profundidad": "Nesting is too deep. Check the configuration."
+      }
     },
     "picker": {
       "placeholder": "Select a product…",

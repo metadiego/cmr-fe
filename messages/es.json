@@ -1508,16 +1508,22 @@
         "servicio": "Servicio"
       },
       "modo": {
-        "a_la_venta": "A la venta",
-        "a_la_entrega": "A la entrega",
-        "no_descarga": "No descarga"
+        "a_la_venta": "Al facturar",
+        "a_la_entrega": "Al entregar",
+        "no_descarga": "No sale"
       },
       "field": {
         "nombre": "Nombre",
         "sku": "SKU",
         "nombreCorto": "Nombre corto",
+        "nombreTecnico": "Nombre técnico (almacén)",
+        "nombreTecnicoPh": "El mismo frasco con su nombre interno",
+        "costoReferencia": "¿Cuánto nos cuesta la unidad?",
+        "opcional": "(opcional)",
+        "facturableGeneral": "¿Se vende suelto?",
+        "facturableGeneralNo": "Este producto no se vende suelto; su precio no se usará.",
         "tipo": "Tipo",
-        "modoDescarga": "Modo de descarga",
+        "modoDescarga": "¿Cuándo sale del inventario?",
         "categoria": "Categoría",
         "marca": "Marca",
         "fabricante": "Fabricante",
@@ -1545,6 +1551,33 @@
       "grupoCrear": "Crear grupo",
       "grupoClave": "Clave del grupo",
       "grupoCreado": "Grupo creado"
+    },
+    "descarga": {
+      "titulo": "¿Qué se descuenta si facturo esto?",
+      "incluirOpcionales": "Incluir opcionales (full)",
+      "recalcular": "Recalcular",
+      "calculando": "Calculando…",
+      "error": "No se pudo calcular",
+      "sinLineas": "No descuenta nada de inventario",
+      "estimadosTitulo": "Estimados (se reportan, no descuentan)",
+      "esteProducto": "este producto",
+      "duplicadoBadge": "duplicado ×{veces}",
+      "col": {
+        "producto": "Producto",
+        "cantidad": "Cantidad",
+        "sale": "Sale del inventario",
+        "costo": "Costo"
+      },
+      "modo": {
+        "a_la_venta": "Al facturar",
+        "a_la_entrega": "Al entregar",
+        "no_descarga": "No sale"
+      },
+      "aviso": {
+        "duplicado": "{nombre} se descontaría {veces} veces (llega por más de un camino).",
+        "ciclo": "Hay un ciclo en los componentes (un kit se contiene a sí mismo). Configuración rota.",
+        "profundidad": "El anidamiento es demasiado profundo. Revisa la configuración."
+      }
     },
     "picker": {
       "placeholder": "Selecciona un producto…",

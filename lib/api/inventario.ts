@@ -133,6 +133,54 @@ export function deleteProducto(id: string): Promise<void> {
   return apiFetch<void>(`/inventario/productos/${id}`, { method: "DELETE" });
 }
 
+// "¿Qué se descuenta si facturo esto?" — desglose YA EXPANDIDO (abre kits anidados, cantidades
+// multiplicadas por el camino). Usa la MISMA función que la descarga real (no una copia). Contrato:
+// GET /inventario/productos/:id/descarga-simulada?cantidad&incluirOpcionales=<id>,<id>
+export type DescargaModo = "a_la_venta" | "a_la_entrega" | "no_descarga";
+// Una línea que SÍ descuenta. `rutas` = por dónde llegó cada uno (array de caminos de productoIds);
+// con más de una ruta, es un DUPLICADO (se descuenta por dos caminos).
+export type DescargaLinea = {
+  productoId: string;
+  sku?: string | null;
+  nombre?: string | null;
+  nombreTecnico?: string | null;
+  cantidad: number;
+  modoDescarga: DescargaModo;
+  costoReferencia?: number | null;
+  rutas: string[][];
+};
+// Consumos ESTIMADOS: se reportan pero NO descargan (gasa, cánula). Se pintan aparte y en gris.
+export type DescargaEstimado = {
+  productoId?: string | null;
+  sku?: string | null;
+  nombre?: string | null;
+  cantidad?: number | null;
+  modoDescarga?: DescargaModo | null;
+};
+// Avisos: `duplicado` (el mismo producto por dos caminos → se descontaría N veces, el fallo que originó
+// esto), `ciclo` y `profundidad` (configuraciones rotas).
+export type DescargaAviso = {
+  tipo: "duplicado" | "ciclo" | "profundidad";
+  productoId?: string | null;
+  veces?: number | null;
+  ruta?: string[] | null;
+};
+export type DescargaSimulada = {
+  producto: { id: string; sku?: string | null; nombre?: string | null; nombreTecnico?: string | null };
+  lineas: DescargaLinea[];
+  estimados: DescargaEstimado[];
+  avisos: DescargaAviso[];
+};
+export function getDescargaSimulada(
+  id: string,
+  cantidad = 1,
+  incluirOpcionales?: string[],
+): Promise<DescargaSimulada> {
+  const sp = new URLSearchParams({ cantidad: String(cantidad) });
+  if (incluirOpcionales && incluirOpcionales.length) sp.set("incluirOpcionales", incluirOpcionales.join(","));
+  return apiFetch<DescargaSimulada>(`/inventario/productos/${id}/descarga-simulada?${sp.toString()}`);
+}
+
 export function listUnidades(): Promise<Unidad[]> {
   return apiFetch<Unidad[]>(`/inventario/unidades?limit=100`);
 }
