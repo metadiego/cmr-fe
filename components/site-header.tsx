@@ -15,6 +15,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { isActive } from "@/lib/nav";
 import { NAV_MANIFEST } from "@/lib/nav-manifest";
+import { resolveMenuIcon } from "@/lib/menu-icons";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { createClient } from "@/lib/supabase/client";
@@ -50,6 +51,8 @@ type MenuNode = {
   labelKey: string;
   labelCustom?: string | null;
   tipo?: "item" | "grupo" | "separador";
+  icon?: string | null;
+  mostrarIcono?: boolean;
   path: string;
   children: MenuNode[];
 };
@@ -58,6 +61,8 @@ type MenuTreeInput = {
   labelKey: string;
   labelCustom?: string | null;
   tipo?: "item" | "grupo" | "separador";
+  icon?: string | null;
+  mostrarIcono?: boolean;
   path: string;
   parentClave?: string | null;
 };
@@ -69,6 +74,8 @@ function buildMenuTree(items: MenuTreeInput[]): MenuNode[] {
       labelKey: i.labelKey,
       labelCustom: i.labelCustom,
       tipo: i.tipo,
+      icon: i.icon,
+      mostrarIcono: i.mostrarIcono,
       path: i.path,
       children: [],
     });
@@ -183,6 +190,12 @@ export function SiteHeader() {
   };
   const nodeActive = (n: MenuNode): boolean =>
     (!!n.path && n.path !== "#" && isActive(pathname, n.path)) || n.children.some(nodeActive);
+  // Icono del nodo (si mostrarIcono y está en el catálogo).
+  const iconOf = (n: MenuNode) => (n.mostrarIcono ? resolveMenuIcon(n.icon) : null);
+  const nodeIcon = (n: MenuNode) => {
+    const ic = iconOf(n);
+    return ic ? <HugeiconsIcon icon={ic} className="size-4 opacity-70" /> : null;
+  };
   // Ítems del dropdown de escritorio, recursivo: separador = línea; hoja = enlace; rama = submenú.
   const renderDesktopNodes = (nodes: MenuNode[]): React.ReactNode =>
     nodes.map((n) =>
@@ -190,14 +203,20 @@ export function SiteHeader() {
         <DropdownMenuSeparator key={n.clave} />
       ) : n.children.length > 0 ? (
         <DropdownMenuSub key={n.clave}>
-          <DropdownMenuSubTrigger>{labelOf(n)}</DropdownMenuSubTrigger>
+          <DropdownMenuSubTrigger>
+            {nodeIcon(n)}
+            {labelOf(n)}
+          </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="max-h-[70vh] overflow-y-auto">
             {renderDesktopNodes(n.children)}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
       ) : (
         <DropdownMenuItem key={n.clave} asChild>
-          <Link href={n.path}>{labelOf(n)}</Link>
+          <Link href={n.path}>
+            {nodeIcon(n)}
+            {labelOf(n)}
+          </Link>
         </DropdownMenuItem>
       ),
     );
@@ -228,12 +247,13 @@ export function SiteHeader() {
           onClick={() => setOpen(false)}
           style={{ marginLeft: (level + 1) * 12 }}
           className={cn(
-            "rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
+            "flex items-center gap-2 rounded-md px-3 py-2 text-[13px] font-medium transition-colors",
             isActive(pathname, n.path)
               ? "bg-accent text-accent-foreground"
               : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
           )}
         >
+          {nodeIcon(n)}
           {labelOf(n)}
         </Link>
       ),
