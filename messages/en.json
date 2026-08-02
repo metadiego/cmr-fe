@@ -488,9 +488,10 @@
       "created": "Patient created.",
       "updated": "Patient updated.",
       "recordDuplicadoTitle": "Record number already in use",
-      "recordDuplicadoBody": "Record #{record} already belongs to {nombre} ({estado}) in this center. Change the number or leave the field empty to auto-generate it.",
+      "recordDuplicadoBody": "Record #{record} already belongs to {nombre} ({estado}) in this center. Use another number or leave the field empty.",
       "recordDuenoActivo": "active",
-      "recordDuenoInactivo": "inactive"
+      "recordDuenoInactivo": "inactive",
+      "camposFaltantes": "Required fields missing: {campos}"
     }
   },
   "common": {

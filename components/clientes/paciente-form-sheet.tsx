@@ -198,10 +198,14 @@ export function PacienteFormSheet({
   // (patrón programar-citas-modal / react-hooks/set-state-in-effect).
   const recordLimpio = form.record.trim();
   const recordKey = `${tenant ?? ""}|${recordLimpio}`;
-  // Editing and keeping the patient's own record: nothing to check.
+  // No tenant yet (multi-center create before picking a centro): checking would
+  // hit the BE unscoped/400 and could accuse a duplicate from ANOTHER center.
+  // recordKey includes the tenant, so picking a centro re-checks automatically.
+  // Editing and keeping the patient's own record: nothing to check either.
   const needsCheck =
     open &&
     !!recordLimpio &&
+    !!tenant &&
     !(isEdit && recordLimpio === (paciente?.record ?? ""));
   // res null = the check failed (silent: the BE re-validates on save with 409).
   const [recordCheck, setRecordCheck] = React.useState<{
@@ -232,27 +236,33 @@ export function PacienteFormSheet({
     recordCheck && recordCheck.key === recordKey ? recordCheck.res : null;
   const checkingRecord =
     needsCheck && (!recordCheck || recordCheck.key !== recordKey);
-  const [duenoServer, setDuenoServer] = React.useState<
-    NonNullable<RecordDueno["dueno"]> | null
-  >(null);
+  // The 409 fallback owner is KEYED by tenant+record: switching centro or
+  // editing the number invalidates it (otherwise a stale red alert from centro A
+  // would contradict a green "available" check in centro B).
+  const [duenoServer, setDuenoServer] = React.useState<{
+    key: string;
+    dueno: NonNullable<RecordDueno["dueno"]>;
+  } | null>(null);
   const duenoLive =
     checkVigente?.dueno && checkVigente.dueno.id !== paciente?.id
       ? checkVigente.dueno
       : null;
-  const dueno = duenoLive ?? duenoServer;
-  const recordDisponible = needsCheck && !!checkVigente && !duenoLive;
+  const dueno =
+    duenoLive ?? (duenoServer?.key === recordKey ? duenoServer.dueno : null);
+  const recordDisponible = needsCheck && !!checkVigente && !dueno;
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((prev) => ({ ...prev, [k]: v }));
-    if (k === "record") setDuenoServer(null);
+  }
+
+  function resetFormState() {
+    setForm(paciente ? fromPaciente(paciente) : EMPTY);
+    setRecordCheck(null);
+    setDuenoServer(null);
   }
 
   function handleOpenChange(next: boolean) {
-    if (!next) {
-      setForm(paciente ? fromPaciente(paciente) : EMPTY);
-      setRecordCheck(null);
-      setDuenoServer(null);
-    }
+    if (!next) resetFormState();
     onOpenChange(next);
   }
 
@@ -284,16 +294,32 @@ export function PacienteFormSheet({
       }
       toast.success(isEdit ? t("updated") : t("created"));
       onSaved(saved);
+      // Reset BEFORE closing: Radix controlled sheets don't fire onOpenChange
+      // for programmatic prop changes, so without this the next open shows the
+      // saved patient's data AND a false blocking duplicate alert on their own
+      // record number.
+      resetFormState();
       onOpenChange(false);
     } catch (err) {
-      // Race fallback: someone took the record between the live check and the
-      // save — show the same big alert with the owner the BE reports.
-      if (
+      const dueno =
+        err instanceof ApiError && err.code === "PACIENTE_RECORD_DUPLICADO"
+          ? (err.data?.dueno as NonNullable<RecordDueno["dueno"]> | undefined)
+          : undefined;
+      if (dueno && typeof dueno === "object" && "nombres" in dueno) {
+        // Race fallback: someone took the record between the live check and
+        // the save — same big alert, keyed to this tenant+record.
+        setDuenoServer({ key: recordKey, dueno });
+      } else if (
         err instanceof ApiError &&
-        err.code === "PACIENTE_RECORD_DUPLICADO" &&
-        err.data?.dueno
+        err.code === "PACIENTE_CAMPOS_OBLIGATORIOS" &&
+        Array.isArray(err.data?.campos)
       ) {
-        setDuenoServer(err.data.dueno as NonNullable<RecordDueno["dueno"]>);
+        // Name the fields (a center can require fields this form doesn't show).
+        toast.error(
+          t("camposFaltantes", {
+            campos: (err.data.campos as string[]).join(", "),
+          }),
+        );
       } else {
         toastError(err, tRoot);
       }

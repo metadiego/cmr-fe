@@ -488,9 +488,10 @@
       "created": "Paciente creado.",
       "updated": "Paciente actualizado.",
       "recordDuplicadoTitle": "Número de récord ya en uso",
-      "recordDuplicadoBody": "El récord #{record} ya pertenece a {nombre} ({estado}) en este centro. Cambia el número o deja el campo vacío para generarlo automáticamente.",
+      "recordDuplicadoBody": "El récord #{record} ya pertenece a {nombre} ({estado}) en este centro. Usa otro número o deja el campo vacío.",
       "recordDuenoActivo": "activo",
-      "recordDuenoInactivo": "inactivo"
+      "recordDuenoInactivo": "inactivo",
+      "camposFaltantes": "Faltan campos obligatorios: {campos}"
     }
   },
   "common": {
