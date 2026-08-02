@@ -155,7 +155,7 @@ function MenuItemForm({
   }
 
   async function onSubmit() {
-    if (!form.clave.trim() || !form.labelKey.trim() || !form.path.trim()) return;
+    if (!form.clave.trim() || !form.labelKey?.trim() || !form.path?.trim()) return;
     setSubmitting(true);
     try {
       const payload: MenuItemPayload = {
@@ -184,7 +184,7 @@ function MenuItemForm({
       description={t("formHelp")}
       submitting={submitting}
       canSubmit={
-        !!form.clave.trim() && !!form.labelKey.trim() && !!form.path.trim()
+        !!form.clave.trim() && !!form.labelKey?.trim() && !!form.path?.trim()
       }
       onSubmit={onSubmit}
     >

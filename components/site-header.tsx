@@ -35,6 +35,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -43,18 +44,34 @@ import {
 
 // Árbol del menú del BE anidado por `parentClave` (soporta 3–4 niveles). El BE ya devuelve los
 // ítems ordenados por `orden`, así que preservamos el orden de llegada. `path "#"`/null = contenedor.
+// tipo (cmr-be PR #230): 'grupo' = caja/dropdown; 'separador' = línea; resto = enlace.
 type MenuNode = {
   clave: string;
   labelKey: string;
+  labelCustom?: string | null;
+  tipo?: "item" | "grupo" | "separador";
   path: string;
   children: MenuNode[];
 };
-function buildMenuTree(
-  items: { clave: string; labelKey: string; path: string; parentClave?: string | null }[],
-): MenuNode[] {
+type MenuTreeInput = {
+  clave: string;
+  labelKey: string;
+  labelCustom?: string | null;
+  tipo?: "item" | "grupo" | "separador";
+  path: string;
+  parentClave?: string | null;
+};
+function buildMenuTree(items: MenuTreeInput[]): MenuNode[] {
   const byClave = new Map<string, MenuNode>();
   for (const i of items) {
-    byClave.set(i.clave, { clave: i.clave, labelKey: i.labelKey, path: i.path, children: [] });
+    byClave.set(i.clave, {
+      clave: i.clave,
+      labelKey: i.labelKey,
+      labelCustom: i.labelCustom,
+      tipo: i.tipo,
+      path: i.path,
+      children: [],
+    });
   }
   const roots: MenuNode[] = [];
   for (const i of items) {
@@ -154,35 +171,53 @@ export function SiteHeader() {
   // Grupos de dominio del BE (Entrega A del handoff Menú-Grupos): raíces `g-*` de /me/menu con sus
   // hijos anidados por `parentClave`. SE SUMAN a los dos menús de desarrollo (que quedan tal cual).
   // 100% data-driven: si el BE no envía raíces `g-*`, no se pinta nada extra (sin regresión).
-  const domainGroups = buildMenuTree(menu).filter((r) => r.clave.startsWith("g-"));
+  // Agrupar por `tipo === 'grupo'` (cmr-be PR #230); fallback al prefijo `g-` por compatibilidad.
+  const domainGroups = buildMenuTree(menu).filter(
+    (r) => r.tipo === "grupo" || r.clave.startsWith("g-"),
+  );
+  // Etiqueta visible: labelCustom (nombre libre) pisa la clave i18n; si no, traducir labelKey.
+  const labelOf = (n: { labelCustom?: string | null; labelKey: string }): string => {
+    const custom = n.labelCustom?.trim();
+    if (custom) return custom;
+    return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.labelKey;
+  };
   const nodeActive = (n: MenuNode): boolean =>
     (!!n.path && n.path !== "#" && isActive(pathname, n.path)) || n.children.some(nodeActive);
-  // Ítems del dropdown de escritorio, recursivo: hoja = enlace; rama = submenú (soporta 3–4 niveles).
+  // Ítems del dropdown de escritorio, recursivo: separador = línea; hoja = enlace; rama = submenú.
   const renderDesktopNodes = (nodes: MenuNode[]): React.ReactNode =>
     nodes.map((n) =>
-      n.children.length > 0 ? (
+      n.tipo === "separador" ? (
+        <DropdownMenuSeparator key={n.clave} />
+      ) : n.children.length > 0 ? (
         <DropdownMenuSub key={n.clave}>
-          <DropdownMenuSubTrigger>{tRoot(n.labelKey)}</DropdownMenuSubTrigger>
+          <DropdownMenuSubTrigger>{labelOf(n)}</DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="max-h-[70vh] overflow-y-auto">
             {renderDesktopNodes(n.children)}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
       ) : (
         <DropdownMenuItem key={n.clave} asChild>
-          <Link href={n.path}>{tRoot(n.labelKey)}</Link>
+          <Link href={n.path}>{labelOf(n)}</Link>
         </DropdownMenuItem>
       ),
     );
   // Ítems del menú móvil (acordeón), recursivo: indentación por nivel; rama = encabezado + hijos.
   const renderMobileNodes = (nodes: MenuNode[], level = 0): React.ReactNode =>
     nodes.map((n) =>
-      n.children.length > 0 ? (
+      n.tipo === "separador" ? (
+        <div
+          key={n.clave}
+          aria-hidden
+          className="my-1 h-px bg-border/60"
+          style={{ marginLeft: (level + 1) * 12 }}
+        />
+      ) : n.children.length > 0 ? (
         <div key={n.clave} className="flex flex-col gap-0.5">
           <span
             className="px-3 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
             style={{ marginLeft: level * 12 }}
           >
-            {tRoot(n.labelKey)}
+            {labelOf(n)}
           </span>
           {renderMobileNodes(n.children, level + 1)}
         </div>
@@ -199,7 +234,7 @@ export function SiteHeader() {
               : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
           )}
         >
-          {tRoot(n.labelKey)}
+          {labelOf(n)}
         </Link>
       ),
     );
@@ -208,7 +243,7 @@ export function SiteHeader() {
   const locale = useLocale();
   type TopItem = {
     key: string;
-    labelKey: string;
+    text: string;
     active: boolean;
     kind: "dev" | "domain";
     devItems?: { clave: string; labelKey: string; path: string }[];
@@ -217,14 +252,14 @@ export function SiteHeader() {
   const topItems: TopItem[] = [
     ...grupos.map((g) => ({
       key: g.clave,
-      labelKey: g.labelKey,
+      text: tRoot.has(g.labelKey) ? tRoot(g.labelKey) : g.labelKey,
       active: g.items.some((c) => isActive(pathname, c.path)),
       kind: "dev" as const,
       devItems: g.items,
     })),
     ...domainGroups.map((g) => ({
       key: g.clave,
-      labelKey: g.labelKey,
+      text: labelOf(g),
       active: nodeActive(g),
       kind: "domain" as const,
       node: g,
@@ -245,7 +280,7 @@ export function SiteHeader() {
       ))
     ) : (
       <>
-        <DropdownMenuLabel>{tRoot(it.labelKey)}</DropdownMenuLabel>
+        <DropdownMenuLabel>{it.text}</DropdownMenuLabel>
         {renderDesktopNodes(it.node!.children)}
       </>
     );
@@ -352,7 +387,7 @@ export function SiteHeader() {
               {domainGroups.map((g) => (
                 <div key={g.clave} className="flex flex-col gap-0.5">
                   <span className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tRoot(g.labelKey)}
+                    {labelOf(g)}
                   </span>
                   {renderMobileNodes(g.children, 1)}
                 </div>
@@ -397,7 +432,7 @@ export function SiteHeader() {
           {topItems.slice(0, fit).map((it) => (
             <DropdownMenu key={it.key}>
               <DropdownMenuTrigger className={triggerCls(it.active)}>
-                {tRoot(it.labelKey)}
+                {it.text}
                 <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="max-h-[70vh] overflow-y-auto">
@@ -416,7 +451,7 @@ export function SiteHeader() {
               <DropdownMenuContent align="end" className="max-h-[70vh] overflow-y-auto">
                 {topItems.slice(fit).map((it) => (
                   <DropdownMenuSub key={it.key}>
-                    <DropdownMenuSubTrigger>{tRoot(it.labelKey)}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger>{it.text}</DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="max-h-[70vh] overflow-y-auto">
                       {renderTopContent(it)}
                     </DropdownMenuSubContent>
@@ -434,7 +469,7 @@ export function SiteHeader() {
         >
           {topItems.map((it) => (
             <span key={it.key} data-top className={triggerCls(false)}>
-              {tRoot(it.labelKey)}
+              {it.text}
               <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5 opacity-60" />
             </span>
           ))}
