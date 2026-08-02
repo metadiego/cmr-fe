@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { NAV_MANIFEST } from "@/lib/nav-manifest";
+import { MENU_ICONS, resolveMenuIcon } from "@/lib/menu-icons";
 import {
   getAllMenu,
   createMenuItem,
@@ -19,6 +20,13 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -231,6 +239,18 @@ export function MenuEditor() {
     setItems(items.map((i) => (i.id === it.id ? { ...i, visible: !i.visible } : i)));
     try {
       await updateMenuItem(it.id, { visible: !it.visible });
+    } catch (e) {
+      toast.error(apiErrorMessage(e));
+      load();
+    }
+  }
+
+  // Icono del ítem: guarda el nombre en `icon` y enciende `mostrarIcono`. null = sin icono.
+  async function setIcon(it: MenuItem, name: string | null) {
+    if (!items) return;
+    setItems(items.map((i) => (i.id === it.id ? { ...i, icon: name, mostrarIcono: !!name } : i)));
+    try {
+      await updateMenuItem(it.id, { icon: name, mostrarIcono: !!name });
     } catch (e) {
       toast.error(apiErrorMessage(e));
       load();
@@ -457,16 +477,56 @@ export function MenuEditor() {
             />
           ) : (
             <span
-              className="flex-1 cursor-text truncate"
+              className="flex flex-1 cursor-text items-center gap-2 truncate"
               title={t("renameHint")}
               onDoubleClick={() => setEditing({ id: it.id, value: it.labelCustom ?? "" })}
             >
-              <span className={cn("font-medium", esGrupo && "font-semibold")}>{label(it)}</span>
+              {it.mostrarIcono && resolveMenuIcon(it.icon) ? (
+                <HugeiconsIcon icon={resolveMenuIcon(it.icon)!} className="size-4 text-muted-foreground" />
+              ) : null}
+              <span className={cn("truncate font-medium", esGrupo && "font-semibold")}>{label(it)}</span>
               {!esGrupo && it.path && it.path !== "#" ? (
-                <span className="ml-2 text-xs text-muted-foreground">{it.path}</span>
+                <span className="ml-1 truncate text-xs text-muted-foreground">{it.path}</span>
               ) : null}
             </span>
           )}
+          {/* Selector de icono (mostrarIcono se enciende al elegir uno). */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="size-7 text-muted-foreground opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100"
+                aria-label={t("icon")}
+              >
+                {resolveMenuIcon(it.icon) ? (
+                  <HugeiconsIcon icon={resolveMenuIcon(it.icon)!} className="size-4" />
+                ) : (
+                  <span className="text-sm">◇</span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-auto">
+              <div className="grid grid-cols-6 gap-1 p-1">
+                {MENU_ICONS.map((ic) => (
+                  <button
+                    key={ic.name}
+                    type="button"
+                    title={ic.name}
+                    onClick={() => setIcon(it, ic.name)}
+                    className={cn(
+                      "grid size-8 place-items-center rounded hover:bg-accent",
+                      it.icon === ic.name && "bg-accent ring-1 ring-primary",
+                    )}
+                  >
+                    <HugeiconsIcon icon={ic.icon} className="size-4" />
+                  </button>
+                ))}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => setIcon(it, null)}>{t("noIcon")}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
             {t("visible")}
             <Switch checked={it.visible} onCheckedChange={() => toggleVisible(it)} />

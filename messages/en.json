@@ -588,6 +588,8 @@
     "separatorAdded": "Divider added",
     "renamePlaceholder": "Name",
     "renameHint": "Double-click to rename",
+    "icon": "Icon",
+    "noIcon": "No icon",
     "availableTitle": "Available routes",
     "availableHelp": "App pages not yet in the menu. Press + to add them.",
     "availableEmpty": "All routes are already in the menu."
