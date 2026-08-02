@@ -1,4 +1,5 @@
-import { apiFetch } from "./client";
+import { apiFetchPaged } from "./client";
+import type { Paginated } from "./types";
 
 // Bitácora de auditoría (BE: AuditLogController, spec docs/specs/auditoria.md — ya en prod).
 // El OpenAPI NO tipa la respuesta (operación vacía), así que estos tipos son LOCALES según el
@@ -26,14 +27,6 @@ export interface AuditRow {
   meta: Record<string, unknown> | null;
 }
 
-// Paginación DENTRO de `data` (no en `meta`) → por eso apiFetch, NO apiFetchPaged.
-export interface AuditPage {
-  data: AuditRow[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
 // Todos opcionales. `userId` = authUserId. Filtros indexados (rápidos): createdAt(desde/hasta),
 // dominio, userId, resultado. `metodo`/`clinicId` filtran de a un valor.
 export interface AuditListParams {
@@ -51,15 +44,17 @@ export interface AuditListParams {
 
 // GET /auditoria — endpoint CORRECTO (el atajo /auditoria/errores devuelve el 98% de las filas por
 // el ruido de RATE_LIMITED, así que NO se usa; el filtro de errores se hace con resultado=error).
+// El BE responde el envelope estándar { data: filas[], meta: { pagination } } → apiFetchPaged
+// (verificado en prod 2026-08-02; el hand-off decía "apiFetch", pero la paginación va en meta).
 // tenant null = sin X-Tenant-ID → el admin ve TODOS los centros; el filtro de centro va por clinicId.
 export function listAuditoria(
   params: AuditListParams = {},
   tenant: string | null = null,
-): Promise<AuditPage> {
+): Promise<Paginated<AuditRow>> {
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null && `${v}` !== "") sp.set(k, String(v));
   }
   const qs = sp.toString();
-  return apiFetch<AuditPage>(`/auditoria${qs ? `?${qs}` : ""}`, {}, tenant);
+  return apiFetchPaged<AuditRow>(`/auditoria${qs ? `?${qs}` : ""}`, {}, tenant);
 }
