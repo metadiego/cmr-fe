@@ -112,6 +112,7 @@ async function rawRequest<T>(
       res.status,
       err?.details,
       err?.labelKey,
+      err,
     );
   }
 

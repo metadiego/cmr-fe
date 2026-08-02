@@ -4,16 +4,28 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Alert02Icon,
+  CheckmarkCircle02Icon,
+  Loading03Icon,
+} from "@hugeicons/core-free-icons";
+
 import {
   createPaciente,
   updatePaciente,
+  getRecordDueno,
+  getConfigAltaPacientes,
   type Paciente,
   type CreatePacientePayload,
+  type RecordDueno,
 } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { toastError } from "@/lib/api/errors";
+import { ApiError } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,6 +145,7 @@ export function PacienteFormSheet({
 }) {
   const t = useTranslations("patients.form");
   const tc = useTranslations("common");
+  const tRoot = useTranslations();
   const isEdit = !!paciente;
 
   const [form, setForm] = React.useState<FormState>(
@@ -151,24 +164,118 @@ export function PacienteFormSheet({
     centroSel ||
     getActiveCentro() ||
     (centros.length === 1 ? centros[0].id : "");
+  // Tenant every request of THIS form goes to (edit stays in the patient's center).
+  const tenant = isEdit
+    ? (paciente?.clinicId ?? undefined)
+    : effectiveCentro || undefined;
+
+  // Required fields come from the BE per-center config (default telefono/zipcode/
+  // sexo) — nothing hardcoded here; the BE enforces on save either way. If the
+  // config can't load we mark nothing and let the BE answer with `campos`.
+  const { state: configState } = useResource(
+    () => getConfigAltaPacientes(tenant),
+    [tenant, open],
+  );
+  const requeridos = React.useMemo(
+    () =>
+      new Set(
+        configState.kind === "ok" ? configState.data.camposObligatorios : [],
+      ),
+    [configState],
+  );
+  const req = (campo: keyof FormState) => requeridos.has(campo);
+  // Only fields this form captures can gate the submit; anything else the
+  // center requires is the BE's final word (surfaced via the 400 toast).
+  const faltantes = [...requeridos].filter(
+    (campo) =>
+      campo in form && !form[campo as keyof FormState].trim(),
+  );
+
+  // ── Async duplicate check of the manual record number ──────────────────────
+  // Debounced 400 ms (patrón paciente-select). Keyed by tenant+record so a stale
+  // response never labels the current value; the "checking" spinner is DERIVED
+  // (no result yet for the current key), never set synchronously in the effect
+  // (patrón programar-citas-modal / react-hooks/set-state-in-effect).
+  const recordLimpio = form.record.trim();
+  const recordKey = `${tenant ?? ""}|${recordLimpio}`;
+  // No tenant yet (multi-center create before picking a centro): checking would
+  // hit the BE unscoped/400 and could accuse a duplicate from ANOTHER center.
+  // recordKey includes the tenant, so picking a centro re-checks automatically.
+  // Editing and keeping the patient's own record: nothing to check either.
+  const needsCheck =
+    open &&
+    !!recordLimpio &&
+    !!tenant &&
+    !(isEdit && recordLimpio === (paciente?.record ?? ""));
+  // res null = the check failed (silent: the BE re-validates on save with 409).
+  const [recordCheck, setRecordCheck] = React.useState<{
+    key: string;
+    res: RecordDueno | null;
+  } | null>(null);
+  React.useEffect(() => {
+    if (!needsCheck) return;
+    let cancel = false;
+    const timer = setTimeout(() => {
+      getRecordDueno(recordLimpio, tenant)
+        .then((res) => {
+          if (!cancel) setRecordCheck({ key: recordKey, res });
+        })
+        .catch(() => {
+          if (!cancel) setRecordCheck({ key: recordKey, res: null });
+        });
+    }, 400);
+    return () => {
+      cancel = true;
+      clearTimeout(timer);
+    };
+  }, [needsCheck, recordKey, recordLimpio, tenant]);
+
+  // Owner surfaced by the live check (only when it matches the CURRENT value),
+  // or by the BE's 409 on save (race fallback). Own record never counts.
+  const checkVigente =
+    recordCheck && recordCheck.key === recordKey ? recordCheck.res : null;
+  const checkingRecord =
+    needsCheck && (!recordCheck || recordCheck.key !== recordKey);
+  // The 409 fallback owner is KEYED by tenant+record: switching centro or
+  // editing the number invalidates it (otherwise a stale red alert from centro A
+  // would contradict a green "available" check in centro B).
+  const [duenoServer, setDuenoServer] = React.useState<{
+    key: string;
+    dueno: NonNullable<RecordDueno["dueno"]>;
+  } | null>(null);
+  const duenoLive =
+    checkVigente?.dueno && checkVigente.dueno.id !== paciente?.id
+      ? checkVigente.dueno
+      : null;
+  const dueno =
+    duenoLive ?? (duenoServer?.key === recordKey ? duenoServer.dueno : null);
+  const recordDisponible = needsCheck && !!checkVigente && !dueno;
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((prev) => ({ ...prev, [k]: v }));
   }
 
+  function resetFormState() {
+    setForm(paciente ? fromPaciente(paciente) : EMPTY);
+    setRecordCheck(null);
+    setDuenoServer(null);
+  }
+
   function handleOpenChange(next: boolean) {
-    if (!next) setForm(paciente ? fromPaciente(paciente) : EMPTY);
+    if (!next) resetFormState();
     onOpenChange(next);
   }
 
   const canSubmit =
     form.nombres.trim().length > 0 &&
+    faltantes.length === 0 &&
+    !dueno &&
+    !checkingRecord &&
     !submitting &&
     (!needsCentro || !!effectiveCentro);
 
   async function onSubmit() {
-    if (!form.nombres.trim()) return;
-    if (needsCentro && !effectiveCentro) return;
+    if (!canSubmit) return;
     setSubmitting(true);
     try {
       const payload = toPayload(form);
@@ -187,9 +294,35 @@ export function PacienteFormSheet({
       }
       toast.success(isEdit ? t("updated") : t("created"));
       onSaved(saved);
+      // Reset BEFORE closing: Radix controlled sheets don't fire onOpenChange
+      // for programmatic prop changes, so without this the next open shows the
+      // saved patient's data AND a false blocking duplicate alert on their own
+      // record number.
+      resetFormState();
       onOpenChange(false);
     } catch (err) {
-      toastError(err);
+      const dueno =
+        err instanceof ApiError && err.code === "PACIENTE_RECORD_DUPLICADO"
+          ? (err.data?.dueno as NonNullable<RecordDueno["dueno"]> | undefined)
+          : undefined;
+      if (dueno && typeof dueno === "object" && "nombres" in dueno) {
+        // Race fallback: someone took the record between the live check and
+        // the save — same big alert, keyed to this tenant+record.
+        setDuenoServer({ key: recordKey, dueno });
+      } else if (
+        err instanceof ApiError &&
+        err.code === "PACIENTE_CAMPOS_OBLIGATORIOS" &&
+        Array.isArray(err.data?.campos)
+      ) {
+        // Name the fields (a center can require fields this form doesn't show).
+        toast.error(
+          t("camposFaltantes", {
+            campos: (err.data.campos as string[]).join(", "),
+          }),
+        );
+      } else {
+        toastError(err, tRoot);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -235,19 +368,19 @@ export function PacienteFormSheet({
                   autoFocus
                 />
               </Field>
-              <Field label={t("apellidos")}>
+              <Field label={t("apellidos")} required={req("apellidos")}>
                 <Input
                   value={form.apellidos}
                   onChange={(e) => set("apellidos", e.target.value)}
                 />
               </Field>
-              <Field label={t("docId")}>
+              <Field label={t("docId")} required={req("docId")}>
                 <Input
                   value={form.docId}
                   onChange={(e) => set("docId", e.target.value)}
                 />
               </Field>
-              <Field label={t("sexo")}>
+              <Field label={t("sexo")} required={req("sexo")}>
                 <Select
                   value={form.sexo || undefined}
                   onValueChange={(v) => set("sexo", v as Sexo)}
@@ -263,14 +396,14 @@ export function PacienteFormSheet({
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label={t("fechaNacimiento")}>
+              <Field label={t("fechaNacimiento")} required={req("fechaNacimiento")}>
                 <Input
                   type="date"
                   value={form.fechaNacimiento}
                   onChange={(e) => set("fechaNacimiento", e.target.value)}
                 />
               </Field>
-              <Field label={t("nacionalidad")}>
+              <Field label={t("nacionalidad")} required={req("nacionalidad")}>
                 <Input
                   value={form.nacionalidad}
                   onChange={(e) => set("nacionalidad", e.target.value)}
@@ -281,34 +414,34 @@ export function PacienteFormSheet({
 
           <Section title={t("sectionContact")}>
             <Grid>
-              <Field label={t("telefono")}>
+              <Field label={t("telefono")} required={req("telefono")}>
                 <Input
                   type="tel"
                   value={form.telefono}
                   onChange={(e) => set("telefono", e.target.value)}
                 />
               </Field>
-              <Field label={t("whatsapp")}>
+              <Field label={t("whatsapp")} required={req("whatsapp")}>
                 <Input
                   type="tel"
                   value={form.whatsapp}
                   onChange={(e) => set("whatsapp", e.target.value)}
                 />
               </Field>
-              <Field label={t("email")}>
+              <Field label={t("email")} required={req("email")}>
                 <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => set("email", e.target.value)}
                 />
               </Field>
-              <Field label={t("zipcode")}>
+              <Field label={t("zipcode")} required={req("zipcode")}>
                 <Input
                   value={form.zipcode}
                   onChange={(e) => set("zipcode", e.target.value)}
                 />
               </Field>
-              <Field label={t("direccion")} full>
+              <Field label={t("direccion")} full required={req("direccion")}>
                 <Input
                   value={form.direccion}
                   onChange={(e) => set("direccion", e.target.value)}
@@ -319,19 +452,53 @@ export function PacienteFormSheet({
 
           <Section title={t("sectionClinical")}>
             <Grid>
-              <Field label={t("record")}>
-                <Input
-                  value={form.record}
-                  onChange={(e) => set("record", e.target.value)}
-                />
+              <Field label={t("record")} required={req("record")}>
+                <div className="relative">
+                  <Input
+                    value={form.record}
+                    onChange={(e) => set("record", e.target.value)}
+                    aria-invalid={!!dueno}
+                    className={dueno ? "pr-8 border-destructive" : "pr-8"}
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
+                    {checkingRecord ? (
+                      <HugeiconsIcon
+                        icon={Loading03Icon}
+                        strokeWidth={2}
+                        className="size-4 animate-spin text-muted-foreground"
+                      />
+                    ) : recordDisponible ? (
+                      <HugeiconsIcon
+                        icon={CheckmarkCircle02Icon}
+                        strokeWidth={2}
+                        className="size-4 text-success"
+                      />
+                    ) : null}
+                  </span>
+                </div>
               </Field>
-              <Field label={t("aseguradora")}>
+              <Field label={t("aseguradora")} required={req("aseguradora")}>
                 <Input
                   value={form.aseguradora}
                   onChange={(e) => set("aseguradora", e.target.value)}
                 />
               </Field>
             </Grid>
+            {dueno && (
+              <Alert variant="destructive">
+                <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} />
+                <AlertTitle>{t("recordDuplicadoTitle")}</AlertTitle>
+                <AlertDescription>
+                  {t("recordDuplicadoBody", {
+                    record: dueno.record ?? recordLimpio,
+                    nombre: `${dueno.nombres}${dueno.apellidos ? ` ${dueno.apellidos}` : ""}`,
+                    estado: dueno.activo
+                      ? t("recordDuenoActivo")
+                      : t("recordDuenoInactivo"),
+                  })}
+                </AlertDescription>
+              </Alert>
+            )}
           </Section>
         </div>
 

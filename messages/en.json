@@ -486,7 +486,12 @@
       "record": "Record number",
       "aseguradora": "Insurer",
       "created": "Patient created.",
-      "updated": "Patient updated."
+      "updated": "Patient updated.",
+      "recordDuplicadoTitle": "Record number already in use",
+      "recordDuplicadoBody": "Record #{record} already belongs to {nombre} ({estado}) in this center. Use another number or leave the field empty.",
+      "recordDuenoActivo": "active",
+      "recordDuenoInactivo": "inactive",
+      "camposFaltantes": "Required fields missing: {campos}"
     }
   },
   "common": {
@@ -2439,5 +2444,9 @@
     "guardando": "Saving…",
     "guardado": "Saved",
     "sinPermiso": "You don't have access (formatos.config)."
+  },
+  "pacientes": {
+    "record_duplicado": "That record number already belongs to another patient of this center",
+    "campos_obligatorios": "Required intake fields are missing"
   }
 }

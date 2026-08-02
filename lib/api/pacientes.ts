@@ -75,3 +75,45 @@ export function deletePaciente(id: string, centroId?: string): Promise<void> {
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
 }
+
+// ─── Alta validada (docs/specs/paciente-alta-validada.md del BE) ─────────────
+// Tipos locales hasta regenerar schema.d.ts con `npm run gen:api` (el BE debe
+// estar desplegado/corriendo con los endpoints nuevos).
+
+// Quién posee un número de récord en el centro. `dueno` null = disponible.
+export interface RecordDueno {
+  record: string;
+  disponible: boolean;
+  dueno: {
+    id: string;
+    nombres: string;
+    apellidos: string | null;
+    record: string | null;
+    activo: boolean;
+  } | null;
+}
+
+// GET /pacientes/record/:record — pre-chequeo de duplicidad del récord manual,
+// SIEMPRE acotado al centro (el mismo número en otro centro es otra persona).
+export function getRecordDueno(
+  record: string,
+  centroId?: string,
+): Promise<RecordDueno> {
+  return apiFetch<RecordDueno>(
+    `/pacientes/record/${encodeURIComponent(record)}`,
+    {},
+    centroId,
+  );
+}
+
+// Config efectiva del alta del centro: qué campos son obligatorios además de
+// nombres (default del BE: telefono, zipcode, sexo; cada centro puede sobreescribir).
+export function getConfigAltaPacientes(
+  centroId?: string,
+): Promise<{ camposObligatorios: string[] }> {
+  return apiFetch<{ camposObligatorios: string[] }>(
+    `/pacientes/config-alta`,
+    {},
+    centroId,
+  );
+}

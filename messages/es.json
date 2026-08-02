@@ -486,7 +486,12 @@
       "record": "Número de record",
       "aseguradora": "Aseguradora",
       "created": "Paciente creado.",
-      "updated": "Paciente actualizado."
+      "updated": "Paciente actualizado.",
+      "recordDuplicadoTitle": "Número de récord ya en uso",
+      "recordDuplicadoBody": "El récord #{record} ya pertenece a {nombre} ({estado}) en este centro. Usa otro número o deja el campo vacío.",
+      "recordDuenoActivo": "activo",
+      "recordDuenoInactivo": "inactivo",
+      "camposFaltantes": "Faltan campos obligatorios: {campos}"
     }
   },
   "common": {
@@ -2439,5 +2444,9 @@
     "guardando": "Guardando…",
     "guardado": "Guardado",
     "sinPermiso": "No tienes acceso (formatos.config)."
+  },
+  "pacientes": {
+    "record_duplicado": "Ese número de récord ya pertenece a otro paciente de este centro",
+    "campos_obligatorios": "Faltan campos obligatorios del alta"
   }
 }
