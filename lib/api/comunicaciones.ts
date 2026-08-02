@@ -15,6 +15,7 @@ export type TipoAlerta = components["schemas"]["TipoAlertaEntity"];
 export type Notificacion = components["schemas"]["NotificacionEntity"];
 export type Plantilla = components["schemas"]["PlantillaNotificacionEntity"];
 export type EnviarNotificacionPayload = components["schemas"]["EnviarNotificacionDto"];
+export type CreatePlantillaPayload = components["schemas"]["CreatePlantillaDto"];
 
 // GET /alertas responde { data:[...], noLeidas } (doble-anidado; apiFetch quita el
 // envelope externo → aquí llega ya como { data, noLeidas }).
@@ -67,6 +68,13 @@ export function enviarNotificacion(
 export function listPlantillas(): Promise<Plantilla[]> {
   return apiFetch<Plantilla[]>(`/comunicaciones/notificaciones/plantillas`);
 }
+// Alta de plantilla — endpoint del dominio único (RBAC: notificaciones.config; el BE es la autoridad).
+export function crearPlantilla(payload: CreatePlantillaPayload): Promise<Plantilla> {
+  return apiFetch<Plantilla>(`/comunicaciones/notificaciones/plantillas`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
 
 // SSE de la campana (via fetch stream; EventSource no puede mandar Authorization).
 // onEvent se llama por cada frame → el consumidor refetchea. Abortar para desconectar.
@@ -103,8 +111,22 @@ export async function subscribeAlertas(opts: {
     while ((sep = buf.indexOf("\n\n")) >= 0) {
       const frame = buf.slice(0, sep);
       buf = buf.slice(sep + 2);
-      // Cualquier frame de datos = algo cambió → refetch (ignoramos el payload).
-      if (frame.split("\n").some((l) => l.startsWith("data:"))) opts.onEvent();
+      // Reunir las líneas `data:` del frame. Filtrar por `entidad === 'alerta'` para no refetchear
+      // ante CUALQUIER evento del centro (el stream emite todo): ruido, no rotura. Si el payload no
+      // trae `entidad` o no parsea, refetcheamos igual (mejor de más que perder una alerta).
+      const dataStr = frame
+        .split("\n")
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5).trim())
+        .join("\n");
+      if (!dataStr) continue;
+      let entidad: unknown;
+      try {
+        entidad = (JSON.parse(dataStr) as { entidad?: unknown }).entidad;
+      } catch {
+        entidad = undefined;
+      }
+      if (entidad === undefined || entidad === "alerta") opts.onEvent();
     }
   }
 }

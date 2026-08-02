@@ -2186,18 +2186,29 @@
       "excede": "Mayor a lo enviado"
     }
   },
+  "alertas": {
+    "sin_destinatarios": "La alerta por usuario no tiene destinatarios"
+  },
   "comunicaciones": {
     "title": "Alertas",
     "pageTitle": "Comunicaciones",
     "verTodas": "Ver todas",
     "empty": "Sin alertas",
+    "loadError": "No se pudieron cargar las alertas",
+    "retry": "Reintentar",
     "bellAria": "Alertas",
     "resolver": "Resolver",
     "descartar": "Descartar",
     "noPlantillas": "Sin plantillas",
-    "pageHelp": "Canal interno (alertas en vivo) y plantillas de notificaciones salientes, en un solo lugar.",
+    "noNotificaciones": "Sin notificaciones enviadas",
+    "nuevaPlantilla": "Nueva plantilla",
+    "nuevaPlantillaHelp": "Crea una plantilla de notificación saliente (WhatsApp, SMS, email o impresa).",
+    "plantillaCreada": "Plantilla creada",
+    "idiomaHint": "Opcional. Si lo dejas vacío, el backend usa el idioma por defecto.",
+    "pageHelp": "Canal interno (alertas en vivo), notificaciones enviadas y plantillas salientes, en un solo lugar.",
     "tab": {
       "alertas": "Alertas",
+      "notificaciones": "Notificaciones",
       "plantillas": "Plantillas"
     },
     "col": {
@@ -2205,7 +2216,16 @@
       "canal": "Canal",
       "idioma": "Idioma",
       "asunto": "Asunto",
-      "estado": "Estado"
+      "estado": "Estado",
+      "destino": "Destino",
+      "fecha": "Fecha",
+      "cuerpo": "Cuerpo"
+    },
+    "estadoNotif": {
+      "pendiente": "Pendiente",
+      "enviada": "Enviada",
+      "fallida": "Fallida",
+      "lista": "Lista"
     }
   },
   "fac": {

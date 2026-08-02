@@ -2186,18 +2186,29 @@
       "excede": "Exceeds sent"
     }
   },
+  "alertas": {
+    "sin_destinatarios": "The per-user alert has no recipients"
+  },
   "comunicaciones": {
     "title": "Alerts",
     "pageTitle": "Communications",
     "verTodas": "View all",
     "empty": "No alerts",
+    "loadError": "Couldn't load alerts",
+    "retry": "Retry",
     "bellAria": "Alerts",
     "resolver": "Resolve",
     "descartar": "Dismiss",
     "noPlantillas": "No templates",
-    "pageHelp": "Internal channel (live alerts) and outbound notification templates, in one place.",
+    "noNotificaciones": "No notifications sent",
+    "nuevaPlantilla": "New template",
+    "nuevaPlantillaHelp": "Create an outbound notification template (WhatsApp, SMS, email or print).",
+    "plantillaCreada": "Template created",
+    "idiomaHint": "Optional. If left empty, the backend uses the default language.",
+    "pageHelp": "Internal channel (live alerts), sent notifications and outbound templates, in one place.",
     "tab": {
       "alertas": "Alerts",
+      "notificaciones": "Notifications",
       "plantillas": "Templates"
     },
     "col": {
@@ -2205,7 +2216,16 @@
       "canal": "Channel",
       "idioma": "Language",
       "asunto": "Subject",
-      "estado": "Status"
+      "estado": "Status",
+      "destino": "Recipient",
+      "fecha": "Date",
+      "cuerpo": "Body"
+    },
+    "estadoNotif": {
+      "pendiente": "Pending",
+      "enviada": "Sent",
+      "fallida": "Failed",
+      "lista": "Ready"
     }
   },
   "fac": {

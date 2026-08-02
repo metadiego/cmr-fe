@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/comunicaciones";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { getActiveCentro } from "@/lib/tenant";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,9 +40,13 @@ const SEV_DOT: Record<string, string> = {
 export function AlertasBell() {
   const t = useTranslations("comunicaciones");
   const router = useRouter();
-  const { state, refresh } = useResource<AlertasResponse>(() => listAlertas());
+  const { can } = useCan();
+  const puedeResolver = can("alertas.resolver"); // el BE es la autoridad; esto solo evita el click a error
+  const { state, refresh, reload } = useResource<AlertasResponse>(() => listAlertas());
   const alertas = state.kind === "ok" ? state.data.data : [];
   const noLeidas = state.kind === "ok" ? state.data.noLeidas : 0;
+  // Distinguir "sin alertas" de "falló la carga": antes ambos se veían igual (vacío) → parecía roto.
+  const fallo = state.kind === "fail";
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
   // SSE en vivo con reconexión hasta desmontar; refetch en cada evento.
@@ -98,11 +103,18 @@ export function AlertasBell() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative" aria-label={t("bellAria")}>
           <HugeiconsIcon icon={Notification03Icon} className="size-5" />
-          {noLeidas > 0 && (
+          {fallo ? (
+            // Falló la carga: punto ámbar (distinto del badge rojo de no leídas) para no confundir
+            // "no hay nada" con "no pude cargar".
+            <span
+              title={t("loadError")}
+              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-amber-500 ring-2 ring-background"
+            />
+          ) : noLeidas > 0 ? (
             <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
               {noLeidas > 9 ? "9+" : noLeidas}
             </span>
-          )}
+          ) : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
@@ -117,7 +129,18 @@ export function AlertasBell() {
           </button>
         </div>
         <div className="max-h-96 overflow-y-auto py-1">
-          {alertas.length === 0 ? (
+          {fallo ? (
+            <div className="px-3 py-6 text-center">
+              <p className="text-sm text-muted-foreground">{t("loadError")}</p>
+              <button
+                type="button"
+                onClick={reload}
+                className="mt-2 text-xs font-medium text-primary hover:underline"
+              >
+                {t("retry")}
+              </button>
+            </div>
+          ) : alertas.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("empty")}</p>
           ) : (
             alertas.map((a) => {
@@ -133,26 +156,28 @@ export function AlertasBell() {
                     <p className="truncate text-sm font-medium">{a.titulo}</p>
                     {a.cuerpo && <p className="line-clamp-2 text-xs text-muted-foreground">{a.cuerpo}</p>}
                   </button>
-                  <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      type="button"
-                      title={t("resolver")}
-                      disabled={busyId === a.id}
-                      onClick={() => act(a.id, resolverAlerta)}
-                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-green-600"
-                    >
-                      <HugeiconsIcon icon={Tick01Icon} className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      title={t("descartar")}
-                      disabled={busyId === a.id}
-                      onClick={() => act(a.id, descartarAlerta)}
-                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    >
-                      <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
-                    </button>
-                  </div>
+                  {puedeResolver && (
+                    <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                      <button
+                        type="button"
+                        title={t("resolver")}
+                        disabled={busyId === a.id}
+                        onClick={() => act(a.id, resolverAlerta)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-green-600"
+                      >
+                        <HugeiconsIcon icon={Tick01Icon} className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        title={t("descartar")}
+                        disabled={busyId === a.id}
+                        onClick={() => act(a.id, descartarAlerta)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })
