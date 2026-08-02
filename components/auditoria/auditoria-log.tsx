@@ -9,9 +9,9 @@ import { RefreshIcon, Copy01Icon } from "@hugeicons/core-free-icons";
 import {
   listAuditoria,
   type AuditRow,
-  type AuditPage,
   type AuditListParams,
 } from "@/lib/api/auditoria";
+import type { Paginated } from "@/lib/api/types";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
@@ -97,19 +97,17 @@ export function AuditoriaLog() {
     limit: 50,
   };
   const key = JSON.stringify(params);
-  const { state, reload } = useResource<AuditPage>(() => listAuditoria(params), [key]);
-  // La tabla recibe solo las filas; el total/página se pasan aparte al paginador.
+  const { state, reload } = useResource<Paginated<AuditRow>>(() => listAuditoria(params), [key]);
+  // La tabla recibe solo las filas (envelope { data: filas, meta.pagination }); el total va al paginador.
   const rowsState = React.useMemo(
     () =>
       state.kind === "ok"
-        ? ({ kind: "ok" as const, data: state.data.data })
+        ? ({ kind: "ok" as const, data: state.data.items })
         : state,
     [state],
   );
   const meta =
-    state.kind === "ok"
-      ? { total: state.data.total, page: state.data.page, limit: state.data.limit }
-      : { total: 0, page, limit: 50 };
+    state.kind === "ok" ? state.data.pagination : { total: 0, page, limit: 50 };
 
   // Al cambiar un filtro, volver a la página 1.
   function onFilter<T>(setter: (v: T) => void) {

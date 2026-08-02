@@ -1,8 +1,9 @@
 # BE Handoff (petición amable) — Auditoría: lo que el FE necesita del BE
 
 > Contexto: la pantalla `/auditoria` ya está construida en el FE (tabla densa + filtros + detalle,
-> ancho completo, i18n, gate `auditoria.read`). Consume `GET /auditoria` con `apiFetch` (paginación
-> dentro de `data`). Faltan 3 cosas que NO deben resolverse en el cliente. Todo API-First + Swagger +
+> ancho completo, i18n, gate `auditoria.read`). Consume `GET /auditoria` con `apiFetchPaged` — el BE
+> responde el envelope estándar `{ data: filas[], meta: { pagination } }` (verificado en prod; la
+> paginación va en `meta`, NO dentro de `data`). Faltan 3 cosas que NO deben resolverse en el cliente. Todo API-First + Swagger +
 > `COMMENT ON` + tests + sin romper el contrato actual.
 
 ## 1. Nombre del usuario en cada fila (alto impacto)
