@@ -1,0 +1,65 @@
+import { apiFetch } from "./client";
+
+// Bitácora de auditoría (BE: AuditLogController, spec docs/specs/auditoria.md — ya en prod).
+// El OpenAPI NO tipa la respuesta (operación vacía), así que estos tipos son LOCALES según el
+// contrato del hand-off; regenerar con `npm run gen:api` cuando el BE exponga el schema.
+
+// Una fila de la bitácora. `meta` hoy llega null en el 100% de las filas (no pintar columna).
+export interface AuditRow {
+  id: string;
+  createdAt: string;
+  clinicId: string | null;
+  userId: string | null; // authUserId de Supabase (NO el perfilId). Nombre: pendiente del BE.
+  userType: string | null; // "api-key" | "user"
+  dominio: string;
+  accion: string; // "Controller.handler" (técnico a propósito) → frase humana se arma en el FE
+  metodo: string;
+  ruta: string;
+  requestId: string | null; // correlación con el envelope de la petición original
+  ip: string | null;
+  resultado: "ok" | "error";
+  statusCode: number | null;
+  durationMs: number | null;
+  entidadId: string | null;
+  errorCode: string | null;
+  errorMensaje: string | null;
+  meta: Record<string, unknown> | null;
+}
+
+// Paginación DENTRO de `data` (no en `meta`) → por eso apiFetch, NO apiFetchPaged.
+export interface AuditPage {
+  data: AuditRow[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// Todos opcionales. `userId` = authUserId. Filtros indexados (rápidos): createdAt(desde/hasta),
+// dominio, userId, resultado. `metodo`/`clinicId` filtran de a un valor.
+export interface AuditListParams {
+  desde?: string;
+  hasta?: string;
+  userId?: string;
+  dominio?: string;
+  accion?: string;
+  resultado?: "ok" | "error";
+  metodo?: string;
+  clinicId?: string;
+  page?: number;
+  limit?: number;
+}
+
+// GET /auditoria — endpoint CORRECTO (el atajo /auditoria/errores devuelve el 98% de las filas por
+// el ruido de RATE_LIMITED, así que NO se usa; el filtro de errores se hace con resultado=error).
+// tenant null = sin X-Tenant-ID → el admin ve TODOS los centros; el filtro de centro va por clinicId.
+export function listAuditoria(
+  params: AuditListParams = {},
+  tenant: string | null = null,
+): Promise<AuditPage> {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && `${v}` !== "") sp.set(k, String(v));
+  }
+  const qs = sp.toString();
+  return apiFetch<AuditPage>(`/auditoria${qs ? `?${qs}` : ""}`, {}, tenant);
+}

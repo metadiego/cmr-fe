@@ -2189,6 +2189,52 @@
   "alertas": {
     "sin_destinatarios": "The per-user alert has no recipients"
   },
+  "auditoria": {
+    "title": "Audit log",
+    "help": "Automatic system log: who did what, when, from which center and whether it succeeded. Filter by date, domain, method and result; click a row for details.",
+    "noPermission": "You don't have permission to view the audit log.",
+    "todos": "All",
+    "desde": "From",
+    "hasta": "To",
+    "vacio": "No records for these filters",
+    "chipSoloErrores": "Errors only",
+    "totalRegistros": "{total, number} records",
+    "resultadoOk": "OK",
+    "resultadoError": "Error",
+    "detalleTitulo": "Event detail",
+    "entidadId": "Entity",
+    "sinDato": "—",
+    "error": "Error",
+    "copiado": "Copied",
+    "copiaError": "Couldn't copy",
+    "col": {
+      "fecha": "Date/time",
+      "usuario": "User",
+      "dominio": "Domain",
+      "accion": "Action",
+      "metodo": "Method",
+      "resultado": "Result",
+      "duracion": "Duration",
+      "centro": "Center"
+    },
+    "verbo": {
+      "creo": "Created",
+      "edito": "Edited",
+      "elimino": "Deleted",
+      "consulto": "Viewed",
+      "accion": "Action"
+    },
+    "dominio": {
+      "pacientes": "Patients",
+      "facturas": "Invoices",
+      "citas": "Appointments",
+      "inventario": "Inventory",
+      "comunicaciones": "Communications",
+      "frontdesk": "Frontdesk",
+      "tablero": "Board",
+      "auth": "Authentication"
+    }
+  },
   "comunicaciones": {
     "title": "Alerts",
     "pageTitle": "Communications",
