@@ -491,7 +491,9 @@
       "recordDuplicadoBody": "El récord #{record} ya pertenece a {nombre} ({estado}) en este centro. Usa otro número o deja el campo vacío.",
       "recordDuenoActivo": "activo",
       "recordDuenoInactivo": "inactivo",
-      "camposFaltantes": "Faltan campos obligatorios: {campos}"
+      "camposFaltantes": "Faltan campos obligatorios: {campos}",
+      "emailInvalido": "Escribe un correo válido, p. ej. nombre@dominio.com",
+      "requiredLegend": "Campos obligatorios"
     }
   },
   "common": {
