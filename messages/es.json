@@ -2189,6 +2189,52 @@
   "alertas": {
     "sin_destinatarios": "La alerta por usuario no tiene destinatarios"
   },
+  "auditoria": {
+    "title": "Auditoría",
+    "help": "Bitácora automática del sistema: quién hizo qué, cuándo, desde qué centro y si salió bien. Filtra por fecha, dominio, método y resultado; haz clic en una fila para ver el detalle.",
+    "noPermission": "No tienes permiso para ver la auditoría.",
+    "todos": "Todos",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "vacio": "Sin registros para estos filtros",
+    "chipSoloErrores": "Solo errores",
+    "totalRegistros": "{total, number} registros",
+    "resultadoOk": "OK",
+    "resultadoError": "Error",
+    "detalleTitulo": "Detalle del evento",
+    "entidadId": "Entidad",
+    "sinDato": "—",
+    "error": "Error",
+    "copiado": "Copiado",
+    "copiaError": "No se pudo copiar",
+    "col": {
+      "fecha": "Fecha/hora",
+      "usuario": "Usuario",
+      "dominio": "Dominio",
+      "accion": "Acción",
+      "metodo": "Método",
+      "resultado": "Resultado",
+      "duracion": "Duración",
+      "centro": "Centro"
+    },
+    "verbo": {
+      "creo": "Creó",
+      "edito": "Editó",
+      "elimino": "Eliminó",
+      "consulto": "Consultó",
+      "accion": "Acción"
+    },
+    "dominio": {
+      "pacientes": "Pacientes",
+      "facturas": "Facturas",
+      "citas": "Citas",
+      "inventario": "Inventario",
+      "comunicaciones": "Comunicaciones",
+      "frontdesk": "Frontdesk",
+      "tablero": "Tablero",
+      "auth": "Autenticación"
+    }
+  },
   "comunicaciones": {
     "title": "Alertas",
     "pageTitle": "Comunicaciones",
