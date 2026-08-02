@@ -39,11 +39,14 @@ export interface ApiErrorDetail {
 export interface ApiErrorShape {
   // labelKey: optional i18n key the BE attaches to domain errors
   // (e.g. "facturacion.anulacion.fuera_de_ventana") for client-side translation.
+  // Domain errors may also carry extra business payload (e.g. `dueno` on
+  // PACIENTE_RECORD_DUPLICADO, `campos` on PACIENTE_CAMPOS_OBLIGATORIOS).
   error: {
     code: string;
     message: string;
     labelKey?: string;
     details?: ApiErrorDetail[];
+    [key: string]: unknown;
   };
   meta: ApiMeta;
 }
@@ -56,6 +59,9 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly details?: ApiErrorDetail[],
     public readonly labelKey?: string,
+    // Full error body from the BE, for domain errors whose UI needs more than
+    // the message (e.g. who owns a duplicated record number).
+    public readonly data?: Record<string, unknown>,
   ) {
     super(message);
     this.name = "ApiError";
