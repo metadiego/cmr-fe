@@ -20,6 +20,17 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { getPermisos } from "@/lib/api/rbac";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Radix Select no admite value=""; centinela para "sin permiso" (visible a todos).
+const SIN_PERMISO = "__sin_permiso__";
 
 const EMPTY: MenuItemPayload = {
   clave: "",
@@ -144,6 +155,9 @@ function MenuItemForm({
     item ? toPayload(item) : EMPTY,
   );
   const [submitting, setSubmitting] = React.useState(false);
+  // Catálogo de permisos para el picker (reemplaza el texto libre).
+  const { state: permisosState } = useResource(() => getPermisos(), [open]);
+  const permisos = permisosState.kind === "ok" ? permisosState.data : [];
 
   function set<K extends keyof MenuItemPayload>(k: K, v: MenuItemPayload[K]) {
     setForm((prev) => ({ ...prev, [k]: v }));
@@ -219,12 +233,27 @@ function MenuItemForm({
           className="font-mono"
         />
       </Field>
+      {/* Picker contra el catálogo real: el texto libre dejaba ítems con
+          permisos inexistentes (invisibles para todos). */}
       <Field label={t("permisoClave")} hint={t("permisoClaveHint")}>
-        <Input
-          value={form.permisoClave ?? ""}
-          onChange={(e) => set("permisoClave", e.target.value)}
-          className="font-mono"
-        />
+        <Select
+          value={form.permisoClave || SIN_PERMISO}
+          onValueChange={(v) =>
+            set("permisoClave", v === SIN_PERMISO ? "" : v)
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={t("permisoClavePlaceholder")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={SIN_PERMISO}>{t("permisoSinPermiso")}</SelectItem>
+            {permisos.map((p) => (
+              <SelectItem key={p.clave} value={p.clave}>
+                {p.clave}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Field>
       <Field label={t("orden")}>
         <Input

@@ -48,10 +48,33 @@ export function deleteRole(id: string): Promise<void> {
   return apiFetch<void>(`/roles/${id}`, { method: "DELETE" });
 }
 
-// Replaces the role's permisos with EXACTLY these claves (BE has no GET for a
-// role's current permisos, so the editor sets from scratch — warn the user).
+// Claves ACTUALES del rol — para PRECARGAR el editor antes del PUT (que
+// reemplaza el set completo). Corrige el viejo bug del REPLACE ciego.
+export async function getRolePermisos(id: string): Promise<string[]> {
+  return asArray<string>(await apiFetch(`/roles/${id}/permisos`));
+}
+
+// Replaces the role's permisos with EXACTLY these claves. Precarga SIEMPRE con
+// getRolePermisos antes de editar.
 export function setRolePermisos(id: string, claves: string[]): Promise<Rol> {
   return apiFetch<Rol>(`/roles/${id}/permisos`, {
+    method: "PUT",
+    body: JSON.stringify({ claves }),
+  });
+}
+
+// Menú anotado (allowed/requiresPermiso) para un ROL — el vínculo rol↔menú.
+export async function getRoleMenu(id: string): Promise<ProfileMenuItem[]> {
+  return asArray<ProfileMenuItem>(await apiFetch(`/roles/${id}/menu`));
+}
+
+// Fija QUÉ ítems de menú ve el rol (claves de menú → permisos; los permisos
+// no ligados a menú del rol no se tocan).
+export function setRoleMenu(
+  id: string,
+  claves: string[],
+): Promise<{ claves: string[] }> {
+  return apiFetch<{ claves: string[] }>(`/roles/${id}/menu`, {
     method: "PUT",
     body: JSON.stringify({ claves }),
   });

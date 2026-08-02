@@ -739,7 +739,13 @@
       "save": "Save",
       "edit": "Edit",
       "editTitle": "Edit role",
-      "updated": "Role updated."
+      "updated": "Role updated.",
+      "menuRol": "Menu",
+      "menuRolTitle": "Menu for role {role}",
+      "menuRolHelp": "Check the menu options this role sees. Translated to permissions; non-menu permissions are untouched.",
+      "menuRolSaved": "Role menu updated",
+      "menuRolSinPermiso": "visible to everyone",
+      "confirmDelete": "Delete role {role}? Users holding it will lose it."
     },
     "access": {
       "title": "User access",
@@ -758,7 +764,10 @@
       "deny": "Deny",
       "allowed": "Visible",
       "blocked": "Hidden",
-      "menuEmpty": "No menu items."
+      "menuEmpty": "No menu items.",
+      "menuEditableHelp": "Turn an option on/off for THIS user without changing their role (kept as an exception).",
+      "excepcion": "exception",
+      "sinPermiso": "visible to everyone"
     },
     "menu": {
       "title": "Dynamic menu",
@@ -783,7 +792,9 @@
       "parentClave": "Parent key",
       "parentClaveHint": "Empty = top-level item",
       "permisoClave": "Required permission",
-      "permisoClaveHint": "Empty = visible to everyone"
+      "permisoClaveHint": "Empty = visible to everyone",
+      "permisoClavePlaceholder": "Pick a permission",
+      "permisoSinPermiso": "No permission (visible to everyone)"
     },
     "theme": {
       "systemTitle": "System theme",
@@ -828,7 +839,9 @@
       "name": "Name",
       "accessMode": "Access mode",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "roles": "Role(s)",
+      "centros": "Center(s)"
     },
     "approve": "Approve",
     "reject": "Reject",
@@ -844,7 +857,17 @@
       "invite": "Invite user",
       "empty": "No users yet.",
       "assign": "Assign center",
-      "access": "Access"
+      "access": "Access",
+      "centros": "Centers",
+      "editar": "Edit user",
+      "suspender": "Suspend",
+      "reactivar": "Reactivate",
+      "suspendido": "User suspended",
+      "reactivado": "User reactivated",
+      "buscar": "Search by email, name, role or center…",
+      "sinRol": "No role",
+      "sinCentro": "No center",
+      "hasta": "until {fecha}"
     },
     "invite": {
       "title": "Invite user",
@@ -867,7 +890,13 @@
       "copy": "Copy",
       "copied": "Copied",
       "assignNow": "Assign center",
-      "done": "Done"
+      "done": "Done",
+      "centro": "Center",
+      "centroPlaceholder": "Pick a center",
+      "centroHint": "Optional; without a center the user can't sign in until one is assigned.",
+      "rol": "Role",
+      "rolPlaceholder": "Pick a role",
+      "rolHint": "Optional; defines what they can do and see in the menu."
     },
     "assign": {
       "title": "Assign center",
@@ -912,6 +941,38 @@
         "logoUrl": "Logo URL",
         "pieFactura": "Invoice footer"
       }
+    },
+    "centrosPerfil": {
+      "title": "Centers for {nombre}",
+      "help": "A user works in one center at a time. Use temporary to cover another center for a while, or fixed/base for a permanent change.",
+      "vacio": "No centers assigned.",
+      "centro": "Center",
+      "centroPlaceholder": "Pick a center",
+      "tipoLabel": "Type",
+      "tipo_base": "Base",
+      "tipo_temporal": "Temporary",
+      "tipo_fijo": "Fixed",
+      "vigenteHasta": "Valid until",
+      "hasta": "until {fecha}",
+      "agregar": "Add center",
+      "asignado": "Center assigned",
+      "revocar": "Revoke",
+      "revocada": "Assignment revoked",
+      "reactivar": "Reactivate",
+      "reactivada": "Assignment reactivated",
+      "inactiva": "inactive",
+      "confirmRevocar": "Revoke access to {centro}?"
+    },
+    "editarPerfil": {
+      "title": "Edit {email}",
+      "help": "Basic data and access mode.",
+      "nombre": "First name",
+      "apellido": "Last name",
+      "accessMode": "Access mode",
+      "operativo": "Operational (one center at a time)",
+      "gerencial": "Managerial (sees all their centers, read-only)",
+      "accessModeHelp": "Managerial sees several centers at once but cannot write.",
+      "guardado": "Profile updated"
     }
   },
   "landing": {
@@ -2450,5 +2511,11 @@
   "pacientes": {
     "record_duplicado": "That record number already belongs to another patient of this center",
     "campos_obligatorios": "Required intake fields are missing"
+  },
+  "perfiles": {
+    "vigencia_invalida": "The end date is before the start date"
+  },
+  "tenant": {
+    "no_encontrado": "The selected center does not exist"
   }
 }

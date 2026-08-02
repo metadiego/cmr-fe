@@ -16,7 +16,8 @@ export default function AdminPage() {
 
   return (
     <AdminGuard>
-      <div className="mx-auto max-w-5xl px-6 py-12">
+      {/* Ancho completo: la administración de usuarios/roles necesita la pantalla entera. */}
+      <div className="mx-auto w-full max-w-none px-6 py-8 2xl:px-10">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
 
         <Tabs defaultValue="users" className="mt-6">

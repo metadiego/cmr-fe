@@ -12,6 +12,22 @@ function asList<T>(res: unknown): T[] {
 
 // Domain types mirror cmr-be profiles endpoints. Optional fields are kept loose
 // because the BE may add columns; the panel only relies on what it renders.
+export interface PerfilRolResumen {
+  clave: string;
+  nombre: string;
+  centroId: string | null;
+}
+
+export interface PerfilCentroResumen {
+  asignacionId: string;
+  centroId: string;
+  nombre: string | null;
+  tipo: string;
+  vigenteDesde?: string | null;
+  vigenteHasta?: string | null;
+  activo: boolean;
+}
+
 export interface Perfil {
   id: string;
   email: string;
@@ -21,6 +37,9 @@ export interface Perfil {
   accessMode: AccessMode;
   isMaster?: boolean;
   createdAt?: string;
+  // GET /profiles enriquecido (usuarios-roles-accesos): roles y centros del perfil.
+  roles?: PerfilRolResumen[];
+  centros?: PerfilCentroResumen[];
 }
 
 export interface Asignacion {
@@ -31,6 +50,8 @@ export interface Asignacion {
   vigenteDesde?: string;
   vigenteHasta?: string | null;
   forzado?: boolean;
+  activo?: boolean;
+  centro?: { id: string; nombre: string } | null;
 }
 
 export interface InvitePayload {
@@ -43,6 +64,11 @@ export interface InvitePayload {
   // Where the Supabase invite magic link should land (the FE set-password page).
   // Sent per-request so it works in any environment (dev :8080 / prod Vercel).
   redirectTo?: string;
+  // Invite ampliado: centro + rol en el mismo paso (el invitado no nace sin accesos).
+  centroId?: string;
+  rolClave?: string;
+  tipoAsignacion?: "base" | "temporal" | "fijo";
+  vigenteHasta?: string;
 }
 
 // Invite without password → the BE sends a Supabase invitation email and
@@ -100,6 +126,67 @@ export function inviteUser(payload: InvitePayload): Promise<InviteResponse> {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export interface UpdatePerfilPayload {
+  nombre?: string;
+  apellido?: string | null;
+  accessMode?: Extract<AccessMode, "operativo" | "gerencial">;
+}
+
+// PUT /profiles/:id — nombre/apellido/accessMode (D5).
+export function updateProfile(
+  id: string,
+  payload: UpdatePerfilPayload,
+): Promise<Perfil> {
+  return apiFetch<Perfil>(`/profiles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function suspenderProfile(id: string): Promise<Perfil> {
+  return apiFetch<Perfil>(`/profiles/${id}/suspender`, { method: "POST" });
+}
+
+export function reactivarProfile(id: string): Promise<Perfil> {
+  return apiFetch<Perfil>(`/profiles/${id}/reactivar`, { method: "POST" });
+}
+
+// GET /profiles/:id/asignaciones — centros del perfil con tipo/vigencia/activo.
+export function getAsignaciones(perfilId: string): Promise<Asignacion[]> {
+  return apiFetch<Asignacion[]>(`/profiles/${perfilId}/asignaciones`).then(
+    (r) => asList<Asignacion>(r),
+  );
+}
+
+export interface UpdateAsignacionPayload {
+  tipo?: "base" | "temporal" | "fijo";
+  vigenteDesde?: string;
+  vigenteHasta?: string;
+  activo?: boolean;
+}
+
+export function updateAsignacion(
+  perfilId: string,
+  asignacionId: string,
+  payload: UpdateAsignacionPayload,
+): Promise<Asignacion> {
+  return apiFetch<Asignacion>(
+    `/profiles/${perfilId}/asignaciones/${asignacionId}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+  );
+}
+
+// Revoca (soft: activo=false) — el perfil pierde el centro sin borrar historial.
+export function revokeAsignacion(
+  perfilId: string,
+  asignacionId: string,
+): Promise<Asignacion> {
+  return apiFetch<Asignacion>(
+    `/profiles/${perfilId}/asignaciones/${asignacionId}`,
+    { method: "DELETE" },
+  );
 }
 
 export function assignCenter(

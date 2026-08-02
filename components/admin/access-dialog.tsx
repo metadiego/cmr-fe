@@ -22,6 +22,7 @@ import { useResource } from "@/hooks/use-resource";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
   SheetContent,
@@ -291,6 +292,11 @@ function ExceptionsTab({
   );
 }
 
+/**
+ * Menú del usuario, EDITABLE (R4): dar o quitar una opción del menú a este
+ * usuario sin cambiarle el rol. El toggle escribe un override (grant/deny) del
+ * `permisoClave` del ítem — mismo motor que la pestaña Excepciones.
+ */
 function MenuPreviewTab({
   profile,
   centroId,
@@ -302,10 +308,51 @@ function MenuPreviewTab({
 }) {
   const t = useTranslations("admin.access");
   const tRoot = useTranslations();
-  const { state } = useResource(
+  const { state, reload } = useResource(
     () => getProfileMenu(profile.id, centroId),
     [profile.id, centro],
   );
+  const { state: accessState, reload: reloadAccess } = useResource(
+    () => getProfileAccess(profile.id, centroId),
+    [profile.id, centro],
+  );
+  const [busy, setBusy] = React.useState<string | null>(null);
+
+  // Overrides vigentes por clave de permiso (para saber si el toggle es excepción).
+  const overridePorClave = React.useMemo(() => {
+    const map = new Map<string, { permisoId: string; efecto: string }>();
+    if (accessState.kind === "ok") {
+      for (const o of accessState.data.overrides) {
+        map.set(o.permisoClave, { permisoId: o.permisoId, efecto: o.efecto });
+      }
+    }
+    return map;
+  }, [accessState]);
+
+  async function toggle(permisoClave: string, dar: boolean) {
+    setBusy(permisoClave);
+    try {
+      const actual = overridePorClave.get(permisoClave);
+      // Si ya hay un override del signo contrario, se reemplaza; si el estado
+      // deseado coincide con lo que da el rol, se limpia (vuelve a heredar).
+      if (actual && ((dar && actual.efecto === "grant") || (!dar && actual.efecto === "deny"))) {
+        await removeProfileOverride(profile.id, actual.permisoId, centroId);
+      } else {
+        await setProfileOverride(
+          profile.id,
+          permisoClave,
+          dar ? "grant" : "deny",
+          centroId,
+        );
+      }
+      reload();
+      reloadAccess();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(null);
+    }
+  }
 
   if (state.kind === "loading") return <Loading />;
   if (state.kind === "fail") return <Fail message={state.message} />;
@@ -313,22 +360,45 @@ function MenuPreviewTab({
     return <p className="text-sm text-muted-foreground">{t("menuEmpty")}</p>;
 
   return (
-    <ul className="space-y-1">
-      {state.data.map((item) => (
-        <li
-          key={item.id}
-          className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-          style={{ marginLeft: item.parentClave ? 16 : 0 }}
-        >
-          <span className={item.allowed ? "" : "text-muted-foreground line-through"}>
-            {safe(tRoot, item.labelKey)}
-          </span>
-          <Badge variant={item.allowed ? "secondary" : "outline"}>
-            {item.allowed ? t("allowed") : t("blocked")}
-          </Badge>
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">{t("menuEditableHelp")}</p>
+      <ul className="space-y-1">
+        {state.data.map((item) => {
+          const permiso = item.requiresPermiso;
+          const esExcepcion = permiso ? overridePorClave.has(permiso) : false;
+          return (
+            <li
+              key={item.id}
+              className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
+              style={{ marginLeft: item.parentClave ? 16 : 0 }}
+            >
+              <span
+                className={
+                  item.allowed ? "" : "text-muted-foreground line-through"
+                }
+              >
+                {safe(tRoot, item.labelKey)}
+              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                {esExcepcion && (
+                  <Badge variant="outline">{t("excepcion")}</Badge>
+                )}
+                {permiso ? (
+                  <Switch
+                    checked={item.allowed}
+                    disabled={busy === permiso}
+                    onCheckedChange={(v) => toggle(permiso, v)}
+                    aria-label={safe(tRoot, item.labelKey)}
+                  />
+                ) : (
+                  <Badge variant="secondary">{t("sinPermiso")}</Badge>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
