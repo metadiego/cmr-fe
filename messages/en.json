@@ -491,7 +491,9 @@
       "recordDuplicadoBody": "Record #{record} already belongs to {nombre} ({estado}) in this center. Use another number or leave the field empty.",
       "recordDuenoActivo": "active",
       "recordDuenoInactivo": "inactive",
-      "camposFaltantes": "Required fields missing: {campos}"
+      "camposFaltantes": "Required fields missing: {campos}",
+      "emailInvalido": "Enter a valid email, e.g. name@domain.com",
+      "requiredLegend": "Required fields"
     }
   },
   "common": {

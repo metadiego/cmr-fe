@@ -9,6 +9,10 @@ import {
   Alert02Icon,
   CheckmarkCircle02Icon,
   Loading03Icon,
+  Building06Icon,
+  UserCircleIcon,
+  Call02Icon,
+  Stethoscope02Icon,
 } from "@hugeicons/core-free-icons";
 
 import {
@@ -152,6 +156,11 @@ export function PacienteFormSheet({
     paciente ? fromPaciente(paciente) : EMPTY,
   );
   const [submitting, setSubmitting] = React.useState(false);
+  // Validación en línea del email SOLO tras salir del campo (patrón moderno: no acusar mientras
+  // se escribe). Es un aviso NO bloqueante — el BE es la autoridad final del formato.
+  const [emailTouched, setEmailTouched] = React.useState(false);
+  const emailInvalido =
+    !!form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
 
   // The center a NEW patient is created in. Writes are tenant-scoped; master /
   // multi-center users have no auto-locked center, so they must choose one.
@@ -259,6 +268,7 @@ export function PacienteFormSheet({
     setForm(paciente ? fromPaciente(paciente) : EMPTY);
     setRecordCheck(null);
     setDuenoServer(null);
+    setEmailTouched(false);
   }
 
   function handleOpenChange(next: boolean) {
@@ -330,15 +340,22 @@ export function PacienteFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-lg">
+      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>{isEdit ? t("editTitle") : t("createTitle")}</SheetTitle>
           <SheetDescription>{t("help")}</SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit();
+          }}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
           {needsCentro && (
-            <Section title={t("sectionCentro")}>
+            <Section title={t("sectionCentro")} icon={Building06Icon}>
               <Field label={t("centro")} required>
                 <Select
                   value={effectiveCentro || undefined}
@@ -359,7 +376,7 @@ export function PacienteFormSheet({
             </Section>
           )}
 
-          <Section title={t("sectionPersonal")}>
+          <Section title={t("sectionPersonal")} icon={UserCircleIcon}>
             <Grid>
               <Field label={t("nombres")} required>
                 <Input
@@ -412,7 +429,7 @@ export function PacienteFormSheet({
             </Grid>
           </Section>
 
-          <Section title={t("sectionContact")}>
+          <Section title={t("sectionContact")} icon={Call02Icon}>
             <Grid>
               <Field label={t("telefono")} required={req("telefono")}>
                 <Input
@@ -428,11 +445,18 @@ export function PacienteFormSheet({
                   onChange={(e) => set("whatsapp", e.target.value)}
                 />
               </Field>
-              <Field label={t("email")} required={req("email")}>
+              <Field
+                label={t("email")}
+                required={req("email")}
+                hint={emailTouched && emailInvalido ? t("emailInvalido") : undefined}
+              >
                 <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => set("email", e.target.value)}
+                  onBlur={() => setEmailTouched(true)}
+                  aria-invalid={emailTouched && emailInvalido}
+                  className={emailTouched && emailInvalido ? "border-destructive" : undefined}
                 />
               </Field>
               <Field label={t("zipcode")} required={req("zipcode")}>
@@ -450,7 +474,7 @@ export function PacienteFormSheet({
             </Grid>
           </Section>
 
-          <Section title={t("sectionClinical")}>
+          <Section title={t("sectionClinical")} icon={Stethoscope02Icon}>
             <Grid>
               <Field label={t("record")} required={req("record")}>
                 <div className="relative">
@@ -500,20 +524,36 @@ export function PacienteFormSheet({
               </Alert>
             )}
           </Section>
-        </div>
+          </div>
 
-        <SheetFooter className="flex-row justify-end gap-2 border-t px-6 py-4">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={submitting}
-          >
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={!canSubmit}>
-            {submitting ? tc("saving") : tc("save")}
-          </Button>
-        </SheetFooter>
+          <SheetFooter className="flex-row items-center gap-2 border-t px-6 py-4">
+            <span className="mr-auto text-xs text-muted-foreground">
+              <span className="text-destructive">*</span> {t("requiredLegend")}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={submitting}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button type="submit" disabled={!canSubmit}>
+              {submitting ? (
+                <>
+                  <HugeiconsIcon
+                    icon={Loading03Icon}
+                    strokeWidth={2}
+                    className="size-4 animate-spin"
+                  />
+                  {tc("saving")}
+                </>
+              ) : (
+                tc("save")
+              )}
+            </Button>
+          </SheetFooter>
+        </form>
       </SheetContent>
     </Sheet>
   );
@@ -521,14 +561,17 @@ export function PacienteFormSheet({
 
 function Section({
   title,
+  icon,
   children,
 }: {
   title: string;
+  icon?: Parameters<typeof HugeiconsIcon>[0]["icon"];
   children: React.ReactNode;
 }) {
   return (
     <section className="space-y-3">
-      <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+      <h3 className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        {icon ? <HugeiconsIcon icon={icon} strokeWidth={2} className="size-3.5" /> : null}
         {title}
       </h3>
       {children}
@@ -544,11 +587,13 @@ function Field({
   label,
   required,
   full,
+  hint,
   children,
 }: {
   label: string;
   required?: boolean;
   full?: boolean;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -558,6 +603,7 @@ function Field({
         {required && <span className="ml-0.5 text-destructive">*</span>}
       </Label>
       {children}
+      {hint ? <p className="text-xs text-destructive">{hint}</p> : null}
     </div>
   );
 }
