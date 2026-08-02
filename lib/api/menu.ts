@@ -4,12 +4,21 @@ import { apiFetch } from "./client";
 // principal's EFFECTIVE menu — already filtered by permission + visibility +
 // active centro, ordered by `orden`, flat (the FE nests by `parentClave`).
 // `clave` matches the FE route manifest (lib/nav.ts); `path` is the route.
+// tipo (cmr-be PR #230): 'item' = enlace normal; 'grupo' = caja/dropdown sin ruta (path '#');
+// 'separador' = línea divisoria sin etiqueta ni ruta.
+export type MenuItemTipo = "item" | "grupo" | "separador";
+
 export interface MenuItem {
   id: string;
   clave: string;
   labelKey: string; // full i18n key, e.g. "nav.home"
+  // labelCustom (cmr-be PR #230): nombre LIBRE que PISA labelKey. Render: labelCustom ?? t(labelKey).
+  labelCustom?: string | null;
+  tipo?: MenuItemTipo;
   path: string;
   icon?: string | null;
+  // mostrarIcono (cmr-be PR #230): icono del ítem configurable sí/no.
+  mostrarIcono?: boolean;
   parentClave?: string | null;
   orden: number;
   permisoClave?: string | null;
@@ -32,9 +41,12 @@ export async function getMyMenu(): Promise<MenuItem[]> {
 // Writable fields of a menu item (id/centro are server-managed).
 export type MenuItemPayload = {
   clave: string;
-  labelKey: string;
-  path: string;
+  labelKey?: string;
+  labelCustom?: string | null;
+  tipo?: MenuItemTipo;
+  path?: string;
   icon?: string | null;
+  mostrarIcono?: boolean;
   parentClave?: string | null;
   orden?: number;
   permisoClave?: string | null;

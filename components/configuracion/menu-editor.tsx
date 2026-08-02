@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/menu";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
@@ -154,6 +155,8 @@ export function MenuEditor() {
   const [over, setOver] = React.useState<{ id: string; zone: Zone } | null>(null);
   const [saving, setSaving] = React.useState(false);
   const [toDelete, setToDelete] = React.useState<MenuItem | null>(null);
+  // Edición en línea del nombre libre (labelCustom).
+  const [editing, setEditing] = React.useState<{ id: string; value: string } | null>(null);
   // Pila de deshacer: instantáneas del árbol (parentClave/orden/visible) antes de cada cambio.
   const [undoStack, setUndoStack] = React.useState<MenuItem[][]>([]);
 
@@ -173,14 +176,17 @@ export function MenuEditor() {
 
   const label = React.useCallback(
     (it: MenuItem) => {
-      // labelKey es una clave i18n; si no existe la traducción, mostrar la clave cruda.
+      // labelCustom (nombre libre) pisa la clave i18n; si no, traducir labelKey (o mostrarla cruda).
+      const custom = it.labelCustom?.trim();
+      if (custom) return custom;
+      if (it.tipo === "separador") return t("separator");
       try {
         return tRoot.has(it.labelKey) ? tRoot(it.labelKey) : it.labelKey;
       } catch {
         return it.labelKey;
       }
     },
-    [tRoot],
+    [t, tRoot],
   );
 
   const snapshot = React.useCallback(() => {
@@ -249,6 +255,72 @@ export function MenuEditor() {
     }
   }
 
+  // Genera una clave única a partir de una base.
+  function uniqueClave(base: string): string {
+    const claves = new Set((items ?? []).map((i) => i.clave));
+    let clave = base;
+    let n = 2;
+    while (claves.has(clave)) clave = `${base}-${n++}`;
+    return clave;
+  }
+
+  // Nuevo grupo (caja/dropdown sin ruta, tipo:'grupo'). Nace con un nombre por defecto → renómbralo.
+  async function nuevoGrupo() {
+    if (!items) return;
+    const orden = childrenOf(items, null).length;
+    try {
+      await createMenuItem({
+        clave: uniqueClave("grupo"),
+        tipo: "grupo",
+        labelCustom: t("newGroupName"),
+        parentClave: null,
+        orden,
+        visible: true,
+      });
+      toast.success(t("groupAdded"));
+      load();
+    } catch (e) {
+      toast.error(apiErrorMessage(e));
+    }
+  }
+
+  // Separador (línea divisoria sin etiqueta ni ruta, tipo:'separador').
+  async function agregarSeparador() {
+    if (!items) return;
+    const orden = childrenOf(items, null).length;
+    try {
+      await createMenuItem({
+        clave: uniqueClave("sep"),
+        tipo: "separador",
+        parentClave: null,
+        orden,
+        visible: true,
+      });
+      toast.success(t("separatorAdded"));
+      load();
+    } catch (e) {
+      toast.error(apiErrorMessage(e));
+    }
+  }
+
+  // Guardar el nombre libre. Vacío → null (vuelve al labelKey i18n).
+  async function saveRename() {
+    if (!editing || !items) return;
+    const { id, value } = editing;
+    setEditing(null);
+    const labelCustom = value.trim() || null;
+    const target = items.find((i) => i.id === id);
+    if (target && (target.labelCustom ?? null) === labelCustom) return; // sin cambios
+    setItems(items.map((i) => (i.id === id ? { ...i, labelCustom } : i)));
+    try {
+      await updateMenuItem(id, { labelCustom });
+      toast.success(t("saved"));
+    } catch (e) {
+      toast.error(apiErrorMessage(e));
+      load();
+    }
+  }
+
   async function confirmDelete() {
     if (!toDelete) return;
     const it = toDelete;
@@ -307,34 +379,94 @@ export function MenuEditor() {
   function renderNode(it: MenuItem, depth: number): React.ReactNode {
     const kids = items ? childrenOf(items, it.clave) : [];
     const isOver = over?.id === it.id;
+    const esGrupo = it.tipo === "grupo";
+    const esSeparador = it.tipo === "separador";
+    const dragProps = {
+      draggable: true,
+      onDragStart: () => setDragId(it.id),
+      onDragEnd: () => {
+        setDragId(null);
+        setOver(null);
+      },
+      onDragOver: (e: React.DragEvent) => onRowDragOver(e, it),
+      onDrop: () => handleDrop(it.id),
+      style: { marginLeft: depth * 20 },
+    };
+    const overCls = cn(
+      dragId === it.id && "opacity-50",
+      isOver && over?.zone === "inside" && "ring-2 ring-primary",
+      isOver && over?.zone === "before" && "border-t-2 border-t-primary",
+      isOver && over?.zone === "after" && "border-b-2 border-b-primary",
+    );
+
+    if (esSeparador) {
+      return (
+        <div key={it.id}>
+          <div
+            {...dragProps}
+            className={cn(
+              "group flex items-center gap-2 rounded-md px-2 py-1",
+              overCls,
+            )}
+          >
+            <span className="cursor-grab text-muted-foreground" aria-hidden>
+              <HugeiconsIcon icon={Menu01Icon} className="size-4" />
+            </span>
+            <span className="h-px flex-1 bg-border" aria-hidden />
+            <span className="text-xs text-muted-foreground">{t("separator")}</span>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-7 text-muted-foreground opacity-0 group-hover:opacity-100"
+              aria-label={t("delete")}
+              onClick={() => setToDelete(it)}
+            >
+              <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div key={it.id}>
         <div
-          draggable
-          onDragStart={() => setDragId(it.id)}
-          onDragEnd={() => {
-            setDragId(null);
-            setOver(null);
-          }}
-          onDragOver={(e) => onRowDragOver(e, it)}
-          onDrop={() => handleDrop(it.id)}
-          style={{ marginLeft: depth * 20 }}
+          {...dragProps}
           className={cn(
             "group relative flex items-center gap-2 rounded-md border bg-card px-2 py-1.5 text-sm",
-            dragId === it.id && "opacity-50",
-            isOver && over?.zone === "inside" && "ring-2 ring-primary",
-            isOver && over?.zone === "before" && "border-t-2 border-t-primary",
-            isOver && over?.zone === "after" && "border-b-2 border-b-primary",
+            esGrupo && "border-primary/30 bg-primary/5",
+            overCls,
             !it.visible && "opacity-60",
           )}
         >
           <span className="cursor-grab text-muted-foreground" aria-hidden>
             <HugeiconsIcon icon={Menu01Icon} className="size-4" />
           </span>
-          <span className="flex-1 truncate">
-            <span className="font-medium">{label(it)}</span>
-            <span className="ml-2 text-xs text-muted-foreground">{it.path}</span>
-          </span>
+          {editing?.id === it.id ? (
+            <Input
+              autoFocus
+              value={editing.value}
+              onChange={(e) => setEditing({ id: it.id, value: e.target.value })}
+              onBlur={saveRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveRename();
+                if (e.key === "Escape") setEditing(null);
+              }}
+              placeholder={t("renamePlaceholder")}
+              className="h-7 flex-1"
+            />
+          ) : (
+            <span
+              className="flex-1 cursor-text truncate"
+              title={t("renameHint")}
+              onDoubleClick={() => setEditing({ id: it.id, value: it.labelCustom ?? "" })}
+            >
+              <span className={cn("font-medium", esGrupo && "font-semibold")}>{label(it)}</span>
+              {!esGrupo && it.path && it.path !== "#" ? (
+                <span className="ml-2 text-xs text-muted-foreground">{it.path}</span>
+              ) : null}
+            </span>
+          )}
           <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
             {t("visible")}
             <Switch checked={it.visible} onCheckedChange={() => toggleVisible(it)} />
@@ -373,7 +505,15 @@ export function MenuEditor() {
     <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
       {/* Árbol editable */}
       <div>
-        <div className="mb-3 flex items-center gap-3">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="outline" onClick={nuevoGrupo} disabled={saving}>
+            <HugeiconsIcon icon={Add01Icon} className="size-4" />
+            {t("newGroup")}
+          </Button>
+          <Button size="sm" variant="outline" onClick={agregarSeparador} disabled={saving}>
+            {t("addSeparator")}
+          </Button>
+          <span className="mx-1 h-5 w-px bg-border" aria-hidden />
           <Button size="sm" variant="outline" onClick={undo} disabled={saving || undoStack.length === 0}>
             {t("undo")}
           </Button>
