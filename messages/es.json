@@ -867,7 +867,9 @@
       "buscar": "Buscar por email, nombre, rol o centro…",
       "sinRol": "Sin rol",
       "sinCentro": "Sin centro",
-      "hasta": "hasta {fecha}"
+      "hasta": "hasta {fecha}",
+      "masAcciones": "Más acciones",
+      "sinResultados": "Ningún usuario coincide con la búsqueda."
     },
     "invite": {
       "title": "Invitar usuario",
@@ -896,7 +898,7 @@
       "centroHint": "Opcional; sin centro el usuario no podrá entrar hasta que se le asigne uno.",
       "rol": "Rol",
       "rolPlaceholder": "Elige un rol",
-      "rolHint": "Opcional; define qué puede hacer y qué ve en el menú."
+      "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros."
     },
     "assign": {
       "title": "Asignar centro",

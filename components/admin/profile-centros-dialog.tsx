@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import * as React from "react"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 import {
   assignCenter,
@@ -11,14 +11,14 @@ import {
   updateAsignacion,
   type Asignacion,
   type Perfil,
-} from "@/lib/api/profiles";
-import { getCenters, type Centro } from "@/lib/api/centers";
-import { toastError } from "@/lib/api/errors";
-import { useResource } from "@/hooks/use-resource";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/lib/api/profiles"
+import { getCenters, type Centro } from "@/lib/api/centers"
+import { toastError } from "@/lib/api/errors"
+import { useResource } from "@/hooks/use-resource"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -26,16 +26,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 
-const TIPOS = ["base", "temporal", "fijo"] as const;
+const TIPOS = ["base", "temporal", "fijo"] as const
 
 /**
  * Centros de un usuario (D4): lista sus asignaciones (tipo + vigencia + estado),
@@ -47,84 +47,86 @@ export function ProfileCentrosDialog({
   open,
   onOpenChange,
 }: {
-  profile: Perfil | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  profile: Perfil | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) {
-  const t = useTranslations("admin.centrosPerfil");
-  const tRoot = useTranslations();
-  const perfilId = profile?.id ?? "";
+  const t = useTranslations("admin.centrosPerfil")
+  const tRoot = useTranslations()
+  const perfilId = profile?.id ?? ""
 
-  const { state: asigState, reload } = useResource<Asignacion[]>(
+  const { state: asigState, refresh } = useResource<Asignacion[]>(
     () => (open && perfilId ? getAsignaciones(perfilId) : Promise.resolve([])),
-    [open, perfilId],
-  );
+    [open, perfilId]
+  )
   const { state: centersState } = useResource<Centro[]>(
     () => (open ? getCenters() : Promise.resolve([])),
-    [open],
-  );
-  const centers = centersState.kind === "ok" ? centersState.data : [];
+    [open]
+  )
+  const centers = centersState.kind === "ok" ? centersState.data : []
   const nombreCentro = (id: string) =>
-    centers.find((c) => c.id === id)?.nombre ?? id.slice(0, 8);
+    centers.find((c) => c.id === id)?.nombre ?? id.slice(0, 8)
 
   // Alta
-  const [centroId, setCentroId] = React.useState("");
-  const [tipo, setTipo] = React.useState<(typeof TIPOS)[number]>("base");
-  const [hasta, setHasta] = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
+  const [centroId, setCentroId] = React.useState("")
+  const [tipo, setTipo] = React.useState<(typeof TIPOS)[number]>("base")
+  const [hasta, setHasta] = React.useState("")
+  const [submitting, setSubmitting] = React.useState(false)
 
   function reset() {
-    setCentroId("");
-    setTipo("base");
-    setHasta("");
+    setCentroId("")
+    setTipo("base")
+    setHasta("")
   }
 
   async function onAdd() {
-    if (!centroId || !profile) return;
-    setSubmitting(true);
+    if (!centroId || !profile) return
+    setSubmitting(true)
     try {
       await assignCenter(profile.id, {
         centroId,
         tipo,
         vigenteHasta: tipo === "temporal" && hasta ? hasta : undefined,
-      });
-      toast.success(t("asignado"));
-      reset();
-      reload();
+      })
+      toast.success(t("asignado"))
+      reset()
+      refresh()
     } catch (err) {
-      toastError(err, tRoot);
+      toastError(err, tRoot)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
   async function onRevoke(a: Asignacion) {
-    if (!profile) return;
-    if (!window.confirm(t("confirmRevocar", { centro: nombreCentro(a.centroId) })))
-      return;
+    if (!profile) return
+    if (
+      !window.confirm(t("confirmRevocar", { centro: nombreCentro(a.centroId) }))
+    )
+      return
     try {
-      await revokeAsignacion(profile.id, a.id);
-      toast.success(t("revocada"));
-      reload();
+      await revokeAsignacion(profile.id, a.id)
+      toast.success(t("revocada"))
+      refresh()
     } catch (err) {
-      toastError(err, tRoot);
+      toastError(err, tRoot)
     }
   }
 
   async function onReactivate(a: Asignacion) {
-    if (!profile) return;
+    if (!profile) return
     try {
-      await updateAsignacion(profile.id, a.id, { activo: true });
-      toast.success(t("reactivada"));
-      reload();
+      await updateAsignacion(profile.id, a.id, { activo: true })
+      toast.success(t("reactivada"))
+      refresh()
     } catch (err) {
-      toastError(err, tRoot);
+      toastError(err, tRoot)
     }
   }
 
   function handleOpenChange(next: boolean) {
-    if (!next) reset();
-    onOpenChange(next);
+    if (!next) reset()
+    onOpenChange(next)
   }
 
   return (
@@ -139,6 +141,16 @@ export function ProfileCentrosDialog({
 
         {/* Asignaciones actuales */}
         <div className="space-y-2">
+          {asigState.kind === "loading" && (
+            <p className="text-sm text-muted-foreground">
+              {tRoot("common.loading")}
+            </p>
+          )}
+          {asigState.kind === "fail" && (
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {asigState.message}
+            </p>
+          )}
           {asigState.kind === "ok" && asigState.data.length === 0 && (
             <p className="text-sm text-muted-foreground">{t("vacio")}</p>
           )}
@@ -246,5 +258,5 @@ export function ProfileCentrosDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

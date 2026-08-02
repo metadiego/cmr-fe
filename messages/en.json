@@ -867,7 +867,9 @@
       "buscar": "Search by email, name, role or center…",
       "sinRol": "No role",
       "sinCentro": "No center",
-      "hasta": "until {fecha}"
+      "hasta": "until {fecha}",
+      "masAcciones": "More actions",
+      "sinResultados": "No user matches the search."
     },
     "invite": {
       "title": "Invite user",
@@ -896,7 +898,7 @@
       "centroHint": "Optional; without a center the user can't sign in until one is assigned.",
       "rol": "Role",
       "rolPlaceholder": "Pick a role",
-      "rolHint": "Optional; defines what they can do and see in the menu."
+      "rolHint": "Optional. Choosing a role WITHOUT a center grants it in ALL centers."
     },
     "assign": {
       "title": "Assign center",

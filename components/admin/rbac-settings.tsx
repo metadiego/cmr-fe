@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import * as React from "react"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 import {
   getRoles,
@@ -17,13 +17,13 @@ import {
   type Rol,
   type Permiso,
   type ProfileMenuItem,
-} from "@/lib/api/rbac";
-import { apiErrorMessage } from "@/lib/api/errors";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "@/lib/api/rbac"
+import { apiErrorMessage } from "@/lib/api/errors"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -31,7 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -39,61 +39,62 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
 type State =
   | { kind: "loading" }
   | { kind: "ok"; roles: Rol[] }
-  | { kind: "fail"; message: string };
+  | { kind: "fail"; message: string }
 
 // RBAC admin (F2): manage roles + their permisos. The BE has no GET for a role's
 // current permisos, so the permisos editor sets from scratch (replace) — warned.
 export function RbacSettings() {
-  const t = useTranslations("admin.rbac");
-  const [state, setState] = React.useState<State>({ kind: "loading" });
-  const [permisos, setPermisos] = React.useState<Permiso[]>([]);
-  const [createOpen, setCreateOpen] = React.useState(false);
-  const [permisosFor, setPermisosFor] = React.useState<Rol | null>(null);
-  const [menuFor, setMenuFor] = React.useState<Rol | null>(null);
-  const [editFor, setEditFor] = React.useState<Rol | null>(null);
-  const [busyId, setBusyId] = React.useState<string | null>(null);
+  const t = useTranslations("admin.rbac")
+  const [state, setState] = React.useState<State>({ kind: "loading" })
+  const [permisos, setPermisos] = React.useState<Permiso[]>([])
+  const [createOpen, setCreateOpen] = React.useState(false)
+  const [permisosFor, setPermisosFor] = React.useState<Rol | null>(null)
+  const [menuFor, setMenuFor] = React.useState<Rol | null>(null)
+  const [editFor, setEditFor] = React.useState<Rol | null>(null)
+  const [busyId, setBusyId] = React.useState<string | null>(null)
 
   const load = React.useCallback(async () => {
     try {
-      const roles = await getRoles();
-      setState({ kind: "ok", roles });
+      const roles = await getRoles()
+      setState({ kind: "ok", roles })
     } catch (err) {
-      setState({ kind: "fail", message: apiErrorMessage(err) });
+      setState({ kind: "fail", message: apiErrorMessage(err) })
     }
-  }, []);
+  }, [])
 
   React.useEffect(() => {
-    let active = true;
+    let active = true
     getRoles()
       .then((roles) => active && setState({ kind: "ok", roles }))
       .catch(
-        (err) => active && setState({ kind: "fail", message: apiErrorMessage(err) }),
-      );
+        (err) =>
+          active && setState({ kind: "fail", message: apiErrorMessage(err) })
+      )
     getPermisos()
       .then((list) => active && setPermisos(list))
-      .catch(() => {});
+      .catch(() => {})
     return () => {
-      active = false;
-    };
-  }, []);
+      active = false
+    }
+  }, [])
 
   async function onDelete(r: Rol) {
     // Confirmación: borrar un rol arrastra sus asignaciones (FK cascade).
-    if (!window.confirm(t("confirmDelete", { role: r.nombre }))) return;
-    setBusyId(r.id);
+    if (!window.confirm(t("confirmDelete", { role: r.nombre }))) return
+    setBusyId(r.id)
     try {
-      await deleteRole(r.id);
-      toast.success(t("deleted"));
-      load();
+      await deleteRole(r.id)
+      toast.success(t("deleted"))
+      load()
     } catch (err) {
-      toast.error(apiErrorMessage(err));
+      toast.error(apiErrorMessage(err))
     } finally {
-      setBusyId(null);
+      setBusyId(null)
     }
   }
 
@@ -201,7 +202,7 @@ export function RbacSettings() {
         onOpenChange={(open) => !open && setMenuFor(null)}
       />
     </section>
-  );
+  )
 }
 
 /**
@@ -213,54 +214,54 @@ function RoleMenuDialog({
   role,
   onOpenChange,
 }: {
-  role: Rol | null;
-  onOpenChange: (open: boolean) => void;
+  role: Rol | null
+  onOpenChange: (open: boolean) => void
 }) {
-  const t = useTranslations("admin.rbac");
-  const tc = useTranslations("admin");
-  const tRoot = useTranslations();
-  const [items, setItems] = React.useState<ProfileMenuItem[] | null>(null);
-  const [selected, setSelected] = React.useState<Set<string>>(new Set());
-  const [submitting, setSubmitting] = React.useState(false);
+  const t = useTranslations("admin.rbac")
+  const tc = useTranslations("admin")
+  const tRoot = useTranslations()
+  const [items, setItems] = React.useState<ProfileMenuItem[] | null>(null)
+  const [selected, setSelected] = React.useState<Set<string>>(new Set())
+  const [submitting, setSubmitting] = React.useState(false)
 
   React.useEffect(() => {
-    if (!role) return;
-    let active = true;
+    if (!role) return
+    let active = true
     getRoleMenu(role.id)
       .then((list) => {
-        if (!active) return;
-        setItems(list);
+        if (!active) return
+        setItems(list)
         setSelected(
           new Set(
             list
               .filter((i) => i.allowed && i.requiresPermiso)
-              .map((i) => i.clave),
-          ),
-        );
+              .map((i) => i.clave)
+          )
+        )
       })
-      .catch((err) => active && toast.error(apiErrorMessage(err)));
+      .catch((err) => active && toast.error(apiErrorMessage(err)))
     return () => {
-      active = false;
-    };
-  }, [role]);
+      active = false
+    }
+  }, [role])
 
   function labelDe(i: ProfileMenuItem) {
-    const anyI = i as unknown as { labelCustom?: string | null };
-    if (anyI.labelCustom) return anyI.labelCustom;
-    return tRoot.has(i.labelKey) ? tRoot(i.labelKey) : i.clave;
+    const anyI = i as unknown as { labelCustom?: string | null }
+    if (anyI.labelCustom) return anyI.labelCustom
+    return tRoot.has(i.labelKey) ? tRoot(i.labelKey) : i.clave
   }
 
   async function onSubmit() {
-    if (!role) return;
-    setSubmitting(true);
+    if (!role) return
+    setSubmitting(true)
     try {
-      await setRoleMenu(role.id, [...selected]);
-      toast.success(t("menuRolSaved"));
-      onOpenChange(false);
+      await setRoleMenu(role.id, [...selected])
+      toast.success(t("menuRolSaved"))
+      onOpenChange(false)
     } catch (err) {
-      toast.error(apiErrorMessage(err));
+      toast.error(apiErrorMessage(err))
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -279,10 +280,13 @@ function RoleMenuDialog({
         )}
         <div className="space-y-1">
           {items?.map((i) => {
-            const anyI = i as unknown as { tipo?: string; parentClave?: string | null };
-            if (anyI.tipo === "separador") return null;
-            const esGrupo = anyI.tipo === "grupo";
-            const indent = anyI.parentClave && !esGrupo ? "pl-6" : "";
+            const anyI = i as unknown as {
+              tipo?: string
+              parentClave?: string | null
+            }
+            if (anyI.tipo === "separador") return null
+            const esGrupo = anyI.tipo === "grupo"
+            const indent = anyI.parentClave && !esGrupo ? "pl-6" : ""
             if (esGrupo) {
               return (
                 <p
@@ -291,9 +295,9 @@ function RoleMenuDialog({
                 >
                   {labelDe(i)}
                 </p>
-              );
+              )
             }
-            const participa = !!i.requiresPermiso;
+            const participa = !!i.requiresPermiso
             return (
               <label
                 key={i.clave}
@@ -304,10 +308,10 @@ function RoleMenuDialog({
                   disabled={!participa}
                   onCheckedChange={(v) =>
                     setSelected((prev) => {
-                      const next = new Set(prev);
-                      if (v === true) next.add(i.clave);
-                      else next.delete(i.clave);
-                      return next;
+                      const next = new Set(prev)
+                      if (v === true) next.add(i.clave)
+                      else next.delete(i.clave)
+                      return next
                     })
                   }
                 />
@@ -318,7 +322,7 @@ function RoleMenuDialog({
                   </Badge>
                 )}
               </label>
-            );
+            )
           })}
         </div>
 
@@ -332,7 +336,7 @@ function RoleMenuDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function EditRoleDialog({
@@ -340,31 +344,31 @@ function EditRoleDialog({
   onOpenChange,
   onSaved,
 }: {
-  role: Rol | null;
-  onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  role: Rol | null
+  onOpenChange: (open: boolean) => void
+  onSaved: () => void
 }) {
-  const t = useTranslations("admin.rbac");
-  const tc = useTranslations("admin");
-  const [nombre, setNombre] = React.useState(role?.nombre ?? "");
-  const [descripcion, setDescripcion] = React.useState(role?.descripcion ?? "");
-  const [submitting, setSubmitting] = React.useState(false);
+  const t = useTranslations("admin.rbac")
+  const tc = useTranslations("admin")
+  const [nombre, setNombre] = React.useState(role?.nombre ?? "")
+  const [descripcion, setDescripcion] = React.useState(role?.descripcion ?? "")
+  const [submitting, setSubmitting] = React.useState(false)
 
   async function onSubmit() {
-    if (!role || !nombre.trim()) return;
-    setSubmitting(true);
+    if (!role || !nombre.trim()) return
+    setSubmitting(true)
     try {
       await updateRole(role.id, {
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
-      });
-      toast.success(t("updated"));
-      onOpenChange(false);
-      onSaved();
+      })
+      toast.success(t("updated"))
+      onOpenChange(false)
+      onSaved()
     } catch (err) {
-      toast.error(apiErrorMessage(err));
+      toast.error(apiErrorMessage(err))
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -398,7 +402,7 @@ function EditRoleDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function CreateRoleDialog({
@@ -406,42 +410,42 @@ function CreateRoleDialog({
   onOpenChange,
   onCreated,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCreated: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onCreated: () => void
 }) {
-  const t = useTranslations("admin.rbac");
-  const tc = useTranslations("admin");
-  const [clave, setClave] = React.useState("");
-  const [nombre, setNombre] = React.useState("");
-  const [descripcion, setDescripcion] = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
+  const t = useTranslations("admin.rbac")
+  const tc = useTranslations("admin")
+  const [clave, setClave] = React.useState("")
+  const [nombre, setNombre] = React.useState("")
+  const [descripcion, setDescripcion] = React.useState("")
+  const [submitting, setSubmitting] = React.useState(false)
 
   function handleOpenChange(next: boolean) {
     if (!next) {
-      setClave("");
-      setNombre("");
-      setDescripcion("");
+      setClave("")
+      setNombre("")
+      setDescripcion("")
     }
-    onOpenChange(next);
+    onOpenChange(next)
   }
 
   async function onSubmit() {
-    if (!clave.trim() || !nombre.trim()) return;
-    setSubmitting(true);
+    if (!clave.trim() || !nombre.trim()) return
+    setSubmitting(true)
     try {
       await createRole({
         clave: clave.trim(),
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
-      });
-      toast.success(t("created"));
-      handleOpenChange(false);
-      onCreated();
+      })
+      toast.success(t("created"))
+      handleOpenChange(false)
+      onCreated()
     } catch (err) {
-      toast.error(apiErrorMessage(err));
+      toast.error(apiErrorMessage(err))
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -487,7 +491,7 @@ function CreateRoleDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 function PermisosDialog({
@@ -495,59 +499,59 @@ function PermisosDialog({
   permisos,
   onOpenChange,
 }: {
-  role: Rol | null;
-  permisos: Permiso[];
-  onOpenChange: (open: boolean) => void;
+  role: Rol | null
+  permisos: Permiso[]
+  onOpenChange: (open: boolean) => void
 }) {
-  const t = useTranslations("admin.rbac");
-  const tc = useTranslations("admin");
-  const [selected, setSelected] = React.useState<Set<string>>(new Set());
-  const [loaded, setLoaded] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
+  const t = useTranslations("admin.rbac")
+  const tc = useTranslations("admin")
+  const [selected, setSelected] = React.useState<Set<string>>(new Set())
+  const [loaded, setLoaded] = React.useState(false)
+  const [submitting, setSubmitting] = React.useState(false)
 
   // PRECARGA las claves actuales del rol: sin esto, guardar con el set vacío
   // BORRABA los permisos del rol (el PUT es un replace completo).
   React.useEffect(() => {
-    if (!role) return;
-    let active = true;
+    if (!role) return
+    let active = true
     getRolePermisos(role.id)
       .then((claves) => {
-        if (!active) return;
-        setSelected(new Set(claves));
-        setLoaded(true);
+        if (!active) return
+        setSelected(new Set(claves))
+        setLoaded(true)
       })
-      .catch((err) => active && toast.error(apiErrorMessage(err)));
+      .catch((err) => active && toast.error(apiErrorMessage(err)))
     return () => {
-      active = false;
-    };
-  }, [role]);
+      active = false
+    }
+  }, [role])
 
   const byModulo = React.useMemo(() => {
-    const acc: Record<string, Permiso[]> = {};
-    for (const p of permisos) (acc[p.modulo] ??= []).push(p);
-    return acc;
-  }, [permisos]);
+    const acc: Record<string, Permiso[]> = {}
+    for (const p of permisos) (acc[p.modulo] ??= []).push(p)
+    return acc
+  }, [permisos])
 
   function toggle(clave: string, on: boolean) {
     setSelected((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(clave);
-      else next.delete(clave);
-      return next;
-    });
+      const next = new Set(prev)
+      if (on) next.add(clave)
+      else next.delete(clave)
+      return next
+    })
   }
 
   async function onSubmit() {
-    if (!role) return;
-    setSubmitting(true);
+    if (!role) return
+    setSubmitting(true)
     try {
-      await setRolePermisos(role.id, [...selected]);
-      toast.success(t("permisosSaved"));
-      onOpenChange(false);
+      await setRolePermisos(role.id, [...selected])
+      toast.success(t("permisosSaved"))
+      onOpenChange(false)
     } catch (err) {
-      toast.error(apiErrorMessage(err));
+      toast.error(apiErrorMessage(err))
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
   }
 
@@ -555,30 +559,36 @@ function PermisosDialog({
     <Dialog open={role !== null} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t("permisosTitle", { role: role?.nombre ?? "" })}</DialogTitle>
+          <DialogTitle>
+            {t("permisosTitle", { role: role?.nombre ?? "" })}
+          </DialogTitle>
           <DialogDescription>{t("permisosHelp")}</DialogDescription>
         </DialogHeader>
 
+        {!loaded && (
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        )}
         <div className="space-y-4">
-          {Object.entries(byModulo).map(([modulo, list]) => (
-            <div key={modulo} className="space-y-2">
-              <p className="text-sm font-semibold capitalize">{modulo}</p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {list.map((p) => (
-                  <label
-                    key={p.clave}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <Checkbox
-                      checked={selected.has(p.clave)}
-                      onCheckedChange={(v) => toggle(p.clave, v === true)}
-                    />
-                    <span className="font-mono text-xs">{p.accion}</span>
-                  </label>
-                ))}
+          {loaded &&
+            Object.entries(byModulo).map(([modulo, list]) => (
+              <div key={modulo} className="space-y-2">
+                <p className="text-sm font-semibold capitalize">{modulo}</p>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {list.map((p) => (
+                    <label
+                      key={p.clave}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={selected.has(p.clave)}
+                        onCheckedChange={(v) => toggle(p.clave, v === true)}
+                      />
+                      <span className="font-mono text-xs">{p.accion}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
 
         <DialogFooter>
@@ -591,5 +601,5 @@ function PermisosDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
