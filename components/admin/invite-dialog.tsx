@@ -9,7 +9,10 @@ import {
   type InviteResponse,
   type Perfil,
 } from "@/lib/api/profiles";
+import { getCenters } from "@/lib/api/centers";
+import { getRoles } from "@/lib/api/rbac";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -49,9 +52,24 @@ export function InviteDialog({
   const [nombre, setNombre] = React.useState("");
   const [apellido, setApellido] = React.useState("");
   const [accessMode, setAccessMode] = React.useState<AccessMode>("operativo");
+  // Invite ampliado: centro + rol en el mismo paso (si no, el invitado nace sin
+  // accesos y su primer login es un 403).
+  const [centroId, setCentroId] = React.useState("");
+  const [rolClave, setRolClave] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState<InviteResponse | null>(null);
   const [copied, setCopied] = React.useState(false);
+
+  const { state: centrosState } = useResource(
+    () => (open ? getCenters() : Promise.resolve([])),
+    [open],
+  );
+  const centros = centrosState.kind === "ok" ? centrosState.data : [];
+  const { state: rolesState } = useResource(
+    () => (open ? getRoles() : Promise.resolve([])),
+    [open],
+  );
+  const roles = rolesState.kind === "ok" ? rolesState.data : [];
 
   // Reset on close so the next open starts fresh (done in the handler, not an
   // effect, to avoid cascading renders).
@@ -61,6 +79,8 @@ export function InviteDialog({
       setNombre("");
       setApellido("");
       setAccessMode("operativo");
+      setCentroId("");
+      setRolClave("");
       setResult(null);
       setCopied(false);
     }
@@ -76,6 +96,8 @@ export function InviteDialog({
         nombre: nombre.trim(),
         apellido: apellido.trim() || undefined,
         accessMode,
+        centroId: centroId || undefined,
+        rolClave: rolClave || undefined,
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
       toast.success(t("success", { email: res.email }));
@@ -138,6 +160,40 @@ export function InviteDialog({
                   <SelectContent>
                     <SelectItem value="operativo">{t("operativo")}</SelectItem>
                     <SelectItem value="gerencial">{t("gerencial")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label={t("centro")} hint={t("centroHint")}>
+                <Select
+                  value={centroId || undefined}
+                  onValueChange={setCentroId}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("centroPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {centros.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label={t("rol")} hint={t("rolHint")}>
+                <Select
+                  value={rolClave || undefined}
+                  onValueChange={setRolClave}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("rolPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((r) => (
+                      <SelectItem key={r.id} value={r.clave}>
+                        {r.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
@@ -204,15 +260,18 @@ export function InviteDialog({
 
 function Field({
   label,
+  hint,
   children,
 }: {
   label: string;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
       <Label>{label}</Label>
       {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

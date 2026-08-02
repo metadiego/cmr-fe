@@ -739,7 +739,13 @@
       "save": "Guardar",
       "edit": "Editar",
       "editTitle": "Editar rol",
-      "updated": "Rol actualizado."
+      "updated": "Rol actualizado.",
+      "menuRol": "Menú",
+      "menuRolTitle": "Menú del rol {role}",
+      "menuRolHelp": "Marca las opciones del menú que verá este rol. Se traduce a permisos; los permisos que no son de menú no se tocan.",
+      "menuRolSaved": "Menú del rol actualizado",
+      "menuRolSinPermiso": "visible para todos",
+      "confirmDelete": "¿Eliminar el rol {role}? Los usuarios que lo tengan lo perderán."
     },
     "access": {
       "title": "Accesos del usuario",
@@ -758,7 +764,10 @@
       "deny": "Bloquear",
       "allowed": "Visible",
       "blocked": "Oculto",
-      "menuEmpty": "Sin ítems de menú."
+      "menuEmpty": "Sin ítems de menú.",
+      "menuEditableHelp": "Enciende o apaga una opción para ESTE usuario sin cambiarle el rol (queda como excepción).",
+      "excepcion": "excepción",
+      "sinPermiso": "visible para todos"
     },
     "menu": {
       "title": "Menú dinámico",
@@ -783,7 +792,9 @@
       "parentClave": "Clave del padre",
       "parentClaveHint": "Vacío = ítem de primer nivel",
       "permisoClave": "Permiso requerido",
-      "permisoClaveHint": "Vacío = visible para todos"
+      "permisoClaveHint": "Vacío = visible para todos",
+      "permisoClavePlaceholder": "Elige un permiso",
+      "permisoSinPermiso": "Sin permiso (visible para todos)"
     },
     "theme": {
       "systemTitle": "Tema del sistema",
@@ -828,7 +839,9 @@
       "name": "Nombre",
       "accessMode": "Modo de acceso",
       "status": "Estado",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "roles": "Rol(es)",
+      "centros": "Centro(s)"
     },
     "approve": "Aprobar",
     "reject": "Rechazar",
@@ -844,7 +857,19 @@
       "invite": "Invitar usuario",
       "empty": "Aún no hay usuarios.",
       "assign": "Asignar centro",
-      "access": "Accesos"
+      "access": "Accesos",
+      "centros": "Centros",
+      "editar": "Editar usuario",
+      "suspender": "Suspender",
+      "reactivar": "Reactivar",
+      "suspendido": "Usuario suspendido",
+      "reactivado": "Usuario reactivado",
+      "buscar": "Buscar por email, nombre, rol o centro…",
+      "sinRol": "Sin rol",
+      "sinCentro": "Sin centro",
+      "hasta": "hasta {fecha}",
+      "masAcciones": "Más acciones",
+      "sinResultados": "Ningún usuario coincide con la búsqueda."
     },
     "invite": {
       "title": "Invitar usuario",
@@ -867,7 +892,13 @@
       "copy": "Copiar",
       "copied": "Copiada",
       "assignNow": "Asignar centro",
-      "done": "Listo"
+      "done": "Listo",
+      "centro": "Centro",
+      "centroPlaceholder": "Elige un centro",
+      "centroHint": "Opcional; sin centro el usuario no podrá entrar hasta que se le asigne uno.",
+      "rol": "Rol",
+      "rolPlaceholder": "Elige un rol",
+      "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros."
     },
     "assign": {
       "title": "Asignar centro",
@@ -912,6 +943,38 @@
         "logoUrl": "URL del logo",
         "pieFactura": "Pie de factura"
       }
+    },
+    "centrosPerfil": {
+      "title": "Centros de {nombre}",
+      "help": "Un usuario trabaja en un centro a la vez. Usa temporal para cubrir en otro centro por un tiempo, o fijo/base para el cambio definitivo.",
+      "vacio": "Sin centros asignados.",
+      "centro": "Centro",
+      "centroPlaceholder": "Elige un centro",
+      "tipoLabel": "Tipo",
+      "tipo_base": "Base",
+      "tipo_temporal": "Temporal",
+      "tipo_fijo": "Fijo",
+      "vigenteHasta": "Vigente hasta",
+      "hasta": "hasta {fecha}",
+      "agregar": "Agregar centro",
+      "asignado": "Centro asignado",
+      "revocar": "Revocar",
+      "revocada": "Asignación revocada",
+      "reactivar": "Reactivar",
+      "reactivada": "Asignación reactivada",
+      "inactiva": "inactiva",
+      "confirmRevocar": "¿Revocar el acceso a {centro}?"
+    },
+    "editarPerfil": {
+      "title": "Editar {email}",
+      "help": "Datos básicos y modo de acceso del usuario.",
+      "nombre": "Nombre",
+      "apellido": "Apellido",
+      "accessMode": "Modo de acceso",
+      "operativo": "Operativo (un centro a la vez)",
+      "gerencial": "Gerencial (ve todos sus centros, solo lectura)",
+      "accessModeHelp": "Gerencial ve varios centros a la vez pero no puede escribir.",
+      "guardado": "Perfil actualizado"
     }
   },
   "landing": {
@@ -2450,5 +2513,11 @@
   "pacientes": {
     "record_duplicado": "Ese número de récord ya pertenece a otro paciente de este centro",
     "campos_obligatorios": "Faltan campos obligatorios del alta"
+  },
+  "perfiles": {
+    "vigencia_invalida": "La fecha final de vigencia es anterior a la inicial"
+  },
+  "tenant": {
+    "no_encontrado": "El centro seleccionado no existe"
   }
 }

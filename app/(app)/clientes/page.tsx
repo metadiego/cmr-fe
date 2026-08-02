@@ -9,7 +9,9 @@ import { Add01Icon } from "@hugeicons/core-free-icons";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro } from "@/lib/tenant";
+import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
 import { useResource, type ResourceState } from "@/hooks/use-resource";
+import { useMe } from "@/hooks/use-me";
 import type { Paginated } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,12 @@ export default function ClientesPage() {
   const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
   const multiCentro = centros.length > 1;
+  // La vista combinada (sin centro) es potestad de admin/master: el BE rechaza
+  // con 409 a un no-admin sin centro (evita leer pacientes de otros centros).
+  const meState = useMe();
+  const puedeCombinado = puedeVerTodosLosCentros(
+    meState.kind === "ok" ? meState.me : null,
+  );
   const centroName = React.useMemo(() => {
     const m = new Map<string, string>();
     centros.forEach((c) => m.set(c.id, c.nombre));
@@ -58,9 +66,11 @@ export default function ClientesPage() {
     getActiveCentro() ??
     (centros.length === 1
       ? centros[0].id
-      : centros.length > 1
+      : centros.length > 1 && puedeCombinado
         ? ALL_CENTERS
-        : "");
+        : centros.length > 1
+          ? centros[0].id
+          : "");
 
   // undefined → default header center; a centroId → force it; null → omit tenant.
   const tenant = scope === ALL_CENTERS ? null : scope || undefined;
@@ -167,7 +177,9 @@ export default function ClientesPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
+                {puedeCombinado && (
+                  <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
+                )}
                 {centros.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.nombre}

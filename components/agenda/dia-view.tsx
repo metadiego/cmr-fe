@@ -12,6 +12,8 @@ import { getTiposCita, type TipoCita, type EstadoCitaCatalogo } from "@/lib/api/
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getDefinicion, type TableroDefinicion, type Transicion } from "@/lib/api/tablero";
 import { useResource } from "@/hooks/use-resource";
+import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
+import { useMe } from "@/hooks/use-me";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
@@ -54,6 +56,12 @@ export function DiaView({ fecha }: { fecha: string }) {
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
+  // Vista combinada (todos los centros) = solo admin/master; el BE 409ea a un
+  // no-admin sin centro activo.
+  const meState = useMe();
+  const puedeCombinado = puedeVerTodosLosCentros(
+    meState.kind === "ok" ? meState.me : null,
+  );
   const medicosRes = useResource<Personal[]>(() => getMedicos());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
@@ -127,7 +135,9 @@ export function DiaView({ fecha }: { fecha: string }) {
           <Select value={centro} onValueChange={pickCentro}>
             <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
+              {puedeCombinado && (
+                <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
+              )}
               {centros.map((c) => (
                 <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
               ))}

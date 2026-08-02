@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useTranslations } from "next-intl";
+import * as React from "react"
+import { useTranslations } from "next-intl"
 
-import type { Perfil } from "@/lib/api/profiles";
+import type { Perfil } from "@/lib/api/profiles"
 import {
   getRoles,
   getProfileAccess,
@@ -15,30 +15,31 @@ import {
   type Rol,
   type ProfileAccess,
   type AccessPermiso,
-} from "@/lib/api/rbac";
-import { getCenters, type Centro } from "@/lib/api/centers";
-import { toastError } from "@/lib/api/errors";
-import { useResource } from "@/hooks/use-resource";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "@/lib/api/rbac"
+import { getCenters, type Centro } from "@/lib/api/centers"
+import { toastError } from "@/lib/api/errors"
+import { useResource } from "@/hooks/use-resource"
+import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/sheet"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 
-const GLOBAL = "__global__";
+const GLOBAL = "__global__"
 
 // "Accesos del usuario": per-profile roles + permission exceptions + menu
 // preview, scoped to a center or global. Opened from the users list.
@@ -46,10 +47,10 @@ export function AccessDialog({
   profile,
   onOpenChange,
 }: {
-  profile: Perfil | null;
-  onOpenChange: (open: boolean) => void;
+  profile: Perfil | null
+  onOpenChange: (open: boolean) => void
 }) {
-  const t = useTranslations("admin.access");
+  const t = useTranslations("admin.access")
 
   return (
     <Sheet open={profile !== null} onOpenChange={onOpenChange}>
@@ -65,20 +66,20 @@ export function AccessDialog({
         )}
       </SheetContent>
     </Sheet>
-  );
+  )
 }
 
 function AccessPanel({ profile }: { profile: Perfil }) {
-  const t = useTranslations("admin.access");
-  const [centro, setCentro] = React.useState<string>(GLOBAL);
-  const centroId = centro === GLOBAL ? undefined : centro;
+  const t = useTranslations("admin.access")
+  const [centro, setCentro] = React.useState<string>(GLOBAL)
+  const centroId = centro === GLOBAL ? undefined : centro
 
-  const centers = useResource<Centro[]>(() => getCenters());
+  const centers = useResource<Centro[]>(() => getCenters())
   const access = useResource<ProfileAccess>(
     () => getProfileAccess(profile.id, centroId),
-    [profile.id, centro],
-  );
-  const roles = useResource<Rol[]>(() => getRoles());
+    [profile.id, centro]
+  )
+  const roles = useResource<Rol[]>(() => getRoles())
 
   return (
     <div className="mt-4 space-y-4">
@@ -127,11 +128,15 @@ function AccessPanel({ profile }: { profile: Perfil }) {
         </TabsContent>
 
         <TabsContent value="menu" className="mt-4">
-          <MenuPreviewTab profile={profile} centroId={centroId} centro={centro} />
+          <MenuPreviewTab
+            profile={profile}
+            centroId={centroId}
+            centro={centro}
+          />
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
 
 function RolesTab({
@@ -141,37 +146,36 @@ function RolesTab({
   access,
   onChanged,
 }: {
-  profile: Perfil;
-  centroId?: string;
-  roles: ReturnType<typeof useResource<Rol[]>>["state"];
-  access: ReturnType<typeof useResource<ProfileAccess>>["state"];
-  onChanged: () => void;
+  profile: Perfil
+  centroId?: string
+  roles: ReturnType<typeof useResource<Rol[]>>["state"]
+  access: ReturnType<typeof useResource<ProfileAccess>>["state"]
+  onChanged: () => void
 }) {
-  const t = useTranslations("admin.access");
-  const [busy, setBusy] = React.useState<string | null>(null);
+  const t = useTranslations("admin.access")
+  const [busy, setBusy] = React.useState<string | null>(null)
 
-  if (roles.kind === "loading" || access.kind === "loading")
-    return <Loading />;
-  if (roles.kind === "fail") return <Fail message={roles.message} />;
-  if (access.kind === "fail") return <Fail message={access.message} />;
+  if (roles.kind === "loading" || access.kind === "loading") return <Loading />
+  if (roles.kind === "fail") return <Fail message={roles.message} />
+  if (access.kind === "fail") return <Fail message={access.message} />
 
-  const assigned = new Map(access.data.roles.map((r) => [r.clave, r]));
+  const assigned = new Map(access.data.roles.map((r) => [r.clave, r]))
 
   async function toggle(role: Rol, on: boolean) {
-    setBusy(role.clave);
+    setBusy(role.clave)
     try {
       if (on) {
-        await assignRoleToProfile(profile.id, role.clave, centroId);
+        await assignRoleToProfile(profile.id, role.clave, centroId)
       } else {
-        const a = assigned.get(role.clave);
-        if (a) await removeRoleFromProfile(profile.id, a.rolId, centroId);
+        const a = assigned.get(role.clave)
+        if (a) await removeRoleFromProfile(profile.id, a.rolId, centroId)
       }
-      toast.success(t("saved"));
-      onChanged();
+      toast.success(t("saved"))
+      onChanged()
     } catch (err) {
-      toastError(err);
+      toastError(err)
     } finally {
-      setBusy(null);
+      setBusy(null)
     }
   }
 
@@ -194,10 +198,10 @@ function RolesTab({
         </label>
       ))}
     </div>
-  );
+  )
 }
 
-type TriState = "inherit" | "grant" | "deny";
+type TriState = "inherit" | "grant" | "deny"
 
 function ExceptionsTab({
   profile,
@@ -205,38 +209,38 @@ function ExceptionsTab({
   access,
   onChanged,
 }: {
-  profile: Perfil;
-  centroId?: string;
-  access: ReturnType<typeof useResource<ProfileAccess>>["state"];
-  onChanged: () => void;
+  profile: Perfil
+  centroId?: string
+  access: ReturnType<typeof useResource<ProfileAccess>>["state"]
+  onChanged: () => void
 }) {
-  const t = useTranslations("admin.access");
-  const [busy, setBusy] = React.useState<string | null>(null);
+  const t = useTranslations("admin.access")
+  const [busy, setBusy] = React.useState<string | null>(null)
 
-  if (access.kind === "loading") return <Loading />;
-  if (access.kind === "fail") return <Fail message={access.message} />;
+  if (access.kind === "loading") return <Loading />
+  if (access.kind === "fail") return <Fail message={access.message} />
 
-  const byModulo: Record<string, AccessPermiso[]> = {};
-  for (const p of access.data.permisos) (byModulo[p.modulo] ??= []).push(p);
+  const byModulo: Record<string, AccessPermiso[]> = {}
+  for (const p of access.data.permisos) (byModulo[p.modulo] ??= []).push(p)
   const overrideByClave = new Map(
-    access.data.overrides.map((o) => [o.permisoClave, o]),
-  );
+    access.data.overrides.map((o) => [o.permisoClave, o])
+  )
 
   async function change(p: AccessPermiso, next: TriState) {
-    setBusy(p.clave);
+    setBusy(p.clave)
     try {
       if (next === "inherit") {
-        const o = overrideByClave.get(p.clave);
-        if (o) await removeProfileOverride(profile.id, o.permisoId, centroId);
+        const o = overrideByClave.get(p.clave)
+        if (o) await removeProfileOverride(profile.id, o.permisoId, centroId)
       } else {
-        await setProfileOverride(profile.id, p.clave, next, centroId);
+        await setProfileOverride(profile.id, p.clave, next, centroId)
       }
-      toast.success(t("saved"));
-      onChanged();
+      toast.success(t("saved"))
+      onChanged()
     } catch (err) {
-      toastError(err);
+      toastError(err)
     } finally {
-      setBusy(null);
+      setBusy(null)
     }
   }
 
@@ -246,7 +250,7 @@ function ExceptionsTab({
         <div key={modulo} className="space-y-2">
           <p className="text-sm font-semibold capitalize">{modulo}</p>
           {list.map((p) => {
-            const value: TriState = p.override ?? "inherit";
+            const value: TriState = p.override ?? "inherit"
             return (
               <div
                 key={p.clave}
@@ -283,68 +287,150 @@ function ExceptionsTab({
                   </SelectContent>
                 </Select>
               </div>
-            );
+            )
           })}
         </div>
       ))}
     </div>
-  );
+  )
 }
 
+/**
+ * Menú del usuario, EDITABLE (R4): dar o quitar una opción del menú a este
+ * usuario sin cambiarle el rol. El toggle escribe un override (grant/deny) del
+ * `permisoClave` del ítem — mismo motor que la pestaña Excepciones.
+ */
 function MenuPreviewTab({
   profile,
   centroId,
   centro,
 }: {
-  profile: Perfil;
-  centroId?: string;
-  centro: string;
+  profile: Perfil
+  centroId?: string
+  centro: string
 }) {
-  const t = useTranslations("admin.access");
-  const tRoot = useTranslations();
-  const { state } = useResource(
+  const t = useTranslations("admin.access")
+  const tRoot = useTranslations()
+  const { state, refresh } = useResource(
     () => getProfileMenu(profile.id, centroId),
-    [profile.id, centro],
-  );
+    [profile.id, centro]
+  )
+  const { state: accessState, refresh: refreshAccess } = useResource(
+    () => getProfileAccess(profile.id, centroId),
+    [profile.id, centro]
+  )
+  const [busy, setBusy] = React.useState<string | null>(null)
 
-  if (state.kind === "loading") return <Loading />;
-  if (state.kind === "fail") return <Fail message={state.message} />;
+  // Overrides vigentes por clave de permiso (para saber si el toggle es excepción).
+  const overridePorClave = React.useMemo(() => {
+    const map = new Map<string, { permisoId: string; efecto: string }>()
+    if (accessState.kind === "ok") {
+      for (const o of accessState.data.overrides) {
+        map.set(o.permisoClave, { permisoId: o.permisoId, efecto: o.efecto })
+      }
+    }
+    return map
+  }, [accessState])
+
+  // ¿El ROL ya concede el permiso? Decide si el estado deseado se logra
+  // heredando (quitar la excepción) o hace falta una excepción.
+  const viaRolePorClave = React.useMemo(() => {
+    const map = new Map<string, boolean>()
+    if (accessState.kind === "ok") {
+      for (const p of accessState.data.permisos) map.set(p.clave, p.viaRole)
+    }
+    return map
+  }, [accessState])
+
+  async function toggle(permisoClave: string, dar: boolean) {
+    setBusy(permisoClave)
+    try {
+      const actual = overridePorClave.get(permisoClave)
+      const viaRole = viaRolePorClave.get(permisoClave) ?? false
+      if (viaRole === dar) {
+        // El rol ya da el resultado deseado → basta con heredar (sin excepción).
+        if (actual) {
+          await removeProfileOverride(profile.id, actual.permisoId, centroId)
+        }
+      } else {
+        // El rol dice lo contrario → hace falta la excepción explícita.
+        await setProfileOverride(
+          profile.id,
+          permisoClave,
+          dar ? "grant" : "deny",
+          centroId
+        )
+      }
+      refresh()
+      refreshAccess()
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  if (state.kind === "loading") return <Loading />
+  if (state.kind === "fail") return <Fail message={state.message} />
   if (state.data.length === 0)
-    return <p className="text-sm text-muted-foreground">{t("menuEmpty")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("menuEmpty")}</p>
 
   return (
-    <ul className="space-y-1">
-      {state.data.map((item) => (
-        <li
-          key={item.id}
-          className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
-          style={{ marginLeft: item.parentClave ? 16 : 0 }}
-        >
-          <span className={item.allowed ? "" : "text-muted-foreground line-through"}>
-            {safe(tRoot, item.labelKey)}
-          </span>
-          <Badge variant={item.allowed ? "secondary" : "outline"}>
-            {item.allowed ? t("allowed") : t("blocked")}
-          </Badge>
-        </li>
-      ))}
-    </ul>
-  );
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">{t("menuEditableHelp")}</p>
+      <ul className="space-y-1">
+        {state.data.map((item) => {
+          const permiso = item.requiresPermiso
+          const esExcepcion = permiso ? overridePorClave.has(permiso) : false
+          return (
+            <li
+              key={item.id}
+              className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
+              style={{ marginLeft: item.parentClave ? 16 : 0 }}
+            >
+              <span
+                className={
+                  item.allowed ? "" : "text-muted-foreground line-through"
+                }
+              >
+                {safe(tRoot, item.labelKey)}
+              </span>
+              <div className="flex shrink-0 items-center gap-2">
+                {esExcepcion && (
+                  <Badge variant="outline">{t("excepcion")}</Badge>
+                )}
+                {permiso ? (
+                  <Switch
+                    checked={item.allowed}
+                    disabled={busy === permiso}
+                    onCheckedChange={(v) => toggle(permiso, v)}
+                    aria-label={safe(tRoot, item.labelKey)}
+                  />
+                ) : (
+                  <Badge variant="secondary">{t("sinPermiso")}</Badge>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
 }
 
 // Translate a full key, falling back to the key itself on a miss.
 function safe(t: (k: string) => string, key: string): string {
   try {
-    const v = t(key);
-    return v || key;
+    const v = t(key)
+    return v || key
   } catch {
-    return key;
+    return key
   }
 }
 
 function Loading() {
-  const t = useTranslations("common");
-  return <p className="text-sm text-muted-foreground">{t("loading")}</p>;
+  const t = useTranslations("common")
+  return <p className="text-sm text-muted-foreground">{t("loading")}</p>
 }
 
 function Fail({ message }: { message: string }) {
@@ -352,5 +438,5 @@ function Fail({ message }: { message: string }) {
     <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
       {message}
     </p>
-  );
+  )
 }
