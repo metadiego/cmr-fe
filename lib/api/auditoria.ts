@@ -1,4 +1,4 @@
-import { apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged } from "./client";
 import type { Paginated } from "./types";
 
 // Bitácora de auditoría (BE: AuditLogController, spec docs/specs/auditoria.md — ya en prod).
@@ -10,7 +10,9 @@ export interface AuditRow {
   id: string;
   createdAt: string;
   clinicId: string | null;
-  userId: string | null; // authUserId de Supabase (NO el perfilId). Nombre: pendiente del BE.
+  userId: string | null; // authUserId de Supabase (NO el perfilId).
+  // Nombre visible resuelto por el BE (authUserId → perfil; email si no hay nombre). null = API key/cron/anónimo.
+  usuarioNombre: string | null;
   userType: string | null; // "api-key" | "user"
   dominio: string;
   accion: string; // "Controller.handler" (técnico a propósito) → frase humana se arma en el FE
@@ -37,9 +39,32 @@ export interface AuditListParams {
   accion?: string;
   resultado?: "ok" | "error";
   metodo?: string;
+  // soloCambios=true → solo POST/PUT/PATCH/DELETE ("quién creó, editó o borró").
+  soloCambios?: boolean;
+  // excluirErrorCode → oculta esos códigos (CSV). El BE hace (errorCode IS NULL OR NOT IN(...)) para
+  // NO ocultar las mutaciones correctas; total y paginación salen bien → NO replicar en el cliente.
+  excluirErrorCode?: string;
   clinicId?: string;
   page?: number;
   limit?: number;
+}
+
+// Valores realmente presentes (para poblar los desplegables sin hardcode). Acotado al centro del
+// principal; acepta desde/hasta. GET /auditoria/facetas.
+export interface AuditFacetas {
+  dominios: string[];
+  acciones: string[];
+  errorCodes: string[];
+}
+export function getAuditoriaFacetas(
+  window: { desde?: string; hasta?: string } = {},
+  tenant: string | null = null,
+): Promise<AuditFacetas> {
+  const sp = new URLSearchParams();
+  if (window.desde) sp.set("desde", window.desde);
+  if (window.hasta) sp.set("hasta", window.hasta);
+  const qs = sp.toString();
+  return apiFetch<AuditFacetas>(`/auditoria/facetas${qs ? `?${qs}` : ""}`, {}, tenant);
 }
 
 // GET /auditoria — endpoint CORRECTO (el atajo /auditoria/errores devuelve el 98% de las filas por

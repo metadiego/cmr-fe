@@ -97,7 +97,14 @@ export async function subscribeAlertas(opts: {
     headers,
     signal: opts.signal,
   });
-  if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
+  if (!res.ok || !res.body) {
+    // Error con status para que el consumidor decida: 401/403 = no reintentar (sin permiso/sesión);
+    // otros = reconectar con backoff. Evita el bucle de reconexión cada 3s (36k UNAUTHORIZED en la
+    // bitácora). Ver components/comunicaciones/alertas-bell.tsx.
+    const err = new Error(`stream ${res.status}`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
+  }
   opts.onOpen?.();
 
   const reader = res.body.getReader();
