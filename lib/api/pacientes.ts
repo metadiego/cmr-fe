@@ -117,3 +117,22 @@ export function getConfigAltaPacientes(
     centroId,
   );
 }
+
+// PUT /pacientes/config-alta — define qué exige el alta. alcance: "centro" (por defecto, solo el
+// centro activo) o "todos" (exige admin; aplica a todos los centros). Devuelve a qué centros aplicó.
+// RBAC pacientes.config. "Datos obligatorios del paciente" ≠ "campos requeridos por servicio".
+export type AltaConfigResult = {
+  camposObligatorios: string[];
+  alcance: "centro" | "todos";
+  centros: string[];
+};
+export function updateConfigAltaPacientes(
+  payload: { camposObligatorios: string[]; alcance?: "centro" | "todos" },
+  centroId?: string,
+): Promise<AltaConfigResult> {
+  return apiFetch<AltaConfigResult>(
+    `/pacientes/config-alta`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    centroId,
+  );
+}

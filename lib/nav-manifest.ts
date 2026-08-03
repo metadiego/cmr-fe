@@ -52,6 +52,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/configuracion/tableros", labelKey: "nav.constructorTableros" },
   { path: "/configuracion/menu", labelKey: "nav.menuEditor" },
   { path: "/configuracion/panel-enfermeria", labelKey: "nav.panelEnfermeriaConfig" },
+  { path: "/configuracion/datos-paciente", labelKey: "nav.datosPaciente" },
   { path: "/auditoria", labelKey: "nav.auditoria" },
   { path: "/admin", labelKey: "nav.admin" },
   { path: "/settings/appearance", labelKey: "nav.appearance" },
