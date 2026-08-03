@@ -697,6 +697,7 @@
     "panelEnfermeria": "Nursing panel",
     "panelEnfermeriaConfig": "Nursing panel settings",
     "requeridos": "Required fields",
+    "requisitos_servicio": "Service requirements",
     "configFormatos": "Therapy formats",
     "estadisticas_servicios": "Service Statistics"
   },
@@ -2583,12 +2584,29 @@
     "tipo": "Type",
     "requerido": "Required",
     "en": "On action",
+    "momentoCol": "On action",
+    "fuente": "Requirement source",
     "dondeVive": "Where the value lives",
     "enFormulario": "In the form",
     "sinCampos": "No fields.",
     "agregarCampo": "Add field",
     "quitar": "Remove",
-    "ayudaBinding": "With a binding, the value comes from the board column (dose, nurse…) and is NOT captured in the form. Without a binding, it is captured in the actions form.",
+    "ayudaBinding": "With a source, the value comes from its column (dose, nurse…) and is NOT captured in the form. Without a source, it is captured in the actions form.",
+    "guardadoTodos": "Applied to {n, number} center(s)",
+    "alcance": "Scope",
+    "alcanceCentro": "This center only",
+    "alcanceTodos": "All centers",
+    "alcanceAviso": "This will apply to ALL centers. Requires admin. You'll see how many centers it applied to on save.",
+    "momento": {
+      "presente": "On mark present",
+      "en_terapia": "In therapy",
+      "asistido": "On assist"
+    },
+    "grupo": {
+      "sesion": "Session",
+      "personal": "Staff",
+      "paquete": "Package"
+    },
     "tipos": {
       "texto": "Text",
       "numero": "Number",

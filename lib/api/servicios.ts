@@ -141,3 +141,28 @@ export type RequeridoBinding = { binding: string; labelKey: string; grupo: strin
 export async function getRequeridosBindings(centroId?: string): Promise<RequeridoBinding[]> {
   return asArray<RequeridoBinding>(await apiFetch(`/servicios/catalogos/requeridos-bindings`, {}, centroId));
 }
+
+// FUENTE DEL REQUISITO — dónde vive el valor que SATISFACE un requisito (sesión/personal/paquete).
+// Endpoint CORRECTO que reemplaza a requeridos-bindings (deprecado; mismo contenido). Distinto del
+// "origen de lectura" (columnas del tablero) y del "destino de escritura" (celdas editables).
+// GET /servicios/catalogos/fuentes-requisito.
+export type FuenteRequisito = RequeridoBinding; // { binding, labelKey, grupo }
+export async function getFuentesRequisito(centroId?: string): Promise<FuenteRequisito[]> {
+  return asArray<FuenteRequisito>(await apiFetch(`/servicios/catalogos/fuentes-requisito`, {}, centroId));
+}
+
+// Alcance de una config: "centro" (por defecto, solo el centro activo) o "todos" (exige admin;
+// aplica a TODOS los centros y devuelve qué cambió y dónde). Se manda en el cuerpo del PUT.
+export type Alcance = "centro" | "todos";
+export function updateServicioConAlcance(
+  id: string,
+  payload: UpdateServicioPayload,
+  alcance: Alcance,
+  centroId?: string,
+): Promise<Servicio | UpdateServicioPorClaveResult> {
+  return apiFetch<Servicio | UpdateServicioPorClaveResult>(
+    `/servicios/${id}`,
+    { method: "PUT", body: JSON.stringify({ ...payload, alcance }) },
+    centroId,
+  );
+}
