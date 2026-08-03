@@ -67,6 +67,41 @@ export function getAuditoriaFacetas(
   return apiFetch<AuditFacetas>(`/auditoria/facetas${qs ? `?${qs}` : ""}`, {}, tenant);
 }
 
+// Resumen para las tarjetas/gráfico de la cabecera (conteos, NO filas). GET /auditoria/resumen.
+// `porDia` viene ordenado por fecha desc. `descartadosDelProceso` es un contador EN MEMORIA del
+// proceso, de TODOS los centros, que ignora las fechas → etiquetar aparte, NO sumar a los totales.
+export interface AuditResumen {
+  total: number;
+  porResultado: { resultado: string; total: number }[];
+  porDominio: { dominio: string; total: number }[];
+  porErrorCode: { errorCode: string; total: number }[];
+  porDia: { dia: string; total: number }[];
+  descartadosDelProceso: { errorCode: string; total: number }[];
+}
+export function getAuditoriaResumen(
+  window: { desde?: string; hasta?: string } = {},
+  tenant: string | null = null,
+): Promise<AuditResumen> {
+  const sp = new URLSearchParams();
+  if (window.desde) sp.set("desde", window.desde);
+  if (window.hasta) sp.set("hasta", window.hasta);
+  const qs = sp.toString();
+  return apiFetch<AuditResumen>(`/auditoria/resumen${qs ? `?${qs}` : ""}`, {}, tenant);
+}
+
+// Purga de la bitácora. Permiso propio auditoria.purgar + rol admin, y EXIGE admin SIN X-Tenant-ID
+// (borra de TODOS los centros → tenant null). IRREVERSIBLE. Multi-pasada: completa:false = queda
+// backlog, volver a llamar. yaEnCurso:true = había otra corriendo (no borró nada, NO es error).
+export interface AuditPurgaResult {
+  errores: number;
+  mutaciones: number;
+  completa: boolean;
+  yaEnCurso?: boolean;
+}
+export function purgarAuditoria(): Promise<AuditPurgaResult> {
+  return apiFetch<AuditPurgaResult>(`/auditoria/purgar`, { method: "POST" }, null);
+}
+
 // GET /auditoria — endpoint CORRECTO (el atajo /auditoria/errores devuelve el 98% de las filas por
 // el ruido de RATE_LIMITED, así que NO se usa; el filtro de errores se hace con resultado=error).
 // El BE responde el envelope estándar { data: filas[], meta: { pagination } } → apiFetchPaged

@@ -2249,6 +2249,25 @@
     "filtrarPorUsuario": "Filtrar por este usuario",
     "filtroUsuario": "Usuario: {nombre}",
     "totalRegistros": "{total, number} registros",
+    "card": {
+      "total": "Total",
+      "ok": "OK",
+      "error": "Errores",
+      "topDominio": "Dominio top",
+      "descartados": "Ruido descartado",
+      "descartadosSub": "desde el último arranque del servidor"
+    },
+    "purga": {
+      "boton": "Purgar bitácora",
+      "corriendo": "Purgando…",
+      "titulo": "Purgar la bitácora",
+      "cuerpo": "Borra errores de más de 30 días y mutaciones de más de 365 días, en TODOS los centros. Es IRREVERSIBLE y puede tomar varias pasadas.",
+      "cancelar": "Cancelar",
+      "confirmar": "Sí, purgar",
+      "ok": "Purga completa: {errores, number} errores y {mutaciones, number} mutaciones borradas.",
+      "parcial": "Purga parcial: {errores, number} errores y {mutaciones, number} mutaciones; queda backlog, vuelve a purgar.",
+      "enCurso": "Ya hay una purga en curso; no se borró nada."
+    },
     "resultadoOk": "OK",
     "resultadoError": "Error",
     "detalleTitulo": "Detalle del evento",

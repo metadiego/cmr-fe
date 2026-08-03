@@ -9,13 +9,18 @@ import { RefreshIcon, Copy01Icon, Cancel01Icon } from "@hugeicons/core-free-icon
 import {
   listAuditoria,
   getAuditoriaFacetas,
+  getAuditoriaResumen,
+  purgarAuditoria,
   type AuditRow,
   type AuditListParams,
   type AuditFacetas,
+  type AuditResumen,
 } from "@/lib/api/auditoria";
 import type { Paginated } from "@/lib/api/types";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { useMe, isAdmin } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +28,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip } from "@/components/ui/tooltip";
 import { DataTable, type Column } from "@/components/kit/data-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -102,10 +117,21 @@ export function AuditoriaLog() {
     setPage(1);
   }
 
+  const me = useMe();
+  const admin = me.kind === "ok" && isAdmin(me.me);
+
   const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
   const centroNombre = (id: string | null) =>
     id ? centros.find((c) => c.id === id)?.nombre ?? id.slice(0, 8) : "—";
+
+  // Resumen (conteos, no filas) para las tarjetas de la cabecera. Recalcula con el rango de fechas.
+  const resumenKey = `${desde}|${hasta}`;
+  const { state: resumenState } = useResource<AuditResumen>(
+    () => getAuditoriaResumen({ desde: desde || undefined, hasta: hasta || undefined }),
+    [resumenKey],
+  );
+  const resumen = resumenState.kind === "ok" ? resumenState.data : null;
 
   // Facetas: valores realmente presentes para los desplegables (sin hardcode). Se recalculan al
   // cambiar el rango de fechas. Fallback a la lista conocida si aún no cargaron o vienen vacías.
@@ -275,6 +301,9 @@ export function AuditoriaLog() {
 
   return (
     <div className="space-y-4">
+      {/* Tarjetas de resumen (conteos) + purga (admin). */}
+      {resumen ? <ResumenCards resumen={resumen} admin={admin} /> : null}
+
       {/* Barra de filtros — una fila que se envuelve en móvil. */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <div className="space-y-1">
@@ -372,6 +401,124 @@ export function AuditoriaLog() {
         onCopy={copiar}
       />
     </div>
+  );
+}
+
+// Tarjetas de resumen (conteos) + botón de purga (admin). Diagnóstico sin arrastrar la tabla.
+function ResumenCards({ resumen, admin }: { resumen: AuditResumen; admin: boolean }) {
+  const t = useTranslations("auditoria");
+  const nf = (n: number) => n.toLocaleString();
+  const ok = resumen.porResultado.find((r) => r.resultado === "ok")?.total ?? 0;
+  const err = resumen.porResultado.find((r) => r.resultado === "error")?.total ?? 0;
+  const topDom = [...resumen.porDominio].sort((a, b) => b.total - a.total)[0];
+  const descartados = resumen.descartadosDelProceso.reduce((s, d) => s + d.total, 0);
+
+  return (
+    <div className="flex flex-wrap items-stretch gap-3">
+      <Tile label={t("card.total")} value={nf(resumen.total)} />
+      <Tile label={t("card.ok")} value={nf(ok)} tone="ok" />
+      <Tile label={t("card.error")} value={nf(err)} tone="error" />
+      {topDom ? (
+        <Tile
+          label={t("card.topDominio")}
+          value={t.has(`dominio.${topDom.dominio}`) ? t(`dominio.${topDom.dominio}`) : topDom.dominio}
+          sub={nf(topDom.total)}
+        />
+      ) : null}
+      {admin && descartados > 0 ? (
+        <Tile label={t("card.descartados")} value={nf(descartados)} sub={t("card.descartadosSub")} />
+      ) : null}
+      {admin ? (
+        <div className="ml-auto flex items-center">
+          <PurgaButton />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Tile({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  tone?: "ok" | "error";
+}) {
+  return (
+    <div className="min-w-[7rem] rounded-lg border bg-card px-3 py-2">
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div
+        className={cn(
+          "text-lg font-semibold tabular-nums",
+          tone === "error" && "text-destructive",
+          tone === "ok" && "text-emerald-600 dark:text-emerald-400",
+        )}
+      >
+        {value}
+      </div>
+      {sub ? <div className="text-[11px] text-muted-foreground">{sub}</div> : null}
+    </div>
+  );
+}
+
+// Purga irreversible, multi-pasada (completa:false → volver a llamar). Confirmación explícita con
+// los umbrales. yaEnCurso no es error. Exige admin sin X-Tenant-ID (lo pone la API con tenant null).
+function PurgaButton() {
+  const t = useTranslations("auditoria");
+  const [open, setOpen] = React.useState(false);
+  const [purgando, setPurgando] = React.useState(false);
+
+  async function purgar() {
+    setOpen(false);
+    setPurgando(true);
+    let errores = 0;
+    let mutaciones = 0;
+    try {
+      // Multi-pasada: repetir mientras el BE diga completa:false (queda backlog). Tope de pasadas
+      // por seguridad; si sigue incompleta, avisar para volver a correr.
+      for (let pasada = 0; pasada < 20; pasada++) {
+        const r = await purgarAuditoria();
+        if (r.yaEnCurso) {
+          toast.info(t("purga.enCurso"));
+          return;
+        }
+        errores += r.errores;
+        mutaciones += r.mutaciones;
+        if (r.completa) {
+          toast.success(t("purga.ok", { errores, mutaciones }));
+          return;
+        }
+      }
+      toast.warning(t("purga.parcial", { errores, mutaciones }));
+    } catch (e) {
+      toast.error(apiErrorMessage(e));
+    } finally {
+      setPurgando(false);
+    }
+  }
+
+  return (
+    <>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)} disabled={purgando}>
+        {purgando ? t("purga.corriendo") : t("purga.boton")}
+      </Button>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("purga.titulo")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("purga.cuerpo")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("purga.cancelar")}</AlertDialogCancel>
+            <AlertDialogAction onClick={purgar}>{t("purga.confirmar")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

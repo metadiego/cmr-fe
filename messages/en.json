@@ -2249,6 +2249,25 @@
     "filtrarPorUsuario": "Filter by this user",
     "filtroUsuario": "User: {nombre}",
     "totalRegistros": "{total, number} records",
+    "card": {
+      "total": "Total",
+      "ok": "OK",
+      "error": "Errors",
+      "topDominio": "Top domain",
+      "descartados": "Noise discarded",
+      "descartadosSub": "since last server start"
+    },
+    "purga": {
+      "boton": "Purge log",
+      "corriendo": "Purging…",
+      "titulo": "Purge the audit log",
+      "cuerpo": "Deletes errors older than 30 days and mutations older than 365 days, across ALL centers. This is IRREVERSIBLE and may take several passes.",
+      "cancelar": "Cancel",
+      "confirmar": "Yes, purge",
+      "ok": "Purge complete: {errores, number} errors and {mutaciones, number} mutations deleted.",
+      "parcial": "Partial purge: {errores, number} errors and {mutaciones, number} mutations; backlog remains, purge again.",
+      "enCurso": "A purge is already running; nothing was deleted."
+    },
     "resultadoOk": "OK",
     "resultadoError": "Error",
     "detalleTitulo": "Event detail",
