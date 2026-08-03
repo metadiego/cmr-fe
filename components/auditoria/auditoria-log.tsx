@@ -19,6 +19,7 @@ import {
 import type { Paginated } from "@/lib/api/types";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
@@ -53,8 +54,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-// Módulos conocidos y verbos: mientras el BE no exponga GET /auditoria/facetas, esta es la lista
-// (los índices del BE son por dominio/resultado, así que filtrar por ellos es rápido).
+// Fallback de dominios SOLO si /auditoria/facetas aún no cargó o viene vacío (el desplegable se
+// llena con facetas.dominios, que son los valores realmente presentes).
 const DOMINIOS = [
   "pacientes",
   "facturas",
@@ -92,6 +93,7 @@ export function AuditoriaLog() {
   const [desde, setDesde] = React.useState(isoDaysAgo(7));
   const [hasta, setHasta] = React.useState("");
   const [dominio, setDominio] = React.useState(TODOS);
+  const [accion, setAccion] = React.useState(TODOS);
   const [resultado, setResultado] = React.useState(TODOS);
   const [metodo, setMetodo] = React.useState(TODOS);
   const [clinicId, setClinicId] = React.useState(TODOS);
@@ -119,6 +121,9 @@ export function AuditoriaLog() {
 
   const me = useMe();
   const admin = me.kind === "ok" && isAdmin(me.me);
+  // Solo admin/master ven varios centros; para el resto el BE FIJA su centro e ignora clinicId, así
+  // que ofrecer el selector sería engañoso (elegir otro centro no haría nada).
+  const verTodos = puedeVerTodosLosCentros(me.kind === "ok" ? me.me : null);
 
   const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
@@ -140,19 +145,21 @@ export function AuditoriaLog() {
     () => getAuditoriaFacetas({ desde: desde || undefined, hasta: hasta || undefined }),
     [facetasKey],
   );
-  const dominiosOpts =
-    facetasState.kind === "ok" && facetasState.data.dominios.length > 0
-      ? facetasState.data.dominios
-      : [...DOMINIOS];
+  const facetas = facetasState.kind === "ok" ? facetasState.data : null;
+  const dominiosOpts = facetas && facetas.dominios.length > 0 ? facetas.dominios : [...DOMINIOS];
+  const accionesOpts = facetas?.acciones ?? []; // solo llega con scope admin (identificadores internos)
+  // Solo mostrar/aplicar el chip de ruido si RATE_LIMITED existe de verdad en la ventana (data-driven).
+  const hayRateLimited = !facetas || facetas.errorCodes.includes("RATE_LIMITED");
 
   const params: AuditListParams = {
     desde: desde || undefined,
     hasta: hasta || undefined,
     dominio: dominio === TODOS ? undefined : dominio,
+    accion: accion === TODOS ? undefined : accion,
     resultado: resultado === TODOS ? undefined : (resultado as "ok" | "error"),
     metodo: metodo === TODOS ? undefined : metodo,
     soloCambios: soloCambios || undefined,
-    excluirErrorCode: ocultarRuido ? "RATE_LIMITED" : undefined,
+    excluirErrorCode: ocultarRuido && hayRateLimited ? "RATE_LIMITED" : undefined,
     userId: userId || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
     page,
@@ -332,10 +339,21 @@ export function AuditoriaLog() {
             { value: "error", label: t("resultadoError") },
           ])}
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs">{t("col.centro")}</Label>
-          {selectAll(clinicId, onFilter(setClinicId), t("todos"), centros.map((c) => ({ value: c.id, label: c.nombre })))}
-        </div>
+        {/* Acción (Controller.handler): la pregunta más afilada de una bitácora. Solo admin (las
+            acciones son identificadores internos y el BE solo las expone con scope admin). */}
+        {admin && accionesOpts.length > 0 ? (
+          <div className="space-y-1">
+            <Label className="text-xs">{t("col.accion")}</Label>
+            {selectAll(accion, onFilter(setAccion), t("todos"), accionesOpts.map((a) => ({ value: a, label: a })))}
+          </div>
+        ) : null}
+        {/* Centro: solo para quien puede ver varios centros (admin/master). */}
+        {verTodos ? (
+          <div className="space-y-1">
+            <Label className="text-xs">{t("col.centro")}</Label>
+            {selectAll(clinicId, onFilter(setClinicId), t("todos"), centros.map((c) => ({ value: c.id, label: c.nombre })))}
+          </div>
+        ) : null}
       </div>
 
       {/* Chips rápidos + recargar. "Solo errores" usa resultado=error (soportado por el BE). */}
@@ -357,16 +375,18 @@ export function AuditoriaLog() {
         >
           {t("chipSoloErrores")}
         </Button>
-        <Button
-          size="sm"
-          variant={ocultarRuido ? "default" : "outline"}
-          onClick={() => {
-            setOcultarRuido((v) => !v);
-            setPage(1);
-          }}
-        >
-          {t("chipOcultarRuido")}
-        </Button>
+        {hayRateLimited ? (
+          <Button
+            size="sm"
+            variant={ocultarRuido ? "default" : "outline"}
+            onClick={() => {
+              setOcultarRuido((v) => !v);
+              setPage(1);
+            }}
+          >
+            {t("chipOcultarRuido")}
+          </Button>
+        ) : null}
         {userId ? (
           <Button size="sm" variant="secondary" onClick={limpiarUsuario} className="gap-1">
             {t("filtroUsuario", { nombre: userLabel })}

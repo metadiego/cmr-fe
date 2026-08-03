@@ -2189,6 +2189,10 @@
       "excede": "Exceeds sent"
     }
   },
+  "errores": {
+    "TENANT_NOT_FOUND": "The specified center does not exist.",
+    "VIGENCIA_INVALIDA": "The end date can't be earlier than the start date."
+  },
   "configAlta": {
     "title": "Required patient data",
     "help": "Choose which data is required when registering a patient (besides the name, which always is). Different from Service requirements.",

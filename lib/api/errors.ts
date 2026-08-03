@@ -30,8 +30,19 @@ export function apiErrorLabel(err: unknown, t?: Translate): string {
   }
   if (err instanceof ApiError && err.labelKey && t) {
     const translated = t(err.labelKey);
-    // next-intl returns the key itself on a miss → fall back to the message.
+    // next-intl returns the key itself on a miss → fall back to la traducción por código o al mensaje.
     if (translated && translated !== err.labelKey) return translated;
+  }
+  // Fallback por CÓDIGO: algunos errores (p. ej. TENANT_NOT_FOUND, VIGENCIA_INVALIDA) llegan sin
+  // labelKey. Se intenta `errores.<CODE>` con el traductor raíz; si no resuelve, se usa el mensaje.
+  if (err instanceof ApiError && err.code && t) {
+    const key = `errores.${err.code}`;
+    try {
+      const tr = t(key);
+      if (tr && tr !== key) return tr;
+    } catch {
+      /* traductor de otro namespace: ignorar */
+    }
     return err.message;
   }
   return apiErrorMessage(err);
