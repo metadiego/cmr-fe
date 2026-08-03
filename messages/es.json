@@ -2200,6 +2200,8 @@
     "chipSoloCambios": "Solo cambios",
     "chipSoloErrores": "Solo errores",
     "chipOcultarRuido": "Ocultar límite de tasa",
+    "filtrarPorUsuario": "Filtrar por este usuario",
+    "filtroUsuario": "Usuario: {nombre}",
     "totalRegistros": "{total, number} registros",
     "resultadoOk": "OK",
     "resultadoError": "Error",

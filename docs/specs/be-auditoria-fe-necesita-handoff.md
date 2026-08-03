@@ -39,3 +39,9 @@ desplegables se llenan con datos reales y quedan configurables (sin hardcode).
 3) Facetas (#3) — cuando haya espacio.
 
 Gracias 🙏 — con #1 y #2 la pantalla queda como la pidió el negocio.
+
+## 4. Usuarios en las facetas (para el desplegable "filtrar por usuario")
+Hoy el filtro por usuario se activa clicando la celda Usuario de una fila (trae `userId`+`usuarioNombre`).
+Para ofrecer además un desplegable "filtrar por usuario", pedimos que `GET /auditoria/facetas` incluya
+`usuarios: { userId: string; nombre: string }[]` (los actores presentes en la ventana, `userId` =
+authUserId, ordenados por nombre). Sin esto no hay mapa nombre→authUserId en el cliente.

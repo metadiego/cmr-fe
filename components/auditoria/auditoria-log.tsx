@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { RefreshIcon, Copy01Icon } from "@hugeicons/core-free-icons";
+import { RefreshIcon, Copy01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import {
   listAuditoria,
@@ -84,8 +84,23 @@ export function AuditoriaLog() {
   // "Ocultar límite de tasa" arranca ENCENDIDO: el 81% de los errores son RATE_LIMITED (ruido).
   const [soloCambios, setSoloCambios] = React.useState(false);
   const [ocultarRuido, setOcultarRuido] = React.useState(true);
+  // Filtro por usuario: el BE filtra por userId (authUserId), pero el perfil no expone ese id → no
+  // hay mapa nombre→id en el cliente. Se activa clicando la celda Usuario de una fila (trae ambos).
+  const [userId, setUserId] = React.useState("");
+  const [userLabel, setUserLabel] = React.useState("");
   const [page, setPage] = React.useState(1);
   const [detalle, setDetalle] = React.useState<AuditRow | null>(null);
+
+  function filtrarPorUsuario(id: string, label: string) {
+    setUserId(id);
+    setUserLabel(label);
+    setPage(1);
+  }
+  function limpiarUsuario() {
+    setUserId("");
+    setUserLabel("");
+    setPage(1);
+  }
 
   const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
@@ -112,6 +127,7 @@ export function AuditoriaLog() {
     metodo: metodo === TODOS ? undefined : metodo,
     soloCambios: soloCambios || undefined,
     excluirErrorCode: ocultarRuido ? "RATE_LIMITED" : undefined,
+    userId: userId || undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
     page,
     limit: 50,
@@ -165,14 +181,25 @@ export function AuditoriaLog() {
     {
       key: "usuario",
       header: t("col.usuario"),
+      // Clic en el usuario = filtrar por esa persona (sin salir de la tabla). stopPropagation para
+      // no abrir el panel de detalle de la fila.
       cell: (r) =>
-        r.usuarioNombre ? (
-          <Tooltip content={r.userId ?? r.usuarioNombre}>
-            <span className="text-sm">{r.usuarioNombre}</span>
-          </Tooltip>
-        ) : r.userId ? (
-          <Tooltip content={r.userId}>
-            <span className="font-mono text-xs">{r.userId.slice(0, 8)}</span>
+        r.userId ? (
+          <Tooltip content={t("filtrarPorUsuario")}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                filtrarPorUsuario(r.userId!, r.usuarioNombre ?? r.userId!);
+              }}
+              className="text-left hover:text-foreground hover:underline"
+            >
+              {r.usuarioNombre ? (
+                <span className="text-sm">{r.usuarioNombre}</span>
+              ) : (
+                <span className="font-mono text-xs">{r.userId.slice(0, 8)}</span>
+              )}
+            </button>
           </Tooltip>
         ) : (
           <span className="text-muted-foreground">—</span>
@@ -311,6 +338,12 @@ export function AuditoriaLog() {
         >
           {t("chipOcultarRuido")}
         </Button>
+        {userId ? (
+          <Button size="sm" variant="secondary" onClick={limpiarUsuario} className="gap-1">
+            {t("filtroUsuario", { nombre: userLabel })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </Button>
+        ) : null}
         <span className="ml-auto flex items-center gap-3">
           {state.kind === "ok" ? (
             <span className="text-xs text-muted-foreground">{t("totalRegistros", { total: meta.total })}</span>

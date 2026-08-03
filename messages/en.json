@@ -2200,6 +2200,8 @@
     "chipSoloCambios": "Changes only",
     "chipSoloErrores": "Errors only",
     "chipOcultarRuido": "Hide rate limit",
+    "filtrarPorUsuario": "Filter by this user",
+    "filtroUsuario": "User: {nombre}",
     "totalRegistros": "{total, number} records",
     "resultadoOk": "OK",
     "resultadoError": "Error",
