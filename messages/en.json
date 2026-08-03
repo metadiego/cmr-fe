@@ -696,6 +696,7 @@
     "gruposFacturacion": "Billing groups",
     "panelEnfermeria": "Nursing panel",
     "panelEnfermeriaConfig": "Nursing panel settings",
+    "datosPaciente": "Required patient data",
     "requeridos": "Required fields",
     "requisitos_servicio": "Service requirements",
     "configFormatos": "Therapy formats",
@@ -2187,6 +2188,18 @@
       "negativo": "Cannot be negative",
       "excede": "Exceeds sent"
     }
+  },
+  "configAlta": {
+    "title": "Required patient data",
+    "help": "Choose which data is required when registering a patient (besides the name, which always is). Different from Service requirements.",
+    "noPermission": "You don't have permission to configure patient registration.",
+    "siempre": "Always required",
+    "alcance": "Scope",
+    "alcanceCentro": "This center only",
+    "alcanceTodos": "All centers",
+    "alcanceAviso": "This will apply to ALL centers. Requires admin. You'll see how many centers it applied to on save.",
+    "guardado": "Saved",
+    "guardadoTodos": "Applied to {n, number} center(s)"
   },
   "capacidades": {
     "enfermera": "Nurse",

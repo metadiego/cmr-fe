@@ -696,6 +696,7 @@
     "gruposFacturacion": "Grupos de facturación",
     "panelEnfermeria": "Panel de Enfermería",
     "panelEnfermeriaConfig": "Config. Panel de Enfermería",
+    "datosPaciente": "Datos obligatorios del paciente",
     "requeridos": "Campos requeridos",
     "requisitos_servicio": "Requisitos por servicio",
     "configFormatos": "Formatos de terapia",
@@ -2187,6 +2188,18 @@
       "negativo": "No puede ser negativo",
       "excede": "Mayor a lo enviado"
     }
+  },
+  "configAlta": {
+    "title": "Datos obligatorios del paciente",
+    "help": "Elige qué datos son obligatorios al dar de alta un paciente (además del nombre, que siempre lo es). Distinto de los Requisitos por servicio.",
+    "noPermission": "No tienes permiso para configurar el alta de pacientes.",
+    "siempre": "Siempre obligatorio",
+    "alcance": "Alcance",
+    "alcanceCentro": "Sólo este centro",
+    "alcanceTodos": "Todos los centros",
+    "alcanceAviso": "Se aplicará a TODOS los centros. Requiere admin. Verás a cuántos centros se aplicó al guardar.",
+    "guardado": "Guardado",
+    "guardadoTodos": "Aplicado a {n, number} centro(s)"
   },
   "capacidades": {
     "enfermera": "Enfermera",
