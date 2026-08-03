@@ -697,6 +697,7 @@
     "panelEnfermeria": "Panel de Enfermería",
     "panelEnfermeriaConfig": "Config. Panel de Enfermería",
     "requeridos": "Campos requeridos",
+    "requisitos_servicio": "Requisitos por servicio",
     "configFormatos": "Formatos de terapia",
     "estadisticas_servicios": "Estadísticas de Servicios"
   },
@@ -2583,12 +2584,29 @@
     "tipo": "Tipo",
     "requerido": "Requerido",
     "en": "En la acción",
+    "momentoCol": "En la acción",
+    "fuente": "Fuente del requisito",
     "dondeVive": "Dónde vive el valor",
     "enFormulario": "En el formulario",
     "sinCampos": "Sin campos.",
     "agregarCampo": "Agregar campo",
     "quitar": "Quitar",
-    "ayudaBinding": "Con un binding, el valor sale de la columna del tablero (dosis, enfermera…) y NO se captura en el formulario. Sin binding, se captura en el formulario de acciones.",
+    "ayudaBinding": "Con una fuente, el valor sale de su columna (dosis, enfermera…) y NO se captura en el formulario. Sin fuente, se captura en el formulario de acciones.",
+    "guardadoTodos": "Aplicado a {n, number} centro(s)",
+    "alcance": "Alcance",
+    "alcanceCentro": "Sólo este centro",
+    "alcanceTodos": "Todos los centros",
+    "alcanceAviso": "Se aplicará a TODOS los centros. Requiere admin. Verás a cuántos centros se aplicó al guardar.",
+    "momento": {
+      "presente": "Al marcar presente",
+      "en_terapia": "En terapia",
+      "asistido": "Al asistir"
+    },
+    "grupo": {
+      "sesion": "Sesión",
+      "personal": "Personal",
+      "paquete": "Paquete"
+    },
     "tipos": {
       "texto": "Texto",
       "numero": "Número",
