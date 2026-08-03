@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon, Delete02Icon, Menu01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Delete02Icon, LockedIcon, Menu01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +16,8 @@ import {
   deleteMenuItem,
   type MenuItem,
 } from "@/lib/api/menu";
+import { getPermisos } from "@/lib/api/rbac";
+import { useResource } from "@/hooks/use-resource";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,6 +169,9 @@ export function MenuEditor() {
   const [editing, setEditing] = React.useState<{ id: string; value: string } | null>(null);
   // Pila de deshacer: instantáneas del árbol (parentClave/orden/visible) antes de cada cambio.
   const [undoStack, setUndoStack] = React.useState<MenuItem[][]>([]);
+  // Catálogo de permisos para el picker (P2.12c: el editor visual no ofrecía permisoClave).
+  const { state: permisosState } = useResource(() => getPermisos());
+  const permisos = permisosState.kind === "ok" ? permisosState.data : [];
 
   // No hace setState de forma síncrona (el rule react-hooks lo prohíbe dentro de efectos): el
   // estado solo se toca dentro de los handlers de la promesa.
@@ -187,14 +192,14 @@ export function MenuEditor() {
       // labelCustom (nombre libre) pisa la clave i18n; si no, traducir labelKey (o mostrarla cruda).
       const custom = it.labelCustom?.trim();
       if (custom) return custom;
-      if (it.tipo === "separador") return t("separator");
+      if (it.tipo === "separador") return tRoot("nav.separador");
       try {
         return tRoot.has(it.labelKey) ? tRoot(it.labelKey) : it.labelKey;
       } catch {
         return it.labelKey;
       }
     },
-    [t, tRoot],
+    [tRoot],
   );
 
   const snapshot = React.useCallback(() => {
@@ -251,6 +256,19 @@ export function MenuEditor() {
     setItems(items.map((i) => (i.id === it.id ? { ...i, icon: name, mostrarIcono: !!name } : i)));
     try {
       await updateMenuItem(it.id, { icon: name, mostrarIcono: !!name });
+    } catch (e) {
+      toast.error(apiErrorMessage(e));
+      load();
+    }
+  }
+
+  // Permiso requerido para ver el ítem. null = sin permiso (visible para todos).
+  async function setPermiso(it: MenuItem, permisoClave: string | null) {
+    if (!items) return;
+    setItems(items.map((i) => (i.id === it.id ? { ...i, permisoClave } : i)));
+    try {
+      await updateMenuItem(it.id, { permisoClave });
+      toast.success(t("saved"));
     } catch (e) {
       toast.error(apiErrorMessage(e));
       load();
@@ -433,7 +451,7 @@ export function MenuEditor() {
               <HugeiconsIcon icon={Menu01Icon} className="size-4" />
             </span>
             <span className="h-px flex-1 bg-border" aria-hidden />
-            <span className="text-xs text-muted-foreground">{t("separator")}</span>
+            <span className="text-xs text-muted-foreground">{tRoot("nav.separador")}</span>
             <Button
               size="icon"
               variant="ghost"
@@ -525,6 +543,35 @@ export function MenuEditor() {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => setIcon(it, null)}>{t("noIcon")}</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {/* Permiso requerido (P2.12c): sin esto no había forma de gatear un ítem por permiso
+              desde el editor visual, solo desde el CRUD crudo de admin/menu-admin.tsx. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                className={cn(
+                  "size-7 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100",
+                  it.permisoClave ? "text-foreground" : "text-muted-foreground",
+                )}
+                aria-label={tRoot("admin.menu.permisoClave")}
+                title={it.permisoClave || tRoot("admin.menu.permisoSinPermiso")}
+              >
+                <HugeiconsIcon icon={LockedIcon} className="size-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setPermiso(it, null)}>
+                {tRoot("admin.menu.permisoSinPermiso")}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {permisos.map((p) => (
+                <DropdownMenuItem key={p.clave} onSelect={() => setPermiso(it, p.clave)}>
+                  {p.clave}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
           <span className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">

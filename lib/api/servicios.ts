@@ -136,17 +136,10 @@ export type ServicioFormAcciones = {
   [k: string]: unknown;
 };
 
-// Catálogo de destinos válidos para un requerido (GET /servicios/catalogos/requeridos-bindings).
-export type RequeridoBinding = { binding: string; labelKey: string; grupo: string };
-export async function getRequeridosBindings(centroId?: string): Promise<RequeridoBinding[]> {
-  return asArray<RequeridoBinding>(await apiFetch(`/servicios/catalogos/requeridos-bindings`, {}, centroId));
-}
-
 // FUENTE DEL REQUISITO — dónde vive el valor que SATISFACE un requisito (sesión/personal/paquete).
-// Endpoint CORRECTO que reemplaza a requeridos-bindings (deprecado; mismo contenido). Distinto del
-// "origen de lectura" (columnas del tablero) y del "destino de escritura" (celdas editables).
-// GET /servicios/catalogos/fuentes-requisito.
-export type FuenteRequisito = RequeridoBinding; // { binding, labelKey, grupo }
+// Distinto del "origen de lectura" (columnas del tablero) y del "destino de escritura"
+// (celdas editables). GET /servicios/catalogos/fuentes-requisito.
+export type FuenteRequisito = { binding: string; labelKey: string; grupo: string };
 export async function getFuentesRequisito(centroId?: string): Promise<FuenteRequisito[]> {
   return asArray<FuenteRequisito>(await apiFetch(`/servicios/catalogos/fuentes-requisito`, {}, centroId));
 }

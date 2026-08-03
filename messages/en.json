@@ -587,7 +587,6 @@
     "deleteBody": "Remove “{name}” from the menu? This does not delete the page, only removes it from the menu.",
     "cancel": "Cancel",
     "depthError": "Maximum {n} levels.",
-    "separator": "Divider",
     "newGroup": "New group",
     "newGroupName": "New group",
     "groupAdded": "Group added",
@@ -642,6 +641,7 @@
     "por_desarrollar": "To be developed",
     "mas": "More",
     "menuEditor": "Menu editor",
+    "separador": "Divider",
     "grupo": {
       "agenda": "Scheduling & patients",
       "facturacion": "Billing & register",
@@ -899,6 +899,8 @@
       "centro": "Center",
       "centroPlaceholder": "Pick a center",
       "centroHint": "Optional; without a center the user can't sign in until one is assigned.",
+      "temporal": "Temporary access to this center",
+      "vigenteHasta": "Valid until",
       "rol": "Role",
       "rolPlaceholder": "Pick a role",
       "rolHint": "Optional. Choosing a role WITHOUT a center grants it in ALL centers."

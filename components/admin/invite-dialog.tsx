@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type AccessMode = "operativo" | "gerencial";
 
@@ -56,6 +57,8 @@ export function InviteDialog({
   // accesos y su primer login es un 403).
   const [centroId, setCentroId] = React.useState("");
   const [rolClave, setRolClave] = React.useState("");
+  const [temporal, setTemporal] = React.useState(false);
+  const [vigenteHasta, setVigenteHasta] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState<InviteResponse | null>(null);
   const [copied, setCopied] = React.useState(false);
@@ -81,6 +84,8 @@ export function InviteDialog({
       setAccessMode("operativo");
       setCentroId("");
       setRolClave("");
+      setTemporal(false);
+      setVigenteHasta("");
       setResult(null);
       setCopied(false);
     }
@@ -98,6 +103,8 @@ export function InviteDialog({
         accessMode,
         centroId: centroId || undefined,
         rolClave: rolClave || undefined,
+        tipoAsignacion: centroId && temporal ? "temporal" : undefined,
+        vigenteHasta: centroId && temporal ? vigenteHasta || undefined : undefined,
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
       toast.success(t("success", { email: res.email }));
@@ -180,6 +187,26 @@ export function InviteDialog({
                   </SelectContent>
                 </Select>
               </Field>
+              {centroId && (
+                <div className="space-y-2 rounded-lg border p-3">
+                  <label className="flex items-center gap-3 text-sm">
+                    <Checkbox
+                      checked={temporal}
+                      onCheckedChange={(v) => setTemporal(v === true)}
+                    />
+                    <span>{t("temporal")}</span>
+                  </label>
+                  {temporal && (
+                    <Field label={t("vigenteHasta")}>
+                      <Input
+                        type="date"
+                        value={vigenteHasta}
+                        onChange={(e) => setVigenteHasta(e.target.value)}
+                      />
+                    </Field>
+                  )}
+                </div>
+              )}
               <Field label={t("rol")} hint={t("rolHint")}>
                 <Select
                   value={rolClave || undefined}
