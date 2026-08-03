@@ -50,6 +50,8 @@ export type PanelDefinicion = {
   secciones: PanelSeccion[];
   personal: PanelPersonal[];
   estatus: PanelEstatus[];
+  // Contadores del día YA vienen aquí (BE) → no hace falta la llamada aparte a /contadores.
+  contadores?: PanelContador[];
 };
 
 export type PanelNotificacion = {
@@ -109,6 +111,21 @@ export async function aceptarNotificacion(
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
   return env.data;
+}
+
+// POST /paneles/notificaciones/:id/cancelar — retira un aviso pendiente (p. ej. el paciente se fue).
+// motivo opcional (máx 300). RBAC panel.notificar. IDEMPOTENTE: si ya lo aceptaron devuelve el estado
+// actual (NO es error). Emite el mismo evento SSE → la tarjeta desaparece en todas las pantallas.
+export function cancelarNotificacion(
+  id: string,
+  motivo?: string,
+  centroId?: string,
+): Promise<PanelNotificacion> {
+  return apiFetch<PanelNotificacion>(
+    `/paneles/notificaciones/${id}/cancelar`,
+    { method: "POST", body: JSON.stringify(motivo ? { motivo } : {}) },
+    centroId,
+  );
 }
 
 // GET /paneles/:clave/contadores?fecha=YYYY-MM-DD — contadores del día por persona (NO se llevan en el FE).
