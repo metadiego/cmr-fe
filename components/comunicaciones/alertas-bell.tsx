@@ -49,23 +49,31 @@ export function AlertasBell() {
   const fallo = state.kind === "fail";
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  // SSE en vivo con reconexión hasta desmontar; refetch en cada evento.
+  // SSE en vivo hasta desmontar. Reconexión con BACKOFF exponencial (3s→60s) y PARADA en 401/403:
+  // sin permiso/sesión no tiene sentido reintentar cada 3s (generaba 36k UNAUTHORIZED en la bitácora).
   React.useEffect(() => {
     const ctrl = new AbortController();
     let stop = false;
+    let backoff = 3000;
     async function connect() {
       while (!stop && !ctrl.signal.aborted) {
         try {
           await subscribeAlertas({
             centroId: getActiveCentro(),
             onEvent: () => refresh(),
+            onOpen: () => {
+              backoff = 3000; // conexión OK → reinicia el backoff
+            },
             signal: ctrl.signal,
           });
-        } catch {
-          /* reconecta abajo */
+        } catch (err) {
+          const status = (err as { status?: number } | null)?.status;
+          // 401/403 = no autorizado: dejar de reintentar (hasta re-montar / nueva sesión).
+          if (status === 401 || status === 403) break;
         }
         if (stop || ctrl.signal.aborted) break;
-        await new Promise((r) => setTimeout(r, 3000));
+        await new Promise((r) => setTimeout(r, backoff));
+        backoff = Math.min(backoff * 2, 60000); // 3s, 6s, 12s … tope 60s
       }
     }
     void connect();

@@ -8,8 +8,10 @@ import { RefreshIcon, Copy01Icon } from "@hugeicons/core-free-icons";
 
 import {
   listAuditoria,
+  getAuditoriaFacetas,
   type AuditRow,
   type AuditListParams,
+  type AuditFacetas,
 } from "@/lib/api/auditoria";
 import type { Paginated } from "@/lib/api/types";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
@@ -78,6 +80,10 @@ export function AuditoriaLog() {
   const [resultado, setResultado] = React.useState(TODOS);
   const [metodo, setMetodo] = React.useState(TODOS);
   const [clinicId, setClinicId] = React.useState(TODOS);
+  // Chips (BE cmr-be): soloCambios = solo mutaciones; ocultarRuido = excluirErrorCode=RATE_LIMITED.
+  // "Ocultar límite de tasa" arranca ENCENDIDO: el 81% de los errores son RATE_LIMITED (ruido).
+  const [soloCambios, setSoloCambios] = React.useState(false);
+  const [ocultarRuido, setOcultarRuido] = React.useState(true);
   const [page, setPage] = React.useState(1);
   const [detalle, setDetalle] = React.useState<AuditRow | null>(null);
 
@@ -86,12 +92,26 @@ export function AuditoriaLog() {
   const centroNombre = (id: string | null) =>
     id ? centros.find((c) => c.id === id)?.nombre ?? id.slice(0, 8) : "—";
 
+  // Facetas: valores realmente presentes para los desplegables (sin hardcode). Se recalculan al
+  // cambiar el rango de fechas. Fallback a la lista conocida si aún no cargaron o vienen vacías.
+  const facetasKey = `${desde}|${hasta}`;
+  const { state: facetasState } = useResource<AuditFacetas>(
+    () => getAuditoriaFacetas({ desde: desde || undefined, hasta: hasta || undefined }),
+    [facetasKey],
+  );
+  const dominiosOpts =
+    facetasState.kind === "ok" && facetasState.data.dominios.length > 0
+      ? facetasState.data.dominios
+      : [...DOMINIOS];
+
   const params: AuditListParams = {
     desde: desde || undefined,
     hasta: hasta || undefined,
     dominio: dominio === TODOS ? undefined : dominio,
     resultado: resultado === TODOS ? undefined : (resultado as "ok" | "error"),
     metodo: metodo === TODOS ? undefined : metodo,
+    soloCambios: soloCambios || undefined,
+    excluirErrorCode: ocultarRuido ? "RATE_LIMITED" : undefined,
     clinicId: clinicId === TODOS ? undefined : clinicId,
     page,
     limit: 50,
@@ -146,7 +166,11 @@ export function AuditoriaLog() {
       key: "usuario",
       header: t("col.usuario"),
       cell: (r) =>
-        r.userId ? (
+        r.usuarioNombre ? (
+          <Tooltip content={r.userId ?? r.usuarioNombre}>
+            <span className="text-sm">{r.usuarioNombre}</span>
+          </Tooltip>
+        ) : r.userId ? (
           <Tooltip content={r.userId}>
             <span className="font-mono text-xs">{r.userId.slice(0, 8)}</span>
           </Tooltip>
@@ -236,7 +260,7 @@ export function AuditoriaLog() {
         </div>
         <div className="space-y-1">
           <Label className="text-xs">{t("col.dominio")}</Label>
-          {selectAll(dominio, onFilter(setDominio), t("todos"), DOMINIOS.map((d) => ({
+          {selectAll(dominio, onFilter(setDominio), t("todos"), dominiosOpts.map((d) => ({
             value: d,
             label: t.has(`dominio.${d}`) ? t(`dominio.${d}`) : d,
           })))}
@@ -262,10 +286,30 @@ export function AuditoriaLog() {
       <div className="flex flex-wrap items-center gap-2">
         <Button
           size="sm"
+          variant={soloCambios ? "default" : "outline"}
+          onClick={() => {
+            setSoloCambios((v) => !v);
+            setPage(1);
+          }}
+        >
+          {t("chipSoloCambios")}
+        </Button>
+        <Button
+          size="sm"
           variant={resultado === "error" ? "default" : "outline"}
           onClick={() => onFilter(setResultado)(resultado === "error" ? TODOS : "error")}
         >
           {t("chipSoloErrores")}
+        </Button>
+        <Button
+          size="sm"
+          variant={ocultarRuido ? "default" : "outline"}
+          onClick={() => {
+            setOcultarRuido((v) => !v);
+            setPage(1);
+          }}
+        >
+          {t("chipOcultarRuido")}
         </Button>
         <span className="ml-auto flex items-center gap-3">
           {state.kind === "ok" ? (
