@@ -26,7 +26,9 @@ export function useCitaStream(opts: {
     cbRef.current = opts;
   });
   const liveRef = React.useRef(live);
-  liveRef.current = live;
+  React.useEffect(() => {
+    liveRef.current = live;
+  }, [live]);
 
   // Self-heal: refetch when the tab regains focus or the network comes back
   // (a crashed/slept connection may have missed events). And while the SSE is
@@ -83,8 +85,15 @@ export function useCitaStream(opts: {
               scheduleInvalidate();
             },
           });
-        } catch {
+        } catch (err) {
           if (stopped || controller.signal.aborted) break;
+          // 401/403 = sin sesión/permiso: PARAR (no reintentar). Antes reconectaba indefinidamente
+          // → ~4 UNAUTHORIZED/min por pestaña contra /tablero/stream (mismo bug que la campana).
+          const status = (err as { status?: number } | null)?.status;
+          if (status === 401 || status === 403) {
+            setLive(false);
+            break;
+          }
         }
         setLive(false);
         if (stopped) break;
