@@ -7,16 +7,36 @@ import { apiFetch, apiFetchEnvelope } from "./client";
 
 export type PanelSeccion = {
   id: string;
+  panelId?: string;
   clave: string;
   labelKey: string;
   orden: number;
-  color: string;
+  color: string | null;
   visible: boolean; // false → franja de color sin número (paridad legacy)
   audio: string | null; // nombre del sonido de alarma para esta sección
-  capacidad?: string | null;
-  asignaA?: string | null; // p. ej. sesion.enfermeraId
+  capacidad?: string | null; // capacidad del personal que puede tomarla (del personal del centro, NO fija)
+  asignaA?: string | null; // lista cerrada: sesion.enfermeraId | sesion.tecnicoId | sesion.medicoId
+  origen?: Record<string, unknown> | null; // { tipo:'servicio', servicioId } — pasarela (el BE no lo interpreta aún)
   activo: boolean;
 };
+
+// asignaA es una FRONTERA DE SEGURIDAD (decide a qué columna de la sesión se escribe) → lista fija.
+export const ASIGNA_A = ["sesion.enfermeraId", "sesion.tecnicoId", "sesion.medicoId"] as const;
+
+// Payloads del CRUD admin. capacidad es `string` a propósito (el BE ya NO la limita a 3 valores:
+// valida contra las capacidades reales del personal del centro). El schema.d.ts está desactualizado.
+export type CreatePanelSeccionPayload = {
+  clave: string;
+  labelKey: string;
+  orden?: number;
+  color?: string | null;
+  visible?: boolean;
+  audio?: string | null;
+  capacidad?: string;
+  asignaA?: (typeof ASIGNA_A)[number];
+  origen?: Record<string, unknown> | null;
+};
+export type UpdatePanelSeccionPayload = Partial<CreatePanelSeccionPayload> & { activo?: boolean };
 export type PanelPersonal = { id: string; nombre: string };
 export type PanelEstatus = {
   personalId: string;
@@ -95,5 +115,59 @@ export async function aceptarNotificacion(
 export function getPanelContadores(clave: string, fecha: string, centroId?: string): Promise<PanelContador[]> {
   return apiFetch<unknown>(`/paneles/${clave}/contadores?fecha=${fecha}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelContador[]) : (((r as { items?: PanelContador[] })?.items) ?? []),
+  );
+}
+
+// ─── CRUD admin de secciones (RBAC panel.config; borrar exige además rol admin) ──────────────────
+// GET /paneles/:clave/secciones — catálogo. includeInactive=true trae también las apagadas para
+// poder reactivarlas (sin él, /definicion filtra activo:true y una sección apagada desaparecía).
+export function getPanelSecciones(
+  clave: string,
+  opts: { includeInactive?: boolean } = {},
+  centroId?: string,
+): Promise<PanelSeccion[]> {
+  const qs = opts.includeInactive ? "?includeInactive=true" : "";
+  return apiFetch<unknown>(`/paneles/${clave}/secciones${qs}`, {}, centroId).then((r) =>
+    Array.isArray(r) ? (r as PanelSeccion[]) : (((r as { items?: PanelSeccion[] })?.items) ?? []),
+  );
+}
+export function createPanelSeccion(
+  clave: string,
+  payload: CreatePanelSeccionPayload,
+  centroId?: string,
+): Promise<PanelSeccion> {
+  return apiFetch<PanelSeccion>(
+    `/paneles/${clave}/secciones`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
+export function updatePanelSeccion(
+  id: string,
+  payload: UpdatePanelSeccionPayload,
+  centroId?: string,
+): Promise<PanelSeccion> {
+  return apiFetch<PanelSeccion>(
+    `/paneles/secciones/${id}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
+// DELETE /paneles/secciones/:id — 409 si tiene histórico (el mensaje trae el conteo): NO es un fallo
+// a ocultar, se muestra y se ofrece desactivar. No arrastra histórico a propósito.
+export function deletePanelSeccion(id: string, centroId?: string): Promise<void> {
+  return apiFetch<void>(`/paneles/secciones/${id}`, { method: "DELETE" }, centroId);
+}
+// PUT /paneles/:clave/secciones/orden — reordenar en BLOQUE (atómico): manda la lista entera. Si
+// algún id no es del panel → 400 y no se aplica ninguno.
+export function reordenarSecciones(
+  clave: string,
+  ordenes: { id: string; orden: number }[],
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(
+    `/paneles/${clave}/secciones/orden`,
+    { method: "PUT", body: JSON.stringify({ ordenes }) },
+    centroId,
   );
 }

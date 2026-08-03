@@ -695,6 +695,7 @@
     "cajaGeneral": "Caja general",
     "gruposFacturacion": "Grupos de facturación",
     "panelEnfermeria": "Panel de Enfermería",
+    "panelEnfermeriaConfig": "Config. Panel de Enfermería",
     "requeridos": "Campos requeridos",
     "configFormatos": "Formatos de terapia",
     "estadisticas_servicios": "Estadísticas de Servicios"
@@ -2185,6 +2186,50 @@
       "negativo": "No puede ser negativo",
       "excede": "Mayor a lo enviado"
     }
+  },
+  "capacidades": {
+    "enfermera": "Enfermera",
+    "tecnico": "Técnico",
+    "medico": "Médico",
+    "cajero": "Cajero",
+    "cc_operator": "Call center"
+  },
+  "panelAdmin": {
+    "title": "Configuración del Panel de Enfermería",
+    "help": "Define las secciones del panel (Enfermería, Intravenoso…): su color, sonido, orden y a quién avisan. Arrastra para reordenar; el orden se guarda al soltar.",
+    "noPermission": "No tienes permiso para configurar el panel.",
+    "secciones": "Secciones",
+    "nueva": "Nueva sección",
+    "vacio": "Aún no hay secciones",
+    "editar": "Editar sección",
+    "elegir": "Sección",
+    "elegirAyuda": "Elige una sección de la lista o crea una nueva.",
+    "visible": "Visible",
+    "activa": "Activa",
+    "borrar": "Borrar",
+    "clave": "Clave",
+    "claveHint": "Minúsculas, números y guion bajo. Única dentro del panel; no se puede cambiar luego.",
+    "labelKey": "Etiqueta (clave i18n)",
+    "labelKeyHint": "Clave de traducción; el texto visible sale de i18n, no se escribe aquí.",
+    "color": "Color",
+    "audio": "Sonido",
+    "audioHint": "Nombre lógico del sonido de alarma; el archivo lo resuelve el FE.",
+    "capacidad": "Capacidad",
+    "capacidadHint": "Quién puede tomar la sección. Sale del personal del centro.",
+    "capacidadPlaceholder": "Elige una capacidad",
+    "asignaA": "Asigna a",
+    "asignaAHint": "A qué campo de la sesión del paciente se escribe al aceptar. Lista fija (seguridad).",
+    "asigna": {
+      "enfermeraId": "Enfermera de la sesión",
+      "tecnicoId": "Técnico de la sesión",
+      "medicoId": "Médico de la sesión"
+    },
+    "creada": "Sección creada",
+    "guardada": "Sección guardada",
+    "borrada": "Sección borrada",
+    "desactivar": "Desactivar",
+    "borrarTitulo": "Borrar sección",
+    "borrarCuerpo": "¿Borrar «{nombre}»? Si tiene avisos en el histórico no se borra; desactívala en su lugar."
   },
   "alertas": {
     "sin_destinatarios": "La alerta por usuario no tiene destinatarios"
