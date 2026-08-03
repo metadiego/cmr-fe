@@ -2189,6 +2189,10 @@
       "excede": "Mayor a lo enviado"
     }
   },
+  "errores": {
+    "TENANT_NOT_FOUND": "El centro indicado no existe.",
+    "VIGENCIA_INVALIDA": "La fecha de fin no puede ser anterior a la de inicio."
+  },
   "configAlta": {
     "title": "Datos obligatorios del paciente",
     "help": "Elige qué datos son obligatorios al dar de alta un paciente (además del nombre, que siempre lo es). Distinto de los Requisitos por servicio.",
