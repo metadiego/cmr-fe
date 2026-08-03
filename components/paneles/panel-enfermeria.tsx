@@ -119,7 +119,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
           {secciones.map((s) => (
             <section key={s.id}>
               <div className="mb-2 flex items-center gap-2">
-                <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color }} aria-hidden />
+                <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
                 <h2 className="text-lg font-semibold">{tRoot(s.labelKey)}</h2>
               </div>
               {s.visible ? (
@@ -133,7 +133,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                       <div key={p.id} className="rounded-xl border p-3" style={{ borderLeftColor: pc, borderLeftWidth: 4 }}>
                         <div className="flex items-start justify-between gap-2">
                           <span className="truncate text-base font-semibold">{p.nombre}</span>
-                          <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-lg font-bold tabular-nums" style={{ color: s.color }}>{nSec}</span>
+                          <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-lg font-bold tabular-nums" style={{ color: s.color ?? undefined }}>{nSec}</span>
                         </div>
                         {cont && Object.keys(cont.porSeccion || {}).length > 1 && (
                           <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
@@ -150,7 +150,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                   })}
                 </div>
               ) : (
-                <div className="h-3 w-full rounded" style={{ backgroundColor: s.color }} aria-hidden />
+                <div className="h-3 w-full rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
               )}
             </section>
           ))}

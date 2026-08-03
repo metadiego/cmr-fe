@@ -695,6 +695,7 @@
     "cajaGeneral": "General cash",
     "gruposFacturacion": "Billing groups",
     "panelEnfermeria": "Nursing panel",
+    "panelEnfermeriaConfig": "Nursing panel settings",
     "requeridos": "Required fields",
     "configFormatos": "Therapy formats",
     "estadisticas_servicios": "Service Statistics"
@@ -2185,6 +2186,50 @@
       "negativo": "Cannot be negative",
       "excede": "Exceeds sent"
     }
+  },
+  "capacidades": {
+    "enfermera": "Nurse",
+    "tecnico": "Technician",
+    "medico": "Doctor",
+    "cajero": "Cashier",
+    "cc_operator": "Call center"
+  },
+  "panelAdmin": {
+    "title": "Nursing panel settings",
+    "help": "Define the panel sections (Nursing, IV…): color, sound, order and who they notify. Drag to reorder; the order saves on drop.",
+    "noPermission": "You don't have permission to configure the panel.",
+    "secciones": "Sections",
+    "nueva": "New section",
+    "vacio": "No sections yet",
+    "editar": "Edit section",
+    "elegir": "Section",
+    "elegirAyuda": "Pick a section from the list or create a new one.",
+    "visible": "Visible",
+    "activa": "Active",
+    "borrar": "Delete",
+    "clave": "Key",
+    "claveHint": "Lowercase, digits and underscore. Unique within the panel; can't change it later.",
+    "labelKey": "Label (i18n key)",
+    "labelKeyHint": "Translation key; the visible text comes from i18n, not typed here.",
+    "color": "Color",
+    "audio": "Sound",
+    "audioHint": "Logical alarm sound name; the FE resolves the file.",
+    "capacidad": "Capability",
+    "capacidadHint": "Who can take the section. Sourced from the center's staff.",
+    "capacidadPlaceholder": "Pick a capability",
+    "asignaA": "Assign to",
+    "asignaAHint": "Which patient-session field is written on accept. Fixed list (security).",
+    "asigna": {
+      "enfermeraId": "Session nurse",
+      "tecnicoId": "Session technician",
+      "medicoId": "Session doctor"
+    },
+    "creada": "Section created",
+    "guardada": "Section saved",
+    "borrada": "Section deleted",
+    "desactivar": "Deactivate",
+    "borrarTitulo": "Delete section",
+    "borrarCuerpo": "Delete “{nombre}”? If it has history it won't be deleted; deactivate it instead."
   },
   "alertas": {
     "sin_destinatarios": "The per-user alert has no recipients"
