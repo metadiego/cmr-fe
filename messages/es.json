@@ -587,7 +587,6 @@
     "deleteBody": "¿Quitar «{name}» del menú? No borra la página, solo la saca del menú.",
     "cancel": "Cancelar",
     "depthError": "Máximo {n} niveles.",
-    "separator": "Separador",
     "newGroup": "Nuevo grupo",
     "newGroupName": "Nuevo grupo",
     "groupAdded": "Grupo agregado",
@@ -642,6 +641,7 @@
     "por_desarrollar": "Por desarrollar",
     "mas": "Más",
     "menuEditor": "Editor del menú",
+    "separador": "Separador",
     "grupo": {
       "agenda": "Agenda y pacientes",
       "facturacion": "Facturación y caja",
@@ -899,6 +899,8 @@
       "centro": "Centro",
       "centroPlaceholder": "Elige un centro",
       "centroHint": "Opcional; sin centro el usuario no podrá entrar hasta que se le asigne uno.",
+      "temporal": "Acceso temporal a este centro",
+      "vigenteHasta": "Vigente hasta",
       "rol": "Rol",
       "rolPlaceholder": "Elige un rol",
       "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros."
