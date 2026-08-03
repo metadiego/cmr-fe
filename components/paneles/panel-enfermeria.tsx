@@ -8,11 +8,10 @@ import { Sun01Icon, Moon02Icon, VolumeHighIcon } from "@hugeicons/core-free-icon
 import {
   getPanelDefinicion,
   getPanelNotificaciones,
-  getPanelContadores,
   aceptarNotificacion,
+  cancelarNotificacion,
   type PanelDefinicion,
   type PanelNotificacion,
-  type PanelContador,
 } from "@/lib/api/paneles";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -22,7 +21,6 @@ import { colorForName } from "@/lib/frontdesk/color";
 
 const CLAVE = "enfermeria";
 const THEME_KEY = "cmr_panel_theme";
-const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 
 // Alarma sin assets: beep en loop con WebAudio (requiere un primer gesto por autoplay del navegador).
 function useAlarma() {
@@ -53,6 +51,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const tRoot = useTranslations();
   const { can } = useCan();
   const puedeAceptar = can("panel.aceptar");
+  const puedeCancelar = can("panel.notificar");
 
   const [dark, setDark] = React.useState(false);
   const [restored, setRestored] = React.useState(false);
@@ -61,15 +60,18 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
-  const [contadores, setContadores] = React.useState<PanelContador[]>([]);
   const alarma = useAlarma();
 
+  // Los contadores del día YA vienen en la definición → sin llamada aparte (dedup). En cada evento
+  // SSE se recarga la definición (trae contadores frescos) + las notificaciones pendientes.
   const refetch = React.useCallback(() => {
+    defRes.reload();
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
-    getPanelContadores(CLAVE, todayISO(), centro).then(setContadores).catch(() => {});
-  }, [centro]);
+  }, [defRes, centro]);
   // Carga inicial (una vez montado, patrón sin setState-en-render).
-  React.useEffect(() => { refetch(); }, [refetch]);
+  React.useEffect(() => {
+    getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
+  }, [centro]);
 
   const { live } = useCitaStream({ centroId: centro ?? null, entidad: "panel_notificacion", onInvalidate: refetch });
 
@@ -84,10 +86,15 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const secciones = (def?.secciones ?? []).slice().sort((a, b) => a.orden - b.orden);
   const personal = def?.personal ?? [];
   const estatusById = new Map((def?.estatus ?? []).map((e) => [e.personalId, e]));
-  const contByPersona = new Map(contadores.map((c) => [c.personalId, c]));
+  const contByPersona = new Map((def?.contadores ?? []).map((c) => [c.personalId, c]));
 
   async function aceptar(notifId: string, personalId: string) {
     try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
+    catch (e) { toastError(e, tRoot); }
+  }
+  // Retirar un aviso atascado (el paciente se fue). Idempotente: no tratar como error si ya lo tomaron.
+  async function cancelar(notifId: string) {
+    try { await cancelarNotificacion(notifId, undefined, centro); refetch(); }
     catch (e) { toastError(e, tRoot); }
   }
 
@@ -189,6 +196,15 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
               ))}
             </div>
             {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
+            {puedeCancelar && (
+              <button
+                type="button"
+                onClick={() => cancelar(actual.id)}
+                className="mt-6 rounded-lg border border-white/40 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+              >
+                {t("cancelarAviso")}
+              </button>
+            )}
           </div>
           );
         })()}
