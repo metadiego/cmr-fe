@@ -69,6 +69,10 @@ export interface InvitePayload {
   rolClave?: string;
   tipoAsignacion?: "base" | "temporal" | "fijo";
   vigenteHasta?: string;
+  // Enlace a una PERSONA ya dada de alta (personal sin cuenta): la invitación engancha la cuenta nueva a
+  // ese personalId y conserva su historial (sellos/participaciones cuelgan de personalId, no del login).
+  // Sin este campo, la cuenta nace sin ficha, como antes (BE PR #241). Ver HANDOFF-invitar-vinculando-persona.
+  personalId?: string;
 }
 
 // Invite without password → the BE sends a Supabase invitation email and
@@ -78,6 +82,8 @@ export interface InvitePayload {
 export interface InviteResponse extends Perfil {
   emailSent?: boolean;
   tempPassword?: string;
+  // Avisos no-bloqueantes tras crear la cuenta (centro/rol/enlace de personal que quedó pendiente).
+  avisos?: string[];
 }
 
 export interface AssignCenterPayload {

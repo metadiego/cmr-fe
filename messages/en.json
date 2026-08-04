@@ -877,6 +877,11 @@
     "invite": {
       "title": "Invite user",
       "description": "Creates the user and an approved profile in one step.",
+      "persona": "Is this someone already on staff?",
+      "personaHint": "Optional. Links the account to that person and keeps their history.",
+      "personaPlaceholder": "Pick the person (or leave empty)",
+      "personaNadie": "Nobody — new account without a staff record",
+      "personaEnlazando": "Will link to: {nombre} (keeps their history)",
       "email": "Email",
       "name": "First name",
       "lastName": "Last name",
@@ -1132,6 +1137,11 @@
     "codo": "Elbow",
     "cadera": "Hip",
     "hombro": "Shoulder"
+  },
+  "personal": {
+    "ya_tiene_cuenta": "That person already has an account. Unlink it before creating another.",
+    "de_otro_centro": "That person belongs to another center.",
+    "no_existe": "That person is no longer in the list; refresh and try again."
   },
   "estadisticasServicios": {
     "title": "Service Statistics",

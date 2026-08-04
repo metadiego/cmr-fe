@@ -877,6 +877,11 @@
     "invite": {
       "title": "Invitar usuario",
       "description": "Crea el usuario y su perfil aprobado en un paso.",
+      "persona": "¿Es alguien que ya está dado de alta?",
+      "personaHint": "Opcional. Engancha la cuenta a esa persona y conserva su historial.",
+      "personaPlaceholder": "Elige la persona (o déjalo vacío)",
+      "personaNadie": "Nadie — cuenta nueva sin ficha",
+      "personaEnlazando": "Se enlazará a: {nombre} (conserva su historial)",
       "email": "Email",
       "name": "Nombre",
       "lastName": "Apellido",
@@ -1132,6 +1137,11 @@
     "codo": "Codo",
     "cadera": "Cadera",
     "hombro": "Hombro"
+  },
+  "personal": {
+    "ya_tiene_cuenta": "Esa persona ya tiene una cuenta. Desvincúlala antes de crear otra.",
+    "de_otro_centro": "Esa persona pertenece a otro centro.",
+    "no_existe": "Esa persona ya no está en la lista; actualiza y vuelve a intentar."
   },
   "estadisticasServicios": {
     "title": "Estadísticas de Servicios",

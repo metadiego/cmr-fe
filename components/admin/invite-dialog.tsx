@@ -11,7 +11,8 @@ import {
 } from "@/lib/api/profiles";
 import { getCenters } from "@/lib/api/centers";
 import { getRoles } from "@/lib/api/rbac";
-import { apiErrorMessage } from "@/lib/api/errors";
+import { listPersonal, type Personal } from "@/lib/api/personal";
+import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -48,10 +49,14 @@ export function InviteDialog({
 }) {
   const t = useTranslations("admin.invite");
   const tc = useTranslations("admin");
+  const tRoot = useTranslations();
 
   const [email, setEmail] = React.useState("");
   const [nombre, setNombre] = React.useState("");
   const [apellido, setApellido] = React.useState("");
+  // Enlace opcional a una PERSONA ya dada de alta (personal sin cuenta): al invitarla, la cuenta nueva
+  // se engancha a su ficha y conserva su historial. "" = cuenta sin ficha, como antes.
+  const [personalId, setPersonalId] = React.useState("");
   const [accessMode, setAccessMode] = React.useState<AccessMode>("operativo");
   // Invite ampliado: centro + rol en el mismo paso (si no, el invitado nace sin
   // accesos y su primer login es un 403).
@@ -73,6 +78,27 @@ export function InviteDialog({
     [open],
   );
   const roles = rolesState.kind === "ok" ? rolesState.data : [];
+  // Personas dadas de alta SIN cuenta (perfilId === null): candidatas a enganchar. 65 activas en Caguas
+  // → entran en una página; si algún día no cupieran, el BE ofrecerá `?sinCuenta=true`.
+  const { state: personalState } = useResource(
+    () => (open ? listPersonal({ limit: 100 }).then((r) => r.items) : Promise.resolve([] as Personal[])),
+    [open],
+  );
+  const sinCuenta = (personalState.kind === "ok" ? personalState.data : [])
+    .filter((p) => p.perfilId == null && p.activo !== false)
+    .sort((a, b) => `${a.nombre} ${a.apellido ?? ""}`.localeCompare(`${b.nombre} ${b.apellido ?? ""}`));
+
+  // Al elegir una persona: prellenar nombre/apellido (mismos datos, no re-teclear) y fijar su centro
+  // (evita el error "es de otro centro"). Todo queda editable.
+  function pickPersonal(id: string) {
+    setPersonalId(id);
+    const p = sinCuenta.find((x) => x.id === id);
+    if (p) {
+      setNombre(p.nombre ?? "");
+      setApellido(p.apellido ?? "");
+      if (p.clinicId) setCentroId(p.clinicId);
+    }
+  }
 
   // Reset on close so the next open starts fresh (done in the handler, not an
   // effect, to avoid cascading renders).
@@ -81,6 +107,7 @@ export function InviteDialog({
       setEmail("");
       setNombre("");
       setApellido("");
+      setPersonalId("");
       setAccessMode("operativo");
       setCentroId("");
       setRolClave("");
@@ -103,6 +130,8 @@ export function InviteDialog({
         accessMode,
         centroId: centroId || undefined,
         rolClave: rolClave || undefined,
+        // Enganchar a la persona ya dada de alta (conserva su historial). Sin esto, cuenta sin ficha.
+        personalId: personalId || undefined,
         tipoAsignacion: centroId && temporal ? "temporal" : undefined,
         vigenteHasta: centroId && temporal ? vigenteHasta || undefined : undefined,
         redirectTo: `${window.location.origin}/auth/set-password`,
@@ -111,7 +140,9 @@ export function InviteDialog({
       onInvited?.();
       setResult(res);
     } catch (err) {
-      toast.error(apiErrorMessage(err));
+      // Los errores del enlace (persona ya con cuenta / de otro centro / no existe) llegan con labelKey;
+      // toastError los traduce. Llegan ANTES de crear la cuenta → se puede reintentar sin dejar nada a medias.
+      toastError(err, tRoot);
     } finally {
       setSubmitting(false);
     }
@@ -138,6 +169,33 @@ export function InviteDialog({
             </DialogHeader>
 
             <div className="space-y-4">
+              {/* Enlace opcional a una persona ya dada de alta (sin cuenta). Va primero: "¿a quién le doy
+                  acceso?" → así el nombre llega relleno. Si no se elige, es una cuenta nueva sin ficha. */}
+              <Field label={t("persona")} hint={personalId ? undefined : t("personaHint")}>
+                <Select
+                  value={personalId || "__none__"}
+                  onValueChange={(v) => (v === "__none__" ? setPersonalId("") : pickPersonal(v))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("personaPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("personaNadie")}</SelectItem>
+                    {sinCuenta.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.nombre} {p.apellido ?? ""}{p.cargo ? ` · ${p.cargo}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {personalId && (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                    {t("personaEnlazando", {
+                      nombre: (() => { const p = sinCuenta.find((x) => x.id === personalId); return p ? `${p.nombre} ${p.apellido ?? ""}`.trim() : ""; })(),
+                    })}
+                  </p>
+                )}
+              </Field>
               <Field label={t("email")}>
                 <Input
                   type="email"
@@ -264,6 +322,14 @@ export function InviteDialog({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">{t("created")}</p>
+            )}
+
+            {!!result.avisos?.length && (
+              <ul className="mt-2 space-y-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+                {result.avisos.map((a, i) => (
+                  <li key={i}>{tRoot.has(a) ? tRoot(a) : a}</li>
+                ))}
+              </ul>
             )}
 
             <DialogFooter>
