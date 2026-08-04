@@ -669,6 +669,7 @@
     "inventario_recibir": "Receive purchase",
     "inventario_productos": "Products",
     "inventario_recetas": "Compound recipes",
+    "inventario_stock": "Stock",
     "servicios": "Services",
     "servicios_config": "Services Setup",
     "inventario_index": "Inventory",
@@ -1584,6 +1585,34 @@
       "preview": {
         "entrada": "Enters as {qty} in base unit",
         "costo": "· cost/base {costo}"
+      }
+    },
+    "stock": {
+      "title": "Stock",
+      "vista": { "centro": "By center", "consolidado": "Consolidated" },
+      "todosCentros": "All centers",
+      "totalProductos": "{n} products",
+      "buscar": "Search product…",
+      "soloNegativos": "Negatives only",
+      "vencePronto": "Expiring soon",
+      "almacen": "Warehouse",
+      "almacenTodos": "All warehouses",
+      "vencido": "expired",
+      "porVencer": "expiring",
+      "vacioCentro": "This center has no stock recorded.",
+      "vacioConsolidado": "No stock recorded.",
+      "pagina": "Page {page} of {total}",
+      "col": {
+        "producto": "Product",
+        "almacen": "Warehouse",
+        "lote": "Lot / expiry",
+        "cantidad": "Quantity",
+        "total": "Total"
+      },
+      "modo": {
+        "a_la_venta": "leaves when billed",
+        "a_la_entrega": "leaves when applied",
+        "no_descarga": "no discharge"
       }
     },
     "prod": {

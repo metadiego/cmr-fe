@@ -669,6 +669,7 @@
     "inventario_recibir": "Recibir compra",
     "inventario_productos": "Productos",
     "inventario_recetas": "Recetas de compuestos",
+    "inventario_stock": "Existencias",
     "servicios": "Servicios",
     "servicios_config": "Configuración de Servicios",
     "inventario_index": "Inventario",
@@ -1584,6 +1585,34 @@
       "preview": {
         "entrada": "Entra como {qty} en unidad base",
         "costo": "· costo/base {costo}"
+      }
+    },
+    "stock": {
+      "title": "Existencias",
+      "vista": { "centro": "Por centro", "consolidado": "Consolidado" },
+      "todosCentros": "Todos los centros",
+      "totalProductos": "{n} productos",
+      "buscar": "Buscar producto…",
+      "soloNegativos": "Solo negativos",
+      "vencePronto": "Vence pronto",
+      "almacen": "Almacén",
+      "almacenTodos": "Todos los almacenes",
+      "vencido": "vencido",
+      "porVencer": "por vencer",
+      "vacioCentro": "Este centro no tiene existencias registradas.",
+      "vacioConsolidado": "No hay existencias registradas.",
+      "pagina": "Página {page} de {total}",
+      "col": {
+        "producto": "Producto",
+        "almacen": "Almacén",
+        "lote": "Lote / vence",
+        "cantidad": "Cantidad",
+        "total": "Total"
+      },
+      "modo": {
+        "a_la_venta": "sale al facturar",
+        "a_la_entrega": "sale al aplicar",
+        "no_descarga": "no descarga"
       }
     },
     "prod": {
