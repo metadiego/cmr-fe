@@ -23,6 +23,8 @@ import {
   type ItemOpcional,
   buscarPaciente,
   emitirFactura,
+  regenerarDisponibilidad,
+  type RegenerarDisponibilidad,
   type FacturaConItems,
   type FacturaItem,
   type Producto,
@@ -41,7 +43,13 @@ import { buildRecibo } from "@/lib/factura/build-recibo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PrinterIcon } from "@hugeicons/core-free-icons";
+import { PrinterIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -70,6 +78,8 @@ export default function FacturacionPage() {
   const [descartando, setDescartando] = React.useState(false);
   const [cambiarOpen, setCambiarOpen] = React.useState(false);
   const [cabeceraOpen, setCabeceraOpen] = React.useState(false);
+  const [regenOpen, setRegenOpen] = React.useState(false);
+  const { can } = useCan();
 
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
@@ -225,8 +235,32 @@ export default function FacturacionPage() {
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {tRoot("receipt.print")}
           </Button>
+          {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
+              EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
+          {estado === "emitida" && can("factura.reparar") && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="no-print size-9" aria-label={t("acciones")}>
+                  <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setRegenOpen(true); }}>
+                  {t("regen.accion")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
+
+      <RegenerarDisponibilidadDialog
+        open={regenOpen}
+        onOpenChange={setRegenOpen}
+        facturaId={id}
+        centro={centro}
+        onDone={refetch}
+      />
 
       <CambiarPacienteDialog
         open={cambiarOpen}
@@ -606,6 +640,91 @@ function Editor({
         />
       )}
     </div>
+  );
+}
+
+// Confirmación + resultado EN PALABRAS de "Regenerar disponibilidad". Fase 1: explica qué hace y pide
+// confirmar (acción deliberada y peligrosa). Fase 2: traduce la respuesta del BE a lenguaje humano
+// (añadidas / nada faltaba / sugerencias de config), nunca JSON. Idempotente → repetir es inofensivo.
+function RegenerarDisponibilidadDialog({
+  open,
+  onOpenChange,
+  facturaId,
+  centro,
+  onDone,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  facturaId: string;
+  centro?: string;
+  onDone?: () => void | Promise<unknown>;
+}) {
+  const t = useTranslations("facturacion");
+  const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  const [busy, setBusy] = React.useState(false);
+  const [res, setRes] = React.useState<RegenerarDisponibilidad | null>(null);
+
+  function handleOpenChange(next: boolean) {
+    if (!next) { setRes(null); setBusy(false); }
+    onOpenChange(next);
+  }
+  async function run() {
+    setBusy(true);
+    try {
+      const r = await regenerarDisponibilidad(facturaId, centro);
+      setRes(r);
+      await onDone?.();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>{t("regen.titulo")}</DialogTitle></DialogHeader>
+        {res === null ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">{t("regen.explica")}</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => handleOpenChange(false)}>{tc("cancel")}</Button>
+              <Button onClick={run} disabled={busy}>{busy ? t("regen.ejecutando") : t("regen.confirmar")}</Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3 text-sm">
+            {res.creados > 0 ? (
+              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-emerald-700 dark:text-emerald-400">
+                <p className="font-medium">{t("regen.creados", { n: res.creados })}</p>
+                <ul className="mt-1 list-disc pl-5">
+                  {res.detalle.map((d, i) => (
+                    <li key={i}>{t("regen.linea", { sesiones: d.sesiones ?? 0, sku: d.sku ?? "—" })}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="rounded-md border bg-muted/40 px-3 py-2 text-muted-foreground">{t("regen.nada")}</p>
+            )}
+            {!!res.sugerencias?.length && (
+              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-700 dark:text-amber-400">
+                <p className="font-medium">{t("regen.sugerenciasTitulo")}</p>
+                <ul className="mt-1 list-disc pl-5">
+                  {res.sugerencias.map((s, i) => (
+                    <li key={i}>{t("regen.sugerencia", { sku: s.sku ?? "—" })}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button onClick={() => handleOpenChange(false)}>{t("regen.listo")}</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

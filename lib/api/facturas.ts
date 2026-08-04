@@ -183,6 +183,19 @@ export function descartarFactura(facturaId: string, centroId?: string): Promise<
   return apiFetch<void>(`/facturas/${facturaId}`, { method: "DELETE" }, centroId);
 }
 
+// Regenerar disponibilidad de una factura EMITIDA (reparar tras corregir la config del kit): recalcula las
+// terapias que el kit debe dar y AÑADE solo las que falten (no toca lo ya existente ni entregado; idempotente;
+// 400 FACTURA_NO_EMITIDA si no está emitida). `sugerencias` = componentes entregados SIN servicio anclado
+// (pista, no fallo). Peligroso → RBAC factura.reparar. Contrato: HANDOFF-regenerar-disponibilidad (BE #246/#247).
+export type RegenerarDisponibilidad = {
+  creados: number;
+  detalle: { sku?: string | null; sesiones?: number | null }[];
+  sugerencias: { productoId?: string | null; sku?: string | null; motivo?: string | null }[];
+};
+export function regenerarDisponibilidad(facturaId: string, centroId?: string): Promise<RegenerarDisponibilidad> {
+  return apiFetch<RegenerarDisponibilidad>(`/facturas/${facturaId}/regenerar-disponibilidad`, { method: "POST" }, centroId);
+}
+
 // Proyección del catálogo facturable: producto + precio resuelto por centro + gravado (default IVU).
 // `unidadesPorEnvase` (de NTPRODUCTOS.CapsulasXUni) y `diasTratamiento` (por producto) vienen ya en
 // ProductoEntity (BE en prod) y alimentan el autocálculo Dosis→Cantidad del POS. null → cantidad manual.
