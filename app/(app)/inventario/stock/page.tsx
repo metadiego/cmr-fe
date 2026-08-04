@@ -57,14 +57,18 @@ export default function StockPage() {
     [tenantCentro],
   );
   const almacenes = almacenesRes.state.kind === "ok" ? almacenesRes.state.data : [];
+  // Almacén EFECTIVO (derivado, sin efecto): si el almacén guardado no pertenece al centro actual (p. ej.
+  // se cambió de Caguas a Bayamón), cae a "" (Todos). Evita el fallo de heredar el almacén de otro centro
+  // → 0 filas, y que el chip quede en blanco filtrando en silencio. Cada centro tiene su propio almacén.
+  const almacenValido = almacenId && almacenes.some((a) => a.id === almacenId) ? almacenId : "";
 
   // Datos de la vista activa.
   const resumenRes = useResource<Paginated<StockResumenFila>>(
     () =>
       vista === "centro" && tenantCentro
-        ? getStockResumen({ q: qApplied, almacenId: almacenId || undefined, soloNegativos, soloPorVencer, page, limit: 50 }, tenantCentro)
+        ? getStockResumen({ q: qApplied, almacenId: almacenValido || undefined, soloNegativos, soloPorVencer, page, limit: 50 }, tenantCentro)
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 50 } }),
-    [vista, tenantCentro, qApplied, almacenId, soloNegativos, soloPorVencer, page],
+    [vista, tenantCentro, qApplied, almacenValido, soloNegativos, soloPorVencer, page],
   );
   const consolRes = useResource<Paginated<StockConsolidadoFila>>(
     () =>
@@ -111,7 +115,7 @@ export default function StockPage() {
         {gate.puedeCambiar && (
           <Select
             value={centroSel === "" ? TODOS : centroSel}
-            onValueChange={(v) => { setCentroSelRaw(v === TODOS ? "" : v); resetPage(); }}
+            onValueChange={(v) => { setCentroSelRaw(v === TODOS ? "" : v); setAlmacenId(""); resetPage(); }}
           >
             <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -137,7 +141,7 @@ export default function StockPage() {
           <Chip active={soloPorVencer} onClick={() => { setSoloPorVencer((s) => !s); resetPage(); }}>{t("vencePronto")}</Chip>
         )}
         {vista === "centro" && almacenes.length > 0 && (
-          <Select value={almacenId || TODOS} onValueChange={(v) => { setAlmacenId(v === TODOS ? "" : v); resetPage(); }}>
+          <Select value={almacenValido || TODOS} onValueChange={(v) => { setAlmacenId(v === TODOS ? "" : v); resetPage(); }}>
             <SelectTrigger className="h-9 w-48"><SelectValue placeholder={t("almacen")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value={TODOS}>{t("almacenTodos")}</SelectItem>
