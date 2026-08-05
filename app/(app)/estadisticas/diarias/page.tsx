@@ -22,20 +22,28 @@ function fmtFecha(iso: string) {
   return d && m && y ? `${d}/${m}/${y}` : iso;
 }
 
-// CSS de la ventana de impresión: tarjeta limpia (sin menú ni botones), tamaño carta, tinta negra.
+// CSS de la ventana de impresión/envío: NO la tabla ancha de pantalla (fea), sino un RECIBO angosto,
+// centrado y elegante (como una factura, un poco más ancho): columna ~108mm, líneas finas en vez de
+// rejilla, encabezado centrado, ingreso con regla. Tinta negra. Se aplica sobre el mismo markup (clases
+// .card/.blk/.am/.ingreso/th.r/td.r/.fecha) que ya trae la tarjeta.
 const PRINT_CSS = `
-*{box-sizing:border-box}@page{size:letter;margin:14mm}
-body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:12px}
-.card{page-break-inside:avoid;margin-bottom:22px}
-h2{font-size:18px;margin:0}
-.fecha{font-size:13px;color:#333;margin-bottom:10px}
-.blk{margin:10px 0}
-.blk h3{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#555;margin:0 0 3px}
+*{box-sizing:border-box}
+@page{size:letter;margin:16mm}
+body{font-family:"Helvetica Neue",system-ui,-apple-system,Arial,sans-serif;color:#111;background:#fff;margin:0;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.card{width:108mm;max-width:100%;margin:0 auto 14mm;border:1px solid #e4e4e4;border-radius:10px;padding:20px 22px;page-break-inside:avoid}
+.text-center{text-align:center}
+h2{font-size:16px;font-weight:700;letter-spacing:.01em;margin:0 0 2px}
+.fecha{font-size:12px;color:#777;margin-bottom:14px}
+.blk{margin:14px 0}
+.blk h3{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#9a9a9a;margin:0 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}
+.am{display:flex;gap:16px;font-size:13px}
+.am .ml-auto{margin-left:auto;font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{border:1px solid #bbb;padding:3px 8px;text-align:left}
-th.r,td.r{text-align:right}
-.am{font-size:14px}
-.ingreso{margin-top:10px;display:flex;justify-content:space-between;border-top:2px solid #000;padding-top:6px;font-weight:700;font-size:14px}
+th{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#9a9a9a;text-align:left;padding:0 0 5px}
+td{padding:5px 0;border-top:1px solid #f2f2f2}
+th.r,td.r,.text-right{text-align:right}
+.font-medium{font-weight:500}.font-semibold{font-weight:600}.tabular-nums{font-variant-numeric:tabular-nums}
+.ingreso{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;border-top:2px solid #111;padding-top:9px;font-weight:700;font-size:15px}
 `;
 
 export default function EstadisticasDiariasPage() {
