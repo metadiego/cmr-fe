@@ -1413,6 +1413,10 @@
     "allStates": "All statuses",
     "from": "From",
     "to": "To",
+    "hoyChip": "Today · {fecha}",
+    "verTodo": "All dates",
+    "hoyBtn": "Today",
+    "emptyHoy": "No billing recorded today.",
     "actions": {
       "menu": "Actions",
       "view": "View / print",

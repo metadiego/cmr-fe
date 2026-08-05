@@ -25,6 +25,11 @@ import {
 const ALL = "__all__";
 const ESTADOS = ["borrador", "emitida", "anulada", "devuelta_parcial", "devuelta_total"];
 const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
+// Fecha LOCAL del navegador (Puerto Rico), no UTC: a las 20:00 PR ya es el día siguiente en UTC y la
+// pantalla mostraría el día equivocado. getFullYear/Month/Date usan la zona del navegador.
+function isoDay(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("facturacionList.estado");
@@ -47,10 +52,14 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const router = useRouter();
   const params = useSearchParams();
 
+  // Abrir filtrando el DÍA DE HOY (fecha local): la caja se trabaja por el día, no por el histórico. Si la
+  // URL ya trae un rango (el usuario lo cambió), se respeta. Handoff facturacion-filtro-dia-actual.
+  const hoy = isoDay(new Date());
   const [q, setQ] = React.useState(params.get("q") ?? "");
   const [estado, setEstado] = React.useState(params.get("estado") ?? "");
-  const [desde, setDesde] = React.useState(params.get("desde") ?? "");
-  const [hasta, setHasta] = React.useState(params.get("hasta") ?? "");
+  const [desde, setDesde] = React.useState(params.get("desde") ?? hoy);
+  const [hasta, setHasta] = React.useState(params.get("hasta") ?? hoy);
+  const rangoEsHoy = desde === hoy && hasta === hoy;
 
   React.useEffect(() => {
     const sp = new URLSearchParams();
@@ -136,6 +145,21 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             </Select>
             <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} aria-label={t("from")} className="h-8 w-[150px]" />
             <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label={t("to")} className="h-8 w-[150px]" />
+            {rangoEsHoy ? (
+              // Se ve que está filtrando por hoy + atajo para ampliar a todas las fechas (no lista corta muda).
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                {t("hoyChip", { fecha: formatFechaSolo(hoy) })}
+                <button type="button" onClick={() => { setDesde(""); setHasta(""); }} className="hover:underline">{t("verTodo")}</button>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setDesde(hoy); setHasta(hoy); }}
+                className="rounded-full border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
+              >
+                {t("hoyBtn")}
+              </button>
+            )}
           </ListToolbar>
 
           <div className="overflow-x-auto rounded-xl border">
@@ -156,7 +180,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                   <tr><td colSpan={columnas.length + 1} className="px-3 py-8 text-center text-destructive">{tRoot("common.error")}</td></tr>
                 )}
                 {state.kind === "ok" && filas.length === 0 && (
-                  <tr><td colSpan={columnas.length + 1} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>
+                  <tr><td colSpan={columnas.length + 1} className="px-3 py-8 text-center text-muted-foreground">{rangoEsHoy ? t("emptyHoy") : t("empty")}</td></tr>
                 )}
                 {filas.map((f) => (
                   <tr key={f.id} className="cursor-pointer hover:bg-muted/30" onClick={() => router.push(detalleHref(f.id))}>

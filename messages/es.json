@@ -1413,6 +1413,10 @@
     "allStates": "Todos los estados",
     "from": "Desde",
     "to": "Hasta",
+    "hoyChip": "Hoy · {fecha}",
+    "verTodo": "Todas las fechas",
+    "hoyBtn": "Hoy",
+    "emptyHoy": "No hay facturación registrada hoy.",
     "actions": {
       "menu": "Acciones",
       "view": "Ver / imprimir",
