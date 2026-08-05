@@ -1160,7 +1160,11 @@
     "servicios": "Specialized services",
     "ingresoBruto": "Total gross income",
     "sinActividad": "No activity recorded this day.",
-    "col": { "servicio": "Service", "aplicados": "Applied", "vendidos": "Sold" },
+    "col": {
+      "servicio": "Service",
+      "aplicados": "Applied",
+      "vendidos": "Sold"
+    },
     "tip": {
       "nuevas": "First-time attended appointments (what happened, not what was scheduled).",
       "seguimientos": "Follow-up appointments attended.",
@@ -1349,6 +1353,12 @@
       "totCompras": "Purchases",
       "totComprado": "Purchased",
       "totEntregadas": "Delivered"
+    },
+    "dosis": {
+      "quedan": "{n} left",
+      "sinSaldo": "no balance",
+      "otras": "Other doses",
+      "avisoSinSaldo": "This dose has no sessions left. It will be applied anyway and go negative."
     }
   },
   "programarCitas": {
@@ -1617,7 +1627,10 @@
     },
     "stock": {
       "title": "Stock",
-      "vista": { "centro": "By center", "consolidado": "Consolidated" },
+      "vista": {
+        "centro": "By center",
+        "consolidado": "Consolidated"
+      },
       "todosCentros": "All centers",
       "totalProductos": "{n} products",
       "buscar": "Search product…",

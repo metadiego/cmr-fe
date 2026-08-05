@@ -1160,7 +1160,11 @@
     "servicios": "Servicios especializados",
     "ingresoBruto": "Ingreso bruto total",
     "sinActividad": "No hubo actividad registrada este día.",
-    "col": { "servicio": "Servicio", "aplicados": "Aplicados", "vendidos": "Vendidos" },
+    "col": {
+      "servicio": "Servicio",
+      "aplicados": "Aplicados",
+      "vendidos": "Vendidos"
+    },
     "tip": {
       "nuevas": "Citas atendidas por primera vez (lo que pasó, no lo agendado).",
       "seguimientos": "Citas de seguimiento atendidas.",
@@ -1349,6 +1353,12 @@
       "totCompras": "Compras",
       "totComprado": "Compradas",
       "totEntregadas": "Entregadas"
+    },
+    "dosis": {
+      "quedan": "quedan {n}",
+      "sinSaldo": "sin saldo",
+      "otras": "Otras dosis",
+      "avisoSinSaldo": "Ya no le quedan sesiones de esta dosis. Se aplicará igual y quedará en negativo."
     }
   },
   "programarCitas": {
@@ -1617,7 +1627,10 @@
     },
     "stock": {
       "title": "Existencias",
-      "vista": { "centro": "Por centro", "consolidado": "Consolidado" },
+      "vista": {
+        "centro": "Por centro",
+        "consolidado": "Consolidado"
+      },
       "todosCentros": "Todos los centros",
       "totalProductos": "{n} productos",
       "buscar": "Buscar producto…",

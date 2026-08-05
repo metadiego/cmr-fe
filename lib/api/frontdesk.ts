@@ -263,6 +263,28 @@ export function getDisponibilidadServicio(
   );
 }
 
+// Saldo de entrega del PACIENTE por producto/dosis (GET /facturas/pendientes-entrega?pacienteId).
+// Cada sobre comprado (aún con sesiones pendientes) del paciente, en TODOS sus grupos. Alimenta el
+// select de DOSIS del frontdesk: cruzando `productoId` con el `value` de las opciones (mismo id) se
+// muestra cuánto le queda de cada dosis que compró. Contrato: HANDOFF-dosis-con-saldo-del-paciente /
+// cmr-be/docs/specs/frontdesk-consumo-por-dosis.md. NO sumar entre sobres: cada dosis es su propio sobre.
+export type PendienteEntrega = {
+  productoId: string;
+  productoNombre?: string | null;
+  pendiente?: number | null; // sesiones que le quedan de esta dosis (puede ser 0 → agotada)
+  sesionesTotales?: number | null;
+  grupoClave?: string | null;
+};
+export function getPendientesEntrega(pacienteId: string, centroId?: string): Promise<PendienteEntrega[]> {
+  return apiFetch<unknown>(
+    `/facturas/pendientes-entrega?pacienteId=${encodeURIComponent(pacienteId)}`,
+    {},
+    centroId,
+  ).then((r) =>
+    Array.isArray(r) ? (r as PendienteEntrega[]) : (((r as { items?: PendienteEntrega[] })?.items) ?? []),
+  );
+}
+
 // Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey) +
 // set tipado (PR #141: SetNurseStatusDto — statusTipoId null = reset).
 export type NurseStatusTipo = components["schemas"]["NurseStatusTipoEntity"];

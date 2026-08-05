@@ -17,6 +17,8 @@ import {
   ajustarDisponibilidad,
   paqueteTotales,
   getComprasPaciente,
+  getPendientesEntrega,
+  type PendienteEntrega,
   type ComprasPaciente,
   type CompraLinea,
   type HistorialSesion,
@@ -67,7 +69,10 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -369,6 +374,46 @@ export function FrontdeskBoard() {
     // el board VIEJO (láser tiene fd_tecnico) contra la pestaña nueva (vitc sin fd_tecnico) → 404 espurio.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, gate.centro]);
+
+  // Saldo de dosis por paciente (para enriquecer el select de DOSIS): cuántas sesiones le quedan de cada
+  // dosis que compró. Solo se pide si el tablero TIENE una columna de dosis (optionsSource productos_grupo);
+  // se pide por paciente (endpoint 1-a-1) para los pacientes visibles con sesión y se REFRESCA cuando el
+  // board se recarga (asistir consume una) o cambia la fecha — ambas cambian la ref de `board`/`sesiones`.
+  const hayDosis = React.useMemo(
+    () =>
+      (board?.columnas ?? []).some(
+        (c) => (c.render as { optionsSource?: string } | null)?.optionsSource === "productos_grupo",
+      ),
+    [board],
+  );
+  const [saldoByPaciente, setSaldoByPaciente] = React.useState<Record<string, PendienteEntrega[]>>({});
+  React.useEffect(() => {
+    const centro = gate.centro;
+    if (!centro) return;
+    // Sin columna de dosis → ids vacío → el .then limpia el mapa (async, nunca setState síncrono en efecto).
+    const ids = hayDosis
+      ? Array.from(
+          new Set(
+            (board?.filas ?? [])
+              .map((f) => sesiones.get(f.id)?.pacienteId)
+              .filter((x): x is string => !!x),
+          ),
+        )
+      : [];
+    let active = true;
+    Promise.all(
+      ids.map((id) =>
+        getPendientesEntrega(id, centro)
+          .then((r) => [id, r] as const)
+          .catch(() => [id, [] as PendienteEntrega[]] as const),
+      ),
+    ).then((pairs) => {
+      if (active) setSaldoByPaciente(Object.fromEntries(pairs));
+    });
+    return () => {
+      active = false;
+    };
+  }, [hayDosis, gate.centro, board, sesiones]);
 
   // Estado de una fila: PREFERIR el `estado` top-level que ahora manda el BE en cada fila (PR #195, la
   // verdad del flujo), con respaldo a la columna proyectada `fd_estado` y a la entidad de sesión.
@@ -673,6 +718,7 @@ export function FrontdeskBoard() {
                       tablero={tabEfectivo}
                       fecha={fecha}
                       optionsByCol={optionsByCol}
+                      saldoDosis={saldoByPaciente[String(sesiones.get(f.id)?.pacienteId ?? "")] ?? []}
                       centro={gate.centro}
                       sinSaldo={sinSaldoIds.has(f.id)}
                       canReparar={can("frontdesk.reparar")}
@@ -763,6 +809,7 @@ function FilaSesion({
   tablero,
   fecha,
   optionsByCol,
+  saldoDosis,
   centro,
   sinSaldo,
   canReparar,
@@ -781,6 +828,7 @@ function FilaSesion({
   tablero: string;
   fecha: string;
   optionsByCol: Record<string, Opcion[]>;
+  saldoDosis: PendienteEntrega[];
   centro?: string;
   sinSaldo: boolean;
   canReparar: boolean;
@@ -905,7 +953,28 @@ function FilaSesion({
       const delBoard = ops.find((o) => o.value === raw || o.label === raw)?.value ?? "";
       // El valor MOSTRADO: el optimista local si existe, si no el del board (normalizado a opción).
       const shown = pendSelect[c.clave] ?? delBoard;
-      const label = ops.find((o) => o.value === shown)?.label ?? (raw || undefined);
+      // DOSIS (optionsSource productos_grupo): enriquecer las opciones con el SALDO de ESTE paciente.
+      // El id de la dosis (value de la opción) == productoId del sobre pendiente → se cruzan directo.
+      // Compradas primero, con "— quedan N" (o "— sin saldo" si se agotó); el resto del catálogo va en
+      // un grupo "Otras dosis" sin número. Nunca se esconde ni se bloquea una dosis. Contrato del handoff.
+      const esDosis = (c.render as { optionsSource?: string } | null)?.optionsSource === "productos_grupo";
+      const saldoMap = new Map<string, PendienteEntrega>();
+      if (esDosis) for (const s of saldoDosis) if (s.productoId) saldoMap.set(String(s.productoId), s);
+      const agotada = (val: string) => {
+        const s = saldoMap.get(val);
+        return !!s && Number(s.pendiente ?? 0) <= 0;
+      };
+      const etiquetaDosis = (o: Opcion) => {
+        const s = saldoMap.get(o.value);
+        if (!s) return o.label;
+        const n = Number(s.pendiente ?? 0);
+        return `${o.label} — ${n > 0 ? t("dosis.quedan", { n }) : t("dosis.sinSaldo")}`;
+      };
+      const compradas = esDosis ? ops.filter((o) => saldoMap.has(o.value)) : [];
+      const otras = esDosis ? ops.filter((o) => !saldoMap.has(o.value)) : ops;
+      const conSaldo = esDosis && compradas.length > 0;
+      const shownOpt = ops.find((o) => o.value === shown);
+      const label = shownOpt ? (esDosis ? etiquetaDosis(shownOpt) : shownOpt.label) : (raw || undefined);
       // Gate data-driven: si la columna declara render.requiereEstado, el select se deshabilita hasta que
       // la sesión alcanzó ese estado (p. ej. técnico bloqueado hasta 'presente'). Genérico, sin hardcode.
       const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado;
@@ -916,6 +985,8 @@ function FilaSesion({
           disabled={busy || cancelada || ops.length === 0 || estadoNoCumplido}
           onValueChange={(valor) => {
             setPendSelect((p) => ({ ...p, [c.clave]: valor })); // reflejo instantáneo
+            // Dosis agotada: NO bloquear (lo decidió el dueño) — avisar que se aplicará en negativo.
+            if (esDosis && agotada(valor)) toast.warning(t("dosis.avisoSinSaldo"));
             run(async () => {
               try {
                 return await editarCelda(
@@ -938,9 +1009,30 @@ function FilaSesion({
             <SelectValue placeholder={ops.length ? t("elegir") : t("sinOpciones")}>{label}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {ops.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
+            {conSaldo ? (
+              <>
+                {/* Las dosis que compró, primero, con su saldo. */}
+                {compradas.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{etiquetaDosis(o)}</SelectItem>
+                ))}
+                {/* El resto del catálogo, en un grupo aparte y sin número (se pueden elegir igual). */}
+                {otras.length > 0 && (
+                  <>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel>{t("dosis.otras")}</SelectLabel>
+                      {otras.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </>
+                )}
+              </>
+            ) : (
+              ops.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       );
