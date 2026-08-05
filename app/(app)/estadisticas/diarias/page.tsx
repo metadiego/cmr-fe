@@ -22,40 +22,28 @@ function fmtFecha(iso: string) {
   return d && m && y ? `${d}/${m}/${y}` : iso;
 }
 
-// CSS de la ventana de impresión/envío. Diseño PREMIUM tipo membrete-recibo: logo, título serif, regla de
-// acento (indigo sobrio), la atención médica como tres estadísticas centradas con divisores, tabla de
-// líneas finas y el INGRESO como total protagonista. Se aplica sobre el mismo markup de la tarjeta
-// (.card/.blk/.am/.ingreso/th.r/td.r/.fecha/.logo/.solo-print). print-color-adjust:exact para que el
-// acento no salga lavado.
-//
-// BACKUP del diseño "recibo simple" anterior (por si el dueño prefiere volver; también en git commit 5db1514):
-//   .card{width:108mm;border:1px solid #e4e4e4;border-radius:10px;padding:20px 22px}
-//   h2{font-size:16px} .blk h3{color:#9a9a9a;border-bottom:1px solid #eee} .am{gap:16px} .am .ml-auto{margin-left:auto}
-//   .ingreso{border-top:2px solid #111;font-size:15px}
+// CSS de la ventana de impresión/envío: NO la tabla ancha de pantalla (fea), sino un RECIBO angosto,
+// centrado y elegante (como una factura, un poco más ancho): columna ~108mm, líneas finas en vez de
+// rejilla, encabezado centrado, ingreso con regla. Tinta negra. Se aplica sobre el mismo markup (clases
+// .card/.blk/.am/.ingreso/th.r/td.r/.fecha) que ya trae la tarjeta.
 const PRINT_CSS = `
 *{box-sizing:border-box}
 @page{size:letter;margin:16mm}
-body{font-family:"Helvetica Neue",system-ui,-apple-system,Arial,sans-serif;color:#1a1a1a;background:#fff;margin:0;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.card{width:114mm;max-width:100%;margin:0 auto 16mm;border:1px solid #e7e7ea;border-radius:14px;padding:26px 28px 22px;page-break-inside:avoid;box-shadow:none}
-.solo-print{display:block}
-.logo{display:block;height:44px;width:auto;object-fit:contain;margin:0 auto 10px}
-.text-center{text-align:center;padding-bottom:14px;border-bottom:2px solid #3b3b6d}
-h2{font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:700;letter-spacing:.01em;margin:0 0 4px}
-.fecha{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a9aa5;margin:0}
-.blk{margin:18px 0}
-.blk h3{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#3b3b6d;margin:0 0 9px}
-.am{display:flex;font-size:12px}
-.am>span{flex:1;text-align:center;padding:2px 6px;border-left:1px solid #eee}
-.am>span:first-child{border-left:none}
-.am .ml-auto{margin-left:0;font-weight:700}
+body{font-family:"Helvetica Neue",system-ui,-apple-system,Arial,sans-serif;color:#111;background:#fff;margin:0;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.card{width:108mm;max-width:100%;margin:0 auto 14mm;border:1px solid #e4e4e4;border-radius:10px;padding:20px 22px;page-break-inside:avoid}
+.text-center{text-align:center}
+h2{font-size:16px;font-weight:700;letter-spacing:.01em;margin:0 0 2px}
+.fecha{font-size:12px;color:#777;margin-bottom:14px}
+.blk{margin:14px 0}
+.blk h3{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#9a9a9a;margin:0 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}
+.am{display:flex;gap:16px;font-size:13px}
+.am .ml-auto{margin-left:auto;font-weight:700}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9a9aa5;text-align:left;padding:0 0 7px;border-bottom:1px solid #ededf0}
-td{padding:6px 0;border-bottom:1px solid #f4f4f6}
+th{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#9a9a9a;text-align:left;padding:0 0 5px}
+td{padding:5px 0;border-top:1px solid #f2f2f2}
 th.r,td.r,.text-right{text-align:right}
 .font-medium{font-weight:500}.font-semibold{font-weight:600}.tabular-nums{font-variant-numeric:tabular-nums}
-.ingreso{display:flex;justify-content:space-between;align-items:baseline;margin-top:20px;border-top:1px solid #3b3b6d;padding-top:12px}
-.ingreso>span:first-child{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3b3b6d}
-.ingreso>span:last-child{font-size:20px;font-weight:800;color:#1a1a1a}
+.ingreso{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;border-top:2px solid #111;padding-top:9px;font-weight:700;font-size:15px}
 `;
 
 export default function EstadisticasDiariasPage() {
@@ -119,8 +107,7 @@ export default function EstadisticasDiariasPage() {
     if (!el || typeof window === "undefined") return;
     const w = window.open("", "_blank", "width=900,height=1100");
     if (!w) return;
-    // <base> para que las rutas relativas (el logo /img/logo_cmr.png) resuelvan en la ventana nueva.
-    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><base href="${window.location.origin}/"><title>${t("title")} ${rangoLabel}</title><style>${PRINT_CSS}</style></head><body>${el.innerHTML}</body></html>`);
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${t("title")} ${rangoLabel}</title><style>${PRINT_CSS}</style></head><body>${el.innerHTML}</body></html>`);
     w.document.close();
     w.focus();
     const go = () => w.print();
@@ -193,9 +180,6 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
   return (
     <div className="card rounded-xl border bg-card p-6">
       <div className="text-center">
-        {/* Membrete con logo SOLO en la versión impresa/enviada (oculto en pantalla vía .solo-print). */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/img/logo_cmr.png" alt="" className="solo-print logo" />
         <h2 className="text-xl font-bold">C.M.R. — {centro}</h2>
         <div className="fecha text-sm text-muted-foreground">{fecha}</div>
       </div>
