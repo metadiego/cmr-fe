@@ -701,7 +701,8 @@
     "requeridos": "Campos requeridos",
     "requisitos_servicio": "Requisitos por servicio",
     "configFormatos": "Formatos de terapia",
-    "estadisticas_servicios": "Estadísticas de Servicios"
+    "estadisticas_servicios": "Estadísticas de Servicios",
+    "estadisticas_diarias": "Estadísticas diarias"
   },
   "admin": {
     "title": "Administración",
@@ -1143,6 +1144,29 @@
     "ya_tiene_cuenta": "Esa persona ya tiene una cuenta. Desvincúlala antes de crear otra.",
     "de_otro_centro": "Esa persona pertenece a otro centro.",
     "no_existe": "Esa persona ya no está en la lista; actualiza y vuelve a intentar."
+  },
+  "estadisticasDiarias": {
+    "title": "Estadísticas diarias",
+    "help": "El cierre del día: atención médica, servicios aplicados/vendidos e ingreso bruto. Elige la fecha y pulsa Generar.",
+    "from": "Desde",
+    "to": "Hasta",
+    "generar": "Generar",
+    "whatsapp": "WhatsApp",
+    "correo": "Correo",
+    "copiar": "Copiar",
+    "copiado": "Reporte copiado",
+    "atencionMedica": "Atención médica",
+    "total": "Total",
+    "servicios": "Servicios especializados",
+    "ingresoBruto": "Ingreso bruto total",
+    "sinActividad": "No hubo actividad registrada este día.",
+    "col": { "servicio": "Servicio", "aplicados": "Aplicados", "vendidos": "Vendidos" },
+    "tip": {
+      "nuevas": "Citas atendidas por primera vez (lo que pasó, no lo agendado).",
+      "seguimientos": "Citas de seguimiento atendidas.",
+      "aplicados": "Sesiones entregadas hoy en el frontdesk (el trabajo hecho).",
+      "vendidos": "Sesiones que prometieron las facturas del día (lo cobrado). No tiene que coincidir con aplicados."
+    }
   },
   "estadisticasServicios": {
     "title": "Estadísticas de Servicios",

@@ -41,6 +41,28 @@ export type EstadisticasServicios = {
   servicios: EstServicio[]; // todos los del catálogo; pintar como pestaña los de sesiones > 0
 };
 
+// Estadísticas DIARIAS (el cierre del gerente, BE PR #260). Tres bloques + total, por centro de la sesión.
+// `nuevas`/`seguimientos` = citas ATENDIDAS (no agendadas); `aplicados` = sesiones ENTREGADAS ese día;
+// `vendidos` = sesiones que prometieron las FACTURAS del día (no coinciden, y está bien). `ingresoBruto`
+// sale del MISMO sitio que el cuadre de caja → NO recalcular sumando la tabla (la tabla cuenta sesiones).
+// Solo vienen servicios con actividad (el BE no manda ceros); orden por nombre → respetar.
+export type EstDiariaServicio = { clave: string; nombre: string; aplicados: number; vendidos: number };
+export type EstadisticasDiarias = {
+  atencionMedica: { nuevas: number; seguimientos: number; total: number };
+  servicios: EstDiariaServicio[];
+  ingresoBruto: number;
+};
+// GET /estadisticas/diarias?desde=YYYY-MM-DD[&hasta] — `hasta` opcional (por defecto = `desde`, un día).
+export function getEstadisticasDiarias(
+  desde: string,
+  hasta?: string,
+  centroId?: string | null,
+): Promise<EstadisticasDiarias> {
+  const sp = new URLSearchParams({ desde });
+  if (hasta) sp.set("hasta", hasta);
+  return apiFetch<EstadisticasDiarias>(`/estadisticas/diarias?${sp.toString()}`, {}, centroId);
+}
+
 // GET /estadisticas/servicios?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — general + todas las pestañas en una.
 export function getEstadisticasServicios(
   desde: string,

@@ -701,7 +701,8 @@
     "requeridos": "Required fields",
     "requisitos_servicio": "Service requirements",
     "configFormatos": "Therapy formats",
-    "estadisticas_servicios": "Service Statistics"
+    "estadisticas_servicios": "Service Statistics",
+    "estadisticas_diarias": "Daily statistics"
   },
   "admin": {
     "title": "Administration",
@@ -1143,6 +1144,29 @@
     "ya_tiene_cuenta": "That person already has an account. Unlink it before creating another.",
     "de_otro_centro": "That person belongs to another center.",
     "no_existe": "That person is no longer in the list; refresh and try again."
+  },
+  "estadisticasDiarias": {
+    "title": "Daily statistics",
+    "help": "The day's close: medical attention, services applied/sold, and gross income. Pick the date and press Generate.",
+    "from": "From",
+    "to": "To",
+    "generar": "Generate",
+    "whatsapp": "WhatsApp",
+    "correo": "Email",
+    "copiar": "Copy",
+    "copiado": "Report copied",
+    "atencionMedica": "Medical attention",
+    "total": "Total",
+    "servicios": "Specialized services",
+    "ingresoBruto": "Total gross income",
+    "sinActividad": "No activity recorded this day.",
+    "col": { "servicio": "Service", "aplicados": "Applied", "vendidos": "Sold" },
+    "tip": {
+      "nuevas": "First-time attended appointments (what happened, not what was scheduled).",
+      "seguimientos": "Follow-up appointments attended.",
+      "aplicados": "Sessions delivered today at the frontdesk (work done).",
+      "vendidos": "Sessions promised by today's invoices (what was billed). Need not match applied."
+    }
   },
   "estadisticasServicios": {
     "title": "Service Statistics",
