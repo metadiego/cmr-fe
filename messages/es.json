@@ -1515,7 +1515,17 @@
     "nuevaVenta": "Nueva venta",
     "empty": "Sin facturas",
     "ver": "Ver",
-    "devoluciones": "Devoluciones"
+    "devoluciones": "Devoluciones",
+    "colNum": "Nº de línea",
+    "totales": {
+      "facturas": "{n} facturas",
+      "facturasN": "facturas",
+      "cortesias": "cortesías",
+      "cienDescuento": "100% descuento",
+      "cobradas": "cobradas",
+      "pagina": "Página",
+      "rango": "Rango"
+    }
   },
   "inventario": {
     "prov": {

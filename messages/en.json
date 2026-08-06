@@ -1515,7 +1515,17 @@
     "nuevaVenta": "New sale",
     "empty": "No invoices",
     "ver": "View",
-    "devoluciones": "Returns"
+    "devoluciones": "Returns",
+    "colNum": "Line no.",
+    "totales": {
+      "facturas": "{n} invoices",
+      "facturasN": "invoices",
+      "cortesias": "courtesies",
+      "cienDescuento": "100% off",
+      "cobradas": "charged",
+      "pagina": "Page",
+      "rango": "Range"
+    }
   },
   "inventario": {
     "prov": {

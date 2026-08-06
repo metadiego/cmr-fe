@@ -5,6 +5,10 @@ export interface ApiMeta {
   timestamp: string;
   requestId: string;
   pagination?: { total: number; page: number; limit: number };
+  // Resumen del RANGO filtrado que el BE calcula server-side (mismos filtros que la lista):
+  // importe facturado, cuántas quedaron exentas (en cero) y cuántas cobradas. GET /facturas.
+  // Es la fuente de verdad del total del rango (no sumar la página). Handoff facturación-totales.
+  resumen?: { importe: number; exentas: number; cobradas: number };
   // Non-fatal warnings the BE attaches to a successful write (e.g. an
   // appointment created despite an overlap when the policy is "advertir").
   advertencias?: ApiWarning[];

@@ -172,8 +172,9 @@ export function apiFetchPaged<T>(
 export async function apiFetchEnvelope<T>(
   path: string,
   init: RequestInit = {},
+  tenant?: string | null,
 ): Promise<ApiEnvelope<T>> {
-  const envelope = await rawRequest<T>(`/api/v1${path}`, init);
+  const envelope = await rawRequest<T>(`/api/v1${path}`, init, tenant);
   return (
     envelope ?? { data: undefined as T, meta: { timestamp: "", requestId: "" } }
   );

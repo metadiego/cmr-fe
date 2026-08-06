@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 import type { Paginated } from "./types";
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
 
 // Facturación (BE PR #39+). Tenant-scoped: pasar centroId (X-Tenant-ID) en escrituras.
 export type Factura = components["schemas"]["FacturaEntity"];
@@ -136,6 +136,38 @@ export function getFacturasTablero(
   if (hasta) sp.set("hasta", hasta);
   if (contexto) sp.set("contexto", contexto);
   return apiFetch<FacturaTablero>(`/facturas/tablero?${sp.toString()}`, {}, centroId);
+}
+
+// Resumen del RANGO filtrado (total del servidor, no de la página): importe/exentas/cobradas del
+// `meta.resumen` de GET /facturas + el conteo total del `meta.pagination`. Mismos filtros que la lista.
+// La lista pinta filas resueltas vía /facturas/tablero (sin resumen); este es el único que trae el
+// total del rango — no sumar la página (número falso si hay paginación). Handoff facturación-totales.
+export interface FacturasResumen {
+  importe: number;
+  exentas: number;
+  cobradas: number;
+  total: number; // nº de facturas del rango (meta.pagination.total)
+}
+export async function getFacturasResumen(
+  params: ListFacturasParams = {},
+  centroId?: string,
+): Promise<FacturasResumen> {
+  const { q, estado, desde, hasta, contexto } = params;
+  // limit=1: solo interesa el meta (resumen + total); no traer filas de más.
+  const sp = new URLSearchParams({ page: "1", limit: "1" });
+  if (q?.trim()) sp.set("q", q.trim());
+  if (estado) sp.set("estado", estado);
+  if (desde) sp.set("desde", desde);
+  if (hasta) sp.set("hasta", hasta);
+  if (contexto) sp.set("contexto", contexto);
+  const env = await apiFetchEnvelope<unknown>(`/facturas?${sp.toString()}`, {}, centroId);
+  const r = env.meta.resumen;
+  return {
+    importe: Number(r?.importe ?? 0),
+    exentas: Number(r?.exentas ?? 0),
+    cobradas: Number(r?.cobradas ?? 0),
+    total: Number(env.meta.pagination?.total ?? 0),
+  };
 }
 
 // Crear/obtener la factura BORRADOR de una cita (idempotente: si existe activa,

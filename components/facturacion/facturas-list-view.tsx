@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { getFacturasTablero, type FacturaTablero } from "@/lib/api/facturas";
+import { getFacturasTablero, getFacturasResumen, type FacturaTablero, type FacturasResumen } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
@@ -25,6 +25,8 @@ import {
 const ALL = "__all__";
 const ESTADOS = ["borrador", "emitida", "anulada", "devuelta_parcial", "devuelta_total"];
 const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
+// Montos grandes de la barra de totales: en-US con separador de miles (negocio USA/PR).
+const moneyBar = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 // Fecha LOCAL del navegador (Puerto Rico), no UTC: a las 20:00 PR ya es el día siguiente en UTC y la
 // pantalla mostraría el día equivocado. getFullYear/Month/Date usan la zona del navegador.
 function isoDay(d: Date) {
@@ -80,9 +82,31 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
     [q, estado, desde, hasta, gate.centro, contexto],
   );
 
+  // Resumen del RANGO (total del servidor): mismos filtros que la lista. La lista pinta /facturas/tablero
+  // (filas resueltas, sin resumen) → este es el único que trae importe/exentas/cobradas + total del rango.
+  const resumenRes = useResource<FacturasResumen>(
+    () =>
+      gate.centro
+        ? getFacturasResumen({ q, estado, desde, hasta, contexto }, gate.centro)
+        : Promise.resolve({ importe: 0, exentas: 0, cobradas: 0, total: 0 }),
+    [q, estado, desde, hasta, gate.centro, contexto],
+  );
+  const resumen = resumenRes.state.kind === "ok" ? resumenRes.state.data : null;
+
   const tablero = state.kind === "ok" ? state.data : null;
   const columnas = (tablero?.columnas ?? []).filter((c) => c.clave !== "fac_acciones");
   const filas = tablero?.filas ?? [];
+
+  // Total de la PÁGINA: se suma de las filas que ya tenemos (no se le pide nada al BE). Exenta = la que
+  // quedó en cero. Como /tablero hoy trae todo el rango sin paginar, página y rango suelen coincidir →
+  // se muestra un solo total (repetir el mismo número confunde). Handoff facturación-totales.
+  const paginaImporte = filas.reduce((acc, f) => acc + Number(f.fac_total ?? 0), 0);
+  const paginaExentas = filas.filter((f) => Number(f.fac_total ?? 0) <= 0).length;
+  const paginaCount = filas.length;
+  // Etiqueta de "exentas" por pantalla: en consultas son cortesías; en general, 100% de descuento.
+  const labelExentas = esConsulta ? t("totales.cortesias") : t("totales.cienDescuento");
+  // ¿Página == rango? (sin resumen aún, o mismo conteo) → un solo total.
+  const totalUnico = !resumen || paginaCount === resumen.total;
   const devolucionesHref = esConsulta ? "/consultas/devoluciones" : "/facturacion/devoluciones";
   const detalleHref = (fid: string) => `/facturacion/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
 
@@ -162,10 +186,46 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             )}
           </ListToolbar>
 
+          {/* Barra de totales: RANGO del servidor (meta.resumen) + PÁGINA sumada de las filas. Un solo
+              total si coinciden; dos niveles si hay paginación (página ≠ rango). No resta devoluciones
+              (regla contable del dueño: la devolución resta el día en que ocurre, no el mes facturado). */}
+          {state.kind === "ok" && filas.length > 0 && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
+              {totalUnico ? (
+                <>
+                  <span className="font-semibold tabular-nums">{moneyBar.format(resumen?.importe ?? paginaImporte)}</span>
+                  <span className="text-muted-foreground">
+                    {t("totales.facturas", { n: resumen?.total ?? paginaCount })}
+                    {" · "}
+                    <span className="tabular-nums">{resumen?.exentas ?? paginaExentas}</span> {labelExentas}
+                    {" · "}
+                    <span className="tabular-nums">{resumen?.cobradas ?? (paginaCount - paginaExentas)}</span> {t("totales.cobradas")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-muted-foreground">{t("totales.pagina")}:</span>
+                  <span className="font-medium tabular-nums">{moneyBar.format(paginaImporte)}</span>
+                  <span className="text-muted-foreground tabular-nums">({paginaCount})</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">{t("totales.rango")}:</span>
+                  <span className="font-semibold tabular-nums">{moneyBar.format(resumen!.importe)}</span>
+                  <span className="text-muted-foreground">
+                    (<span className="tabular-nums">{resumen!.total}</span> {t("totales.facturasN")},{" "}
+                    <span className="tabular-nums">{resumen!.exentas}</span> {labelExentas},{" "}
+                    <span className="tabular-nums">{resumen!.cobradas}</span> {t("totales.cobradas")})
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+
           <div className="overflow-x-auto rounded-xl border">
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {/* Ordinal: nº de línea (orden en que se ven), no un dato de la factura. */}
+                  <th className="w-10 px-3 py-2 text-right font-semibold" aria-label={t("colNum")}>#</th>
                   {columnas.map((c) => (
                     <th key={c.clave} className="px-3 py-2 font-semibold">{tRoot(c.labelKey)}</th>
                   ))}
@@ -174,16 +234,18 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
               </thead>
               <tbody className="divide-y">
                 {state.kind === "loading" && (
-                  <tr><td colSpan={columnas.length + 1} className="px-3 py-8 text-center text-muted-foreground">{tRoot("common.loading")}</td></tr>
+                  <tr><td colSpan={columnas.length + 2} className="px-3 py-8 text-center text-muted-foreground">{tRoot("common.loading")}</td></tr>
                 )}
                 {state.kind === "fail" && (
-                  <tr><td colSpan={columnas.length + 1} className="px-3 py-8 text-center text-destructive">{tRoot("common.error")}</td></tr>
+                  <tr><td colSpan={columnas.length + 2} className="px-3 py-8 text-center text-destructive">{tRoot("common.error")}</td></tr>
                 )}
                 {state.kind === "ok" && filas.length === 0 && (
-                  <tr><td colSpan={columnas.length + 1} className="px-3 py-8 text-center text-muted-foreground">{rangoEsHoy ? t("emptyHoy") : t("empty")}</td></tr>
+                  <tr><td colSpan={columnas.length + 2} className="px-3 py-8 text-center text-muted-foreground">{rangoEsHoy ? t("emptyHoy") : t("empty")}</td></tr>
                 )}
-                {filas.map((f) => (
+                {filas.map((f, i) => (
                   <tr key={f.id} className="cursor-pointer hover:bg-muted/30" onClick={() => router.push(detalleHref(f.id))}>
+                    {/* Ordinal continuo (con paginación: (page-1)*limit + i + 1; hoy la lista es de una página). */}
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{i + 1}</td>
                     {columnas.map((c) => (
                       <td key={c.clave} className="px-3 py-2">{cell(c.clave, f[c.clave])}</td>
                     ))}
