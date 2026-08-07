@@ -79,6 +79,44 @@ export interface ReporteDia {
     montoAbonado: number;
     pendiente: number;
   }>;
+  // ---- Pie del cuadre (BE 2026-08-06): lo que se entrega a contabilidad. ----
+  // Documentos del día: una línea por factura. `formaPago` viene YA resuelta en siglas (p.ej. "EF+VISA")
+  // — pintar tal cual, no calcular. `record` puede venir null (paciente sin número → celda vacía).
+  documentos?: Array<{
+    id: string;
+    numero: string | null;
+    pacienteId?: string | null;
+    paciente: string | null;
+    record: string | null;
+    formaPago: string | null;
+    total: number;
+    estado: string;
+  }>;
+  // Devoluciones del día con su detalle (bloque aparte, en rojo). `numero` = nº de nota de crédito.
+  devolucionesDetalle?: Array<{
+    id: string;
+    numero: number | string | null;
+    facturaId: string | null;
+    montoDevuelto: number;
+    motivo: string | null;
+  }>;
+  // Bloque tributario (lo mira contabilidad). Tres partidas con las mismas columnas + las facturas
+  // EXONERADAS (producto gravable al que se le quitó el IVU — decisión que hay que ver). NO recalcular
+  // en el cliente: los números salen calzados del BE. Handoff HANDOFF-pie-del-cuadre.
+  tributario?: {
+    gravado: TributarioPartida;
+    exento: TributarioPartida;
+    exonerado: TributarioPartida;
+    facturasExoneradas: string[]; // ids de factura → se cruzan con `documentos` para el nº
+  };
+}
+// Una partida tributaria: monto facturado, descuento, base imponible, impuesto y nº de líneas.
+export interface TributarioPartida {
+  monto: number;
+  descuento: number;
+  base: number;
+  impuesto: number;
+  lineas: number;
 }
 
 // ---- catálogos (CC1) ------------------------------------------------

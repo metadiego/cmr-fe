@@ -2664,7 +2664,34 @@
       "pending": "Pendiente",
       "empty": "No hay facturas pendientes."
     },
-    "applyOpening": "Aplicar"
+    "applyOpening": "Aplicar",
+    "detalle": {
+      "footerTitle": "Pie del cuadre",
+      "print": "Imprimir cuadre",
+      "footerHelp": "",
+      "tributario": "Desglose tributario",
+      "partida": "Partida",
+      "gravado": "Gravado",
+      "exento": "Exento",
+      "exonerado": "Exonerado",
+      "colMonto": "Monto",
+      "colDescuento": "Descuento",
+      "colBase": "Base",
+      "colImpuesto": "Impuesto",
+      "colLineas": "Líneas",
+      "documentos": "Documentos del día",
+      "sinDocumentos": "No hubo documentos este día.",
+      "colNumero": "Nº",
+      "colRecord": "Récord",
+      "colPaciente": "Paciente",
+      "colFormaPago": "Forma de pago",
+      "colTotal": "Total",
+      "devoluciones": "Devoluciones del día",
+      "colMotivo": "Motivo",
+      "exoneradoAviso": "Productos gravables a los que se les quitó el IVU — revisar.",
+      "firmaCajero": "Cajero",
+      "firmaGerente": "Gerente"
+    }
   },
   "gruposFacturacion": {
     "title": "Grupos de facturación",

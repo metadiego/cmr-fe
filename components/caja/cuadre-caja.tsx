@@ -35,6 +35,7 @@ import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
+import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -133,6 +134,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
         meId={me?.id ?? null}
         canCerrar={canCerrar}
         centro={gate.centro}
+        centroNombre={gate.centroNombre}
       />
     </Shell>
   );
@@ -182,6 +184,7 @@ type LoaderProps = {
   meId: string | null;
   canCerrar: boolean;
   centro?: string;
+  centroNombre?: string;
 };
 
 // Carga el reporte del día + denominaciones + los cuadres de esa (fecha × división). Para un cajero
@@ -254,6 +257,7 @@ function Editor({
   meId,
   canCerrar,
   centro,
+  centroNombre,
   reporte,
   denoms,
   cuadreInicial,
@@ -552,6 +556,29 @@ function Editor({
 
       {/* Facturas pendientes */}
       <FacturasPendientes pendientes={reporte.pendientes} centroId={centro} />
+
+      {/* Pie del cuadre para contabilidad: documentos del día + bloque tributario + hoja impresa firmable.
+          En el consolidado los números del resumen son la UNIÓN de cajeros; el detalle/tributario del BE
+          es del reporte del día (mismos filtros: división + centro). Handoff HANDOFF-pie-del-cuadre. */}
+      <CuadreDetalle
+        division={division}
+        fecha={fecha}
+        centroNombre={centroNombre}
+        reporte={reporte}
+        resumen={{
+          inicio,
+          salesCash,
+          electronicas: reporte.detalle.totalElectronicas,
+          totalTarjetas: reporte.detalle.totalTarjetas,
+          totalDia: reporte.detalle.total,
+          bruto: reporte.ventas.bruto,
+          devuelto: reporte.devoluciones.total,
+          neto: reporte.ventas.neto,
+          contado,
+          aDepositar,
+          diferencia,
+        }}
+      />
     </div>
   );
 }

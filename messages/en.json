@@ -2664,7 +2664,34 @@
       "pending": "Pending",
       "empty": "No pending invoices."
     },
-    "applyOpening": "Apply"
+    "applyOpening": "Apply",
+    "detalle": {
+      "footerTitle": "Cash-close footer",
+      "print": "Print close",
+      "footerHelp": "",
+      "tributario": "Tax breakdown",
+      "partida": "Item",
+      "gravado": "Taxable",
+      "exento": "Exempt",
+      "exonerado": "Exonerated",
+      "colMonto": "Amount",
+      "colDescuento": "Discount",
+      "colBase": "Base",
+      "colImpuesto": "Tax",
+      "colLineas": "Lines",
+      "documentos": "Documents of the day",
+      "sinDocumentos": "No documents this day.",
+      "colNumero": "No.",
+      "colRecord": "Record",
+      "colPaciente": "Patient",
+      "colFormaPago": "Payment method",
+      "colTotal": "Total",
+      "devoluciones": "Returns of the day",
+      "colMotivo": "Reason",
+      "exoneradoAviso": "Taxable products with IVU removed — please review.",
+      "firmaCajero": "Cashier",
+      "firmaGerente": "Manager"
+    }
   },
   "gruposFacturacion": {
     "title": "Billing groups",
