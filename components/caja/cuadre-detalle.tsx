@@ -324,12 +324,16 @@ th{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;c
 td{padding:5px 6px;border-top:1px solid #f0f0f0}
 .r{text-align:right}
 .mono{font-family:"SF Mono",Menlo,Consolas,monospace}
-.res{width:60%;margin:0 auto}
+.res{width:100%}
 .res td{border:none;padding:3px 6px}
 .res .strong td{font-weight:700;border-top:1px solid #ccc}
 .res .var td{font-weight:800;border-top:2px solid #111;padding-top:7px}
-.conteo{width:60%;margin:0 auto}
+.conteo{width:100%}
 .conteo .tot td{font-weight:700;border-top:2px solid #111}
+/* Resumen y conteo lado a lado (uso óptimo del papel). */
+.cols{display:flex;gap:28px;align-items:flex-start;page-break-inside:avoid}
+.cols .col{flex:1;min-width:0}
+.cols .col h2{margin-top:0}
 .aviso{margin-top:8px;border:1px solid #d9a441;background:#fdf6e8;color:#8a5a00;border-radius:6px;padding:8px 10px;font-size:11px}
 .dim{color:#999}
 .firmas{display:flex;gap:40px;margin-top:48px}
@@ -444,9 +448,10 @@ function buildPrintHtml(args: {
       <h1>${esc(centroNombre || titulo)}</h1>
       <div class="sub">${esc(titulo)} — ${esc(divisionLabel)} · ${esc(fechaLabel)}</div>
     </div>
-    <h2>${esc(L.resumen)}</h2>
-    <table class="res"><tbody>${resumenRows}</tbody></table>
-    ${conteoBlock}
+    <div class="cols">
+      <div class="col"><h2>${esc(L.resumen)}</h2><table class="res"><tbody>${resumenRows}</tbody></table></div>
+      <div class="col">${conteoBlock}</div>
+    </div>
     ${tribBlock}
     ${docBlock}
     ${devBlock}
