@@ -620,9 +620,22 @@ function Editor({
         )}
 
         {esBorrador ? (
-          <Button className="w-full" disabled={busy || serverItems.length === 0} onClick={() => run(() => emitirFactura(id, centro))}>
-            {t("emit")}
-          </Button>
+          <div className="space-y-4">
+            {/* Primero se cobra, después se emite: el cobro es el paso PREVIO a emitir (regla
+                cobrar-antes-de-emitir). El BE ya acepta pagos en borrador. */}
+            <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.montoAbonado)} />
+            {/* Emitir solo cuando está SALDADA (nada por cobrar). Cortesía / 100% de descuento = total 0
+                → saldo 0 → habilitado de un clic. Con saldo pendiente, deshabilitado y con el importe que
+                falta a la vista (no hay que pulsarlo para enterarse). El BE es la autoridad: si igual llega
+                sin saldar responde 400 FACTURA_NO_SALDADA y se muestra su mensaje (toastError). */}
+            <Button
+              className="w-full"
+              disabled={busy || serverItems.length === 0 || saldo > 0.005}
+              onClick={() => run(() => emitirFactura(id, centro))}
+            >
+              {saldo > 0.005 ? t("emitFaltaCobrar", { monto: money(saldo) }) : t("emit")}
+            </Button>
+          </div>
         ) : (
           <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.montoAbonado)} />
         )}

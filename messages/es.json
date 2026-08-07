@@ -2052,7 +2052,8 @@
     "opcionalesTitle": "Opcionales del kit",
     "opcionalesEmpty": "Este kit no tiene opcionales",
     "opcionalesExtra": "Extra por opcionales",
-    "cantEfectivaHint": "Cantidad efectiva (base × multiplicadores)"
+    "cantEfectivaHint": "Cantidad efectiva (base × multiplicadores)",
+    "emitFaltaCobrar": "Falta cobrar {monto} para emitir"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

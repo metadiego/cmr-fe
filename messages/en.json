@@ -2052,7 +2052,8 @@
     "opcionalesTitle": "Kit options",
     "opcionalesEmpty": "This kit has no options",
     "opcionalesExtra": "Options extra",
-    "cantEfectivaHint": "Effective quantity (base × multipliers)"
+    "cantEfectivaHint": "Effective quantity (base × multipliers)",
+    "emitFaltaCobrar": "Collect {monto} first to issue"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
