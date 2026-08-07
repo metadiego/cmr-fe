@@ -2690,7 +2690,13 @@
       "colMotivo": "Reason",
       "exoneradoAviso": "Taxable products with IVU removed — please review.",
       "firmaCajero": "Cashier",
-      "firmaGerente": "Manager"
+      "firmaGerente": "Manager",
+      "conteoEfectivo": "Cash count",
+      "sinConteo": "Not counted yet.",
+      "colCantidad": "Qty",
+      "colValor": "Value",
+      "conteoTotal": "Counted total",
+      "cajerosSumados": "{n} drawers summed"
     }
   },
   "gruposFacturacion": {

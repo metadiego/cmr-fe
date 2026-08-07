@@ -100,6 +100,18 @@ export interface ReporteDia {
     montoDevuelto: number;
     motivo: string | null;
   }>;
+  // Conteo de efectivo SELLADO del día (hoja del legado): denominaciones de mayor a menor + total.
+  // `cuadreId`/`usuarioId` null = SUMA de las cajas del día (consolidado). `null` = aún sin contar (o
+  // el admin ve varios centros a la vez, donde sumar cajas no significa nada) → "sin conteo todavía".
+  conteoEfectivo?: {
+    cuadreId: string | null;
+    usuarioId: string | null;
+    estado?: string;
+    fondoInicial: number;
+    total: number;
+    cajeros: number;
+    lineas: Array<{ denominacionId?: string; valor: number; cantidad: number; monto: number }>;
+  } | null;
   // Bloque tributario (lo mira contabilidad). Tres partidas con las mismas columnas + las facturas
   // EXONERADAS (producto gravable al que se le quitó el IVU — decisión que hay que ver). NO recalcular
   // en el cliente: los números salen calzados del BE. Handoff HANDOFF-pie-del-cuadre.

@@ -50,6 +50,10 @@ export function ordenarDenominaciones<T extends DenominacionOrdenable>(
 }
 
 /** Formato de moneda de la app (mismo estilo que el recibo térmico: `$0.00`). */
+// Formateador ÚNICO del dinero de toda la caja (pantalla y hoja impresa): en-US con separador de miles
+// y dos decimales ($28,138.37). El dueño lo pidió: quien firma el cuadre compara importes de un vistazo
+// y sin los miles se leen mal. El BE devuelve números limpios a propósito; el formato es del FE.
+const MONEY_FMT = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 export function money(v: number): string {
-  return `$${(Number(v) || 0).toFixed(2)}`;
+  return MONEY_FMT.format(Number(v) || 0);
 }

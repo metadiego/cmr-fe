@@ -2690,7 +2690,13 @@
       "colMotivo": "Motivo",
       "exoneradoAviso": "Productos gravables a los que se les quitó el IVU — revisar.",
       "firmaCajero": "Cajero",
-      "firmaGerente": "Gerente"
+      "firmaGerente": "Gerente",
+      "conteoEfectivo": "Conteo de efectivo",
+      "sinConteo": "Sin conteo todavía.",
+      "colCantidad": "Cantidad",
+      "colValor": "Valor",
+      "conteoTotal": "Total contado",
+      "cajerosSumados": "{n} cajas sumadas"
     }
   },
   "gruposFacturacion": {

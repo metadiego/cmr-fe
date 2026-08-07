@@ -47,6 +47,12 @@ export function CuadreDetalle({
   const documentos = React.useMemo(() => reporte.documentos ?? [], [reporte.documentos]);
   const devoluciones = reporte.devolucionesDetalle ?? [];
   const trib = reporte.tributario ?? null;
+  const conteo = reporte.conteoEfectivo ?? null;
+  // Denominaciones de MAYOR a menor (hoja del legado).
+  const conteoLineas = React.useMemo(
+    () => [...(conteo?.lineas ?? [])].sort((a, b) => b.valor - a.valor),
+    [conteo],
+  );
 
   // Cruce id → documento, para nombrar las facturas exoneradas (nº + paciente) que el BE da por id.
   const docPorId = React.useMemo(() => {
@@ -86,6 +92,11 @@ export function CuadreDetalle({
           cashInDrawer: tp("cashInDrawer"),
           deposit: tp("deposit"),
           variance: t("summary.variance"),
+          conteoEfectivo: td("conteoEfectivo"),
+          conteoTotal: td("conteoTotal"),
+          sinConteo: td("sinConteo"),
+          colCantidad: td("colCantidad"),
+          colValor: td("colValor"),
           tributario: td("tributario"),
           gravado: td("gravado"),
           exento: td("exento"),
@@ -124,6 +135,49 @@ export function CuadreDetalle({
           <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {td("print")}
         </Button>
       </div>
+
+      {/* 0. Conteo de efectivo (sellado / consolidado): cantidad · valor · monto, de mayor a menor. */}
+      <section className="rounded-xl border">
+        <h3 className="flex items-center justify-between border-b px-4 py-2.5 text-sm font-semibold">
+          <span>{td("conteoEfectivo")}</span>
+          {conteo && conteo.cajeros > 1 && (
+            <span className="text-xs font-normal text-muted-foreground">{td("cajerosSumados", { n: conteo.cajeros })}</span>
+          )}
+        </h3>
+        {!conteo ? (
+          <p className="px-4 py-3 text-sm text-muted-foreground">{td("sinConteo")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <th className="px-4 py-2 text-right font-semibold">{td("colCantidad")}</th>
+                  <th className="px-4 py-2 text-right font-semibold">{td("colValor")}</th>
+                  <th className="px-4 py-2 text-right font-semibold">{td("colMonto")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {conteoLineas.length === 0 && (
+                  <tr><td colSpan={3} className="px-4 py-3 text-center text-muted-foreground">{td("sinConteo")}</td></tr>
+                )}
+                {conteoLineas.map((l, i) => (
+                  <tr key={l.denominacionId ?? `${l.valor}-${i}`}>
+                    <td className="px-4 py-2 text-right tabular-nums">{l.cantidad}</td>
+                    <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{money(l.valor)}</td>
+                    <td className="px-4 py-2 text-right tabular-nums">{money(l.monto)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2">
+                  <td className="px-4 py-2 text-right text-xs uppercase tracking-wide text-muted-foreground" colSpan={2}>{td("conteoTotal")}</td>
+                  <td className="px-4 py-2 text-right font-semibold tabular-nums">{money(conteo.total)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </section>
 
       {/* 1. Bloque tributario */}
       {trib && (
@@ -274,6 +328,8 @@ td{padding:5px 6px;border-top:1px solid #f0f0f0}
 .res td{border:none;padding:3px 6px}
 .res .strong td{font-weight:700;border-top:1px solid #ccc}
 .res .var td{font-weight:800;border-top:2px solid #111;padding-top:7px}
+.conteo{width:60%;margin:0 auto}
+.conteo .tot td{font-weight:700;border-top:2px solid #111}
 .aviso{margin-top:8px;border:1px solid #d9a441;background:#fdf6e8;color:#8a5a00;border-radius:6px;padding:8px 10px;font-size:11px}
 .dim{color:#999}
 .firmas{display:flex;gap:40px;margin-top:48px}
@@ -300,7 +356,23 @@ function buildPrintHtml(args: {
   const trib = reporte.tributario;
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
+  const conteo = reporte.conteoEfectivo ?? null;
+  const conteoLineas = [...(conteo?.lineas ?? [])].sort((a, b) => b.valor - a.valor);
   const hayExonerado = !!trib && trib.exonerado.monto > 0;
+
+  const conteoBlock = `<h2>${esc(L.conteoEfectivo)}</h2>${
+    !conteo
+      ? `<p class="dim">${esc(L.sinConteo)}</p>`
+      : `<table class="conteo"><thead><tr><th class="r">${esc(L.colCantidad)}</th><th class="r">${esc(L.colValor)}</th><th class="r">${esc(L.colMonto)}</th></tr></thead>
+         <tbody>${
+           conteoLineas.length
+             ? conteoLineas
+                 .map((l) => `<tr><td class="r mono">${esc(l.cantidad)}</td><td class="r mono dim">${esc(money(l.valor))}</td><td class="r mono">${esc(money(l.monto))}</td></tr>`)
+                 .join("")
+             : `<tr><td colspan="3" class="dim">${esc(L.sinConteo)}</td></tr>`
+         }</tbody>
+         <tfoot><tr class="tot"><td colspan="2" class="r dim">${esc(L.conteoTotal)}</td><td class="r mono">${esc(money(conteo.total))}</td></tr></tfoot></table>`
+  }`;
 
   const resumenRows = [
     [L.opening, money(s.inicio)],
@@ -374,6 +446,7 @@ function buildPrintHtml(args: {
     </div>
     <h2>${esc(L.resumen)}</h2>
     <table class="res"><tbody>${resumenRows}</tbody></table>
+    ${conteoBlock}
     ${tribBlock}
     ${docBlock}
     ${devBlock}
