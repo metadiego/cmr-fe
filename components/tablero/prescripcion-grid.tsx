@@ -4,11 +4,11 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import {
-  getCatalogoPrescripcion,
+  getRecetables,
   getPrescripcionCita,
   setPrescripcionCelda,
   setNoPrescripcion,
-  type GrupoPrescripcion,
+  type Recetable,
 } from "@/lib/api/prescripcion";
 import { toastError } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
@@ -33,7 +33,9 @@ export function PrescripcionGrid({
   const { can } = useCan();
   const canWrite = can("prescripcion.write");
 
-  const [grupos, setGrupos] = React.useState<GrupoPrescripcion[]>([]);
+  // Filas RECETABLES del catálogo vivo (BE #275). Se pintan en el orden que vienen (ya ordenadas por
+  // nombre); nada de reordenar ni de lista de respaldo — esa lista paralela era justo el problema.
+  const [grupos, setGrupos] = React.useState<Recetable[]>([]);
   const [cant, setCant] = React.useState<Record<string, number>>({});
   const [none, setNone] = React.useState(false);
   const [resuelto, setResuelto] = React.useState(false); // autoridad del BE
@@ -42,16 +44,16 @@ export function PrescripcionGrid({
 
   React.useEffect(() => {
     let active = true;
-    Promise.all([getCatalogoPrescripcion(centroId), getPrescripcionCita(citaId, centroId)])
-      .then(([cat, pc]) => {
+    Promise.all([getRecetables(centroId), getPrescripcionCita(citaId, centroId)])
+      .then(([recetables, pc]) => {
         if (!active) return;
-        setGrupos([...(cat.grupos ?? [])].sort((a, b) => a.orden - b.orden));
+        setGrupos(recetables ?? []);
         setCant(pc.registros ?? {});
         setNone(!!pc.noPrescripcion);
         setResuelto(!!pc.resuelto);
         setReady(true);
       })
-      .catch(() => active && setReady(true)); // error → ready sin grupos → oculto
+      .catch(() => active && setReady(true)); // error → ready sin filas → oculto
     return () => {
       active = false;
     };
@@ -128,25 +130,26 @@ export function PrescripcionGrid({
         }
       >
         {grupos.map((g) => {
-          const v = cant[g.clave] ?? 0;
+          const v = cant[g.servicioClave] ?? 0;
           const on = v > 0;
           return (
             <div
-              key={g.clave}
+              key={g.servicioClave}
               className={
                 "flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 transition-colors " +
                 (on ? "border-primary/50 bg-primary/5" : "border-transparent")
               }
             >
-              <span className={"truncate text-xs font-medium " + (on ? "text-foreground" : "text-muted-foreground")} title={tRoot(g.labelKey)}>
-                {tRoot(g.labelKey)}
+              {/* Nombre TAL CUAL del catálogo (acentos correctos): no se traduce ni se recorta. */}
+              <span className={"truncate text-xs font-medium " + (on ? "text-foreground" : "text-muted-foreground")} title={g.nombre}>
+                {g.nombre}
               </span>
               <Input
                 type="number"
                 min={0}
                 inputMode="numeric"
                 value={v === 0 ? "" : String(v)}
-                onChange={(e) => change(g.clave, e.target.value)}
+                onChange={(e) => change(g.servicioClave, e.target.value)}
                 disabled={!canWrite}
                 className="h-7 w-14 shrink-0 px-1.5 text-center tabular-nums"
               />

@@ -25,6 +25,23 @@ export function getCatalogoPrescripcion(centroId?: string): Promise<CatalogoPres
   return apiFetch<CatalogoPrescripcion>(`/prescripcion/catalogo`, {}, centroId);
 }
 
+// Lo RECETABLE sale del catálogo vivo (BE #275): los servicios activos del centro, ya ordenados por
+// nombre y con acentos correctos. Reemplaza la lista paralela de `/prescripcion/catalogo`.grupos (que
+// tenía huecos —EMTT, Neurocatch, Ondas de choque, P. Articular, Sermorelin— y duplicados). Se pinta
+// TAL CUAL viene, sin lista de respaldo. `servicioClave` es lo que se guarda en la línea; `nombre` es
+// solo para mostrar. Permiso `prescripcion.read`. Contrato: HANDOFF-prescripcion-recetables.
+export interface Recetable {
+  tipo: string; // "servicio"
+  servicioClave: string; // lo que se guarda (p. ej. "vitc", "rodilla")
+  nombre: string; // etiqueta a mostrar, del catálogo (acentos correctos)
+  grupo?: string | null; // id de grupo (opcional; para agrupar si se quiere)
+}
+export function getRecetables(centroId?: string): Promise<Recetable[]> {
+  return apiFetch<Recetable[]>(`/prescripciones/recetables`, {}, centroId).then((r) =>
+    Array.isArray(r) ? r : ((r as { items?: Recetable[] } | null)?.items ?? []),
+  );
+}
+
 export function getPrescripcionCita(citaId: string, centroId?: string): Promise<PrescripcionCita> {
   return apiFetch<PrescripcionCita>(`/prescripcion/cita/${citaId}`, {}, centroId);
 }
