@@ -1825,7 +1825,8 @@
         "cantidad": "Quantity",
         "unidad": "Unit",
         "opcional": "Optional",
-        "nota": "Note"
+        "nota": "Note",
+        "dosis": "Dose per application"
       },
       "empty": "No recipe — add components",
       "opcional": "Optional",
@@ -1833,7 +1834,9 @@
       "incluidoPorDefecto": "Included by default",
       "porDefecto": "default",
       "nota": "Note / Scheduling",
-      "notaPlaceholder": "e.g. Shockwave — visits 1, 7 and 10"
+      "notaPlaceholder": "e.g. Shockwave — visits 1, 7 and 10",
+      "ayudaDosis": "The dose is what is consumed each time it is applied. A 10 mg vial with a 0.6 mg dose yields 16 applications.",
+      "rendimiento": "≈ {n} applications per package"
     },
     "index": {
       "title": "Inventory",
@@ -1886,8 +1889,11 @@
       "col": {
         "componente": "Supply",
         "cantidad": "Est. quantity",
-        "unidad": "Unit"
-      }
+        "unidad": "Unit",
+        "dosis": "Dose per application"
+      },
+      "ayudaDosis": "The dose is what is consumed each time it is applied. A 10 mg vial with a 0.6 mg dose yields 16 applications.",
+      "rendimiento": "≈ {n} applications per package"
     },
     "consumoReporte": {
       "title": "Supply consumption",

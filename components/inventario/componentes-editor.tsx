@@ -55,12 +55,31 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
     if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.nombre));
     return m;
   }, [prodRes.state]);
+  // Producto completo del componente (para el contenido del envase → rendimiento por dosis).
+  const prodMap = React.useMemo(() => {
+    const m = new Map<string, Producto>();
+    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p));
+    return m;
+  }, [prodRes.state]);
   const unidadName = (id: string | null) => (id ? (unidades.find((u) => u.id === id)?.nombre ?? "") : "");
+  // Un insumo se DOSIFICA cuando su unidad es de masa o volumen (mg, mcg, g, ml): la "cantidad" es en
+  // realidad la dosis que se consume cada vez que se aplica. Con unidades de conteo (vial, caja) no.
+  const dimensionDe = (unidadId: string | null): string | null =>
+    unidadId ? (unidades.find((u) => u.id === unidadId)?.dimension ?? null) : null;
+  const esDosis = (unidadId: string | null) => {
+    const d = dimensionDe(unidadId);
+    return d === "masa" || d === "volumen";
+  };
 
   // Activas y del modo pedido (DELETE = baja lógica; el BE no filtra ?activo).
   const items = (state.kind === "ok" ? state.data : [])
     .filter((c) => c.activo !== false)
     .filter((c) => !!c.estimado === estimado);
+  // Encabezado de la columna: "Dosis por aplicación" cuando TODAS las filas se dosifican (el caso de un
+  // protocolo de medicación); si hay mezcla o son de conteo, se queda en "Cantidad". La ayuda aparece
+  // en cuanto haya al menos una dosificada.
+  const todasDosis = items.length > 0 && items.every((c) => esDosis(c.unidadId));
+  const hayDosis = items.some((c) => esDosis(c.unidadId));
 
   const [nuevoId, setNuevoId] = React.useState("");
   const [nuevaCant, setNuevaCant] = React.useState("");
@@ -126,7 +145,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
               <th className="px-3 py-2 font-semibold">{t("col.componente")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.cantidad")}</th>
+              <th className="px-3 py-2 font-semibold">{todasDosis ? t("col.dosis") : t("col.cantidad")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.unidad")}</th>
               {allowOpcional && <th className="px-3 py-2 font-semibold">{t("col.opcional")}</th>}
               {allowOpcional && <th className="px-3 py-2 font-semibold">{t("col.nota")}</th>}
@@ -147,6 +166,9 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
                 nombre={prodName.get(c.componenteId) ?? c.componenteId}
                 unidades={unidades}
                 unidadName={unidadName}
+                esDosis={esDosis(c.unidadId)}
+                contenido={prodMap.get(c.componenteId)?.contenido ?? null}
+                contenidoUnidadId={prodMap.get(c.componenteId)?.unidadContenidoId ?? null}
                 onSaved={reload}
                 onRemove={() => quitar(c.id)}
                 disabled={busy}
@@ -157,6 +179,11 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
           </tbody>
         </table>
       </div>
+
+      {/* Ayuda: qué es la dosis por aplicación (con el ejemplo del vial). Solo cuando hay insumos dosificados. */}
+      {hayDosis && (
+        <p className="px-1 text-xs text-muted-foreground">{t("ayudaDosis")}</p>
+      )}
 
       {/* Agregar componente/insumo */}
       <div className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
@@ -218,6 +245,9 @@ function ComponenteRow({
   nombre,
   unidades,
   unidadName,
+  esDosis,
+  contenido,
+  contenidoUnidadId,
   onSaved,
   onRemove,
   disabled,
@@ -228,6 +258,9 @@ function ComponenteRow({
   nombre: string;
   unidades: Unidad[];
   unidadName: (id: string | null) => string;
+  esDosis: boolean;
+  contenido: number | null;
+  contenidoUnidadId: string | null;
   onSaved: () => void;
   onRemove: () => void;
   disabled: boolean;
@@ -272,6 +305,16 @@ function ComponenteRow({
 
   const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
 
+  // Rendimiento = contenido del envase ÷ dosis. Solo si se dosifica y la unidad de la dosis coincide con
+  // la del contenido (no se convierte mg↔ml en el cliente). Delata el error de tecleo: "≈ 1 aplicación"
+  // significa que alguien puso la dosis del vial entero. Se recalcula en vivo al editar.
+  const cantNum = Number(editing ? cant : comp.cantidad);
+  const unidadActual = editing ? unidad : (comp.unidadId ?? NONE);
+  const rendimiento =
+    esDosis && contenido != null && contenido > 0 && cantNum > 0 && !!contenidoUnidadId && unidadActual === contenidoUnidadId
+      ? Math.floor(contenido / cantNum)
+      : null;
+
   return (
     <tr className="hover:bg-muted/30">
       <td className="px-3 py-2 font-medium">{nombre}</td>
@@ -280,6 +323,9 @@ function ComponenteRow({
           <Input inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} className="h-7 w-24" />
         ) : (
           comp.cantidad
+        )}
+        {rendimiento != null && (
+          <div className="text-[11px] font-normal text-muted-foreground">{t("rendimiento", { n: rendimiento })}</div>
         )}
       </td>
       <td className="px-3 py-2 text-muted-foreground">

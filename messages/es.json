@@ -1825,7 +1825,8 @@
         "cantidad": "Cantidad",
         "unidad": "Unidad",
         "opcional": "Opcional",
-        "nota": "Nota"
+        "nota": "Nota",
+        "dosis": "Dosis por aplicación"
       },
       "empty": "Sin receta — agrega componentes",
       "opcional": "Opcional",
@@ -1833,7 +1834,9 @@
       "incluidoPorDefecto": "Incluido por defecto",
       "porDefecto": "por defecto",
       "nota": "Nota / Programación",
-      "notaPlaceholder": "Ej. Ondas de choque — visitas 1, 7 y 10"
+      "notaPlaceholder": "Ej. Ondas de choque — visitas 1, 7 y 10",
+      "ayudaDosis": "La dosis es lo que se consume cada vez que se aplica. Un vial de 10 mg con dosis de 0,6 mg rinde 16 aplicaciones.",
+      "rendimiento": "≈ {n} aplicaciones por envase"
     },
     "index": {
       "title": "Inventario",
@@ -1886,8 +1889,11 @@
       "col": {
         "componente": "Insumo",
         "cantidad": "Cantidad estimada",
-        "unidad": "Unidad"
-      }
+        "unidad": "Unidad",
+        "dosis": "Dosis por aplicación"
+      },
+      "ayudaDosis": "La dosis es lo que se consume cada vez que se aplica. Un vial de 10 mg con dosis de 0,6 mg rinde 16 aplicaciones.",
+      "rendimiento": "≈ {n} aplicaciones por envase"
     },
     "consumoReporte": {
       "title": "Consumo de insumos",
