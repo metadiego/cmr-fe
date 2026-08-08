@@ -182,7 +182,10 @@
       "colAddFromCatalog": "Add from catalog",
       "colCatalogEmpty": "All catalog columns are already in this board.",
       "colAdd": "Add",
-      "colRemove": "Remove"
+      "colRemove": "Remove",
+      "cfgMostrarAsignado": "Show the assignee under the button",
+      "cfgMostrarAsignadoHelp": "Instead of spending a whole column, the assignee's name shows inside this cell, under the button.",
+      "cfgAsignadoDe": "Column the name comes from (e.g. fd_enfermera)"
     }
   },
   "tableroEditor": {

@@ -182,7 +182,10 @@
       "colAddFromCatalog": "Agregar del catálogo",
       "colCatalogEmpty": "Todas las columnas del catálogo ya están en este tablero.",
       "colAdd": "Agregar",
-      "colRemove": "Quitar"
+      "colRemove": "Quitar",
+      "cfgMostrarAsignado": "Mostrar el asignado bajo el botón",
+      "cfgMostrarAsignadoHelp": "En vez de gastar una columna, el nombre de quien está asignado se ve dentro de esta celda, debajo del botón.",
+      "cfgAsignadoDe": "Columna de la que sale el nombre (ej. fd_enfermera)"
     }
   },
   "tableroEditor": {

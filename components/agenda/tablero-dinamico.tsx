@@ -133,15 +133,28 @@ function NotificarCell({
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
-  const render = (col.render ?? {}) as { panel?: string; seccion?: string };
+  // `mostrarAsignado` pinta el nombre de quien está asignado JUSTO DEBAJO de la campana, en la misma
+  // celda: así no hace falta gastar una columna entera de la tabla para un dato que solo importa al
+  // lado del aviso. De qué columna sale lo dice `asignadoDe` — mañana puede ser el técnico.
+  // Ambas se configuran por API y desde el constructor. See docs/specs/notificar-enfermera-en-celda.md.
+  const render = (col.render ?? {}) as {
+    panel?: string;
+    seccion?: string;
+    mostrarAsignado?: boolean;
+    asignadoDe?: string;
+  };
   // La columna de enfermera es la MISMA en todos los tableros, pero puede no estar colocada en este:
   // se busca por su clave y, si no está, no se ofrece el selector (el aviso sigue funcionando).
-  const claveEnfermera = ["fd_enfermera", "enfermera"].find(
-    (k) => (optionsByCol?.[k]?.length ?? 0) > 0,
-  );
+  const claveEnfermera = [render.asignadoDe, "fd_enfermera", "enfermera"]
+    .filter(Boolean)
+    .find((k) => (optionsByCol?.[k as string]?.length ?? 0) > 0) as string | undefined;
   const enfermeras = claveEnfermera ? (optionsByCol?.[claveEnfermera] ?? []) : [];
   const rawEnf = claveEnfermera ? fila[claveEnfermera] : undefined;
   const enfermeraActual = enfermeras.find((o) => o.value === rawEnf || o.label === rawEnf)?.value;
+  // El nombre que se ve bajo la campana: el de la opción elegida, o el texto que ya trae la fila.
+  const nombreAsignado =
+    enfermeras.find((o) => o.value === enfermeraActual)?.label ??
+    (typeof rawEnf === "string" ? rawEnf : "");
 
   async function asignar(pid: string) {
     if (!tablero || !claveEnfermera) return;
@@ -154,7 +167,7 @@ function NotificarCell({
   }
 
   return (
-    <>
+    <div className="flex flex-col items-start">
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -164,6 +177,11 @@ function NotificarCell({
       >
         <HugeiconsIcon icon={Notification03Icon} className="size-4" />
       </button>
+      {render.mostrarAsignado && nombreAsignado && (
+        <div className="mt-0.5 max-w-[9rem] truncate text-[11px] leading-tight text-muted-foreground" title={nombreAsignado}>
+          {nombreAsignado}
+        </div>
+      )}
       {open && (
         <PanelNotificarModal
           open={open}
@@ -184,7 +202,7 @@ function NotificarCell({
           centro={centroId}
         />
       )}
-    </>
+    </div>
   );
 }
 

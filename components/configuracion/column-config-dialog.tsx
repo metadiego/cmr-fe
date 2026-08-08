@@ -66,6 +66,10 @@ export function ColumnConfigDialog({
   const [actions, setActions] = React.useState<AccionRow[]>(
     Array.isArray(r.actions) ? (r.actions as AccionRow[]) : [],
   );
+  // Celda de acción: enseñar bajo el botón a quién se asignó (p. ej. la enfermera), en vez de gastar
+  // una columna entera de la tabla. `asignadoDe` dice de qué columna sale el nombre.
+  const [mostrarAsignado, setMostrarAsignado] = React.useState(!!r.mostrarAsignado);
+  const [asignadoDe, setAsignadoDe] = React.useState((r.asignadoDe as string) ?? "");
   const [busy, setBusy] = React.useState(false);
 
   // Preserva las claves NO gestionadas por este diálogo (group, postAccion, color,
@@ -86,7 +90,10 @@ export function ColumnConfigDialog({
     } else if (tipo === "derivado") {
       setOrDel("compute", compute);
     } else if (tipo === "accion") {
-      base.actions = actions;
+      if (actions.length) base.actions = actions;
+      else delete base.actions;
+      setOrDel("mostrarAsignado", mostrarAsignado || "");
+      setOrDel("asignadoDe", asignadoDe.trim());
     }
     return Object.keys(base).length ? base : null;
   }
@@ -190,7 +197,26 @@ export function ColumnConfigDialog({
       )}
 
       {tipo === "accion" && (
-        <AccionesEditor actions={actions} onChange={setActions} />
+        <>
+          <AccionesEditor actions={actions} onChange={setActions} />
+          <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={mostrarAsignado}
+                onCheckedChange={(v) => setMostrarAsignado(v === true)}
+              />
+              <span>{t("cfgMostrarAsignado")}</span>
+            </label>
+            <p className="text-xs text-muted-foreground">{t("cfgMostrarAsignadoHelp")}</p>
+            {mostrarAsignado && (
+              <Input
+                value={asignadoDe}
+                onChange={(e) => setAsignadoDe(e.target.value)}
+                placeholder={t("cfgAsignadoDe")}
+              />
+            )}
+          </div>
+        </>
       )}
     </FormDialog>
   );
