@@ -8,6 +8,8 @@ import { Notification03Icon } from "@hugeicons/core-free-icons";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { editarCelda, type Opcion, type Transicion } from "@/lib/api/tablero";
+import { asignarEnfermeraVitales } from "@/lib/api/citas";
+import { listPersonalPorCapacidad } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
@@ -133,38 +135,67 @@ function NotificarCell({
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
-  // `mostrarAsignado` pinta el nombre de quien está asignado JUSTO DEBAJO de la campana, en la misma
-  // celda: así no hace falta gastar una columna entera de la tabla para un dato que solo importa al
-  // lado del aviso. De qué columna sale lo dice `asignadoDe` — mañana puede ser el técnico.
-  // Ambas se configuran por API y desde el constructor. See docs/specs/notificar-enfermera-en-celda.md.
+  // El render manda TODO (data-driven): panel/sección del aviso; y para el asignado: de qué columna sale
+  // (`asignadoDe`, p. ej. fd_enfermera), dónde se escribe (`asignadoWriteBinding`, p. ej. cita.enfermeraId
+  // en Atención / sesion.enfermeraId en un servicio) y si se pinta bajo la campana (`mostrarAsignado`).
+  // See docs/specs/notificar-enfermera-en-celda.md + HANDOFF-regresion-modal-notificar-atencion.
   const render = (col.render ?? {}) as {
     panel?: string;
     seccion?: string;
     mostrarAsignado?: boolean;
     asignadoDe?: string;
+    asignadoBinding?: string;
+    asignadoWriteBinding?: string;
   };
-  // La columna de enfermera es la MISMA en todos los tableros, pero puede no estar colocada en este:
-  // se busca por su clave y, si no está, no se ofrece el selector (el aviso sigue funcionando).
-  const claveEnfermera = [render.asignadoDe, "fd_enfermera", "enfermera"]
-    .filter(Boolean)
-    .find((k) => (optionsByCol?.[k as string]?.length ?? 0) > 0) as string | undefined;
-  const enfermeras = claveEnfermera ? (optionsByCol?.[claveEnfermera] ?? []) : [];
-  const rawEnf = claveEnfermera ? fila[claveEnfermera] : undefined;
-  const enfermeraActual = enfermeras.find((o) => o.value === rawEnf || o.label === rawEnf)?.value;
-  // El nombre que se ve bajo la campana: el de la opción elegida, o el texto que ya trae la fila.
-  const nombreAsignado =
-    enfermeras.find((o) => o.value === enfermeraActual)?.label ??
-    (typeof rawEnf === "string" ? rawEnf : "");
+  const asignadoDe = render.asignadoDe ?? "fd_enfermera";
+  // ¿La asignación se escribe en la CITA (Atención) o en la SESIÓN (servicio)? Lo dice el writeBinding
+  // (o, en su defecto, el binding resuelto de la columna). Determina la llamada y de dónde salen las opciones.
+  const writeBinding = render.asignadoWriteBinding ?? String(col.binding ?? "");
+  const esCita = writeBinding.startsWith("cita.");
+  // Nombre asignado y su id: proyectados en la FILA por el BE (fd_enfermera + fd_enfermera__valor),
+  // exista o no la columna en este tablero. `asignadoBinding` es informativo (enfermera.nombre).
+  const nombreAsignado = typeof fila[asignadoDe] === "string" ? (fila[asignadoDe] as string) : "";
+  const valorAsignado = fila[`${asignadoDe}__valor`];
+
+  // Opciones del selector: si la columna está COLOCADA en este tablero, sus opciones ya vienen resueltas
+  // (services); si NO (Atención), se pide el roster por capacidad — la misma gente, agnóstico al tablero.
+  const opcionesColumna = optionsByCol?.[asignadoDe] ?? [];
+  const [roster, setRoster] = React.useState<Opcion[]>([]);
+  React.useEffect(() => {
+    if (!open || opcionesColumna.length) return;
+    // Capacidad = la clave sin el prefijo de columna (fd_enfermera → enfermera).
+    const capacidad = asignadoDe.replace(/^fd_/, "") || "enfermera";
+    let active = true;
+    listPersonalPorCapacidad(capacidad, centroId)
+      .then((list) => {
+        if (active) setRoster(list.map((p) => ({ value: p.id, label: `${p.nombre} ${p.apellido ?? ""}`.trim() })));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [open, opcionesColumna.length, asignadoDe, centroId]);
+  const enfermeras = opcionesColumna.length ? opcionesColumna : roster;
+  const enfermeraActual =
+    enfermeras.find((o) => o.value === valorAsignado || o.label === nombreAsignado)?.value ??
+    (typeof valorAsignado === "string" ? valorAsignado : undefined);
 
   async function asignar(pid: string) {
-    if (!tablero || !claveEnfermera) return;
+    if (!tablero) return;
     try {
-      await editarCelda({ tablero, entidadId: fila.id, columna: claveEnfermera, valor: pid }, centroId);
+      if (esCita) {
+        // Atención: la enfermera de vitales vive en la cita (writeBinding cita.enfermeraId → enfermeraVitalesId).
+        await asignarEnfermeraVitales(fila.id, pid || null, centroId);
+      } else {
+        // Servicio: la columna de enfermera está colocada; se escribe por celda (resuelve sesion.enfermeraId).
+        await editarCelda({ tablero, entidadId: fila.id, columna: asignadoDe, valor: pid }, centroId);
+      }
       onRefresh?.();
     } catch (e) {
       toastError(e, tRoot);
     }
   }
+
+  // Récord del paciente para el subtítulo (NO el nombre repetido). Sin récord, la línea se omite.
+  const record = typeof fila.record === "string" ? fila.record : "";
 
   return (
     <div className="flex flex-col items-start">
@@ -188,17 +219,14 @@ function NotificarCell({
           onOpenChange={setOpen}
           panelClave={render.panel ?? "enfermeria"}
           seccion={render.seccion ?? ""}
-          // La entidad la dice el binding que ya resuelve el BE: `cita.acciones` en Atención,
-          // `sesion.acciones` en un servicio. Sin esto el aviso de una cita salía como sesión y el
-          // servidor respondía 404.
-          {...(String(col.binding ?? "").startsWith("cita.")
-            ? { citaId: fila.id }
-            : { sesionId: fila.id })}
+          // La entidad la dice el binding que ya resuelve el BE: `cita.*` en Atención, `sesion.*` en un
+          // servicio. Sin esto el aviso de una cita salía como sesión y el servidor respondía 404.
+          {...(esCita ? { citaId: fila.id } : { sesionId: fila.id })}
           servicioNombre={String(fila.paciente ?? t("notificarAlPanel"))}
-          pacienteNombre={String(fila.paciente ?? "")}
+          pacienteNombre={record}
           enfermeras={enfermeras}
           enfermeraActual={enfermeraActual}
-          onAsignarEnfermera={tablero && claveEnfermera ? asignar : undefined}
+          onAsignarEnfermera={tablero ? asignar : undefined}
           centro={centroId}
         />
       )}

@@ -97,6 +97,21 @@ export function getCita(id: string): Promise<Cita> {
   return apiFetch<Cita>(`/citas/${id}`);
 }
 
+// Asignar la enfermera de VITALES de una cita (es el writeBinding `cita.enfermeraId` del modal de
+// Notificar en Atención → campo real `enfermeraVitalesId`). `null` la limpia. PUT /citas/:id.
+// Verificado en prod: la fila del tablero refleja el nombre en `fd_enfermera` tras guardar.
+export function asignarEnfermeraVitales(
+  citaId: string,
+  enfermeraVitalesId: string | null,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(
+    `/citas/${citaId}`,
+    { method: "PUT", body: JSON.stringify({ enfermeraVitalesId }) },
+    centroId,
+  );
+}
+
 // Writes are tenant-scoped: pass centroId to set X-Tenant-ID for this request.
 export function createCita(
   payload: CreateCitaPayload,
