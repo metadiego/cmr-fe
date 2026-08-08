@@ -11,9 +11,6 @@ import {
   repararSesion,
   getDisponibilidadServicio,
   getHistorialPaciente,
-  getNurseStatusTipos,
-  getNurseStatusActuales,
-  setNurseStatus,
   ajustarDisponibilidad,
   paqueteTotales,
   getComprasPaciente,
@@ -28,8 +25,6 @@ import {
   type Sesion,
   type DisponibilidadServicio,
   type PaqueteDisponibilidad,
-  type NurseStatusTipo,
-  type NurseStatusActual,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
@@ -45,6 +40,7 @@ import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
+import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
@@ -76,13 +72,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Mic01Icon,
   MicOff01Icon,
   Search01Icon,
-  StethoscopeIcon,
   MoreHorizontalIcon,
   Tick02Icon,
   Calendar01Icon,
@@ -1778,80 +1772,8 @@ function RowMenu({
   );
 }
 
-// ————— Estatus de enfermeras (triage/vitales) — ver + CAMBIAR (PR #141: SetNurseStatusDto) —————
-function NurseStatusButton({ fecha, centro }: { fecha: string; centro?: string }) {
-  const t = useTranslations("frontdesk");
-  const tRoot = useTranslations();
-  const [open, setOpen] = React.useState(false);
-  const [tipos, setTipos] = React.useState<NurseStatusTipo[] | null>(null);
-  const [actuales, setActuales] = React.useState<NurseStatusActual[] | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [gen, setGen] = React.useState(0); // bump para recargar tras un set
-
-  React.useEffect(() => {
-    if (!open || !centro) return;
-    getNurseStatusTipos(centro).then(setTipos).catch(() => setTipos([]));
-    getNurseStatusActuales(fecha, centro).then(setActuales).catch(() => setActuales([]));
-  }, [open, fecha, centro, gen]);
-
-  const NONE = "__none__";
-  async function cambiar(personalId: string, statusTipoId: string | null) {
-    setBusy(true);
-    try {
-      await setNurseStatus({ personalId, statusTipoId: statusTipoId ?? undefined } as never, centro);
-      setGen((g) => g + 1);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
-          {t("nurseTitle")}
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-80 p-4">
-        <SheetHeader className="p-0">
-          <SheetTitle>{t("nurseTitle")}</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 space-y-2">
-          {actuales == null && <p className="text-sm text-muted-foreground">…</p>}
-          {actuales != null && actuales.length === 0 && (
-            <p className="text-sm text-muted-foreground">{t("nurseEmpty")}</p>
-          )}
-          {(actuales ?? []).map((a, i) => (
-            <div key={i} className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm">
-              <span className="min-w-0 truncate font-medium">{a.personalNombre ?? a.personalId.slice(0, 8)}</span>
-              <Select
-                value={a.statusTipoId ?? NONE}
-                disabled={busy}
-                onValueChange={(v) => cambiar(a.personalId, v === NONE ? null : v)}
-              >
-                <SelectTrigger size="sm" className="h-8 w-36"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE}>{t("nurseSinStatus")}</SelectItem>
-                  {(tipos ?? []).filter((x) => x.activo !== false).map((x) => (
-                    <SelectItem key={x.id} value={x.id}>
-                      <span className="inline-flex items-center gap-2">
-                        {x.color && <span className="size-2 rounded-full" style={{ backgroundColor: x.color }} aria-hidden />}
-                        {x.nombre}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
+// El botón de Estatus de enfermeras (ver + poner/quitar, con contador) es ahora un componente COMPARTIDO
+// con el panel de enfermería: components/frontdesk/nurse-status-button.tsx (no duplicar).
 
 // ————— Modal "Historial de terapias" del paciente por servicio (BE PR #148, paridad legacy) —————
 // Nivel mega-pro: tabla limpia con fecha, estado (badge), Sesión X/Y + Áreas, y staff. El BE lo proyecta

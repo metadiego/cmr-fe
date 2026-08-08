@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Sun01Icon, Moon02Icon, VolumeHighIcon, StethoscopeIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Sun01Icon, Moon02Icon, VolumeHighIcon } from "@hugeicons/core-free-icons";
 
 import {
   getPanelDefinicion,
@@ -12,10 +12,7 @@ import {
   cancelarNotificacion,
   type PanelDefinicion,
   type PanelNotificacion,
-  type PanelPersonal,
-  type PanelEstatus,
 } from "@/lib/api/paneles";
-import { getNurseStatusTipos, setNurseStatus, type NurseStatusTipo } from "@/lib/api/frontdesk";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -139,8 +136,6 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                 <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
               </button>
             )}
-            {/* Estatus de enfermera: botón con contador (cuántas tienen estatus ahora) + modal para poner/quitar. */}
-            <NurseStatusPanelButton personal={personal} estatus={def?.estatus ?? []} centro={centro} onChanged={refetch} />
             <button type="button" onClick={toggleTheme} className="rounded-md border p-2" aria-label={t("tema")}>
               <HugeiconsIcon icon={dark ? Sun01Icon : Moon02Icon} className="size-4" />
             </button>
@@ -238,146 +233,5 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
         })()}
       </div>
     </div>
-  );
-}
-
-// Botón "Estatus de enfermera" con contador + modal (paridad CMR viejo). El contador = cuántas
-// enfermeras tienen estatus AHORA (burbuja roja; sin nadie, sin burbuja). El modal: elegir enfermera,
-// parrilla de estatus recorriendo el CATÁLOGO con su color (data-driven, nada escrito a mano),
-// "Reset (disponible)" para quitar, y la lista de estatus actuales con una equis para quitar de un toque.
-// Reusa las APIs del frontdesk (mismo estatus vivo, append-only). Handoff HANDOFF-estatus-de-enfermera.
-function NurseStatusPanelButton({
-  personal,
-  estatus,
-  centro,
-  onChanged,
-}: {
-  personal: PanelPersonal[];
-  estatus: PanelEstatus[];
-  centro?: string;
-  onChanged: () => void;
-}) {
-  const t = useTranslations("panel");
-  const tRoot = useTranslations();
-  const [open, setOpen] = React.useState(false);
-  const [tipos, setTipos] = React.useState<NurseStatusTipo[]>([]);
-  const [sel, setSel] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!open) return;
-    getNurseStatusTipos(centro).then(setTipos).catch(() => setTipos([]));
-  }, [open, centro]);
-
-  const nombreDe = (id: string) => personal.find((p) => p.id === id)?.nombre ?? id.slice(0, 8);
-  // Con estatus AHORA = las entradas que traen un tipo/etiqueta (el BE ya da el estatus vivo del día).
-  const conStatus = estatus.filter((e) => e.statusTipoId || e.labelKey || e.label);
-  const count = conStatus.length;
-  const tipoLabel = (x: NurseStatusTipo) => (tRoot.has(x.labelKey) ? tRoot(x.labelKey) : x.nombre);
-
-  async function aplicar(personalId: string, statusTipoId: string | null) {
-    if (!personalId) return;
-    setBusy(true);
-    try {
-      await setNurseStatus({ personalId, statusTipoId: statusTipoId ?? undefined } as never, centro);
-      onChanged();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="relative rounded-md border p-2"
-        aria-label={t("estatus.titulo")}
-        title={t("estatus.titulo")}
-      >
-        <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
-        {count > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-4 text-white">
-            {count}
-          </span>
-        )}
-      </button>
-      {open && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={() => setOpen(false)}>
-          <div className="w-full max-w-md rounded-xl border bg-background p-4 text-foreground shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{t("estatus.titulo")}</h3>
-              <button type="button" onClick={() => setOpen(false)} aria-label={tRoot("common.remove")} className="rounded p-1 hover:bg-muted">
-                <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
-              </button>
-            </div>
-
-            {/* Elegir enfermera + parrilla de estatus del catálogo (color del catálogo). */}
-            <select
-              value={sel}
-              onChange={(e) => setSel(e.target.value)}
-              className="mb-3 w-full rounded-md border bg-background px-3 py-2 text-sm"
-            >
-              <option value="">{t("estatus.elegirEnfermera")}</option>
-              {personal.map((p) => (
-                <option key={p.id} value={p.id}>{p.nombre}</option>
-              ))}
-            </select>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {[...tipos]
-                .filter((x) => x.activo !== false)
-                .sort((a, b) => a.orden - b.orden)
-                .map((x) => (
-                  <button
-                    key={x.id}
-                    type="button"
-                    disabled={!sel || busy}
-                    onClick={() => aplicar(sel, x.id)}
-                    className="rounded-md border px-2 py-1.5 text-xs font-medium transition-colors disabled:opacity-40"
-                    style={x.color ? { borderColor: x.color, color: x.color } : undefined}
-                  >
-                    {tipoLabel(x)}
-                  </button>
-                ))}
-            </div>
-            <button
-              type="button"
-              disabled={!sel || busy}
-              onClick={() => aplicar(sel, null)}
-              className="mt-2 w-full rounded-md border px-2 py-1.5 text-sm font-medium disabled:opacity-40"
-            >
-              {t("estatus.reset")}
-            </button>
-
-            {/* Estatus actuales, cada uno con su color y una equis para quitarlo de un toque. */}
-            <p className="mb-1 mt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("estatus.actuales")}</p>
-            {conStatus.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("estatus.sin")}</p>
-            ) : (
-              <ul className="space-y-1">
-                {conStatus.map((e) => (
-                  <li key={e.personalId} className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm">
-                    <span className="min-w-0 truncate">{nombreDe(e.personalId)}</span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      <span
-                        className="rounded-full px-2 py-0.5 text-[11px] font-medium"
-                        style={e.color ? { backgroundColor: `${e.color}22`, color: e.color } : undefined}
-                      >
-                        {e.labelKey && tRoot.has(e.labelKey) ? tRoot(e.labelKey) : e.label}
-                      </span>
-                      <button type="button" disabled={busy} onClick={() => aplicar(e.personalId, null)} aria-label={tRoot("common.remove")} className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground">
-                        <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-                      </button>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      )}
-    </>
   );
 }

@@ -1373,7 +1373,10 @@
       "sinSaldo": "sin saldo",
       "otras": "Otras dosis",
       "avisoSinSaldo": "Ya no le quedan sesiones de esta dosis. Se aplicará igual y quedará en negativo."
-    }
+    },
+    "nurseElegir": "Elegir enfermera(o)",
+    "nurseReset": "Reset (disponible)",
+    "nurseActuales": "Estatus actuales"
   },
   "programarCitas": {
     "title": "Programar citas",

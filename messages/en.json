@@ -1373,7 +1373,10 @@
       "sinSaldo": "no balance",
       "otras": "Other doses",
       "avisoSinSaldo": "This dose has no sessions left. It will be applied anyway and go negative."
-    }
+    },
+    "nurseElegir": "Pick nurse",
+    "nurseReset": "Reset (available)",
+    "nurseActuales": "Current statuses"
   },
   "programarCitas": {
     "title": "Schedule sessions",
