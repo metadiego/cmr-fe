@@ -363,7 +363,8 @@ export function TableroDinamico({
                     return (
                       <span className="inline-flex items-center gap-1.5" style={c ? { color: c } : undefined}>
                         {c && <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />}
-                        {tRoot(g.col.labelKey)}
+                        {/* Nombre propio del negocio (render.label) si lo hay; si no, la traducción. */}
+                        {g.col.label ?? tRoot(g.col.labelKey)}
                       </span>
                     );
                   })()}

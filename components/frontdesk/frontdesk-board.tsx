@@ -687,7 +687,7 @@ export function FrontdeskBoard() {
                       ) : (
                         <th key={item.col.clave} className="px-3 py-2 font-semibold">
                           <button type="button" onClick={() => toggleSort(item.col.clave)} className="inline-flex items-center gap-1 hover:text-foreground">
-                            {tRoot(((item.col.render as { labelKey?: string } | null)?.labelKey) ?? item.col.labelKey)}
+                            {item.col.label ?? tRoot(((item.col.render as { labelKey?: string } | null)?.labelKey) ?? item.col.labelKey)}
                             {sort?.col === item.col.clave && <span aria-hidden>{sort.dir === "asc" ? "▲" : "▼"}</span>}
                           </button>
                         </th>

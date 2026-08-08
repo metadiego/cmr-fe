@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import {
   actualizarColumna,
+  setComposicionRender,
   type ColumnaCatalogo,
   type UpdateColumnaInput,
   type Transicion,
@@ -40,11 +41,20 @@ interface AccionRow {
 // Muestra la config específica según el `tipo`. Persiste con PUT /tablero/columnas/:id.
 export function ColumnConfigDialog({
   col,
+  tablero,
+  renderEfectivo,
+  labelActual,
   transiciones,
   onClose,
   onSaved,
 }: {
   col: ColumnaCatalogo;
+  // Tablero (servicio) en cuyo contexto se configura: el "Nombre en este servicio" es POR tablero.
+  tablero: string;
+  // Render EFECTIVO actual de la columna en este tablero (catálogo + override de composición): base
+  // sobre la que se guarda el label para no perder min/dato/group/transition. null = sin override.
+  renderEfectivo?: Record<string, unknown> | null;
+  labelActual?: string; // nombre propio actual en este tablero (composición), "" si no tiene
   transiciones: Transicion[];
   onClose: () => void;
   onSaved: () => void;
@@ -52,6 +62,8 @@ export function ColumnConfigDialog({
   const t = useTranslations("configuracion.tableros");
   const tRoot = useTranslations();
   const r = (col.render as Record<string, unknown> | null) ?? {};
+  // "Nombre en este servicio" (render.label, POR tablero). Vacío = quitar el nombre propio.
+  const [label, setLabel] = React.useState(labelActual ?? "");
 
   const [tipo, setTipo] = React.useState<string>(col.tipo);
   const [binding, setBinding] = React.useState(col.binding ?? "");
@@ -109,6 +121,15 @@ export function ColumnConfigDialog({
         render: buildRender(),
       } as unknown as UpdateColumnaInput;
       await actualizarColumna(col.id, payload);
+      // "Nombre en este servicio" (render.label) es POR TABLERO: se guarda en la COMPOSICIÓN, no en el
+      // catálogo. Se manda el render efectivo completo + label (vacío = "", el BE lo trata como sin
+      // nombre) para no perder min/dato/group/transition. Solo si cambió.
+      if ((label.trim() || "") !== (labelActual ?? "").trim()) {
+        await setComposicionRender(tablero, col.id, {
+          ...(renderEfectivo ?? {}),
+          label: label.trim(),
+        });
+      }
       toast.success(t("saved"));
       onSaved();
       onClose();
@@ -128,6 +149,16 @@ export function ColumnConfigDialog({
       submitting={busy}
       canSubmit={!busy && !!binding.trim()}
     >
+      {/* Nombre propio del negocio para esta columna EN ESTE servicio (re-etiquetar sin desplegar). El
+          marcador es el nombre actual traducido; vacío = volver al de siempre. */}
+      <Field label={t("cfgLabel")} hint={t("cfgLabelHelp")}>
+        <Input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder={tRoot(col.labelKey)}
+        />
+      </Field>
+
       <div className="grid grid-cols-2 gap-3">
         <Field label={t("colTipo")}>
           <Select value={tipo} onValueChange={setTipo}>

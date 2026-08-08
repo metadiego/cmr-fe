@@ -185,7 +185,9 @@
       "colRemove": "Remove",
       "cfgMostrarAsignado": "Show the assignee under the button",
       "cfgMostrarAsignadoHelp": "Instead of spending a whole column, the assignee's name shows inside this cell, under the button.",
-      "cfgAsignadoDe": "Column the name comes from (e.g. fd_enfermera)"
+      "cfgAsignadoDe": "Column the name comes from (e.g. fd_enfermera)",
+      "cfgLabel": "Name in this service",
+      "cfgLabelHelp": "Only changes how it looks here. The column and what it saves stay the same."
     }
   },
   "tableroEditor": {

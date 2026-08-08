@@ -185,7 +185,9 @@
       "colRemove": "Quitar",
       "cfgMostrarAsignado": "Mostrar el asignado bajo el botón",
       "cfgMostrarAsignadoHelp": "En vez de gastar una columna, el nombre de quien está asignado se ve dentro de esta celda, debajo del botón.",
-      "cfgAsignadoDe": "Columna de la que sale el nombre (ej. fd_enfermera)"
+      "cfgAsignadoDe": "Columna de la que sale el nombre (ej. fd_enfermera)",
+      "cfgLabel": "Nombre en este servicio",
+      "cfgLabelHelp": "Solo cambia cómo se ve aquí. La columna y lo que guarda no cambian."
     }
   },
   "tableroEditor": {

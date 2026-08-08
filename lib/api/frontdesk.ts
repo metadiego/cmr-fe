@@ -116,6 +116,8 @@ export function getAgendaHoras(
 export type FrontdeskColumna = {
   clave: string;
   labelKey: string;
+  // Nombre propio del negocio para esta columna en este servicio (render.label): tal cual, sin traducir.
+  label?: string | null;
   tipo: string;
   binding: string;
   editable: boolean;

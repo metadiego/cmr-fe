@@ -7,6 +7,9 @@ import { apiFetch } from "./client";
 export interface ColumnaEfectiva {
   clave: string; // key into each row of citas[]
   labelKey: string; // i18n header key
+  // Nombre PROPIO del negocio para esta columna en ESTE tablero (render.label): se pinta tal cual,
+  // NO se traduce ni capitaliza. null/ausente = usar labelKey. Handoff nombre-de-columna-por-servicio.
+  label?: string | null;
   // Ya RESUELTO por el BE contra la entidad del tablero: "cita.acciones" en Atención,
   // "sesion.acciones" en un servicio. Es lo que permite que una columna sirva en todos los tableros.
   binding?: string;

@@ -338,9 +338,22 @@ function ColumnasEditor({
       </section>
 
       {creating && <NuevaColumnaDialog clave={clave} onClose={() => setCreating(false)} onSaved={onChanged} />}
-      {configCol && (
-        <ColumnConfigDialog col={configCol} transiciones={transiciones} onClose={() => setConfigCol(null)} onSaved={onChanged} />
-      )}
+      {configCol && (() => {
+        // La efectiva de esta columna EN ESTE tablero: su render (catálogo + override) y su nombre
+        // propio actual (label), para el campo "Nombre en este servicio".
+        const ef = efectivas.find((e) => e.clave === configCol.clave);
+        return (
+          <ColumnConfigDialog
+            col={configCol}
+            tablero={clave}
+            renderEfectivo={(ef?.render as Record<string, unknown> | null) ?? (configCol.render as Record<string, unknown> | null)}
+            labelActual={ef?.label ?? ""}
+            transiciones={transiciones}
+            onClose={() => setConfigCol(null)}
+            onSaved={onChanged}
+          />
+        );
+      })()}
     </div>
   );
 }
