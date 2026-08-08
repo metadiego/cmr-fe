@@ -6,6 +6,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
+import { useDragReorder, DRAG_GRIP } from "@/hooks/use-drag-reorder";
+
 import {
   getServicios,
   createServicio,
@@ -171,6 +173,34 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
 
   const centroNombre = centros.find((c) => c.id === centro)?.nombre ?? "";
 
+  // Orden de los servicios = orden de las PESTAÑAS del Frontdesk (nada rígido, configurable). Arrastrar
+  // una fila renumera el `orden` (0..n) y lo persiste al instante: en "Todos" por clave (multicentro),
+  // en un centro solo ahí. El tablero ordena las pestañas por este `orden`.
+  const [busyOrden, setBusyOrden] = React.useState(false);
+  async function reordenar(from: number, to: number) {
+    if (from === to || from < 0 || to < 0 || from >= filas.length || to >= filas.length) return;
+    const arr = filas.slice();
+    const [x] = arr.splice(from, 1);
+    arr.splice(to, 0, x);
+    setBusyOrden(true);
+    try {
+      await Promise.all(
+        arr.map((f, i) => {
+          if ((f.rep.orden ?? 0) === i) return Promise.resolve();
+          return esTodos
+            ? updateServicioPorClave(f.clave, { orden: i } as UpdateServicioPorClavePayload)
+            : updateServicio(f.rep.id, { orden: i }, centro);
+        }),
+      );
+      reload();
+    } catch (err) {
+      toast.error(apiErrorMessage(err));
+    } finally {
+      setBusyOrden(false);
+    }
+  }
+  const { dragProps, rowClass } = useDragReorder(reordenar, !busyOrden);
+
   // Activo por centro (solo modo un-centro): apagar aquí = este centro no ofrece el servicio.
   async function toggleActivo(s: Servicio) {
     setBusyId(s.id);
@@ -219,6 +249,7 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              <th className="w-8 px-2 py-2" />
               <th className="px-3 py-2 font-semibold">{t("col.nombre")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.tipo")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.requisitos")}</th>
@@ -228,19 +259,25 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
           </thead>
           <tbody className="divide-y">
             {state.kind === "loading" && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
             )}
             {state.kind === "fail" && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center">
+              <tr><td colSpan={6} className="px-3 py-8 text-center">
                 <p className="text-sm text-muted-foreground">{tc("error")}</p>
                 <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
               </td></tr>
             )}
             {state.kind === "ok" && filas.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>
             )}
-            {filas.map((f) => (
-              <tr key={f.clave} className="hover:bg-muted/30">
+            {filas.map((f, i) => (
+              <tr key={f.clave} {...dragProps(i)} className={"hover:bg-muted/30 transition " + rowClass(i)}>
+                {/* Asa para arrastrar y reordenar las pestañas del Frontdesk. */}
+                <td className="w-8 px-2 py-2 text-center">
+                  <span className={"select-none text-base leading-none text-muted-foreground " + (busyOrden ? "opacity-30" : "cursor-grab")} title={t("ordenArrastrar")} aria-hidden>
+                    {DRAG_GRIP}
+                  </span>
+                </td>
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-2 font-medium">
                     <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: f.rep.color ?? "#94a3b8" }} />
