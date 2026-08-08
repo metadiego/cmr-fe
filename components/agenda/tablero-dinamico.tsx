@@ -3,14 +3,19 @@
 import * as React from "react";
 import { useTranslations, useLocale } from "next-intl";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Notification03Icon } from "@hugeicons/core-free-icons";
+
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
-import type { Opcion, Transicion } from "@/lib/api/tablero";
+import { editarCelda, type Opcion, type Transicion } from "@/lib/api/tablero";
+import { toastError } from "@/lib/api/errors";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
 import { CeldaSelect } from "@/components/tablero/celda-select";
 import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
 import { CeldaToggleIcon } from "@/components/tablero/celda-toggle-icon";
 import { FlujoAtencion } from "@/components/tablero/flujo-atencion";
+import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
@@ -107,6 +112,72 @@ export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   return <span className={col.tipo === "hora" ? "font-mono" : undefined}>{text}</span>;
 }
 
+// Celda de NOTIFICAR (campana) reusable: abre el modal del panel (mismo que Frontdesk) y, opcional,
+// asigna la enfermera reusando la columna `fd_enfermera` (editarCelda) — el BE resuelve el binding a la
+// entidad del tablero (cita en Atención, sesión en un servicio). Se activa por render.kind === "notificar".
+function NotificarCell({
+  col,
+  fila,
+  tablero,
+  centroId,
+  optionsByCol,
+  onRefresh,
+}: {
+  col: ColumnaEfectiva;
+  fila: CitaFila;
+  tablero?: string;
+  centroId?: string;
+  optionsByCol?: Record<string, Opcion[]>;
+  onRefresh?: () => void;
+}) {
+  const t = useTranslations("frontdesk");
+  const tRoot = useTranslations();
+  const [open, setOpen] = React.useState(false);
+  const render = (col.render ?? {}) as { panel?: string; seccion?: string };
+  const enfermeras = optionsByCol?.["fd_enfermera"] ?? [];
+  const rawEnf = fila["fd_enfermera"];
+  const enfermeraActual = enfermeras.find((o) => o.value === rawEnf || o.label === rawEnf)?.value;
+
+  async function asignar(pid: string) {
+    if (!tablero) return;
+    try {
+      await editarCelda({ tablero, entidadId: fila.id, columna: "fd_enfermera", valor: pid }, centroId);
+      onRefresh?.();
+    } catch (e) {
+      toastError(e, tRoot);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        aria-label={t("notificarAlPanel")}
+        title={t("notificarAlPanel")}
+      >
+        <HugeiconsIcon icon={Notification03Icon} className="size-4" />
+      </button>
+      {open && (
+        <PanelNotificarModal
+          open={open}
+          onOpenChange={setOpen}
+          panelClave={render.panel ?? "enfermeria"}
+          seccion={render.seccion ?? ""}
+          sesionId={fila.id}
+          servicioNombre={String(fila.paciente ?? t("notificarAlPanel"))}
+          pacienteNombre={String(fila.paciente ?? "")}
+          enfermeras={enfermeras}
+          enfermeraActual={enfermeraActual}
+          onAsignarEnfermera={tablero ? asignar : undefined}
+          centro={centroId}
+        />
+      )}
+    </>
+  );
+}
+
 const AVATAR_PALETTE = ["#0D9488", "#0284C7", "#7C3AED", "#D97706", "#15803D", "#E11D48", "#0891B2", "#4F46E5", "#DB2777"];
 function avatarColor(s: string): string {
   let h = 0;
@@ -144,8 +215,9 @@ export function TableroDinamico({
 }: {
   columnas: ColumnaEfectiva[];
   filas: CitaFila[];
-  // Renders the cell for the "accion" column (declarative actions per row).
-  renderAccion?: (fila: CitaFila) => React.ReactNode;
+  // Renders the cell for an "accion" column (declarative actions per row). Recibe la COLUMNA para que el
+  // padre decida por ella (su render), no por el binding — hay tableros con varias columnas accion.
+  renderAccion?: (fila: CitaFila, col: ColumnaEfectiva) => React.ReactNode;
   emptyLabel?: string;
   tablero?: string;
   centroId?: string;
@@ -176,8 +248,24 @@ export function TableroDinamico({
         </div>
       );
     }
+    // Columna reusable NOTIFICAR (campana): se decide por la COLUMNA (render.kind), NO por el binding.
+    // Con columnas reusables (binding relativo @.acciones) dos columnas accion comparten binding, así que
+    // mirar el binding abría el menú equivocado. El render dice QUÉ es; el binding solo dónde escribe.
+    // Handoff HANDOFF-columnas-reusables-binding.
+    if ((col.render as { kind?: string } | null)?.kind === "notificar") {
+      return (
+        <NotificarCell
+          col={col}
+          fila={fila}
+          tablero={tablero}
+          centroId={centroId}
+          optionsByCol={optionsByCol}
+          onRefresh={onRefresh}
+        />
+      );
+    }
     if (col.tipo === "accion") {
-      return renderAccion?.(fila) ?? <Cell col={col} value={fila[col.clave]} />;
+      return renderAccion?.(fila, col) ?? <Cell col={col} value={fila[col.clave]} />;
     }
     // Timed toggle (PRESENTE/EN CONSULTA/ASISTIDO): render.transition drives it.
     if (col.tipo === "toggle" && (col.render as Record<string, unknown> | null)?.transition && tablero) {

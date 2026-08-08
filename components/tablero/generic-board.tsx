@@ -219,17 +219,15 @@ export function GenericBoard({ tablero }: { tablero: string }) {
           estados={def.estados}
           density={density}
           emptyLabel={t("empty")}
-          renderAccion={(fila) =>
-            registro?.entidad === "cita" ? (
-              <AccionesModal
-                actions={
-                  ((data.columnas.find((c) => c.tipo === "accion")?.render as Record<string, unknown> | null)
-                    ?.actions as AccionItem[] | undefined) ?? []
-                }
-                fila={fila}
-                centroId={centroId}
-              />
-            ) : (
+          renderAccion={(fila, col) => {
+            // Decide por LA COLUMNA (su render), no por el binding: una columna accion con `actions`
+            // abre el menú declarativo; el resto cae al flujo de transiciones. La de notificar ya se
+            // resolvió antes en la celda (render.kind). Handoff HANDOFF-columnas-reusables-binding.
+            const actions = (col.render as Record<string, unknown> | null)?.actions as AccionItem[] | undefined;
+            if (registro?.entidad === "cita" || actions) {
+              return <AccionesModal actions={actions ?? []} fila={fila} centroId={centroId} />;
+            }
+            return (
               <TableroAcciones
                 tablero={tablero}
                 entidadId={fila.id}
@@ -239,8 +237,8 @@ export function GenericBoard({ tablero }: { tablero: string }) {
                 centroId={centroId}
                 onDone={filasRes.refresh}
               />
-            )
-          }
+            );
+          }}
             />
           </>
         );
