@@ -206,7 +206,8 @@
     "moveDown": "Move down",
     "chained": "Chained",
     "chainedHint": "These columns move together.",
-    "saved": "Columns saved"
+    "saved": "Columns saved",
+    "dragToReorder": "Drag to reorder"
   },
   "tablero": {
     "col": {

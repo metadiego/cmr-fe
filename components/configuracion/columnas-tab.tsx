@@ -156,6 +156,21 @@ function ColumnasEditor({
       return arr.flatMap((b) => b.items.map((x) => x.row));
     });
   }
+  // Arrastrar y soltar: reubica el bloque `from` en la posición `to` (arbitraria), no solo contigua.
+  // La cadena (Presente/En terapia/Asistido) se mueve entera. Al guardar, el BE reagrupa y repintamos
+  // desde su respuesta (onChanged), así que el drop es solo una intención de orden.
+  function reorderBlocks(from: number, to: number) {
+    if (from === to) return;
+    setRows((rs) => {
+      const blocks = toBlocks(rs);
+      if (from < 0 || from >= blocks.length || to < 0 || to >= blocks.length) return rs;
+      const arr = blocks.slice();
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr.flatMap((b) => b.items.map((x) => x.row));
+    });
+  }
+  const [dragBi, setDragBi] = React.useState<number | null>(null);
   function patch(i: number, p: Partial<Row>) {
     setRows((rs) => rs.map((r, idx) => (idx === i ? { ...r, ...p } : r)));
   }
@@ -278,8 +293,22 @@ function ColumnasEditor({
           {blocks.map((b, bi) => {
             const isChain = !!b.group && b.items.length > 1;
             return (
-              <li key={b.group ? `g:${b.group}:${b.items[0].row.columnaId}` : `c:${b.items[0].row.columnaId}`} className="flex items-stretch overflow-hidden rounded-md border">
-                <div className="flex flex-col justify-center gap-0.5 border-r bg-muted/30 px-2">
+              <li
+                key={b.group ? `g:${b.group}:${b.items[0].row.columnaId}` : `c:${b.items[0].row.columnaId}`}
+                draggable
+                onDragStart={(e) => { setDragBi(bi); e.dataTransfer.effectAllowed = "move"; }}
+                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                onDrop={(e) => { e.preventDefault(); if (dragBi != null) reorderBlocks(dragBi, bi); setDragBi(null); }}
+                onDragEnd={() => setDragBi(null)}
+                className={
+                  "flex items-stretch overflow-hidden rounded-md border transition " +
+                  (dragBi === bi ? "opacity-40 " : "") +
+                  (dragBi != null && dragBi !== bi ? "hover:border-primary hover:ring-1 hover:ring-primary/40 " : "")
+                }
+              >
+                {/* Asa para arrastrar + flechas (accesibilidad / ajuste fino). Arrastrar el bloque lo reubica. */}
+                <div className="flex flex-col items-center justify-center gap-0.5 border-r bg-muted/30 px-2" title={te("dragToReorder")}>
+                  <span className="cursor-grab select-none text-base leading-none text-muted-foreground" aria-hidden>⠿</span>
                   <button type="button" onClick={() => moveBlock(bi, -1)} disabled={bi === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={te("moveUp")}>
                     <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
                   </button>
