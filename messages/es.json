@@ -2773,7 +2773,14 @@
     "enCola": "{n} en cola",
     "record": "Récord",
     "soloEnfermeria": "Solo Enfermería puede tomar el aviso.",
-    "sinPermiso": "No tienes acceso a este panel (panel.read)."
+    "sinPermiso": "No tienes acceso a este panel (panel.read).",
+    "estatus": {
+      "titulo": "Enviar estatus de enfermera",
+      "elegirEnfermera": "Elegir enfermera(o)",
+      "reset": "Reset (disponible)",
+      "actuales": "Estatus actuales",
+      "sin": "Sin estatus ahora"
+    }
   },
   "requeridos": {
     "title": "Campos requeridos por servicio",

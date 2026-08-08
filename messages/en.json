@@ -2773,7 +2773,14 @@
     "enCola": "{n} in queue",
     "record": "Record",
     "soloEnfermeria": "Only Nursing can take the alert.",
-    "sinPermiso": "You don't have access to this panel (panel.read)."
+    "sinPermiso": "You don't have access to this panel (panel.read).",
+    "estatus": {
+      "titulo": "Send nurse status",
+      "elegirEnfermera": "Pick nurse",
+      "reset": "Reset (available)",
+      "actuales": "Current statuses",
+      "sin": "No status right now"
+    }
   },
   "requeridos": {
     "title": "Required fields per service",
