@@ -22,10 +22,24 @@ import { colorForName } from "@/lib/frontdesk/color";
 const CLAVE = "enfermeria";
 const THEME_KEY = "cmr_panel_theme";
 
+// Tono por SECCIÓN: el nombre lógico (`panel_secciones.audio`) decide cómo suena, para que la enfermera
+// sepa cuál sonó sin mirar la pantalla. Se distinguen de verdad (una quinta + otro timbre, no 880 vs 900).
+// Un nombre desconocido NUNCA queda mudo: cae al tono por defecto. El BE nombra, el FE resuelve el sonido.
+type Tono = { hz: number; tipo: OscillatorType };
+const TONO_DEFAULT: Tono = { hz: 880, tipo: "sine" };
+const TONOS: Record<string, Tono> = {
+  vitales: { hz: 880, tipo: "sine" },
+  intravenoso: { hz: 587, tipo: "triangle" }, // más grave y con otro timbre
+};
+function tonoDe(audio?: string | null): Tono {
+  return (audio && TONOS[audio]) || TONO_DEFAULT;
+}
+
 // Alarma sin assets: beep en loop con WebAudio (requiere un primer gesto por autoplay del navegador).
 function useAlarma() {
   const ctxRef = React.useRef<AudioContext | null>(null);
   const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const tonoRef = React.useRef<Tono>(TONO_DEFAULT);
   const armado = React.useRef(false);
   const armar = () => {
     if (armado.current) return;
@@ -34,13 +48,15 @@ function useAlarma() {
   const beep = () => {
     const ctx = ctxRef.current; if (!ctx) return;
     const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.frequency.value = 880; o.type = "sine"; o.connect(g); g.connect(ctx.destination);
+    // Tono de la sección del aviso actual (se actualiza en cada start; el loop lo lee en cada beep).
+    o.frequency.value = tonoRef.current.hz; o.type = tonoRef.current.tipo; o.connect(g); g.connect(ctx.destination);
     g.gain.setValueAtTime(0.001, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + 0.02);
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
     o.start(); o.stop(ctx.currentTime + 0.42);
   };
-  const start = () => { if (timerRef.current || !armado.current) return; beep(); timerRef.current = setInterval(beep, 1200); };
+  // `tono` se aplica SIEMPRE (aunque el loop ya esté sonando, para que un cambio de sección se oiga).
+  const start = (tono?: Tono) => { tonoRef.current = tono ?? TONO_DEFAULT; if (timerRef.current || !armado.current) return; beep(); timerRef.current = setInterval(beep, 1200); };
   const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
   React.useEffect(() => () => stop(), []);
   return { armar, armado, start, stop };
@@ -78,12 +94,19 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   // Cola: la más antigua primero. La alarma suena mientras haya avisos pendientes.
   const pendientes = notifs;
   const actual = pendientes[0] ?? null;
-  React.useEffect(() => {
-    if (actual && alarma.armado.current) alarma.start(); else alarma.stop();
-  }, [actual, alarma]);
 
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
   const secciones = (def?.secciones ?? []).slice().sort((a, b) => a.orden - b.orden);
+  // El sonido depende de la SECCIÓN del aviso actual: su `audio` (lo enriquece el BE en la notificación;
+  // respaldo a la sección por id/clave). Un audio desconocido cae al tono por defecto (nunca mudo).
+  const audioActual =
+    actual?.audio ??
+    (secciones.find((s) => s.id === actual?.seccionId) ?? secciones.find((s) => s.clave === actual?.seccion))?.audio ??
+    null;
+  React.useEffect(() => {
+    if (actual && alarma.armado.current) alarma.start(tonoDe(audioActual)); else alarma.stop();
+  }, [actual, audioActual, alarma]);
+
   const personal = def?.personal ?? [];
   const estatusById = new Map((def?.estatus ?? []).map((e) => [e.personalId, e]));
   const contByPersona = new Map((def?.contadores ?? []).map((c) => [c.personalId, c]));
