@@ -212,11 +212,22 @@ function ColumnasEditor({
     }
   }
 
+  // Simétrico a agregar(): primero sacarla de la composición (mientras `clave` todavía
+  // está en ambitos, por si el BE valida pertenencia) y recién después de ambitos. Antes
+  // solo tocaba ambitos: la columna quedaba fuera de este editor pero SEGUÍA activa en la
+  // composición real del tablero — y un guardado posterior de OTRA columna (bulk = replace
+  // completo) podía además borrarla del todo sin que nadie la tocara a propósito.
   async function quitar(row: Row) {
     const cat = catById.get(row.columnaId);
     if (!cat) return;
     setBusyId(row.columnaId);
     try {
+      await setComposicionBulk(
+        clave,
+        rows
+          .filter((r) => r.columnaId !== row.columnaId)
+          .map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
+      );
       await actualizarColumna(cat.id, { ambitos: (cat.ambitos ?? []).filter((a) => a !== clave) });
       onChanged();
     } catch (err) {
