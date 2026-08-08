@@ -122,7 +122,9 @@ export function FlujoAtencion({
         return (
           <React.Fragment key={col.clave}>
             {i > 0 && <span className={"h-px w-4 shrink-0 " + (checked ? "bg-primary/50" : "bg-border")} aria-hidden />}
-            <div className="flex flex-col items-center gap-1">
+            {/* Ancho FIJO por paso: así Presente/En consulta/Asistido quedan alineados en columna entre
+                filas, sin importar que un paso tenga hora sellada (más ancho) y otro esté vacío. */}
+            <div className="flex w-[5.5rem] shrink-0 flex-col items-center gap-1">
               <label
                 title={tRoot(col.labelKey)}
                 className={
@@ -143,7 +145,7 @@ export function FlujoAtencion({
                 />
                 {hora && <span className="font-mono">{hora}</span>}
               </label>
-              <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{tRoot(col.labelKey)}</span>
+              <span className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{tRoot(col.labelKey)}</span>
             </div>
           </React.Fragment>
         );

@@ -133,7 +133,8 @@ function ResumenFactura({ factura }: { factura: FacturaConItems }) {
     f.descuentoGlobalTipo === "porcentaje" && n(f.descuentoGlobalValor) > 0
       ? `${n(f.descuentoGlobalValor)}% · ${money(desc)}`
       : money(desc);
-  const imps = (f.impuestos ?? []).filter((i) => n(i.monto) > 0);
+  // Desglose del IVU (Estatal + Municipal) TAL CUAL del BE; sin filtrar por monto>0 (un 0,00 gravado va).
+  const imps = f.impuestos ?? [];
 
   return (
     <div className="mt-3 border-t pt-3">

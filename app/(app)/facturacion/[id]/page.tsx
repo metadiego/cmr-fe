@@ -382,8 +382,10 @@ function Editor({
   const impuesto = n(factura.impuesto);
   // Desglose de impuestos del BE (impuestos[] con nombre/tasa/monto). Data-driven: N renglones,
   // sin hardcodear "11.5%". El total NO se recomputa aquí. Vacío → una sola línea (o exento).
-  const impuestosDesglose = ((factura as { impuestos?: { nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [])
-    .filter((im) => n(im.monto) > 0);
+  // IVU en dos renglones (Estatal 10.5% + Municipal 1%) tal cual los proyecta el BE. NO se filtra por
+  // monto>0: un municipal en 0,00 de una línea gravada debe verse (su ausencia se lee como error).
+  // Exento → lista vacía (no ceros). Handoff HANDOFF-ivu-estatal-y-municipal.
+  const impuestosDesglose = (factura as { impuestos?: { nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [];
   const total = n(factura.total) || Math.max(0, subtotal - descuento + impuesto);
   const saldo = total - n(factura.montoAbonado);
 

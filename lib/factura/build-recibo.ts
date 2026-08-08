@@ -101,9 +101,10 @@ export function buildRecibo(
   const impuestosRaw =
     (f as { impuestos?: { nombre?: string; label?: string; tasa?: number; monto?: number }[] })
       .impuestos ?? [];
-  const impuestos = impuestosRaw
-    .map((i) => ({ nombre: i.nombre ?? i.label ?? "", tasa: i.tasa, monto: num(i.monto) }))
-    .filter((i) => i.monto > 0);
+  // Un renglón por impuesto TAL CUAL lo proyecta el BE (Estatal 10.5% + Municipal 1% en PR). NO se
+  // filtran los que dan 0: si la línea es gravada, el renglón va aunque salga en 0,00 — su ausencia se
+  // leería como un error de cálculo. Los exentos llegan con la lista VACÍA (no ceros). Handoff IVU.
+  const impuestos = impuestosRaw.map((i) => ({ nombre: i.nombre ?? i.label ?? "", tasa: i.tasa, monto: num(i.monto) }));
 
   const pac = f.paciente;
 
