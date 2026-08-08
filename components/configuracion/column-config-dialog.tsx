@@ -11,11 +11,16 @@ import {
   type UpdateColumnaInput,
   type Transicion,
 } from "@/lib/api/tablero";
+import { listProductos, type Producto } from "@/lib/api/inventario";
+import { listGruposFacturacion } from "@/lib/api/grupos-facturacion";
 import { toastError } from "@/lib/api/errors";
+import { useResource } from "@/hooks/use-resource";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowUp01Icon, ArrowDown01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import {
   Select,
   SelectContent,
@@ -64,6 +69,14 @@ export function ColumnConfigDialog({
   const r = (col.render as Record<string, unknown> | null) ?? {};
   // "Nombre en este servicio" (render.label, POR tablero). Vacío = quitar el nombre propio.
   const [label, setLabel] = React.useState(labelActual ?? "");
+  // Origen EFECTIVO por-tablero (composición sobre catálogo) para los ajustes POR SERVICIO (label +
+  // productos del select). Se prefiere el override; si no hay, el catálogo.
+  const rEf = (renderEfectivo as Record<string, unknown> | null) ?? r;
+  // Select de productos_grupo (por servicio): grupo alterno o productos escogidos a mano EN ORDEN.
+  const [grupoSel, setGrupoSel] = React.useState(String((rEf.grupoFacturacionId as string) ?? ""));
+  const [productoIds, setProductoIds] = React.useState<string[]>(
+    Array.isArray(rEf.productoIds) ? (rEf.productoIds as string[]).map(String) : [],
+  );
 
   const [tipo, setTipo] = React.useState<string>(col.tipo);
   const [binding, setBinding] = React.useState(col.binding ?? "");
@@ -121,15 +134,20 @@ export function ColumnConfigDialog({
         render: buildRender(),
       } as unknown as UpdateColumnaInput;
       await actualizarColumna(col.id, payload);
-      // "Nombre en este servicio" (render.label) es POR TABLERO: se guarda en la COMPOSICIÓN, no en el
-      // catálogo. Se manda el render efectivo completo + label (vacío = "", el BE lo trata como sin
-      // nombre) para no perder min/dato/group/transition. Solo si cambió.
-      if ((label.trim() || "") !== (labelActual ?? "").trim()) {
-        await setComposicionRender(tablero, col.id, {
-          ...(renderEfectivo ?? {}),
-          label: label.trim(),
-        });
+      // Ajustes POR TABLERO (composición, no catálogo): "Nombre en este servicio" (render.label) y, para
+      // un select de productos_grupo, el grupo alterno o los productos escogidos EN ORDEN (render.productoIds
+      // gana sobre grupoFacturacionId, y este sobre el grupo del servicio). Se manda el render EFECTIVO
+      // completo + estas llaves, para no perder optionsSource/writeBinding/min/dato/group/transition.
+      const esProductosGrupo = tipo === "select" && optionsSource === "productos_grupo";
+      const compRender: Record<string, unknown> = { ...(renderEfectivo ?? {}) };
+      compRender.label = label.trim(); // "" = sin nombre propio (el BE lo trata como vacío)
+      if (esProductosGrupo) {
+        if (productoIds.length) compRender.productoIds = productoIds;
+        else delete compRender.productoIds;
+        if (grupoSel) compRender.grupoFacturacionId = grupoSel;
+        else delete compRender.grupoFacturacionId;
       }
+      await setComposicionRender(tablero, col.id, compRender);
       toast.success(t("saved"));
       onSaved();
       onClose();
@@ -200,6 +218,16 @@ export function ColumnConfigDialog({
         </div>
       )}
 
+      {/* Productos del select (por servicio): grupo alterno o productos escogidos a mano, en orden. */}
+      {tipo === "select" && optionsSource === "productos_grupo" && (
+        <ProductosGrupoConfig
+          grupoSel={grupoSel}
+          onGrupo={setGrupoSel}
+          productoIds={productoIds}
+          onProductoIds={setProductoIds}
+        />
+      )}
+
       {tipo === "toggle" && (
         <div className="grid grid-cols-2 gap-3 rounded-md border bg-muted/30 p-3">
           <Field label={t("cfgTransition")}>
@@ -250,6 +278,129 @@ export function ColumnConfigDialog({
         </>
       )}
     </FormDialog>
+  );
+}
+
+// Config del select `productos_grupo` POR SERVICIO: elegir OTRO grupo de facturación, o escoger los
+// productos a mano y ORDENARLOS (arrastrando). productoIds gana sobre el grupo. Con nada, el grupo del
+// servicio. Handoff HANDOFF-select-de-productos-y-orden-columnas.
+const GRUPO_SERVICIO = "__servicio__";
+function ProductosGrupoConfig({
+  grupoSel,
+  onGrupo,
+  productoIds,
+  onProductoIds,
+}: {
+  grupoSel: string;
+  onGrupo: (v: string) => void;
+  productoIds: string[];
+  onProductoIds: (v: string[]) => void;
+}) {
+  const t = useTranslations("configuracion.tableros");
+  const tRoot = useTranslations();
+  const gruposRes = useResource(() => listGruposFacturacion(), []);
+  const poolRes = useResource<Producto[]>(() => listProductos({}), []);
+  const grupos = gruposRes.state.kind === "ok" ? gruposRes.state.data : [];
+  const pool = React.useMemo(() => (poolRes.state.kind === "ok" ? poolRes.state.data : []), [poolRes.state]);
+  const prodMap = React.useMemo(() => new Map(pool.map((p) => [p.id, p] as const)), [pool]);
+  const grupoLabel = (labelKey: string, fallback: string) => (labelKey && tRoot.has(labelKey) ? tRoot(labelKey) : fallback);
+
+  const [q, setQ] = React.useState("");
+  const [dragIdx, setDragIdx] = React.useState<number | null>(null);
+  const chosen = new Set(productoIds);
+  const resultados = React.useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return [];
+    return pool
+      .filter((p) => !chosen.has(p.id))
+      .filter((p) => `${p.nombre} ${p.sku ?? ""}`.toLowerCase().includes(term))
+      .slice(0, 12);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, pool, productoIds]);
+
+  const add = (id: string) => { onProductoIds([...productoIds, id]); setQ(""); };
+  const remove = (id: string) => onProductoIds(productoIds.filter((x) => x !== id));
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= productoIds.length || from === to) return;
+    const arr = productoIds.slice();
+    const [x] = arr.splice(from, 1);
+    arr.splice(to, 0, x);
+    onProductoIds(arr);
+  };
+  const nombreDe = (id: string) => {
+    const p = prodMap.get(id);
+    return p ? { nombre: p.nombre, sku: p.sku } : { nombre: id.slice(0, 8), sku: "" };
+  };
+
+  return (
+    <div className="space-y-3 rounded-md border bg-muted/30 p-3">
+      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("cfgProductosTitle")}</span>
+      <Field label={t("cfgGrupoAlterno")}>
+        <Select value={grupoSel || GRUPO_SERVICIO} onValueChange={(v) => onGrupo(v === GRUPO_SERVICIO ? "" : v)}>
+          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value={GRUPO_SERVICIO}>{t("cfgGrupoServicio")}</SelectItem>
+            {grupos.map((g) => (
+              <SelectItem key={g.id} value={g.id}>{grupoLabel(g.labelKey, g.clave)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
+      <div className="space-y-1.5">
+        <span className="text-xs font-medium text-muted-foreground">{t("cfgEscogeProductos")}</span>
+        <div className="relative">
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("cfgBuscarProducto")} />
+          {resultados.length > 0 && (
+            <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border bg-background shadow-md">
+              {resultados.map((p) => (
+                <li key={p.id}>
+                  <button type="button" onClick={() => add(p.id)} className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-muted">
+                    <span className="font-mono text-xs text-muted-foreground">{p.sku || "—"}</span>
+                    <span className="truncate">{p.nombre}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Elegidos, EN ORDEN: se arrastran (o ↑/↓) para ordenarlos; lo más usado primero. */}
+        {productoIds.length === 0 ? (
+          <p className="text-[11px] text-muted-foreground">{t("cfgProductosHelp")}</p>
+        ) : (
+          <ul className="divide-y rounded-md border bg-background">
+            {productoIds.map((id, i) => {
+              const info = nombreDe(id);
+              return (
+                <li
+                  key={id}
+                  draggable
+                  onDragStart={() => setDragIdx(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => { if (dragIdx != null) move(dragIdx, i); setDragIdx(null); }}
+                  className={"flex cursor-grab items-center gap-2 px-2.5 py-1.5 text-sm " + (dragIdx === i ? "opacity-50" : "")}
+                >
+                  <span className="text-muted-foreground">⠿</span>
+                  <span className="font-mono text-xs text-muted-foreground">{info.sku || "—"}</span>
+                  <span className="min-w-0 flex-1 truncate">{info.nombre}</span>
+                  <button type="button" onClick={() => move(i, i - 1)} disabled={i === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={tRoot("tableroEditor.moveUp")}>
+                    <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5" />
+                  </button>
+                  <button type="button" onClick={() => move(i, i + 1)} disabled={i === productoIds.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30" aria-label={tRoot("tableroEditor.moveDown")}>
+                    <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+                  </button>
+                  <button type="button" onClick={() => remove(id)} className="text-destructive hover:opacity-70" aria-label={tRoot("common.remove")}>
+                    <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {productoIds.length > 0 && <p className="text-[11px] text-muted-foreground">{t("cfgProductosHelp")}</p>}
+      </div>
+    </div>
   );
 }
 

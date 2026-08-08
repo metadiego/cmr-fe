@@ -187,7 +187,13 @@
       "cfgMostrarAsignadoHelp": "Instead of spending a whole column, the assignee's name shows inside this cell, under the button.",
       "cfgAsignadoDe": "Column the name comes from (e.g. fd_enfermera)",
       "cfgLabel": "Name in this service",
-      "cfgLabelHelp": "Only changes how it looks here. The column and what it saves stay the same."
+      "cfgLabelHelp": "Only changes how it looks here. The column and what it saves stay the same.",
+      "cfgProductosTitle": "Select options",
+      "cfgGrupoAlterno": "Billing group",
+      "cfgGrupoServicio": "The service group",
+      "cfgEscogeProductos": "Or pick the products",
+      "cfgBuscarProducto": "Search product…",
+      "cfgProductosHelp": "Drag to reorder: most used first."
     }
   },
   "tableroEditor": {
@@ -534,7 +540,8 @@
     "inactive": "Inactive",
     "noResults": "No results",
     "print": "Print",
-    "rateLimited": "Too many requests. Wait a few seconds and retry."
+    "rateLimited": "Too many requests. Wait a few seconds and retry.",
+    "remove": "Remove"
   },
   "pending": {
     "title": "Access pending",
