@@ -134,14 +134,19 @@ function NotificarCell({
   const tRoot = useTranslations();
   const [open, setOpen] = React.useState(false);
   const render = (col.render ?? {}) as { panel?: string; seccion?: string };
-  const enfermeras = optionsByCol?.["fd_enfermera"] ?? [];
-  const rawEnf = fila["fd_enfermera"];
+  // La columna de enfermera es la MISMA en todos los tableros, pero puede no estar colocada en este:
+  // se busca por su clave y, si no está, no se ofrece el selector (el aviso sigue funcionando).
+  const claveEnfermera = ["fd_enfermera", "enfermera"].find(
+    (k) => (optionsByCol?.[k]?.length ?? 0) > 0,
+  );
+  const enfermeras = claveEnfermera ? (optionsByCol?.[claveEnfermera] ?? []) : [];
+  const rawEnf = claveEnfermera ? fila[claveEnfermera] : undefined;
   const enfermeraActual = enfermeras.find((o) => o.value === rawEnf || o.label === rawEnf)?.value;
 
   async function asignar(pid: string) {
-    if (!tablero) return;
+    if (!tablero || !claveEnfermera) return;
     try {
-      await editarCelda({ tablero, entidadId: fila.id, columna: "fd_enfermera", valor: pid }, centroId);
+      await editarCelda({ tablero, entidadId: fila.id, columna: claveEnfermera, valor: pid }, centroId);
       onRefresh?.();
     } catch (e) {
       toastError(e, tRoot);
@@ -165,12 +170,17 @@ function NotificarCell({
           onOpenChange={setOpen}
           panelClave={render.panel ?? "enfermeria"}
           seccion={render.seccion ?? ""}
-          sesionId={fila.id}
+          // La entidad la dice el binding que ya resuelve el BE: `cita.acciones` en Atención,
+          // `sesion.acciones` en un servicio. Sin esto el aviso de una cita salía como sesión y el
+          // servidor respondía 404.
+          {...(String(col.binding ?? "").startsWith("cita.")
+            ? { citaId: fila.id }
+            : { sesionId: fila.id })}
           servicioNombre={String(fila.paciente ?? t("notificarAlPanel"))}
           pacienteNombre={String(fila.paciente ?? "")}
           enfermeras={enfermeras}
           enfermeraActual={enfermeraActual}
-          onAsignarEnfermera={tablero ? asignar : undefined}
+          onAsignarEnfermera={tablero && claveEnfermera ? asignar : undefined}
           centro={centroId}
         />
       )}

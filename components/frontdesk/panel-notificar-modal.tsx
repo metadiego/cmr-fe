@@ -18,6 +18,7 @@ export function PanelNotificarModal({
   panelClave,
   seccion,
   sesionId,
+  citaId,
   servicioNombre,
   pacienteNombre,
   enfermeras,
@@ -29,7 +30,9 @@ export function PanelNotificarModal({
   onOpenChange: (o: boolean) => void;
   panelClave: string;
   seccion: string;
-  sesionId: string;
+  // Uno de los dos, según la entidad del tablero: sesión en frontdesk, cita en Atención.
+  sesionId?: string;
+  citaId?: string;
   servicioNombre: string;
   pacienteNombre: string;
   enfermeras: { value: string; label: string }[];
@@ -43,7 +46,11 @@ export function PanelNotificarModal({
   async function notificar() {
     setEnviando(true);
     try {
-      await notificarPanel(panelClave, { seccion, sesionId }, centro);
+      await notificarPanel(
+        panelClave,
+        citaId ? { seccion, citaId } : { seccion, sesionId },
+        centro,
+      );
       toast.success(t("notificado"));
       onOpenChange(false);
     } catch (e) {

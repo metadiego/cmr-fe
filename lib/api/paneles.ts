@@ -86,9 +86,11 @@ export function getPanelNotificaciones(clave: string, centroId?: string): Promis
 }
 
 // POST /paneles/:clave/notificar — lo llama la campana. Idempotente (doble toque no duplica).
+// El aviso puede nacer de una SESIÓN (frontdesk) o de una CITA (Atención). La misma columna sirve en
+// los dos tableros, así que quien llama manda el id que corresponda a su entidad — el BE acepta ambos.
 export function notificarPanel(
   clave: string,
-  payload: { seccion: string; sesionId: string },
+  payload: { seccion: string; sesionId?: string; citaId?: string },
   centroId?: string,
 ): Promise<PanelNotificacion> {
   return apiFetch<PanelNotificacion>(
