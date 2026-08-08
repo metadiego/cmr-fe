@@ -1722,7 +1722,12 @@
         "activo": "Activo",
         "none": "(ninguno)",
         "aplicaPrecioBaseDevolucion": "Devuelve a precio base",
-        "grupoFacturacion": "Grupo de facturación"
+        "grupoFacturacion": "Grupo de facturación",
+        "envaseTitle": "Contenido del envase",
+        "contenido": "Contenido",
+        "unidadContenido": "Unidad",
+        "unidadesPorEnvase": "Unidades por envase",
+        "envaseHelp": "Cuánto trae el frasco o caja (p. ej. 10 mg). Con esto la receta calcula cuántas aplicaciones rinde un vial."
       },
       "proveedorMas": "+{n}",
       "noResults": "Sin resultados para «{q}»",

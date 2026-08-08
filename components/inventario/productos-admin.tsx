@@ -478,6 +478,11 @@ type FormState = {
   gravado: boolean;
   facturableGeneral: boolean;
   costoReferencia: string;
+  // Contenido del envase (frasco/caja): cuánto trae y en qué unidad + cuántas unidades por envase.
+  // Permite calcular el rendimiento por dosis (contenido ÷ dosis) en la receta. Todos opcionales.
+  contenido: string;
+  unidadContenidoId: string;
+  unidadesPorEnvase: string;
   imprimeComponentes: boolean;
   aplicaPrecioBaseDevolucion: boolean;
   activo: boolean;
@@ -499,6 +504,9 @@ const EMPTY: FormState = {
   gravado: false,
   facturableGeneral: true,
   costoReferencia: "",
+  contenido: "",
+  unidadContenidoId: "",
+  unidadesPorEnvase: "",
   imprimeComponentes: true,
   aplicaPrecioBaseDevolucion: false,
   activo: true,
@@ -551,6 +559,9 @@ function ProductoForm({
             facturableGeneral: (producto as { facturableGeneral?: boolean }).facturableGeneral ?? true,
             costoReferencia:
               producto.costoReferencia != null ? String(producto.costoReferencia) : "",
+            contenido: producto.contenido != null ? String(producto.contenido) : "",
+            unidadContenidoId: producto.unidadContenidoId ?? "",
+            unidadesPorEnvase: producto.unidadesPorEnvase != null ? String(producto.unidadesPorEnvase) : "",
             imprimeComponentes: (producto as { imprimeComponentes?: boolean }).imprimeComponentes ?? true,
             aplicaPrecioBaseDevolucion: (producto as { aplicaPrecioBaseDevolucion?: boolean }).aplicaPrecioBaseDevolucion ?? false,
             activo: producto.activo ?? true,
@@ -569,6 +580,13 @@ function ProductoForm({
   const tRoot = useTranslations();
   const gruposRes = useResource(() => listGruposFacturacion(), []);
   const divisionesRes = useResource(() => listDivisiones(), []);
+  // Unidades para el contenido del envase (mg, ml, …). Se priorizan masa/volumen (dosificables) arriba.
+  const unidadesRes = useResource<Unidad[]>(() => listUnidades(), []);
+  const unidadesContenido = React.useMemo(() => {
+    const all = unidadesRes.state.kind === "ok" ? unidadesRes.state.data : [];
+    const rank = (u: Unidad) => (u.dimension === "masa" || u.dimension === "volumen" ? 0 : 1);
+    return [...all].sort((a, b) => rank(a) - rank(b) || a.nombre.localeCompare(b.nombre));
+  }, [unidadesRes.state]);
   const grupos = gruposRes.state.kind === "ok" ? gruposRes.state.data : [];
   const divisiones = divisionesRes.state.kind === "ok" ? divisionesRes.state.data : [];
   const grupoLabel = (labelKey: string, fallback: string) =>
@@ -612,6 +630,10 @@ function ProductoForm({
     try {
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const id = (s: string) => (s && s !== NONE ? s : undefined);
+      const num = (s: string) => {
+        const v = Number(s);
+        return s.trim() !== "" && Number.isFinite(v) ? v : undefined;
+      };
       const costo = form.costoReferencia.trim() === "" ? undefined : Number(form.costoReferencia);
       const common = {
         nombre: form.nombre.trim(),
@@ -629,6 +651,10 @@ function ProductoForm({
         gravado: form.gravado,
         // Costo estable de la unidad (el costo real de cada compra sigue viniendo del lote).
         ...(costo != null && Number.isFinite(costo) ? { costoReferencia: costo } : {}),
+        // Contenido del envase (opcional): cuánto trae el frasco + su unidad + unidades por envase.
+        ...(num(form.contenido) != null ? { contenido: num(form.contenido) } : {}),
+        ...(id(form.unidadContenidoId) ? { unidadContenidoId: id(form.unidadContenidoId) } : {}),
+        ...(num(form.unidadesPorEnvase) != null ? { unidadesPorEnvase: num(form.unidadesPorEnvase) } : {}),
         // Devolución a precio base (láser/vit C/GLP-1…): la política precio_base solo aplica a los marcados.
         aplicaPrecioBaseDevolucion: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
@@ -796,6 +822,54 @@ function ProductoForm({
                 placeholder={t("field.opcional")}
               />
             </Field>
+          </div>
+
+          {/* Contenido del envase (opcional): cuánto trae el frasco/caja + su unidad + unidades por envase.
+              Simple y opcional; con esto la receta calcula cuántas aplicaciones rinde un vial (contenido ÷ dosis). */}
+          <div className="rounded-lg border bg-muted/20 p-3">
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("field.envaseTitle")}</span>
+              <span className="text-[11px] text-muted-foreground">{t("field.opcional")}</span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <Field label={t("field.contenido")}>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="any"
+                  value={form.contenido}
+                  onChange={(e) => set("contenido", e.target.value)}
+                  placeholder="10"
+                />
+              </Field>
+              <Field label={t("field.unidadContenido")}>
+                <Select
+                  value={form.unidadContenidoId || NONE}
+                  onValueChange={(v) => set("unidadContenidoId", v === NONE ? "" : v)}
+                >
+                  <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>{t("field.none")}</SelectItem>
+                    {unidadesContenido.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>{u.nombre}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label={t("field.unidadesPorEnvase")}>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  step="1"
+                  value={form.unidadesPorEnvase}
+                  onChange={(e) => set("unidadesPorEnvase", e.target.value)}
+                  placeholder="1"
+                />
+              </Field>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">{t("field.envaseHelp")}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("field.tipo")}>

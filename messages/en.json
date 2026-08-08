@@ -1722,7 +1722,12 @@
         "activo": "Active",
         "none": "(none)",
         "aplicaPrecioBaseDevolucion": "Refunds at base price",
-        "grupoFacturacion": "Billing group"
+        "grupoFacturacion": "Billing group",
+        "envaseTitle": "Package content",
+        "contenido": "Content",
+        "unidadContenido": "Unit",
+        "unidadesPorEnvase": "Units per package",
+        "envaseHelp": "How much the vial or box holds (e.g. 10 mg). With this, the recipe computes how many applications a vial yields."
       },
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",
