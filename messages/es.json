@@ -193,7 +193,8 @@
       "cfgGrupoServicio": "El grupo del servicio",
       "cfgEscogeProductos": "O escoge los productos",
       "cfgBuscarProducto": "Buscar producto…",
-      "cfgProductosHelp": "Arrastra para ordenar: lo más usado primero."
+      "cfgProductosHelp": "Arrastra para ordenar: lo más usado primero.",
+      "colArrastrar": "Arrastra para reordenar"
     }
   },
   "tableroEditor": {

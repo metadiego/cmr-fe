@@ -193,7 +193,8 @@
       "cfgGrupoServicio": "The service group",
       "cfgEscogeProductos": "Or pick the products",
       "cfgBuscarProducto": "Search product…",
-      "cfgProductosHelp": "Drag to reorder: most used first."
+      "cfgProductosHelp": "Drag to reorder: most used first.",
+      "colArrastrar": "Drag to reorder"
     }
   },
   "tableroEditor": {

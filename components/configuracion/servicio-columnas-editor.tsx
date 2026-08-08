@@ -199,6 +199,36 @@ export function ServicioColumnasEditor() {
     }
   }
 
+  // Arrastrar y soltar: reubica una columna activa en la posición de otra (arbitraria, no solo contigua)
+  // y renumera el orden de TODAS las activas (0..n) en cada centro. Guarda al instante, como el resto.
+  const [dragClave, setDragClave] = React.useState<string | null>(null);
+  async function soltar(fromClave: string, toClave: string) {
+    if (!sel || fromClave === toClave) return;
+    const orden = activas.map((c) => c.clave);
+    const from = orden.indexOf(fromClave);
+    const to = orden.indexOf(toClave);
+    if (from < 0 || to < 0) return;
+    const arr = orden.slice();
+    const [x] = arr.splice(from, 1);
+    arr.splice(to, 0, x);
+    setBusy(true);
+    try {
+      await Promise.all(
+        arr.map((clave, i) => {
+          const columnaId = idPorClave.get(clave);
+          return columnaId
+            ? componerEnTodos({ columnaId, orden: i, visible: true, activo: true })
+            : Promise.resolve();
+        }),
+      );
+      colsRes.reload();
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -258,29 +288,47 @@ export function ServicioColumnasEditor() {
             return (
               <li
                 key={clave}
+                draggable={!!activa && !busy}
+                onDragStart={activa ? (e) => { setDragClave(clave); e.dataTransfer.effectAllowed = "move"; } : undefined}
+                onDragOver={activa ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; } : undefined}
+                onDrop={activa ? (e) => { e.preventDefault(); if (dragClave) soltar(dragClave, clave); setDragClave(null); } : undefined}
+                onDragEnd={() => setDragClave(null)}
                 className={
-                  "flex items-center gap-3 rounded-lg border px-3 py-2 " + (activa ? "" : "opacity-60")
+                  "flex items-center gap-3 rounded-lg border px-3 py-2 transition " +
+                  (activa ? "" : "opacity-60 ") +
+                  (dragClave === clave ? "opacity-40 " : "") +
+                  (dragClave && dragClave !== clave && activa ? "hover:border-primary hover:ring-1 hover:ring-primary/40 " : "")
                 }
               >
-                <div className="flex flex-col">
-                  <button
-                    type="button"
-                    onClick={() => mover(clave, -1)}
-                    disabled={!activa || idx <= 0 || busy}
-                    className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                    aria-label={t("moveUp")}
+                <div className="flex items-center gap-1">
+                  {/* Asa para arrastrar (afordancia) + flechas para ajuste fino. */}
+                  <span
+                    className={"select-none text-base leading-none text-muted-foreground " + (activa ? "cursor-grab" : "opacity-30")}
+                    title={t("colArrastrar")}
+                    aria-hidden
                   >
-                    <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => mover(clave, 1)}
-                    disabled={!activa || idx < 0 || idx >= activas.length - 1 || busy}
-                    className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                    aria-label={t("moveDown")}
-                  >
-                    <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
-                  </button>
+                    ⠿
+                  </span>
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => mover(clave, -1)}
+                      disabled={!activa || idx <= 0 || busy}
+                      className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                      aria-label={t("moveUp")}
+                    >
+                      <HugeiconsIcon icon={ArrowUp01Icon} className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => mover(clave, 1)}
+                      disabled={!activa || idx < 0 || idx >= activas.length - 1 || busy}
+                      className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                      aria-label={t("moveDown")}
+                    >
+                      <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
+                    </button>
+                  </div>
                 </div>
                 {/* Selección para Agrupar/Sueltas (solo columnas activas). */}
                 {activa && (
