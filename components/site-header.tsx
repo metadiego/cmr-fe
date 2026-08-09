@@ -185,9 +185,12 @@ export function SiteHeader() {
   // hijos anidados por `parentClave`. SE SUMAN a los dos menús de desarrollo (que quedan tal cual).
   // 100% data-driven: si el BE no envía raíces `g-*`, no se pinta nada extra (sin regresión).
   // Agrupar por `tipo === 'grupo'` (cmr-be PR #230); fallback al prefijo `g-` por compatibilidad.
-  const domainGroups = buildMenuTree(menu).filter(
-    (r) => r.tipo === "grupo" || r.clave.startsWith("g-"),
-  );
+  // Un grupo sin hijos (el usuario no tiene permiso para ninguno de sus ítems) NO se pinta: un
+  // botón que abre un dropdown vacío sugiere un acceso que no existe (ver atencionbay@cmr.test,
+  // rol "atencion" — el BE manda la raíz g-facturacion/g-servicios/etc. aunque estén vacías).
+  const domainGroups = buildMenuTree(menu)
+    .filter((r) => r.tipo === "grupo" || r.clave.startsWith("g-"))
+    .filter((r) => r.children.length > 0);
   // Etiqueta visible: labelCustom (nombre libre) pisa la clave i18n; si no, traducir labelKey.
   const labelOf = (n: { labelCustom?: string | null; labelKey: string }): string => {
     const custom = n.labelCustom?.trim();
