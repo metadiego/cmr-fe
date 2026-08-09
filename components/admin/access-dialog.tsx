@@ -69,9 +69,21 @@ export function AccessDialog({
   )
 }
 
+// Ámbito inicial: si TODOS los roles del perfil apuntan al mismo centro no-nulo (ningún rol
+// global), nace ahí en vez de en Global — así el admin ve los roles ya marcados sin tener que
+// cambiar el selector a mano (FE-HANDOFF-AMBITO-DEFAULT-ACCESOS).
+function defaultCentroDe(profile: Perfil): string {
+  const roles = profile.roles ?? []
+  const tieneRolGlobal = roles.some((r) => r.centroId === null)
+  const centrosDeRoles = new Set(
+    roles.map((r) => r.centroId).filter((c): c is string => c !== null)
+  )
+  return !tieneRolGlobal && centrosDeRoles.size === 1 ? [...centrosDeRoles][0] : GLOBAL
+}
+
 function AccessPanel({ profile }: { profile: Perfil }) {
   const t = useTranslations("admin.access")
-  const [centro, setCentro] = React.useState<string>(GLOBAL)
+  const [centro, setCentro] = React.useState<string>(() => defaultCentroDe(profile))
   const centroId = centro === GLOBAL ? undefined : centro
 
   const centers = useResource<Centro[]>(() => getCenters())
