@@ -17,7 +17,7 @@ import { isActive } from "@/lib/nav";
 import { NAV_MANIFEST } from "@/lib/nav-manifest";
 import { resolveMenuIcon } from "@/lib/menu-icons";
 import { useMenu } from "@/hooks/use-menu";
-import { useMe } from "@/hooks/use-me";
+import { useMe, isAdmin } from "@/hooks/use-me";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CenterSelector } from "@/components/center-selector";
@@ -115,6 +115,9 @@ export function SiteHeader() {
   const tRoot = useTranslations();
   // Dynamic, RBAC-filtered nav from the BE (#6). Empty when unauthenticated.
   const menu = useMenu();
+  const me = useMe();
+  const session = me.kind === "ok" ? me.me : null;
+  const puedeVerCatalogoCompleto = !!session && isAdmin(session);
   // Categorización 100% en el FE (independiente de la config/caché del menú del BE):
   // "En desarrollo" = la ruta existe como página; "Por desarrollar" = el resto.
   // Rutas reales de la app (prefijos). Actualizar al agregar módulos nuevos.
@@ -151,14 +154,17 @@ export function SiteHeader() {
       m.clave !== "por-desarrollar",
   );
   // Catch-all de desarrollo: completa el menú con TODAS las páginas reales que el BE aún no
-  // registró (dedup por path — los items del BE mandan). Así nada queda "escondido" mientras
-  // se organiza el menú RBAC del BE. Ver lib/nav-manifest.ts.
+  // registró (dedup por path — los items del BE mandan). Solo para master/admin — el catálogo
+  // completo es una herramienta de configuración, no algo que un usuario con permisos acotados
+  // deba ver (aunque no pueda entrar, verlas ahí sugiere que sí tiene acceso). Ver lib/nav-manifest.ts.
   const bePaths = new Set(navItems.map((m) => m.path));
-  const manifestItems = NAV_MANIFEST.filter((r) => !bePaths.has(r.path)).map((r) => ({
-    clave: `manifest:${r.path}`,
-    labelKey: r.labelKey,
-    path: r.path,
-  }));
+  const manifestItems = puedeVerCatalogoCompleto
+    ? NAV_MANIFEST.filter((r) => !bePaths.has(r.path)).map((r) => ({
+        clave: `manifest:${r.path}`,
+        labelKey: r.labelKey,
+        path: r.path,
+      }))
+    : [];
   const allItems: { clave: string; labelKey: string; path: string }[] = [
     ...navItems.map((m) => ({ clave: m.clave, labelKey: m.labelKey, path: m.path })),
     ...manifestItems,
@@ -341,9 +347,6 @@ export function SiteHeader() {
     ro.observe(bar);
     return () => ro.disconnect();
   }, [topKeys, locale]);
-  // Session for the header (email + sign out). Anonymous → shows "sign in".
-  const me = useMe();
-  const session = me.kind === "ok" ? me.me : null;
 
   async function signOut() {
     setSigningOut(true);
