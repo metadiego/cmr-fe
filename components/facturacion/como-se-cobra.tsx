@@ -159,7 +159,7 @@ export function ComoSeCobra({
             grupoClave: grupo.clave,
             clave: c.clave,
             labelKey: c.labelKey,
-            tipo: c.tipo as never,
+            tipo: c.tipo,
             rol: c.rol,
             orden: c.orden,
             requerido: c.requerido,
@@ -218,7 +218,7 @@ export function ComoSeCobra({
       <div className="space-y-2">
         {extra.map((c) => (
           <CampoExtra
-            key={c.id}
+            key={`${c.id}:${c.labelKey}`}
             col={c}
             label={label}
             onToggle={toggleMultiplica}
