@@ -153,15 +153,15 @@ export function RbacSettings() {
                   >
                     {t("menuRol")}
                   </Button>
-                  {!r.esSistema && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setEditFor(r)}
-                    >
-                      {t("edit")}
-                    </Button>
-                  )}
+                  {/* Editar (solo nombre/descripción, NUNCA la clave) también para roles Sistema: el BE
+                      acepta el PUT de nombre en Sistema (verificado). Solo Eliminar queda vedado a Sistema. */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditFor(r)}
+                  >
+                    {t("edit")}
+                  </Button>
                   {!r.esSistema && (
                     <Button
                       size="sm"
