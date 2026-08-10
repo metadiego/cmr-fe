@@ -15,6 +15,50 @@ export type GrupoFacturacion = components["schemas"]["GrupoFacturacionEntity"];
 export type CrearGrupoPayload = components["schemas"]["CrearGrupoFacturacionDto"];
 export type ActualizarGrupoPayload = components["schemas"]["UpdateGrupoFacturacionDto"];
 
+// Esquema de columnas de línea, por grupo (los 7 roles de fábrica + los campos EXTRA que definen
+// qué se le pregunta al empleado al facturar y cuáles multiplican el precio). Contrato verificado
+// en prod (2026-08-10): GET/POST /facturacion/columnas, PUT /facturacion/columnas/:id — sin DELETE,
+// "quitar" es PUT con activo:false. FE-HANDOFF-MULTIPLICADOR-GRUPOS-FACTURACION.
+export type ColumnaFacturacion = components["schemas"]["ColumnaFacturacionEntity"];
+export type CrearColumnaPayload = components["schemas"]["CrearColumnaFacturacionDto"];
+export type ActualizarColumnaPayload = components["schemas"]["UpdateColumnaFacturacionDto"];
+
+// Roles de fábrica: todo grupo los tiene, no se editan/borran desde "Cómo se cobra".
+export const ROLES_DE_FABRICA = [
+  "producto",
+  "cantidad",
+  "precio",
+  "descuento",
+  "impuesto",
+  "subtotal",
+  "accion",
+] as const;
+
+export function getColumnasDeGrupo(grupoClave: string): Promise<ColumnaFacturacion[]> {
+  return apiFetch<ColumnaFacturacion[]>(
+    `/facturacion/columnas?grupo=${encodeURIComponent(grupoClave)}`,
+  );
+}
+
+export function crearColumnaFacturacion(
+  payload: CrearColumnaPayload,
+): Promise<ColumnaFacturacion> {
+  return apiFetch<ColumnaFacturacion>(`/facturacion/columnas`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function actualizarColumnaFacturacion(
+  id: string,
+  payload: ActualizarColumnaPayload,
+): Promise<ColumnaFacturacion> {
+  return apiFetch<ColumnaFacturacion>(`/facturacion/columnas/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
 // El endpoint de divisiones sale sin tipar en Swagger (Record<string,never>); el BE devuelve
 // `{clave, labelKey}[]` (columnas-facturacion.service.listarDivisiones). Se tipa aquí.
 export interface Division {

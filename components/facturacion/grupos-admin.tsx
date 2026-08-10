@@ -20,6 +20,7 @@ import { contarPorGrupo, particionarMembresia } from "@/lib/facturacion/grupos";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
+import { ComoSeCobra } from "@/components/facturacion/como-se-cobra";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +42,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Administración de GRUPOS DE FACTURACIÓN (crear/editar + membresía de productos). Layout
 // master-detail: lista a la izquierda, detalle + transfer-list a la derecha. RBAC cosmético por
@@ -177,6 +179,7 @@ function Contenido({
         <DetalleGrupo
           key={sel.id}
           grupo={sel}
+          grupos={grupos}
           divisiones={divisiones}
           productos={productos}
           label={label}
@@ -193,12 +196,14 @@ function Contenido({
 
 function DetalleGrupo({
   grupo,
+  grupos,
   divisiones,
   productos,
   label,
   onChanged,
 }: {
   grupo: GrupoFacturacion;
+  grupos: GrupoFacturacion[];
   divisiones: Division[];
   productos: Producto[];
   label: (labelKey: string, fallback: string) => string;
@@ -314,37 +319,48 @@ function DetalleGrupo({
         </div>
       </div>
 
-      {/* Membresía de productos (transfer list) */}
-      <div className="rounded-xl border">
-        <div className="flex items-center justify-between border-b px-4 py-2.5">
-          <h3 className="text-sm font-semibold">{t("membership")}</h3>
-          <Button size="sm" onClick={guardarMembresia} disabled={savingMembresia}>
-            {t("saveMembership")}
-          </Button>
-        </div>
-        <div className="p-3">
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("search")}
-            className="mb-3 h-9"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <TransferColumna
-              titulo={`${t("members")} (${miembrosIds.size})`}
-              productos={miembros}
-              accionLabel="−"
-              onAccion={(id) => toggle(id, false)}
-            />
-            <TransferColumna
-              titulo={t("available")}
-              productos={disponibles}
-              accionLabel="+"
-              onAccion={(id) => toggle(id, true)}
-            />
+      {/* Productos del grupo / cómo se cobra */}
+      <Tabs defaultValue="productos">
+        <TabsList>
+          <TabsTrigger value="productos">{t("tabProductos")}</TabsTrigger>
+          <TabsTrigger value="cobro">{t("tabComoSeCobra")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="productos">
+          <div className="rounded-xl border">
+            <div className="flex items-center justify-between border-b px-4 py-2.5">
+              <h3 className="text-sm font-semibold">{t("membership")}</h3>
+              <Button size="sm" onClick={guardarMembresia} disabled={savingMembresia}>
+                {t("saveMembership")}
+              </Button>
+            </div>
+            <div className="p-3">
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={t("search")}
+                className="mb-3 h-9"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <TransferColumna
+                  titulo={`${t("members")} (${miembrosIds.size})`}
+                  productos={miembros}
+                  accionLabel="−"
+                  onAccion={(id) => toggle(id, false)}
+                />
+                <TransferColumna
+                  titulo={t("available")}
+                  productos={disponibles}
+                  accionLabel="+"
+                  onAccion={(id) => toggle(id, true)}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+        <TabsContent value="cobro">
+          <ComoSeCobra grupo={grupo} grupos={grupos} label={label} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
