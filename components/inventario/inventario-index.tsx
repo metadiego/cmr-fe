@@ -8,6 +8,8 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 // (c) Índice/subnav de Inventario: un solo punto de entrada que amarra las secciones ya
 // existentes (sin rutas paralelas ni duplicados). Solo enlaza rutas REALES.
 const SECTIONS: { key: string; href: string }[] = [
+  // Existencias primero: "cuánto hay" es la pregunta más frecuente (stock por centro + consolidado).
+  { key: "existencias", href: "/inventario/existencias" },
   { key: "productos", href: "/inventario/productos" },
   { key: "recepcion", href: "/inventario/recibir-compra" },
   { key: "transferencias", href: "/inventario/transferencias" },

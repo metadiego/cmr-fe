@@ -32,6 +32,8 @@ export type StockResumenParams = {
   soloNegativos?: boolean;
   soloPorVencer?: boolean;
   asOf?: string;
+  // Por defecto el BE solo trae lo que se inventaría; true incluye no-inventariables (auditar negativos raros).
+  incluirNoInventariables?: boolean;
   page?: number;
   limit?: number;
 };
@@ -45,6 +47,7 @@ export function getStockResumen(
   if (params.soloNegativos) sp.set("soloNegativos", "true");
   if (params.soloPorVencer) sp.set("soloPorVencer", "true");
   if (params.asOf) sp.set("asOf", params.asOf);
+  if (params.incluirNoInventariables) sp.set("incluirNoInventariables", "true");
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(Math.min(params.limit ?? 50, 100)));
   return apiFetchPaged<StockResumenFila>(`/inventario/stock/resumen?${sp.toString()}`, {}, centro);
@@ -67,6 +70,7 @@ export type StockConsolidadoParams = {
   q?: string;
   soloNegativos?: boolean;
   asOf?: string;
+  incluirNoInventariables?: boolean;
   page?: number;
   limit?: number;
 };
@@ -78,6 +82,7 @@ export function getStockConsolidado(
   if (params.q?.trim()) sp.set("q", params.q.trim());
   if (params.soloNegativos) sp.set("soloNegativos", "true");
   if (params.asOf) sp.set("asOf", params.asOf);
+  if (params.incluirNoInventariables) sp.set("incluirNoInventariables", "true");
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(Math.min(params.limit ?? 50, 100)));
   // `centro` undefined → admin combinado (todos los centros); un id → recortado a ese centro (1 columna).

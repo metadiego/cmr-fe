@@ -716,7 +716,8 @@
     "requisitos_servicio": "Service requirements",
     "configFormatos": "Therapy formats",
     "estadisticas_servicios": "Service Statistics",
-    "estadisticas_diarias": "Daily statistics"
+    "estadisticas_diarias": "Daily statistics",
+    "inventario_existencias": "Stock on hand"
   },
   "admin": {
     "title": "Administration",
@@ -1681,7 +1682,10 @@
         "a_la_venta": "leaves when billed",
         "a_la_entrega": "leaves when applied",
         "no_descarga": "no discharge"
-      }
+      },
+      "incluirNoInventariables": "Include non-stocked",
+      "asOf": "As of",
+      "asOfHoy": "Today"
     },
     "prod": {
       "title": "Products",
@@ -1889,6 +1893,10 @@
         "transferencias": {
           "title": "Transfers",
           "desc": "Move stock between centers with partial reception/approval."
+        },
+        "existencias": {
+          "title": "Stock on hand",
+          "desc": "How much of each product there is, per center and in total."
         }
       }
     },

@@ -43,6 +43,10 @@ export default function StockPage() {
   const [soloNegativos, setSoloNegativos] = React.useState(false);
   const [soloPorVencer, setSoloPorVencer] = React.useState(false);
   const [almacenId, setAlmacenId] = React.useState("");
+  // Existencia a una FECHA pasada (asOf): "¿cuánto había el día que cuadramos?". Vacío = hoy.
+  const [asOf, setAsOf] = React.useState("");
+  // Por defecto solo lo inventariable; incluir no-inventariables sirve para auditar negativos imposibles.
+  const [incluirNI, setIncluirNI] = React.useState(false);
   const [page, setPage] = React.useState(1);
   React.useEffect(() => {
     const h = setTimeout(() => { setQApplied(q); setPage(1); }, 350);
@@ -66,16 +70,16 @@ export default function StockPage() {
   const resumenRes = useResource<Paginated<StockResumenFila>>(
     () =>
       vista === "centro" && tenantCentro
-        ? getStockResumen({ q: qApplied, almacenId: almacenValido || undefined, soloNegativos, soloPorVencer, page, limit: 50 }, tenantCentro)
+        ? getStockResumen({ q: qApplied, almacenId: almacenValido || undefined, soloNegativos, soloPorVencer, asOf: asOf || undefined, incluirNoInventariables: incluirNI, page, limit: 50 }, tenantCentro)
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 50 } }),
-    [vista, tenantCentro, qApplied, almacenValido, soloNegativos, soloPorVencer, page],
+    [vista, tenantCentro, qApplied, almacenValido, soloNegativos, soloPorVencer, asOf, incluirNI, page],
   );
   const consolRes = useResource<Paginated<StockConsolidadoFila>>(
     () =>
       vista === "consolidado"
-        ? getStockConsolidado({ q: qApplied, soloNegativos, page, limit: 50 }, centroSel === "" ? null : centroSel)
+        ? getStockConsolidado({ q: qApplied, soloNegativos, asOf: asOf || undefined, incluirNoInventariables: incluirNI, page, limit: 50 }, centroSel === "" ? null : centroSel)
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 50 } }),
-    [vista, centroSel, qApplied, soloNegativos, page],
+    [vista, centroSel, qApplied, soloNegativos, asOf, incluirNI, page],
   );
 
   const cargando = vista === "centro" ? resumenRes.state.kind === "loading" : consolRes.state.kind === "loading";
@@ -149,6 +153,22 @@ export default function StockPage() {
             </SelectContent>
           </Select>
         )}
+        <Chip active={incluirNI} onClick={() => { setIncluirNI((s) => !s); resetPage(); }}>{t("incluirNoInventariables")}</Chip>
+        {/* Existencia a una fecha pasada (para cuadrar el día). Vacío = hoy. */}
+        <label className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+          <span>{t("asOf")}</span>
+          <Input
+            type="date"
+            value={asOf}
+            max={new Date().toISOString().slice(0, 10)}
+            onChange={(e) => { setAsOf(e.target.value); resetPage(); }}
+            className="h-9 w-40"
+            aria-label={t("asOf")}
+          />
+          {asOf && (
+            <button type="button" onClick={() => { setAsOf(""); resetPage(); }} className="text-xs text-primary hover:underline">{t("asOfHoy")}</button>
+          )}
+        </label>
       </div>
 
       {gate.cargando ? (

@@ -716,7 +716,8 @@
     "requisitos_servicio": "Requisitos por servicio",
     "configFormatos": "Formatos de terapia",
     "estadisticas_servicios": "Estadísticas de Servicios",
-    "estadisticas_diarias": "Estadísticas diarias"
+    "estadisticas_diarias": "Estadísticas diarias",
+    "inventario_existencias": "Existencias"
   },
   "admin": {
     "title": "Administración",
@@ -1681,7 +1682,10 @@
         "a_la_venta": "sale al facturar",
         "a_la_entrega": "sale al aplicar",
         "no_descarga": "no descarga"
-      }
+      },
+      "incluirNoInventariables": "Incluir no inventariables",
+      "asOf": "A la fecha",
+      "asOfHoy": "Hoy"
     },
     "prod": {
       "title": "Productos",
@@ -1889,6 +1893,10 @@
         "transferencias": {
           "title": "Transferencias",
           "desc": "Mover stock entre centros con recepción/aprobación parcial."
+        },
+        "existencias": {
+          "title": "Existencias",
+          "desc": "Cuánto hay de cada producto, por centro y en total."
         }
       }
     },
