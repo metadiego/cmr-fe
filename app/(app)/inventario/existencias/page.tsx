@@ -36,6 +36,11 @@ export default function StockPage() {
   const unico = gate.centros.length === 1 ? gate.centros[0].id : null;
   const [centroSelRaw, setCentroSelRaw] = React.useState<string>("");
   const centroSel = unico ?? centroSelRaw;
+  // Regla del dueño ("que lo entienda un chico de 12"): al entrar YA se ve la tabla, sin elegir centro
+  // antes. "Por centro" nace en un centro relleno (el activo o el primero visible), no en vacío; en
+  // "Consolidado", vacío = todos los centros combinados. El usuario lo cambia después con el selector.
+  const primerCentro = gate.centro || gate.centros[0]?.id || "";
+  const centroCentro = centroSel || primerCentro; // centro EFECTIVO de la vista "Por centro" (nunca vacío)
 
   // Filtros (chips + buscador). q se aplica con debounce; el resto en el acto. Cambiar cualquiera → page 1.
   const [q, setQ] = React.useState("");
@@ -54,8 +59,8 @@ export default function StockPage() {
   }, [q]);
   const resetPage = () => setPage(1);
 
-  // Almacenes del centro (para el filtro en "Por centro").
-  const tenantCentro = (centroSel && centroSel !== "" ? centroSel : gate.centro) || undefined;
+  // Almacenes del centro (para el filtro en "Por centro"). Usa el centro EFECTIVO (nunca vacío).
+  const tenantCentro = centroCentro || undefined;
   const almacenesRes = useResource<Almacen[]>(
     () => (tenantCentro ? listAlmacenes(tenantCentro) : Promise.resolve([])),
     [tenantCentro],
@@ -118,7 +123,7 @@ export default function StockPage() {
         {/* Selector de centro (admin). En consolidado, "Todos" = combinado. */}
         {gate.puedeCambiar && (
           <Select
-            value={centroSel === "" ? TODOS : centroSel}
+            value={vista === "centro" ? centroCentro : (centroSel === "" ? TODOS : centroSel)}
             onValueChange={(v) => { setCentroSelRaw(v === TODOS ? "" : v); setAlmacenId(""); resetPage(); }}
           >
             <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
@@ -187,34 +192,55 @@ export default function StockPage() {
             resumen.items.length === 0 ? (
               <Vacio texto={t("vacioCentro")} />
             ) : (
-              <div className="overflow-x-auto rounded-xl border">
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-muted/60">
-                    <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                      <th className="px-3 py-2 font-semibold">{t("col.producto")}</th>
-                      <th className="px-3 py-2 font-semibold">{t("col.almacen")}</th>
-                      <th className="px-3 py-2 font-semibold">{t("col.lote")}</th>
-                      <th className="px-3 py-2 text-right font-semibold">{t("col.cantidad")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {resumen.items.map((r, i) => (
-                      <tr key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="hover:bg-muted/30">
-                        <td className="px-3 py-2">
-                          <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                          {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
-                          <span className="block text-xs text-muted-foreground">{r.sku}{r.modoDescarga ? ` · ${t(`modo.${r.modoDescarga}` as const)}` : ""}</span>
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">{r.almacenNombre ?? "—"}</td>
-                        <td className="px-3 py-2">
-                          <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
-                        </td>
-                        <td className="px-3 py-2 text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} /></td>
+              <>
+                {/* md+: tabla. La cabecera sale del BE; sin scroll lateral en pantallas normales. */}
+                <div className="hidden overflow-x-auto rounded-xl border md:block">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-muted/60">
+                      <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                        <th className="px-3 py-2 font-semibold">{t("col.producto")}</th>
+                        <th className="px-3 py-2 font-semibold">{t("col.almacen")}</th>
+                        <th className="px-3 py-2 font-semibold">{t("col.lote")}</th>
+                        <th className="px-3 py-2 text-right font-semibold">{t("col.cantidad")}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y">
+                      {resumen.items.map((r, i) => (
+                        <tr key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="hover:bg-muted/30">
+                          <td className="px-3 py-2">
+                            <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
+                            {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                            <span className="block text-xs text-muted-foreground">{r.sku}{r.modoDescarga ? ` · ${t(`modo.${r.modoDescarga}` as const)}` : ""}</span>
+                          </td>
+                          <td className="px-3 py-2 text-muted-foreground">{r.almacenNombre ?? "—"}</td>
+                          <td className="px-3 py-2">
+                            <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
+                          </td>
+                          <td className="px-3 py-2 text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Móvil: cada fila es una TARJETA (nombre + cuánto hay grande a la derecha; almacén/lote debajo). */}
+                <div className="space-y-2 md:hidden">
+                  {resumen.items.map((r, i) => (
+                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="rounded-xl border p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
+                          <div className="truncate text-xs text-muted-foreground">{r.sku}{r.nombreTecnico ? ` · ${r.nombreTecnico}` : ""}</div>
+                        </div>
+                        <Cantidad valor={r.cantidad} negativo={r.negativo} />
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span>{r.almacenNombre ?? "—"}</span>
+                        <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )
           )}
 
@@ -223,33 +249,62 @@ export default function StockPage() {
             consol.items.length === 0 ? (
               <Vacio texto={t("vacioConsolidado")} />
             ) : (
-              <div className="overflow-x-auto rounded-xl border">
-                <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-muted/60">
-                    <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                      <th className="px-3 py-2 font-semibold">{t("col.producto")}</th>
-                      {colCentros.map((c) => <th key={c.id} className="px-3 py-2 text-right font-semibold">{c.nombre}</th>)}
-                      <th className="px-3 py-2 text-right font-semibold">{t("col.total")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {consol.items.map((r) => (
-                      <tr key={r.productoId} className="hover:bg-muted/30">
-                        <td className="px-3 py-2">
-                          <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                          {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
-                          <span className="block text-xs text-muted-foreground">{r.sku}</span>
-                        </td>
+              <>
+                <div className="hidden overflow-x-auto rounded-xl border md:block">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 bg-muted/60">
+                      <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                        <th className="px-3 py-2 font-semibold">{t("col.producto")}</th>
+                        {colCentros.map((c) => <th key={c.id} className="px-3 py-2 text-right font-semibold">{c.nombre}</th>)}
+                        <th className="px-3 py-2 text-right font-semibold">{t("col.total")}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {consol.items.map((r) => (
+                        <tr key={r.productoId} className="hover:bg-muted/30">
+                          <td className="px-3 py-2">
+                            <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
+                            {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                            <span className="block text-xs text-muted-foreground">{r.sku}</span>
+                          </td>
+                          {colCentros.map((c) => {
+                            const v = r.porCentro?.[c.id] ?? 0;
+                            return <td key={c.id} className="px-3 py-2 text-right"><Cantidad valor={v} negativo={v < 0} /></td>;
+                          })}
+                          <td className="px-3 py-2 text-right"><Cantidad valor={r.total} negativo={r.negativo} bold /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Móvil: tarjeta por producto con el Total grande y el desglose por centro debajo. */}
+                <div className="space-y-2 md:hidden">
+                  {consol.items.map((r) => (
+                    <div key={`m-${r.productoId}`} className="rounded-xl border p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
+                          <div className="truncate text-xs text-muted-foreground">{r.sku}{r.nombreTecnico ? ` · ${r.nombreTecnico}` : ""}</div>
+                        </div>
+                        <span className="shrink-0 text-right">
+                          <span className="block text-[10px] uppercase tracking-wide text-muted-foreground">{t("col.total")}</span>
+                          <Cantidad valor={r.total} negativo={r.negativo} bold />
+                        </span>
+                      </div>
+                      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         {colCentros.map((c) => {
                           const v = r.porCentro?.[c.id] ?? 0;
-                          return <td key={c.id} className="px-3 py-2 text-right"><Cantidad valor={v} negativo={v < 0} /></td>;
+                          return (
+                            <span key={c.id}>
+                              {c.nombre}: <span className={"tabular-nums " + (v < 0 ? "font-semibold text-destructive" : "text-foreground")}>{v}</span>
+                            </span>
+                          );
                         })}
-                        <td className="px-3 py-2 text-right"><Cantidad valor={r.total} negativo={r.negativo} bold /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )
           )}
 
@@ -279,9 +334,11 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
+// Números GRANDES y a la derecha (regla del dueño): se comparan de un vistazo; negativo en rojo, sin
+// explicación. `bold` (el Total) va un punto mayor.
 function Cantidad({ valor, negativo, bold }: { valor: number; negativo: boolean; bold?: boolean }) {
   return (
-    <span className={"tabular-nums " + (negativo ? "font-semibold text-destructive" : bold ? "font-bold" : "")}>
+    <span className={"tabular-nums " + (bold ? "text-lg font-bold " : "text-base ") + (negativo ? "font-semibold text-destructive" : "")}>
       {valor}
     </span>
   );
