@@ -285,6 +285,24 @@ export function setItemOpcionales(facturaId: string, itemId: string, incluidos: 
   );
 }
 
+// Personalizar un KIT en la factura (BE PR #293): cambiar cantidad / quitar / AGREGAR componentes de un
+// producto compuesto SOLO en ESTA línea, sin tocar la receta general. Se manda la LISTA FINAL completa
+// ({productoId,cantidad}[]): lo ausente se interpreta como quitado. Esto es lo que entra al frontdesk
+// (menos PEMF = menos disponibilidad). Agregar exige el permiso fino `factura.kit_agregar` (el BE lo
+// valida; el FE no muestra la puerta sin permiso). Devuelve la línea con su `personalizacion` guardada.
+export function personalizarKit(
+  facturaId: string,
+  itemId: string,
+  componentes: { productoId: string; cantidad: number }[],
+  centroId?: string,
+): Promise<FacturaItem> {
+  return apiFetch<FacturaItem>(
+    `/facturas/${facturaId}/items/${itemId}/kit`,
+    { method: "PUT", body: JSON.stringify({ componentes }) },
+    centroId,
+  );
+}
+
 export function setDescuentoGlobal(facturaId: string, payload: DescuentoGlobalPayload, centroId?: string): Promise<FacturaConItems> {
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/descuento-global`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }

@@ -544,7 +544,8 @@
     "print": "Print",
     "rateLimited": "Too many requests. Wait a few seconds and retry.",
     "remove": "Remove",
-    "close": "Close"
+    "close": "Close",
+    "add": "Add"
   },
   "pending": {
     "title": "Access pending",
@@ -2105,7 +2106,19 @@
     "opcionalesEmpty": "This kit has no options",
     "opcionalesExtra": "Options extra",
     "cantEfectivaHint": "Effective quantity (base × multipliers)",
-    "emitFaltaCobrar": "Collect {monto} first to issue"
+    "emitFaltaCobrar": "Collect {monto} first to issue",
+    "kit": {
+      "abrir": "Components",
+      "titulo": "Components of {nombre}",
+      "vacio": "This kit has no components.",
+      "cantidad": "Quantity",
+      "quitar": "Remove",
+      "reponer": "Restore",
+      "agregado": "added",
+      "agregarComponente": "Add component",
+      "buscarProducto": "Search product…",
+      "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

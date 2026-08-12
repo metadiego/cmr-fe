@@ -544,7 +544,8 @@
     "print": "Imprimir",
     "rateLimited": "Demasiadas solicitudes. Espera unos segundos y reintenta.",
     "remove": "Quitar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "add": "Agregar"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -2105,7 +2106,19 @@
     "opcionalesEmpty": "Este kit no tiene opcionales",
     "opcionalesExtra": "Extra por opcionales",
     "cantEfectivaHint": "Cantidad efectiva (base × multiplicadores)",
-    "emitFaltaCobrar": "Falta cobrar {monto} para emitir"
+    "emitFaltaCobrar": "Falta cobrar {monto} para emitir",
+    "kit": {
+      "abrir": "Componentes",
+      "titulo": "Componentes de {nombre}",
+      "vacio": "Este kit no tiene componentes.",
+      "cantidad": "Cantidad",
+      "quitar": "Quitar",
+      "reponer": "Reponer",
+      "agregado": "agregado",
+      "agregarComponente": "Agregar componente",
+      "buscarProducto": "Buscar producto…",
+      "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
