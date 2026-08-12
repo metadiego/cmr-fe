@@ -111,8 +111,16 @@ export function deleteProveedor(id: string): Promise<void> {
   return apiFetch<void>(`/inventario/proveedores/${id}`, { method: "DELETE" });
 }
 
-export type CreateProductoPayload = components["schemas"]["CreateProductoDto"];
-export type UpdateProductoPayload = components["schemas"]["UpdateProductoDto"];
+// `grupoFacturacionId` (uuid | null) YA lo acepta el BE en create/update de producto (verificado por HTTP:
+// PUT con el campo responde 200 y persiste). El schema generado aún no lo refleja (drift pendiente de
+// gen:api), así que lo añadimos aquí explícitamente. null = "sin grupo" (insumo que se consume, no abre
+// columna en frontdesk). Handoff HANDOFF-grupo-de-facturacion-en-la-ficha-del-producto.
+export type CreateProductoPayload = components["schemas"]["CreateProductoDto"] & {
+  grupoFacturacionId?: string | null;
+};
+export type UpdateProductoPayload = components["schemas"]["UpdateProductoDto"] & {
+  grupoFacturacionId?: string | null;
+};
 
 export function createProducto(payload: CreateProductoPayload): Promise<Producto> {
   return apiFetch<Producto>(`/inventario/productos`, {

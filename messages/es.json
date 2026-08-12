@@ -1767,7 +1767,10 @@
         "contenido": "Contenido",
         "unidadContenido": "Unidad",
         "unidadesPorEnvase": "Unidades por envase",
-        "envaseHelp": "Cuánto trae el frasco o caja (p. ej. 10 mg). Con esto la receta calcula cuántas aplicaciones rinde un vial."
+        "envaseHelp": "Cuánto trae el frasco o caja (p. ej. 10 mg). Con esto la receta calcula cuántas aplicaciones rinde un vial.",
+        "grupoNinguno": "Sin grupo (insumo)",
+        "grupoFacturacionHelpSin": "Decide en qué columna del frontdesk aparece el paciente; sin grupo, el producto es un insumo que se consume (no abre columna).",
+        "grupoFacturacionHelpCon": "El paciente aparecerá en la columna del servicio de este grupo ({division}) en el frontdesk."
       },
       "proveedorMas": "+{n}",
       "noResults": "Sin resultados para «{q}»",

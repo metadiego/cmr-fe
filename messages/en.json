@@ -1767,7 +1767,10 @@
         "contenido": "Content",
         "unidadContenido": "Unit",
         "unidadesPorEnvase": "Units per package",
-        "envaseHelp": "How much the vial or box holds (e.g. 10 mg). With this, the recipe computes how many applications a vial yields."
+        "envaseHelp": "How much the vial or box holds (e.g. 10 mg). With this, the recipe computes how many applications a vial yields.",
+        "grupoNinguno": "No group (supply)",
+        "grupoFacturacionHelpSin": "Decides which frontdesk column the patient appears in; with no group, the product is a supply that gets consumed (opens no column).",
+        "grupoFacturacionHelpCon": "The patient will appear in this group’s service column ({division}) at the front desk."
       },
       "proveedorMas": "+{n}",
       "noResults": "No results for “{q}”",

@@ -35,8 +35,6 @@ import {
   listGruposFacturacion,
   listDivisiones,
   crearGrupoFacturacion,
-  setProductosDeGrupo,
-  listTodosProductos,
 } from "@/lib/api/grupos-facturacion";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -575,8 +573,8 @@ function ProductoForm({
     setForm((prev) => ({ ...prev, [k]: v }));
   }
 
-  // Grupo de facturación: asignar a uno existente o crear uno nuevo AL VUELO (sin salir del form).
-  // El BE no acepta grupoFacturacionId en el producto; se asigna por la membresía del grupo tras guardar.
+  // Grupo de facturación: asignar a uno existente, "Sin grupo (insumo)" (null), o crear uno nuevo AL VUELO
+  // (sin salir del form). Viaja DIRECTO en el producto (grupoFacturacionId), verificado contra el BE.
   const tRoot = useTranslations();
   const gruposRes = useResource(() => listGruposFacturacion(), []);
   const divisionesRes = useResource(() => listDivisiones(), []);
@@ -659,6 +657,9 @@ function ProductoForm({
         aplicaPrecioBaseDevolucion: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
         ...(form.tipo === "compuesto" ? { imprimeComponentes: form.imprimeComponentes } : {}),
+        // Grupo de facturación (directo al BE): uuid ancla el producto a su servicio de frontdesk; null =
+        // "sin grupo (insumo)" — se consume, no abre columna. Explícito (no "no mandar el campo").
+        grupoFacturacionId: form.grupoFacturacionId ? form.grupoFacturacionId : null,
       };
       let savedId: string;
       if (isEdit && producto) {
@@ -672,24 +673,9 @@ function ProductoForm({
         } as CreateProductoPayload);
         savedId = creado.id;
       }
-      // Asignación de grupo por MEMBRESÍA (el producto no lleva grupoFacturacionId en su DTO): si
-      // cambió respecto al actual, se reemplaza la membresía del grupo destino (y se saca del anterior).
-      const targetGrupo = id(form.grupoFacturacionId);
-      const prevGrupo = producto?.grupoFacturacionId ?? undefined;
-      if (targetGrupo !== prevGrupo && (targetGrupo || prevGrupo)) {
-        const all = await listTodosProductos();
-        if (targetGrupo) {
-          const miembros = all
-            .filter((p) => p.grupoFacturacionId === targetGrupo && p.id !== savedId)
-            .map((p) => p.id);
-          await setProductosDeGrupo(targetGrupo, [...miembros, savedId]);
-        } else if (prevGrupo) {
-          const miembros = all
-            .filter((p) => p.grupoFacturacionId === prevGrupo && p.id !== savedId)
-            .map((p) => p.id);
-          await setProductosDeGrupo(prevGrupo, miembros);
-        }
-      }
+      // El grupo de facturación ya viaja en el propio producto (grupoFacturacionId, arriba): uuid o null
+      // explícito. Ya no hace falta reasignar la membresía del grupo tras guardar.
+      void savedId;
       toast.success(isEdit ? t("updated") : t("created"));
       onOpenChange(false);
       onSaved();
@@ -724,7 +710,8 @@ function ProductoForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={NONE}>{t("field.none")}</SelectItem>
+                  {/* "Sin grupo (insumo)" = null explícito: el producto se consume, no abre columna. */}
+                  <SelectItem value={NONE}>{t("field.grupoNinguno")}</SelectItem>
                   {grupos.map((g) => (
                     <SelectItem key={g.id} value={g.id}>
                       {grupoLabel(g.labelKey, g.clave)} ·{" "}
@@ -733,6 +720,17 @@ function ProductoForm({
                   ))}
                 </SelectContent>
               </Select>
+              {/* Qué implica la elección (sin esto se elige a ciegas). Con grupo, se nombra su división. */}
+              <p className="text-xs text-muted-foreground">
+                {form.grupoFacturacionId
+                  ? t("field.grupoFacturacionHelpCon", {
+                      division: grupoLabel(
+                        `fac.division.${grupos.find((g) => g.id === form.grupoFacturacionId)?.division ?? ""}`,
+                        grupos.find((g) => g.id === form.grupoFacturacionId)?.division ?? "",
+                      ),
+                    })
+                  : t("field.grupoFacturacionHelpSin")}
+              </p>
               {nuevoGrupo ? (
                 <div className="space-y-2 rounded-lg border p-2">
                   <Input
