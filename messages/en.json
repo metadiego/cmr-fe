@@ -543,7 +543,8 @@
     "noResults": "No results",
     "print": "Print",
     "rateLimited": "Too many requests. Wait a few seconds and retry.",
-    "remove": "Remove"
+    "remove": "Remove",
+    "close": "Close"
   },
   "pending": {
     "title": "Access pending",
@@ -1685,7 +1686,22 @@
       },
       "incluirNoInventariables": "Include non-stocked",
       "asOf": "As of",
-      "asOfHoy": "Today"
+      "asOfHoy": "Today",
+      "detalle": {
+        "title": "Stock detail",
+        "almacen": "Warehouse",
+        "lote": "Lot",
+        "cantidad": "Quantity",
+        "total": "Total",
+        "fisico": "Physical",
+        "reservado": "Reserved",
+        "comprometido": "Committed",
+        "danado": "Damaged",
+        "disponible": "Available",
+        "vacio": "No breakdown for this product.",
+        "error": "Could not load the detail. Try again.",
+        "notaMovimientos": "This shows where it is and in what state. The history of what came in and out is coming soon."
+      }
     },
     "prod": {
       "title": "Products",

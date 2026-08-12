@@ -6,8 +6,10 @@ import { useTranslations } from "next-intl";
 import {
   getStockResumen,
   getStockConsolidado,
+  getStockDetalle,
   type StockResumenFila,
   type StockConsolidadoFila,
+  type StockDetalleFila,
 } from "@/lib/api/stock";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { useResource } from "@/hooks/use-resource";
@@ -53,6 +55,9 @@ export default function StockPage() {
   // Por defecto solo lo inventariable; incluir no-inventariables sirve para auditar negativos imposibles.
   const [incluirNI, setIncluirNI] = React.useState(false);
   const [page, setPage] = React.useState(1);
+  // Clic en un producto → modal con su DESGLOSE (por almacén/lote y estado): explica dónde está y por qué
+  // un negativo. (El historial Entró/Salió aún no lo sirve el BE; ver handoff.)
+  const [detalleDe, setDetalleDe] = React.useState<{ productoId: string; nombre: string } | null>(null);
   React.useEffect(() => {
     const h = setTimeout(() => { setQApplied(q); setPage(1); }, 350);
     return () => clearTimeout(h);
@@ -206,7 +211,7 @@ export default function StockPage() {
                     </thead>
                     <tbody className="divide-y">
                       {resumen.items.map((r, i) => (
-                        <tr key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="hover:bg-muted/30">
+                        <tr key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer hover:bg-muted/30" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                           <td className="px-3 py-2">
                             <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
                             {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
@@ -225,7 +230,7 @@ export default function StockPage() {
                 {/* Móvil: cada fila es una TARJETA (nombre + cuánto hay grande a la derecha; almacén/lote debajo). */}
                 <div className="space-y-2 md:hidden">
                   {resumen.items.map((r, i) => (
-                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="rounded-xl border p-3">
+                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-xl border p-3" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
@@ -261,7 +266,7 @@ export default function StockPage() {
                     </thead>
                     <tbody className="divide-y">
                       {consol.items.map((r) => (
-                        <tr key={r.productoId} className="hover:bg-muted/30">
+                        <tr key={r.productoId} className="cursor-pointer hover:bg-muted/30" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                           <td className="px-3 py-2">
                             <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
                             {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
@@ -280,7 +285,7 @@ export default function StockPage() {
                 {/* Móvil: tarjeta por producto con el Total grande y el desglose por centro debajo. */}
                 <div className="space-y-2 md:hidden">
                   {consol.items.map((r) => (
-                    <div key={`m-${r.productoId}`} className="rounded-xl border p-3">
+                    <div key={`m-${r.productoId}`} className="cursor-pointer rounded-xl border p-3" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
@@ -317,6 +322,10 @@ export default function StockPage() {
             </div>
           )}
         </>
+      )}
+
+      {detalleDe && (
+        <DetalleModal producto={detalleDe} centro={tenantCentro} onClose={() => setDetalleDe(null)} />
       )}
     </div>
   );
@@ -358,4 +367,120 @@ function Lote({ numero, fecha, vencido, porVencer, tVencido, tPorVencer }: { num
 
 function Vacio({ texto }: { texto: string }) {
   return <p className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{texto}</p>;
+}
+
+// Clic en un producto → DESGLOSE: dónde está (almacén/lote) y en qué estado (físico, reservado,
+// comprometido, dañado, disponible). Palabras normales, números grandes a la derecha (regla del dueño).
+// NO es el historial Entró/Salió (el BE aún no lo sirve): un aviso lo dice sin código ni jerga.
+function DetalleModal({
+  producto,
+  centro,
+  onClose,
+}: {
+  producto: { productoId: string; nombre: string };
+  centro?: string;
+  onClose: () => void;
+}) {
+  const t = useTranslations("inventario.stock");
+  const tc = useTranslations("common");
+  const { state } = useResource<StockDetalleFila[]>(
+    () => getStockDetalle(producto.productoId, centro),
+    [producto.productoId, centro ?? ""],
+  );
+  const filas = state.kind === "ok" ? state.data : null;
+  const error = state.kind === "fail" ? t("detalle.error") : null;
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  // Columnas de estado: solo las que traiga algún dato (no ensuciar con ceros que no aplican).
+  const cols: { key: keyof StockDetalleFila; label: string }[] = (
+    [
+      ["fisico", t("detalle.fisico")],
+      ["reservado", t("detalle.reservado")],
+      ["comprometido", t("detalle.comprometido")],
+      ["dañado", t("detalle.danado")],
+      ["disponible", t("detalle.disponible")],
+    ] as const
+  )
+    .filter(([k]) => (filas ?? []).some((f) => typeof f[k] === "number"))
+    .map(([key, label]) => ({ key, label }));
+
+  const total = (filas ?? []).reduce((s, f) => s + (f.cantidad ?? 0), 0);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="max-h-[85vh] w-full max-w-2xl overflow-auto rounded-2xl border bg-background shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 border-b p-5">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("detalle.title")}</p>
+            <h2 className="mt-0.5 text-lg font-semibold">{producto.nombre}</h2>
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose}>{tc("close")}</Button>
+        </div>
+
+        <div className="p-5">
+          {error ? (
+            <p className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-6 text-center text-sm text-destructive">{error}</p>
+          ) : filas === null ? (
+            <p className="px-4 py-12 text-center text-sm text-muted-foreground">{tc("loading")}</p>
+          ) : filas.length === 0 ? (
+            <Vacio texto={t("detalle.vacio")} />
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+                      <th className="py-2 pr-3 font-medium">{t("detalle.almacen")}</th>
+                      <th className="py-2 pr-3 font-medium">{t("detalle.lote")}</th>
+                      {cols.map((c) => (
+                        <th key={String(c.key)} className="py-2 pl-3 text-right font-medium">{c.label}</th>
+                      ))}
+                      <th className="py-2 pl-3 text-right font-medium">{t("detalle.cantidad")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filas.map((f, i) => (
+                      <tr key={`${f.almacenId ?? ""}-${f.loteId ?? ""}-${i}`} className="border-b last:border-0">
+                        <td className="py-2 pr-3">{f.almacenNombre ?? "—"}</td>
+                        <td className="py-2 pr-3 tabular-nums">{f.numeroLote ?? "—"}</td>
+                        {cols.map((c) => (
+                          <td key={String(c.key)} className="py-2 pl-3 text-right tabular-nums">{nf.format(Number(f[c.key] ?? 0))}</td>
+                        ))}
+                        <td className="py-2 pl-3 text-right">
+                          <Cantidad valor={f.cantidad} negativo={!!f.negativo || f.cantidad < 0} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2">
+                      <td className="py-2 pr-3 font-semibold" colSpan={2 + cols.length}>{t("detalle.total")}</td>
+                      <td className="py-2 pl-3 text-right">
+                        <Cantidad valor={total} negativo={total < 0} bold />
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <p className="mt-4 rounded-xl bg-muted/40 px-4 py-3 text-xs text-muted-foreground">{t("detalle.notaMovimientos")}</p>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

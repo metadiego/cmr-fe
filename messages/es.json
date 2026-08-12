@@ -543,7 +543,8 @@
     "noResults": "Sin resultados",
     "print": "Imprimir",
     "rateLimited": "Demasiadas solicitudes. Espera unos segundos y reintenta.",
-    "remove": "Quitar"
+    "remove": "Quitar",
+    "close": "Cerrar"
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -1685,7 +1686,22 @@
       },
       "incluirNoInventariables": "Incluir no inventariables",
       "asOf": "A la fecha",
-      "asOfHoy": "Hoy"
+      "asOfHoy": "Hoy",
+      "detalle": {
+        "title": "Detalle de existencia",
+        "almacen": "Almacén",
+        "lote": "Lote",
+        "cantidad": "Cantidad",
+        "total": "Total",
+        "fisico": "Físico",
+        "reservado": "Reservado",
+        "comprometido": "Comprometido",
+        "danado": "Dañado",
+        "disponible": "Disponible",
+        "vacio": "Sin desglose para este producto.",
+        "error": "No se pudo cargar el detalle. Intenta de nuevo.",
+        "notaMovimientos": "Esto muestra dónde está y en qué estado. El historial de qué entró y qué salió llega pronto."
+      }
     },
     "prod": {
       "title": "Productos",

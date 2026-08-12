@@ -1,4 +1,4 @@
-import { apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged } from "./client";
 import type { Paginated } from "./types";
 
 // Stock por centro y consolidado (BE PR #248). SOLO LECTURA. Tenant-scoped: gerente ve su centro; admin
@@ -87,4 +87,30 @@ export function getStockConsolidado(
   sp.set("limit", String(Math.min(params.limit ?? 50, 100)));
   // `centro` undefined → admin combinado (todos los centros); un id → recortado a ese centro (1 columna).
   return apiFetchPaged<StockConsolidadoFila>(`/inventario/stock/consolidado?${sp.toString()}`, {}, centro);
+}
+
+// Detalle de la existencia de UN producto: desglose por almacén/lote con los estados que componen la
+// cantidad (físico, reservado, comprometido, dañado, disponible). Explica DÓNDE está y por qué un negativo.
+// NOTA: NO es el libro de movimientos (Entró/Salió); ese historial aún no tiene endpoint en el BE.
+// GET /inventario/stock/detalle?productoId= — tenant-scoped (centro activo).
+export type StockDetalleFila = {
+  productoId: string;
+  almacenId?: string | null;
+  almacenNombre?: string | null;
+  loteId?: string | null;
+  numeroLote?: string | null;
+  cantidad: number;
+  negativo?: boolean;
+  fisico?: number;
+  reservado?: number;
+  comprometido?: number;
+  dañado?: number;
+  disponible?: number;
+};
+export function getStockDetalle(productoId: string, centro?: string | null): Promise<StockDetalleFila[]> {
+  return apiFetch<unknown>(
+    `/inventario/stock/detalle?productoId=${encodeURIComponent(productoId)}`,
+    {},
+    centro,
+  ).then((r) => (Array.isArray(r) ? (r as StockDetalleFila[]) : (((r as { items?: StockDetalleFila[] })?.items) ?? [])));
 }
