@@ -339,7 +339,8 @@
       "save": "Guardar",
       "saveAnyway": "Guardar de todos modos",
       "created": "Cita creada.",
-      "updated": "Cita actualizada."
+      "updated": "Cita actualizada.",
+      "noDoctor": "Sin médico"
     }
   },
   "appointments": {

@@ -68,13 +68,18 @@ export function EstadoSelect({
   // Authority: if the current state isn't in this board's editable set (e.g. the
   // AP board moved it to presente/atendida), CC can't change it → read-only.
   if (!def) {
+    // Respaldo: nunca pintar una clave a medias ("citas.estado." con estado vacío). Con estado válido y
+    // traducción, se usa; si falta la traducción, la clave cruda del estado; si viene vacío (dato ausente
+    // del BE), un guion. Handoff citas-medico-y-confirmada / agenda-dia-estado-y-medico-nulos.
+    const key = `citas.estado.${estado}`;
+    const label = !estado ? "—" : tRoot.has(key) ? tRoot(key) : estado;
     return (
       <span
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground"
         title={tRoot("tableroBoard.managedByAtencion")}
       >
         <HugeiconsIcon icon={LockedIcon} className="size-3.5" />
-        {tRoot(`citas.estado.${estado}`)}
+        {label}
       </span>
     );
   }

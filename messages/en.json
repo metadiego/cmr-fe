@@ -339,7 +339,8 @@
       "save": "Save",
       "saveAnyway": "Save anyway",
       "created": "Appointment created.",
-      "updated": "Appointment updated."
+      "updated": "Appointment updated.",
+      "noDoctor": "No doctor"
     }
   },
   "appointments": {

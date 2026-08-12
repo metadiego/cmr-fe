@@ -21,7 +21,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
 import { useEstados } from "@/hooks/use-estados";
 import { Badge } from "@/components/ui/badge";
-import { addMinutes } from "@/lib/agenda/calendar";
+import { addMinutes, todayISO } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +42,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PacienteSelect } from "@/components/citas/paciente-select";
+
+// Centinela "Sin médico" para que el Select nunca quede en vacío (Radix no admite value="").
+const NONE_MEDICO = "__sin_medico__";
 
 export function CitaModal({
   open,
@@ -98,6 +101,12 @@ export function CitaModal({
     return tp ? addMinutes(start, tp.duracionMin) : "09:30";
   });
   const [esPrimeraVez, setEsPrimeraVez] = React.useState(cita?.esPrimeraVez ?? false);
+  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Una cita solo
+  // entra al tablero de Atención si está confirmada, así que para una cita de HOY nace "confirmada" por
+  // defecto (lo que se quiere el 99% de las veces). Handoff citas-medico-y-confirmada.
+  const [estadoCrear, setEstadoCrear] = React.useState<"programada" | "confirmada">(
+    fecha === todayISO() ? "confirmada" : "programada",
+  );
   const [motivo, setMotivo] = React.useState(cita?.motivo ?? "");
   const [notas, setNotas] = React.useState(cita?.notas ?? "");
   const [submitting, setSubmitting] = React.useState(false);
@@ -167,7 +176,7 @@ export function CitaModal({
       };
       const { advertencias } = isEdit
         ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
-        : await crearCitaAgenda({ ...payload, callcenterId }, effectiveCentro || undefined);
+        : await crearCitaAgenda({ ...payload, estado: estadoCrear, callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
       toast.success(isEdit ? t("updated") : t("created"));
       for (const a of advertencias) {
@@ -221,12 +230,15 @@ export function CitaModal({
             <Field label={t("patient")} required>
               <PacienteSelect value={paciente} onChange={setPaciente} />
             </Field>
+            {/* El selector NUNCA sale vacío: si no hay médico, queda en "Sin médico" (no bloquea el
+                guardado salvo que el TIPO exija médico). Handoff citas-medico-y-confirmada. */}
             <Field label={t("doctor")} required={medicoRequired}>
-              <Select value={medicoId || undefined} onValueChange={(v) => { setMedicoId(v); setWarn(null); }}>
+              <Select value={medicoId || NONE_MEDICO} onValueChange={(v) => { setMedicoId(v === NONE_MEDICO ? "" : v); setWarn(null); }}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("doctorPlaceholder")} />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
                   {medicos.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
                       {[m.nombre, m.apellido].filter(Boolean).join(" ")}
@@ -256,14 +268,35 @@ export function CitaModal({
               </Select>
             </Field>
             <Field label={t("status")}>
-              <div className="flex h-9 items-center">
-                <Badge
-                  variant="secondary"
-                  style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
-                >
-                  {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
-                </Badge>
-              </div>
+              {isEdit ? (
+                <div className="flex h-9 items-center">
+                  <Badge
+                    variant="secondary"
+                    style={estadoDef ? { backgroundColor: `${estadoDef.color}20`, color: estadoDef.color } : undefined}
+                  >
+                    {estadoDef ? tRoot(estadoDef.labelKey) : t("statusScheduled")}
+                  </Badge>
+                </div>
+              ) : (
+                // Al crear: elegir con qué estado nace (allowlist BE). Confirmada = entra al tablero de
+                // Atención de una vez. Colores/etiquetas del catálogo (data-driven).
+                <Select value={estadoCrear} onValueChange={(v) => setEstadoCrear(v as "programada" | "confirmada")}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(["programada", "confirmada"] as const).map((clave) => {
+                      const d = estadosMap.get(clave);
+                      return (
+                        <SelectItem key={clave} value={clave}>
+                          <span className="inline-flex items-center gap-2">
+                            <span className="size-2.5 rounded-full" style={{ backgroundColor: d?.color ?? "#999" }} />
+                            {d ? tRoot(d.labelKey) : clave}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              )}
             </Field>
           </div>
 
