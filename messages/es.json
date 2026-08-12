@@ -1153,7 +1153,8 @@
     "col": {
       "zona": "Zona"
     },
-    "no_emitida_pendiente_pago": "No se emitió: la factura tiene saldo pendiente de cobro."
+    "no_emitida_pendiente_pago": "No se emitió: la factura tiene saldo pendiente de cobro.",
+    "ya_emitida": "La factura ya estaba emitida (no se renumera)."
   },
   "zona": {
     "rodilla": "Rodilla",
@@ -2123,7 +2124,7 @@
       "buscarProducto": "Buscar producto…",
       "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto."
     },
-    "imprimirNoEmitida": "Se imprimió, pero la factura no quedó emitida: falta cobrarla."
+    "imprimirNoEmitida": "La factura no se emitió al imprimir."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

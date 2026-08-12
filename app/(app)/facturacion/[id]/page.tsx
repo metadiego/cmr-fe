@@ -178,7 +178,12 @@ export default function FacturacionPage() {
       const r = await imprimirFactura(id, centro);
       setFactura(r.factura);
       if (!r.emitida && r.motivo) {
-        toast.warning(tRoot.has(r.motivo) ? tRoot(r.motivo) : t("imprimirNoEmitida"));
+        // El motivo viene como labelKey del BE (factura.no_emitida_pendiente_pago, factura.ya_emitida…).
+        // Ámbar solo cuando falta cobrar (hay `pendiente`); neutral para reimpresiones normales (ya
+        // emitida/anulada/devuelta). Nunca como error: imprimir es válido igual.
+        const msg = tRoot.has(r.motivo) ? tRoot(r.motivo) : t("imprimirNoEmitida");
+        if (r.pendiente) toast.warning(msg);
+        else toast.info(msg);
       }
     } catch (err) {
       // Un fallo al emitir NO debe impedir imprimir: se avisa y se imprime igual.

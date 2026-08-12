@@ -1153,7 +1153,8 @@
     "col": {
       "zona": "Zone"
     },
-    "no_emitida_pendiente_pago": "Not issued: the invoice has a pending balance."
+    "no_emitida_pendiente_pago": "Not issued: the invoice has a pending balance.",
+    "ya_emitida": "The invoice was already issued (not renumbered)."
   },
   "zona": {
     "rodilla": "Knee",
@@ -2123,7 +2124,7 @@
       "buscarProducto": "Search product…",
       "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe."
     },
-    "imprimirNoEmitida": "Printed, but the invoice was not issued: it still needs payment."
+    "imprimirNoEmitida": "The invoice was not issued when printing."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
