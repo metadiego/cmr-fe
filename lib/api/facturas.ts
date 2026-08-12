@@ -320,6 +320,22 @@ export function emitirFactura(facturaId: string, centroId?: string): Promise<Fac
   return apiFetch<FacturaConItems>(`/facturas/${facturaId}/emitir`, { method: "POST" }, centroId);
 }
 
+// Imprimir = EMITIR si procede (BE, desplegado). Un borrador SALDADO se emite (número/fecha definitivos,
+// entra al cuadre) y `emitida:true`; un borrador SIN cobrar NO se emite pero NO bloquea la impresión
+// (`emitida:false`, `motivo:"factura.no_emitida_pendiente_pago"`, `pendiente` con lo que falta); ya
+// emitida/anulada/devuelta no hace nada (idempotente). El FE llama esto ANTES de window.print(), refresca
+// con la factura devuelta y, si emitida=false con motivo, lo muestra como AVISO (no error): imprimir es
+// válido igual. Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
+export interface ImprimirFacturaResult {
+  factura: FacturaConItems;
+  emitida: boolean;
+  motivo?: string | null;
+  pendiente?: { saldo?: number; montoAbonado?: number; total?: number } | null;
+}
+export function imprimirFactura(facturaId: string, centroId?: string): Promise<ImprimirFacturaResult> {
+  return apiFetch<ImprimirFacturaResult>(`/facturas/${facturaId}/imprimir`, { method: "POST" }, centroId);
+}
+
 // Anular una factura emitida (RBAC factura.anular; motivo obligatorio). El BE sella
 // actor/fecha. La ventana "mismo día" es configurable en el BE.
 export function anularFactura(facturaId: string, motivo: string, centroId?: string): Promise<FacturaConItems> {

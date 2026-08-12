@@ -32,7 +32,8 @@
     "tipo": {
       "nueva": "Consultation (New)",
       "seguimiento": "Follow-up"
-    }
+    },
+    "paciente_ya_es_seguimiento": "This patient has already been seen: they are a follow-up, cannot be booked as new."
   },
   "tableroBoard": {
     "live": "Live",
@@ -340,7 +341,8 @@
       "saveAnyway": "Save anyway",
       "created": "Appointment created.",
       "updated": "Appointment updated.",
-      "noDoctor": "No doctor"
+      "noDoctor": "No doctor",
+      "followUpPatient": "Follow-up patient (already seen)"
     }
   },
   "appointments": {
@@ -1150,7 +1152,8 @@
   "factura": {
     "col": {
       "zona": "Zone"
-    }
+    },
+    "no_emitida_pendiente_pago": "Not issued: the invoice has a pending balance."
   },
   "zona": {
     "rodilla": "Knee",
@@ -2119,7 +2122,8 @@
       "agregarComponente": "Add component",
       "buscarProducto": "Search product…",
       "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe."
-    }
+    },
+    "imprimirNoEmitida": "Printed, but the invoice was not issued: it still needs payment."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

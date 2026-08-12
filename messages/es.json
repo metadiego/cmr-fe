@@ -32,7 +32,8 @@
     "tipo": {
       "nueva": "Consulta (Nueva)",
       "seguimiento": "Seguimiento"
-    }
+    },
+    "paciente_ya_es_seguimiento": "Este paciente ya fue atendido: es de seguimiento, no puede agendarse como nuevo."
   },
   "tableroBoard": {
     "live": "En vivo",
@@ -340,7 +341,8 @@
       "saveAnyway": "Guardar de todos modos",
       "created": "Cita creada.",
       "updated": "Cita actualizada.",
-      "noDoctor": "Sin médico"
+      "noDoctor": "Sin médico",
+      "followUpPatient": "Paciente de seguimiento (ya fue atendido)"
     }
   },
   "appointments": {
@@ -1150,7 +1152,8 @@
   "factura": {
     "col": {
       "zona": "Zona"
-    }
+    },
+    "no_emitida_pendiente_pago": "No se emitió: la factura tiene saldo pendiente de cobro."
   },
   "zona": {
     "rodilla": "Rodilla",
@@ -2119,7 +2122,8 @@
       "agregarComponente": "Agregar componente",
       "buscarProducto": "Buscar producto…",
       "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto."
-    }
+    },
+    "imprimirNoEmitida": "Se imprimió, pero la factura no quedó emitida: falta cobrarla."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

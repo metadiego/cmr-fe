@@ -24,6 +24,7 @@ import {
   type ItemOpcional,
   buscarPaciente,
   emitirFactura,
+  imprimirFactura,
   regenerarDisponibilidad,
   type RegenerarDisponibilidad,
   type FacturaConItems,
@@ -41,6 +42,7 @@ import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/fact
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
+import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
@@ -167,6 +169,26 @@ export default function FacturacionPage() {
     }
   }
 
+  // Imprimir PASA POR EL SERVIDOR: un borrador saldado se emite (número/fecha definitivos, entra al
+  // cuadre) antes de imprimir; uno sin cobrar imprime igual pero avisa que no quedó emitido. Refrescamos
+  // la factura con lo que devuelve el BE y, tras pintar el recibo definitivo, mandamos a imprimir.
+  // Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
+  async function imprimir() {
+    try {
+      const r = await imprimirFactura(id, centro);
+      setFactura(r.factura);
+      if (!r.emitida && r.motivo) {
+        toast.warning(tRoot.has(r.motivo) ? tRoot(r.motivo) : t("imprimirNoEmitida"));
+      }
+    } catch (err) {
+      // Un fallo al emitir NO debe impedir imprimir: se avisa y se imprime igual.
+      toastError(err, tRoot);
+    } finally {
+      // Esperar a que el recibo se repinte con el número/estado definitivos antes de imprimir.
+      requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+    }
+  }
+
   if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
   if (!factura) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
 
@@ -234,7 +256,7 @@ export default function FacturacionPage() {
               {t("descartar")}
             </Button>
           )}
-          <Button variant="outline" size="sm" className="no-print" onClick={() => window.print()}>
+          <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {tRoot("receipt.print")}
           </Button>
@@ -301,7 +323,7 @@ export default function FacturacionPage() {
       <section className="mt-8">
         <div className="mb-3 flex items-center justify-between no-print">
           <h2 className="text-sm font-semibold text-muted-foreground">{tRoot("receipt.previewTitle")}</h2>
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Button variant="outline" size="sm" onClick={imprimir}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {tRoot("receipt.print")}
           </Button>

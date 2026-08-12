@@ -113,7 +113,13 @@ export function CitaModal({
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
 
   const tipo = tipos.find((x) => x.id === tipoCitaId);
-  const medicoRequired = !!tipo?.requiereMedico && !esPrimeraVez;
+  // "Primera vez" es un HECHO del historial, no una preferencia: si el paciente ya fue atendido
+  // (`atendidoPor`), es de seguimiento y el BE rechaza crearlo como nuevo (400
+  // CITA_PACIENTE_YA_ES_SEGUIMIENTO). No ofrecemos la opción para no dejar elegir algo que se va a
+  // rechazar. Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
+  const yaSeguimiento = !!(paciente as { atendidoPor?: string | null } | null)?.atendidoPor;
+  const esPrimeraVezEff = yaSeguimiento ? false : esPrimeraVez;
+  const medicoRequired = !!tipo?.requiereMedico && !esPrimeraVezEff;
 
   // Pick a type → auto-fill end time (start + duración), reset any prior warning.
   function onTipoChange(id: string) {
@@ -170,7 +176,7 @@ export function CitaModal({
         hora,
         horaFin,
         canal: "callcenter" as const,
-        esPrimeraVez,
+        esPrimeraVez: esPrimeraVezEff,
         motivo: motivo.trim() || undefined,
         notas: notas.trim() || undefined,
       };
@@ -300,10 +306,17 @@ export function CitaModal({
             </Field>
           </div>
 
-          <label className="flex items-center gap-2 text-sm">
-            <Checkbox checked={esPrimeraVez} onCheckedChange={(v) => setEsPrimeraVez(v === true)} />
-            {t("firstVisit")}
-          </label>
+          {yaSeguimiento ? (
+            // Paciente con historial: no se ofrece "primera vez" (es de seguimiento). Solo informa.
+            <p className="inline-flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
+              {t("followUpPatient")}
+            </p>
+          ) : (
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={esPrimeraVez} onCheckedChange={(v) => setEsPrimeraVez(v === true)} />
+              {t("firstVisit")}
+            </label>
+          )}
 
           <Field label={t("reason")}>
             <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />
