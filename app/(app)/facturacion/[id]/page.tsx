@@ -378,14 +378,16 @@ function Editor({
     listasRes.state.kind === "ok"
       ? (listasRes.state.data.find((l) => l.id === (factura as { tipoPrecioId?: string }).tipoPrecioId)?.nombre ?? null)
       : null;
-  // IVU activo: el BE calcula el impuesto SOLO si el ítem lleva impuestoId → lo mandamos cuando
-  // la línea es gravada (el cajero decide con el toggle IVU). Sin él, gravado no hace nada.
+  // Impuestos APLICABLES: solo los que NO son componentes de desglose (parentId null) y están activos.
+  // NO hay "impuesto por defecto" (regla del dueño): el FE NO autoselecciona ni manda impuestoId al crear
+  // una línea — el servidor resuelve el impuesto correcto por la cascada precio→presentación→producto (y
+  // así no se pierde el Municipal). Estos aplicables solo pueblan el selector de CORRECCIÓN de una línea.
+  // Handoff HANDOFF-ivu-compuesto-y-corregir-impuesto-de-linea.
   const impuestosRes = useResource<Impuesto[]>(() => listImpuestos(), []);
-  const ivuId =
-    impuestosRes.state.kind === "ok"
-      ? (impuestosRes.state.data.find((i) => i.esDefault && i.activo)?.id ??
-         impuestosRes.state.data.find((i) => i.activo)?.id ?? null)
-      : null;
+  const impuestosAplicables = React.useMemo(
+    () => (impuestosRes.state.kind === "ok" ? impuestosRes.state.data.filter((i) => !i.parentId && i.activo) : []),
+    [impuestosRes.state],
+  );
 
   // Ediciones locales (cantidad/precio) por item → cálculo INSTANTÁNEO al teclear;
   // se persiste al salir del campo. Sembrado del servidor (el padre remonta al guardar).
@@ -432,6 +434,8 @@ function Editor({
   // Toggle IVU por línea. WORKAROUND: PUT items no acepta `gravado` (UpdateItemDto no lo
   // tiene) → borramos y re-agregamos con el gravado invertido. Ver mini-handoff BE
   // (pos-item-gravado-y-descartar-borrador). Cuando BE lo agregue al PUT, será un PUT directo.
+  // NO se manda impuestoId: al quedar gravada, el servidor resuelve el impuesto correcto por la cascada
+  // del precio (así no se pierde el Municipal). Handoff HANDOFF-ivu-compuesto-y-corregir-impuesto-de-linea.
   function toggleGravado(it: FacturaItem) {
     const nuevoGravado = !it.gravado;
     run(async () => {
@@ -444,8 +448,6 @@ function Editor({
           cantidad: n(it.cantidad),
           precioUnitario: n(it.precioUnitario),
           gravado: nuevoGravado,
-          // IVU solo si queda gravado (el BE necesita impuestoId para calcularlo).
-          ...(nuevoGravado && ivuId ? { impuestoId: ivuId } : {}),
         },
         centro,
       );
@@ -469,6 +471,11 @@ function Editor({
   const [opcItemId, setOpcItemId] = React.useState<string | null>(null);
   // Personalizar el kit de una línea (quitar/cambiar cantidad/agregar componentes) → lo que entra a frontdesk.
   const [kitItem, setKitItem] = React.useState<FacturaItem | null>(null);
+  // Corregir el impuesto de una línea (incluso emitida): abre el diálogo de corrección.
+  const [impuestoItem, setImpuestoItem] = React.useState<FacturaItem | null>(null);
+  // Impuestos de UNA línea, discriminados (Estatal/Municipal…), tal cual los proyecta el BE.
+  const impuestosDeLinea = (it: FacturaItem) =>
+    (it as { impuestos?: { clave?: string; nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [];
 
   // Multiplicadores (láser: áreas×días). Data-driven desde meta.multiplicadores; sin asumir cuáles ni cuántos.
   // Cantidad EFECTIVA = base × Π(multiplicadores). El label de cada clave sale de fac.col.<clave> (i18n).
@@ -543,6 +550,29 @@ function Editor({
                       {multsDe(it) && (
                         <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
                       )}
+                      {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
+                          data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
+                      {impuestosDeLinea(it).length > 0 && (
+                        <span className="block text-[11px] text-muted-foreground">
+                          {impuestosDeLinea(it).map((im, i) => (
+                            <span key={i}>
+                              {i > 0 ? " · " : ""}
+                              {(im.nombre || "") + (im.tasa != null ? ` ${im.tasa}%` : "")}: {money(im.monto)}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                      {/* Corregir el impuesto de una línea EMITIDA (recomputa totales, puede dejar saldo).
+                          Solo con permiso factura.reparar — el sistema deja arreglar, no bloquear. */}
+                      {!esBorrador && esGeneral && can("factura.reparar") && (
+                        <button
+                          type="button"
+                          onClick={() => setImpuestoItem(it)}
+                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                        >
+                          {t("corregirImpuesto.abrir")}
+                        </button>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-right">
                       {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
@@ -608,7 +638,6 @@ function Editor({
           <AddItem
             catalogo={catalogo}
             showIvu={esGeneral}
-            ivuId={ivuId}
             tipoPrecioId={(factura as { tipoPrecioId?: string }).tipoPrecioId ?? null}
             tenant={(factura as { clinicId?: string }).clinicId ?? centro ?? null}
             disabled={busy}
@@ -705,6 +734,19 @@ function Editor({
           centro={centro}
           onOpenChange={(o) => !o && setKitItem(null)}
           onSaved={() => { setKitItem(null); run(() => Promise.resolve()); }}
+        />
+      )}
+
+      {impuestoItem && (
+        <CorregirImpuestoDialog
+          key={impuestoItem.id}
+          open={!!impuestoItem}
+          facturaId={id}
+          item={impuestoItem}
+          impuestos={impuestosAplicables}
+          centro={centro}
+          onOpenChange={(o) => !o && setImpuestoItem(null)}
+          onSaved={() => { setImpuestoItem(null); run(() => Promise.resolve()); }}
         />
       )}
     </div>
@@ -1116,6 +1158,81 @@ function PersonalizarKitDialog({
   );
 }
 
+// Corregir el IMPUESTO de una línea, incluso en una factura EMITIDA (caso real: salió con el impuesto
+// equivocado). PUT /facturas/:id/items/:itemId {impuestoId} recomputa los totales y puede dejar saldo
+// (se cobra la diferencia normal). Solo lista impuestos APLICABLES (parentId null); el desglose
+// Estatal/Municipal lo calcula el servidor. Gate factura.reparar (ya resuelto por quien abre el botón).
+// Handoff HANDOFF-ivu-compuesto-y-corregir-impuesto-de-linea.
+function CorregirImpuestoDialog({
+  open,
+  onOpenChange,
+  facturaId,
+  item,
+  impuestos,
+  centro,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  facturaId: string;
+  item: FacturaItem;
+  impuestos: Impuesto[];
+  centro?: string;
+  onSaved: () => void;
+}) {
+  const t = useTranslations("facturacion");
+  const tc = useTranslations("common");
+  const tRoot = useTranslations();
+  const SIN = "__sin_impuesto__";
+  const [sel, setSel] = React.useState<string>(item.impuestoId ? String(item.impuestoId) : SIN);
+  const [saving, setSaving] = React.useState(false);
+
+  async function guardar() {
+    setSaving(true);
+    try {
+      await actualizarItem(facturaId, item.id, { impuestoId: sel === SIN ? null : sel } as never, centro);
+      onSaved();
+    } catch (err) {
+      toastError(err, tRoot);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("corregirImpuesto.titulo", { nombre: item.descripcion ?? "" })}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1.5">
+            <Lbl>{t("corregirImpuesto.impuesto")}</Lbl>
+            <Select value={sel} onValueChange={setSel}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {/* "Sin impuesto" (exento) + solo los APLICABLES (parentId null): nunca sus componentes. */}
+                <SelectItem value={SIN}>{t("corregirImpuesto.sinImpuesto")}</SelectItem>
+                {impuestos.map((im) => (
+                  <SelectItem key={im.id} value={im.id}>
+                    {(im.nombre || im.clave) + (im.tasa != null ? ` (${im.tasa}%)` : "")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+          <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            {t("corregirImpuesto.aviso")}
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
+            <Button size="sm" onClick={guardar} disabled={saving}>{tc("save")}</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // Diálogo para CORREGIR el paciente de un borrador sin descartar. Reusa el finder (buscarPaciente,
 // nombre/record/doc, debounce ≥2 chars). Al elegir → PUT /facturas/:id/paciente en el padre.
 function CambiarPacienteDialog({
@@ -1296,7 +1413,7 @@ function CabeceraDialog({
   );
 }
 
-function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; ivuId?: string | null; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; impuestoId?: string; meta?: Record<string, number | string> }) => void }) {
+function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; meta?: Record<string, number | string> }) => void }) {
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
@@ -1431,8 +1548,9 @@ function AddItem({ catalogo, showIvu, ivuId, tipoPrecioId, tenant, disabled, onA
       descripcion: prod.nombre,
       cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
       ...(precioUnitarioEff !== undefined ? { precioUnitario: precioUnitarioEff } : {}),
+      // Solo el flag gravado: NO se manda impuestoId — el servidor resuelve el impuesto correcto por la
+      // cascada del precio (así el desglose Estatal+Municipal sale completo). Handoff IVU compuesto.
       gravado: g,
-      ...(g && ivuId ? { impuestoId: ivuId } : {}),
       ...(Object.keys(meta).length ? { meta } : {}),
     });
     setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({});

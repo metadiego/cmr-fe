@@ -76,6 +76,11 @@ export interface Impuesto {
   nombre?: string;
   tasa?: number;
   activo?: boolean;
+  // `parentId` != null → es un COMPONENTE del desglose (Estatal/Municipal), NO un impuesto aplicable.
+  // Aplicables = parentId null (p. ej. IVU PR 11.5%). El desglose lo calcula el servidor.
+  parentId?: string | null;
+  // NO existe "impuesto por defecto" en PR (regla del dueño 14-ago): se activan/desactivan; cada producto
+  // trae los suyos. Se conserva el campo por compatibilidad pero no debe usarse para autoseleccionar.
   esDefault?: boolean;
 }
 export function listImpuestos(): Promise<Impuesto[]> {

@@ -2127,7 +2127,14 @@
       "buscarProducto": "Search product…",
       "avisoFrontdesk": "This changes what the patient will receive at the front desk, not the product recipe."
     },
-    "imprimirNoEmitida": "The invoice was not issued when printing."
+    "imprimirNoEmitida": "The invoice was not issued when printing.",
+    "corregirImpuesto": {
+      "abrir": "Fix tax",
+      "titulo": "Fix tax for {nombre}",
+      "impuesto": "Tax",
+      "sinImpuesto": "No tax (exempt)",
+      "aviso": "Recomputes the invoice totals and may leave a balance to collect."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

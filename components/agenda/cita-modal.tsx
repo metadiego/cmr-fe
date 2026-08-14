@@ -92,7 +92,10 @@ export function CitaModal({
 
   const [paciente, setPaciente] = React.useState<Paciente | null>(pacienteInicial ?? null);
   const [tipoCitaId, setTipoCitaId] = React.useState(cita?.tipoCitaId ?? tipoCitaIdInicial ?? "");
-  const [medicoId, setMedicoId] = React.useState(cita?.medicoId ?? "");
+  // El médico llega PRESELECCIONADO: el de la cita (edición) o el asignado al paciente (`paciente.medicoId`).
+  // Vacío = "Sin médico" (opción nula, nunca un registro comodín). Handoff agenda-estado-y-el-medico-comodin.
+  const medicoDelPaciente = (p: Paciente | null) => (p as { medicoId?: string | null } | null)?.medicoId ?? "";
+  const [medicoId, setMedicoId] = React.useState(cita?.medicoId ?? medicoDelPaciente(pacienteInicial ?? null));
   const [hora, setHora] = React.useState(cita?.hora ?? horaInicial ?? "09:00");
   const [horaFin, setHoraFin] = React.useState(() => {
     if (cita?.horaFin) return cita.horaFin;
@@ -234,7 +237,14 @@ export function CitaModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("patient")} required>
-              <PacienteSelect value={paciente} onChange={setPaciente} />
+              <PacienteSelect
+                value={paciente}
+                onChange={(p) => {
+                  setPaciente(p);
+                  // Preseleccionar el médico del paciente si aún no se eligió uno (no pisa una elección manual).
+                  if (!medicoId && medicoDelPaciente(p)) setMedicoId(medicoDelPaciente(p));
+                }}
+              />
             </Field>
             {/* El selector NUNCA sale vacío: si no hay médico, queda en "Sin médico" (no bloquea el
                 guardado salvo que el TIPO exija médico). Handoff citas-medico-y-confirmada. */}

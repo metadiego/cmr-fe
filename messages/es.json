@@ -2127,7 +2127,14 @@
       "buscarProducto": "Buscar producto…",
       "avisoFrontdesk": "Esto cambia lo que el paciente va a recibir en el frontdesk, no la receta del producto."
     },
-    "imprimirNoEmitida": "La factura no se emitió al imprimir."
+    "imprimirNoEmitida": "La factura no se emitió al imprimir.",
+    "corregirImpuesto": {
+      "abrir": "Corregir impuesto",
+      "titulo": "Corregir impuesto de {nombre}",
+      "impuesto": "Impuesto",
+      "sinImpuesto": "Sin impuesto (exento)",
+      "aviso": "Recalcula los totales de la factura y puede dejar un saldo por cobrar."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
