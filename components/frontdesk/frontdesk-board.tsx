@@ -22,6 +22,7 @@ import {
   type FrontdeskColumna,
   type FrontdeskFila,
   type FrontdeskTablero,
+  type FrontdeskTotal,
   type Sesion,
   type DisponibilidadServicio,
   type PaqueteDisponibilidad,
@@ -659,6 +660,11 @@ export function FrontdeskBoard() {
               ))}
           </div>
 
+          {/* Contador del DÍA (gramos → viales): se activa solo al abrir la pestaña del servicio. */}
+          {board?.totales && board.totales.length > 0 && (
+            <TotalesDia totales={board.totales} servicio={servicioActivo?.nombre} />
+          )}
+
           {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
           {boardRes.state.kind === "fail" && (
             <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -755,6 +761,59 @@ export function FrontdeskBoard() {
         defaultServicioId={programar.servicioId}
         onDone={refetch}
       />
+    </div>
+  );
+}
+
+// Plural español simple para la unidad del insumo (vial→viales, caja→cajas; "dosis" no cambia).
+function pluralES(u: string, n: number): string {
+  if (!u || n === 1) return u ?? "";
+  if (/s$/i.test(u)) return u; // ya termina en s (dosis)
+  return /[aeiouáéíóú]$/i.test(u) ? `${u}s` : `${u}es`;
+}
+
+// ————— Contador del DÍA por servicio (gramos → viales) —————
+// Se activa al abrir la pestaña (llega en `totales`). Muestra el total con su unidad y, si hay
+// equivalencia, los viales SIN redondear (el decimal dice que quedó vial abierto). Sin equivalencia,
+// solo el total. Data-driven: N contadores. Handoff HANDOFF-contador-del-dia-en-el-tablero.
+function TotalesDia({ totales, servicio }: { totales: FrontdeskTotal[]; servicio?: string }) {
+  const tRoot = useTranslations();
+  const t = useTranslations("frontdesk");
+  const nf = new Intl.NumberFormat("es-PR", { maximumFractionDigits: 2 });
+  const rotulo = (x: FrontdeskTotal) => (tRoot.has(x.labelKey) ? tRoot(x.labelKey) : x.columna);
+  return (
+    <div className="mb-4 flex flex-wrap gap-3">
+      {totales.map((x) => {
+        const eq = x.equivalencia;
+        return (
+          <div
+            key={x.columna}
+            className="flex items-center gap-4 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5"
+          >
+            <div className="flex flex-col">
+              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {[servicio, t("hoy")].filter(Boolean).join(" · ")}
+              </span>
+              <span className="text-sm font-medium">{rotulo(x)}</span>
+            </div>
+            <span className="text-2xl font-bold tabular-nums">
+              {nf.format(x.total)}
+              {x.unidad ? <span className="ml-1 text-base font-semibold text-muted-foreground">{x.unidad}</span> : null}
+            </span>
+            {eq && eq.cantidad != null && (
+              <span
+                className="rounded-lg bg-background/70 px-2.5 py-1 text-lg font-semibold tabular-nums ring-1 ring-border"
+                title={eq.capacidad != null ? t("vialDe", { capacidad: nf.format(eq.capacidad), unidad: x.unidad ?? "" }) : undefined}
+              >
+                {nf.format(eq.cantidad)}
+                <span className="ml-1 text-sm font-medium text-muted-foreground">
+                  {eq.unidad ? pluralES(eq.unidad, Number(eq.cantidad)) : t("viales")}
+                </span>
+              </span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

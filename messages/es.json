@@ -1385,7 +1385,10 @@
     "nurseElegir": "Elegir enfermera(o)",
     "nurseReset": "Reset (disponible)",
     "nurseActuales": "Estatus actuales",
-    "enfermera": "Enfermera"
+    "enfermera": "Enfermera",
+    "hoy": "Hoy",
+    "viales": "viales",
+    "vialDe": "Vial de {capacidad} {unidad}"
   },
   "programarCitas": {
     "title": "Programar citas",

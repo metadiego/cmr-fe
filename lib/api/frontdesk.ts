@@ -128,7 +128,25 @@ export type FrontdeskColumna = {
   color: string | null;
 };
 export type FrontdeskFila = { id: string } & Record<string, unknown>;
-export type FrontdeskTablero = { columnas: FrontdeskColumna[]; filas: FrontdeskFila[] };
+
+// Contador del DÍA que "se activa" al abrir la pestaña del servicio (BE, GET /frontdesk/tablero): suma lo
+// que corresponde EXACTAMENTE a las filas devueltas (canceladas no suman). Es derivado: corregir una dosis
+// corrige el contador solo. `equivalencia` (opcional) traduce el total a viales/insumo por el `contenido`
+// del insumo (p. ej. 90 g → 3,6 viales de 25 g). `cantidad` NO se redondea: el decimal es la información
+// (queda vial abierto). Handoff HANDOFF-contador-del-dia-en-el-tablero.
+export type FrontdeskTotal = {
+  columna: string;
+  labelKey: string;
+  total: number;
+  unidad?: string | null;
+  equivalencia?: {
+    insumoSku?: string | null;
+    cantidad: number;
+    unidad?: string | null;
+    capacidad?: number | null;
+  } | null;
+};
+export type FrontdeskTablero = { columnas: FrontdeskColumna[]; filas: FrontdeskFila[]; totales?: FrontdeskTotal[] };
 
 export function getFrontdeskTablero(
   servicio: string,

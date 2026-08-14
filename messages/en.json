@@ -1385,7 +1385,10 @@
     "nurseElegir": "Pick nurse",
     "nurseReset": "Reset (available)",
     "nurseActuales": "Current statuses",
-    "enfermera": "Nurse"
+    "enfermera": "Nurse",
+    "hoy": "Today",
+    "viales": "vials",
+    "vialDe": "{capacidad} {unidad} vial"
   },
   "programarCitas": {
     "title": "Schedule sessions",
