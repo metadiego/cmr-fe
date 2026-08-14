@@ -320,6 +320,7 @@ function CentroSheet({
                                 tipo={col.tipo}
                                 value={fila[col.clave]}
                                 centroId={centro.clinicId}
+                                etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
                                 onChanged={onChanged}
                               />
                             ) : col.tipo === "accion" ? (

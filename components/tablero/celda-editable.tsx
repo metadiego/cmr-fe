@@ -7,6 +7,7 @@ import { Edit02Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 
 import { editarCelda } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
+import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { Input } from "@/components/ui/input";
 import { HistorialDialog } from "@/components/tablero/historial-dialog";
 
@@ -20,6 +21,7 @@ export function CeldaEditable({
   tipo,
   value,
   centroId,
+  etiqueta,
   onChanged,
 }: {
   tablero: string;
@@ -28,9 +30,11 @@ export function CeldaEditable({
   tipo: string; // column tipo (texto/hora/…) → input kind
   value: unknown;
   centroId?: string;
+  etiqueta?: string; // nombre humano de la columna para el toast de certificación
   onChanged: () => void;
 }) {
   const t = useTranslations("tableroBoard");
+  const notifyPersistencia = usePersistenciaToast();
   const original = value == null ? "" : String(value);
   const [editing, setEditing] = React.useState(false);
   const [val, setVal] = React.useState(original);
@@ -44,7 +48,10 @@ export function CeldaEditable({
     }
     setBusy(true);
     try {
-      await editarCelda({ tablero, entidadId, columna, valor: val }, centroId);
+      const { persistencia } = await editarCelda({ tablero, entidadId, columna, valor: val }, centroId);
+      // El toast CERTIFICA con lo que quedó en la base. Si ok:false, onChanged() re-lee la fila y la celda
+      // vuelve sola a la verdad (no dejamos en pantalla un número que no se guardó).
+      notifyPersistencia(persistencia, etiqueta);
       setEditing(false);
       onChanged();
     } catch (err) {

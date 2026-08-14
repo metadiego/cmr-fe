@@ -1384,7 +1384,8 @@
     },
     "nurseElegir": "Pick nurse",
     "nurseReset": "Reset (available)",
-    "nurseActuales": "Current statuses"
+    "nurseActuales": "Current statuses",
+    "enfermera": "Nurse"
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -2946,5 +2947,9 @@
   },
   "tenant": {
     "no_encontrado": "The selected center does not exist"
+  },
+  "persistencia": {
+    "guardado": "Saved",
+    "noGuardado": "NOT saved"
   }
 }

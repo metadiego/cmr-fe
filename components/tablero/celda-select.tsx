@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { editarCelda, type Opcion } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
+import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,7 @@ export function CeldaSelect({
   value,
   options,
   centroId,
+  etiqueta,
   onSaved,
 }: {
   tablero: string;
@@ -33,9 +35,11 @@ export function CeldaSelect({
   value: unknown;
   options: Opcion[];
   centroId?: string;
+  etiqueta?: string; // nombre humano de la columna para el toast de certificación
   onSaved?: () => void;
 }) {
   const tRoot = useTranslations();
+  const notifyPersistencia = usePersistenciaToast();
   const [busy, setBusy] = React.useState(false);
   // Optimistic: reflect the pick INSTANTLY; server + SSE confirm.
   const [optimistic, setOptimistic] = React.useState<string | null>(null);
@@ -52,7 +56,10 @@ export function CeldaSelect({
     setBusy(true);
     setOptimistic(next); // instant feedback
     try {
-      await editarCelda({ tablero, entidadId, columna, valor: next }, centroId);
+      const { persistencia } = await editarCelda({ tablero, entidadId, columna, valor: next }, centroId);
+      // Certifica con la base. Si ok:false, soltamos el optimista y onSaved() re-lee la verdad.
+      const ok = notifyPersistencia(persistencia, etiqueta);
+      if (!ok) setOptimistic(null);
       onSaved?.();
     } catch (err) {
       setOptimistic(null); // revert on failure

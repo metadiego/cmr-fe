@@ -1,5 +1,6 @@
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchEnvelope } from "./client";
 import type { components } from "./schema";
+import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
 
@@ -183,11 +184,19 @@ export function getFilas(
 // POST /tablero/celda — edit an editable cell. BE validates the column is
 // editable in that tablero, maps by binding (allowlist), applies it and records
 // a `campo_editado` audit event (antes/después + actor) + SSE. tenant scopes it.
-export function editarCelda(
+// Devuelve la fila (`data`) + el CERTIFICADO de persistencia (`meta.persistencia`), que el BE arma
+// releyendo la base. El FE lo usa para el toast que certifica y, si ok:false, revertir la celda.
+// Handoff HANDOFF-toast-que-certifica-la-persistencia.
+export async function editarCelda(
   body: { tablero: string; entidadId: string; columna: string; valor: unknown },
   centroId?: string,
-): Promise<unknown> {
-  return apiFetch(`/tablero/celda`, { method: "POST", body: JSON.stringify(body) }, centroId);
+): Promise<{ data: unknown; persistencia?: Persistencia }> {
+  const env = await apiFetchEnvelope<unknown>(
+    `/tablero/celda`,
+    { method: "POST", body: JSON.stringify(body) },
+    centroId,
+  );
+  return { data: env.data, persistencia: env.meta?.persistencia };
 }
 
 // An option for a data-driven `select` cell (GET /tablero/opciones). Populated

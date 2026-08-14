@@ -1384,7 +1384,8 @@
     },
     "nurseElegir": "Elegir enfermera(o)",
     "nurseReset": "Reset (disponible)",
-    "nurseActuales": "Estatus actuales"
+    "nurseActuales": "Estatus actuales",
+    "enfermera": "Enfermera"
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -2946,5 +2947,9 @@
   },
   "tenant": {
     "no_encontrado": "El centro seleccionado no existe"
+  },
+  "persistencia": {
+    "guardado": "Guardado",
+    "noGuardado": "NO se guardó"
   }
 }

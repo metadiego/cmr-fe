@@ -11,6 +11,7 @@ import { editarCelda, type Opcion, type Transicion } from "@/lib/api/tablero";
 import { asignarEnfermeraVitales } from "@/lib/api/citas";
 import { listPersonalPorCapacidad } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
+import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
 import { CeldaSelect } from "@/components/tablero/celda-select";
@@ -134,6 +135,7 @@ function NotificarCell({
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
+  const notifyPersistencia = usePersistenciaToast();
   const [open, setOpen] = React.useState(false);
   // El render manda TODO (data-driven): panel/sección del aviso; y para el asignado: de qué columna sale
   // (`asignadoDe`, p. ej. fd_enfermera), dónde se escribe (`asignadoWriteBinding`, p. ej. cita.enfermeraId
@@ -183,10 +185,13 @@ function NotificarCell({
     try {
       if (esCita) {
         // Atención: la enfermera de vitales vive en la cita (writeBinding cita.enfermeraId → enfermeraVitalesId).
+        // (Esta ruta es una transición de cita, aún sin certificado de persistencia — pendiente en el BE.)
         await asignarEnfermeraVitales(fila.id, pid || null, centroId);
       } else {
         // Servicio: la columna de enfermera está colocada; se escribe por celda (resuelve sesion.enfermeraId).
-        await editarCelda({ tablero, entidadId: fila.id, columna: asignadoDe, valor: pid }, centroId);
+        // Certifica con lo que quedó en la base.
+        const { persistencia } = await editarCelda({ tablero, entidadId: fila.id, columna: asignadoDe, valor: pid }, centroId);
+        notifyPersistencia(persistencia, tRoot.has("frontdesk.enfermera") ? tRoot("frontdesk.enfermera") : undefined);
       }
       onRefresh?.();
     } catch (e) {
@@ -355,6 +360,7 @@ export function TableroDinamico({
           value={fila[col.clave]}
           options={optionsByCol?.[col.clave] ?? []}
           centroId={centroId}
+          etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
           onSaved={onRefresh}
         />
       );

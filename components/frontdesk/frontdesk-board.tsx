@@ -36,6 +36,7 @@ import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { useDictado } from "@/hooks/use-dictado";
+import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
@@ -833,6 +834,7 @@ function FilaSesion({
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
   const { can } = useCan();
+  const notifyPersistencia = usePersistenciaToast();
   const [busy, setBusy] = React.useState(false);
   const [historialOpen, setHistorialOpen] = React.useState(false);
   const [comprasOpen, setComprasOpen] = React.useState(false);
@@ -865,6 +867,18 @@ function FilaSesion({
     } finally {
       setBusy(false);
     }
+  }
+
+  // Etiqueta humana de una columna para el toast de certificación (label propio → i18n → clave cruda).
+  const etiquetaCol = (c: FrontdeskColumna): string =>
+    (c as { label?: string | null }).label ?? (tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave);
+  // Guardar una celda CERTIFICANDO: escribe y muestra el toast con lo que quedó en la base (verde) o el
+  // motivo (rojo); onChanged() re-lee la fila, así una escritura fallida revierte sola a la verdad.
+  // Handoff HANDOFF-toast-que-certifica-la-persistencia.
+  async function guardarCelda(columna: string, valor: unknown, etiqueta?: string) {
+    const { persistencia } = await editarCelda({ tablero, entidadId: fila.id, columna, valor }, centro);
+    notifyPersistencia(persistencia, etiqueta);
+    return persistencia;
   }
 
   function celda(c: FrontdeskColumna) {
@@ -983,10 +997,7 @@ function FilaSesion({
             if (esDosis && agotada(valor)) toast.warning(t("dosis.avisoSinSaldo"));
             run(async () => {
               try {
-                return await editarCelda(
-                  { tablero, entidadId: fila.id, columna: c.clave, valor },
-                  centro,
-                );
+                return await guardarCelda(c.clave, valor, etiquetaCol(c));
               } catch (e) {
                 // Si falla la escritura, revierte el reflejo optimista.
                 setPendSelect((p) => {
@@ -1037,7 +1048,7 @@ function FilaSesion({
           col={c}
           sesion={sesion}
           disabled={busy || cancelada}
-          onSave={(valor) => run(() => editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor }, centro))}
+          onSave={(valor) => run(() => guardarCelda(c.clave, valor, etiquetaCol(c)))}
         />
       );
     }
@@ -1086,7 +1097,7 @@ function FilaSesion({
         setPendSelect((p) => ({ ...p, [c.clave]: nuevo }));
         run(async () => {
           try {
-            return await editarCelda({ tablero, entidadId: fila.id, columna: c.clave, valor: nuevo }, centro);
+            return await guardarCelda(c.clave, nuevo, etiquetaCol(c));
           } catch (e) {
             setPendSelect((p) => { const n = { ...p }; delete n[c.clave]; return n; });
             throw e;
@@ -1360,7 +1371,7 @@ function FilaSesion({
             pacienteNombre={String(fila.paciente ?? "")}
             enfermeras={optionsByCol["fd_enfermera"] ?? []}
             enfermeraActual={(() => { const raw = fila["fd_enfermera"]; const ops = optionsByCol["fd_enfermera"] ?? []; return ops.find((o) => o.value === raw || o.label === raw)?.value; })()}
-            onAsignarEnfermera={(pid) => run(() => editarCelda({ tablero, entidadId: fila.id, columna: "fd_enfermera", valor: pid }, centro))}
+            onAsignarEnfermera={(pid) => run(() => guardarCelda("fd_enfermera", pid, tRoot.has("tb.col.enfermera") ? tRoot("tb.col.enfermera") : t("enfermera")))}
             centro={centro}
           />
         )}

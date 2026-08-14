@@ -15,6 +15,22 @@ export interface ApiMeta {
   // Avisos no bloqueantes de una escritura exitosa (p. ej. cupo excedido al agendar,
   // BE PR #168). El FE los muestra como toast traducido por `labelKey`.
   warnings?: ApiWarning[];
+  // CERTIFICADO de persistencia (BE, POST /tablero/celda): el bloque se arma RELEYENDO la fila de la base
+  // tras guardar, no con lo que el servidor creía escribir. `ok:false` = no quedó (validador, carrera, no
+  // se pudo releer). El FE lo muestra en un toast y, si ok:false, devuelve la celda a `campos` (la verdad).
+  // Handoff HANDOFF-toast-que-certifica-la-persistencia.
+  persistencia?: Persistencia;
+}
+
+export interface Persistencia {
+  ok: boolean;
+  entidad?: string;
+  id?: string;
+  // Ruta del dato → valor REAL en la base (p. ej. { "datos.tubos": 8 }). Con ok:false trae lo que hay
+  // de verdad (a veces null): esa es la fuente de verdad para revertir la celda.
+  campos?: Record<string, unknown>;
+  guardadoEn?: string | null; // updatedAt de la fila releída (hora de la BASE, no del navegador)
+  motivo?: string;
 }
 
 export interface ApiWarning {
