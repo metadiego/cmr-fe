@@ -1212,11 +1212,12 @@ function CorregirImpuestoDialog({
               <SelectContent>
                 {/* "Sin impuesto" (exento) + solo los APLICABLES (parentId null): nunca sus componentes. */}
                 <SelectItem value={SIN}>{t("corregirImpuesto.sinImpuesto")}</SelectItem>
-                {impuestos.map((im) => (
-                  <SelectItem key={im.id} value={im.id}>
-                    {(im.nombre || im.clave) + (im.tasa != null ? ` (${im.tasa}%)` : "")}
-                  </SelectItem>
-                ))}
+                {impuestos.map((im) => {
+                  // El nombre del catálogo a veces YA trae la tasa ("IVU PR (11.5%)"): no duplicarla.
+                  const base = im.nombre || im.clave;
+                  const label = im.tasa != null && !/%/.test(base) ? `${base} (${im.tasa}%)` : base;
+                  return <SelectItem key={im.id} value={im.id}>{label}</SelectItem>;
+                })}
               </SelectContent>
             </Select>
           </label>
