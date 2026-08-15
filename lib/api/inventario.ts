@@ -255,6 +255,47 @@ export function deletePresentacionProveedor(id: string): Promise<void> {
   });
 }
 
+// Presentaciones del PRODUCTO (el "vial": contenido + su unidad). Cambiar de vial = elegir la ACTIVA
+// (esDefault); el BE deja exactamente UNA. `contenido`/`unidadContenidoId` los añadió el BE (drift del
+// schema pendiente de gen:api). No hay borrado: se pone activo:false y se queda (histórico/viales apuntan).
+// Handoff HANDOFF-viales-presentaciones-y-remanente.
+export type Presentacion = components["schemas"]["PresentacionEntity"] & {
+  contenido?: number | null;
+  unidadContenidoId?: string | null;
+};
+export type CreatePresentacionPayload = components["schemas"]["CreatePresentacionDto"] & {
+  contenido?: number | null;
+  unidadContenidoId?: string | null;
+};
+export type UpdatePresentacionPayload = components["schemas"]["UpdatePresentacionDto"] & {
+  contenido?: number | null;
+  unidadContenidoId?: string | null;
+};
+export function listPresentaciones(productoId: string, centroId?: string): Promise<Presentacion[]> {
+  return apiFetch<Presentacion[]>(`/inventario/presentaciones?productoId=${encodeURIComponent(productoId)}`, {}, centroId);
+}
+export function createPresentacion(payload: CreatePresentacionPayload, centroId?: string): Promise<Presentacion> {
+  return apiFetch<Presentacion>(`/inventario/presentaciones`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+export function updatePresentacion(id: string, payload: UpdatePresentacionPayload, centroId?: string): Promise<Presentacion> {
+  return apiFetch<Presentacion>(`/inventario/presentaciones/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+
+// Viales ABIERTOS de un producto (por dosis): el remanente NO se guarda, se deriva de las dosis apuntadas
+// contra el vial (corregir una dosis lo corrige solo). `remanente` nunca negativo: si se aplicó de más,
+// llega remanente:0 + `excedido` con la diferencia (mostrar en ámbar, es dato a revisar). Campos nuevos
+// del BE (schema stale). Ordenar por más viejo primero (orden en que el sistema los consume).
+export type VialAbierto = components["schemas"]["VialAbiertoEntity"] & {
+  consumido?: number;
+  remanente?: number;
+  porcentajeUsado?: number;
+  agotado?: boolean;
+  excedido?: number;
+};
+export function listVialesAbiertos(productoId: string, centroId?: string): Promise<VialAbierto[]> {
+  return apiFetch<VialAbierto[]>(`/inventario/viales-abiertos?productoId=${encodeURIComponent(productoId)}`, {}, centroId);
+}
+
 // Recetas de compuestos (bill-of-materials): un producto `compuesto` (derivado) consume
 // N componentes (base|unico) en cierta cantidad/unidad. Al vender/entregar, el BE descarga
 // la receta. GET devuelve IDs crudos → el FE resuelve nombres con productos+unidades.

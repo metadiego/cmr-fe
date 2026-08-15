@@ -1981,6 +1981,32 @@
       "insumo": "Insumos",
       "compuesto": "Compuestos",
       "servicio": "Servicios"
+    },
+    "viales": {
+      "abiertosTitle": "Viales abiertos",
+      "sinAbiertos": "No hay viales abiertos de este producto.",
+      "cargando": "Cargando…",
+      "vialDe": "Vial de {capacidad} {unidad}",
+      "restan": "restan",
+      "excedido": "Excedido: {n} {unidad}",
+      "consumidoDe": "Usado {consumido} de {total} {unidad}",
+      "presentacionesTitle": "Presentaciones del vial",
+      "activa": "Activa",
+      "marcarActiva": "Marcar como activa",
+      "activada": "«{nombre}» es ahora la presentación activa",
+      "contenidoVial": "{contenido} {unidad} por vial",
+      "sinVial": "Sin contenido de vial definido",
+      "dejarDeComprar": "Dejar de comprar",
+      "reactivar": "Reactivar",
+      "nuevaPresentacion": "Nueva presentación",
+      "nombrePlaceholder": "Nombre (p. ej. Vial 60 mg / 3 mL (20 mg/mL))",
+      "contenidoPlaceholder": "Contenido",
+      "unidadPlaceholder": "Unidad",
+      "crear": "Crear",
+      "cancelar": "Cancelar",
+      "crearInvalido": "Falta el nombre, el contenido o la unidad.",
+      "creada": "Presentación creada",
+      "avisoDesdeAhora": "El cambio de vial activo aplica a los viales que se abran a partir de ahora; los ya abiertos conservan su capacidad."
     }
   },
   "receipt": {

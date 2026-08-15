@@ -61,6 +61,7 @@ import {
 } from "@/components/ui/sheet";
 import { AmpEditorSheet } from "@/components/inventario/amp-editor-sheet";
 import { InsumosEditorSheet } from "@/components/inventario/insumos-editor-sheet";
+import { VialYPresentaciones } from "@/components/inventario/vial-y-presentaciones";
 
 const NONE = "__none__";
 const TIPOS = ["base", "unico", "compuesto", "servicio"] as const;
@@ -959,6 +960,14 @@ function ProductoForm({
           {isEdit && producto && form.tipo === "compuesto" && (
             <div className="pt-1">
               <DescargaSimuladaPanel productoId={producto.id} />
+            </div>
+          )}
+
+          {/* Viales abiertos (remanente) + presentaciones del vial (cambiar = elegir la activa). Solo con
+              producto existente. Handoff HANDOFF-viales-presentaciones-y-remanente. */}
+          {isEdit && producto && (
+            <div className="pt-1">
+              <VialYPresentaciones productoId={producto.id} />
             </div>
           )}
         </div>

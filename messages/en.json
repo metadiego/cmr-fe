@@ -1981,6 +1981,32 @@
       "insumo": "Supplies",
       "compuesto": "Bundles",
       "servicio": "Services"
+    },
+    "viales": {
+      "abiertosTitle": "Open vials",
+      "sinAbiertos": "No open vials for this product.",
+      "cargando": "Loading…",
+      "vialDe": "{capacidad} {unidad} vial",
+      "restan": "left",
+      "excedido": "Exceeded: {n} {unidad}",
+      "consumidoDe": "Used {consumido} of {total} {unidad}",
+      "presentacionesTitle": "Vial presentations",
+      "activa": "Active",
+      "marcarActiva": "Set as active",
+      "activada": "«{nombre}» is now the active presentation",
+      "contenidoVial": "{contenido} {unidad} per vial",
+      "sinVial": "No vial content set",
+      "dejarDeComprar": "Stop buying",
+      "reactivar": "Reactivate",
+      "nuevaPresentacion": "New presentation",
+      "nombrePlaceholder": "Name (e.g. Vial 60 mg / 3 mL (20 mg/mL))",
+      "contenidoPlaceholder": "Content",
+      "unidadPlaceholder": "Unit",
+      "crear": "Create",
+      "cancelar": "Cancel",
+      "crearInvalido": "Name, content or unit is missing.",
+      "creada": "Presentation created",
+      "avisoDesdeAhora": "Changing the active vial applies to vials opened from now on; already-open vials keep their capacity."
     }
   },
   "receipt": {
