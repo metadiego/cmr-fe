@@ -722,7 +722,8 @@
     "configFormatos": "Therapy formats",
     "estadisticas_servicios": "Service Statistics",
     "estadisticas_diarias": "Daily statistics",
-    "inventario_existencias": "Stock on hand"
+    "inventario_existencias": "Stock on hand",
+    "ventasPorGrupo": "Sales by group"
   },
   "admin": {
     "title": "Administration",
@@ -2164,6 +2165,42 @@
       "impuesto": "Tax",
       "sinImpuesto": "No tax (exempt)",
       "aviso": "Recomputes the invoice totals and may leave a balance to collect."
+    },
+    "ventasPorGrupo": {
+      "title": "Sales by group",
+      "help": "What moves and what is in demand, by billing group. Not cash: product movement. The breakdown matches the invoice total for the period exactly.",
+      "from": "From",
+      "to": "To",
+      "division": "Division",
+      "search": "Search",
+      "exportCsv": "Export CSV",
+      "div": {
+        "todas": "All",
+        "general": "General",
+        "consulta": "Consultations"
+      },
+      "atajo": {
+        "hoy": "Today",
+        "ayer": "Yesterday",
+        "semana": "This week",
+        "mes": "This month"
+      },
+      "col": {
+        "grupo": "Group",
+        "facturado": "Billed",
+        "descuento": "Discount",
+        "devoluciones": "Returns",
+        "impuesto": "Tax",
+        "envio": "Shipping",
+        "neto": "Net",
+        "facturas": "Invoices"
+      },
+      "totales": "Totals",
+      "nFacturas": "{n} invoices",
+      "cuadra": "Matches the invoice total: {total}",
+      "noCuadra": "Does not match invoices — difference {diferencia}",
+      "sinClasificarTip": "Products with no billing group assigned",
+      "empty": "No invoices in this period."
     }
   },
   "agregarCita": {

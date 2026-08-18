@@ -722,7 +722,8 @@
     "configFormatos": "Formatos de terapia",
     "estadisticas_servicios": "Estadísticas de Servicios",
     "estadisticas_diarias": "Estadísticas diarias",
-    "inventario_existencias": "Existencias"
+    "inventario_existencias": "Existencias",
+    "ventasPorGrupo": "Ventas por grupo"
   },
   "admin": {
     "title": "Administración",
@@ -2164,6 +2165,42 @@
       "impuesto": "Impuesto",
       "sinImpuesto": "Sin impuesto (exento)",
       "aviso": "Recalcula los totales de la factura y puede dejar un saldo por cobrar."
+    },
+    "ventasPorGrupo": {
+      "title": "Ventas por grupo",
+      "help": "Qué se mueve y qué tiene demanda, por grupo de facturación. No es dinero de caja: es movimiento de producto. El desglose cuadra exactamente con el total de las facturas del período.",
+      "from": "Desde",
+      "to": "Hasta",
+      "division": "División",
+      "search": "Buscar",
+      "exportCsv": "Exportar CSV",
+      "div": {
+        "todas": "Todas",
+        "general": "General",
+        "consulta": "Consultas"
+      },
+      "atajo": {
+        "hoy": "Hoy",
+        "ayer": "Ayer",
+        "semana": "Esta semana",
+        "mes": "Este mes"
+      },
+      "col": {
+        "grupo": "Grupo",
+        "facturado": "Facturado",
+        "descuento": "Descuento",
+        "devoluciones": "Devoluciones",
+        "impuesto": "Impuesto",
+        "envio": "Envío",
+        "neto": "Neto",
+        "facturas": "Facturas"
+      },
+      "totales": "Totales",
+      "nFacturas": "{n} facturas",
+      "cuadra": "Cuadra con el total de las facturas: {total}",
+      "noCuadra": "No cuadra con las facturas — diferencia {diferencia}",
+      "sinClasificarTip": "Productos sin grupo de facturación asignado",
+      "empty": "No hay facturas en este período."
     }
   },
   "agregarCita": {
