@@ -2231,7 +2231,15 @@
       "totales": "Totales",
       "sinUsuario": "Sin usuario",
       "empty": "No hay ventas en este período."
-    }
+    },
+    "atendidoPor": "Atendido por",
+    "integracion": "Integración",
+    "sinUsuario": "Sin usuario",
+    "corregirUsuario": "Corregir",
+    "corregirUsuarioTitle": "Corregir usuario responsable",
+    "usuarioResponsable": "Usuario responsable",
+    "elegirUsuario": "Elegir usuario",
+    "corregirUsuarioAyuda": "De este usuario salen las estadísticas de quién vende. En borrador corrige quién la creó; en emitida, quién cobró."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

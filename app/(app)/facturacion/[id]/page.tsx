@@ -42,6 +42,7 @@ import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/fact
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
+import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
@@ -84,6 +85,7 @@ export default function FacturacionPage() {
   const [cambiarOpen, setCambiarOpen] = React.useState(false);
   const [cabeceraOpen, setCabeceraOpen] = React.useState(false);
   const [regenOpen, setRegenOpen] = React.useState(false);
+  const [usuarioOpen, setUsuarioOpen] = React.useState(false);
   const { can } = useCan();
 
   const t = useTranslations("facturacion");
@@ -240,6 +242,17 @@ export default function FacturacionPage() {
             )}
           </div>
           {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
+          {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
+              el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
+          <UsuarioResponsable
+            factura={factura}
+            puedeEditar={can("factura.update")}
+            onCorregir={() => setUsuarioOpen(true)}
+            label={t("atendidoPor")}
+            integracionLabel={t("integracion")}
+            sinUsuarioLabel={t("sinUsuario")}
+            corregirLabel={t("corregirUsuario")}
+          />
         </div>
         <div className="flex items-center gap-2">
           {record && (
@@ -308,6 +321,18 @@ export default function FacturacionPage() {
         factura={factura}
         onSaved={async () => {
           setCabeceraOpen(false);
+          await refetch();
+        }}
+      />
+
+      <UsuarioDialog
+        key={`usr-${usuarioOpen}`}
+        open={usuarioOpen}
+        onOpenChange={setUsuarioOpen}
+        centro={centro}
+        factura={factura}
+        onSaved={async () => {
+          setUsuarioOpen(false);
           await refetch();
         }}
       />
@@ -1407,6 +1432,106 @@ function CabeceraDialog({
           <div className="flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tRoot("common.cancel")}</Button>
             <Button size="sm" onClick={guardar} disabled={saving}>{tRoot("common.save")}</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Usuario responsable de la venta (en el encabezado). En emitida = quién cobró; en borrador = quién la
+// creó. `esLlave` = la emitió una integración (se muestra distinto). El botón corregir aparece con permiso
+// (el BE es la autoridad final de si se puede). Handoff usuario-de-la-factura.
+function UsuarioResponsable({
+  factura,
+  puedeEditar,
+  onCorregir,
+  label,
+  integracionLabel,
+  sinUsuarioLabel,
+  corregirLabel,
+}: {
+  factura: FacturaConItems;
+  puedeEditar: boolean;
+  onCorregir: () => void;
+  label: string;
+  integracionLabel: string;
+  sinUsuarioLabel: string;
+  corregirLabel: string;
+}) {
+  const est = String(factura.estado ?? "");
+  const u = est === "borrador"
+    ? (factura.creadoPor ?? factura.emisor)
+    : (factura.emitidoPor ?? factura.emisor ?? factura.creadoPor);
+  const esLlave = !!u?.esLlave;
+  return (
+    <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <span>
+        {label}: <span className="font-medium text-foreground">{esLlave ? integracionLabel : (u?.nombre || sinUsuarioLabel)}</span>
+      </span>
+      {puedeEditar && (
+        <button type="button" onClick={onCorregir} className="no-print rounded-md border px-1.5 py-0.5 font-medium text-primary hover:bg-primary/10">
+          {corregirLabel}
+        </button>
+      )}
+    </p>
+  );
+}
+
+// Corregir el usuario responsable → PUT /facturas/:id/cabecera { usuarioId } (id de /profiles). El BE
+// valida existencia y permiso (admin; gerente o quien facturó, el mismo día). Handoff usuario-de-la-factura.
+function UsuarioDialog({
+  open,
+  onOpenChange,
+  centro,
+  factura,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  centro?: string;
+  factura: FacturaConItems;
+  onSaved: () => void;
+}) {
+  const t = useTranslations("facturacion");
+  const tRoot = useTranslations();
+  const perfilesRes = useResource<Perfil[]>(() => getProfiles(), []);
+  const perfiles = perfilesRes.state.kind === "ok" ? perfilesRes.state.data : [];
+  const est = String(factura.estado ?? "");
+  const actual = ((est === "borrador" ? factura.creadoPor?.perfilId : factura.emitidoPor?.perfilId) ?? factura.emisor?.perfilId ?? "") as string;
+  const [sel, setSel] = React.useState<string>(actual);
+  const [saving, setSaving] = React.useState(false);
+
+  async function guardar() {
+    if (!sel) return;
+    setSaving(true);
+    try {
+      await editarCabeceraFactura(String(factura.id), { usuarioId: sel } as EditarCabeceraPayload, centro);
+      onSaved();
+    } catch (err) {
+      toastError(err, tRoot);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader><DialogTitle>{t("corregirUsuarioTitle")}</DialogTitle></DialogHeader>
+        <div className="space-y-3">
+          <label className="flex flex-col gap-1.5">
+            <Lbl>{t("usuarioResponsable")}</Lbl>
+            <Select value={sel} onValueChange={setSel}>
+              <SelectTrigger><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
+              <SelectContent>
+                {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </label>
+          <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("corregirUsuarioAyuda")}</p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tRoot("common.cancel")}</Button>
+            <Button size="sm" onClick={guardar} disabled={saving || !sel}>{tRoot("common.save")}</Button>
           </div>
         </div>
       </DialogContent>

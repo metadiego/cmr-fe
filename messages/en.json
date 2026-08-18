@@ -2231,7 +2231,15 @@
       "totales": "Totals",
       "sinUsuario": "No user",
       "empty": "No sales in this period."
-    }
+    },
+    "atendidoPor": "Handled by",
+    "integracion": "Integration",
+    "sinUsuario": "No user",
+    "corregirUsuario": "Fix",
+    "corregirUsuarioTitle": "Fix responsible user",
+    "usuarioResponsable": "Responsible user",
+    "elegirUsuario": "Choose user",
+    "corregirUsuarioAyuda": "This user drives the who-sells stats. On a draft it fixes who created it; on an issued invoice, who charged it."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

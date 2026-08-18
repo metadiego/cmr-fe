@@ -138,7 +138,7 @@ export function buildRecibo(
     })),
     // "Atendido por" = quien COBRÓ (emitidoPor) o, si aún es borrador, quien la CREÓ (creadoPor).
     // BE PR #82; `emisor` queda como fallback legacy. NUNCA el médico.
-    atendidoPor: f.emitidoPor?.nombre ?? f.creadoPor?.nombre ?? f.emisor?.nombre,
+    atendidoPor: f.emitidoPor?.nombre ?? f.creadoPor?.nombre ?? f.emisor?.nombre ?? undefined,
   };
 }
 

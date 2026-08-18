@@ -16,7 +16,12 @@ export type AgregarItemPayload = Omit<components["schemas"]["AgregarItemDto"], "
 export type RegistrarPagoPayload = components["schemas"]["RegistrarPagoDto"];
 export type DescuentoGlobalPayload = components["schemas"]["DescuentoGlobalDto"];
 export type CrearFacturaPayload = components["schemas"]["CreateFacturaDto"];
-export type EditarCabeceraPayload = components["schemas"]["EditarCabeceraDto"];
+// `usuarioId` YA lo acepta el BE en PUT /facturas/:id/cabecera (verificado 18-ago; corrige el usuario
+// responsable — quién creó el borrador / quién cobró la emitida). El schema generado aún no lo refleja
+// (drift pendiente de gen:api). Handoff HANDOFF-usuario-de-la-factura-y-ventas-por-usuario.
+export type EditarCabeceraPayload = components["schemas"]["EditarCabeceraDto"] & {
+  usuarioId?: string | null;
+};
 export type DescuentosGrupoPayload = components["schemas"]["DescuentosGrupoDto"];
 export type SetExentoPayload = components["schemas"]["SetExentoDto"];
 
@@ -64,9 +69,11 @@ export type FacturaConItems = Omit<Factura, "creadoPor" | "emitidoPor"> & {
   medico?: { id?: string; nombre?: string } | null;
   empresa?: FacturaEmpresa | null;
   pagos?: FacturaPago[];
-  emisor?: { id?: string; nombre?: string } | null;
-  creadoPor?: { id?: string; nombre?: string } | null;
-  emitidoPor?: { id?: string; nombre?: string } | null;
+  // `perfilId` = id de /profiles (para preseleccionar el select de usuario); `esLlave` = la emitió una
+  // integración, no una persona (no ofrecer corregirlo como empleado). Handoff usuario-de-la-factura.
+  emisor?: { id?: string; perfilId?: string | null; nombre?: string | null; esLlave?: boolean } | null;
+  creadoPor?: { id?: string; perfilId?: string | null; nombre?: string | null; esLlave?: boolean } | null;
+  emitidoPor?: { id?: string; perfilId?: string | null; nombre?: string | null; esLlave?: boolean } | null;
   emitidaEn?: string | null;
   numeroDisplay?: string | null;
   // Snapshot congelado de componentes de kit (solo facturas EMITIDAS), agrupado por facturaItemId.
