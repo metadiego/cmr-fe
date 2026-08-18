@@ -1,59 +1,70 @@
-# HANDOFF BE — Proyectar el USUARIO en el tablero de facturas (para verlo/editarlo en la lista)
+# HANDOFF BE → FE — Corregir el USUARIO de una factura: RESUELTO (18-ago, tarde)
 
-Actualizado 18-ago (tarde). **Lo grueso ya quedó resuelto** por ustedes y verificado por HTTP; el FE ya
-lo usó. Queda **un solo hueco** para poder mostrar/corregir el usuario **en la LISTA** de facturas.
+Este documento respondía al handoff del FE que reportaba que el contrato prometido no existía.
+**Tenían razón en los cuatro puntos.** Todo lo de abajo está **probado por HTTP contra producción**,
+no supuesto. El handoff del FE queda contestado punto por punto.
 
-## Ya resuelto (gracias) — el FE ya lo consume
+## 1. Endpoint real para fijar el usuario responsable — ✅ HECHO
 
-- **Corregir el usuario**: `PUT /api/v1/facturas/:id/cabecera { usuarioId }` (id de `/profiles`). Verificado
-  (factura 000640). El FE lo usa desde el **detalle** de la factura ("Atendido por" → botón Corregir →
-  selector de `/profiles`). Funciona en borrador y en emitida; el BE valida existencia y permiso.
-- **GET /api/v1/facturas** (findAll) ya trae por fila `usuario: { perfilId, nombre, esLlave? }`, y el
-  detalle trae `creadoPor/emitidoPor/emisor` con `perfilId`. Los ids **casan** con `/profiles`.
-- **Reporte** `GET /facturacion/reportes/por-usuario` desplegado y en pantalla (`/facturacion/ventas-por-usuario`).
-
-## El hueco que queda: el TABLERO de la lista no proyecta el usuario
-
-La pantalla **lista de facturas** (General y Consultas) NO se dibuja con `GET /facturas`, sino con el motor
-de tableros: **`GET /api/v1/facturas/tablero`**. Hoy ese endpoint devuelve, por fila, solo:
+**La ruta es `PUT /api/v1/facturas/:id/cabecera`** (el handoff anterior decía `PUT /facturas/:id`,
+que no existe: 404. Error mío por no revisar el endpoint). Se eligió **añadir `usuarioId` a
+`EditarCabeceraDto`** y no crear una ruta nueva: la regla de permiso, la de tenencia y la de
+«qué se puede editar de una factura» ya viven ahí, y duplicarlas sería otro sitio donde equivocarse.
 
 ```
-columnas: fac_numero, fac_fecha, fac_paciente, fac_medico, fac_estado, fac_total, fac_medio, fac_acciones
-fila:     { id, estado, fac_numero, fac_fecha, fac_paciente, fac_medico, fac_estado, fac_total, fac_medio }
+PUT /api/v1/facturas/:id/cabecera   { "usuarioId": "<id del perfil>" }   → 200
 ```
 
-- **No trae el usuario** (ni `usuario`, ni `fac_usuario`, ni `usuarioId`), y `fac_medico` es solo texto
-  (además llega `null`) — la fila **no trae `medicoId`** para preseleccionar un select.
+- **Valida que exista**: un id inventado → **400** `el usuario … no existe`. (Probado: antes entraba
+  un uuid de ceros y dejaba la factura sin dueño.)
+- **No acepta vacío** → 400. Se cambia el responsable, no se quita.
+- **Borrador** → corrige quién la creó. **Emitida** → quién cobró (a quien se atribuye la venta).
+- Permiso: el de la edición de cabecera (admin sin límite; gerente o quien facturó, el mismo día).
+- Swagger actualizado; segunda puerta MCP: `editar_cabecera_factura` acepta `usuarioId`.
 
-Por eso, hoy el usuario solo se puede ver/corregir **una factura a la vez** en su detalle, no en la lista.
+## 2. El roster ahora casa — ✅ HECHO, sin exponer el id de autenticación
 
-## Lo que se pide (para el select editable por fila en la lista)
+La causa: la factura sella el `RequestContext.id`, que para un JWT es el **authUserId**, mientras
+`/profiles` devuelve el **id del perfil**. Dos identificadores para la misma persona.
 
-En `GET /facturas/tablero`, que cada fila y las columnas incluyan, igual que ya hace `GET /facturas`:
+- **`usuarioId` acepta cualquiera de los dos** y el BE lo normaliza. Manda el `id` de `/profiles`.
+- **Todo lo que se LEE devuelve `perfilId`**, nunca el authUserId (esa decisión de no filtrarlo ya
+  estaba tomada y se respeta).
+- **Roster para el selector**: `GET /api/v1/tablero/opciones?tablero=facturacion&columna=fac_usuario`
+  → perfiles aprobados con `{ value: <id de perfil>, label: <nombre> }`, ya ordenados. Es la misma
+  fuente de opciones que usan los demás selects del motor de tableros; no hay endpoint nuevo que
+  aprender.
 
-1. **Columna `fac_usuario`** (display) + el **valor crudo** por fila para el select:
-   - `fac_usuario` (nombre a mostrar; "Integración" cuando `esLlave`; vacío = "Sin usuario"),
-   - `fac_usuario__valor` = el **`perfilId`** (el mismo de `/profiles` y de `PUT .../cabecera`),
-   - una marca `esLlave` por fila (para pintar la de integración distinta y no ofrecer corregirla como
-     empleado).
-2. **`fac_medico__valor` = `medicoId`** por fila, para que el select de médico de la lista preseleccione
-   (hoy solo hay el display `fac_medico`).
-3. Marcar `fac_usuario` (y `fac_medico`) **editable** con su `writeBinding` (`factura.usuarioId`,
-   `factura.medicoId`) para que el FE reuse el motor de **celda editable** existente, sin código bespoke y
-   sin duplicar el endpoint de corrección.
+## 3. Editar en la LISTA de facturas — ✅ HECHO con el motor de siempre
 
-Con eso, el FE pinta la columna Usuario y el select por fila reusando lo que ya existe; el guardado sigue
-yendo por `PUT /facturas/:id/cabecera { usuarioId }` (o el writeBinding lo resuelve el motor).
+`GET /api/v1/facturas/tablero` ahora trae (verificado en producción):
 
-## Comprobación al terminar (el FE la hará, sin adivinar)
+```
+fac_medico  | tipo select | editable true | render {writeBinding:"factura.medicoId",  optionsSource:"medicos"}
+fac_usuario | tipo select | editable true | render {writeBinding:"factura.usuarioId", optionsSource:"usuarios_facturables"}
 
-- `GET /facturas/tablero?contexto=general&desde&hasta` → cada fila trae `fac_usuario`, `fac_usuario__valor`
-  (= perfilId de `/profiles`), `esLlave` y `fac_medico__valor` (= medicoId).
-- En la lista: columna Usuario visible; select por fila que preselecciona al responsable; al cambiarlo, la
-  venta se reatribuye (se refleja en `por-usuario`); las de integración se ven distintas y no se editan
-  como empleado.
+fila: { fac_medico: "Gilberto Caraballo",  fac_medico__valor:  "519a3272-…",
+        fac_usuario: "Facturacion Caguas", fac_usuario__valor: "0b1d2736-…" }
+```
 
-## Aparte (observación del dueño, a validar con diseño)
+- Los `__valor` los genera el motor genérico para cualquier select con `writeBinding`: nada bespoke.
+- `fac_usuario__valor` es el **id del perfil** — el mismo que mandas de vuelta en `usuarioId`.
+- Escribir: `PUT /facturas/:id/cabecera` con `{ medicoId }` o `{ usuarioId }`.
+- `GET /facturas` (la lista no-tablero) también trae `usuario { perfilId, nombre }` por fila.
 
-La vista de Facturas desperdicia ancho a los lados; el legado usaba la pantalla completa con una tabla más
-densa. No hay medida exacta; es de diseño, no de este contrato.
+## 4. Nota de datos: las filas «sin nombre» — ✅ RESUELTO
+
+Las que salían con `usuarioId` presente y `nombre: null` **no eran personas**: son **223 facturas
+selladas por una API key** (importaciones y carga por API). Ahora se nombran:
+
+```
+"usuario": { "perfilId": null, "nombre": "dev-prueba-frontdesk-full-2026-07-24", "esLlave": true }
+```
+
+Muéstralas como integración (chip o icono) y **no ofrezcas corregirlas** como si fueran un empleado.
+Solo queda `usuario: null` cuando de verdad no hay ningún responsable registrado.
+
+## Qué mirar al retomarlo
+
+El handoff FE actualizado es `cmr-fe/.personal/HANDOFF-usuario-de-la-factura-y-ventas-por-usuario.md`
+(reemplazado, mismo nombre). El reporte «Ventas por usuario» que ya desplegaste no cambia.

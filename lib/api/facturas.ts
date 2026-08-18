@@ -125,6 +125,12 @@ export interface FacturaTableroColumna {
   clave: string;
   labelKey: string;
   rol?: string | null;
+  // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select con writeBinding
+  // (factura.medicoId / factura.usuarioId) y optionsSource; la fila trae `<clave>__valor` = el id crudo
+  // (perfilId/medicoId). Se escribe por PUT /facturas/:id/cabecera. Handoff usuario-de-la-factura.
+  tipo?: string;
+  editable?: boolean;
+  render?: { writeBinding?: string; optionsSource?: string; [k: string]: unknown } | null;
 }
 export type FacturaTableroFila = { id: string } & Record<string, unknown>;
 export interface FacturaTablero {

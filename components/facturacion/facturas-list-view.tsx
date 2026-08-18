@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { getFacturasTablero, getFacturasResumen, type FacturaTablero, type FacturasResumen } from "@/lib/api/facturas";
+import { getFacturasTablero, getFacturasResumen, editarCabeceraFactura, type FacturaTablero, type FacturaTableroColumna, type FacturaTableroFila, type FacturasResumen } from "@/lib/api/facturas";
+import { getOpciones, type Opcion } from "@/lib/api/tablero";
+import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
@@ -96,6 +98,31 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const tablero = state.kind === "ok" ? state.data : null;
   const columnas = (tablero?.columnas ?? []).filter((c) => c.clave !== "fac_acciones");
   const filas = tablero?.filas ?? [];
+
+  // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select+editable con writeBinding.
+  // Las opciones salen del motor de tableros (GET /tablero/opciones), cargadas UNA vez por columna.
+  const selectCols = columnas.filter((c) => c.tipo === "select" && c.editable);
+  const selectKey = selectCols.map((c) => c.clave).join(",");
+  const opcionesRes = useResource<Record<string, Opcion[]>>(
+    async () => {
+      if (!gate.centro || selectCols.length === 0) return {};
+      const entries = await Promise.all(
+        selectCols.map(async (c) => [c.clave, await getOpciones("facturacion", c.clave, gate.centro!)] as const),
+      );
+      return Object.fromEntries(entries);
+    },
+    [selectKey, gate.centro],
+  );
+  const opciones = opcionesRes.state.kind === "ok" ? opcionesRes.state.data : {};
+
+  // Celda: select editable (médico/usuario) reusando el escritor correcto (PUT /facturas/:id/cabecera);
+  // el resto, display. stopPropagation para no navegar al detalle al usar el select.
+  function renderCelda(col: FacturaTableroColumna, fila: FacturaTableroFila) {
+    if (col.tipo === "select" && col.editable) {
+      return <SelectCelda col={col} fila={fila} opciones={opciones[col.clave] ?? []} centro={gate.centro} onSaved={reload} />;
+    }
+    return cell(col.clave, fila[col.clave]);
+  }
 
   // Total de la PÁGINA: se suma de las filas que ya tenemos (no se le pide nada al BE). Exenta = la que
   // quedó en cero. Como /tablero hoy trae todo el rango sin paginar, página y rango suelen coincidir →
@@ -247,7 +274,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                     {/* Ordinal continuo (con paginación: (page-1)*limit + i + 1; hoy la lista es de una página). */}
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{i + 1}</td>
                     {columnas.map((c) => (
-                      <td key={c.clave} className="px-3 py-2">{cell(c.clave, f[c.clave])}</td>
+                      <td key={c.clave} className="px-3 py-2">{renderCelda(c, f)}</td>
                     ))}
                     <td className="px-3 py-2 text-right">
                       <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={gate.centro} onChanged={reload} />
@@ -259,6 +286,58 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Select editable de una columna del tablero de facturas (médico / usuario). Lee el valor crudo de
+// `<clave>__valor` (perfilId / medicoId) y escribe por PUT /facturas/:id/cabecera con el campo del
+// writeBinding (factura.usuarioId → usuarioId). El BE valida permiso y existencia. Handoff usuario-de-la-factura.
+function SelectCelda({
+  col,
+  fila,
+  opciones,
+  centro,
+  onSaved,
+}: {
+  col: FacturaTableroColumna;
+  fila: FacturaTableroFila;
+  opciones: Opcion[];
+  centro?: string;
+  onSaved: () => void;
+}) {
+  const tRoot = useTranslations();
+  const field = String(col.render?.writeBinding ?? "").split(".").pop() ?? "";
+  const crudo = fila[`${col.clave}__valor`];
+  const current = crudo == null ? "" : String(crudo);
+  const display = fila[col.clave];
+  const [busy, setBusy] = React.useState(false);
+
+  async function change(v: string) {
+    if (!field || v === current) return;
+    setBusy(true);
+    try {
+      await editarCabeceraFactura(String(fila.id), { [field]: v } as never, centro);
+      onSaved();
+    } catch (e) {
+      toastError(e, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Select value={current || undefined} onValueChange={change} disabled={busy || opciones.length === 0}>
+        <SelectTrigger size="sm" className="h-8 min-w-[150px] border-transparent bg-transparent px-2 hover:bg-muted/60 focus:bg-background">
+          <SelectValue placeholder={display == null || display === "" ? "—" : String(display)} />
+        </SelectTrigger>
+        <SelectContent>
+          {opciones.map((o) => (
+            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
