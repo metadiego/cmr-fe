@@ -726,7 +726,8 @@
     "ventasPorGrupo": "Sales by group",
     "cuadreGeneral": "Cuadre general",
     "dispLegado": "Disponibilidad heredada",
-    "ventasPorUsuario": "Ventas por usuario"
+    "ventasPorUsuario": "Ventas por usuario",
+    "preparacionLegado": "Preparación del legado"
   },
   "admin": {
     "title": "Administration",
@@ -774,7 +775,9 @@
       "menuRolHelp": "Check the menu options this role sees. Translated to permissions; non-menu permissions are untouched.",
       "menuRolSaved": "Role menu updated",
       "menuRolSinPermiso": "visible to everyone",
-      "confirmDelete": "Delete role {role}? Users holding it will lose it."
+      "confirmDelete": "Delete role {role}? Users holding it will lose it.",
+      "todosLosCentros": "Operates in all centers",
+      "todosLosCentrosAyuda": "Whoever gets this role inherits it; the role is assigned globally (not to a center)."
     },
     "access": {
       "title": "User access",
@@ -3073,6 +3076,33 @@
       "sinItems": "No inherited availability to load.",
       "confirmar": "Load availability",
       "aplicada": "Inherited availability loaded."
+    },
+    "preparacionLegado": {
+      "title": "Legacy readiness",
+      "help": "Patients with an upcoming appointment who still need their inherited legacy availability loaded.",
+      "dias": "Days",
+      "buscar": "Search",
+      "omitidos": "Showing {mostrados} of {total} — there are more than fit.",
+      "col": {
+        "paciente": "Patient",
+        "record": "Record",
+        "proximaCita": "Next appointment",
+        "estado": "Status",
+        "detalle": "Detail",
+        "accion": "Action"
+      },
+      "estado": {
+        "pendiente": "Pending",
+        "al_dia": "Up to date",
+        "sin_record": "No record",
+        "record_ambiguo": "Ambiguous record",
+        "error": "No legacy connection"
+      },
+      "nItems": "{n} to load",
+      "nCandidatos": "{n} people with that record",
+      "sinNombre": "(no name)",
+      "cargar": "Load",
+      "empty": "No patients with an appointment in the window."
     }
   },
   "perfiles": {

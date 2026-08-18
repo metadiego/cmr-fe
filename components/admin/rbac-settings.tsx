@@ -352,6 +352,7 @@ function EditRoleDialog({
   const tc = useTranslations("admin")
   const [nombre, setNombre] = React.useState(role?.nombre ?? "")
   const [descripcion, setDescripcion] = React.useState(role?.descripcion ?? "")
+  const [todosLosCentros, setTodosLosCentros] = React.useState(!!role?.todosLosCentros)
   const [submitting, setSubmitting] = React.useState(false)
 
   async function onSubmit() {
@@ -361,6 +362,7 @@ function EditRoleDialog({
       await updateRole(role.id, {
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || undefined,
+        todosLosCentros,
       })
       toast.success(t("updated"))
       onOpenChange(false)
@@ -391,6 +393,14 @@ function EditRoleDialog({
               onChange={(e) => setDescripcion(e.target.value)}
             />
           </div>
+          {/* Rol multi-centro: quien lo recibe lo hereda; se asigna global (sin centroId). */}
+          <label className="flex items-start gap-2">
+            <Checkbox checked={todosLosCentros} onCheckedChange={(v) => setTodosLosCentros(v === true)} className="mt-0.5" />
+            <span>
+              <span className="text-sm font-medium">{t("todosLosCentros")}</span>
+              <span className="block text-xs text-muted-foreground">{t("todosLosCentrosAyuda")}</span>
+            </span>
+          </label>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

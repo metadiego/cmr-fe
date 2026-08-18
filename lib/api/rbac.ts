@@ -17,6 +17,9 @@ export interface Rol {
   nombre: string
   descripcion?: string | null
   esSistema: boolean
+  // El rol opera en TODOS los centros (quien lo recibe lo hereda). Un rol multi-centro se asigna GLOBAL
+  // (sin centroId). Handoff HANDOFF-rol-multicentro-y-preparacion-legado.
+  todosLosCentros?: boolean
 }
 
 function asArray<T>(res: unknown): T[] {
@@ -84,7 +87,7 @@ export function setRoleMenu(
 // not editable on the BE.
 export function updateRole(
   id: string,
-  payload: { nombre?: string; descripcion?: string }
+  payload: { nombre?: string; descripcion?: string; todosLosCentros?: boolean }
 ): Promise<Rol> {
   return apiFetch<Rol>(`/roles/${id}`, {
     method: "PUT",
@@ -92,15 +95,16 @@ export function updateRole(
   })
 }
 
-// Assign a role to a profile (POST). Optional centroId scopes it to one center.
+// Assign a role to a profile (POST). Se asigna GLOBAL: NO se manda centroId (el centro donde trabaja
+// alguien vive en sus asignaciones de centro, no en la del rol; un rol multi-centro rechaza centroId).
+// Handoff HANDOFF-rol-multicentro-y-preparacion-legado.
 export function assignRoleToProfile(
   profileId: string,
-  rolClave: string,
-  centroId?: string
+  rolClave: string
 ): Promise<unknown> {
   return apiFetch(`/profiles/${profileId}/roles`, {
     method: "POST",
-    body: JSON.stringify({ rolClave, centroId }),
+    body: JSON.stringify({ rolClave }),
   })
 }
 

@@ -183,3 +183,33 @@ export function aplicarDisponibilidadLegado(
     centroId,
   );
 }
+
+// Reporte de PREPARACIÓN del legado: a quién con cita próxima le falta cargar disponibilidad heredada.
+// `estado` colorea la fila (pendiente|al_dia|sin_record|record_ambiguo|error). `omitidos`>0 = hubo más que
+// el tope (decirlo, no esconderlo). Permiso factura.retroactivo. Handoff rol-multicentro-y-preparacion-legado.
+export interface PreparacionFila {
+  pacienteId: string;
+  record?: string | null;
+  nombre?: string | null;
+  proximaCita?: string | null;
+  estado: "pendiente" | "al_dia" | "sin_record" | "record_ambiguo" | "error" | string;
+  items?: unknown[];
+  candidatos?: CandidatoRecord[];
+  motivo?: string | null;
+}
+export interface PreparacionLegado {
+  desde: string;
+  hasta: string;
+  total: number;
+  omitidos: number;
+  filas: PreparacionFila[];
+}
+export function getPreparacionLegado(
+  params: { dias?: number; limite?: number } = {},
+  centroId?: string,
+): Promise<PreparacionLegado> {
+  const sp = new URLSearchParams();
+  if (params.dias) sp.set("dias", String(params.dias));
+  if (params.limite) sp.set("limite", String(params.limite));
+  return apiFetch<PreparacionLegado>(`/pacientes/disponibilidad-legado/preparacion?${sp.toString()}`, {}, centroId);
+}

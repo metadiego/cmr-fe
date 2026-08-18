@@ -726,7 +726,8 @@
     "ventasPorGrupo": "Ventas por grupo",
     "cuadreGeneral": "Cuadre general",
     "dispLegado": "Disponibilidad heredada",
-    "ventasPorUsuario": "Ventas por usuario"
+    "ventasPorUsuario": "Ventas por usuario",
+    "preparacionLegado": "Preparación del legado"
   },
   "admin": {
     "title": "Administración",
@@ -774,7 +775,9 @@
       "menuRolHelp": "Marca las opciones del menú que verá este rol. Se traduce a permisos; los permisos que no son de menú no se tocan.",
       "menuRolSaved": "Menú del rol actualizado",
       "menuRolSinPermiso": "visible para todos",
-      "confirmDelete": "¿Eliminar el rol {role}? Los usuarios que lo tengan lo perderán."
+      "confirmDelete": "¿Eliminar el rol {role}? Los usuarios que lo tengan lo perderán.",
+      "todosLosCentros": "Opera en todos los centros",
+      "todosLosCentrosAyuda": "Quien reciba este rol lo hereda; el rol se asigna global (no a un centro)."
     },
     "access": {
       "title": "Accesos del usuario",
@@ -3073,6 +3076,33 @@
       "sinItems": "No hay disponibilidad heredada para cargar.",
       "confirmar": "Cargar disponibilidad",
       "aplicada": "Disponibilidad heredada cargada."
+    },
+    "preparacionLegado": {
+      "title": "Preparación del legado",
+      "help": "Pacientes con cita próxima a quienes falta cargar la disponibilidad heredada del legado.",
+      "dias": "Días",
+      "buscar": "Buscar",
+      "omitidos": "Mostrando {mostrados} de {total} — hay más de los que caben.",
+      "col": {
+        "paciente": "Paciente",
+        "record": "Récord",
+        "proximaCita": "Próxima cita",
+        "estado": "Estado",
+        "detalle": "Detalle",
+        "accion": "Acción"
+      },
+      "estado": {
+        "pendiente": "Pendiente",
+        "al_dia": "Al día",
+        "sin_record": "Sin récord",
+        "record_ambiguo": "Récord ambiguo",
+        "error": "Sin conexión al legado"
+      },
+      "nItems": "{n} por cargar",
+      "nCandidatos": "{n} personas con ese récord",
+      "sinNombre": "(sin nombre)",
+      "cargar": "Cargar",
+      "empty": "No hay pacientes con cita en la ventana."
     }
   },
   "perfiles": {

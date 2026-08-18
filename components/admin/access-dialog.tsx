@@ -177,7 +177,9 @@ function RolesTab({
     setBusy(role.clave)
     try {
       if (on) {
-        await assignRoleToProfile(profile.id, role.clave, centroId)
+        // El rol se asigna GLOBAL (sin centroId): el centro vive en las asignaciones de centro del perfil,
+        // y un rol multi-centro rechaza centroId. Handoff rol-multicentro-y-preparacion-legado.
+        await assignRoleToProfile(profile.id, role.clave)
       } else {
         const a = assigned.get(role.clave)
         if (a) await removeRoleFromProfile(profile.id, a.rolId, centroId)
