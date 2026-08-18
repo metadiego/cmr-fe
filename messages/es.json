@@ -1395,7 +1395,30 @@
     "enfermera": "Enfermera",
     "hoy": "Hoy",
     "viales": "viales",
-    "vialDe": "Vial de {capacidad} {unidad}"
+    "vialDe": "Vial de {capacidad} {unidad}",
+    "transferir": {
+      "abrir": "Transferir a otro centro",
+      "titulo": "Transferir tratamiento a otro centro",
+      "desc": "Mueve las sesiones pendientes de este paquete a otra oficina para que el paciente continúe allí.",
+      "pendientes": "{n} sesiones pendientes",
+      "destino": "Centro destino",
+      "elegirCentro": "Elegir centro",
+      "sesiones": "Sesiones a transferir",
+      "sesionesAyuda": "Vacío = todas ({n}). O escribe cuántas para una transferencia parcial.",
+      "sesionesInvalida": "Debe ser entre 1 y {n}.",
+      "modo": "Modo",
+      "virtual": "Virtual",
+      "virtualAyuda": "Solo el tratamiento; el otro centro usa su propio inventario.",
+      "fisica": "Física",
+      "fisicaAyuda": "Además mueve el material (viales/insumos) entre almacenes.",
+      "almacenOrigen": "Almacén origen",
+      "almacenDestino": "Almacén destino",
+      "motivo": "Motivo",
+      "motivoPlaceholder": "Opcional",
+      "cancelar": "Cancelar",
+      "confirmar": "Transferir",
+      "ok": "Tratamiento transferido."
+    }
   },
   "programarCitas": {
     "title": "Programar citas",

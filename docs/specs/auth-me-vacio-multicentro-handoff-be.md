@@ -1,55 +1,72 @@
-# HANDOFF BE — `/auth/me` vuelve VACÍO para un perfil real (larcilesbay), rompe multi-centro
+# RESPUESTA BE — `/auth/me` de larcilesbay: RESUELTO, y no era el enlace del perfil (18-ago)
 
-**Verificado por HTTP el 18-ago.** Un usuario real, aprobado y bien configurado (rol citas + doble centro)
-inicia sesión correctamente, pero el BE **no resuelve su perfil en la sesión**: `/auth/me` responde `{}` y
-`/auth/me/centros` responde `[]` (0). Con eso, el FE lo trata como "sin centro" y el selector de centro
-multi-centro (que ya es data-driven en el FE) no tiene qué mostrar.
-
-## El caso
-
-Usuario del equipo de citas del call-center (agenda para Bayamón y Caguas):
-
-- Email / auth: **larcilesbay@outlook.com** — login OK. `access_token.sub` (authUserId) =
-  **`e3907bfc-87f7-4416-9e90-30a158ffeab7`**.
-- En el admin (`GET /profiles`, con token de master) el perfil está perfecto:
-  - profileId **`6c770179-4bf6-4ab5-8f45-d2d31a41dafa`**, estado **aprobado**,
-  - rol **`citas`** (global, `centroId: null`),
-  - centros asignados (base, activos): **CMR Bayamón** (`ef6f87b0-…`) y **CMR Caguas** (`5f98ef29-…`).
-
-## Lo que falla (con el token del propio usuario)
+**Ya funciona en producción.** Comprobado con el token real de `larcilesbay@outlook.com`, **sin**
+mandar `X-Tenant-ID`, que es como entra el navegador:
 
 ```
-GET /api/v1/auth/me           → {}            (esperado: su perfil, isMaster/accessMode, activeClinicId)
-GET /api/v1/auth/me/centros   → []  (n=0)     (esperado: [CMR Bayamón, CMR Caguas])
+GET /api/v1/auth/me          → 200
+   perfil: larcilesbay@outlook.com | roles: ['citas'] | activeClinicId: null | allowedClinicIds: 2
+GET /api/v1/auth/me/centros  → 200
+   - CMR Bayamon
+   - CMR Caguas
 ```
 
-El token es válido (200 al mintearlo, `sub` = e3907bfc-…). Así que el problema es la **resolución
-sesión → perfil** en el BE: el `authUserId` `e3907bfc-…` no está enlazando con el perfil
-`6c770179-…` (larcilesbay@outlook.com). Probable causa: el perfil se creó/aprobó con un `authUserId`
-distinto del que hoy emite el login (usuario de auth recreado, o el vínculo `profiles.authUserId` quedó
-apuntando a otro uid). No es del FE.
+## Corrección del diagnóstico
 
-## Qué se pide
+El handoff apuntaba a que el `authUserId` no enlazaba con el perfil. **No era eso**: el enlace estaba
+bien, comprobado en la base de producción —
 
-1. **Enlazar** el auth user `e3907bfc-…` con el perfil `6c770179-…` (o corregir el `authUserId` del
-   perfil) para que `/auth/me` devuelva el perfil real de larcilesbay.
-2. Que `/auth/me/centros` devuelva sus centros asignados (**Bayamón + Caguas**) — la fuente que usa el FE
-   (`getMyCentros`) para el selector.
-3. Verificar que NO haya perfiles duplicados/huérfanos para ese email (en `/profiles` aparece
-   larcilesbay@outlook.com una sola vez, pero conviene confirmar el uid enlazado).
+```
+perfiles.id 6c770179-4bf6-4ab5-8f45-d2d31a41dafa
+authUserId  e3907bfc-87f7-4416-9e90-30a158ffeab7   ← el mismo `sub` del token. Coincide.
+asignaciones: Bayamón + Caguas, ambas activas y vigentes.
+```
 
-## Comprobación (la hará el FE, sin adivinar)
+Y no hay perfiles duplicados ni huérfanos para ese email (el otro, `citasbay@cmr.test`, es un perfil
+distinto con su propio uid; el mismo síntoma tenía la misma causa).
 
-- Login `larcilesbay@outlook.com` → `GET /auth/me` devuelve el perfil (no `{}`), y `GET /auth/me/centros`
-  devuelve **2** centros.
-- En pantalla (agenda / pacientes / gate de facturación) aparece el **selector de centro con Bayamón y
-  Caguas**, sin la opción «Todos los centros» (esa sigue siendo solo de admin/master). El FE ya lo hace
-  data-driven; solo faltaban los datos de la sesión.
+## Lo que pasaba de verdad: un círculo vicioso
 
-## Contexto
+Reproducido con su propio token:
 
-- El FE ya dejó: rol con interruptor `todosLosCentros` (PUT /roles/:id), asignación de rol global (sin
-  centroId), y el selector de centro data-driven (se muestra con >1 centro, «Todos» solo admin). Todo eso
-  funciona en cuanto `/auth/me/centros` devuelva los centros del usuario.
-- El usuario de prueba anterior `citasbay@cmr.test` también daba `/auth/me` = {} — mismo síntoma de perfil
-  no resuelto; vale revisar si es el mismo patrón de enlace roto.
+```
+GET /auth/me                        → 409  «An active clinic must be selected (X-Tenant-ID header)»
+GET /auth/me/centros                → 409  (y es la lista con la que se elige el centro)
+GET /auth/me  + X-Tenant-ID puesto  → 200  perfil OK, rol citas, sus 2 centros
+```
+
+> Para elegir centro hay que saber cuáles tiene → para saber cuáles tiene hay que haber elegido centro.
+
+El 409 es una defensa deliberada (un perfil con varios centros que opera sin centro activo leería PHI
+de los dos a la vez) y **no se ha tocado**. Lo único mal era aplicarla a las dos rutas que no leen datos
+de negocio sino la identidad de quien pregunta. El cliente recibía el 409 y lo interpretaba como «este
+usuario no tiene centros», lo contrario de la verdad.
+
+## Qué se cambió
+
+Un decorador nuevo, **`@SinCentroActivo()`** — opt-in y explícito, como `@Public()` o
+`@AllowPending()` — puesto **solo** en `GET /auth/me` y `GET /auth/me/centros`. En esas dos rutas, con
+varios centros y sin header:
+
+- no se lanza 409;
+- **`activeClinicId: null`** — esa es la señal de «elige uno»;
+- **`allowedClinicIds`** viaja completo, que es lo que alimenta el selector.
+
+### Lo que NO cambió (fijado con tests de regresión)
+
+- Cualquier endpoint de negocio sin centro elegido → **sigue dando 409**. Esto no abre ninguna vía para
+  leer datos sin centro.
+- Un `X-Tenant-ID` que el perfil no tiene → **403**, también en estas rutas.
+- Un perfil con **un solo** centro sigue quedando fijado a ese centro, sin header.
+- El portal gerencial (solo lectura, varios centros) no se altera.
+
+## Qué puede comprobar el FE ahora
+
+1. Login `larcilesbay@outlook.com` → `/auth/me` **200** con su perfil y `allowedClinicIds` = 2, y
+   `/auth/me/centros` = **Bayamón + Caguas**. Sin header.
+2. `activeClinicId: null` → pintar el **selector de centro** (sin «Todos los centros», que sigue siendo
+   solo de admin/master).
+3. Al elegir uno, mandar `X-Tenant-ID` en el resto de las llamadas, como hasta ahora.
+4. `citasbay@cmr.test` debería comportarse igual: mismo patrón, misma causa.
+
+Spec y plan: `docs/specs/sesion-sin-centro-elegido.md`, `docs/plans/sesion-sin-centro-elegido.md`.

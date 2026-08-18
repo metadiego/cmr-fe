@@ -1395,7 +1395,30 @@
     "enfermera": "Nurse",
     "hoy": "Today",
     "viales": "vials",
-    "vialDe": "{capacidad} {unidad} vial"
+    "vialDe": "{capacidad} {unidad} vial",
+    "transferir": {
+      "abrir": "Transfer to another center",
+      "titulo": "Transfer treatment to another center",
+      "desc": "Move this package’s pending sessions to another office so the patient can continue there.",
+      "pendientes": "{n} pending sessions",
+      "destino": "Destination center",
+      "elegirCentro": "Choose center",
+      "sesiones": "Sessions to transfer",
+      "sesionesAyuda": "Empty = all ({n}). Or type how many for a partial transfer.",
+      "sesionesInvalida": "Must be between 1 and {n}.",
+      "modo": "Mode",
+      "virtual": "Virtual",
+      "virtualAyuda": "Only the treatment; the other center uses its own inventory.",
+      "fisica": "Physical",
+      "fisicaAyuda": "Also moves the material (vials/supplies) between warehouses.",
+      "almacenOrigen": "Source warehouse",
+      "almacenDestino": "Destination warehouse",
+      "motivo": "Reason",
+      "motivoPlaceholder": "Optional",
+      "cancelar": "Cancel",
+      "confirmar": "Transfer",
+      "ok": "Treatment transferred."
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",

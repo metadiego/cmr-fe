@@ -271,6 +271,30 @@ export function ajustarDisponibilidad(
     centroId,
   );
 }
+// POST /facturas/paquetes/:id/transferir — mueve las sesiones PENDIENTES de un paquete a OTRO centro
+// (total o parcial), para que el paciente continúe su terapia en la otra oficina. `modo`: "virtual" mueve
+// solo el tratamiento (el destino descuenta su propio stock al aplicar) o "fisica" mueve además el
+// material entre almacenes (viales/insumos). Reversible con /transferencias/:id/anular. El centro ORIGEN
+// es el activo (X-Tenant-ID). Handoff transferir-tratamiento-entre-centros.
+export type TransferirTratamientoPayload = {
+  clinicDestinoId: string;
+  sesiones?: number; // omitido = todas las pendientes
+  modo?: "virtual" | "fisica";
+  almacenOrigenId?: string; // solo modo fisica
+  almacenDestinoId?: string; // solo modo fisica
+  motivo?: string;
+};
+export function transferirTratamiento(
+  paqueteId: string,
+  payload: TransferirTratamientoPayload,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch<unknown>(
+    `/facturas/paquetes/${encodeURIComponent(paqueteId)}/transferir`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
 export function getDisponibilidadServicio(
   servicioId: string,
   pacienteId: string,

@@ -26,7 +26,10 @@ import {
   type Sesion,
   type DisponibilidadServicio,
   type PaqueteDisponibilidad,
+  transferirTratamiento,
 } from "@/lib/api/frontdesk";
+import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
 import { useRouter, usePathname } from "next/navigation";
@@ -83,6 +86,7 @@ import {
   Tick02Icon,
   Calendar01Icon,
   PencilEdit01Icon,
+  ArrowRight01Icon,
   Notification03Icon,
   ShoppingCart01Icon,
 } from "@hugeicons/core-free-icons";
@@ -1533,6 +1537,170 @@ function CorregirDisponibilidadDialog({
   );
 }
 
+// ————— Transferir tratamiento a OTRO centro (POST /facturas/paquetes/:id/transferir) —————
+// Mueve las sesiones pendientes del paquete a otra oficina para que el paciente continúe allí. Modo
+// "virtual" (solo el tratamiento; el destino usa su stock) o "física" (además mueve el material entre
+// almacenes). Total o parcial. Handoff transferir-tratamiento-entre-centros.
+function TransferirTratamientoDialog({
+  paquete,
+  centro,
+  onClose,
+  onDone,
+}: {
+  paquete: PaqueteDisponibilidad | null;
+  centro?: string;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const t = useTranslations("frontdesk");
+  const { entregadas, totales } = paquete ? paqueteTotales(paquete) : { entregadas: 0, totales: 0 };
+  const pendientes = Math.max(0, totales - entregadas);
+  const centrosRes = useResource<Centro[]>(() => getMyCentros(), []);
+  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
+  const destinos = centros.filter((c) => c.id !== centro); // no transferir al mismo centro
+
+  const [destino, setDestino] = React.useState<string>("");
+  const [sesiones, setSesiones] = React.useState<string>("");
+  const [modo, setModo] = React.useState<"virtual" | "fisica">("virtual");
+  const [almOrigen, setAlmOrigen] = React.useState<string>("");
+  const [almDestino, setAlmDestino] = React.useState<string>("");
+  const [motivo, setMotivo] = React.useState<string>("");
+  const [guardando, setGuardando] = React.useState(false);
+
+  // Reset al abrir/cambiar de paquete (sin efecto).
+  const pid = paquete?.id ?? null;
+  const [prevPid, setPrevPid] = React.useState<string | null>(null);
+  if (pid !== prevPid) {
+    setPrevPid(pid);
+    setDestino(""); setSesiones(String(pendientes || "")); setModo("virtual");
+    setAlmOrigen(""); setAlmDestino(""); setMotivo("");
+  }
+
+  // Almacenes por centro (solo si modo física).
+  const almOrigenRes = useResource<Almacen[]>(
+    () => (modo === "fisica" && centro ? listAlmacenes(centro) : Promise.resolve([])),
+    [modo, centro],
+  );
+  const almDestinoRes = useResource<Almacen[]>(
+    () => (modo === "fisica" && destino ? listAlmacenes(destino) : Promise.resolve([])),
+    [modo, destino],
+  );
+  const almacenesOrigen = almOrigenRes.state.kind === "ok" ? almOrigenRes.state.data : [];
+  const almacenesDestino = almDestinoRes.state.kind === "ok" ? almDestinoRes.state.data : [];
+
+  const nSes = Number(sesiones);
+  const sesInvalida = sesiones !== "" && (!Number.isFinite(nSes) || nSes <= 0 || nSes > pendientes);
+  const faltaAlmacen = modo === "fisica" && (!almOrigen || !almDestino);
+  const puede = !!paquete?.id && !!destino && !sesInvalida && !faltaAlmacen && pendientes > 0;
+
+  async function guardar() {
+    if (!puede || !paquete?.id) return;
+    setGuardando(true);
+    try {
+      await transferirTratamiento(
+        paquete.id,
+        {
+          clinicDestinoId: destino,
+          ...(sesiones !== "" && nSes < pendientes ? { sesiones: nSes } : {}), // omitido = todas
+          modo,
+          ...(modo === "fisica" ? { almacenOrigenId: almOrigen, almacenDestinoId: almDestino } : {}),
+          ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
+        },
+        centro,
+      );
+      toast.success(t("transferir.ok"));
+      onClose();
+      onDone();
+    } catch (e) {
+      toastError(e, t);
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <Dialog open={paquete != null} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("transferir.titulo")}</DialogTitle>
+          <DialogDescription>{t("transferir.desc")}</DialogDescription>
+        </DialogHeader>
+        {paquete && (
+          <div className="space-y-3">
+            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+              <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
+              <span className="ml-2 text-muted-foreground">{t("transferir.pendientes", { n: pendientes })}</span>
+            </div>
+
+            <div className="space-y-1">
+              <Label>{t("transferir.destino")}</Label>
+              <Select value={destino} onValueChange={setDestino}>
+                <SelectTrigger><SelectValue placeholder={t("transferir.elegirCentro")} /></SelectTrigger>
+                <SelectContent>
+                  {destinos.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label>{t("transferir.sesiones")}</Label>
+              <Input type="number" min={1} max={pendientes} value={sesiones} onChange={(e) => setSesiones(e.target.value)} />
+              <p className="text-[11px] text-muted-foreground">{t("transferir.sesionesAyuda", { n: pendientes })}</p>
+              {sesInvalida && <p className="text-xs text-destructive">{t("transferir.sesionesInvalida", { n: pendientes })}</p>}
+            </div>
+
+            <div className="space-y-1">
+              <Label>{t("transferir.modo")}</Label>
+              <div className="flex gap-2">
+                {(["virtual", "fisica"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setModo(m)}
+                    className={"flex-1 rounded-lg border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
+                  >
+                    <span className="block font-medium">{t(`transferir.${m}`)}</span>
+                    <span className="block text-[11px] text-muted-foreground">{t(`transferir.${m}Ayuda`)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {modo === "fisica" && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label>{t("transferir.almacenOrigen")}</Label>
+                  <Select value={almOrigen} onValueChange={setAlmOrigen}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>{almacenesOrigen.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label>{t("transferir.almacenDestino")}</Label>
+                  <Select value={almDestino} onValueChange={setAlmDestino} disabled={!destino}>
+                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>{almacenesDestino.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <Label>{t("transferir.motivo")}</Label>
+              <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("transferir.motivoPlaceholder")} />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={onClose} disabled={guardando}>{t("transferir.cancelar")}</Button>
+              <Button onClick={guardar} disabled={!puede || guardando}>{t("transferir.confirmar")}</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ————— X/Y + disponibilidad del paciente (lazy, al abrir) —————
 function SesionesCell({
   display,
@@ -1552,6 +1720,7 @@ function SesionesCell({
   const [disp, setDisp] = React.useState<DisponibilidadServicio | null>(null);
   const [fallo, setFallo] = React.useState(false);
   const [corrigiendo, setCorrigiendo] = React.useState<PaqueteDisponibilidad | null>(null);
+  const [transfiriendo, setTransfiriendo] = React.useState<PaqueteDisponibilidad | null>(null);
 
   React.useEffect(() => {
     if (!open || disp || fallo || !servicioId || !pacienteId) return;
@@ -1592,15 +1761,26 @@ function SesionesCell({
                     </div>
                   </div>
                   {puedeCorregir && p.id && (
-                    <button
-                      type="button"
-                      onClick={() => setCorrigiendo(p)}
-                      className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      aria-label={t("corregirDisponibilidad")}
-                      title={t("corregirDisponibilidad")}
-                    >
-                      <HugeiconsIcon icon={PencilEdit01Icon} className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex shrink-0 items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setCorrigiendo(p)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        aria-label={t("corregirDisponibilidad")}
+                        title={t("corregirDisponibilidad")}
+                      >
+                        <HugeiconsIcon icon={PencilEdit01Icon} className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTransfiriendo(p)}
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        aria-label={t("transferir.abrir")}
+                        title={t("transferir.abrir")}
+                      >
+                        <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   )}
                 </div>
               );
@@ -1621,6 +1801,14 @@ function SesionesCell({
         paquete={corrigiendo}
         centro={centro}
         onClose={() => setCorrigiendo(null)}
+        onDone={recargar}
+      />
+    )}
+    {puedeCorregir && (
+      <TransferirTratamientoDialog
+        paquete={transfiriendo}
+        centro={centro}
+        onClose={() => setTransfiriendo(null)}
         onDone={recargar}
       />
     )}
