@@ -35,17 +35,26 @@ La causa: la factura sella el `RequestContext.id`, que para un JWT es el **authU
   fuente de opciones que usan los demás selects del motor de tableros; no hay endpoint nuevo que
   aprender.
 
-## 3. Editar en la LISTA de facturas — ✅ HECHO con el motor de siempre
+## 3. Editar en la LISTA de facturas — ✅ COMPLETO (incluida la marca de integración)
 
-`GET /api/v1/facturas/tablero` ahora trae (verificado en producción):
+`GET /api/v1/facturas/tablero` — copiado tal cual de producción, 18-ago:
 
 ```
 fac_medico  | tipo select | editable true | render {writeBinding:"factura.medicoId",  optionsSource:"medicos"}
-fac_usuario | tipo select | editable true | render {writeBinding:"factura.usuarioId", optionsSource:"usuarios_facturables"}
+fac_usuario | tipo select | editable true | render {writeBinding:"factura.usuarioId",
+                                                    optionsSource:"usuarios_facturables",
+                                                    metaBinding:"usuario.meta"}
 
-fila: { fac_medico: "Gilberto Caraballo",  fac_medico__valor:  "519a3272-…",
-        fac_usuario: "Facturacion Caguas", fac_usuario__valor: "0b1d2736-…" }
+fila persona:     { fac_usuario: "Facturacion Caguas (prueba)",  fac_usuario__valor: "0b1d2736-…" }
+fila integración: { fac_usuario: "dev-prueba-frontdesk-full-…",  fac_usuario__valor: null,
+                    fac_usuario__meta: { "esLlave": true } }
+fila médico:      { fac_medico: "Gilberto Caraballo", fac_medico__valor: "519a3272-…" }
 ```
+
+**`<clave>__meta`** es nuevo en el motor (`render.metaBinding`, documentado en Swagger): sirve para
+que una celda diga algo más que su display y su valor. Aquí lleva `{ esLlave: true }` cuando la
+factura la emitió una integración → píntala distinta y **no ofrezcas el select** en esa fila. En una
+fila de persona `__meta` **no viene**, así que el select se comporta como cualquier otro.
 
 - Los `__valor` los genera el motor genérico para cualquier select con `writeBinding`: nada bespoke.
 - `fac_usuario__valor` es el **id del perfil** — el mismo que mandas de vuelta en `usuarioId`.

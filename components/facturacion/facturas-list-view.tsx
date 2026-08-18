@@ -147,7 +147,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
+    <div className="w-full px-6 py-8">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{esConsulta ? t("titleConsulta") : t("title")}</h1>
         <div className="flex items-center gap-2">
