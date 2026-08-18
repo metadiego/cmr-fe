@@ -724,7 +724,8 @@
     "estadisticas_diarias": "Estadísticas diarias",
     "inventario_existencias": "Existencias",
     "ventasPorGrupo": "Ventas por grupo",
-    "cuadreGeneral": "Cuadre general"
+    "cuadreGeneral": "Cuadre general",
+    "dispLegado": "Disponibilidad heredada"
   },
   "admin": {
     "title": "Administración",
@@ -3020,7 +3021,23 @@
   },
   "pacientes": {
     "record_duplicado": "Ese número de récord ya pertenece a otro paciente de este centro",
-    "campos_obligatorios": "Faltan campos obligatorios del alta"
+    "campos_obligatorios": "Faltan campos obligatorios del alta",
+    "dispLegado": {
+      "title": "Cargar disponibilidad heredada",
+      "help": "Trae al sistema las sesiones/terapias que el paciente ya tenía en el legado, buscando por número de récord.",
+      "record": "Número de récord",
+      "recordPlaceholder": "p. ej. 15491",
+      "buscar": "Buscar",
+      "ambiguoTitulo": "El récord {record} corresponde a {n} personas",
+      "ambiguoAyuda": "Un mismo número de récord puede ser de varias personas. Elige a cuál cargarle la disponibilidad.",
+      "elegir": "Elegir",
+      "sinNombre": "(sin nombre)",
+      "cargarPara": "Se cargará para",
+      "nItems": "{n} para cargar",
+      "sinItems": "No hay disponibilidad heredada para cargar.",
+      "confirmar": "Cargar disponibilidad",
+      "aplicada": "Disponibilidad heredada cargada."
+    }
   },
   "perfiles": {
     "vigencia_invalida": "La fecha final de vigencia es anterior a la inicial"

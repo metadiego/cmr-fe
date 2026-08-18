@@ -18,6 +18,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   // declaran aquí. Tampoco `/tablero/citas` (tablero inexistente) ni `/atencion` (alias): duplicaban ítems.
   // Clientes
   { path: "/clientes", labelKey: "nav.clientes" },
+  { path: "/pacientes/disponibilidad-legado", labelKey: "nav.dispLegado" },
   // Comunicaciones
   { path: "/comunicaciones", labelKey: "nav.comunicaciones" },
   // Facturación

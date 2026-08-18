@@ -136,3 +136,50 @@ export function updateConfigAltaPacientes(
     centroId,
   );
 }
+
+// --- Disponibilidad heredada del LEGADO (BE 18-ago) ---------------------------------------------
+// El número de récord NO identifica a una persona: en prod hay 239 récords compartidos por >1 ficha.
+// Flujo: diagnosticar por récord → si es ambiguo (409 RECORD_AMBIGUO con `candidatos`), elegir a quién
+// → repetir con pacienteId → aplicar con ese mismo pacienteId. Handoff HANDOFF-record-ambiguo-elegir-persona.
+// El endpoint NO está aún en el schema generado (gen:api pendiente) → se tipa aquí.
+export interface CandidatoRecord {
+  id: string;
+  record: string;
+  nombres?: string | null;
+  apellidos?: string | null;
+  telefono?: string | null;
+  fechaNacimiento?: string | null;
+  createdAt?: string | null;
+}
+// La forma del diagnóstico "feliz" la sirve el BE al leer el legado; se tipa laxa (hoy la nube
+// devuelve 500 porque el contenedor no trae sqlcmd — solo el camino del 409 es probable en prod).
+export interface DiagnosticoLegado {
+  record: string;
+  pacienteId?: string | null;
+  paciente?: { id?: string; nombres?: string | null; apellidos?: string | null } | null;
+  items?: unknown[];
+  [k: string]: unknown;
+}
+export function diagnosticoDisponibilidadLegado(
+  record: string,
+  pacienteId?: string,
+  centroId?: string,
+): Promise<DiagnosticoLegado> {
+  const qs = pacienteId ? `?pacienteId=${encodeURIComponent(pacienteId)}` : "";
+  return apiFetch<DiagnosticoLegado>(
+    `/pacientes/disponibilidad-legado/${encodeURIComponent(record)}/diagnostico${qs}`,
+    {},
+    centroId,
+  );
+}
+export function aplicarDisponibilidadLegado(
+  record: string,
+  payload: { pacienteId: string; items: unknown[] },
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch<unknown>(
+    `/pacientes/disponibilidad-legado/${encodeURIComponent(record)}/aplicar`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
+  );
+}

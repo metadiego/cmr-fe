@@ -724,7 +724,8 @@
     "estadisticas_diarias": "Daily statistics",
     "inventario_existencias": "Stock on hand",
     "ventasPorGrupo": "Sales by group",
-    "cuadreGeneral": "Cuadre general"
+    "cuadreGeneral": "Cuadre general",
+    "dispLegado": "Disponibilidad heredada"
   },
   "admin": {
     "title": "Administration",
@@ -3020,7 +3021,23 @@
   },
   "pacientes": {
     "record_duplicado": "That record number already belongs to another patient of this center",
-    "campos_obligatorios": "Required intake fields are missing"
+    "campos_obligatorios": "Required intake fields are missing",
+    "dispLegado": {
+      "title": "Load inherited availability",
+      "help": "Brings the sessions/therapies the patient already had in the legacy system, searching by record number.",
+      "record": "Record number",
+      "recordPlaceholder": "e.g. 15491",
+      "buscar": "Search",
+      "ambiguoTitulo": "Record {record} matches {n} people",
+      "ambiguoAyuda": "One record number can belong to several people. Choose who to load the availability for.",
+      "elegir": "Choose",
+      "sinNombre": "(no name)",
+      "cargarPara": "Will load for",
+      "nItems": "{n} to load",
+      "sinItems": "No inherited availability to load.",
+      "confirmar": "Load availability",
+      "aplicada": "Inherited availability loaded."
+    }
   },
   "perfiles": {
     "vigencia_invalida": "The end date is before the start date"
