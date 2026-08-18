@@ -61,6 +61,14 @@ export default function VentasPorGrupoPage() {
     () => (data?.grupos ?? []).reduce((m, g) => Math.max(m, Math.abs(g.neto ?? 0)), 0),
     [data],
   );
+  // Un megagrupo solo es "subtotal" útil si agrupa 2+ grupos; si cada grupo es su propio megagrupo
+  // (1:1, el caso de hoy), las tarjetas y la etiqueta por fila serían ruido → se ocultan.
+  const gruposPorMega = React.useMemo(() => {
+    const m = new Map<string, number>();
+    (data?.grupos ?? []).forEach((g) => { if (g.megagrupoClave) m.set(g.megagrupoClave, (m.get(g.megagrupoClave) ?? 0) + 1); });
+    return m;
+  }, [data]);
+  const megasUtiles = (data?.megagrupos ?? []).filter((m) => (gruposPorMega.get(m.clave) ?? 0) > 1);
 
   function aplicar(d: string, h: string, div: string) {
     setDesde(d);
@@ -167,10 +175,10 @@ export default function VentasPorGrupoPage() {
             )}
           </div>
 
-          {/* Subtotales por MEGAGRUPO (del BE, sin recalcular). */}
-          {data.megagrupos.length > 0 && (
+          {/* Subtotales por MEGAGRUPO (del BE, sin recalcular). Solo si agrupan 2+ grupos. */}
+          {megasUtiles.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {data.megagrupos.map((m) => (
+              {megasUtiles.map((m) => (
                 <div key={m.clave} className="rounded-lg border bg-muted/30 px-3 py-2">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     {tRoot.has(`fac.megagrupo.${m.clave}`) ? tRoot(`fac.megagrupo.${m.clave}`) : titleCase(m.clave)}
@@ -201,9 +209,12 @@ export default function VentasPorGrupoPage() {
                 {grupos.length === 0 && (
                   <tr><td colSpan={8} className="px-3 py-10 text-center text-muted-foreground">{t("empty")}</td></tr>
                 )}
-                {grupos.map((g) => (
-                  <GrupoRow key={g.clave} g={g} rotulo={rotulo(g)} maxNeto={maxNeto} sinClasLabel={t("sinClasificarTip")} mega={g.megagrupoClave ? (tRoot.has(`fac.megagrupo.${g.megagrupoClave}`) ? tRoot(`fac.megagrupo.${g.megagrupoClave}`) : titleCase(g.megagrupoClave)) : null} />
-                ))}
+                {grupos.map((g) => {
+                  // Etiqueta de megagrupo por fila solo cuando agrupa 2+ (si es 1:1 con su clave, es ruido).
+                  const megaUtil = !!g.megagrupoClave && g.megagrupoClave !== g.clave && (gruposPorMega.get(g.megagrupoClave) ?? 0) > 1;
+                  const mega = megaUtil ? (tRoot.has(`fac.megagrupo.${g.megagrupoClave}`) ? tRoot(`fac.megagrupo.${g.megagrupoClave}`) : titleCase(g.megagrupoClave!)) : null;
+                  return <GrupoRow key={g.clave} g={g} rotulo={rotulo(g)} maxNeto={maxNeto} sinClasLabel={t("sinClasificarTip")} mega={mega} />;
+                })}
               </tbody>
               {grupos.length > 0 && (
                 <tfoot>
