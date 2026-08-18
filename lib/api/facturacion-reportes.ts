@@ -84,3 +84,20 @@ export function getReportePorGrupo(
   if (params.contexto) sp.set("contexto", params.contexto); // omitido = las dos divisiones
   return apiFetch<ReportePorGrupo>(`/facturacion/reportes/por-grupo?${sp.toString()}`, {}, centroId);
 }
+
+// Ventas por USUARIO (quién vende). Ordenado de mayor a menor. `nombre: null` = factura sin usuario
+// responsable (importada/vieja) → se muestra como "Sin usuario", no se esconde. Totales redondeados por
+// el BE (no recalcular). Permiso estadisticas.read. Handoff HANDOFF-usuario-de-la-factura-y-ventas-por-usuario.
+export interface ReporteUsuarioFila {
+  usuarioId: string | null;
+  nombre: string | null;
+  total: number;
+}
+export function getReportePorUsuario(
+  params: { desde: string; hasta: string; contexto?: DivisionReporte },
+  centroId?: string,
+): Promise<ReporteUsuarioFila[]> {
+  const sp = new URLSearchParams({ desde: params.desde, hasta: params.hasta });
+  if (params.contexto) sp.set("contexto", params.contexto);
+  return apiFetch<ReporteUsuarioFila[]>(`/facturacion/reportes/por-usuario?${sp.toString()}`, {}, centroId);
+}

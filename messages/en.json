@@ -725,7 +725,8 @@
     "inventario_existencias": "Stock on hand",
     "ventasPorGrupo": "Sales by group",
     "cuadreGeneral": "Cuadre general",
-    "dispLegado": "Disponibilidad heredada"
+    "dispLegado": "Disponibilidad heredada",
+    "ventasPorUsuario": "Ventas por usuario"
   },
   "admin": {
     "title": "Administration",
@@ -2203,6 +2204,33 @@
       "noCuadra": "Does not match invoices — difference {diferencia}",
       "sinClasificarTip": "Products with no billing group assigned",
       "empty": "No invoices in this period."
+    },
+    "ventasPorUsuario": {
+      "title": "Sales by user",
+      "help": "Who sells: total billed per responsible user in the period. No user = invoices without a responsible party (imported or old).",
+      "from": "From",
+      "to": "To",
+      "division": "Division",
+      "search": "Search",
+      "exportCsv": "Export CSV",
+      "div": {
+        "todas": "All",
+        "general": "General",
+        "consulta": "Consultations"
+      },
+      "atajo": {
+        "hoy": "Today",
+        "ayer": "Yesterday",
+        "semana": "This week",
+        "mes": "This month"
+      },
+      "col": {
+        "usuario": "User",
+        "total": "Total"
+      },
+      "totales": "Totals",
+      "sinUsuario": "No user",
+      "empty": "No sales in this period."
     }
   },
   "agregarCita": {

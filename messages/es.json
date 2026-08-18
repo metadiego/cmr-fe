@@ -725,7 +725,8 @@
     "inventario_existencias": "Existencias",
     "ventasPorGrupo": "Ventas por grupo",
     "cuadreGeneral": "Cuadre general",
-    "dispLegado": "Disponibilidad heredada"
+    "dispLegado": "Disponibilidad heredada",
+    "ventasPorUsuario": "Ventas por usuario"
   },
   "admin": {
     "title": "Administración",
@@ -2203,6 +2204,33 @@
       "noCuadra": "No cuadra con las facturas — diferencia {diferencia}",
       "sinClasificarTip": "Productos sin grupo de facturación asignado",
       "empty": "No hay facturas en este período."
+    },
+    "ventasPorUsuario": {
+      "title": "Ventas por usuario",
+      "help": "Quién vende: total facturado por usuario responsable en el período. Sin usuario = facturas sin responsable (importadas o viejas).",
+      "from": "Desde",
+      "to": "Hasta",
+      "division": "División",
+      "search": "Buscar",
+      "exportCsv": "Exportar CSV",
+      "div": {
+        "todas": "Todas",
+        "general": "General",
+        "consulta": "Consultas"
+      },
+      "atajo": {
+        "hoy": "Hoy",
+        "ayer": "Ayer",
+        "semana": "Esta semana",
+        "mes": "Este mes"
+      },
+      "col": {
+        "usuario": "Usuario",
+        "total": "Total"
+      },
+      "totales": "Totales",
+      "sinUsuario": "Sin usuario",
+      "empty": "No hay ventas en este período."
     }
   },
   "agregarCita": {

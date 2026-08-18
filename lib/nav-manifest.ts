@@ -28,6 +28,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/facturacion/devoluciones", labelKey: "nav.devoluciones" },
   { path: "/facturacion/reportes/consumo-insumos", labelKey: "nav.consumoInsumos" },
   { path: "/facturacion/ventas-por-grupo", labelKey: "nav.ventasPorGrupo" },
+  { path: "/facturacion/ventas-por-usuario", labelKey: "nav.ventasPorUsuario" },
   { path: "/consultas", labelKey: "nav.facturacionConsultas" },
   { path: "/consultas/devoluciones", labelKey: "nav.devolucionesConsultas" },
   // Estadísticas (el BE ya siembra el ítem en /me/menu; aquí para dedup/manifiesto)
