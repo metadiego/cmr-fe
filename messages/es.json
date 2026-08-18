@@ -723,7 +723,8 @@
     "estadisticas_servicios": "Estadísticas de Servicios",
     "estadisticas_diarias": "Estadísticas diarias",
     "inventario_existencias": "Existencias",
-    "ventasPorGrupo": "Ventas por grupo"
+    "ventasPorGrupo": "Ventas por grupo",
+    "cuadreGeneral": "Cuadre general"
   },
   "admin": {
     "title": "Administración",
@@ -2847,6 +2848,19 @@
       "colValor": "Valor",
       "conteoTotal": "Total contado",
       "cajerosSumados": "{n} cajas sumadas"
+    },
+    "cuadreGeneral": {
+      "title": "Cuadre general",
+      "help": "Ventas del día por división y forma de pago. General reúne productos, suero y láser; Consulta va aparte. El total general suma las dos.",
+      "fecha": "Fecha",
+      "buscar": "Buscar",
+      "general": "Facturación general",
+      "consulta": "Facturación consulta",
+      "totalGeneral": "Total general",
+      "efectivo": "Efectivo",
+      "totalTarjetas": "Total tarjetas",
+      "totalDivision": "Total {division}",
+      "totalGeneralRow": "Total GENERAL"
     }
   },
   "gruposFacturacion": {

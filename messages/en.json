@@ -723,7 +723,8 @@
     "estadisticas_servicios": "Service Statistics",
     "estadisticas_diarias": "Daily statistics",
     "inventario_existencias": "Stock on hand",
-    "ventasPorGrupo": "Sales by group"
+    "ventasPorGrupo": "Sales by group",
+    "cuadreGeneral": "Cuadre general"
   },
   "admin": {
     "title": "Administration",
@@ -2847,6 +2848,19 @@
       "colValor": "Value",
       "conteoTotal": "Counted total",
       "cajerosSumados": "{n} drawers summed"
+    },
+    "cuadreGeneral": {
+      "title": "General cash-up",
+      "help": "Daily sales by division and payment method. General bundles products, IV and laser; Consultation is separate. The general total sums both.",
+      "fecha": "Date",
+      "buscar": "Search",
+      "general": "General billing",
+      "consulta": "Consultation billing",
+      "totalGeneral": "General total",
+      "efectivo": "Cash",
+      "totalTarjetas": "Total cards",
+      "totalDivision": "Total {division}",
+      "totalGeneralRow": "GENERAL total"
     }
   },
   "gruposFacturacion": {
