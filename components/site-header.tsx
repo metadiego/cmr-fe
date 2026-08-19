@@ -169,18 +169,26 @@ export function SiteHeader() {
     ...navItems.map((m) => ({ clave: m.clave, labelKey: m.labelKey, path: m.path })),
     ...manifestItems,
   ];
-  const grupos = [
-    {
-      clave: "en-desarrollo",
-      labelKey: "nav.en_desarrollo",
-      items: allItems.filter((m) => hasPage(m.path)),
-    },
-    {
-      clave: "por-desarrollar",
-      labelKey: "nav.por_desarrollar",
-      items: allItems.filter((m) => !hasPage(m.path)),
-    },
-  ].filter((g) => g.items.length > 0);
+  // «En desarrollo» / «Por desarrollar» son herramientas de trabajo INTERNO: la lista de lo que falta
+  // por construir. Solo las ve admin/master, igual que el catch-all del manifiesto de arriba. El BE ya
+  // exige el permiso `menu.desarrollo` (solo el rol admin lo tiene) y dejó de mandar esos ítems, pero
+  // estos dos grupos los arma el FE por su cuenta, así que sin este gate seguían saliendo aunque se
+  // quitara el permiso — ni con refresh desaparecían.
+  // See cmr-be/docs/specs/menu-desarrollo-solo-admin-handoff-fe.md.
+  const grupos = puedeVerCatalogoCompleto
+    ? [
+        {
+          clave: "en-desarrollo",
+          labelKey: "nav.en_desarrollo",
+          items: allItems.filter((m) => hasPage(m.path)),
+        },
+        {
+          clave: "por-desarrollar",
+          labelKey: "nav.por_desarrollar",
+          items: allItems.filter((m) => !hasPage(m.path)),
+        },
+      ].filter((g) => g.items.length > 0)
+    : [];
   // Grupos de dominio del BE (Entrega A del handoff Menú-Grupos): raíces `g-*` de /me/menu con sus
   // hijos anidados por `parentClave`. SE SUMAN a los dos menús de desarrollo (que quedan tal cual).
   // 100% data-driven: si el BE no envía raíces `g-*`, no se pinta nada extra (sin regresión).
