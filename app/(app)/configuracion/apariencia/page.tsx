@@ -19,6 +19,7 @@ import type { ThemeConfig } from "@/lib/theme/config";
 import { mezclarSoloTema } from "@/lib/theme/mezclar-capa";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { formatFechaSolo } from "@/lib/format/fecha";
 import { ThemeEditor } from "@/components/theme/theme-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,7 @@ import {
 // que se lee, se mezcla y se escribe. Pisar el sobre entero rompería la facturación del centro.
 // See docs/specs/apariencia-personal-en-el-avatar-y-corporativa-en-configuracion.md
 
-/** Claves de TEMA: lo único que esta pantalla toca del sobre de configuración. */
+/** Lo que puede estar pasando con cada capa mientras se lee del BE. */
 type Estado<T> =
   | { kind: "loading" }
   | { kind: "ok"; value: T }
@@ -157,7 +158,11 @@ export default function AparienciaCorporativaPage() {
     }
   }
 
-  async function quitarOverride(id: string) {
+  async function quitarOverride(o: Override) {
+    // Un DELETE que le cambia la pantalla a todo el mundo al instante y no se puede deshacer: se
+    // pregunta, igual que antes de borrar un rol o revocar un centro.
+    if (!window.confirm(t("overrideRemoveConfirm", { nombre: o.nombre || o.id }))) return;
+    const id = o.id;
     try {
       await deleteOverride(id);
       setOverrides((prev) => prev.filter((o) => o.id !== id));
@@ -219,7 +224,7 @@ export default function AparienciaCorporativaPage() {
             <h2 className="text-sm font-medium">{t("centroTitle")}</h2>
             <p className="mb-4 text-xs text-muted-foreground">{t("centroHint")}</p>
             <div className="mb-4 space-y-2">
-              <Label>{t("centroLabel")}</Label>
+              <Label htmlFor="ap-centro">{t("centroLabel")}</Label>
               <Select
                 value={centroId}
                 onValueChange={(v) => {
@@ -228,7 +233,7 @@ export default function AparienciaCorporativaPage() {
                   setCentroId(v);
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger id="ap-centro">
                   <SelectValue placeholder={t("centroPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -240,7 +245,10 @@ export default function AparienciaCorporativaPage() {
                 </SelectContent>
               </Select>
             </div>
-            {centro.kind === "loading" && (
+            {centros.length === 0 && (
+              <p className="text-sm text-muted-foreground">{t("centroVacio")}</p>
+            )}
+            {centros.length > 0 && centro.kind === "loading" && (
               <p className="text-sm text-muted-foreground">{t("loading")}</p>
             )}
             {centro.kind === "fail" && (
@@ -308,14 +316,14 @@ export default function AparienciaCorporativaPage() {
                     <p className="truncate text-sm font-medium">{o.nombre || o.id}</p>
                     <p className="text-xs text-muted-foreground">
                       {o.vigenteHasta
-                        ? t("overrideUntilValue", { fecha: o.vigenteHasta })
+                        ? t("overrideUntilValue", { fecha: formatFechaSolo(o.vigenteHasta) })
                         : t("overrideNoEnd")}
                     </p>
                   </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => quitarOverride(o.id)}
+                    onClick={() => quitarOverride(o)}
                   >
                     {t("overrideRemove")}
                   </Button>

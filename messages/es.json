@@ -3192,6 +3192,8 @@
     "savedCentro": "Apariencia del centro guardada.",
     "saving": "Guardando…",
     "loading": "Cargando…",
-    "noAccess": "No tienes acceso a la apariencia corporativa. Tu apariencia personal se cambia desde tu avatar."
+    "noAccess": "No tienes acceso a la apariencia corporativa. Tu apariencia personal se cambia desde tu avatar.",
+    "overrideRemoveConfirm": "¿Desactivar «{nombre}»? Todos volverán a la apariencia que les toque.",
+    "centroVacio": "No hay centros disponibles para tu usuario."
   }
 }

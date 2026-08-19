@@ -3192,6 +3192,8 @@
     "savedCentro": "Center appearance saved.",
     "saving": "Saving…",
     "loading": "Loading…",
-    "noAccess": "You do not have access to the corporate appearance. Your personal look is set from your avatar."
+    "noAccess": "You do not have access to the corporate appearance. Your personal look is set from your avatar.",
+    "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
+    "centroVacio": "No centers available for your user."
   }
 }
