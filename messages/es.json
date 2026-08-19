@@ -643,7 +643,8 @@
     "lang_en": "English",
     "appSettings": "Configuración de la app",
     "boardModules": "Módulos de tablero",
-    "profileSoon": "Perfil y preferencias (próximamente)"
+    "profileSoon": "Perfil y preferencias (próximamente)",
+    "myAppearance": "Mi apariencia"
   },
   "nav": {
     "home": "Inicio",
@@ -3163,5 +3164,34 @@
   "persistencia": {
     "guardado": "Guardado",
     "noGuardado": "NO se guardó"
+  },
+  "aparienciaCorporativa": {
+    "title": "Apariencia corporativa",
+    "description": "La apariencia que ven todos por defecto, la de cada centro, y los cambios temporales que pisan a todo el mundo mientras estén activos. Tu apariencia personal se cambia desde tu avatar.",
+    "systemTitle": "Sistema",
+    "systemHint": "Lo que ve todo el mundo cuando no tiene nada propio.",
+    "centroTitle": "Por centro",
+    "centroHint": "Pisa la del sistema para la gente de ese centro.",
+    "centroLabel": "Centro",
+    "centroPlaceholder": "Elige un centro",
+    "overrideTitle": "Cambios temporales (overrides)",
+    "overrideHint": "Mientras uno esté activo, manda sobre todo lo demás, incluida la apariencia personal de cada usuario. Se crea con los colores que tengas ahora mismo en «Sistema».",
+    "overrideName": "Nombre",
+    "overrideNamePlaceholder": "Campaña de aniversario",
+    "overrideUntil": "Hasta",
+    "overrideUntilValue": "Hasta {fecha}",
+    "overrideNoEnd": "Sin fecha de fin",
+    "overrideCreate": "Crear",
+    "overrideRemove": "Desactivar",
+    "overrideRemoved": "Cambio temporal desactivado.",
+    "overrideCreated": "Cambio temporal activado.",
+    "overrideEmpty": "No hay ninguno activo.",
+    "saveSystem": "Guardar la del sistema",
+    "saveCentro": "Guardar la del centro",
+    "savedSystem": "Apariencia del sistema guardada.",
+    "savedCentro": "Apariencia del centro guardada.",
+    "saving": "Guardando…",
+    "loading": "Cargando…",
+    "noAccess": "No tienes acceso a la apariencia corporativa. Tu apariencia personal se cambia desde tu avatar."
   }
 }

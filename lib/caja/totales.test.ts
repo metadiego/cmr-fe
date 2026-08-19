@@ -64,8 +64,9 @@ test("ordenarDenominaciones: por valor DESC (mayor→menor); no muta", () => {
   assert.equal(input[0].valor, 20);
 });
 
-test("money formatea a $0.00 y tolera NaN", () => {
-  assert.equal(money(1234.5), "$1234.50");
+test("money formatea a $0.00, con separador de miles, y tolera NaN", () => {
+  // El pie del cuadre lee cifras de miles de un vistazo: money lleva separador de miles (bd4fe49).
+  assert.equal(money(1234.5), "$1,234.50");
   assert.equal(money(0), "$0.00");
   assert.equal(money(Number.NaN), "$0.00");
 });

@@ -139,10 +139,15 @@ export function UserMenu() {
               {t("boardModules")}
             </Link>
           </DropdownMenuItem>
-          {/* Perfil y preferencias del usuario: pensado, aún sin desarrollar. */}
-          <DropdownMenuItem disabled>
-            <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
-            {t("profileSoon")}
+          {/* MI apariencia: colores, radio y fondo propios (capa `usuario` de preferencias). La tiene
+              cualquier usuario y cualquier rol —incluido el administrador, que también quiere sus
+              colores—; la corporativa (sistema, centro y overrides) vive en Configuración.
+              See docs/specs/apariencia-personal-en-el-avatar-y-corporativa-en-configuracion.md */}
+          <DropdownMenuItem asChild>
+            <Link href="/settings/appearance">
+              <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
+              {t("myAppearance")}
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
