@@ -643,7 +643,8 @@
     "lang_en": "English",
     "appSettings": "App settings",
     "boardModules": "Board modules",
-    "profileSoon": "Profile & preferences (coming soon)"
+    "profileSoon": "Profile & preferences (coming soon)",
+    "myAppearance": "My appearance"
   },
   "nav": {
     "home": "Home",
@@ -3163,5 +3164,36 @@
   "persistencia": {
     "guardado": "Saved",
     "noGuardado": "NOT saved"
+  },
+  "aparienciaCorporativa": {
+    "title": "Corporate appearance",
+    "description": "What everyone sees by default, each center’s own look, and temporary changes that override everyone while active. Your personal appearance is set from your avatar.",
+    "systemTitle": "System",
+    "systemHint": "What everyone sees when they have nothing of their own.",
+    "centroTitle": "Per center",
+    "centroHint": "Overrides the system look for that center’s people.",
+    "centroLabel": "Center",
+    "centroPlaceholder": "Pick a center",
+    "overrideTitle": "Temporary changes (overrides)",
+    "overrideHint": "While one is active it wins over everything else, including each user’s personal look. It is created from the colors currently in “System”.",
+    "overrideName": "Name",
+    "overrideNamePlaceholder": "Anniversary campaign",
+    "overrideUntil": "Until",
+    "overrideUntilValue": "Until {fecha}",
+    "overrideNoEnd": "No end date",
+    "overrideCreate": "Create",
+    "overrideRemove": "Deactivate",
+    "overrideRemoved": "Temporary change deactivated.",
+    "overrideCreated": "Temporary change activated.",
+    "overrideEmpty": "None active.",
+    "saveSystem": "Save system look",
+    "saveCentro": "Save center look",
+    "savedSystem": "System appearance saved.",
+    "savedCentro": "Center appearance saved.",
+    "saving": "Saving…",
+    "loading": "Loading…",
+    "noAccess": "You do not have access to the corporate appearance. Your personal look is set from your avatar.",
+    "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
+    "centroVacio": "No centers available for your user."
   }
 }
