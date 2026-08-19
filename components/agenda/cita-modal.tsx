@@ -104,12 +104,21 @@ export function CitaModal({
     return tp ? addMinutes(start, tp.duracionMin) : "09:30";
   });
   const [esPrimeraVez, setEsPrimeraVez] = React.useState(cita?.esPrimeraVez ?? false);
-  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Una cita solo
-  // entra al tablero de Atención si está confirmada, así que para una cita de HOY nace "confirmada" por
-  // defecto (lo que se quiere el 99% de las veces). Handoff citas-medico-y-confirmada.
-  const [estadoCrear, setEstadoCrear] = React.useState<"programada" | "confirmada">(
-    fecha === todayISO() ? "confirmada" : "programada",
-  );
+  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Sale del
+  // CATÁLOGO (`esInicial`), no de una regla escrita aquí: antes una cita de HOY nacía "confirmada", y
+  // confirmada entra DIRECTA al tablero de Atención cuando todavía no se está seguro de que el paciente
+  // venga. Confirmar es una decisión del usuario. Cambiarlo mañana es marcar otro estado como inicial en
+  // el catálogo del BE, sin tocar este archivo.
+  const claveInicial = (estados.find((e) => e.esInicial)?.clave ?? "programada") as
+    | "programada"
+    | "confirmada";
+  const [estadoCrear, setEstadoCrear] = React.useState<"programada" | "confirmada">(claveInicial);
+  // El catálogo llega por red: cuando resuelve, se adopta su estado inicial (salvo que el usuario ya
+  // haya elegido a mano — para eso está `tocado`).
+  const [estadoTocado, setEstadoTocado] = React.useState(false);
+  React.useEffect(() => {
+    if (!estadoTocado) setEstadoCrear(claveInicial);
+  }, [claveInicial, estadoTocado]);
   const [motivo, setMotivo] = React.useState(cita?.motivo ?? "");
   const [notas, setNotas] = React.useState(cita?.notas ?? "");
   const [submitting, setSubmitting] = React.useState(false);
@@ -296,7 +305,10 @@ export function CitaModal({
               ) : (
                 // Al crear: elegir con qué estado nace (allowlist BE). Confirmada = entra al tablero de
                 // Atención de una vez. Colores/etiquetas del catálogo (data-driven).
-                <Select value={estadoCrear} onValueChange={(v) => setEstadoCrear(v as "programada" | "confirmada")}>
+                <Select value={estadoCrear} onValueChange={(v) => {
+                    setEstadoTocado(true);
+                    setEstadoCrear(v as "programada" | "confirmada");
+                  }}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(["programada", "confirmada"] as const).map((clave) => {
