@@ -580,7 +580,17 @@
     "mismatch": "Las contraseñas no coinciden.",
     "submit": "Crear contraseña",
     "submitting": "Guardando…",
-    "success": "Contraseña creada."
+    "success": "Contraseña creada.",
+    "usarCodigo": "Tengo un código de acceso",
+    "codigoIntro": "Para crear tu contraseña necesitas un código de acceso. Pídeselo al administrador y escríbelo aquí.",
+    "email": "Correo",
+    "codigo": "Código de acceso",
+    "codigoPlaceholder": "8 caracteres",
+    "codigoErr": {
+      "expirado": "Ese código ya se usó o caducó. Pide uno nuevo al administrador.",
+      "incorrecto": "Código incorrecto. Revisa los 8 caracteres.",
+      "correo": "El correo no coincide con el código."
+    }
   },
   "language": {
     "label": "Idioma",
@@ -901,7 +911,18 @@
       "sinCentro": "Sin centro",
       "hasta": "hasta {fecha}",
       "masAcciones": "Más acciones",
-      "sinResultados": "Ningún usuario coincide con la búsqueda."
+      "sinResultados": "Ningún usuario coincide con la búsqueda.",
+      "generarCodigo": "Generar código de acceso",
+      "codigo": {
+        "titulo": "Código de acceso",
+        "desc": "Entrégaselo a {email} para que cree su propia contraseña.",
+        "copiar": "Copiar",
+        "copiado": "Copiado",
+        "copiarError": "No se pudo copiar.",
+        "aviso": "Caduca en {min} minutos y es de un solo uso. Pedir otro invalida este.",
+        "comoUsar": "La persona entra a Crear contraseña, elige «Tengo un código», pone su correo y este código, y escribe su contraseña.",
+        "listo": "Listo"
+      }
     },
     "invite": {
       "title": "Invitar usuario",

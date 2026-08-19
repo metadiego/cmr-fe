@@ -159,6 +159,19 @@ export function reactivarProfile(id: string): Promise<Perfil> {
   return apiFetch<Perfil>(`/profiles/${id}/reactivar`, { method: "POST" });
 }
 
+// Código de acceso de UN SOLO USO (8 caracteres, caduca en 60 min): el admin lo genera y lo entrega en
+// persona; con él, la persona fija SU propia contraseña en /auth/set-password (verifyOtp). El admin NO
+// fija ni conoce la contraseña. Permiso profiles.codigo_acceso (solo admin). NUNCA devuelve contraseñas
+// ni enlaces. 409 si el perfil está suspendido/rechazado o sin email. Handoff codigo-de-acceso.
+export interface CodigoAccesoResult {
+  email: string;
+  codigo: string;
+  expiraEnMinutos: number;
+}
+export function generarCodigoAcceso(id: string): Promise<CodigoAccesoResult> {
+  return apiFetch<CodigoAccesoResult>(`/profiles/${id}/codigo-acceso`, { method: "POST", body: JSON.stringify({}) });
+}
+
 // GET /profiles/:id/asignaciones — centros del perfil con tipo/vigencia/activo.
 export function getAsignaciones(perfilId: string): Promise<Asignacion[]> {
   return apiFetch<Asignacion[]>(`/profiles/${perfilId}/asignaciones`).then(

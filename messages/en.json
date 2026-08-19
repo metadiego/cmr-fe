@@ -580,7 +580,17 @@
     "mismatch": "Passwords don't match.",
     "submit": "Create password",
     "submitting": "Saving…",
-    "success": "Password created."
+    "success": "Password created.",
+    "usarCodigo": "I have an access code",
+    "codigoIntro": "To create your password you need an access code. Ask the administrator for one and enter it here.",
+    "email": "Email",
+    "codigo": "Access code",
+    "codigoPlaceholder": "8 characters",
+    "codigoErr": {
+      "expirado": "That code was already used or expired. Ask the administrator for a new one.",
+      "incorrecto": "Incorrect code. Check the 8 characters.",
+      "correo": "The email does not match the code."
+    }
   },
   "language": {
     "label": "Language",
@@ -901,7 +911,18 @@
       "sinCentro": "No center",
       "hasta": "until {fecha}",
       "masAcciones": "More actions",
-      "sinResultados": "No user matches the search."
+      "sinResultados": "No user matches the search.",
+      "generarCodigo": "Generate access code",
+      "codigo": {
+        "titulo": "Access code",
+        "desc": "Give it to {email} so they can create their own password.",
+        "copiar": "Copy",
+        "copiado": "Copied",
+        "copiarError": "Could not copy.",
+        "aviso": "Expires in {min} minutes and is single-use. Requesting another invalidates this one.",
+        "comoUsar": "The person opens Create password, chooses “I have a code”, enters their email and this code, and sets their password.",
+        "listo": "Done"
+      }
     },
     "invite": {
       "title": "Invite user",

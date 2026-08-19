@@ -8,10 +8,14 @@ import {
   getProfiles,
   reactivarProfile,
   suspenderProfile,
+  generarCodigoAcceso,
   type Perfil,
+  type CodigoAccesoResult,
 } from "@/lib/api/profiles"
 import { toastError } from "@/lib/api/errors"
+import { useCan } from "@/hooks/use-can"
 import { useResource } from "@/hooks/use-resource"
+import { CodigoAccesoDialog } from "@/components/admin/codigo-acceso-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -48,6 +52,21 @@ export function UsersList() {
   const [editFor, setEditFor] = React.useState<Perfil | null>(null)
   const [q, setQ] = React.useState("")
   const [busyId, setBusyId] = React.useState<string | null>(null)
+  const { can } = useCan()
+  const puedeCodigo = can("profiles.codigo_acceso")
+  const [codigo, setCodigo] = React.useState<CodigoAccesoResult | null>(null)
+
+  async function generarCodigo(p: Perfil) {
+    setBusyId(p.id)
+    try {
+      const r = await generarCodigoAcceso(p.id)
+      setCodigo(r) // se muestra en un diálogo con copiar; credencial temporal, no se guarda
+    } catch (err) {
+      toastError(err)
+    } finally {
+      setBusyId(null)
+    }
+  }
 
   // Búsqueda client-side sobre email/nombre/rol/centro (la lista es corta).
   const filtered = React.useMemo(() => {
@@ -201,6 +220,13 @@ export function UsersList() {
                   {t("users.reactivar")}
                 </DropdownMenuItem>
               )}
+              {/* Código de acceso: el usuario pone su propia clave. Solo con permiso y perfil aprobado
+                  (el BE responde 409 si está suspendido/rechazado). Handoff codigo-de-acceso. */}
+              {puedeCodigo && p.estado === "aprobado" && (
+                <DropdownMenuItem disabled={busyId === p.id} onClick={() => generarCodigo(p)}>
+                  {t("users.generarCodigo")}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -260,6 +286,8 @@ export function UsersList() {
         profile={accessFor}
         onOpenChange={(open) => !open && setAccessFor(null)}
       />
+
+      <CodigoAccesoDialog codigo={codigo} onClose={() => setCodigo(null)} />
     </div>
   )
 }
