@@ -737,7 +737,12 @@
     "cuadreGeneral": "Cuadre general",
     "dispLegado": "Disponibilidad heredada",
     "ventasPorUsuario": "Ventas por usuario",
-    "preparacionLegado": "Preparación del legado"
+    "preparacionLegado": "Preparación del legado",
+    "ventas_por_grupo": "Ventas por grupo",
+    "ventas_por_usuario": "Ventas por usuario",
+    "cambio_de_protocolo": "Cambio de protocolo",
+    "captacion_por_agente": "Captación por agente",
+    "operaciones": "Operaciones"
   },
   "admin": {
     "title": "Administración",
