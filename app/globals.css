@@ -190,8 +190,13 @@
   .recibo-print img {
     filter: grayscale(100%) contrast(1.15);
   }
+  /* OJO: Chrome IGNORA `var()` en el descriptor `size` de @page (queda inválido → la página cae a
+     Letter y el ticket sale chiquito arriba-izquierda). Por eso el default va LITERAL (72mm). El
+     ancho por centro se aplica inyectando una regla @page en runtime desde las preferencias
+     (ver presentation-provider), no con var aquí. Verificado con PDF: MediaBox pasa de 612pt (Letter)
+     a ~204pt (72mm). Handoff recibo-termico-sale-en-miniatura. */
   @page {
-    size: var(--recibo-ancho, 72mm) auto;
+    size: 72mm auto;
     margin: 0;
   }
 }
