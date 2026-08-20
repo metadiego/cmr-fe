@@ -69,7 +69,8 @@ export function CenterSelector() {
   return (
     <Select value={current} onValueChange={onChange}>
       <SelectTrigger className="h-9 w-40 gap-2" aria-label={t("center")}>
-        {dot(current)}
+        {/* No pintamos el punto aquí: SelectValue ya replica el contenido de la opción activa
+            (que incluye su punto). Pintarlo también duplicaría el acento en el trigger. */}
         <SelectValue placeholder={t("center")} />
       </SelectTrigger>
       <SelectContent>
