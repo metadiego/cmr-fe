@@ -214,8 +214,11 @@ export default function FacturacionPage() {
       .join("\n");
     return (
       `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
-      `<style>html,body{margin:0;padding:0;background:#fff}` +
-      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:var(--recibo-ancho,72mm)!important}</style>` +
+      // NO imponemos tamaño: sin @page size y sin ancho fijo. El recibo es un bloque con width:auto → se
+      // AJUSTA SOLO al ancho del papel que dé el driver (igual que las facturas que siempre funcionaron),
+      // y así imprime bien en Chrome, Safari, Firefox y Edge. Solo margen de página 0.
+      `<style>@page{margin:0}html,body{margin:0;padding:0;background:#fff}` +
+      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important}</style>` +
       // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
       `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
     );
