@@ -86,6 +86,8 @@ export default function FacturacionPage() {
   const [cabeceraOpen, setCabeceraOpen] = React.useState(false);
   const [regenOpen, setRegenOpen] = React.useState(false);
   const [usuarioOpen, setUsuarioOpen] = React.useState(false);
+  // Nº de presupuesto que asigna el BE al imprimir un borrador con saldo (se reusa al reimprimir).
+  const [presupuestoNum, setPresupuestoNum] = React.useState<string | null>(null);
   const { can } = useCan();
 
   const t = useTranslations("facturacion");
@@ -179,6 +181,9 @@ export default function FacturacionPage() {
     try {
       const r = await imprimirFactura(id, centro);
       setFactura(r.factura);
+      // Presupuesto: guardar el nº que asigna el BE (se reusa al reimprimir) para pintarlo en el recibo y
+      // en la ficha. Handoff imprimir-presupuesto-cuando-no-esta-cobrada.
+      if (r.documento === "presupuesto" && r.numeroPresupuesto) setPresupuestoNum(r.numeroPresupuesto);
       if (!r.emitida && r.motivo) {
         // El motivo viene como labelKey del BE (factura.no_emitida_pendiente_pago, factura.ya_emitida…).
         // Ámbar solo cuando falta cobrar (hay `pendiente`); neutral para reimpresiones normales (ya
@@ -218,7 +223,9 @@ export default function FacturacionPage() {
   // Mapa formaPagoId → clave (del catálogo) para traducir las formas de pago en el recibo.
   const clavePorFormaId: Record<string, string> = {};
   formas.forEach((f) => { if (f.clave) clavePorFormaId[f.id] = f.clave; });
-  const recibo = buildRecibo(factura, diasCatalogo, clavePorFormaId);
+  const recibo = buildRecibo(factura, diasCatalogo, clavePorFormaId, presupuestoNum);
+  // Un borrador con saldo pendiente es un PRESUPUESTO (no se emite al imprimir). Rige el rótulo del botón.
+  const esPresupuesto = estado === "borrador" && n(factura.total) - n(factura.montoAbonado) > 0.005;
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">
@@ -264,6 +271,12 @@ export default function FacturacionPage() {
             </span>
           )}
           <EstadoBadge estado={estado} />
+          {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
+          {presupuestoNum && (
+            <span className="rounded-md bg-amber-500/15 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-400">
+              {t("presupuestoNum", { num: presupuestoNum })}
+            </span>
+          )}
           {esGeneral && estado === "borrador" && (
             <Button variant="outline" size="sm" className="no-print" onClick={() => setCabeceraOpen(true)}>
               {t("editarCabecera")}
@@ -276,7 +289,7 @@ export default function FacturacionPage() {
           )}
           <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-            {tRoot("receipt.print")}
+            {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
           </Button>
           {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
               EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
@@ -355,7 +368,7 @@ export default function FacturacionPage() {
           <h2 className="text-sm font-semibold text-muted-foreground">{tRoot("receipt.previewTitle")}</h2>
           <Button variant="outline" size="sm" onClick={imprimir}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-            {tRoot("receipt.print")}
+            {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
           </Button>
         </div>
         <div className="flex justify-center rounded-xl border bg-muted/30 p-6">

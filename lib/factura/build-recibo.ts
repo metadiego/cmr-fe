@@ -26,7 +26,7 @@ export type Recibo = {
   empresa: ReciboEmpresa;
   logoUrl: string | null;
   // "factura" (por defecto) o "devolucion" → el encabezado dice "Factura #" vs "Devolución #".
-  tipoDocumento?: "factura" | "devolucion";
+  tipoDocumento?: "factura" | "devolucion" | "presupuesto";
   numeroDisplay: string;
   fecha: string;
   estado: string;
@@ -58,6 +58,9 @@ export function buildRecibo(
   diasTratamiento: Record<string, number> = {},
   // Mapa formaPagoId → clave (del catálogo) para traducir la forma en el recibo. Opcional.
   clavePorFormaId: Record<string, string> = {},
+  // Modo PRESUPUESTO: un borrador (aún sin emitir) es una cotización, no una factura. El nº de
+  // presupuesto lo asigna el BE al imprimir (`numeroPresupuesto`). Handoff imprimir-presupuesto.
+  presupuestoNumero: string | null = null,
 ): Recibo {
   const items: ReciboItem[] = (f.items ?? []).map((it) => {
     // "Incluye:" del kit desde item.contenido (BE PR #96): disponible en borrador Y emitida.
@@ -108,11 +111,15 @@ export function buildRecibo(
 
   const pac = f.paciente;
 
+  // Un borrador es un PRESUPUESTO (no emitido): el papel lo dice y usa el nº de presupuesto, no el de
+  // factura (que es null hasta emitir). Handoff imprimir-presupuesto-cuando-no-esta-cobrada.
+  const esBorrador = String(f.estado ?? "") === "borrador";
   return {
     empresa: f.empresa ?? null,
     // Per-branch logo enables distinct brands; null → the FE default asset.
     logoUrl: f.empresa?.logoUrl ?? null,
-    numeroDisplay: f.numeroDisplay ?? "—",
+    tipoDocumento: esBorrador ? "presupuesto" : "factura",
+    numeroDisplay: esBorrador ? (presupuestoNumero ?? f.numeroDisplay ?? "—") : (f.numeroDisplay ?? "—"),
     fecha: f.emitidaEn ?? f.fecha ?? f.createdAt ?? "",
     estado: String(f.estado ?? ""),
     anulada: String(f.estado ?? "") === "anulada",

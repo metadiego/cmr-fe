@@ -344,6 +344,11 @@ export interface ImprimirFacturaResult {
   emitida: boolean;
   motivo?: string | null;
   pendiente?: { saldo?: number; montoAbonado?: number; total?: number } | null;
+  // Qué documento es el papel: "presupuesto" (borrador con saldo → NO emite, NO consume correlativo de
+  // factura; trae `numeroPresupuesto`) o "factura" (saldado/cortesía → emitida). El nº de presupuesto se
+  // asigna la 1ª vez y se reusa al reimprimir. Handoff imprimir-presupuesto-cuando-no-esta-cobrada.
+  documento?: "presupuesto" | "factura" | string;
+  numeroPresupuesto?: string | null;
 }
 export function imprimirFactura(facturaId: string, centroId?: string): Promise<ImprimirFacturaResult> {
   return apiFetch<ImprimirFacturaResult>(`/facturas/${facturaId}/imprimir`, { method: "POST" }, centroId);

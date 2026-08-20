@@ -100,7 +100,13 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
 
       <div className="flex justify-between font-bold">
         <span>
-          {recibo.tipoDocumento === "devolucion" ? t("returnDoc") : t("invoice")} #{recibo.numeroDisplay}
+          {/* Presupuesto (borrador no emitido), devolución o factura. Handoff imprimir-presupuesto. */}
+          {recibo.tipoDocumento === "devolucion"
+            ? t("returnDoc")
+            : recibo.tipoDocumento === "presupuesto"
+              ? t("budgetDoc")
+              : t("invoice")}{" "}
+          #{recibo.numeroDisplay}
         </span>
         <span className="font-normal">{fecha}</span>
       </div>

@@ -2085,7 +2085,8 @@
     "attendedBy": "Attended by",
     "thanks": "Thanks for your visit!",
     "includes": "Includes",
-    "protocolVisits": "{n}-visit protocol"
+    "protocolVisits": "{n}-visit protocol",
+    "budgetDoc": "QUOTE"
   },
   "facturacion": {
     "title": "Bill consultation",
@@ -2292,7 +2293,9 @@
     "corregirUsuarioTitle": "Fix responsible user",
     "usuarioResponsable": "Responsible user",
     "elegirUsuario": "Choose user",
-    "corregirUsuarioAyuda": "This user drives the who-sells stats. On a draft it fixes who created it; on an issued invoice, who charged it."
+    "corregirUsuarioAyuda": "This user drives the who-sells stats. On a draft it fixes who created it; on an issued invoice, who charged it.",
+    "imprimirPresupuesto": "Print quote",
+    "presupuestoNum": "Quote {num}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

@@ -2085,7 +2085,8 @@
     "attendedBy": "Atendido por",
     "thanks": "¡Gracias por su visita!",
     "includes": "Incluye",
-    "protocolVisits": "Protocolo de {n} visitas"
+    "protocolVisits": "Protocolo de {n} visitas",
+    "budgetDoc": "PRESUPUESTO"
   },
   "facturacion": {
     "title": "Facturar consulta",
@@ -2292,7 +2293,9 @@
     "corregirUsuarioTitle": "Corregir usuario responsable",
     "usuarioResponsable": "Usuario responsable",
     "elegirUsuario": "Elegir usuario",
-    "corregirUsuarioAyuda": "De este usuario salen las estadísticas de quién vende. En borrador corrige quién la creó; en emitida, quién cobró."
+    "corregirUsuarioAyuda": "De este usuario salen las estadísticas de quién vende. En borrador corrige quién la creó; en emitida, quién cobró.",
+    "imprimirPresupuesto": "Imprimir presupuesto",
+    "presupuestoNum": "Presupuesto {num}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
