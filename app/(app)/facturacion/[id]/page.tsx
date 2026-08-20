@@ -197,8 +197,68 @@ export default function FacturacionPage() {
       toastError(err, tRoot);
     } finally {
       // Esperar a que el recibo se repinte con el número/estado definitivos antes de imprimir.
-      requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
+      requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado()));
     }
+  }
+
+  // Imprime SOLO el recibo, en un iframe aislado con los mismos estilos de la app. Antes hacíamos
+  // window.print() sobre la página completa: el recibo salía incrustado dentro del layout (chico y con
+  // el fondo de la app alrededor) y a un ancho equivocado. En un documento propio de 72mm el ticket
+  // llena todo el papel térmico (probado renderizando a imagen). Mismo patrón que la hoja de caja.
+  function imprimirReciboAislado() {
+    const node = document.querySelector(".recibo-print");
+    if (!node) {
+      window.print();
+      return;
+    }
+    // Reusar los estilos ya cargados (Tailwind + globals: incluye .recibo-print y @page) para no duplicar CSS.
+    const estilos = Array.from(
+      document.querySelectorAll('link[rel="stylesheet"], style'),
+    )
+      .map((el) => el.outerHTML)
+      .join("\n");
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    Object.assign(iframe.style, {
+      position: "fixed",
+      right: "0",
+      bottom: "0",
+      width: "0",
+      height: "0",
+      border: "0",
+    });
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow?.document;
+    if (!doc) {
+      iframe.remove();
+      window.print();
+      return;
+    }
+    doc.open();
+    doc.write(
+      `<!doctype html><html><head><meta charset="utf-8">${estilos}` +
+        // El recibo es lo ÚNICO del documento → forzarlo visible y a flujo normal (sin el position:absolute
+        // del aislamiento de la app, que aquí no hace falta) para que ocupe la hoja desde arriba.
+        `<style>html,body{margin:0;padding:0;background:#fff}` +
+        `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;` +
+        `width:var(--recibo-ancho,72mm)!important}</style></head><body>${node.outerHTML}</body></html>`,
+    );
+    doc.close();
+    let impreso = false;
+    const go = () => {
+      if (impreso) return; // una sola vez (onload o respaldo, lo que ocurra primero)
+      impreso = true;
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } finally {
+        setTimeout(() => iframe.remove(), 1000);
+      }
+    };
+    // Esperar a que carguen hojas de estilo, fuentes e imágenes (logo) del iframe antes de imprimir.
+    iframe.onload = () => setTimeout(go, 350);
+    // Respaldo por si onload no dispara tras document.write.
+    setTimeout(go, 1500);
   }
 
   if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
