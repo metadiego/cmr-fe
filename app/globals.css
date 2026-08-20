@@ -156,9 +156,17 @@
     @apply font-sans;
     }
 }
-/* Impresión de recibo térmico 80mm (Epson TM como impresora del sistema).
-   Aísla `.recibo-print`: oculta todo lo demás y dimensiona la página a 80mm.
-   Ver docs/specs/factura-formato-termico-fe.md. */
+/* Ancho IMPRIMIBLE del recibo térmico (no el ancho del rollo). Default del sistema 72mm (rollo de
+   80mm → área imprimible ~72). Es DATO por centro: el motor de preferencias lo puede sobreescribir
+   escribiendo `--recibo-ancho` (ver configToCssVars); aquí queda el default. Handoff
+   recibo-termico-sale-en-miniatura. */
+:root {
+  --recibo-ancho: 72mm;
+}
+/* Impresión de recibo térmico (Epson TM como impresora del sistema). Aísla `.recibo-print`: oculta
+   todo lo demás y dimensiona la página EXACTAMENTE al área imprimible, sin márgenes de página, para
+   que el navegador no encoja el ticket a una miniatura. El aire va DENTRO (padding), no como margen.
+   Ver docs/specs/recibo-termico-sale-en-miniatura.md. */
 @media print {
   body * {
     visibility: hidden !important;
@@ -171,9 +179,10 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm;
+    width: var(--recibo-ancho, 72mm);
     margin: 0;
-    padding: 2mm;
+    padding: 0 2mm;
+    box-sizing: border-box;
     background: #fff !important;
     color: #000 !important;
     box-shadow: none !important;
@@ -182,8 +191,8 @@
     filter: grayscale(100%) contrast(1.15);
   }
   @page {
-    size: 80mm auto;
-    margin: 2mm;
+    size: var(--recibo-ancho, 72mm) auto;
+    margin: 0;
   }
 }
 /* Impresión del FORMATO médico de láser (HILT/MLS) en tamaño carta. Aísla `.formato-print`:

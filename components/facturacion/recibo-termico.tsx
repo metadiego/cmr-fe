@@ -47,10 +47,11 @@ function Line({
   );
 }
 
-// Presentational 80mm thermal receipt. Pure: receives a Recibo, renders paper.
+// Presentational thermal receipt. Pure: receives a Recibo, renders paper.
 // On screen it shows as a paper preview; print CSS (globals.css, `.recibo-print`)
-// isolates it and sizes @page to 80mm. Degrades gracefully with partial data
-// (no empresa block / no pagos / no tax) so nothing crashes before the BE lands.
+// isolates it and sizes @page to the IMPRINTABLE width (`--recibo-ancho`, default 72mm — el ancho
+// imprimible del rollo, NO 80mm que es el del papel). No fijamos un ancho en px/mm aquí: un solo
+// ancho manda (la variable), en pantalla y en papel. Degrades gracefully with partial data.
 export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   const t = useTranslations("receipt");
   const tRoot = useTranslations();
@@ -64,7 +65,10 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   const emp = recibo.empresa;
 
   return (
-    <div className="recibo-print mx-auto w-[80mm] bg-white px-3 py-4 font-mono text-[11px] leading-tight text-black">
+    <div
+      className="recibo-print mx-auto bg-white px-3 py-4 font-mono text-[11px] leading-tight text-black"
+      style={{ width: "var(--recibo-ancho, 72mm)" }}
+    >
       {recibo.anulada && (
         <div className="mb-1 border border-black py-0.5 text-center text-base font-bold tracking-widest">
           {t("void")}

@@ -50,6 +50,12 @@ export interface ThemeConfig {
    * personalizable por usuario en "Mi apariencia". No es una CSS var — el FE lo pinta puntual.
    */
   colorPorCentro?: Record<string, string>;
+  /**
+   * Recibo térmico: ancho IMPRIMIBLE del papel en mm (no el ancho del rollo). Default del sistema 72
+   * (rollo de 80mm, área imprimible ~72). Hay rollos de 58mm → dato por centro, no constante. El FE lo
+   * escribe como `--recibo-ancho` y `@page`/`.recibo-print` lo usan. Handoff recibo-termico-sale-en-miniatura.
+   */
+  recibo?: { anchoMm?: number };
 }
 
 // camelCase token key → CSS custom property in globals.css.
@@ -97,6 +103,9 @@ export function configToCssVars(config: ThemeConfig | null | undefined): Record<
     // CSS.escape isn't needed for a URL inside url("…"); quote it.
     vars["--app-bg-image"] = `url("${config.background.imageUrl}")`;
   }
+  // Ancho imprimible del recibo térmico por centro; si el BE no lo manda, el CSS deja el default 72mm.
+  const ancho = Number(config.recibo?.anchoMm);
+  if (Number.isFinite(ancho) && ancho > 0) vars["--recibo-ancho"] = `${ancho}mm`;
 
   return vars;
 }
