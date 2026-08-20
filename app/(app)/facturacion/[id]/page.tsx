@@ -78,6 +78,11 @@ import {
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
+// Impresión ESC/POS por QZ Tray: OCULTA por ahora (exige instalar QZ en cada equipo → no práctico).
+// El código queda intacto para el futuro; en false todo imprime por el navegador. Cambiar a true para
+// volver a exponer el botón «Opciones de impresión» y la ruta QZ.
+const QZ_PRINT_UI = false;
+
 export default function FacturacionPage() {
   const params = useParams<{ id: string }>();
   const search = useSearchParams();
@@ -192,7 +197,8 @@ export default function FacturacionPage() {
     //  - "qz": ESC/POS crudo a la impresora térmica vía QZ Tray (independiente del navegador). Si algo
     //    falla (QZ no corriendo, sin impresora, error), SIEMPRE cae al navegador — nunca deja sin imprimir.
     const cfg = getPrintSettings();
-    const usarQz = cfg.metodo === "qz";
+    // Mientras QZ_PRINT_UI esté oculto, SIEMPRE navegador (aunque un equipo tenga 'qz' guardado de antes).
+    const usarQz = QZ_PRINT_UI && cfg.metodo === "qz";
     const win = usarQz ? null : window.open("", "cmr_recibo", "width=380,height=760");
     let facturaFinal = factura;
     let numPres = presupuestoNum;
@@ -439,16 +445,20 @@ export default function FacturacionPage() {
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
           </Button>
-          {/* Opciones de impresión (por dispositivo): navegador vs impresora térmica ESC/POS por QZ Tray. */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="no-print text-xs text-muted-foreground"
-            onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
-          >
-            {t("print.options")}
-            {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
-          </Button>
+          {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
+              software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
+              imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
+          {QZ_PRINT_UI && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="no-print text-xs text-muted-foreground"
+              onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
+            >
+              {t("print.options")}
+              {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
+            </Button>
+          )}
           {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
               EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
           {estado === "emitida" && can("factura.reparar") && (
