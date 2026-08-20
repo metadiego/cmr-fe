@@ -505,3 +505,27 @@ export function anularPago(
     centroId,
   );
 }
+
+// Series de numeración por centro (BE): `default` (facturas), `devolucion`, `presupuesto`, cada una con
+// `prefijo`, `padding` y `proximo` (solo lectura: moverlo abre huecos o repite un correlativo). Editar el
+// prefijo/padding: admin, super_admin, gerente; exige centro elegido. Handoff imprimir-presupuesto (§3).
+export interface SerieNumeracion {
+  id: string;
+  serie: string;
+  prefijo?: string | null;
+  padding?: number | null;
+  proximo?: number | null;
+}
+export function getSeriesNumeracion(centroId?: string): Promise<SerieNumeracion[]> {
+  return apiFetch<SerieNumeracion[]>(`/facturas/series`, {}, centroId);
+}
+export function actualizarSerieNumeracion(
+  serie: string,
+  payload: { prefijo?: string | null; padding?: number },
+  centroId?: string,
+): Promise<SerieNumeracion> {
+  return apiFetch<SerieNumeracion>(`/facturas/series/${encodeURIComponent(serie)}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }, centroId);
+}

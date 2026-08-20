@@ -745,7 +745,8 @@
     "cambio_de_protocolo": "Protocol change",
     "captacion_por_agente": "Bookings by agent",
     "operaciones": "Operations",
-    "cambioProtocolo": "Cambio de protocolo"
+    "cambioProtocolo": "Cambio de protocolo",
+    "configNumeracion": "Numbering"
   },
   "admin": {
     "title": "Administration",
@@ -3224,5 +3225,26 @@
     "noAccess": "You do not have access to the corporate appearance. Your personal look is set from your avatar.",
     "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
     "centroVacio": "No centers available for your user."
+  },
+  "numeracion": {
+    "title": "Document numbering",
+    "help": "Prefix and zero-padding for each numbering series. The next number is read-only so no gaps open and no correlative repeats.",
+    "centro": "Center",
+    "noCentros": "You have no assigned centers.",
+    "noSeries": "This center has no configured series.",
+    "preview": "Will look like",
+    "prefijo": "Prefix",
+    "prefijoPlaceholder": "e.g. F-, P-…",
+    "padding": "Zero-padding",
+    "proximo": "Next number",
+    "proximoHelp": "Read-only: changing it would open gaps or repeat a correlative.",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Numbering updated",
+    "serie": {
+      "default": "Invoices",
+      "presupuesto": "Quotes",
+      "devolucion": "Returns"
+    }
   }
 }

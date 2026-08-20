@@ -745,7 +745,8 @@
     "cambio_de_protocolo": "Cambio de protocolo",
     "captacion_por_agente": "Captación por agente",
     "operaciones": "Operaciones",
-    "cambioProtocolo": "Cambio de protocolo"
+    "cambioProtocolo": "Cambio de protocolo",
+    "configNumeracion": "Numeración"
   },
   "admin": {
     "title": "Administración",
@@ -3224,5 +3225,26 @@
     "noAccess": "No tienes acceso a la apariencia corporativa. Tu apariencia personal se cambia desde tu avatar.",
     "overrideRemoveConfirm": "¿Desactivar «{nombre}»? Todos volverán a la apariencia que les toque.",
     "centroVacio": "No hay centros disponibles para tu usuario."
+  },
+  "numeracion": {
+    "title": "Numeración de documentos",
+    "help": "Prefijo y relleno de cada serie de correlativos. El próximo número es de solo lectura para no abrir huecos ni repetir un correlativo.",
+    "centro": "Centro",
+    "noCentros": "No tienes centros asignados.",
+    "noSeries": "Este centro no tiene series configuradas.",
+    "preview": "Se verá así",
+    "prefijo": "Prefijo",
+    "prefijoPlaceholder": "Ej. F-, P-…",
+    "padding": "Relleno (ceros)",
+    "proximo": "Próximo número",
+    "proximoHelp": "Solo lectura: moverlo abriría huecos o repetiría un correlativo.",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Numeración actualizada",
+    "serie": {
+      "default": "Facturas",
+      "presupuesto": "Presupuestos",
+      "devolucion": "Devoluciones"
+    }
   }
 }
