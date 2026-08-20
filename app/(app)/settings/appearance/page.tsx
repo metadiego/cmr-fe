@@ -9,6 +9,7 @@ import {
   updateMyPreferences,
 } from "@/lib/api/preferences";
 import type { ThemeConfig } from "@/lib/theme/config";
+import { mezclarSoloTema } from "@/lib/theme/mezclar-capa";
 import { uploadMedia } from "@/lib/api/media";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
@@ -30,13 +31,19 @@ export default function AppearancePage() {
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [busy, setBusy] = React.useState(false);
   const bgInputRef = React.useRef<HTMLInputElement>(null);
+  // El sobre de la capa `usuario` no es solo tema: también lleva preferencias propias como el acento de
+  // color por centro (colorPorCentro). Guardar el tema con un PUT del objeto del editor las borraría, así
+  // que se conserva el original y se mezclan SOLO las claves de tema — igual que la pantalla corporativa.
+  // See cmr-be/docs/specs/acento-de-color-por-centro.md
+  const originalUsuario = React.useRef<ThemeConfig | null>(null);
 
   React.useEffect(() => {
     let active = true;
     getMyPreferences()
       .then((res) => {
-        if (active)
-          setState({ kind: "ok", config: res.layers?.usuario ?? {} });
+        if (!active) return;
+        originalUsuario.current = res.layers?.usuario ?? {};
+        setState({ kind: "ok", config: res.layers?.usuario ?? {} });
       })
       .catch(
         (err) =>
@@ -50,7 +57,7 @@ export default function AppearancePage() {
   async function persist(config: ThemeConfig, msg: string) {
     setBusy(true);
     try {
-      await updateMyPreferences(config);
+      await updateMyPreferences(mezclarSoloTema(originalUsuario.current, config));
       toast.success(msg);
       window.location.reload();
     } catch (err) {
