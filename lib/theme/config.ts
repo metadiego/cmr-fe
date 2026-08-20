@@ -43,6 +43,13 @@ export interface ThemeConfig {
     imageUrl?: string;
     videoUrl?: string; // applied by the FE separately (future); not a CSS var
   };
+  /**
+   * Acento de color por centro, indexado por centroId (ej. { "<bayamon>": "#2563EB" }).
+   * Señal visual sutil (punto de color junto al nombre del centro) para que los usuarios
+   * multi-centro se ubiquen de un vistazo. Default del sistema (Bayamón azul, Caguas verde);
+   * personalizable por usuario en "Mi apariencia". No es una CSS var — el FE lo pinta puntual.
+   */
+  colorPorCentro?: Record<string, string>;
 }
 
 // camelCase token key → CSS custom property in globals.css.
