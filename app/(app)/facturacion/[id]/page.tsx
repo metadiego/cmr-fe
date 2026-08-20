@@ -212,18 +212,16 @@ export default function FacturacionPage() {
     const estilos = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .map((el) => el.outerHTML)
       .join("\n");
-    // Ancho del papel resuelto a valor LITERAL (ej. "72mm"): Chrome usa el papel seleccionado como ancho
-    // de maqueta y sale bien, pero Firefox maqueta sobre una hoja más ancha y ENCOGE la letra si no le
-    // decimos el tamaño. Fijamos @page al ancho del papel (× 297mm, el largo del media térmico 71.97×297
-    // de la EPSON) con valor literal —Firefox/Chrome NO aceptan var() en @page—, para que la fuente salga
-    // al tamaño correcto en ambos. El ancho es dato por centro vía --recibo-ancho (72mm default).
-    const anchoRecibo =
-      getComputedStyle(document.documentElement).getPropertyValue("--recibo-ancho").trim() || "72mm";
     return (
       `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
-      `<style>@page{size:${anchoRecibo} 297mm;margin:0}html,body{margin:0;padding:0;background:#fff}` +
-      // El contenido llena el ancho de esa página (width:auto = ancho del papel), a flujo normal.
-      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important}</style>` +
+      // ANCHO LIBRE: sin @page size ni ancho fijo, el recibo (width:auto) se ajusta SOLO al papel del
+      // driver, en todo navegador. Firefox encogía la LETRA porque su "ajustar al ancho" reduce toda la
+      // hoja cuando ALGO del contenido es más ancho que el papel (p. ej. las líneas largas del pie sin
+      // espacios que corten). Solución sin imponer tamaño: forzar que TODO parta línea y nada desborde.
+      `<style>@page{margin:0}html,body{margin:0;padding:0;background:#fff}` +
+      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important;max-width:100%!important}` +
+      `.recibo-print *{overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%!important}` +
+      `.recibo-print img{max-width:100%!important;height:auto!important}</style>` +
       // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
       `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
     );
