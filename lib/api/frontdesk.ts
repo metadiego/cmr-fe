@@ -313,11 +313,15 @@ export function getDisponibilidadServicio(
 // muestra cuánto le queda de cada dosis que compró. Contrato: HANDOFF-dosis-con-saldo-del-paciente /
 // cmr-be/docs/specs/frontdesk-consumo-por-dosis.md. NO sumar entre sobres: cada dosis es su propio sobre.
 export type PendienteEntrega = {
+  id: string; // id del PAQUETE (paquete_sesiones) → es el `paqueteOrigenIds` del cambio de protocolo
   productoId: string;
   productoNombre?: string | null;
+  sku?: string | null;
   pendiente?: number | null; // sesiones que le quedan de esta dosis (puede ser 0 → agotada)
   sesionesTotales?: number | null;
+  sesionesEntregadas?: number | null;
   grupoClave?: string | null;
+  multiplicadores?: Record<string, number> | null;
 };
 export function getPendientesEntrega(pacienteId: string, centroId?: string): Promise<PendienteEntrega[]> {
   return apiFetch<unknown>(
@@ -326,6 +330,44 @@ export function getPendientesEntrega(pacienteId: string, centroId?: string): Pro
     centroId,
   ).then((r) =>
     Array.isArray(r) ? (r as PendienteEntrega[]) : (((r as { items?: PendienteEntrega[] })?.items) ?? []),
+  );
+}
+
+// CAMBIO DE PROTOCOLO: el médico deja sin efecto sesiones pendientes y las reemplaza por otras. Contrato
+// verificado por HTTP: POST /facturas/paquetes/cambio-protocolo/:pacienteId con paqueteOrigenIds (ids de
+// pendientes-entrega), nuevos (productoId + sesionesTotales≥1, opc. cantidad/areas/dosis), motivo (obl.),
+// medicoId opc., reintegros opc. (unidades selladas que vuelven al almacén de un producto de entrega
+// directa). Todo-o-nada; devuelve avisos (diferencia de valor, reintegros ignorados…). Handoff
+// cambio-de-protocolo. Las cantidades nuevas son juicio del médico: el BE AVISA, no bloquea.
+export interface CambioProtocaloNuevo {
+  productoId: string;
+  sesionesTotales: number;
+  cantidad?: number;
+  areas?: number;
+  dosis?: number;
+}
+export interface CambioProtocoloPayload {
+  paqueteOrigenIds: string[];
+  nuevos: CambioProtocaloNuevo[];
+  motivo: string;
+  medicoId?: string;
+  reintegros?: { productoId: string; unidadesSelladas: number }[];
+}
+export interface CambioProtocoloResult {
+  cambioId?: string;
+  creados?: unknown[];
+  cerrados?: unknown[];
+  avisos?: { code?: string; labelKey?: string; message?: string }[];
+}
+export function aplicarCambioProtocolo(
+  pacienteId: string,
+  payload: CambioProtocoloPayload,
+  centroId?: string,
+): Promise<CambioProtocoloResult> {
+  return apiFetch<CambioProtocoloResult>(
+    `/facturas/paquetes/cambio-protocolo/${encodeURIComponent(pacienteId)}`,
+    { method: "POST", body: JSON.stringify(payload) },
+    centroId,
   );
 }
 

@@ -548,7 +548,8 @@
     "rateLimited": "Too many requests. Wait a few seconds and retry.",
     "remove": "Remove",
     "close": "Close",
-    "add": "Add"
+    "add": "Add",
+    "forbidden": "No tienes acceso a esta pantalla."
   },
   "pending": {
     "title": "Access pending",
@@ -743,7 +744,8 @@
     "ventas_por_usuario": "Sales by user",
     "cambio_de_protocolo": "Protocol change",
     "captacion_por_agente": "Bookings by agent",
-    "operaciones": "Operations"
+    "operaciones": "Operations",
+    "cambioProtocolo": "Cambio de protocolo"
   },
   "admin": {
     "title": "Administration",
@@ -3156,6 +3158,30 @@
       "sinNombre": "(no name)",
       "cargar": "Load",
       "empty": "No patients with an appointment in the window."
+    },
+    "cambioProtocolo": {
+      "title": "Protocol change",
+      "help": "Void the patient’s pending sessions and replace them with others. It is a clinical decision and is recorded.",
+      "paciente": "Patient",
+      "paso1": "What is replaced (pending)",
+      "sinPendientes": "This patient has no pending sessions.",
+      "pendientesN": "{n} of {total} pending",
+      "reintegro": "Sealed units returning",
+      "reintegroAyuda": "only if the product was delivered sealed; otherwise leave 0",
+      "paso2": "What replaces it",
+      "producto": "Product",
+      "sesiones": "Sessions",
+      "cantidad": "Qty",
+      "areas": "Areas",
+      "dosis": "Dose",
+      "agregarLinea": "Add line",
+      "medico": "Authorizing doctor",
+      "medicoPlaceholder": "Choose doctor",
+      "motivo": "Reason",
+      "motivoPlaceholder": "Clinical reason for the change",
+      "aviso": "New quantities are the doctor’s judgment: not validated against pending. The system warns if far off, but does not block.",
+      "aplicar": "Apply change",
+      "aplicado": "Protocol change applied."
     }
   },
   "perfiles": {

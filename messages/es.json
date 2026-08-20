@@ -548,7 +548,8 @@
     "rateLimited": "Demasiadas solicitudes. Espera unos segundos y reintenta.",
     "remove": "Quitar",
     "close": "Cerrar",
-    "add": "Agregar"
+    "add": "Agregar",
+    "forbidden": "No tienes acceso a esta pantalla."
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -743,7 +744,8 @@
     "ventas_por_usuario": "Ventas por usuario",
     "cambio_de_protocolo": "Cambio de protocolo",
     "captacion_por_agente": "Captación por agente",
-    "operaciones": "Operaciones"
+    "operaciones": "Operaciones",
+    "cambioProtocolo": "Cambio de protocolo"
   },
   "admin": {
     "title": "Administración",
@@ -3156,6 +3158,30 @@
       "sinNombre": "(sin nombre)",
       "cargar": "Cargar",
       "empty": "No hay pacientes con cita en la ventana."
+    },
+    "cambioProtocolo": {
+      "title": "Cambio de protocolo",
+      "help": "Deja sin efecto sesiones pendientes del paciente y reemplázalas por otras. Es una decisión clínica y queda registrada.",
+      "paciente": "Paciente",
+      "paso1": "Qué se reemplaza (pendientes)",
+      "sinPendientes": "Este paciente no tiene sesiones pendientes.",
+      "pendientesN": "{n} pendientes de {total}",
+      "reintegro": "Unidades selladas que vuelven",
+      "reintegroAyuda": "solo si el producto se entregó sellado; si no, deja 0",
+      "paso2": "Con qué se reemplaza",
+      "producto": "Producto",
+      "sesiones": "Sesiones",
+      "cantidad": "Cant.",
+      "areas": "Áreas",
+      "dosis": "Dosis",
+      "agregarLinea": "Agregar línea",
+      "medico": "Médico que autoriza",
+      "medicoPlaceholder": "Elegir médico",
+      "motivo": "Motivo",
+      "motivoPlaceholder": "Motivo clínico del cambio",
+      "aviso": "Las cantidades nuevas son juicio del médico: no se validan contra lo pendiente. El sistema avisa si se alejan, pero no bloquea.",
+      "aplicar": "Aplicar cambio",
+      "aplicado": "Cambio de protocolo aplicado."
     }
   },
   "perfiles": {

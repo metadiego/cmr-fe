@@ -19,6 +19,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   // Clientes
   { path: "/clientes", labelKey: "nav.clientes" },
   { path: "/pacientes/disponibilidad-legado", labelKey: "nav.dispLegado" },
+  { path: "/pacientes/cambio-protocolo", labelKey: "nav.cambioProtocolo" },
   { path: "/pacientes/disponibilidad-legado/preparacion", labelKey: "nav.preparacionLegado" },
   // Comunicaciones
   { path: "/comunicaciones", labelKey: "nav.comunicaciones" },
