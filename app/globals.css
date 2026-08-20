@@ -190,13 +190,14 @@
   .recibo-print img {
     filter: grayscale(100%) contrast(1.15);
   }
-  /* OJO: Chrome IGNORA `var()` en el descriptor `size` de @page (queda inválido → la página cae a
-     Letter y el ticket sale chiquito arriba-izquierda). Por eso el default va LITERAL (72mm). El
-     ancho por centro se aplica inyectando una regla @page en runtime desde las preferencias
-     (ver presentation-provider), no con var aquí. Verificado con PDF: MediaBox pasa de 612pt (Letter)
-     a ~204pt (72mm). Handoff recibo-termico-sale-en-miniatura. */
+  /* NO fijamos `size`: `72mm auto` es CSS INVÁLIDO (no se puede mezclar una medida con la palabra
+     `auto`), y una regla inválida hace que Chrome maquete en Letter → el ticket de 72mm sale chiquito
+     arriba-izquierda (el bug reportado). Solo quitamos el margen; la PÁGINA la define el papel térmico
+     que elija el driver (media 71.97mm de la EPSON) y el ancho del CONTENIDO lo da `.recibo-print`
+     (width: var(--recibo-ancho), 72mm default, dato por centro). Verificado renderizando a PDF/imagen:
+     el recibo llena todo el ancho del papel. NO usar Letter (rasteriza una hoja enorme = lentísimo).
+     Handoff recibo-termico-sale-en-miniatura. */
   @page {
-    size: 72mm auto;
     margin: 0;
   }
 }
