@@ -62,21 +62,38 @@ export default function CuadreGeneralPage() {
   const hoy = new Date();
   const [fecha, setFecha] = React.useState(isoDay(hoy));
   const [query, setQuery] = React.useState(isoDay(hoy));
+  // Filtro «Quién facturó»: al elegir un cajero, TODA la hoja (ambas divisiones) se recarga acotada a él
+  // (el BE lo aplica en las dos llamadas). null = totalizado de todos. Handoff cuadre-quien-facturo-por-cajero.
+  const [usuarioId, setUsuarioId] = React.useState<string | null>(null);
 
   const { state } = useResource<{ general: ReporteDia; consulta: ReporteDia }>(
     async () => {
       const [general, consulta] = await Promise.all([
-        getReporteDia(query, "general"),
-        getReporteDia(query, "consulta"),
+        getReporteDia(query, "general", usuarioId),
+        getReporteDia(query, "consulta", usuarioId),
       ]);
       return { general, consulta };
     },
-    [query],
+    [query, usuarioId],
   );
 
   const general = desgloseDe(state.kind === "ok" ? state.data.general : null);
   const consulta = desgloseDe(state.kind === "ok" ? state.data.consulta : null);
   const total = sumar(general, consulta);
+
+  // «Quién facturó» de las DOS divisiones: unión por usuarioId (Σ debe dar el total del día). El nombre
+  // lo resuelve el BE; ordenado de mayor a menor.
+  const porCajero = React.useMemo(() => {
+    if (state.kind !== "ok") return [] as Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
+    const m = new Map<string, { usuarioId: string | null; nombre: string | null; total: number }>();
+    for (const c of [...(state.data.general.porCajero ?? []), ...(state.data.consulta.porCajero ?? [])]) {
+      const k = c.usuarioId ?? "sin";
+      const prev = m.get(k);
+      m.set(k, { usuarioId: c.usuarioId, nombre: c.nombre ?? prev?.nombre ?? null, total: (prev?.total ?? 0) + Number(c.total ?? 0) });
+    }
+    return [...m.values()].sort((a, b) => b.total - a.total);
+  }, [state]);
+  const cajeroActivo = usuarioId ? (porCajero.find((c) => c.usuarioId === usuarioId)?.nombre ?? usuarioId.slice(0, 8)) : null;
 
   return (
     <div className="w-full px-6 py-8">
@@ -104,12 +121,25 @@ export default function CuadreGeneralPage() {
 
       {state.kind === "ok" && (
         <>
+          {cajeroActivo && (
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm">
+              <span className="font-medium text-blue-700 dark:text-blue-300">
+                {t("who.acotado", { cajero: cajeroActivo })}
+              </span>
+              <Button variant="outline" size="sm" className="h-8 no-print" onClick={() => setUsuarioId(null)}>
+                {t("who.volver")}
+              </Button>
+            </div>
+          )}
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <CuadreCard title={t("general")} tono="general" d={general} totalLabel={t("totalDivision", { division: t("general") })} t={t} />
             <CuadreCard title={t("consulta")} tono="consulta" d={consulta} totalLabel={t("totalDivision", { division: t("consulta") })} t={t} />
           </div>
           <div className="mt-4 max-w-xl">
             <CuadreCard title={t("totalGeneral")} tono="total" d={total} totalLabel={t("totalGeneralRow")} t={t} destacado />
+          </div>
+          <div className="mt-4 max-w-xl">
+            <WhoBilled cajeros={porCajero} total={total.total} activeUsuarioId={usuarioId} onPick={setUsuarioId} t={t} />
           </div>
         </>
       )}
@@ -155,6 +185,61 @@ function CuadreCard({
         <Row label={t("totalTarjetas")} value={money(d.totalTarjetas)} className={rowText} strong />
         <Row label={totalLabel} value={money(d.total)} className={rowText} strong grande />
       </div>
+    </div>
+  );
+}
+
+// Tabla «Quién facturó»: una fila por facturador (nombre + total, mayor a menor) y un pie con la Σ que
+// debe coincidir con el total del día. Clic en una fila acota toda la hoja a ese cajero. §1 del handoff.
+function WhoBilled({
+  cajeros,
+  total,
+  activeUsuarioId,
+  onPick,
+  t,
+}: {
+  cajeros: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
+  total: number;
+  activeUsuarioId: string | null;
+  onPick: (usuarioId: string | null) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const suma = cajeros.reduce((s, c) => s + Number(c.total ?? 0), 0);
+  // Aviso honesto si la Σ por cajero NO da el total del día: es defecto del BE, no se maquilla.
+  const descuadre = Math.abs(suma - total) > 0.005;
+  return (
+    <div className="overflow-hidden rounded-xl border">
+      <div className="bg-muted/60 px-4 py-2.5 text-sm font-bold uppercase tracking-wide">{t("who.title")}</div>
+      {cajeros.length === 0 ? (
+        <p className="px-4 py-3 text-sm text-muted-foreground">{t("who.empty")}</p>
+      ) : (
+        <div className="divide-y">
+          {cajeros.map((c) => {
+            const activo = c.usuarioId === activeUsuarioId;
+            const label = c.nombre ?? (c.usuarioId ?? "—").slice(0, 8);
+            return (
+              <button
+                key={c.usuarioId ?? "sin"}
+                type="button"
+                onClick={() => onPick(c.usuarioId)}
+                className={"flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-sm transition-colors hover:bg-accent/40 " + (activo ? "bg-accent/60" : "")}
+              >
+                <span className="font-medium">{label}</span>
+                <span className="tabular-nums">{money(c.total)}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-3 border-t px-4 py-2.5 text-sm font-bold">
+        <span>{t("who.total")}</span>
+        <span className="tabular-nums">{money(suma)}</span>
+      </div>
+      {descuadre && (
+        <p className="border-t bg-destructive/10 px-4 py-2 text-xs font-medium text-destructive">
+          {t("who.descuadre", { total: money(total) })}
+        </p>
+      )}
     </div>
   );
 }

@@ -107,6 +107,9 @@ export function CuadreDetalle({
           colImpuesto: td("colImpuesto"),
           colLineas: td("colLineas"),
           documentos: td("documentos"),
+          whoBilled: td("who.title"),
+          whoTotal: td("who.total"),
+          colCajero: td("who.col"),
           colNumero: td("colNumero"),
           colRecord: td("colRecord"),
           colPaciente: td("colPaciente"),
@@ -418,6 +421,20 @@ function buildPrintHtml(args: {
        }`
     : "";
 
+  // «Quién facturó» en la hoja impresa (§5): una fila por facturador + Σ que cuadra con el total del día.
+  const porCajero = reporte.porCajero ?? [];
+  const cajerosBlock = porCajero.length
+    ? `<h2>${esc(L.whoBilled)}</h2>
+       <table>
+         <thead><tr><th>${esc(L.colCajero)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
+         <tbody>${[...porCajero]
+           .sort((a, b) => b.total - a.total)
+           .map((c) => `<tr><td>${esc(c.nombre || "—")}</td><td class="r mono">${esc(money(c.total))}</td></tr>`)
+           .join("")}</tbody>
+         <tfoot><tr class="tot"><td class="r dim">${esc(L.whoTotal)}</td><td class="r mono">${esc(money(porCajero.reduce((sum, c) => sum + Number(c.total ?? 0), 0)))}</td></tr></tfoot>
+       </table>`
+    : "";
+
   const docRows = documentos
     .map(
       (d) =>
@@ -453,6 +470,7 @@ function buildPrintHtml(args: {
       <div class="col">${conteoBlock}</div>
     </div>
     ${tribBlock}
+    ${cajerosBlock}
     ${docBlock}
     ${devBlock}
     <div class="firmas">

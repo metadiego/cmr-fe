@@ -2964,7 +2964,12 @@
       "colCantidad": "Qty",
       "colValor": "Value",
       "conteoTotal": "Counted total",
-      "cajerosSumados": "{n} drawers summed"
+      "cajerosSumados": "{n} drawers summed",
+      "who": {
+        "title": "Who billed",
+        "total": "Day total",
+        "col": "Biller"
+      }
     },
     "cuadreGeneral": {
       "title": "General cash-up",
@@ -2977,7 +2982,15 @@
       "efectivo": "Cash",
       "totalTarjetas": "Total cards",
       "totalDivision": "Total {division}",
-      "totalGeneralRow": "GENERAL total"
+      "totalGeneralRow": "GENERAL total",
+      "who": {
+        "title": "Who billed",
+        "empty": "Nobody billed on this day.",
+        "total": "Day total",
+        "acotado": "Showing only {cajero}",
+        "volver": "Show all",
+        "descuadre": "The per-biller sum does not match the day total ({total}). Report it — it is a backend defect."
+      }
     }
   },
   "gruposFacturacion": {

@@ -2964,7 +2964,12 @@
       "colCantidad": "Cantidad",
       "colValor": "Valor",
       "conteoTotal": "Total contado",
-      "cajerosSumados": "{n} cajas sumadas"
+      "cajerosSumados": "{n} cajas sumadas",
+      "who": {
+        "title": "Quién facturó",
+        "total": "Total del día",
+        "col": "Facturador"
+      }
     },
     "cuadreGeneral": {
       "title": "Cuadre general",
@@ -2977,7 +2982,15 @@
       "efectivo": "Efectivo",
       "totalTarjetas": "Total tarjetas",
       "totalDivision": "Total {division}",
-      "totalGeneralRow": "Total GENERAL"
+      "totalGeneralRow": "Total GENERAL",
+      "who": {
+        "title": "Quién facturó",
+        "empty": "Nadie facturó este día.",
+        "total": "Total del día",
+        "acotado": "Viendo solo a {cajero}",
+        "volver": "Ver todos",
+        "descuadre": "La suma por facturador no cuadra con el total del día ({total}). Repórtalo — es un defecto del backend."
+      }
     }
   },
   "gruposFacturacion": {

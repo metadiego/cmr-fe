@@ -59,7 +59,11 @@ export interface ReporteDia {
   anulaciones: { cantidad: number; total: number };
   porMetodo: Record<string, number>;
   porGrupo: Record<string, number>;
-  // Solo viene cuando se pasa `division`. Incluye nombre resuelto por el BE.
+  // QUIÉN facturó (BE 2026-08-20): SIEMPRE presente (antes solo con `division`). Sin división = todos
+  // los facturadores de las dos divisiones; con división = los de esa; con usuarioId = solo ese. Un
+  // cajero que no es gerencia recibe una sola fila (la suya), lo fija el BE. La Σ de `porCajero` debe
+  // dar `detalle.total` (hay prueba del BE); si en pantalla no cuadra, es defecto, no se maquilla.
+  // Handoff cuadre-quien-facturo-por-cajero. Nombre resuelto por el BE.
   porCajero?: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
   detalle: {
     efectivo: { cantidad: number; monto: number };
@@ -149,14 +153,16 @@ export function getCajeros(q?: string): Promise<Cajero[]> {
 }
 
 // ---- reporte del día (CC3) ------------------------------------------
-// `division` separa consulta/general; `usuarioId` acota a un cajero (undefined = alcance por rol
-// que resuelve el BE). Un cajero solo verá el suyo; gerencia puede pasar otro id o null (consolidado).
+// `division` separa consulta/general; OMITIRLA = totalizado de las DOS divisiones (la vista del
+// gerente). `usuarioId` acota a un cajero (undefined = alcance por rol que resuelve el BE). Un cajero
+// solo verá el suyo; gerencia puede pasar otro id o null (consolidado).
 export function getReporteDia(
   fecha: string,
-  division: CajaDivision,
+  division?: CajaDivision | null,
   usuarioId?: string | null,
 ): Promise<ReporteDia> {
-  const sp = new URLSearchParams({ fecha, division });
+  const sp = new URLSearchParams({ fecha });
+  if (division) sp.set("division", division);
   if (usuarioId != null) sp.set("usuarioId", usuarioId);
   return apiFetch<ReporteDia>(`/caja/reportes/dia?${sp.toString()}`);
 }
