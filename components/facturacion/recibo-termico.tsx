@@ -65,10 +65,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   const emp = recibo.empresa;
 
   return (
-    <div
-      className="recibo-print mx-auto bg-white px-3 py-4 font-mono text-[11px] leading-tight text-black"
-      style={{ width: "var(--recibo-ancho, 72mm)" }}
-    >
+    <div className="recibo-print mx-auto bg-white px-3 py-4 font-mono text-[11px] leading-tight text-black">
       {recibo.anulada && (
         <div className="mb-1 border border-black py-0.5 text-center text-base font-bold tracking-widest">
           {t("void")}
