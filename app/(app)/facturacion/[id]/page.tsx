@@ -178,6 +178,10 @@ export default function FacturacionPage() {
   // la factura con lo que devuelve el BE y, tras pintar el recibo definitivo, mandamos a imprimir.
   // Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
   async function imprimir() {
+    // Abrir la ventana YA, sincrónico con el clic, para conservar la activación del usuario (si no, el
+    // navegador la bloquea como popup). El contenido se escribe después de emitir/repintar. Imprimir en
+    // una VENTANA propia (no iframe) es lo portable: el iframe funciona en Chrome pero falla en Safari.
+    const win = window.open("", "cmr_recibo", "width=380,height=760");
     try {
       const r = await imprimirFactura(id, centro);
       setFactura(r.factura);
@@ -197,26 +201,50 @@ export default function FacturacionPage() {
       toastError(err, tRoot);
     } finally {
       // Esperar a que el recibo se repinte con el número/estado definitivos antes de imprimir.
-      requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado()));
+      requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(win)));
     }
   }
 
-  // Imprime SOLO el recibo, en un iframe aislado con los mismos estilos de la app. Antes hacíamos
-  // window.print() sobre la página completa: el recibo salía incrustado dentro del layout (chico y con
-  // el fondo de la app alrededor) y a un ancho equivocado. En un documento propio de 72mm el ticket
-  // llena todo el papel térmico (probado renderizando a imagen). Mismo patrón que la hoja de caja.
-  function imprimirReciboAislado() {
+  // Documento HTML autónomo del recibo: reusa los estilos ya cargados (Tailwind + globals, sin duplicar
+  // CSS) y fuerza el recibo a ancho completo. Se auto-imprime al cargar (body onload) — patrón portable
+  // que funciona en Chrome, Safari, Firefox y Edge.
+  function reciboDocHtml(node: Element): string {
+    const estilos = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map((el) => el.outerHTML)
+      .join("\n");
+    return (
+      `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
+      `<style>html,body{margin:0;padding:0;background:#fff}` +
+      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:var(--recibo-ancho,72mm)!important}</style>` +
+      // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
+      `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
+    );
+  }
+
+  // Imprime SOLO el recibo aislado. Antes hacíamos window.print() sobre la página completa: el recibo
+  // salía incrustado en el layout (chico y con el fondo de la app). PRIMARIO: una ventana propia que se
+  // auto-imprime (portable, funciona en Safari). RESPALDO: un iframe oculto (si el popup fue bloqueado).
+  function imprimirReciboAislado(win: Window | null) {
     const node = document.querySelector(".recibo-print");
     if (!node) {
+      win?.close();
       window.print();
       return;
     }
-    // Reusar los estilos ya cargados (Tailwind + globals: incluye .recibo-print y @page) para no duplicar CSS.
-    const estilos = Array.from(
-      document.querySelectorAll('link[rel="stylesheet"], style'),
-    )
-      .map((el) => el.outerHTML)
-      .join("\n");
+    if (win && !win.closed) {
+      win.document.open();
+      win.document.write(reciboDocHtml(node));
+      win.document.close();
+      win.onafterprint = () => {
+        try {
+          win.close();
+        } catch {
+          /* noop */
+        }
+      };
+      return;
+    }
+    // Popup bloqueado → iframe oculto (funciona al menos en Chrome/Edge/Firefox).
     const iframe = document.createElement("iframe");
     iframe.setAttribute("aria-hidden", "true");
     Object.assign(iframe.style, {
@@ -235,30 +263,14 @@ export default function FacturacionPage() {
       return;
     }
     doc.open();
-    doc.write(
-      `<!doctype html><html><head><meta charset="utf-8">${estilos}` +
-        // El recibo es lo ÚNICO del documento → forzarlo visible y a flujo normal (sin el position:absolute
-        // del aislamiento de la app, que aquí no hace falta) para que ocupe la hoja desde arriba.
-        `<style>html,body{margin:0;padding:0;background:#fff}` +
-        `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;` +
-        `width:var(--recibo-ancho,72mm)!important}</style></head><body>${node.outerHTML}</body></html>`,
-    );
+    doc.write(reciboDocHtml(node));
     doc.close();
-    let impreso = false;
-    const go = () => {
-      if (impreso) return; // una sola vez (onload o respaldo, lo que ocurra primero)
-      impreso = true;
-      try {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      } finally {
-        setTimeout(() => iframe.remove(), 1000);
-      }
-    };
-    // Esperar a que carguen hojas de estilo, fuentes e imágenes (logo) del iframe antes de imprimir.
-    iframe.onload = () => setTimeout(go, 350);
-    // Respaldo por si onload no dispara tras document.write.
-    setTimeout(go, 1500);
+    // El body onload del documento dispara la impresión; limpiamos el iframe al terminar.
+    const cw = iframe.contentWindow;
+    if (cw) cw.onafterprint = () => setTimeout(() => iframe.remove(), 500);
+    setTimeout(() => {
+      if (iframe.isConnected) iframe.remove();
+    }, 8000);
   }
 
   if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
