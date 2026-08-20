@@ -212,12 +212,17 @@ export default function FacturacionPage() {
     const estilos = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
       .map((el) => el.outerHTML)
       .join("\n");
+    // Ancho del papel resuelto a valor LITERAL (ej. "72mm"): Chrome usa el papel seleccionado como ancho
+    // de maqueta y sale bien, pero Firefox maqueta sobre una hoja más ancha y ENCOGE la letra si no le
+    // decimos el tamaño. Fijamos @page al ancho del papel (× 297mm, el largo del media térmico 71.97×297
+    // de la EPSON) con valor literal —Firefox/Chrome NO aceptan var() en @page—, para que la fuente salga
+    // al tamaño correcto en ambos. El ancho es dato por centro vía --recibo-ancho (72mm default).
+    const anchoRecibo =
+      getComputedStyle(document.documentElement).getPropertyValue("--recibo-ancho").trim() || "72mm";
     return (
       `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
-      // NO imponemos tamaño: sin @page size y sin ancho fijo. El recibo es un bloque con width:auto → se
-      // AJUSTA SOLO al ancho del papel que dé el driver (igual que las facturas que siempre funcionaron),
-      // y así imprime bien en Chrome, Safari, Firefox y Edge. Solo margen de página 0.
-      `<style>@page{margin:0}html,body{margin:0;padding:0;background:#fff}` +
+      `<style>@page{size:${anchoRecibo} 297mm;margin:0}html,body{margin:0;padding:0;background:#fff}` +
+      // El contenido llena el ancho de esa página (width:auto = ancho del papel), a flujo normal.
       `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important}</style>` +
       // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
       `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
