@@ -190,13 +190,9 @@
   .recibo-print img {
     filter: grayscale(100%) contrast(1.15);
   }
-  /* NO fijamos `size`: `72mm auto` es CSS INVÁLIDO (no se puede mezclar una medida con la palabra
-     `auto`), y una regla inválida hace que Chrome maquete en Letter → el ticket de 72mm sale chiquito
-     arriba-izquierda (el bug reportado). Solo quitamos el margen; la PÁGINA la define el papel térmico
-     que elija el driver (media 71.97mm de la EPSON) y el ancho del CONTENIDO lo da `.recibo-print`
-     (width: var(--recibo-ancho), 72mm default, dato por centro). Verificado renderizando a PDF/imagen:
-     el recibo llena todo el ancho del papel. NO usar Letter (rasteriza una hoja enorme = lentísimo).
-     Handoff recibo-termico-sale-en-miniatura. */
+  /* NO fijamos `size`: Chrome ignora `var()` en `@page size` (queda inválido → la página cae a Carta y
+     el ticket se encoge). La página la define el papel térmico que elija el driver (media 71.97mm de la
+     EPSON) y el ancho del CONTENIDO lo da `.recibo-print` (width: var(--recibo-ancho), 72mm default). */
   @page {
     margin: 0;
   }
