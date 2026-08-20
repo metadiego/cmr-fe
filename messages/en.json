@@ -2337,7 +2337,11 @@
       "saved": "Options saved",
       "doneQz": "Sent to the thermal printer",
       "qzFallback": "Could not print via QZ; using the browser.",
-      "qzNoPrinters": "No printers found (is QZ Tray running?)."
+      "qzNoPrinters": "No printers found (is QZ Tray running?).",
+      "usbTest": "Test direct USB",
+      "usbDone": "Sent directly over USB",
+      "usbError": "Could not print over USB",
+      "usbUnsupported": "This browser does not support direct USB printing (use Chrome or Edge)."
     }
   },
   "agregarCita": {

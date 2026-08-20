@@ -2337,7 +2337,11 @@
       "saved": "Opciones guardadas",
       "doneQz": "Enviado a la impresora térmica",
       "qzFallback": "No se pudo imprimir por QZ; se usa el navegador.",
-      "qzNoPrinters": "No se encontraron impresoras (¿está QZ Tray abierto?)."
+      "qzNoPrinters": "No se encontraron impresoras (¿está QZ Tray abierto?).",
+      "usbTest": "Probar USB directo",
+      "usbDone": "Enviado directo por USB",
+      "usbError": "No se pudo imprimir por USB",
+      "usbUnsupported": "Este navegador no soporta impresión USB directa (usa Chrome o Edge)."
     }
   },
   "agregarCita": {

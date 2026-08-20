@@ -49,6 +49,7 @@ import { buildRecibo } from "@/lib/factura/build-recibo";
 import { reciboToEscPos, type EscPosLabels } from "@/lib/print/escpos";
 import { getPrintSettings, setPrintSettings, type PrintSettings } from "@/lib/print/print-settings";
 import { qzListPrinters, qzPrintRaw } from "@/lib/print/qz";
+import { printEscPosWebUsb, webUsbSupported } from "@/lib/print/webusb";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -269,6 +270,22 @@ export default function FacturacionPage() {
     includes: Lr("includes", "Incluye"),
   };
 
+  // PRUEBA: impresión directa por WebUSB (Chrome/Edge, sin instalar nada, sin diálogo). Envía el recibo
+  // actual tal cual está en pantalla. Al primer uso el navegador pide elegir la impresora (una vez).
+  async function probarUsbDirecto() {
+    try {
+      if (!webUsbSupported()) {
+        toast.error(t("print.usbUnsupported"));
+        return;
+      }
+      const bytes = reciboToEscPos(recibo, escposLabels, getPrintSettings().columnas);
+      await printEscPosWebUsb(bytes);
+      toast.success(t("print.usbDone"));
+    } catch (e) {
+      toast.error(e instanceof Error && e.message ? e.message : t("print.usbError"));
+    }
+  }
+
   // Buscar impresoras del sistema vía QZ (para el selector del diálogo de opciones).
   async function buscarImpresoras() {
     setBuscandoImpresoras(true);
@@ -444,6 +461,10 @@ export default function FacturacionPage() {
           <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
+          </Button>
+          {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge. */}
+          <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
+            {t("print.usbTest")}
           </Button>
           {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
               software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
