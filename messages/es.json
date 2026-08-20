@@ -2319,7 +2319,26 @@
     "elegirUsuario": "Elegir usuario",
     "corregirUsuarioAyuda": "De este usuario salen las estadísticas de quién vende. En borrador corrige quién la creó; en emitida, quién cobró.",
     "imprimirPresupuesto": "Imprimir presupuesto",
-    "presupuestoNum": "Presupuesto {num}"
+    "presupuestoNum": "Presupuesto {num}",
+    "print": {
+      "options": "Opciones de impresión",
+      "title": "Opciones de impresión",
+      "help": "Se guardan en ESTE equipo. Por defecto imprime por el navegador. Si el centro tiene una impresora térmica con QZ Tray instalado, elige «Impresora térmica» para imprimir directo, más rápido y sin depender del navegador.",
+      "method": "Método",
+      "methodBrowser": "Navegador (diálogo de impresión)",
+      "methodQz": "Impresora térmica (QZ Tray)",
+      "printer": "Impresora",
+      "printerPlaceholder": "Elige una impresora",
+      "search": "Buscar impresoras",
+      "width": "Ancho del papel",
+      "width80": "80 mm (48 columnas)",
+      "width58": "58 mm (32 columnas)",
+      "qzHint": "Requiere QZ Tray instalado y abierto en este equipo. Descárgalo gratis en qz.io. Si falla, se imprime por el navegador automáticamente.",
+      "saved": "Opciones guardadas",
+      "doneQz": "Enviado a la impresora térmica",
+      "qzFallback": "No se pudo imprimir por QZ; se usa el navegador.",
+      "qzNoPrinters": "No se encontraron impresoras (¿está QZ Tray abierto?)."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

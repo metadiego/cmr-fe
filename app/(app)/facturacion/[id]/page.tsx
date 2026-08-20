@@ -46,6 +46,9 @@ import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
+import { reciboToEscPos, type EscPosLabels } from "@/lib/print/escpos";
+import { getPrintSettings, setPrintSettings, type PrintSettings } from "@/lib/print/print-settings";
+import { qzListPrinters, qzPrintRaw } from "@/lib/print/qz";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -88,6 +91,11 @@ export default function FacturacionPage() {
   const [usuarioOpen, setUsuarioOpen] = React.useState(false);
   // Nº de presupuesto que asigna el BE al imprimir un borrador con saldo (se reusa al reimprimir).
   const [presupuestoNum, setPresupuestoNum] = React.useState<string | null>(null);
+  // Impresión: ajustes por dispositivo (navegador vs térmica ESC/POS por QZ Tray) + diálogo de opciones.
+  const [printOpen, setPrintOpen] = React.useState(false);
+  const [printCfg, setPrintCfg] = React.useState<PrintSettings>(() => getPrintSettings());
+  const [impresoras, setImpresoras] = React.useState<string[]>([]);
+  const [buscandoImpresoras, setBuscandoImpresoras] = React.useState(false);
   const { can } = useCan();
 
   const t = useTranslations("facturacion");
@@ -178,16 +186,26 @@ export default function FacturacionPage() {
   // la factura con lo que devuelve el BE y, tras pintar el recibo definitivo, mandamos a imprimir.
   // Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
   async function imprimir() {
-    // Abrir la ventana YA, sincrónico con el clic, para conservar la activación del usuario (si no, el
-    // navegador la bloquea como popup). El contenido se escribe después de emitir/repintar. Imprimir en
-    // una VENTANA propia (no iframe) es lo portable: el iframe funciona en Chrome pero falla en Safari.
-    const win = window.open("", "cmr_recibo", "width=380,height=760");
+    // Dos rutas según el ajuste del DISPOSITIVO (por defecto navegador → todo igual que antes):
+    //  - "navegador": ventana propia aislada (portable). Se abre YA, sincrónico con el clic, para
+    //    conservar la activación del usuario (si no, el navegador la bloquea como popup).
+    //  - "qz": ESC/POS crudo a la impresora térmica vía QZ Tray (independiente del navegador). Si algo
+    //    falla (QZ no corriendo, sin impresora, error), SIEMPRE cae al navegador — nunca deja sin imprimir.
+    const cfg = getPrintSettings();
+    const usarQz = cfg.metodo === "qz";
+    const win = usarQz ? null : window.open("", "cmr_recibo", "width=380,height=760");
+    let facturaFinal = factura;
+    let numPres = presupuestoNum;
     try {
       const r = await imprimirFactura(id, centro);
       setFactura(r.factura);
+      facturaFinal = r.factura;
       // Presupuesto: guardar el nº que asigna el BE (se reusa al reimprimir) para pintarlo en el recibo y
       // en la ficha. Handoff imprimir-presupuesto-cuando-no-esta-cobrada.
-      if (r.documento === "presupuesto" && r.numeroPresupuesto) setPresupuestoNum(r.numeroPresupuesto);
+      if (r.documento === "presupuesto" && r.numeroPresupuesto) {
+        setPresupuestoNum(r.numeroPresupuesto);
+        numPres = r.numeroPresupuesto;
+      }
       if (!r.emitida && r.motivo) {
         // El motivo viene como labelKey del BE (factura.no_emitida_pendiente_pago, factura.ya_emitida…).
         // Ámbar solo cuando falta cobrar (hay `pendiente`); neutral para reimpresiones normales (ya
@@ -200,8 +218,60 @@ export default function FacturacionPage() {
       // Un fallo al emitir NO debe impedir imprimir: se avisa y se imprime igual.
       toastError(err, tRoot);
     } finally {
-      // Esperar a que el recibo se repinte con el número/estado definitivos antes de imprimir.
-      requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(win)));
+      if (usarQz) {
+        try {
+          if (!cfg.impresora) throw new Error("sin impresora configurada");
+          // Reconstruir el recibo del BE recién devuelto (el `recibo` de render aún es el viejo).
+          const reciboFinal = facturaFinal
+            ? buildRecibo(facturaFinal, diasCatalogo, clavePorFormaId, numPres)
+            : recibo;
+          await qzPrintRaw(cfg.impresora, reciboToEscPos(reciboFinal, escposLabels, cfg.columnas));
+          toast.success(t("print.doneQz"));
+        } catch {
+          // QZ falló → respaldo por navegador (ventana propia aislada), sin dejar al usuario sin recibo.
+          toast.warning(t("print.qzFallback"));
+          const w = window.open("", "cmr_recibo", "width=380,height=760");
+          requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(w)));
+        }
+      } else {
+        // Esperar a que el recibo se repinte con el número/estado definitivos antes de imprimir.
+        requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(win)));
+      }
+    }
+  }
+
+  // Etiquetas del recibo ESC/POS (la lib es pura; el texto i18n viene de aquí). Objeto plano: el React
+  // Compiler lo memoiza solo.
+  const Lr = (key: string, fallback: string) =>
+    tRoot.has(`receipt.${key}`) ? tRoot(`receipt.${key}`) : fallback;
+  const escposLabels: EscPosLabels = {
+    factura: Lr("invoice", "Factura"),
+    presupuesto: Lr("budgetDoc", "Presupuesto"),
+    devolucion: Lr("returnDoc", "Devolucion"),
+    anulada: Lr("void", "ANULADA"),
+    patientEn: Lr("patientLabelEn", "Patient or Responsible Party"),
+    patientEs: Lr("patientLabelEs", "Paciente o responsable"),
+    record: Lr("record", "Record"),
+    id: "ID",
+    subtotal: Lr("subtotal", "Subtotal"),
+    discount: Lr("discount", "Descuento"),
+    tax: Lr("tax", "Impuesto"),
+    shipping: Lr("shipping", "Envio"),
+    total: Lr("total", "Total"),
+    paid: Lr("paid", "Total pagado"),
+    balance: Lr("balance", "Balance"),
+    includes: Lr("includes", "Incluye"),
+  };
+
+  // Buscar impresoras del sistema vía QZ (para el selector del diálogo de opciones).
+  async function buscarImpresoras() {
+    setBuscandoImpresoras(true);
+    try {
+      const lista = await qzListPrinters();
+      setImpresoras(lista);
+      if (lista.length === 0) toast.warning(t("print.qzNoPrinters"));
+    } finally {
+      setBuscandoImpresoras(false);
     }
   }
 
@@ -369,6 +439,16 @@ export default function FacturacionPage() {
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
           </Button>
+          {/* Opciones de impresión (por dispositivo): navegador vs impresora térmica ESC/POS por QZ Tray. */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="no-print text-xs text-muted-foreground"
+            onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
+          >
+            {t("print.options")}
+            {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
+          </Button>
           {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
               EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
           {estado === "emitida" && can("factura.reparar") && (
@@ -387,6 +467,76 @@ export default function FacturacionPage() {
           )}
         </div>
       </div>
+
+      {/* Opciones de impresión (por dispositivo, en localStorage). El navegador es el default; la térmica
+          por QZ Tray es opcional y con respaldo automático al navegador si falla. */}
+      <Dialog open={printOpen} onOpenChange={setPrintOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("print.title")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <p className="text-xs text-muted-foreground">{t("print.help")}</p>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("print.method")}</label>
+              <Select
+                value={printCfg.metodo}
+                onValueChange={(v) => setPrintCfg((c) => ({ ...c, metodo: v as PrintSettings["metodo"] }))}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="navegador">{t("print.methodBrowser")}</SelectItem>
+                  <SelectItem value="qz">{t("print.methodQz")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {printCfg.metodo === "qz" && (
+              <>
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <label className="text-xs font-medium text-muted-foreground">{t("print.printer")}</label>
+                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={buscarImpresoras} disabled={buscandoImpresoras}>
+                      {buscandoImpresoras ? tRoot("common.loading") : t("print.search")}
+                    </Button>
+                  </div>
+                  <Select
+                    value={printCfg.impresora ?? ""}
+                    onValueChange={(v) => setPrintCfg((c) => ({ ...c, impresora: v }))}
+                  >
+                    <SelectTrigger><SelectValue placeholder={t("print.printerPlaceholder")} /></SelectTrigger>
+                    <SelectContent>
+                      {impresoras.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                      {printCfg.impresora && !impresoras.includes(printCfg.impresora) && (
+                        <SelectItem value={printCfg.impresora}>{printCfg.impresora}</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("print.width")}</label>
+                  <Select
+                    value={String(printCfg.columnas)}
+                    onValueChange={(v) => setPrintCfg((c) => ({ ...c, columnas: Number(v) }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="48">{t("print.width80")}</SelectItem>
+                      <SelectItem value="32">{t("print.width58")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("print.qzHint")}</p>
+              </>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setPrintOpen(false)}>{tRoot("common.cancel")}</Button>
+              <Button size="sm" onClick={() => { setPrintSettings(printCfg); setPrintOpen(false); toast.success(t("print.saved")); }}>
+                {tRoot("common.save")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <RegenerarDisponibilidadDialog
         open={regenOpen}

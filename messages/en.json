@@ -2319,7 +2319,26 @@
     "elegirUsuario": "Choose user",
     "corregirUsuarioAyuda": "This user drives the who-sells stats. On a draft it fixes who created it; on an issued invoice, who charged it.",
     "imprimirPresupuesto": "Print quote",
-    "presupuestoNum": "Quote {num}"
+    "presupuestoNum": "Quote {num}",
+    "print": {
+      "options": "Print options",
+      "title": "Print options",
+      "help": "Saved on THIS device. Prints via the browser by default. If the center has a thermal printer with QZ Tray installed, pick “Thermal printer” to print directly — faster and browser-independent.",
+      "method": "Method",
+      "methodBrowser": "Browser (print dialog)",
+      "methodQz": "Thermal printer (QZ Tray)",
+      "printer": "Printer",
+      "printerPlaceholder": "Choose a printer",
+      "search": "Find printers",
+      "width": "Paper width",
+      "width80": "80 mm (48 columns)",
+      "width58": "58 mm (32 columns)",
+      "qzHint": "Requires QZ Tray installed and running on this device. Free at qz.io. If it fails, it falls back to the browser automatically.",
+      "saved": "Options saved",
+      "doneQz": "Sent to the thermal printer",
+      "qzFallback": "Could not print via QZ; using the browser.",
+      "qzNoPrinters": "No printers found (is QZ Tray running?)."
+    }
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
