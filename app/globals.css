@@ -163,14 +163,10 @@
 :root {
   --recibo-ancho: 72mm;
 }
-/* En PANTALLA el recibo se ve como papel: ancho = el imprimible del rollo (default 72mm, dato por
-   centro vía --recibo-ancho). En impresión NO fijamos el ancho: la página usa el PAPEL NATIVO que
-   elija el driver (`@page size: auto` → el media 71.97mm de la EPSON, impresión rápida) y el ticket
-   lo LLENA al 100%. Así no se fuerza un tamaño mayor que el imprimible (eso era la miniatura) ni hay
-   que caer en Letter (que rasteriza una hoja enorme y va lentísimo). Handoff recibo-termico-sale-en-miniatura. */
-.recibo-print {
-  width: var(--recibo-ancho, 72mm);
-}
+/* Impresión de recibo térmico (Epson TM como impresora del sistema). Aísla `.recibo-print`: oculta
+   todo lo demás y dimensiona la página EXACTAMENTE al área imprimible, sin márgenes de página, para
+   que el navegador no encoja el ticket a una miniatura. El aire va DENTRO (padding), no como margen.
+   Ver docs/specs/recibo-termico-sale-en-miniatura.md. */
 @media print {
   body * {
     visibility: hidden !important;
@@ -183,7 +179,7 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%; /* llena el papel nativo seleccionado, sea 71.97mm (80) o 49.99mm (58) */
+    width: var(--recibo-ancho, 72mm);
     margin: 0;
     padding: 0 2mm;
     box-sizing: border-box;
@@ -195,7 +191,7 @@
     filter: grayscale(100%) contrast(1.15);
   }
   @page {
-    size: auto; /* usa el papel del driver (elegir el media térmico, NO Letter) → rápido y a todo el ancho */
+    size: var(--recibo-ancho, 72mm) auto;
     margin: 0;
   }
 }
