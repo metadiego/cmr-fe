@@ -28,10 +28,10 @@ TM-T20II de 80 mm el área imprimible es ~72 mm (por eso el propio driver ofrece
 
 ## El arreglo
 
-1. **Igualar la página al área imprimible, sin márgenes:**
+1. **Igualar la página al área imprimible, sin márgenes y con altura térmica:**
 
 ```css
-@page { size: 72mm auto; margin: 0; }
+@page { size: 72mm 297mm; margin: 0; }
 .recibo-print {
   width: 72mm;
   padding: 0 2mm;          /* el aire va DENTRO, no como margen de página */
@@ -55,8 +55,8 @@ TM-T20II de 80 mm el área imprimible es ~72 mm (por eso el propio driver ofrece
 - Imprimir el mismo recibo y comprobar que el texto ocupa **todo** el ancho del papel, sin franjas
   blancas a los lados y sin letra reducida.
 - El diálogo debe seguir mostrando **1 hoja**, con el papel `71.97 x 296.97 mm` seleccionado.
-- Repetir con un recibo largo (una factura con muchas líneas) para confirmar que `size: … auto` sigue
-  cortando por altura y no parte el ticket en dos.
+- Repetir con un recibo largo (una factura con muchas líneas) para confirmar que la altura térmica no
+  reduce el contenido y que el driver continúa manejando el papel continuo correctamente.
 - Comprobar el otro formato que ya funcionaba (`.formato-print`, láser en carta) para no romperlo: los dos
   bloques `@media print` conviven en el mismo archivo.
 
