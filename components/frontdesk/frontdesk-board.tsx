@@ -27,6 +27,8 @@ import {
   type DisponibilidadServicio,
   type PaqueteDisponibilidad,
   transferirTratamiento,
+  getAvisosFrontdesk,
+  type FrontdeskAvisosReporte,
 } from "@/lib/api/frontdesk";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
@@ -60,6 +62,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import {
   DropdownMenu,
@@ -84,6 +94,7 @@ import {
   Search01Icon,
   MoreHorizontalIcon,
   Tick02Icon,
+  Alert02Icon,
   Calendar01Icon,
   PencilEdit01Icon,
   ArrowRight01Icon,
@@ -259,6 +270,18 @@ export function FrontdeskBoard() {
         : Promise.resolve([]),
     [gate.centro, servicioActivo?.id, fecha, rango?.hasta],
   );
+  // Avisos / descuidos del día (§2): contador visible que abre la lista. Mismo permiso que la jornada
+  // (frontdesk.read). Se recarga junto con el tablero, así al aplicar una dosis no comprada el número sube.
+  const puedeAvisos = can("frontdesk.read");
+  const avisosRes = useResource<FrontdeskAvisosReporte | null>(
+    () =>
+      gate.centro && puedeAvisos
+        ? getAvisosFrontdesk(fecha, rango?.hasta ?? fecha, gate.centro)
+        : Promise.resolve(null),
+    [gate.centro, puedeAvisos, fecha, rango?.hasta],
+  );
+  const avisos = avisosRes.state.kind === "ok" ? avisosRes.state.data : null;
+  const [avisosOpen, setAvisosOpen] = React.useState(false);
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
   const sesiones = React.useMemo(
     () => new Map((sesRes.state.kind === "ok" ? sesRes.state.data : []).map((s) => [s.id, s])),
@@ -267,7 +290,8 @@ export function FrontdeskBoard() {
   const refetch = React.useCallback(() => {
     boardRes.refresh();
     sesRes.refresh();
-  }, [boardRes, sesRes]);
+    avisosRes.refresh();
+  }, [boardRes, sesRes, avisosRes]);
 
   // En vivo (bus único /tablero/stream, entidad sesion). entrega_sin_saldo → alerta roja persistente.
   const [sinSaldoIds, setSinSaldoIds] = React.useState<Set<string>>(new Set());
@@ -664,6 +688,31 @@ export function FrontdeskBoard() {
               ))}
           </div>
 
+          {/* Contador de DESCUIDOS del día (§2): siempre visible (0 = día limpio), abre la lista. */}
+          {puedeAvisos && avisos && (
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => avisos.total > 0 && setAvisosOpen(true)}
+                disabled={avisos.total === 0}
+                className={
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition " +
+                  (avisos.total > 0
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-300"
+                    : "border-border bg-muted/40 text-muted-foreground")
+                }
+              >
+                <HugeiconsIcon
+                  icon={avisos.total > 0 ? Alert02Icon : Tick02Icon}
+                  className="size-4"
+                />
+                {avisos.total > 0
+                  ? t("avisos.contador", { n: avisos.total })
+                  : t("avisos.limpio")}
+              </button>
+            </div>
+          )}
+
           {/* Contador del DÍA (gramos → viales): se activa solo al abrir la pestaña del servicio. */}
           {board?.totales && board.totales.length > 0 && (
             <TotalesDia totales={board.totales} servicio={servicioActivo?.nombre} />
@@ -765,6 +814,68 @@ export function FrontdeskBoard() {
         defaultServicioId={programar.servicioId}
         onDone={refetch}
       />
+
+      {/* Lista de DESCUIDOS del día (§2): paciente, servicio y quién lo hizo, con los tres contadores
+          arriba. Clic en una fila → filtra el tablero a ese paciente para abrir su sesión y repararla. */}
+      <Dialog open={avisosOpen} onOpenChange={setAvisosOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("avisos.titulo")}</DialogTitle>
+            <DialogDescription>{t("avisos.desc")}</DialogDescription>
+          </DialogHeader>
+          {avisos && (
+            <>
+              <div className="mb-3 flex flex-wrap gap-2 text-xs">
+                {(["entrega_sin_paquete", "dosis_no_comprada", "entrega_sin_saldo"] as const).map((tp) => (
+                  <span
+                    key={tp}
+                    className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1"
+                  >
+                    <span className="font-semibold tabular-nums">{avisos.porTipo?.[tp] ?? 0}</span>
+                    <span className="text-muted-foreground">{t(`avisos.tipo.${tp}`)}</span>
+                  </span>
+                ))}
+              </div>
+              <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+                {avisos.avisos.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted-foreground">{t("avisos.limpio")}</p>
+                ) : (
+                  avisos.avisos.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => {
+                        // Traer la sesión al tablero para repararla: filtra por el paciente del aviso.
+                        if (a.paciente) setQ(a.paciente);
+                        setAvisosOpen(false);
+                      }}
+                      className="flex w-full items-start justify-between gap-3 rounded-lg border bg-card p-3 text-left transition hover:bg-accent/50"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+                            {t.has(`avisos.tipo.${a.tipo}`) ? t(`avisos.tipo.${a.tipo}`) : a.tipo}
+                          </span>
+                          <span className="truncate font-medium">{a.paciente ?? "—"}</span>
+                        </div>
+                        <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {a.servicio ?? "—"}
+                          {a.actor ? ` · ${t("avisos.por", { actor: a.actor })}` : ""}
+                        </div>
+                      </div>
+                      {a.cuando && (
+                        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                          {fmtHora(a.cuando)}
+                        </span>
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -909,6 +1020,17 @@ function FilaSesion({
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
   const [pendSelect, setPendSelect] = React.useState<Record<string, string>>({});
+  // Cartel CENTRADO (no bloqueante) cuando el usuario elige una dosis que el paciente NO compró teniendo
+  // dosis compradas pendientes. Guarda todo lo necesario para confirmar/revertir sin recalcular. El dueño
+  // lo pidió a la vista (no un toast abajo): que se dé cuenta cuando aún puede corregir. Handoff §1.
+  const [dosisAviso, setDosisAviso] = React.useState<{
+    clave: string;
+    valor: string;
+    etiqueta: string;
+    prev: string;
+    eligiendo: string;
+    comprado: { nombre: string; n: number }[];
+  } | null>(null);
   // Verdad del flujo: el `estado` top-level que ahora manda el BE en cada fila (PR #195). Antes el FE lo
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.estado ?? "");
@@ -1056,6 +1178,22 @@ function FilaSesion({
           disabled={busy || cancelada || ops.length === 0 || estadoNoCumplido}
           onValueChange={(valor) => {
             setPendSelect((p) => ({ ...p, [c.clave]: valor })); // reflejo instantáneo
+            // Eligió una dosis que el paciente NO compró teniendo compradas pendientes → cartel CENTRADO,
+            // no bloqueante (§1). Reflejamos la elección mientras decide y DIFERIMOS la escritura al confirmar.
+            if (esDosis && conSaldo && !saldoMap.has(valor)) {
+              setDosisAviso({
+                clave: c.clave,
+                valor,
+                etiqueta: etiquetaCol(c),
+                prev: shown,
+                eligiendo: ops.find((o) => o.value === valor)?.label ?? valor,
+                comprado: compradas.map((o) => ({
+                  nombre: o.label,
+                  n: Number(saldoMap.get(o.value)?.pendiente ?? 0),
+                })),
+              });
+              return;
+            }
             // Dosis agotada: NO bloquear (lo decidió el dueño) — avisar que se aplicará en negativo.
             if (esDosis && agotada(valor)) toast.warning(t("dosis.avisoSinSaldo"));
             run(async () => {
@@ -1438,6 +1576,86 @@ function FilaSesion({
             centro={centro}
           />
         )}
+        {/* Cartel CENTRADO: dosis no comprada. No bloquea; dos salidas claras (§1 del handoff). */}
+        <AlertDialog open={!!dosisAviso} onOpenChange={(o) => !o && setDosisAviso(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("dosis.avisoNoComprada.titulo")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("dosis.avisoNoComprada.desc")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            {dosisAviso && (
+              <div className="space-y-3 text-sm">
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {t("dosis.avisoNoComprada.compro")}
+                  </div>
+                  <ul className="mt-1 space-y-0.5">
+                    {dosisAviso.comprado.map((c2, i) => (
+                      <li key={i} className="font-medium">
+                        {c2.n > 0
+                          ? t("dosis.avisoNoComprada.compradoItem", { nombre: c2.nombre, n: c2.n })
+                          : c2.nombre}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {t("dosis.avisoNoComprada.eligiendo")}
+                  </div>
+                  <div className="mt-1 font-semibold text-amber-600 dark:text-amber-400">
+                    {dosisAviso.eligiendo}
+                  </div>
+                </div>
+              </div>
+            )}
+            <AlertDialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // Volver a lo comprado: revierte el reflejo a lo que había y no escribe nada.
+                  const prev = dosisAviso?.prev ?? "";
+                  const clave = dosisAviso?.clave;
+                  if (clave) {
+                    setPendSelect((p) => {
+                      const n = { ...p };
+                      if (prev) n[clave] = prev;
+                      else delete n[clave];
+                      return n;
+                    });
+                  }
+                  setDosisAviso(null);
+                }}
+              >
+                {t("dosis.avisoNoComprada.usarComprada")}
+              </Button>
+              <Button
+                onClick={() => {
+                  const a = dosisAviso;
+                  setDosisAviso(null);
+                  if (!a) return;
+                  // Aplicar igual: el BE registra el descuido `dosis_no_comprada` al asistir y sale en la lista.
+                  run(async () => {
+                    try {
+                      return await guardarCelda(a.clave, a.valor, a.etiqueta);
+                    } catch (e) {
+                      setPendSelect((p) => {
+                        const n = { ...p };
+                        delete n[a.clave];
+                        return n;
+                      });
+                      throw e;
+                    }
+                  });
+                }}
+              >
+                {t("dosis.avisoNoComprada.aplicarIgual")}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </td>
     </tr>
   );

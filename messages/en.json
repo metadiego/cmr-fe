@@ -1417,7 +1417,16 @@
       "quedan": "{n} left",
       "sinSaldo": "no balance",
       "otras": "Other doses",
-      "avisoSinSaldo": "This dose has no sessions left. It will be applied anyway and go negative."
+      "avisoSinSaldo": "This dose has no sessions left. It will be applied anyway and go negative.",
+      "avisoNoComprada": {
+        "titulo": "You are applying a dose the patient did not buy",
+        "desc": "The patient has purchased doses pending. You can apply a different one if it is truly needed, but it will be logged as an oversight.",
+        "compro": "The patient bought",
+        "compradoItem": "{nombre} — {n} left",
+        "eligiendo": "You are applying",
+        "usarComprada": "Use the purchased one",
+        "aplicarIgual": "Apply this one anyway"
+      }
     },
     "nurseElegir": "Pick nurse",
     "nurseReset": "Reset (available)",
@@ -1448,6 +1457,18 @@
       "cancelar": "Cancel",
       "confirmar": "Transfer",
       "ok": "Treatment transferred."
+    },
+    "avisos": {
+      "contador": "{n, plural, one {# alert today} other {# alerts today}}",
+      "limpio": "No oversights today",
+      "titulo": "Oversights of the day",
+      "desc": "Doses and deliveries that did not match. Tap one to go to its session and fix it.",
+      "por": "by {actor}",
+      "tipo": {
+        "entrega_sin_paquete": "Delivery without package",
+        "dosis_no_comprada": "Dose not purchased",
+        "entrega_sin_saldo": "Delivery without balance"
+      }
     }
   },
   "programarCitas": {

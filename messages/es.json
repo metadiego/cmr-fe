@@ -1417,7 +1417,16 @@
       "quedan": "quedan {n}",
       "sinSaldo": "sin saldo",
       "otras": "Otras dosis",
-      "avisoSinSaldo": "Ya no le quedan sesiones de esta dosis. Se aplicará igual y quedará en negativo."
+      "avisoSinSaldo": "Ya no le quedan sesiones de esta dosis. Se aplicará igual y quedará en negativo.",
+      "avisoNoComprada": {
+        "titulo": "Estás aplicando una dosis que el paciente no compró",
+        "desc": "El paciente tiene dosis compradas pendientes. Puedes aplicar otra si de verdad hace falta, pero quedará registrada como descuido.",
+        "compro": "El paciente compró",
+        "compradoItem": "{nombre} — quedan {n}",
+        "eligiendo": "Estás aplicando",
+        "usarComprada": "Usar la que compró",
+        "aplicarIgual": "Aplicar esta de todas formas"
+      }
     },
     "nurseElegir": "Elegir enfermera(o)",
     "nurseReset": "Reset (disponible)",
@@ -1448,6 +1457,18 @@
       "cancelar": "Cancelar",
       "confirmar": "Transferir",
       "ok": "Tratamiento transferido."
+    },
+    "avisos": {
+      "contador": "{n, plural, one {# aviso hoy} other {# avisos hoy}}",
+      "limpio": "Sin descuidos hoy",
+      "titulo": "Descuidos del día",
+      "desc": "Dosis y entregas que no cuadraron. Toca uno para ir a su sesión y repararlo.",
+      "por": "por {actor}",
+      "tipo": {
+        "entrega_sin_paquete": "Entrega sin paquete",
+        "dosis_no_comprada": "Dosis no comprada",
+        "entrega_sin_saldo": "Entrega sin saldo"
+      }
     }
   },
   "programarCitas": {

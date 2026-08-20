@@ -371,6 +371,43 @@ export function aplicarCambioProtocolo(
   );
 }
 
+// AVISOS / DESCUIDOS del día (GET /frontdesk/reportes/avisos?desde&hasta). El BE ya no pierde el
+// descuido en silencio: registra tres tipos y este reporte los devuelve con paciente, servicio y quién
+// lo hizo. `porTipo` trae SIEMPRE los tres contadores (0 en un día limpio → "todo bien" de un vistazo,
+// no se confunde con "no cargó"). Filtra por centro (X-Tenant-ID). RBAC frontdesk.read. Handoff
+// aviso-centrado-dosis-no-comprada-y-lista-de-descuidos / cmr-be/docs/specs/avisos-del-descuido-frontdesk.
+//  - entrega_sin_paquete: la visita ocurrió sin paquete al que descontar (el insumo no se movió).
+//  - dosis_no_comprada:   se aplicó una presentación que el paciente no compró (se cobró al paquete de la fila).
+//  - entrega_sin_saldo:   se entregó sin disponibilidad y el pendiente quedó en negativo.
+export type FrontdeskAvisoTipo = "entrega_sin_paquete" | "dosis_no_comprada" | "entrega_sin_saldo";
+export interface FrontdeskAviso {
+  id: string;
+  tipo: string;
+  sesionId?: string | null;
+  fecha?: string | null;
+  paciente?: string | null;
+  servicio?: string | null;
+  actorId?: string | null;
+  actor?: string | null;
+  cuando?: string | null;
+  detalle?: Record<string, unknown> | null;
+}
+export interface FrontdeskAvisosReporte {
+  desde?: string;
+  hasta?: string;
+  total: number;
+  porTipo: Record<string, number>;
+  avisos: FrontdeskAviso[];
+}
+export function getAvisosFrontdesk(
+  desde: string,
+  hasta: string,
+  centroId?: string,
+): Promise<FrontdeskAvisosReporte> {
+  const sp = new URLSearchParams({ desde, hasta });
+  return apiFetch<FrontdeskAvisosReporte>(`/frontdesk/reportes/avisos?${sp.toString()}`, {}, centroId);
+}
+
 // Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey) +
 // set tipado (PR #141: SetNurseStatusDto — statusTipoId null = reset).
 export type NurseStatusTipo = components["schemas"]["NurseStatusTipoEntity"];
