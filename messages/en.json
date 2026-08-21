@@ -3311,5 +3311,30 @@
       "presupuesto": "Quotes",
       "devolucion": "Returns"
     }
+  },
+  "inventarioAjuste": {
+    "boton": "Adjust",
+    "titulo": "Adjust stock",
+    "stockActual": "Now",
+    "modoMovimiento": "In or out",
+    "modoConteo": "Physical count",
+    "cantidad": "Quantity",
+    "sentido": "Direction",
+    "resta": "Subtract",
+    "suma": "Add",
+    "motivo": "Reason",
+    "motivoPlaceholder": "Pick a reason",
+    "contado": "How many are actually there?",
+    "contadoAyuda": "Type what you counted; the system works out the difference.",
+    "diferencia": "Will adjust by {signo}{n}.",
+    "sinDiferencia": "Your count matches the system: nothing to adjust.",
+    "notas": "Why",
+    "notasPlaceholder": "A vial broke while taking it out of the fridge",
+    "notasAyuda": "Required: an adjustment with no explanation is just another mismatch.",
+    "sinAlmacen": "This row has no warehouse, so it cannot be adjusted from here. Filter by a warehouse and try again.",
+    "guardar": "Adjust",
+    "guardando": "Adjusting…",
+    "cancelar": "Cancel",
+    "hecho": "Stock adjusted."
   }
 }
