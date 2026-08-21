@@ -65,12 +65,12 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   const emp = recibo.empresa;
 
   return (
-    <div
-      className="recibo-print mx-auto bg-white px-3 py-4 font-mono text-[11px] leading-tight text-black"
-      style={{ width: "var(--recibo-ancho, 72mm)" }}
-    >
+    <div className="recibo-print mx-auto bg-white px-3 py-4 font-mono text-[8.25pt] leading-tight text-black">
+      {/* Sin ancho impuesto aquí: en PANTALLA el ancho lo pone @media screen (--recibo-ancho); en
+          IMPRESIÓN es width:auto → se ajusta al papel del driver (Chrome/Firefox, cualquier rollo).
+          Fuente en pt (unidad del papel), no px, para que no dependa del ancho de pantalla. */}
       {recibo.anulada && (
-        <div className="mb-1 border border-black py-0.5 text-center text-base font-bold tracking-widest">
+        <div className="mb-1 border border-black py-0.5 text-center text-[12pt] font-bold tracking-widest">
           {t("void")}
         </div>
       )}
@@ -84,7 +84,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           alt=""
           className="mx-auto mb-1 max-h-[18mm] w-auto object-contain"
         />
-        <div className="text-[13px] font-bold uppercase">{emp?.nombreLegal ?? ""}</div>
+        <div className="text-[9.75pt] font-bold uppercase">{emp?.nombreLegal ?? ""}</div>
         {emp?.nombreComercial && <div>{emp.nombreComercial}</div>}
         {emp?.sucursal && <div>{emp.sucursal}</div>}
         {emp?.direccion && (
@@ -221,7 +221,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       {conMultiplicadores.length > 0 && (
         <>
           <Dashed />
-          <div className="space-y-0.5 text-[10px]">
+          <div className="space-y-0.5 text-[7.5pt]">
             {conMultiplicadores.map((it, i) => (
               <div key={i}>* {it.descripcion} — {multTexto(it.multiplicadores!)}</div>
             ))}

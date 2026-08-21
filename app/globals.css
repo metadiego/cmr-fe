@@ -156,17 +156,23 @@
     @apply font-sans;
     }
 }
-/* Ancho IMPRIMIBLE del recibo térmico (no el ancho del rollo). Default del sistema 72mm (rollo de
-   80mm → área imprimible ~72). Es DATO por centro: el motor de preferencias lo puede sobreescribir
-   escribiendo `--recibo-ancho` (ver configToCssVars); aquí queda el default. Handoff
-   recibo-termico-sale-en-miniatura. */
+/* Ancho de vista PREVIA en pantalla del recibo (solo pantalla, para que se vea como un ticket). Dato
+   por centro vía --recibo-ancho (72mm default). En IMPRESIÓN no se impone ancho — ver abajo. */
 :root {
   --recibo-ancho: 72mm;
 }
-/* Impresión de recibo térmico (Epson TM como impresora del sistema). Aísla `.recibo-print`: oculta
-   todo lo demás y dimensiona la página EXACTAMENTE al área imprimible, sin márgenes de página, para
-   que el navegador no encoja el ticket a una miniatura. El aire va DENTRO (padding), no como margen.
-   Ver docs/specs/recibo-termico-sale-en-miniatura.md. */
+@media screen {
+  .recibo-print {
+    width: var(--recibo-ancho, 72mm);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+/* Impresión del recibo térmico. LECCIÓN (auditado contra el legado, que se adapta a cualquier
+   impresora/navegador con solo esconder header/footer): NO imponer ancho ni `@page size` ni escalar.
+   Al dejar `width:auto`, el navegador usa el ancho del PAPEL elegido y el contenido fluye — así sale
+   igual en Chrome y Firefox y con cualquier rollo (80/58mm). Fuente en pt (unidad del papel), no px.
+   Ver docs/specs/recibo-termico-sale-en-miniatura.md (corrección 21-ago). */
 @media print {
   body * {
     visibility: hidden !important;
@@ -176,23 +182,21 @@
     visibility: visible !important;
   }
   .recibo-print {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: var(--recibo-ancho, 72mm);
-    margin: 0;
-    padding: 0 2mm;
-    box-sizing: border-box;
+    position: static !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
     color: #000 !important;
     box-shadow: none !important;
   }
   .recibo-print img {
+    max-width: 100% !important;
+    height: auto !important;
     filter: grayscale(100%) contrast(1.15);
   }
-  /* NO fijamos `size`: Chrome ignora `var()` en `@page size` (queda inválido → la página cae a Carta y
-     el ticket se encoge). La página la define el papel térmico que elija el driver (media 71.97mm de la
-     EPSON) y el ancho del CONTENIDO lo da `.recibo-print` (width: var(--recibo-ancho), 72mm default). */
+  /* Sin `@page { size }`: la página la define el papel del driver. Solo quitamos el margen. */
   @page {
     margin: 0;
   }
