@@ -350,3 +350,48 @@ export function recibirCompra(payload: RecibirCompraPayload): Promise<unknown> {
     body: JSON.stringify(payload),
   });
 }
+
+// ---- Ajuste de existencias ------------------------------------------------
+// Los MOTIVOS son un catálogo del BE (`motivos_movimiento`), no una lista escrita aquí: el select se
+// llena con esto y si mañana se agrega un motivo en la base, aparece sin tocar el FE. El BE valida la
+// clave contra el catálogo y, si no existe, responde MOTIVO_INVALIDO con `motivosValidos`.
+// See cmr-be/docs/specs/ajuste-de-inventario-handoff-fe.md
+export interface MotivoMovimiento {
+  id: string;
+  clave: string;
+  nombre: string;
+  labelKey?: string | null;
+  activo?: boolean;
+}
+
+export function listMotivosMovimiento(
+  tenant?: string | null,
+): Promise<MotivoMovimiento[]> {
+  return apiFetch<MotivoMovimiento[]>(
+    `/inventario/motivos-movimiento`,
+    {},
+    tenant,
+  );
+}
+
+// `cantidad` SIEMPRE positiva; el sentido lo da `signo`. Las notas son obligatorias: un ajuste sin el
+// por qué es un descuadre nuevo con otra cara.
+export function ajustarExistencias(
+  payload: {
+    productoId: string;
+    almacenId: string;
+    cantidad: number;
+    signo: "positivo" | "negativo";
+    motivo: string;
+    notas: string;
+    loteId?: string;
+    fechaEfectiva?: string;
+  },
+  tenant?: string | null,
+): Promise<unknown> {
+  return apiFetch(
+    `/inventario/operaciones/ajustar`,
+    { method: "POST", body: JSON.stringify(payload) },
+    tenant,
+  );
+}

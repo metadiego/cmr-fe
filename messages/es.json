@@ -3311,5 +3311,30 @@
       "presupuesto": "Presupuestos",
       "devolucion": "Devoluciones"
     }
+  },
+  "inventarioAjuste": {
+    "boton": "Ajustar",
+    "titulo": "Ajustar existencias",
+    "stockActual": "Ahora",
+    "modoMovimiento": "Entra o sale",
+    "modoConteo": "Conteo físico",
+    "cantidad": "Cantidad",
+    "sentido": "Sentido",
+    "resta": "Resta",
+    "suma": "Suma",
+    "motivo": "Motivo",
+    "motivoPlaceholder": "Elige el motivo",
+    "contado": "¿Cuántos hay de verdad?",
+    "contadoAyuda": "Escribe lo que contaste; el sistema calcula la diferencia.",
+    "diferencia": "Se ajustará {signo}{n}.",
+    "sinDiferencia": "Lo contado coincide con el sistema: no hay nada que ajustar.",
+    "notas": "Por qué",
+    "notasPlaceholder": "Se rompió un frasco al sacarlo de la nevera",
+    "notasAyuda": "Obligatorio: un ajuste sin explicación es otro descuadre.",
+    "sinAlmacen": "Esta fila no tiene almacén, así que no se puede ajustar desde aquí. Filtra por un almacén y vuelve a intentarlo.",
+    "guardar": "Ajustar",
+    "guardando": "Ajustando…",
+    "cancelar": "Cancelar",
+    "hecho": "Existencias ajustadas."
   }
 }

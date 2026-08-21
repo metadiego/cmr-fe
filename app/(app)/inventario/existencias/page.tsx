@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Paginated } from "@/lib/api/types";
+import { AjusteModal, type AjusteObjetivo } from "@/components/inventario/ajuste-modal";
 
 const TODOS = "__todos__";
 const nf = new Intl.NumberFormat("en-US");
@@ -57,7 +58,12 @@ export default function StockPage() {
   const [page, setPage] = React.useState(1);
   // Clic en un producto → modal con su DESGLOSE (por almacén/lote y estado): explica dónde está y por qué
   // un negativo. (El historial Entró/Salió aún no lo sirve el BE; ver handoff.)
+  const tAj = useTranslations("inventarioAjuste");
   const [detalleDe, setDetalleDe] = React.useState<{ productoId: string; nombre: string } | null>(null);
+  // AJUSTAR: el botón vive en la fila donde se VE el descuadre — ahí es donde la persona lo nota, y que
+  // el ajuste esté a un clic de ese número es la mitad del trabajo.
+  // See cmr-be/docs/specs/ajuste-de-inventario-handoff-fe.md
+  const [ajusteDe, setAjusteDe] = React.useState<AjusteObjetivo | null>(null);
   React.useEffect(() => {
     const h = setTimeout(() => { setQApplied(q); setPage(1); }, 350);
     return () => clearTimeout(h);
@@ -207,6 +213,7 @@ export default function StockPage() {
                         <th className="px-3 py-2 font-semibold">{t("col.almacen")}</th>
                         <th className="px-3 py-2 font-semibold">{t("col.lote")}</th>
                         <th className="px-3 py-2 text-right font-semibold">{t("col.cantidad")}</th>
+                        <th className="px-3 py-2 text-right font-semibold sr-only">{tAj("titulo")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -222,6 +229,24 @@ export default function StockPage() {
                             <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
                           </td>
                           <td className="px-3 py-2 text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} /></td>
+                          <td className="px-3 py-2 text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAjusteDe({
+                                  productoId: r.productoId,
+                                  nombre: r.nombre ?? r.sku ?? "—",
+                                  almacenId: r.almacenId ?? null,
+                                  almacenNombre: r.almacenNombre ?? null,
+                                  stockActual: Number(r.cantidad) || 0,
+                                });
+                              }}
+                            >
+                              {tAj("boton")}
+                            </Button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -326,6 +351,14 @@ export default function StockPage() {
 
       {detalleDe && (
         <DetalleModal producto={detalleDe} centro={tenantCentro} onClose={() => setDetalleDe(null)} />
+      )}
+      {ajusteDe && (
+        <AjusteModal
+          objetivo={ajusteDe}
+          centro={tenantCentro}
+          onClose={() => setAjusteDe(null)}
+          onHecho={() => resumenRes.reload()}
+        />
       )}
     </div>
   );
