@@ -242,7 +242,15 @@
       "freeSlots": "{n, plural, one {# free slot} other {# free slots}}",
       "closed": "closed",
       "closedNotice": "Holiday — scheduling is closed. New appointments cannot be created.",
-      "live": "Live"
+      "live": "Live",
+      "vistaClasica": "Classic",
+      "vistaNueva": "New",
+      "kpiCitas": "Appointments",
+      "kpiAtendidas": "Seen",
+      "kpiNoShow": "No-show",
+      "kpiLibres": "Free slots",
+      "filterAll": "All",
+      "sinCitas": "No appointments for this filter."
     },
     "cupos": {
       "title": "Schedule configuration",

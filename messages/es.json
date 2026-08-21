@@ -242,7 +242,15 @@
       "freeSlots": "{n, plural, one {# cupo libre} other {# cupos libres}}",
       "closed": "cerrado",
       "closedNotice": "Día feriado — la agenda está cerrada. No se pueden crear citas nuevas.",
-      "live": "En vivo"
+      "live": "En vivo",
+      "vistaClasica": "Clásica",
+      "vistaNueva": "Nueva",
+      "kpiCitas": "Citas",
+      "kpiAtendidas": "Atendidas",
+      "kpiNoShow": "No-show",
+      "kpiLibres": "Cupos libres",
+      "filterAll": "Todas",
+      "sinCitas": "No hay citas para este filtro."
     },
     "cupos": {
       "title": "Configuración de agenda",

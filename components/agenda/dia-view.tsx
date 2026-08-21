@@ -32,26 +32,38 @@ import { CitaModal } from "@/components/agenda/cita-modal";
 
 const ALL = "__all__";
 const CENTRO_KEY = "cmr_agenda_centro";
+const VISTA_KEY = "cmr_agenda_vista"; // preferencia POR DISPOSITIVO (localStorage): "clasica" | "nueva"
+type Vista = "clasica" | "nueva";
 
 export function DiaView({ fecha }: { fecha: string }) {
   const t = useTranslations("agenda");
   const tc = useTranslations("common");
   const [centro, setCentro] = React.useState<string>(ALL);
+  // Vista clásica (la de siempre, DEFAULT e intacta) vs nueva (beta, reordenamiento visual). El equipo
+  // puede alternar y opinar antes de decidir; se recuerda por equipo. Idea: docs/plans/agenda-dia-vista-alternativa-opcional.md
+  const [vista, setVista] = React.useState<Vista>("clasica");
   const [modal, setModal] = React.useState<
     { fecha: string; centroId?: string; hora?: string; tipoCitaId?: string } | null
   >(null);
 
-  // Restore persisted center choice once.
+  // Restore persisted center + view choice once.
   const [prevF, setPrevF] = React.useState(false);
   if (!prevF && typeof window !== "undefined") {
     setPrevF(true);
     const saved = window.localStorage.getItem(CENTRO_KEY);
     if (saved) setCentro(saved);
+    const savedVista = window.localStorage.getItem(VISTA_KEY);
+    if (savedVista === "nueva" || savedVista === "clasica") setVista(savedVista);
   }
   function pickCentro(v: string) {
     setCentro(v);
     if (typeof window !== "undefined") window.localStorage.setItem(CENTRO_KEY, v);
   }
+  function pickVista(v: Vista) {
+    setVista(v);
+    if (typeof window !== "undefined") window.localStorage.setItem(VISTA_KEY, v);
+  }
+  const SheetView = vista === "nueva" ? CentroSheetV2 : CentroSheet;
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -123,6 +135,29 @@ export function DiaView({ fecha }: { fecha: string }) {
           </span>
         )}
         <div className="ml-auto flex items-center gap-2">
+          {/* Toggle de vista (por dispositivo). La clásica es el default e intacta. */}
+          <div className="inline-flex rounded-md border p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => pickVista("clasica")}
+              className={
+                "rounded px-2.5 py-1 font-medium transition-colors " +
+                (vista === "clasica" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
+              }
+            >
+              {t("dia.vistaClasica")}
+            </button>
+            <button
+              type="button"
+              onClick={() => pickVista("nueva")}
+              className={
+                "rounded px-2.5 py-1 font-medium transition-colors " +
+                (vista === "nueva" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
+              }
+            >
+              {t("dia.vistaNueva")}
+            </button>
+          </div>
           <Can permiso="citas.config">
             <Link
               href="/citas/agenda/cupos"
@@ -162,7 +197,7 @@ export function DiaView({ fecha }: { fecha: string }) {
           </TabsList>
           {centrosData.map((c) => (
             <TabsContent key={c.clinicId} value={c.clinicId}>
-              <CentroSheet
+              <SheetView
                 centro={c}
                 columnas={data.columnas}
                 estados={def?.estados ?? []}
@@ -177,7 +212,7 @@ export function DiaView({ fecha }: { fecha: string }) {
           ))}
         </Tabs>
       ) : data && centrosData.length === 1 ? (
-        <CentroSheet
+        <SheetView
           centro={centrosData[0]}
           columnas={data.columnas}
           estados={def?.estados ?? []}
@@ -301,35 +336,16 @@ function CentroSheet({
                     {tipo.citas.map((fila) => (
                       <tr key={fila.id} className="border-t">
                         {cols.map((col) => (
-                          <td key={col.clave} className="px-3 py-1.5 whitespace-nowrap">
-                            {col.clave === "estado" ? (
-                              <EstadoSelect
-                                tablero="citas_cc"
-                                entidadId={fila.id}
-                                estado={String(fila.estado ?? fila["estado"] ?? "")}
-                                estados={estados}
-                                transiciones={transiciones}
-                                centroId={centro.clinicId}
-                                onDone={onChanged}
-                              />
-                            ) : editableClaves.has(col.clave) ? (
-                              <CeldaEditable
-                                tablero="citas_cc"
-                                entidadId={fila.id}
-                                columna={col.clave}
-                                tipo={col.tipo}
-                                value={fila[col.clave]}
-                                centroId={centro.clinicId}
-                                etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
-                                onChanged={onChanged}
-                              />
-                            ) : col.tipo === "accion" ? (
-                              // ⋯ reservado para otras acciones (no estado)
-                              null
-                            ) : (
-                              <Cell col={col} value={fila[col.clave]} />
-                            )}
-                          </td>
+                          <CeldaCita
+                            key={col.clave}
+                            col={col}
+                            fila={fila}
+                            clinicId={centro.clinicId}
+                            estados={estados}
+                            transiciones={transiciones}
+                            editableClaves={editableClaves}
+                            onChanged={onChanged}
+                          />
                         ))}
                       </tr>
                     ))}
@@ -361,6 +377,264 @@ function CentroSheet({
           );
         }),
       )}
+    </div>
+  );
+}
+
+// Celda de una cita: MISMA lógica que usa la vista clásica y la nueva (sin duplicar). Estado = selector
+// inline; columnas editables = CeldaEditable; acción = reservado; resto = Cell de solo lectura.
+function CeldaCita({
+  col,
+  fila,
+  clinicId,
+  estados,
+  transiciones,
+  editableClaves,
+  onChanged,
+}: {
+  col: ColumnaEfectiva;
+  fila: { id: string; estado?: string } & Record<string, unknown>;
+  clinicId: string;
+  estados: EstadoCitaCatalogo[];
+  transiciones: Transicion[];
+  editableClaves: Set<string>;
+  onChanged: () => void;
+}) {
+  const tRoot = useTranslations();
+  return (
+    <td className="px-3 py-1.5 whitespace-nowrap">
+      {col.clave === "estado" ? (
+        <EstadoSelect
+          tablero="citas_cc"
+          entidadId={fila.id}
+          estado={String(fila.estado ?? fila["estado"] ?? "")}
+          estados={estados}
+          transiciones={transiciones}
+          centroId={clinicId}
+          onDone={onChanged}
+        />
+      ) : editableClaves.has(col.clave) ? (
+        <CeldaEditable
+          tablero="citas_cc"
+          entidadId={fila.id}
+          columna={col.clave}
+          tipo={col.tipo}
+          value={fila[col.clave]}
+          centroId={clinicId}
+          etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
+          onChanged={onChanged}
+        />
+      ) : col.tipo === "accion" ? null : (
+        <Cell col={col} value={fila[col.clave]} />
+      )}
+    </td>
+  );
+}
+
+function Kpi({ label, value, tono }: { label: string; value: number; tono?: "ok" | "warn" | "muted" }) {
+  const color =
+    tono === "ok" ? "text-emerald-600 dark:text-emerald-400"
+    : tono === "warn" ? "text-amber-600 dark:text-amber-400"
+    : tono === "muted" ? "text-muted-foreground"
+    : "text-primary";
+  return (
+    <div className="rounded-lg border bg-card px-3 py-2">
+      <div className={"text-xl font-bold tabular-nums " + color}>{value}</div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        "rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
+        (active ? "border-primary bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent/50")
+      }
+    >
+      {children}
+    </button>
+  );
+}
+
+// VISTA NUEVA (beta): mismos datos, columnas y acciones que la clásica, reordenados. KPIs en tarjetas +
+// franja compacta de cupos por hora (reemplaza las ~20 tablas vacías) + UNA tabla de citas del día
+// filtrable por tipo (chips; "sin hora" es un filtro más, no una sección aparte).
+function CentroSheetV2({
+  centro,
+  columnas,
+  estados,
+  transiciones,
+  editableClaves,
+  onAgendar,
+  onChanged,
+}: {
+  centro: CentroDia;
+  columnas: ColumnaEfectiva[];
+  estados: EstadoCitaCatalogo[];
+  transiciones: Transicion[];
+  editableClaves: Set<string>;
+  onAgendar: (hora: string | null, tipo: TipoFranja) => void;
+  onChanged: () => void;
+}) {
+  const t = useTranslations("agenda");
+  const tRoot = useTranslations();
+  const { can } = useCan();
+  const [filtro, setFiltro] = React.useState<string>(""); // "" = todos | tipoCitaId | "__sinhora__"
+
+  const seen = new Set<string>();
+  const cols = columnas
+    .filter((c) => (seen.has(c.clave) ? false : (seen.add(c.clave), true)))
+    .filter((c) => !c.permiso || can(c.permiso));
+  const r = centro.resumen;
+  const franjas = centro.franjas ?? [];
+  const festivos = centro.festivos ?? [];
+  const bloqueado = centro.bloqueado ?? false;
+
+  // Tipos únicos (para los chips) + cupos libres del día.
+  const tiposMap = new Map<string, string>();
+  let libres = 0;
+  franjas.forEach((f) => f.tipos.forEach((tp) => { tiposMap.set(tp.tipoCitaId, tp.tipoNombre); libres += tp.vacios; }));
+  const tiposChips = [...tiposMap.entries()];
+
+  // Aplanar TODAS las citas (con o sin hora) a una sola lista.
+  const items = franjas.flatMap((f) =>
+    f.tipos.flatMap((tp) => tp.citas.map((fila) => ({ fila, hora: f.hora, tipoCitaId: tp.tipoCitaId }))),
+  );
+  const hayNoHora = items.some((i) => i.hora === null);
+  const filtered = items.filter((i) =>
+    !filtro ? true : filtro === "__sinhora__" ? i.hora === null : i.tipoCitaId === filtro,
+  );
+  const franjasHora = franjas.filter((f) => f.hora !== null);
+
+  return (
+    <div className="space-y-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <Kpi label={t("dia.kpiCitas")} value={r?.totalCitas ?? 0} />
+        <Kpi label={t("dia.kpiAtendidas")} value={r?.atendidas ?? 0} tono="ok" />
+        <Kpi label={t("dia.kpiNoShow")} value={r?.noShow ?? 0} tono="warn" />
+        <Kpi label={t("dia.kpiLibres")} value={libres} tono="muted" />
+      </div>
+
+      {(festivos.length > 0 || centro.notasDia.some((n) => n.activo)) && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {festivos.map((f) => (
+            <span
+              key={f.fecha + f.nombre}
+              className={
+                f.bloqueaAgenda
+                  ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
+                  : "rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-400"
+              }
+            >
+              {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}{f.bloqueaAgenda ? ` — ${t("dia.closed")}` : ""}
+            </span>
+          ))}
+          {centro.notasDia.filter((n) => n.activo).map((n) => (
+            <span key={n.id} className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">📌 {n.contenido}</span>
+          ))}
+        </div>
+      )}
+
+      {bloqueado && (
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          {t("dia.closedNotice")}
+        </div>
+      )}
+
+      {/* Franja compacta de cupos por hora (reemplaza las ~20 tablas vacías). */}
+      {franjasHora.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {franjasHora.map((f) => {
+            const conCitas = f.tipos.some((tp) => tp.citas.length > 0);
+            return (
+              <div
+                key={f.hora}
+                className={"min-w-[9.5rem] shrink-0 rounded-lg border p-2 " + (conCitas ? "border-primary/40 bg-primary/5" : "bg-card")}
+              >
+                <div className="mb-1 font-mono text-xs font-semibold">{f.hora}</div>
+                <div className="space-y-0.5">
+                  {f.tipos.filter((tp) => tp.cupo > 0).map((tp) => (
+                    <div key={tp.tipoCitaId} className="flex items-center justify-between gap-1.5 text-xs">
+                      <span className="min-w-0 flex-1 truncate text-muted-foreground">{tp.tipoNombre}</span>
+                      <span className="tabular-nums">{tp.vacios}/{tp.cupo}</span>
+                      <Can permiso="citas.create">
+                        <button
+                          type="button"
+                          onClick={() => onAgendar(f.hora, tp)}
+                          disabled={tp.vacios <= 0}
+                          className="text-primary hover:underline disabled:opacity-30"
+                          aria-label={t("dia.book", { tipo: tp.tipoNombre, hora: f.hora ?? "" })}
+                        >
+                          <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
+                        </button>
+                      </Can>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Chips de tipo + "sin hora" como filtro (no sección aparte). */}
+      <div className="flex flex-wrap gap-1.5">
+        <Chip active={filtro === ""} onClick={() => setFiltro("")}>{t("dia.filterAll")} ({items.length})</Chip>
+        {tiposChips.map(([id, nombre]) => (
+          <Chip key={id} active={filtro === id} onClick={() => setFiltro(id)}>
+            {nombre} ({items.filter((i) => i.tipoCitaId === id).length})
+          </Chip>
+        ))}
+        {hayNoHora && (
+          <Chip active={filtro === "__sinhora__"} onClick={() => setFiltro("__sinhora__")}>
+            {t("dia.noTime")} ({items.filter((i) => i.hora === null).length})
+          </Chip>
+        )}
+      </div>
+
+      {/* UNA sola tabla de citas del día — MISMAS columnas y celdas que la clásica. */}
+      <div className="overflow-x-auto rounded-md border">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40 text-xs text-muted-foreground">
+            <tr>
+              {cols.map((col) => (
+                <th key={col.clave} className="px-3 py-1.5 text-left font-medium whitespace-nowrap">
+                  {tRoot(col.labelKey)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={cols.length} className="px-3 py-6 text-center text-muted-foreground">{t("dia.sinCitas")}</td>
+              </tr>
+            ) : (
+              filtered.map(({ fila }) => (
+                <tr key={fila.id} className="border-t">
+                  {cols.map((col) => (
+                    <CeldaCita
+                      key={col.clave}
+                      col={col}
+                      fila={fila}
+                      clinicId={centro.clinicId}
+                      estados={estados}
+                      transiciones={transiciones}
+                      editableClaves={editableClaves}
+                      onChanged={onChanged}
+                    />
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
