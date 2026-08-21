@@ -41,3 +41,27 @@ resto. RBAC/`caja.read` como el resto del cuadre.
 ## Verificar
 `GET /caja/reportes/dia?division=consulta` de un día con facturación real → cada `documentos[]` trae
 `usuario:{id,nombre}` (o null), y la columna «Facturó» aparece por fila.
+
+---
+
+## ENTREGADO — 2026-08-21, ya en producción (cmr-be PR #275)
+
+Cada item de `documentos[]` de `GET /api/v1/caja/reportes/dia` trae:
+
+```json
+"usuario": { "id": "afc97245-…", "nombre": "LMARTINEZ" }
+```
+
+- `usuario: null` → no hay a quién atribuir el documento. Pinta «—».
+- `usuario: { id, nombre: null }` → hay sello pero no persona (una llave de integración). Pinta «—»
+  también; no pintes el id.
+
+De dónde sale el nombre: del cajero de los pagos **de ese día** de la factura — la misma fuente que
+`porCajero`, así que la suma por persona cuadra con el total. Si cobraron dos, la fila es del que
+cobró más (y en empate, del que cobró primero); el reparto exacto del dinero sigue estando en
+`porCajero`. Si nadie la ha cobrado todavía, es de quien la emitió.
+
+En la hoja acotada a un cajero (`?usuarioId=`), todas las filas salen a su nombre: es su hoja.
+
+Comprobado en producción el 21-ago: Bayamón/consulta da `porCajero` = MRIVERA $10 y YADIRA
+FELICIANO $90, y las filas suman exactamente eso.
