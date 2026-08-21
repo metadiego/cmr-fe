@@ -754,7 +754,8 @@
     "captacion_por_agente": "Bookings by agent",
     "operaciones": "Operations",
     "cambioProtocolo": "Cambio de protocolo",
-    "configNumeracion": "Numbering"
+    "configNumeracion": "Numbering",
+    "inventario_viales": "Vials"
   },
   "admin": {
     "title": "Administration",
@@ -3336,5 +3337,34 @@
     "guardando": "Adjusting…",
     "cancelar": "Cancel",
     "hecho": "Stock adjusted."
+  },
+  "inventarioViales": {
+    "titulo": "Vials",
+    "subtitulo": "How many sealed vials are left, which one is in use, and which vial each dose came from.",
+    "producto": "Product",
+    "productoPlaceholder": "Pick a vial product",
+    "almacen": "Warehouse",
+    "almacenTodos": "All",
+    "desde": "From",
+    "hasta": "To",
+    "elijeProducto": "Pick a product to see its vials.",
+    "enInventario": "In stock",
+    "vialesDisponibles": "sealed vials",
+    "vialActivo": "Active vial",
+    "vialNumero": "Vial #{n}",
+    "sinVialActivo": "No vial is open right now.",
+    "remanenteNegativo": "More was applied than the vial held: something was recorded wrong.",
+    "consumos": "Doses",
+    "nConsumos": "{n} doses",
+    "sinConsumos": "No doses in this range.",
+    "sinNumero": "no number",
+    "historicos": "Previous vials ({n})",
+    "col.fecha": "Time",
+    "col.paciente": "Patient",
+    "col.dosis": "Dose",
+    "col.vial": "Vial",
+    "estado.abierto": "open",
+    "estado.agotado": "empty",
+    "estado.descartado": "discarded"
   }
 }

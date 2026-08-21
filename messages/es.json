@@ -754,7 +754,8 @@
     "captacion_por_agente": "Captación por agente",
     "operaciones": "Operaciones",
     "cambioProtocolo": "Cambio de protocolo",
-    "configNumeracion": "Numeración"
+    "configNumeracion": "Numeración",
+    "inventario_viales": "Viales"
   },
   "admin": {
     "title": "Administración",
@@ -3336,5 +3337,34 @@
     "guardando": "Ajustando…",
     "cancelar": "Cancelar",
     "hecho": "Existencias ajustadas."
+  },
+  "inventarioViales": {
+    "titulo": "Viales",
+    "subtitulo": "Cuántos frascos quedan cerrados, cuál está en uso y de qué vial salió cada dosis.",
+    "producto": "Producto",
+    "productoPlaceholder": "Elige un producto de vial",
+    "almacen": "Almacén",
+    "almacenTodos": "Todos",
+    "desde": "Desde",
+    "hasta": "Hasta",
+    "elijeProducto": "Elige un producto para ver sus viales.",
+    "enInventario": "En inventario",
+    "vialesDisponibles": "viales cerrados",
+    "vialActivo": "Vial activo",
+    "vialNumero": "Vial #{n}",
+    "sinVialActivo": "No hay ningún vial abierto ahora mismo.",
+    "remanenteNegativo": "Se aplicó más de lo que el frasco tenía: hay algo mal registrado.",
+    "consumos": "Consumos",
+    "nConsumos": "{n} dosis",
+    "sinConsumos": "Sin consumos en este rango.",
+    "sinNumero": "sin número",
+    "historicos": "Viales anteriores ({n})",
+    "col.fecha": "Hora",
+    "col.paciente": "Paciente",
+    "col.dosis": "Dosis",
+    "col.vial": "Vial",
+    "estado.abierto": "abierto",
+    "estado.agotado": "agotado",
+    "estado.descartado": "descartado"
   }
 }

@@ -395,3 +395,65 @@ export function ajustarExistencias(
     tenant,
   );
 }
+
+// ---- Reporte de viales ----------------------------------------------------
+// La foto de un producto que se dosifica en viales: cerrados, el que está en uso con su nivel, los que
+// ya pasaron, y de qué vial salió cada dosis. El BE ya calcula remanente y porcentaje: aquí no se
+// recalcula nada. See docs/specs/pantalla-de-viales.md
+export interface VialDelReporte {
+  id: string;
+  numero: number | null;
+  estado: string;
+  capacidadTotal: number;
+  remanente: number;
+  pacienteId?: string | null;
+}
+
+export interface VialActivoDelReporte extends VialDelReporte {
+  capacidad: number;
+  /** 0–100, ya acotado por el BE. */
+  porcentaje: number;
+}
+
+export interface ConsumoDelReporte {
+  fecha: string;
+  cantidad: number;
+  vialId: string;
+  vialNumero: number | null;
+  pacienteId: string | null;
+  /** Nombre completo y récord: el BE los resuelve para que la tabla se pueda leer. */
+  paciente: string | null;
+  record: string | null;
+  sesionId: string | null;
+  usuarioId: string | null;
+}
+
+export interface ReporteViales {
+  productoId: string;
+  cerrados: number;
+  activo: VialActivoDelReporte | null;
+  historicos: VialDelReporte[];
+  consumos: ConsumoDelReporte[];
+}
+
+export function getReporteViales(
+  params: {
+    productoId: string;
+    almacenId?: string;
+    desde?: string;
+    hasta?: string;
+    pacienteId?: string;
+  },
+  tenant?: string | null,
+): Promise<ReporteViales> {
+  const qs = new URLSearchParams({ productoId: params.productoId });
+  if (params.almacenId) qs.set("almacenId", params.almacenId);
+  if (params.desde) qs.set("desde", params.desde);
+  if (params.hasta) qs.set("hasta", params.hasta);
+  if (params.pacienteId) qs.set("pacienteId", params.pacienteId);
+  return apiFetch<ReporteViales>(
+    `/inventario/viales-abiertos/reporte?${qs.toString()}`,
+    {},
+    tenant,
+  );
+}
