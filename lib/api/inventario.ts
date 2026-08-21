@@ -421,6 +421,9 @@ export interface ConsumoDelReporte {
   vialId: string;
   vialNumero: number | null;
   pacienteId: string | null;
+  /** Nombre completo y récord: el BE los resuelve para que la tabla se pueda leer. */
+  paciente: string | null;
+  record: string | null;
   sesionId: string | null;
   usuarioId: string | null;
 }

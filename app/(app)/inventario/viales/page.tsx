@@ -36,7 +36,7 @@ import {
 
 /** Un producto se dosifica en vial cuando tiene contenido por envase y descarga por dosis. */
 function esDeVial(p: Producto): boolean {
-  const contenido = Number((p as { contenido?: number }).contenido ?? 0);
+  const contenido = Number(p.contenido ?? 0);
   return contenido > 0 && p.esInventariable !== false;
 }
 
@@ -271,7 +271,18 @@ export default function VialesPage() {
                             })}
                           </td>
                           <td className="px-4 py-2">
-                            {(c.pacienteId as string | null) ?? "—"}
+                            {c.paciente ? (
+                              <>
+                                <span>{c.paciente}</span>
+                                {c.record && (
+                                  <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                                    {c.record}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              "—"
+                            )}
                           </td>
                           <td className="px-4 py-2 text-right font-mono">
                             {String(c.cantidad)}
