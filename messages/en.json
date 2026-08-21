@@ -3001,7 +3001,8 @@
         "title": "Who billed",
         "total": "Day total",
         "col": "Biller"
-      }
+      },
+      "colFacturo": "Billed by"
     },
     "cuadreGeneral": {
       "title": "General cash-up",

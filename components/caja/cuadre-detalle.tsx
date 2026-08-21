@@ -113,6 +113,7 @@ export function CuadreDetalle({
           colNumero: td("colNumero"),
           colRecord: td("colRecord"),
           colPaciente: td("colPaciente"),
+          colFacturo: td("colFacturo"),
           colFormaPago: td("colFormaPago"),
           colTotal: td("colTotal"),
           devoluciones: td("devoluciones"),
@@ -241,6 +242,7 @@ export function CuadreDetalle({
                   <th className="px-4 py-2 text-left font-semibold">{td("colNumero")}</th>
                   <th className="px-4 py-2 text-left font-semibold">{td("colRecord")}</th>
                   <th className="px-4 py-2 text-left font-semibold">{td("colPaciente")}</th>
+                  <th className="px-4 py-2 text-left font-semibold">{td("colFacturo")}</th>
                   <th className="px-4 py-2 text-left font-semibold">{td("colFormaPago")}</th>
                   <th className="px-4 py-2 text-right font-semibold">{td("colTotal")}</th>
                 </tr>
@@ -252,6 +254,8 @@ export function CuadreDetalle({
                     {/* Sin récord = celda vacía (no "null" ni guion raro). */}
                     <td className="px-4 py-2 tabular-nums text-muted-foreground">{d.record || ""}</td>
                     <td className="px-4 py-2">{d.paciente || "—"}</td>
+                    {/* Quién facturó: usuario.nombre; null (o nombre null = llave) → "—", nunca el id. */}
+                    <td className="px-4 py-2">{d.usuario?.nombre || "—"}</td>
                     {/* Forma de pago YA resuelta en siglas: pintar tal cual. */}
                     <td className="px-4 py-2 font-mono text-xs">{d.formaPago || "—"}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{money(d.total)}</td>
@@ -438,13 +442,13 @@ function buildPrintHtml(args: {
   const docRows = documentos
     .map(
       (d) =>
-        `<tr><td class="mono">${esc(d.numero || "—")}</td><td class="mono dim">${esc(d.record || "")}</td><td>${esc(d.paciente || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
+        `<tr><td class="mono">${esc(d.numero || "—")}</td><td class="mono dim">${esc(d.record || "")}</td><td>${esc(d.paciente || "—")}</td><td>${esc(d.usuario?.nombre || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
     )
     .join("");
   const docBlock = `<h2>${esc(L.documentos)} (${documentos.length})</h2>
     <table>
-      <thead><tr><th>${esc(L.colNumero)}</th><th>${esc(L.colRecord)}</th><th>${esc(L.colPaciente)}</th><th>${esc(L.colFormaPago)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
-      <tbody>${docRows || `<tr><td colspan="5" class="dim">—</td></tr>`}</tbody>
+      <thead><tr><th>${esc(L.colNumero)}</th><th>${esc(L.colRecord)}</th><th>${esc(L.colPaciente)}</th><th>${esc(L.colFacturo)}</th><th>${esc(L.colFormaPago)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
+      <tbody>${docRows || `<tr><td colspan="6" class="dim">—</td></tr>`}</tbody>
     </table>`;
 
   const devBlock = devoluciones.length

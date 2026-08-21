@@ -3001,7 +3001,8 @@
         "title": "Quién facturó",
         "total": "Total del día",
         "col": "Facturador"
-      }
+      },
+      "colFacturo": "Facturó"
     },
     "cuadreGeneral": {
       "title": "Cuadre general",

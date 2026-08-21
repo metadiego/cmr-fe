@@ -95,6 +95,10 @@ export interface ReporteDia {
     formaPago: string | null;
     total: number;
     estado: string;
+    // Quién facturó ese documento (cmr-be PR #275): sale del cajero de los pagos del día (misma fuente
+    // que `porCajero`, cuadra la suma). `usuario:null` = sin a quién atribuir; `nombre:null` = sello de
+    // integración (llave). En ambos casos se pinta "—", NUNCA el id. Handoff documentos-del-dia-quien-facturo.
+    usuario?: { id: string; nombre: string | null } | null;
   }>;
   // Devoluciones del día con su detalle (bloque aparte, en rojo). `numero` = nº de nota de crédito.
   devolucionesDetalle?: Array<{
