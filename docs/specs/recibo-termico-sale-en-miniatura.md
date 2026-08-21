@@ -64,3 +64,60 @@ TM-T20II de 80 mm el área imprimible es ~72 mm (por eso el propio driver ofrece
 
 Configurable sin hardcode (el ancho es dato por centro) · i18n intacto · no duplicar código (una sola
 variable de ancho para `@page` y para el contenedor) · verificar en papel con `/qa`, no adivinar.
+
+
+## Corrección (21-ago) — la causa de fondo, comprobada contra el legado
+
+El dueño señaló que **su impresión del legado se ajusta sola a cualquier impresora**: cambia de impresora
+y sale bien, sin tocar nada. Y que la nuestra sale bien en Chrome pero en **miniatura en Firefox**.
+
+Se auditó el legado (`/htdocs/cma/vistas/invoservices/print.php` + `/htdocs/cma/css/print-styles.css`) y
+el hallazgo es contundente. Su CSS de impresión **completo** es esto:
+
+```css
+@media print {
+  header, footer { display: none; }
+}
+```
+
+Nada más. **Sin `@page`, sin `size`, sin ancho fijo, sin márgenes, sin escalado.** Por eso se adapta: al
+no declarar ninguna medida, el navegador usa el ancho del papel que el usuario eligió en el diálogo y el
+contenido simplemente fluye dentro.
+
+Nuestro recibo hace justo lo contrario: declara `width: 80mm` y `@page { size: 80mm auto; margin: 2mm }`.
+Cuando ese tamaño no coincide con el papel real, el navegador **tiene que escalar** para encajarlo — y
+Chrome y Firefox escalan con criterios distintos. De ahí que en uno se vea bien y en el otro diminuto. No
+es un bug de Firefox: es que le estamos dando una medida que pelea con el papel.
+
+### La recomendación cambia: no fijar el ancho, dejar que el papel mande
+
+Antes se propuso «pon 72mm en vez de 80mm». Eso arregla UNA impresora y rompe la siguiente. Lo correcto
+es lo que hace el legado:
+
+```css
+@media print {
+  /* aislar el recibo: todo lo demás no se imprime */
+  body > *:not(.recibo-print) { display: none; }
+  .recibo-print {
+    width: auto;          /* NO 80mm, NO 72mm: lo manda el papel */
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: 9pt;       /* en PUNTOS: no depende del ancho de la pantalla */
+  }
+  /* sin @page size, sin transform: scale */
+}
+```
+
+- Quitar el `w-[80mm]` del componente (`recibo-termico.tsx`) o dejarlo **solo para la vista en pantalla**,
+  nunca para la impresión.
+- Los anchos internos (columnas de la tabla) en **porcentaje**, no en milímetros ni píxeles.
+- Tipografía en `pt` y no en `px`: es la unidad del papel.
+- Si algún día un centro necesita forzar un ancho concreto, eso es **dato por centro** (ver el punto 4 más
+  arriba), no una constante en el CSS — pero el default debe ser «lo que diga el papel».
+
+### Cómo verificar (las dos, no una)
+
+Imprimir el mismo recibo en **Chrome y en Firefox**, y con dos papeles distintos (el rollo de 80mm y el de
+58mm si hay). Debe llenar el ancho en los cuatro casos, sin franjas blancas y sin letra reducida. Si hace
+falta tocar el zoom del diálogo para que quepa, el CSS sigue mal.
