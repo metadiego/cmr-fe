@@ -172,6 +172,18 @@ export function generarCodigoAcceso(id: string): Promise<CodigoAccesoResult> {
   return apiFetch<CodigoAccesoResult>(`/profiles/${id}/codigo-acceso`, { method: "POST", body: JSON.stringify({}) });
 }
 
+// Cambia el email de ACCESO de un perfil ya invitado (cmr-be PR #277). Mueve el correo en Supabase Y en
+// nuestra tabla a la vez, CIERRA las sesiones abiertas de esa persona (tendrá que volver a entrar) y
+// actualiza su ficha de personal. NO cambia la contraseña. Permiso profiles.email (admin/super_admin).
+// Errores: 409 (email ya usado / correo reservado del master / perfil master), 400 (email inválido).
+// Devuelve el perfil actualizado. Handoff cambiar-email-de-perfil-handoff-be.
+export function cambiarEmailPerfil(id: string, email: string): Promise<Perfil> {
+  return apiFetch<Perfil>(`/profiles/${id}/email`, {
+    method: "PUT",
+    body: JSON.stringify({ email }),
+  });
+}
+
 // GET /profiles/:id/asignaciones — centros del perfil con tipo/vigencia/activo.
 export function getAsignaciones(perfilId: string): Promise<Asignacion[]> {
   return apiFetch<Asignacion[]>(`/profiles/${perfilId}/asignaciones`).then(

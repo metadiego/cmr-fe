@@ -940,6 +940,19 @@
         "aviso": "Caduca en {min} minutos y es de un solo uso. Pedir otro invalida este.",
         "comoUsar": "La persona entra a Crear contraseña, elige «Tengo un código», pone su correo y este código, y escribe su contraseña.",
         "listo": "Listo"
+      },
+      "cambiarEmail": "Cambiar email de acceso",
+      "email": {
+        "titulo": "Cambiar email de acceso",
+        "desc": "Nuevo correo con el que entrará {nombre}. Toma efecto de inmediato, sin correo de confirmación.",
+        "label": "Nuevo email",
+        "placeholder": "nuevo@dominio.com",
+        "invalido": "Correo mal escrito",
+        "aviso": "Cierra las sesiones abiertas de esta persona: tendrá que volver a entrar. No cambia la contraseña.",
+        "cancelar": "Cancelar",
+        "guardar": "Cambiar email",
+        "guardando": "Cambiando…",
+        "ok": "Email de acceso actualizado"
       }
     },
     "invite": {

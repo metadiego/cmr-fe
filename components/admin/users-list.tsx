@@ -16,6 +16,7 @@ import { toastError } from "@/lib/api/errors"
 import { useCan } from "@/hooks/use-can"
 import { useResource } from "@/hooks/use-resource"
 import { CodigoAccesoDialog } from "@/components/admin/codigo-acceso-dialog"
+import { CambiarEmailDialog } from "@/components/admin/cambiar-email-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -55,6 +56,9 @@ export function UsersList() {
   const { can } = useCan()
   const puedeCodigo = can("profiles.codigo_acceso")
   const [codigo, setCodigo] = React.useState<CodigoAccesoResult | null>(null)
+  // Cambiar email de acceso: permiso profiles.email (admin/super_admin). El botón no se enseña sin él.
+  const puedeEmail = can("profiles.email")
+  const [emailFor, setEmailFor] = React.useState<Perfil | null>(null)
 
   async function generarCodigo(p: Perfil) {
     setBusyId(p.id)
@@ -227,6 +231,13 @@ export function UsersList() {
                   {t("users.generarCodigo")}
                 </DropdownMenuItem>
               )}
+              {/* Cambiar email de acceso: solo con permiso y perfil NO master (el BE también lo rechaza).
+                  Abre un diálogo con confirmación porque cierra las sesiones abiertas. Handoff cambiar-email. */}
+              {puedeEmail && !p.isMaster && (
+                <DropdownMenuItem onClick={() => setEmailFor(p)}>
+                  {t("users.cambiarEmail")}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -288,6 +299,7 @@ export function UsersList() {
       />
 
       <CodigoAccesoDialog codigo={codigo} onClose={() => setCodigo(null)} />
+      <CambiarEmailDialog perfil={emailFor} onClose={() => setEmailFor(null)} onSaved={reload} />
     </div>
   )
 }

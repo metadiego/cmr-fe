@@ -940,6 +940,19 @@
         "aviso": "Expires in {min} minutes and is single-use. Requesting another invalidates this one.",
         "comoUsar": "The person opens Create password, chooses “I have a code”, enters their email and this code, and sets their password.",
         "listo": "Done"
+      },
+      "cambiarEmail": "Change access email",
+      "email": {
+        "titulo": "Change access email",
+        "desc": "New email {nombre} will sign in with. Takes effect immediately, no confirmation email.",
+        "label": "New email",
+        "placeholder": "new@domain.com",
+        "invalido": "Invalid email",
+        "aviso": "Signs this person out of open sessions: they will need to sign in again. Does not change the password.",
+        "cancelar": "Cancel",
+        "guardar": "Change email",
+        "guardando": "Changing…",
+        "ok": "Access email updated"
       }
     },
     "invite": {
