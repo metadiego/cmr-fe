@@ -756,7 +756,8 @@
     "cambioProtocolo": "Cambio de protocolo",
     "configNumeracion": "Numbering",
     "inventario_viales": "Vials",
-    "planificacionCompras": "Purchase planning"
+    "planificacionCompras": "Purchase planning",
+    "calendario": "Calendar"
   },
   "admin": {
     "title": "Administration",
@@ -3474,5 +3475,30 @@
     "cancelarPo": "Cancel order",
     "cancelarConfirm": "Cancel order {n}? Reserved stock is released.",
     "ordenCancelada": "Order cancelled"
+  },
+  "calendario": {
+    "hoy": "Today",
+    "nuevo": "New event",
+    "mesAnterior": "Previous month",
+    "mesSiguiente": "Next month",
+    "global": "Global (all centers)",
+    "guardado": "Event saved",
+    "borrado": "Event deleted",
+    "borrarConfirm": "Delete this event?",
+    "nuevoTitulo": "New event",
+    "editarTitulo": "Event",
+    "modalDesc": "Global events are visible to every center.",
+    "field": {
+      "titulo": "Title",
+      "dia": "Day",
+      "diaFin": "Until (optional)",
+      "todoDia": "All day",
+      "hora": "Time",
+      "horaFin": "End time",
+      "categoria": "Category",
+      "selCategoria": "Pick category",
+      "descripcion": "Description",
+      "global": "Global event (all centers)"
+    }
   }
 }

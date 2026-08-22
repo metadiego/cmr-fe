@@ -12,6 +12,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/dashboard", labelKey: "nav.dashboard" },
   // Citas
   { path: "/citas", labelKey: "nav.citas" },
+  { path: "/calendario", labelKey: "nav.calendario" },
   { path: "/citas/agenda/cupos", labelKey: "nav.cupos" },
   { path: "/citas/config/columnas", labelKey: "nav.columnasCitas" },
   // "Frontdesk" (/tablero/frontdesk) y "Atención" (/tablero/atencion) los sirve el BE en /me/menu; NO se
