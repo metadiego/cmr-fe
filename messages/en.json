@@ -3451,6 +3451,21 @@
       "pedir": "Order?",
       "nuevoPedido": "New order",
       "pedidoRed": "Rounded order"
+    },
+    "crearTitulo": "Convert to order",
+    "crearHint": "Creates an order with the recommended quantities (Rounded order) of the products to buy.",
+    "okPedido": "Create PO ({n})",
+    "creando": "Creating…",
+    "ordenCreada": "Order created with {n} lines",
+    "faltaProvAlm": "Pick supplier and warehouse.",
+    "nadaQuePedir": "Nothing to order with the current parameters.",
+    "field": {
+      "proveedor": "Supplier",
+      "selProveedor": "Pick supplier",
+      "almacen": "Warehouse",
+      "selAlmacen": "Pick warehouse",
+      "numero": "PO number",
+      "numeroPh": "optional"
     }
   }
 }

@@ -70,3 +70,24 @@ export function actualizarNumeroOrden(poId: string, numero: string): Promise<unk
     body: JSON.stringify({ numero }),
   });
 }
+
+// Crear una orden de compra. El BE EXIGE proveedor + almacén (a diferencia del legado, que solo pedía
+// un número); por eso la pantalla los pide explícitos, sin asumir. `lineas` = productos con su cantidad.
+// «Ok P.O de pedido» manda la recomendación (pedidoRedondeado de los que hay que pedir). Handoff
+// planificacion-compras-handoff-be-listo.
+export interface CrearOrdenLinea {
+  productoId: string;
+  cantidad: number;
+  costoUnitario?: number;
+}
+export function crearOrdenCompra(payload: {
+  proveedorId: string;
+  almacenId: string;
+  lineas: CrearOrdenLinea[];
+  notas?: string;
+}): Promise<{ id: string }> {
+  return apiFetch<{ id: string }>(`/inventario/ordenes-compra`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}

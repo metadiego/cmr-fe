@@ -8,15 +8,24 @@ import {
   getPlanificacionCompras,
   actualizarItemOrden,
   actualizarNumeroOrden,
+  crearOrdenCompra,
   type PlanificacionCompras,
   type PlanParams,
 } from "@/lib/api/compras";
+import { listProveedores, listAlmacenes, type Proveedor, type Almacen } from "@/lib/api/inventario";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const nfmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 const n = (v: number) => nfmt.format(Number(v) || 0);
@@ -42,6 +51,17 @@ export function PlanificacionCompras() {
     () => getPlanificacionCompras(aplicados),
     [aplicados],
   );
+
+  // Convertir la recomendación en ORDEN. El BE exige proveedor + almacén → se piden explícitos (sin
+  // asumir). El nº de la orden es opcional (se puede fijar/editar después en la columna de la PO).
+  const proveedoresRes = useResource<Proveedor[]>(() => listProveedores());
+  const almacenesRes = useResource<Almacen[]>(() => listAlmacenes());
+  const proveedores = proveedoresRes.state.kind === "ok" ? proveedoresRes.state.data : [];
+  const almacenes = almacenesRes.state.kind === "ok" ? almacenesRes.state.data : [];
+  const [proveedorId, setProveedorId] = React.useState("");
+  const [almacenId, setAlmacenId] = React.useState("");
+  const [nuevoNumero, setNuevoNumero] = React.useState("");
+  const [creando, setCreando] = React.useState(false);
 
   if (!can("compras.planificar")) {
     return <div className="w-full px-6 py-16 text-center text-sm text-muted-foreground">{tc("forbidden")}</div>;
@@ -86,6 +106,42 @@ export function PlanificacionCompras() {
     }
   }
 
+  // Recomendados = los que hay que pedir (pedir>0) con su Pedido Red.
+  const recomendados = (data?.productos ?? []).filter((p) => p.pedir > 0 && p.pedidoRedondeado > 0);
+  async function crearDesdeRecomendacion() {
+    if (!proveedorId || !almacenId) {
+      toast.error(t("faltaProvAlm"));
+      return;
+    }
+    if (recomendados.length === 0) {
+      toast.warning(t("nadaQuePedir"));
+      return;
+    }
+    setCreando(true);
+    try {
+      const orden = await crearOrdenCompra({
+        proveedorId,
+        almacenId,
+        lineas: recomendados.map((p) => ({ productoId: p.productoId, cantidad: p.pedidoRedondeado })),
+      });
+      // El nº ante el proveedor es aparte (PUT numero); si lo escribieron, se fija ahora.
+      if (nuevoNumero.trim() && orden?.id) {
+        try {
+          await actualizarNumeroOrden(orden.id, nuevoNumero.trim());
+        } catch {
+          /* la orden ya se creó; el nº se puede fijar luego en su columna */
+        }
+      }
+      toast.success(t("ordenCreada", { n: recomendados.length }));
+      setNuevoNumero("");
+      res.reload();
+    } catch (e) {
+      toast.error(apiErrorLabel(e, tRoot));
+    } finally {
+      setCreando(false);
+    }
+  }
+
   return (
     <div className="w-full px-6 py-8">
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
@@ -99,6 +155,37 @@ export function PlanificacionCompras() {
         <Campo label={t("param.desde")}><Input className="w-[150px]" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} /></Campo>
         <Button onClick={aplicar} disabled={res.state.kind === "loading"}>{t("aplicar")}</Button>
         <span className="text-xs text-muted-foreground">{t("paramHint")}</span>
+      </div>
+
+      {/* Convertir la recomendación en ORDEN. El BE exige proveedor + almacén → explícitos (sin asumir). */}
+      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border p-4">
+        <span className="mb-1.5 text-sm font-semibold">{t("crearTitulo")}</span>
+        <Campo label={t("field.proveedor")}>
+          <Select value={proveedorId} onValueChange={setProveedorId}>
+            <SelectTrigger className="w-52"><SelectValue placeholder={t("field.selProveedor")} /></SelectTrigger>
+            <SelectContent>
+              {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Campo>
+        <Campo label={t("field.almacen")}>
+          <Select value={almacenId} onValueChange={setAlmacenId}>
+            <SelectTrigger className="w-52"><SelectValue placeholder={t("field.selAlmacen")} /></SelectTrigger>
+            <SelectContent>
+              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </Campo>
+        <Campo label={t("field.numero")}>
+          <Input className="w-36" value={nuevoNumero} onChange={(e) => setNuevoNumero(e.target.value)} placeholder={t("field.numeroPh")} />
+        </Campo>
+        <Button
+          onClick={crearDesdeRecomendacion}
+          disabled={creando || !proveedorId || !almacenId || recomendados.length === 0}
+        >
+          {creando ? t("creando") : t("okPedido", { n: recomendados.length })}
+        </Button>
+        <span className="text-xs text-muted-foreground">{t("crearHint")}</span>
       </div>
 
       {res.state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}

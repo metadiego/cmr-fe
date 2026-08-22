@@ -3451,6 +3451,21 @@
       "pedir": "Pedir?",
       "nuevoPedido": "Nuevo pedido",
       "pedidoRed": "Pedido red."
+    },
+    "crearTitulo": "Convertir a orden",
+    "crearHint": "Crea una orden con las cantidades recomendadas (Pedido red.) de los productos por pedir.",
+    "okPedido": "Ok P.O de pedido ({n})",
+    "creando": "Creando…",
+    "ordenCreada": "Orden creada con {n} líneas",
+    "faltaProvAlm": "Elige proveedor y almacén.",
+    "nadaQuePedir": "No hay nada que pedir con los parámetros actuales.",
+    "field": {
+      "proveedor": "Proveedor",
+      "selProveedor": "Elige proveedor",
+      "almacen": "Almacén",
+      "selAlmacen": "Elige almacén",
+      "numero": "Nº de P.O",
+      "numeroPh": "opcional"
     }
   }
 }
