@@ -2795,6 +2795,13 @@
       "enviada": "Sent",
       "fallida": "Failed",
       "lista": "Ready"
+    },
+    "dominio": {
+      "inventario": "Inventory",
+      "caja": "Cash",
+      "clinico": "Clinical",
+      "agenda": "Schedule",
+      "otras": "Other"
     }
   },
   "fac": {

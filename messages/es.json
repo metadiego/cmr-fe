@@ -2795,6 +2795,13 @@
       "enviada": "Enviada",
       "fallida": "Fallida",
       "lista": "Lista"
+    },
+    "dominio": {
+      "inventario": "Inventario",
+      "caja": "Caja",
+      "clinico": "Clínico",
+      "agenda": "Agenda",
+      "otras": "Otras"
     }
   },
   "fac": {
