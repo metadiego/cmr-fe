@@ -49,6 +49,23 @@ export function getDestinosTransferencia(): Promise<DestinoTransferencia[]> {
 export function listTransferenciasPendientes(): Promise<Transferencia[]> {
   return apiFetch<Transferencia[]>(`/inventario/transferencias/pendientes`);
 }
+
+// HISTORIAL: todas las transferencias del centro (enviadas + recibidas), recientes primero (tope 200),
+// con los dos nombres YA resueltos (no en la entity → aquí se extiende el tipo). Filtros opcionales por
+// estado y dirección. Perm inventario.read. Handoff historial-transferencias.
+export interface TransferenciaHistorial extends Transferencia {
+  origenNombre?: string | null;
+  destinoNombre?: string | null;
+}
+export function listTransferencias(
+  params: { estado?: string; direccion?: "enviadas" | "recibidas" } = {},
+): Promise<TransferenciaHistorial[]> {
+  const sp = new URLSearchParams();
+  if (params.estado) sp.set("estado", params.estado);
+  if (params.direccion) sp.set("direccion", params.direccion);
+  const qs = sp.toString();
+  return apiFetch<TransferenciaHistorial[]>(`/inventario/transferencias${qs ? `?${qs}` : ""}`);
+}
 export function getTransferencia(id: string): Promise<TransferenciaDetalle> {
   return apiFetch<TransferenciaDetalle>(`/inventario/transferencias/${id}`);
 }

@@ -2608,7 +2608,8 @@
       "cantidad": "Quantity",
       "enviado": "Sent",
       "recibido": "Received",
-      "remanente": "Remainder"
+      "remanente": "Remainder",
+      "fecha": "Date"
     },
     "field": {
       "origen": "Origin center",
@@ -2625,6 +2626,15 @@
       "required": "Required",
       "negativo": "Cannot be negative",
       "excede": "Exceeds sent"
+    },
+    "pendientesTitulo": "Pending",
+    "historialTitulo": "History",
+    "historialVacio": "No transfers in history.",
+    "estadoTodos": "All statuses",
+    "dir": {
+      "todas": "All",
+      "enviadas": "Sent",
+      "recibidas": "Received"
     }
   },
   "errores": {

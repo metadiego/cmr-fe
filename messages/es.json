@@ -2608,7 +2608,8 @@
       "cantidad": "Cantidad",
       "enviado": "Enviado",
       "recibido": "Recibido",
-      "remanente": "Remanente"
+      "remanente": "Remanente",
+      "fecha": "Fecha"
     },
     "field": {
       "origen": "Centro origen",
@@ -2625,6 +2626,15 @@
       "required": "Requerido",
       "negativo": "No puede ser negativo",
       "excede": "Mayor a lo enviado"
+    },
+    "pendientesTitulo": "Pendientes",
+    "historialTitulo": "Historial",
+    "historialVacio": "Sin transferencias en el historial.",
+    "estadoTodos": "Todos los estados",
+    "dir": {
+      "todas": "Todas",
+      "enviadas": "Enviadas",
+      "recibidas": "Recibidas"
     }
   },
   "errores": {
