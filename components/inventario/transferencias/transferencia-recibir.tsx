@@ -9,7 +9,9 @@ import {
   getTransferencia,
   recibirTransferencia,
   rechazarTransferencia,
+  getDestinosTransferencia,
   type TransferenciaDetalle,
+  type DestinoTransferencia,
 } from "@/lib/api/transferencias";
 import { listProductos, type Producto } from "@/lib/api/inventario";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
@@ -62,6 +64,9 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   );
   const prodRes = useResource<Producto[]>(() => listProductos({}));
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
+  // Los OTROS centros (con nombre) para poder resolver el ORIGEN: no está en `me/centros` del usuario
+  // destino, pero sí en el endpoint de destinos. Unión → origen y destino resuelven. Handoff transferencia-boton-recibir.
+  const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia());
   const me = useMe();
 
   const prodName = React.useMemo(() => {
@@ -69,8 +74,13 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.nombre));
     return m;
   }, [prodRes.state]);
-  const centroName = (cid: string) =>
-    (centrosRes.state.kind === "ok" ? centrosRes.state.data : []).find((c) => c.id === cid)?.nombre ?? cid;
+  const centroNames = React.useMemo(() => {
+    const m = new Map<string, string>();
+    if (centrosRes.state.kind === "ok") centrosRes.state.data.forEach((c) => m.set(c.id, c.nombre));
+    if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.nombre));
+    return m;
+  }, [centrosRes.state, destinosRes.state]);
+  const centroName = (cid: string) => centroNames.get(cid) ?? cid;
 
   const detalle = state.kind === "ok" ? state.data : null;
   const transfer = detalle?.transferencia ?? null;
@@ -196,7 +206,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
               const err = puedeRecibir ? lineError(it) : null;
               return (
                 <tr key={it.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-medium">{prodName.get(it.productoId) ?? it.productoId}</td>
+                  <td className="px-3 py-2 font-medium">{it.productoNombre ?? prodName.get(it.productoId) ?? it.productoId}</td>
                   <td className="px-3 py-2 tabular-nums">{enviado}</td>
                   {puedeRecibir && (
                     <td className="px-3 py-2">

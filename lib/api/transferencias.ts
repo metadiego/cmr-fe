@@ -18,6 +18,10 @@ export interface TransferenciaItem {
   id: string;
   transferenciaId: string;
   productoId: string;
+  // Nombre resuelto por el BE en el detalle (deseable — evita depender del catálogo, que está paginado
+  // y puede no traer el producto). Si no viene, el FE cae al catálogo y luego al id. Handoff
+  // transferencia-boton-recibir (pieza BE).
+  productoNombre?: string | null;
   loteId: string | null;
   cantidad: number | string;
   cantidadRecibida: number | string | null;
