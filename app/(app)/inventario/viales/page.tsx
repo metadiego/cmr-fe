@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import {
@@ -273,7 +274,18 @@ export default function VialesPage() {
                           <td className="px-4 py-2">
                             {c.paciente ? (
                               <>
-                                <span>{c.paciente}</span>
+                                {/* Nada aislado: la dosis enlaza a la FICHA del paciente que la consumió
+                                    (pacienteId ya viene del reporte). Si no hay id, texto plano. */}
+                                {c.pacienteId ? (
+                                  <Link
+                                    href={`/clientes/${c.pacienteId}`}
+                                    className="font-medium text-primary hover:underline"
+                                  >
+                                    {c.paciente}
+                                  </Link>
+                                ) : (
+                                  <span>{c.paciente}</span>
+                                )}
                                 {c.record && (
                                   <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                                     {c.record}
