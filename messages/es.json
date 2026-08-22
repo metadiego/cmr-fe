@@ -755,7 +755,8 @@
     "operaciones": "Operaciones",
     "cambioProtocolo": "Cambio de protocolo",
     "configNumeracion": "Numeración",
-    "inventario_viales": "Viales"
+    "inventario_viales": "Viales",
+    "planificacionCompras": "Planificación de compras"
   },
   "admin": {
     "title": "Administración",
@@ -2044,6 +2045,10 @@
         "viales": {
           "title": "Viales",
           "desc": "Viales abiertos y cerrados, con el dibujo del frasco y de qué vial salió cada dosis."
+        },
+        "planificacion": {
+          "title": "Planificación de compras",
+          "desc": "Cuánto pedir según ventas e inventario de todos los centros."
         }
       }
     },
@@ -3420,5 +3425,32 @@
       "factura": "Factura"
     },
     "verFactura": "Ver factura"
+  },
+  "compras": {
+    "title": "Planificación de compras",
+    "help": "Existencias de todos los centros y lo que ya viene en órdenes, con cuánto pedir según las ventas. Ajusta los parámetros y el backend recalcula.",
+    "aplicar": "Aplicar",
+    "guardado": "Guardado",
+    "vacio": "No hay productos que planificar.",
+    "paramHint": "Sobrescriben la configuración solo para esta consulta (simular sin guardar).",
+    "param": {
+      "meses": "Meses",
+      "criterio1": "Criterio 1",
+      "criterio2": "Criterio 2",
+      "desde": "Desde"
+    },
+    "col": {
+      "producto": "Producto",
+      "invTotal": "Inv. total",
+      "poNumero": "Nº de orden",
+      "ventas": "Ventas",
+      "ventasHint": "Ventas del período (salidas por venta/aplicación/apertura, menos devoluciones)",
+      "promedio": "Promedio",
+      "total": "Total",
+      "meses": "Meses",
+      "pedir": "Pedir?",
+      "nuevoPedido": "Nuevo pedido",
+      "pedidoRed": "Pedido red."
+    }
   }
 }

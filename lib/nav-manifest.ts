@@ -50,6 +50,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/inventario/recibir-compra", labelKey: "nav.recibirCompra" },
   { path: "/inventario/recetas", labelKey: "nav.recetas" },
   { path: "/inventario/transferencias", labelKey: "nav.transferencias" },
+  { path: "/inventario/planificacion", labelKey: "nav.planificacionCompras" },
   // Precios / Servicios
   { path: "/precios", labelKey: "nav.precios" },
   { path: "/servicios", labelKey: "nav.servicios_config" },

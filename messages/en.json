@@ -755,7 +755,8 @@
     "operaciones": "Operations",
     "cambioProtocolo": "Cambio de protocolo",
     "configNumeracion": "Numbering",
-    "inventario_viales": "Vials"
+    "inventario_viales": "Vials",
+    "planificacionCompras": "Purchase planning"
   },
   "admin": {
     "title": "Administration",
@@ -2044,6 +2045,10 @@
         "viales": {
           "title": "Vials",
           "desc": "Open and closed vials, with the bottle drawing and which vial each dose came from."
+        },
+        "planificacion": {
+          "title": "Purchase planning",
+          "desc": "How much to buy from sales and all-center stock."
         }
       }
     },
@@ -3420,5 +3425,32 @@
       "factura": "Invoice"
     },
     "verFactura": "View invoice"
+  },
+  "compras": {
+    "title": "Purchase planning",
+    "help": "Stock across all centers plus what is already on orders, with how much to buy based on sales. Tweak the parameters and the backend recomputes.",
+    "aplicar": "Apply",
+    "guardado": "Saved",
+    "vacio": "Nothing to plan.",
+    "paramHint": "Override the config for this query only (simulate without saving).",
+    "param": {
+      "meses": "Months",
+      "criterio1": "Criteria 1",
+      "criterio2": "Criteria 2",
+      "desde": "From"
+    },
+    "col": {
+      "producto": "Product",
+      "invTotal": "Total stock",
+      "poNumero": "PO number",
+      "ventas": "Sales",
+      "ventasHint": "Sales in the period (sale/application/vial-opening outflows, minus returns)",
+      "promedio": "Average",
+      "total": "Total",
+      "meses": "Months",
+      "pedir": "Order?",
+      "nuevoPedido": "New order",
+      "pedidoRed": "Rounded order"
+    }
   }
 }

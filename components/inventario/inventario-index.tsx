@@ -13,6 +13,7 @@ const SECTIONS: { key: string; href: string }[] = [
   { key: "viales", href: "/inventario/viales" },
   { key: "productos", href: "/inventario/productos" },
   { key: "recepcion", href: "/inventario/recibir-compra" },
+  { key: "planificacion", href: "/inventario/planificacion" },
   { key: "transferencias", href: "/inventario/transferencias" },
   { key: "recetas", href: "/inventario/recetas" },
   { key: "proveedores", href: "/inventario/proveedores" },
