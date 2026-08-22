@@ -9,6 +9,7 @@ import {
   actualizarItemOrden,
   actualizarNumeroOrden,
   crearOrdenCompra,
+  cancelarOrden,
   type PlanificacionCompras,
   type PlanParams,
 } from "@/lib/api/compras";
@@ -106,24 +107,23 @@ export function PlanificacionCompras() {
     }
   }
 
-  // Recomendados = los que hay que pedir (pedir>0) con su Pedido Red.
-  const recomendados = (data?.productos ?? []).filter((p) => p.pedir > 0 && p.pedidoRedondeado > 0);
-  async function crearDesdeRecomendacion() {
+  // Recomendados = los que hay que pedir (pedir>0). Redondeado = Pedido Red.; manual = Nuevo Pedido (crudo).
+  const recomendados = (data?.productos ?? []).filter((p) => p.pedir > 0);
+  async function crear(modo: "redondeado" | "manual") {
     if (!proveedorId || !almacenId) {
       toast.error(t("faltaProvAlm"));
       return;
     }
-    if (recomendados.length === 0) {
+    const lineas = recomendados
+      .map((p) => ({ productoId: p.productoId, cantidad: modo === "manual" ? p.nuevoPedido : p.pedidoRedondeado }))
+      .filter((l) => l.cantidad > 0);
+    if (lineas.length === 0) {
       toast.warning(t("nadaQuePedir"));
       return;
     }
     setCreando(true);
     try {
-      const orden = await crearOrdenCompra({
-        proveedorId,
-        almacenId,
-        lineas: recomendados.map((p) => ({ productoId: p.productoId, cantidad: p.pedidoRedondeado })),
-      });
+      const orden = await crearOrdenCompra({ proveedorId, almacenId, lineas });
       // El nº ante el proveedor es aparte (PUT numero); si lo escribieron, se fija ahora.
       if (nuevoNumero.trim() && orden?.id) {
         try {
@@ -132,7 +132,7 @@ export function PlanificacionCompras() {
           /* la orden ya se creó; el nº se puede fijar luego en su columna */
         }
       }
-      toast.success(t("ordenCreada", { n: recomendados.length }));
+      toast.success(t("ordenCreada", { n: lineas.length }));
       setNuevoNumero("");
       res.reload();
     } catch (e) {
@@ -142,9 +142,72 @@ export function PlanificacionCompras() {
     }
   }
 
+  async function cancelar(poId: string, numero: string | null) {
+    if (!window.confirm(t("cancelarConfirm", { n: numero ?? poId.slice(0, 8) }))) return;
+    try {
+      await cancelarOrden(poId);
+      toast.success(t("ordenCancelada"));
+      res.reload();
+    } catch (e) {
+      toast.error(apiErrorLabel(e, tRoot));
+    }
+  }
+
+  // Filas planas para imprimir/exportar (mismas columnas que la tabla, resueltas).
+  function filasPlanas(): { headers: string[]; rows: (string | number)[][] } {
+    const headers = [
+      t("col.producto"),
+      ...centros.map((c) => c.nombre),
+      t("col.invTotal"),
+      ...pos.map((po) => `PO ${po.numero ?? ""}`.trim()),
+      t("col.ventas"), t("col.promedio"), t("col.total"), t("col.meses"), t("col.pedir"), t("col.nuevoPedido"), t("col.pedidoRed"),
+    ];
+    const rows = (data?.productos ?? []).map((p) => [
+      p.nombre,
+      ...centros.map((c) => p.existencias?.[c.clinicId] ?? 0),
+      p.invTotal,
+      ...pos.map((po) => p.poCantidades?.[po.id] ?? 0),
+      p.ventasDelPeriodo, p.promedio, p.total, p.meses, p.pedir, p.nuevoPedido, p.pedidoRedondeado,
+    ]);
+    return { headers, rows };
+  }
+  function exportarCsv() {
+    const { headers, rows } = filasPlanas();
+    const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+    const csv = [headers, ...rows].map((r) => r.map(esc).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "planificacion-compras.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function imprimir() {
+    const { headers, rows } = filasPlanas();
+    const w = window.open("", "_blank", "width=1100,height=800");
+    if (!w) return;
+    const th = headers.map((h) => `<th>${h}</th>`).join("");
+    const trs = rows.map((r) => `<tr>${r.map((c, i) => `<td class="${i === 0 ? "l" : "r"}">${c}</td>`).join("")}</tr>`).join("");
+    w.document.write(
+      `<!doctype html><html><head><meta charset="utf-8"><title>${t("title")}</title>` +
+        `<style>body{font-family:system-ui,Arial,sans-serif;font-size:11px;margin:16px}h1{font-size:15px}` +
+        `table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:3px 6px}` +
+        `th{background:#eee;text-align:right}th:first-child{text-align:left}td.r{text-align:right}td.l{text-align:left}` +
+        `@page{size:landscape;margin:8mm}</style></head><body onload="window.print()">` +
+        `<h1>${t("title")}</h1><table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table></body></html>`,
+    );
+    w.document.close();
+  }
+
   return (
     <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={imprimir} disabled={!data}>{t("imprimir")}</Button>
+          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data}>{t("exportar")}</Button>
+        </div>
+      </div>
       <p className="mb-4 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
 
       {/* Parámetros (los edita la gerencia; sobrescriben la config solo para esta consulta) */}
@@ -180,10 +243,18 @@ export function PlanificacionCompras() {
           <Input className="w-36" value={nuevoNumero} onChange={(e) => setNuevoNumero(e.target.value)} placeholder={t("field.numeroPh")} />
         </Campo>
         <Button
-          onClick={crearDesdeRecomendacion}
+          onClick={() => crear("redondeado")}
           disabled={creando || !proveedorId || !almacenId || recomendados.length === 0}
         >
           {creando ? t("creando") : t("okPedido", { n: recomendados.length })}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => crear("manual")}
+          disabled={creando || !proveedorId || !almacenId || recomendados.length === 0}
+          title={t("okManualHint")}
+        >
+          {t("okManual")}
         </Button>
         <span className="text-xs text-muted-foreground">{t("crearHint")}</span>
       </div>
@@ -206,13 +277,24 @@ export function PlanificacionCompras() {
                 {/* Columnas de PO: nº editable en el propio encabezado. */}
                 {pos.map((po) => (
                   <th key={po.id} className="px-2 py-1 font-semibold">
-                    <Input
-                      key={po.numero ?? po.id}
-                      defaultValue={po.numero ?? ""}
-                      onBlur={(e) => editarNumero(po.id, e.target.value, po.numero ?? "")}
-                      className="h-7 w-20 text-right text-xs"
-                      title={t("col.poNumero")}
-                    />
+                    <div className="flex items-center justify-end gap-1">
+                      <Input
+                        key={po.numero ?? po.id}
+                        defaultValue={po.numero ?? ""}
+                        onBlur={(e) => editarNumero(po.id, e.target.value, po.numero ?? "")}
+                        className="h-7 w-20 text-right text-xs"
+                        title={t("col.poNumero")}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => cancelar(po.id, po.numero)}
+                        className="rounded p-1 text-muted-foreground hover:text-destructive"
+                        title={t("cancelarPo")}
+                        aria-label={t("cancelarPo")}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </th>
                 ))}
                 <th className="px-3 py-2 font-semibold" title={t("col.ventasHint")}>{t("col.ventas")}</th>

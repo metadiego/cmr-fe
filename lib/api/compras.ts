@@ -91,3 +91,8 @@ export function crearOrdenCompra(payload: {
     body: JSON.stringify(payload),
   });
 }
+
+// Cancelar una orden abierta (borrador/enviada). Handoff planificacion-compras-handoff-be-listo.
+export function cancelarOrden(poId: string): Promise<unknown> {
+  return apiFetch(`/inventario/ordenes-compra/${poId}/cancelar`, { method: "POST" });
+}

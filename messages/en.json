@@ -3466,6 +3466,13 @@
       "selAlmacen": "Pick warehouse",
       "numero": "PO number",
       "numeroPh": "optional"
-    }
+    },
+    "okManual": "Manual PO",
+    "okManualHint": "Creates the order with raw quantities (New order); adjust them later in its column.",
+    "imprimir": "Print",
+    "exportar": "Export CSV",
+    "cancelarPo": "Cancel order",
+    "cancelarConfirm": "Cancel order {n}? Reserved stock is released.",
+    "ordenCancelada": "Order cancelled"
   }
 }

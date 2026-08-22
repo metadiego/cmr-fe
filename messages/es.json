@@ -3466,6 +3466,13 @@
       "selAlmacen": "Elige almacén",
       "numero": "Nº de P.O",
       "numeroPh": "opcional"
-    }
+    },
+    "okManual": "Ok P.O Manual",
+    "okManualHint": "Crea la orden con las cantidades crudas (Nuevo pedido); ajústalas luego en su columna.",
+    "imprimir": "Imprimir",
+    "exportar": "Exportar CSV",
+    "cancelarPo": "Cancelar orden",
+    "cancelarConfirm": "¿Cancelar la orden {n}? El stock reservado se libera.",
+    "ordenCancelada": "Orden cancelada"
   }
 }
