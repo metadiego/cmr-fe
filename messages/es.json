@@ -2618,7 +2618,8 @@
       "almacenDestino": "Almacén destino",
       "selectAlmacen": "Selecciona…",
       "motivo": "Motivo",
-      "selectProducto": "Buscar producto…"
+      "selectProducto": "Buscar producto…",
+      "destinoSinAlmacen": "Ese centro no tiene almacén."
     },
     "err": {
       "required": "Requerido",

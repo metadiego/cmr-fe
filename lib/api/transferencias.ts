@@ -27,6 +27,20 @@ export interface TransferenciaDetalle {
   items: TransferenciaItem[];
 }
 
+// Centros DESTINO posibles para una transferencia: los OTROS centros activos (el propio NO aparece),
+// cada uno con sus almacenes activos DENTRO (no hace falta otra llamada). Es el endpoint correcto para
+// el desplegable de destino — NO `auth/me/centros` (ese es solo para el centro ACTIVO). Un destino sin
+// almacén viene con `almacenes: []` (enseñar + avisar, no esconder). Perm inventario.transferir.
+// Handoff transferencia-destinos.
+export interface DestinoTransferencia {
+  clinicId: string;
+  nombre: string;
+  almacenes: Array<{ id: string; nombre: string }>;
+}
+export function getDestinosTransferencia(): Promise<DestinoTransferencia[]> {
+  return apiFetch<DestinoTransferencia[]>(`/inventario/transferencias/destinos`);
+}
+
 // Pendientes del centro activo (como origen o destino).
 export function listTransferenciasPendientes(): Promise<Transferencia[]> {
   return apiFetch<Transferencia[]>(`/inventario/transferencias/pendientes`);

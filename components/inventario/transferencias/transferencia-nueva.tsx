@@ -9,7 +9,9 @@ import { toast } from "sonner";
 
 import {
   crearTransferencia,
+  getDestinosTransferencia,
   type CrearTransferenciaPayload,
+  type DestinoTransferencia,
 } from "@/lib/api/transferencias";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
@@ -51,14 +53,17 @@ export function TransferenciaNueva() {
   const [lineas, setLineas] = React.useState<Linea[]>([nuevaLinea()]);
   const [busy, setBusy] = React.useState(false);
 
-  // Almacenes del origen (centro activo) y del destino (por tenant).
+  // Almacenes del ORIGEN (centro activo) por su tenant.
   const almOrigenRes = useResource<Almacen[]>(() => listAlmacenes(), []);
-  const almDestinoRes = useResource<Almacen[]>(
-    () => (destinoId ? listAlmacenes(destinoId) : Promise.resolve([])),
-    [destinoId],
-  );
   const almOrigen = almOrigenRes.state.kind === "ok" ? almOrigenRes.state.data : [];
-  const almDestino = almDestinoRes.state.kind === "ok" ? almDestinoRes.state.data : [];
+
+  // DESTINOS: endpoint propio (otros centros activos con SUS almacenes DENTRO). No `me/centros`, y los
+  // almacenes del destino salen del mismo payload → sin otra llamada. Handoff transferencia-destinos.
+  const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia(), []);
+  const destinos = destinosRes.state.kind === "ok" ? destinosRes.state.data : [];
+  const destinoSel = destinos.find((d) => d.clinicId === destinoId) ?? null;
+  const almDestino = destinoSel?.almacenes ?? [];
+  const destinoSinAlmacen = !!destinoSel && almDestino.length === 0;
 
   // Preselección del único almacén (caso común: 1 por centro). Guard con estado (no ref
   // en render): auto-selecciona una vez por carga de datos.
@@ -73,7 +78,6 @@ export function TransferenciaNueva() {
     setAlmacenDestinoId(almDestino[0].id);
   }
 
-  const destinos = centros.filter((c) => c.id !== origenId);
   const lineasValidas = lineas.filter((l) => l.productoId && Number(l.cantidad) > 0);
   const canSubmit =
     !!origenId && !!destinoId && !!almacenOrigenId && !!almacenDestinoId &&
@@ -121,7 +125,7 @@ export function TransferenciaNueva() {
           <Select value={destinoId} onValueChange={(v) => { setDestinoId(v); setAlmacenDestinoId(""); setAutoAlmD(null); }}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectCentro")} /></SelectTrigger>
             <SelectContent>
-              {destinos.map((c) => (<SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>))}
+              {destinos.map((d) => (<SelectItem key={d.clinicId} value={d.clinicId}>{d.nombre}</SelectItem>))}
             </SelectContent>
           </Select>
         </Field>
@@ -134,12 +138,16 @@ export function TransferenciaNueva() {
           </Select>
         </Field>
         <Field label={t("field.almacenDestino")}>
-          <Select value={almacenDestinoId} onValueChange={setAlmacenDestinoId} disabled={!destinoId}>
+          <Select value={almacenDestinoId} onValueChange={setAlmacenDestinoId} disabled={!destinoId || destinoSinAlmacen}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectAlmacen")} /></SelectTrigger>
             <SelectContent>
               {almDestino.map((a) => (<SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>))}
             </SelectContent>
           </Select>
+          {/* Destino sin almacén: se avisa (no se esconde) para que no busquen el centro en vano. */}
+          {destinoSinAlmacen && (
+            <span className="mt-1 text-xs text-amber-600 dark:text-amber-400">{t("field.destinoSinAlmacen")}</span>
+          )}
         </Field>
         <div className="sm:col-span-2">
           <Field label={t("field.motivo")}>

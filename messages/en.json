@@ -2618,7 +2618,8 @@
       "almacenDestino": "Destination warehouse",
       "selectAlmacen": "Select…",
       "motivo": "Reason",
-      "selectProducto": "Search product…"
+      "selectProducto": "Search product…",
+      "destinoSinAlmacen": "That center has no warehouse."
     },
     "err": {
       "required": "Required",
