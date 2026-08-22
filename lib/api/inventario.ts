@@ -351,6 +351,62 @@ export function recibirCompra(payload: RecibirCompraPayload): Promise<unknown> {
   });
 }
 
+// Recibir compra por PACKING LIST: una cabecera común + 1..200 líneas, todo-o-nada. OJO (verificado en
+// el handoff recepcion-packing-list): a diferencia de recibir-compra de UNA línea, este endpoint NO
+// convierte por empaque — `cantidad` se guarda TAL CUAL, en la unidad de inventario del producto. Por eso
+// la pantalla captura cantidad en unidad base (sin pre-conversión por AMP). Errores con labelKey:
+// inventario.recepcion_sin_lineas / recepcion_demasiadas_lineas / recepcion_cantidad_invalida.
+export interface RecibirCompraLoteItem {
+  productoId: string;
+  cantidad: number; // > 0, en la unidad de inventario del producto
+  costoUnitario?: number;
+  numeroLote?: string;
+  fechaVencimiento?: string; // YYYY-MM-DD
+  presentacionProveedorId?: string;
+  ubicacionId?: string;
+  notas?: string; // gana a la nota común de la cabecera
+}
+export interface RecibirCompraLotePayload {
+  almacenId?: string; // si no va, el del centro activo
+  proveedorId?: string;
+  numeroFacturaCompra?: string; // nº del PROVEEDOR, común a todas las líneas
+  fechaEfectiva?: string; // YYYY-MM-DD (por defecto, ahora)
+  notas?: string;
+  items: RecibirCompraLoteItem[];
+}
+export interface RecibirCompraLoteResult {
+  documentoId: string;
+  lineas: Array<{ lote?: unknown; movimiento?: unknown }>;
+}
+export function recibirCompraLote(payload: RecibirCompraLotePayload): Promise<RecibirCompraLoteResult> {
+  return apiFetch<RecibirCompraLoteResult>(`/inventario/operaciones/recibir-compra-lote`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// Recibo de una recepción por lote (para volver a verlo tras guardar). Perm inventario.read.
+export interface RecepcionLinea {
+  productoId?: string;
+  producto?: string | null;
+  cantidad?: number;
+  costoUnitario?: number | null;
+  numeroLote?: string | null;
+  fechaVencimiento?: string | null;
+}
+export interface Recepcion {
+  documentoId?: string;
+  proveedor?: string | null;
+  numeroFacturaCompra?: string | null;
+  fechaEfectiva?: string | null;
+  almacen?: string | null;
+  notas?: string | null;
+  lineas: RecepcionLinea[];
+}
+export function getRecepcion(documentoId: string): Promise<Recepcion> {
+  return apiFetch<Recepcion>(`/inventario/operaciones/recepciones/${encodeURIComponent(documentoId)}`);
+}
+
 // ---- Ajuste de existencias ------------------------------------------------
 // Los MOTIVOS son un catálogo del BE (`motivos_movimiento`), no una lista escrita aquí: el select se
 // llena con esto y si mañana se agrega un motivo en la base, aparece sin tocar el FE. El BE valida la

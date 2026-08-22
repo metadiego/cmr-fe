@@ -1760,12 +1760,23 @@
         "vencimiento": "Vencimiento",
         "factura": "N.º factura de compra",
         "notas": "Notas",
-        "none": "(ninguno)"
+        "none": "(ninguno)",
+        "fecha": "Fecha"
       },
       "preview": {
         "entrada": "Entra como {qty} en unidad base",
         "costo": "· costo/base {costo}"
-      }
+      },
+      "helpLote": "Recibe un packing list completo: una cabecera común (proveedor, factura, fecha) y todas las líneas de una vez. El mismo producto puede ir dos veces con lotes distintos.",
+      "cabecera": "Cabecera",
+      "lineas": "Líneas",
+      "agregar": "Agregar",
+      "quitar": "Quitar",
+      "sinLineas": "Aún no hay líneas. Agrega la primera arriba.",
+      "totalLineas": "{n, plural, one {# línea} other {# líneas}}",
+      "subtotal": "Subtotal",
+      "reciboOk": "Recepción guardada · recibo {id}",
+      "nuevaRecepcion": "Nueva recepción"
     },
     "stock": {
       "title": "Existencias",
@@ -2114,7 +2125,10 @@
       "crearInvalido": "Falta el nombre, el contenido o la unidad.",
       "creada": "Presentación creada",
       "avisoDesdeAhora": "El cambio de vial activo aplica a los viales que se abran a partir de ahora; los ya abiertos conservan su capacidad."
-    }
+    },
+    "recepcion_sin_lineas": "La recepción no tiene líneas.",
+    "recepcion_demasiadas_lineas": "Demasiadas líneas (máximo 200).",
+    "recepcion_cantidad_invalida": "Hay una cantidad inválida en alguna línea."
   },
   "receipt": {
     "print": "Imprimir recibo",

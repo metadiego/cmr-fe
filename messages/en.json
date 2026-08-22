@@ -1760,12 +1760,23 @@
         "vencimiento": "Expiry",
         "factura": "Purchase invoice no.",
         "notas": "Notes",
-        "none": "(none)"
+        "none": "(none)",
+        "fecha": "Date"
       },
       "preview": {
         "entrada": "Enters as {qty} in base unit",
         "costo": "· cost/base {costo}"
-      }
+      },
+      "helpLote": "Receive a full packing list: one shared header (supplier, invoice, date) and all lines at once. The same product can appear twice with different lots.",
+      "cabecera": "Header",
+      "lineas": "Lines",
+      "agregar": "Add",
+      "quitar": "Remove",
+      "sinLineas": "No lines yet. Add the first one above.",
+      "totalLineas": "{n, plural, one {# line} other {# lines}}",
+      "subtotal": "Subtotal",
+      "reciboOk": "Reception saved · receipt {id}",
+      "nuevaRecepcion": "New reception"
     },
     "stock": {
       "title": "Stock",
@@ -2114,7 +2125,10 @@
       "crearInvalido": "Name, content or unit is missing.",
       "creada": "Presentation created",
       "avisoDesdeAhora": "Changing the active vial applies to vials opened from now on; already-open vials keep their capacity."
-    }
+    },
+    "recepcion_sin_lineas": "The reception has no lines.",
+    "recepcion_demasiadas_lineas": "Too many lines (max 200).",
+    "recepcion_cantidad_invalida": "There is an invalid quantity in a line."
   },
   "receipt": {
     "print": "Print receipt",
