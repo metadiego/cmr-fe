@@ -43,6 +43,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   // Inventario
   { path: "/inventario", labelKey: "nav.inventario" },
   { path: "/inventario/existencias", labelKey: "nav.inventario_existencias" },
+  { path: "/inventario/viales", labelKey: "nav.inventario_viales" },
   { path: "/inventario/productos", labelKey: "nav.productos" },
   { path: "/inventario/proveedores", labelKey: "nav.proveedores" },
   { path: "/inventario/presentaciones-proveedor", labelKey: "nav.presentaciones" },

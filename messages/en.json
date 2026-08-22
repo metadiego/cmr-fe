@@ -2029,6 +2029,10 @@
         "existencias": {
           "title": "Stock on hand",
           "desc": "How much of each product there is, per center and in total."
+        },
+        "viales": {
+          "title": "Vials",
+          "desc": "Open and closed vials, with the bottle drawing and which vial each dose came from."
         }
       }
     },

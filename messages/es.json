@@ -2029,6 +2029,10 @@
         "existencias": {
           "title": "Existencias",
           "desc": "Cuánto hay de cada producto, por centro y en total."
+        },
+        "viales": {
+          "title": "Viales",
+          "desc": "Viales abiertos y cerrados, con el dibujo del frasco y de qué vial salió cada dosis."
         }
       }
     },

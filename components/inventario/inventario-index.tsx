@@ -10,6 +10,7 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 const SECTIONS: { key: string; href: string }[] = [
   // Existencias primero: "cuánto hay" es la pregunta más frecuente (stock por centro + consolidado).
   { key: "existencias", href: "/inventario/existencias" },
+  { key: "viales", href: "/inventario/viales" },
   { key: "productos", href: "/inventario/productos" },
   { key: "recepcion", href: "/inventario/recibir-compra" },
   { key: "transferencias", href: "/inventario/transferencias" },
