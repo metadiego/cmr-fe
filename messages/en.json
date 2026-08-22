@@ -3499,6 +3499,18 @@
       "selCategoria": "Pick category",
       "descripcion": "Description",
       "global": "Global event (all centers)"
+    },
+    "proximos": "Upcoming events",
+    "anterior": "Previous",
+    "siguiente": "Next",
+    "sinEventos": "No events this day.",
+    "sinProximos": "No upcoming events.",
+    "todoDia": "All day",
+    "vista": {
+      "mes": "Month",
+      "semana": "Week",
+      "dia": "Day",
+      "agenda": "Agenda"
     }
   }
 }

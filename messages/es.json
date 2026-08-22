@@ -3499,6 +3499,18 @@
       "selCategoria": "Elige categoría",
       "descripcion": "Descripción",
       "global": "Evento global (todos los centros)"
+    },
+    "proximos": "Próximos eventos",
+    "anterior": "Anterior",
+    "siguiente": "Siguiente",
+    "sinEventos": "No hay eventos este día.",
+    "sinProximos": "No hay eventos próximos.",
+    "todoDia": "Todo el día",
+    "vista": {
+      "mes": "Mes",
+      "semana": "Semana",
+      "dia": "Día",
+      "agenda": "Agenda"
     }
   }
 }
