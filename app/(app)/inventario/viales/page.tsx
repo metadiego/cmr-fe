@@ -249,6 +249,7 @@ export default function VialesPage() {
                     <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                       <th className="px-4 py-2 font-semibold">{t("col.fecha")}</th>
                       <th className="px-4 py-2 font-semibold">{t("col.paciente")}</th>
+                      <th className="px-4 py-2 font-semibold">{t("col.factura")}</th>
                       <th className="px-4 py-2 text-right font-semibold">{t("col.dosis")}</th>
                       <th className="px-4 py-2 text-right font-semibold">{t("col.vial")}</th>
                     </tr>
@@ -256,7 +257,7 @@ export default function VialesPage() {
                   {dias.map((d) => (
                     <tbody key={d.dia} className="divide-y border-t">
                       <tr className="bg-muted/20">
-                        <td className="px-4 py-1.5 text-xs font-medium" colSpan={3}>
+                        <td className="px-4 py-1.5 text-xs font-medium" colSpan={4}>
                           {d.dia}
                         </td>
                         <td className="px-4 py-1.5 text-right text-xs font-medium">
@@ -294,6 +295,16 @@ export default function VialesPage() {
                               </>
                             ) : (
                               "—"
+                            )}
+                          </td>
+                          {/* Nada aislado: la dosis enlaza a su FACTURA. null = carga vieja sin sesión. */}
+                          <td className="px-4 py-2">
+                            {c.facturaId ? (
+                              <Link href={`/facturacion/${c.facturaId}`} className="font-medium text-primary hover:underline">
+                                {c.facturaNumero ? `#${c.facturaNumero}` : t("verFactura")}
+                              </Link>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </td>
                           <td className="px-4 py-2 text-right font-mono">

@@ -482,6 +482,11 @@ export interface ConsumoDelReporte {
   record: string | null;
   sesionId: string | null;
   usuarioId: string | null;
+  // Factura que originó el consumo (BE arregló el join sesión↔factura: la descarga se etiqueta como
+  // "aplicación", no "entrega"). null = carga vieja sin sesión detrás. El FE enlaza la dosis a su
+  // factura. Handoff viales-enlazar-a-factura.
+  facturaId?: string | null;
+  facturaNumero?: string | null;
 }
 
 export interface ReporteViales {

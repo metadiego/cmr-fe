@@ -3415,6 +3415,10 @@
     "col.vial": "Vial",
     "estado.abierto": "abierto",
     "estado.agotado": "agotado",
-    "estado.descartado": "descartado"
+    "estado.descartado": "descartado",
+    "col": {
+      "factura": "Factura"
+    },
+    "verFactura": "Ver factura"
   }
 }
