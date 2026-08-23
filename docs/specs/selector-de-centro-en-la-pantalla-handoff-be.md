@@ -1,5 +1,19 @@
 # FE — El selector de centro va EN la pantalla. Un patrón para todas.
 
+> ## LO PRIMERO: la pantalla de CITAS necesita su selector
+>
+> En `/citas` **no hay selector de centro**. Hay que ponerlo, en la barra de la propia pantalla,
+> junto a «Doctores - todos» y «Nueva Cita» — exactamente como se hizo en el calendario.
+>
+> Y el del **nav sale de ahí para el call center**: ya no lo verán, porque cambiar el centro de la
+> sesión pasó a exigir el permiso `centros.cambiar`, que solo tiene gerencia. Si Karola no tiene un
+> selector en `/citas`, se queda sin poder agendar en el otro centro. **Esta parte no es opcional.**
+>
+> - Llenarlo con `GET /api/v1/me/centros-donde-puedo?permiso=citas.read`
+> - «Nueva Cita» solo si el centro elegido está en `…?permiso=citas.create`
+> - Pedir la agenda con `GET /api/v1/citas/agenda-dia?fecha=…&centroId=<elegido>`
+> - Cambiar de centro ahí **no** toca la sesión.
+
 Backend desplegado y verificado en producción el 23-ago-2026. Esto **sustituye** al handoff del
 calendario: el mismo patrón vale para citas, facturación, inventario y lo que venga.
 
@@ -7,8 +21,9 @@ calendario: el mismo patrón vale para citas, facturación, inventario y lo que 
 
 Para que alguien mirara el calendario del otro centro había que darle ese centro, y entonces le
 aparecía el **selector global del nav** — que cambia el contexto de toda la sesión y expone centros
-donde no puede hacer nada. Lo que se quiere es lo que ya hacen pacientes y citas: el selector
-**dentro de la pantalla**, afectando solo a lo que esa pantalla muestra.
+donde no puede hacer nada. Lo que se quiere es lo que ya hace pacientes: el selector
+**dentro de la pantalla**, afectando solo a lo que esa pantalla muestra. **Citas todavía NO lo
+tiene** — es lo primero que hay que hacer.
 
 ## Los dos selectores no son el mismo
 
