@@ -12,7 +12,26 @@ Lo que se quiere es lo que ya hace la agenda de citas: el selector **dentro de l
 Se puede: el endpoint del calendario acepta el centro como parámetro, así que la pantalla pide otro
 centro sin tocar el de la sesión.
 
-## Los dos endpoints
+## El selector del NAV es OTRA cosa
+
+Los dos selectores responden preguntas distintas y no deben confundirse:
+
+- **El del nav** = «en qué centro estoy trabajando». Cambia el contexto de facturar, cobrar y
+  agendar. Debe ofrecer solo los centros donde la persona **trabaja de verdad**:
+
+  ```
+  GET /api/v1/auth/me/centros/operativos
+  ```
+  Devuelve los centros donde tiene un **rol**. Un centro donde solo hay un acceso puntual —mirar el
+  calendario del otro centro— **no sale aquí**: ofrecerlo invita a mudarse a un sitio donde no se
+  puede hacer nada. **Si devuelve un solo centro, no enseñes el selector del nav.**
+
+  Deja de usar `auth/me/centros` para llenarlo: esa lista trae todos los centros asignados, que es
+  justo lo que produce el problema.
+
+- **El de la pantalla** = «qué estoy mirando». Solo afecta a esa pantalla y no toca la sesión.
+
+## Los endpoints del calendario
 
 **1. Qué centros ofrecer en el selector** — nuevo:
 
@@ -70,8 +89,37 @@ GET /api/v1/calendario/eventos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&centroId=<id>
    Con `centroId` el evento nace en ese centro. Sin él, en el de la sesión, como siempre. Si no
    tiene el permiso allí, 403 — el mismo criterio que la lectura.
 
+## Cada uno toca lo suyo
+
+Regla nueva del dueño: **nadie edita ni borra lo que agendó otra persona, salvo el admin.**
+
+- Al crear, el backend guarda quién lo hizo. Los eventos que se editan o borran se comprueban contra
+  ese autor: si no eres tú, responde 403 con el motivo escrito («lo agendó otra persona»).
+- Los ~3.500 eventos importados del legado **no traen autor**: solo el admin puede tocarlos.
+- En pantalla: enseña editar y borrar solo en los eventos propios. Con el resto, o los escondes o los
+  dejas visibles pero inertes — lo que no vale es ofrecer un botón que va a dar 403.
+- El evento trae su autor en la respuesta, así que la decisión se toma sin llamadas extra.
+
+## Facilidad de uso: lo que pide el dueño
+
+Esto tiene que resolverse **desde la pantalla, sin pedirle nada a nadie**. En concreto:
+
+- Que se vea de un vistazo en qué centro estás y qué estás mirando, sin abrir menús.
+- Que cambiar de centro en una pantalla sea un clic, y que quede claro que no cambió tu sesión.
+- Que «solo lectura» se lea sin explicación: el distintivo que ya pusiste al lado del selector
+  funciona bien.
+- Nada de opciones que fallan al pulsarlas: si un endpoint va a responder 403, esa opción no se
+  ofrece. Los tres endpoints de arriba existen precisamente para eso.
+
 ## Caso real que ya funciona
 
-Bonillo, gerente de Caguas, tiene concedida la **lectura** del calendario de Bayamón. Con esto:
-ve Caguas y Bayamón en el desplegable, mira el de Bayamón sin salir de su centro, y allí no puede
-tocar nada. Un gerente que solo tiene Caguas ve un único centro y ningún selector.
+Bonillo, gerente de Caguas, tiene concedida la **lectura** del calendario de Bayamón. Verificado
+en producción el 23-ago:
+
+| | |
+|---|---|
+| Selector del **nav** | `CMR Caguas` — uno solo, así que no se enseña |
+| Calendario, donde **lee** | `CMR Bayamon`, `CMR Caguas` |
+| Calendario, donde **escribe** | `CMR Caguas` |
+
+Un gerente que solo tiene Caguas: un centro en el nav, uno en el calendario, ningún selector.
