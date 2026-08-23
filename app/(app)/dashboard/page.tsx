@@ -9,6 +9,7 @@ import { getMe, type Me } from "@/lib/api/auth";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { ApiError } from "@/lib/api/types";
 import { useCan } from "@/hooks/use-can";
+import { useMenu } from "@/hooks/use-menu";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 
@@ -29,6 +30,10 @@ export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tCommon = useTranslations("common");
   const { can } = useCan();
+  // «Mis tableros» solo tiene sentido para quien USA tableros: si el menú de la persona no trae ningún
+  // /tablero/* (p.ej. call-center que solo hace Citas), personalizar tableros no aplica → se esconde.
+  const menu = useMenu();
+  const tieneTableros = menu.some((m) => m.path?.startsWith("/tablero/"));
   const [state, setState] = React.useState<State>({ kind: "loading" });
   const [signingOut, setSigningOut] = React.useState(false);
   const [verDetalles, setVerDetalles] = React.useState(false);
@@ -67,7 +72,9 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" asChild><Link href="/settings/appearance">{t("appearance")}</Link></Button>
-          <Button variant="outline" size="sm" asChild><Link href="/settings/tableros">{t("myBoards")}</Link></Button>
+          {tieneTableros && (
+            <Button variant="outline" size="sm" asChild><Link href="/settings/tableros">{t("myBoards")}</Link></Button>
+          )}
           {can("tablero.admin") && (
             <Button variant="outline" size="sm" asChild><Link href="/settings/tablero-modulos">{t("boardModules")}</Link></Button>
           )}

@@ -17,6 +17,7 @@ import { setLocale } from "@/i18n/locale-actions";
 import { locales, type Locale } from "@/i18n/config";
 import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
+import { useCan } from "@/hooks/use-can";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
@@ -39,6 +40,7 @@ export function UserMenu() {
   const router = useRouter();
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
+  const { can } = useCan();
   const { theme, setTheme } = useTheme();
   const locale = useLocale() as Locale;
 
@@ -135,12 +137,16 @@ export function UserMenu() {
               {t("appSettings")}
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/settings/tablero-modulos">
-              <HugeiconsIcon icon={DashboardSquare01Icon} className="size-4" />
-              {t("boardModules")}
-            </Link>
-          </DropdownMenuItem>
+          {/* Módulos de tablero = administración de tableros: solo quien los administra. Un call-center
+              que solo hace Citas no debe verlo. */}
+          {can("tablero.admin") && (
+            <DropdownMenuItem asChild>
+              <Link href="/settings/tablero-modulos">
+                <HugeiconsIcon icon={DashboardSquare01Icon} className="size-4" />
+                {t("boardModules")}
+              </Link>
+            </DropdownMenuItem>
+          )}
           {/* MI apariencia: colores, radio y fondo propios (capa `usuario` de preferencias). La tiene
               cualquier usuario y cualquier rol —incluido el administrador, que también quiere sus
               colores—; la corporativa (sistema, centro y overrides) vive en Configuración.
