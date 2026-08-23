@@ -104,7 +104,10 @@ export function Calendario() {
     return { desde: ymd(h), hasta: ymd(addDias(h, 45)), celdasMes: [], celdasSemana: [] };
   }, [vista, cursor]);
 
-  const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta, centroActivo || undefined), [desde, hasta, centroActivo]);
+  // Solo mandar centroId al VER OTRO centro; en el de la sesión va sin parámetro (así el BE resuelve el
+  // de la sesión y no da 403 en el propio, p.ej. master sin centro activo). Handoff calendario-selector-de-centro.
+  const fetchCentroId = viendoOtroCentro ? centroActivo : undefined;
+  const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta, fetchCentroId), [desde, hasta, fetchCentroId]);
   const catsRes = useResource<CalendarioCategoria[]>(() => getCategorias());
   const eventos = eventosRes.state.kind === "ok" ? eventosRes.state.data : [];
   const cats = catsRes.state.kind === "ok" ? catsRes.state.data : [];
