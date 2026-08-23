@@ -9,15 +9,18 @@ import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Globe02Icon } from "@huge
 import {
   getEventos,
   getCategorias,
+  getCentrosCalendario,
   crearEvento,
   actualizarEvento,
   eliminarEvento,
   type CalendarioEvento,
   type CalendarioCategoria,
+  type CalendarioCentro,
   type CrearEventoPayload,
 } from "@/lib/api/calendario";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { useMe } from "@/hooks/use-me";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -60,9 +63,24 @@ export function Calendario() {
   const tRoot = useTranslations();
   const locale = useLocale();
   const { can } = useCan();
-  const puedeCrear = can("calendario.create");
-  const puedeEditar = can("calendario.update");
-  const puedeBorrar = can("calendario.delete");
+  const me = useMe();
+  const sessionCentroId = me.kind === "ok" ? (me.me.activeClinicId ?? null) : null;
+  const puedeCrearPerm = can("calendario.create");
+  const puedeEditarPerm = can("calendario.update");
+  const puedeBorrarPerm = can("calendario.delete");
+
+  // Selector de centro DENTRO de la pantalla (como la agenda de citas), sin tocar el centro de la
+  // sesión ni el selector del nav. Uno solo → no se enseña. Handoff calendario-selector-de-centro.
+  const centrosRes = useResource<CalendarioCentro[]>(() => getCentrosCalendario());
+  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
+  const [centroSel, setCentroSel] = React.useState("");
+  // Valor mostrado: el elegido, o el de la sesión, o el primero disponible.
+  const centroActivo = centroSel || (sessionCentroId && centros.some((c) => c.id === sessionCentroId) ? sessionCentroId : centros[0]?.id) || "";
+  // Ver OTRO centro (no el de la sesión) = solo lectura: crear/editar/borrar van contra el de la sesión.
+  const viendoOtroCentro = !!centroActivo && !!sessionCentroId && centroActivo !== sessionCentroId;
+  const puedeCrear = puedeCrearPerm && !viendoOtroCentro;
+  const puedeEditar = puedeEditarPerm && !viendoOtroCentro;
+  const puedeBorrar = puedeBorrarPerm && !viendoOtroCentro;
 
   const [vista, setVista] = React.useState<Vista>("mes");
   const [cursor, setCursor] = React.useState(new Date());
@@ -86,7 +104,7 @@ export function Calendario() {
     return { desde: ymd(h), hasta: ymd(addDias(h, 45)), celdasMes: [], celdasSemana: [] };
   }, [vista, cursor]);
 
-  const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta), [desde, hasta]);
+  const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta, centroActivo || undefined), [desde, hasta, centroActivo]);
   const catsRes = useResource<CalendarioCategoria[]>(() => getCategorias());
   const eventos = eventosRes.state.kind === "ok" ? eventosRes.state.data : [];
   const cats = catsRes.state.kind === "ok" ? catsRes.state.data : [];
@@ -147,6 +165,22 @@ export function Calendario() {
           ))}
         </div>
         {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
+
+        {/* Selector de centro: solo si hay más de uno. Preselecciona el de la sesión. */}
+        {centros.length > 1 && (
+          <div className="flex items-center gap-2">
+            <Select value={centroActivo} onValueChange={setCentroSel}>
+              <SelectTrigger className="w-48" aria-label={t("centroSel")}><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {viendoOtroCentro && (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{t("soloLectura")}</span>
+            )}
+          </div>
+        )}
+
         {puedeCrear && (
           <Button size="sm" className="ml-auto" onClick={() => setModal({ dia: hoyStr() })}>
             <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("nuevo")}

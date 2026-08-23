@@ -3547,7 +3547,9 @@
       "semana": "Week",
       "dia": "Day",
       "agenda": "Agenda"
-    }
+    },
+    "centroSel": "Center",
+    "soloLectura": "Read-only"
   },
   "recepcionFactura": {
     "title": "Receive from invoice",

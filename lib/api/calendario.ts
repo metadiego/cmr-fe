@@ -36,6 +36,18 @@ export interface CrearEventoPayload {
   esGlobal?: boolean;
 }
 
+// Centros cuyo calendario puede VER quien pregunta (con nombre). NO usar auth/me/centros: esa trae
+// todos los centros de la persona y en algunos no puede ver el calendario → el selector ofrecería
+// opciones que dan 403. Uno solo → la pantalla no enseña selector. Handoff calendario-selector-de-centro.
+export interface CalendarioCentro {
+  id: string;
+  nombre: string;
+  codigo?: string | null;
+}
+export function getCentrosCalendario(): Promise<CalendarioCentro[]> {
+  return apiFetch<CalendarioCentro[]>(`/calendario/centros`);
+}
+
 export function getEventos(desde: string, hasta: string, centroId?: string): Promise<CalendarioEvento[]> {
   const sp = new URLSearchParams({ desde, hasta });
   if (centroId) sp.set("centroId", centroId);

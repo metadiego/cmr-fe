@@ -3547,7 +3547,9 @@
       "semana": "Semana",
       "dia": "Día",
       "agenda": "Agenda"
-    }
+    },
+    "centroSel": "Centro",
+    "soloLectura": "Solo lectura"
   },
   "recepcionFactura": {
     "title": "Recibir desde factura",
