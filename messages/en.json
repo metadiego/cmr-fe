@@ -771,7 +771,8 @@
       "centers": "Centers",
       "theme": "Theme",
       "roles": "Roles",
-      "menu": "Menu"
+      "menu": "Menu",
+      "permisos": "Permissions"
     },
     "rbac": {
       "title": "Roles & permissions",
@@ -1069,6 +1070,33 @@
       "gerencial": "Managerial (sees all their centers, read-only)",
       "accessModeHelp": "Managerial sees several centers at once but cannot write.",
       "guardado": "Profile updated"
+    },
+    "permisos": {
+      "buscar": "Search permission or module…",
+      "total": "{n} permissions",
+      "nuevo": "New permission",
+      "vacio": "No permissions.",
+      "borrarConfirm": "Delete permission {clave}?",
+      "borrado": "Permission deleted",
+      "creado": "Permission created",
+      "guardado": "Saved",
+      "nuevoTitulo": "New permission",
+      "nuevoDesc": "The key is module.action (the action may contain dots).",
+      "editarTitulo": "Edit permission",
+      "editarDesc": "The key cannot be changed; edit only the description.",
+      "formatoInvalido": "Invalid format: use module.action, lowercase.",
+      "col": {
+        "clave": "Key",
+        "modulo": "Module",
+        "accion": "Action",
+        "descripcion": "Description"
+      },
+      "field": {
+        "clave": "Key",
+        "modulo": "Module",
+        "accion": "Action",
+        "descripcion": "Description"
+      }
     }
   },
   "landing": {

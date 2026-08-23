@@ -32,6 +32,21 @@ export async function getPermisos(): Promise<Permiso[]> {
   return asArray<Permiso>(await apiFetch(`/permisos`))
 }
 
+// Catálogo de permisos (rbac.create/update/delete). La CLAVE va `modulo.accion` (la acción puede llevar
+// puntos: `factura.pago.anular`); el BE deriva modulo/accion de la clave y la normaliza (minúsculas, sin
+// espacios) — NO mandar modulo/accion por separado. La clave NO se edita (está en el código y en cada
+// concesión). Al borrar, el BE responde 400 con un mensaje que dice a cuántos afecta → mostrarlo tal cual.
+// Handoff permisos-y-roles-pantalla.
+export function crearPermiso(payload: { clave: string; descripcion?: string }): Promise<Permiso> {
+  return apiFetch<Permiso>(`/permisos`, { method: "POST", body: JSON.stringify(payload) })
+}
+export function actualizarPermiso(id: string, descripcion: string): Promise<Permiso> {
+  return apiFetch<Permiso>(`/permisos/${id}`, { method: "PUT", body: JSON.stringify({ descripcion }) })
+}
+export function eliminarPermiso(id: string): Promise<void> {
+  return apiFetch<void>(`/permisos/${id}`, { method: "DELETE" })
+}
+
 export async function getRoles(): Promise<Rol[]> {
   return asArray<Rol>(await apiFetch(`/roles`))
 }

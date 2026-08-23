@@ -771,7 +771,8 @@
       "centers": "Centros",
       "theme": "Tema",
       "roles": "Roles",
-      "menu": "Menú"
+      "menu": "Menú",
+      "permisos": "Permisos"
     },
     "rbac": {
       "title": "Roles y permisos",
@@ -1069,6 +1070,33 @@
       "gerencial": "Gerencial (ve todos sus centros, solo lectura)",
       "accessModeHelp": "Gerencial ve varios centros a la vez pero no puede escribir.",
       "guardado": "Perfil actualizado"
+    },
+    "permisos": {
+      "buscar": "Buscar permiso o módulo…",
+      "total": "{n} permisos",
+      "nuevo": "Nuevo permiso",
+      "vacio": "No hay permisos.",
+      "borrarConfirm": "¿Borrar el permiso {clave}?",
+      "borrado": "Permiso borrado",
+      "creado": "Permiso creado",
+      "guardado": "Guardado",
+      "nuevoTitulo": "Nuevo permiso",
+      "nuevoDesc": "La clave va como módulo.acción (la acción puede llevar puntos).",
+      "editarTitulo": "Editar permiso",
+      "editarDesc": "La clave no se puede cambiar; edita solo la descripción.",
+      "formatoInvalido": "Formato inválido: usa módulo.acción, en minúsculas.",
+      "col": {
+        "clave": "Clave",
+        "modulo": "Módulo",
+        "accion": "Acción",
+        "descripcion": "Descripción"
+      },
+      "field": {
+        "clave": "Clave",
+        "modulo": "Módulo",
+        "accion": "Acción",
+        "descripcion": "Descripción"
+      }
     }
   },
   "landing": {
