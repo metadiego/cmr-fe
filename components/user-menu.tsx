@@ -46,7 +46,9 @@ export function UserMenu() {
   async function signOut() {
     setSigningOut(true);
     await createClient().auth.signOut();
-    router.replace("/login");
+    // Navegación DURA (no router.replace): la suave dejaba el menú pegado en «Saliendo…» porque el header
+    // no se remonta. Recargar en /login limpia del todo el estado de sesión.
+    window.location.assign("/login");
   }
 
   if (!session) {

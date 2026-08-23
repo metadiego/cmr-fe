@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { createClient } from "@/lib/supabase/client";
@@ -27,7 +26,6 @@ function iniciales(me: Me): string {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
   const t = useTranslations("dashboard");
   const tCommon = useTranslations("common");
   const { can } = useCan();
@@ -55,7 +53,7 @@ export default function DashboardPage() {
   async function logout() {
     setSigningOut(true);
     await createClient().auth.signOut();
-    router.replace("/login");
+    window.location.assign("/login"); // recarga dura: limpia sesión sin dejar el botón pegado
   }
 
   const me = state.kind === "ok" ? state.me : null;
