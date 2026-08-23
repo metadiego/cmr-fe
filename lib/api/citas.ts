@@ -62,15 +62,18 @@ export interface ListCitasParams {
   soloAtencion?: boolean; // only states visible to the Atención board
 }
 
+// `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, sin tocar el centro de la
+// sesión — para el selector de centro EN la pantalla (leer el otro centro). Handoff selector-de-centro.
 export function listCitas(
   params: ListCitasParams = {},
+  centroId?: string,
 ): Promise<Paginated<Cita>> {
   const { page = 1, limit = 100, ...filters } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   for (const [k, v] of Object.entries(filters)) {
     if (v) sp.set(k, String(v));
   }
-  return apiFetchPaged<Cita>(`/citas?${sp.toString()}`);
+  return apiFetchPaged<Cita>(`/citas?${sp.toString()}`, {}, centroId);
 }
 
 // Fetch ALL citas for a range across pages (BE caps limit at 100). Used by the
@@ -80,11 +83,13 @@ export async function listCitasRango(params: {
   hasta: string;
   medicoId?: string;
   estado?: EstadoCita;
+  centroId?: string; // fuerza el centro de la lectura (selector de centro EN la pantalla)
 }): Promise<Cita[]> {
+  const { centroId, ...filters } = params;
   const acc: Cita[] = [];
   let page = 1;
   for (;;) {
-    const { items, pagination } = await listCitas({ ...params, page, limit: 100 });
+    const { items, pagination } = await listCitas({ ...filters, page, limit: 100 }, centroId);
     acc.push(...items);
     if (items.length === 0 || acc.length >= pagination.total) break;
     page++;

@@ -10,6 +10,8 @@ import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getFestivos, type Festivo } from "@/lib/api/disponibilidad";
 import { listPacientes } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
+import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
+import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { usePacienteMap } from "@/lib/agenda/use-paciente-map";
 import { monthMatrix, toISO } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
@@ -41,6 +43,9 @@ export function ServiciosCalendar() {
   const [newPatientOpen, setNewPatientOpen] = React.useState(false);
   const [q, setQ] = React.useState("");
 
+  // Selector de centro EN la pantalla (patrón único): agendar/leer servicios en otro centro sin tocar la sesión.
+  const centro = useCentroPantalla("frontdesk.read", "frontdesk.create");
+
   const weeks = monthMatrix(year, month0);
   const desde = toISO(weeks[0][0]);
   const hasta = toISO(weeks[weeks.length - 1][6]);
@@ -59,8 +64,9 @@ export function ServiciosCalendar() {
         desde,
         hasta,
         servicioId: servicioId === ALL ? undefined : servicioId,
+        centroId: centro.fetchCentroId,
       }),
-    [desde, hasta, servicioId],
+    [desde, hasta, servicioId, centro.fetchCentroId],
   );
   const sesiones = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
@@ -121,6 +127,8 @@ export function ServiciosCalendar() {
           <h2 className="ml-1 text-xl font-semibold capitalize">{monthLabel}</h2>
           <Button variant="ghost" size="sm" onClick={goToday}>{t("today")}</Button>
           <div className="ml-auto flex items-center gap-2">
+            {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
+            <CentroPantallaSelector estado={centro} />
             <Select value={servicioId} onValueChange={setServicioId}>
               <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -130,12 +138,13 @@ export function ServiciosCalendar() {
                 ))}
               </SelectContent>
             </Select>
-            <Can permiso="frontdesk.create">
+            {/* «Nuevo servicio» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
+            {centro.puedeEscribir && (
               <Button size="sm" onClick={() => setModal({ fecha: toISO(new Date()) })}>
                 <HugeiconsIcon icon={Add01Icon} className="size-4" />
                 {t("newService")}
               </Button>
-            </Can>
+            )}
           </div>
         </div>
 
@@ -209,6 +218,7 @@ export function ServiciosCalendar() {
           servicios={servicios}
           servicioInicial={servicioInicial}
           pacienteInicial={modal.paciente}
+          centroInicial={centro.centroActivo || undefined}
           onOpenChange={(o) => !o && setModal(null)}
           onSaved={reload}
         />

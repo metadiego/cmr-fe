@@ -16,6 +16,8 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getFestivos, type Festivo } from "@/lib/api/disponibilidad";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
+import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
+import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { usePacienteMap } from "@/lib/agenda/use-paciente-map";
 import { monthMatrix, toISO, colorDeEvento } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
@@ -46,6 +48,9 @@ export function MedicasCalendar() {
   const [newPatientOpen, setNewPatientOpen] = React.useState(false);
   const [q, setQ] = React.useState("");
 
+  // Selector de centro EN la pantalla (patrón único): agendar/leer en otro centro sin tocar la sesión.
+  const centro = useCentroPantalla("citas.read", "citas.create");
+
   const weeks = monthMatrix(year, month0);
   const desde = toISO(weeks[0][0]);
   const hasta = toISO(weeks[weeks.length - 1][6]);
@@ -69,8 +74,9 @@ export function MedicasCalendar() {
         desde,
         hasta,
         medicoId: medico === ALL ? undefined : medico,
+        centroId: centro.fetchCentroId,
       }),
-    [desde, hasta, medico],
+    [desde, hasta, medico, centro.fetchCentroId],
   );
   const citas = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
@@ -135,6 +141,8 @@ export function MedicasCalendar() {
           <h2 className="ml-1 text-xl font-semibold capitalize">{monthLabel}</h2>
           <Button variant="ghost" size="sm" onClick={goToday}>{t("today")}</Button>
           <div className="ml-auto flex items-center gap-2">
+            {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
+            <CentroPantallaSelector estado={centro} />
             <Select value={medico} onValueChange={setMedico}>
               <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -146,12 +154,13 @@ export function MedicasCalendar() {
                 ))}
               </SelectContent>
             </Select>
-            <Can permiso="citas.create">
+            {/* «Nueva Cita» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
+            {centro.puedeEscribir && (
               <Button size="sm" onClick={() => setModal({ fecha: toISO(new Date()) })}>
                 <HugeiconsIcon icon={Add01Icon} className="size-4" />
                 {t("new")}
               </Button>
-            </Can>
+            )}
           </div>
         </div>
 
@@ -227,6 +236,7 @@ export function MedicasCalendar() {
           fecha={modal.fecha}
           cita={modal.cita}
           pacienteInicial={modal.paciente}
+          centroId={centro.centroActivo || undefined}
           tipos={tipos}
           medicos={medicos}
           onOpenChange={(o) => !o && setModal(null)}

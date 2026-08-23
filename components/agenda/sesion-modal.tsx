@@ -39,6 +39,7 @@ export function SesionModal({
   servicios,
   servicioInicial,
   pacienteInicial,
+  centroInicial,
   onOpenChange,
   onSaved,
 }: {
@@ -47,6 +48,7 @@ export function SesionModal({
   servicios: Servicio[];
   servicioInicial?: string;
   pacienteInicial?: Paciente | null;
+  centroInicial?: string; // centro preseleccionado (el que se está mirando en la pantalla)
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
 }) {
@@ -59,7 +61,7 @@ export function SesionModal({
   const needsCentro = centros.length > 1;
   const [centroSel, setCentroSel] = React.useState("");
   const effectiveCentro =
-    centroSel || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
+    centroSel || centroInicial || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
 
   const [paciente, setPaciente] = React.useState<Paciente | null>(pacienteInicial ?? null);
   const [servicioId, setServicioId] = React.useState(servicioInicial ?? "");
