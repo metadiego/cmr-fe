@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { useMe } from "@/hooks/use-me";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getMyCentrosOperativos, type Centro } from "@/lib/api/centers";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { apiErrorMessage } from "@/lib/api/errors";
@@ -17,9 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Active-center picker for operativo users with more than one center. Sets the
-// X-Tenant-ID cookie and reloads so every request uses the new tenant. Hidden
-// for single-center / admin / master (allowedClinicIds <= 1).
+// Active-center picker del NAV = «en qué centro estoy trabajando» (cambia el contexto de facturar/
+// cobrar/agendar). Fija la cookie X-Tenant-ID y recarga para que todo pida bajo el nuevo tenant. Ofrece
+// SOLO los centros OPERATIVOS (donde la persona tiene un rol), no todos los asignados: un acceso puntual
+// (p.ej. leer el calendario ajeno) no debe invitar a mudarse allí. Uno solo → no se enseña. Handoff
+// calendario-selector-de-centro §«El selector del NAV es OTRA cosa».
 export function CenterSelector() {
   const me = useMe();
   const t = useTranslations("nav");
@@ -29,12 +31,10 @@ export function CenterSelector() {
   // de preferencias por capas (effective.colorPorCentro); default del sistema Bayamón azul/Caguas verde.
   const [colores, setColores] = React.useState<Record<string, string>>({});
 
-  const show = me.kind === "ok" && me.me.allowedClinicIds.length > 1;
-
   React.useEffect(() => {
-    if (!show) return;
+    if (me.kind !== "ok") return;
     let active = true;
-    getMyCentros()
+    getMyCentrosOperativos()
       .then((list) => active && setCentros(list))
       .catch((err) => active && toast.error(apiErrorMessage(err)));
     getMyPreferences()
@@ -43,9 +43,10 @@ export function CenterSelector() {
     return () => {
       active = false;
     };
-  }, [show]);
+  }, [me.kind]);
 
-  if (!show) return null;
+  // Se enseña solo si hay MÁS DE UN centro operativo — con uno no hay nada que elegir.
+  if (centros.length <= 1) return null;
 
   const current =
     getActiveCentro() ??

@@ -78,12 +78,18 @@ export function Calendario() {
   const centroActivo = centroSel || (sessionCentroId && centros.some((c) => c.id === sessionCentroId) ? sessionCentroId : centros[0]?.id) || "";
   // Ver OTRO centro (≠ el de la sesión): solo para saber si hay que pasar centroId al leer/crear.
   const viendoOtroCentro = !!centroActivo && !!sessionCentroId && centroActivo !== sessionCentroId;
-  // Escritura = permiso de creación en el centro elegido (no «es mi centro»). Editar/borrar igual: el BE
-  // vuelve a comprobar, así que no ofrecemos lo que va a fallar con 403.
+  // Escritura = permiso de creación en el centro elegido (no «es mi centro»). Crear solo necesita esto.
   const puedeEscribir = !!centroActivo && escrituraIds.has(centroActivo);
   const puedeCrear = puedeEscribir;
-  const puedeEditar = puedeEscribir;
-  const puedeBorrar = puedeEscribir;
+
+  // «Cada uno toca lo suyo»: editar/borrar solo eventos PROPIOS, salvo admin. Los del legado no traen
+  // autor (creadoPor null, legacyId) → solo admin. El BE re-comprueba (403 con motivo), así que esto solo
+  // evita ofrecer un botón que va a fallar. Handoff calendario-selector-de-centro §«Cada uno toca lo suyo».
+  const esAdmin = me.kind === "ok" && (me.me.isMaster || me.me.accessMode === "admin" || me.me.roles.some((r) => r === "admin" || r === "super_admin"));
+  const miId = me.kind === "ok" ? me.me.perfilId : null;
+  const miUserId = me.kind === "ok" ? me.me.id : null;
+  const esMio = (ev?: CalendarioEvento) => !!ev?.creadoPor && (ev.creadoPor === miId || ev.creadoPor === miUserId);
+  const puedeTocar = (ev?: CalendarioEvento) => puedeEscribir && (esAdmin || esMio(ev));
 
   const [vista, setVista] = React.useState<Vista>("mes");
   const [cursor, setCursor] = React.useState(new Date());
@@ -142,7 +148,7 @@ export function Calendario() {
 
   // Al CREAR en un centro ≠ sesión, el evento debe nacer allí → pasar centroId. En el de la sesión, sin él.
   const centroIdCrear = viendoOtroCentro ? centroActivo : undefined;
-  const modalCommon = { cats, catLabel, puedeBorrar, tRoot, tc, t };
+  const modalCommon = { cats, catLabel, tRoot, tc, t };
 
   return (
     <div className="w-full px-6 py-8">
@@ -289,7 +295,8 @@ export function Calendario() {
         <EventoModal
           key={modal.evento?.id ?? modal.dia}
           inicial={modal}
-          puedeEditar={modal.evento ? puedeEditar : puedeCrear}
+          puedeEditar={modal.evento ? puedeTocar(modal.evento) : puedeCrear}
+          puedeBorrar={modal.evento ? puedeTocar(modal.evento) : false}
           centroIdCrear={centroIdCrear}
           onClose={() => setModal(null)}
           onSaved={() => { setModal(null); eventosRes.reload(); }}

@@ -76,3 +76,14 @@ export async function getMyCentros(): Promise<Centro[]> {
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];
 }
+
+// Centros donde la persona TRABAJA DE VERDAD (tiene un rol) → para el selector del NAV, que cambia el
+// contexto de facturar/cobrar/agendar. NO usar getMyCentros aquí: esa trae TODOS los centros asignados,
+// incluidos accesos puntuales (p.ej. mirar el calendario ajeno) → mudarse allí no deja hacer nada. Uno
+// solo → no enseñar el selector del nav. Handoff calendario-selector-de-centro §«El selector del NAV».
+export async function getMyCentrosOperativos(): Promise<Centro[]> {
+  const res: unknown = await apiFetch(`/auth/me/centros/operativos`);
+  if (Array.isArray(res)) return res as Centro[];
+  const items = (res as { items?: unknown } | null)?.items;
+  return Array.isArray(items) ? (items as Centro[]) : [];
+}
