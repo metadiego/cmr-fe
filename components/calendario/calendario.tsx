@@ -10,6 +10,7 @@ import {
   getEventos,
   getCategorias,
   getCentrosCalendario,
+  getCentrosEscrituraCalendario,
   crearEvento,
   actualizarEvento,
   eliminarEvento,
@@ -19,7 +20,6 @@ import {
   type CrearEventoPayload,
 } from "@/lib/api/calendario";
 import { useResource } from "@/hooks/use-resource";
-import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
@@ -62,25 +62,28 @@ export function Calendario() {
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const locale = useLocale();
-  const { can } = useCan();
   const me = useMe();
   const sessionCentroId = me.kind === "ok" ? (me.me.activeClinicId ?? null) : null;
-  const puedeCrearPerm = can("calendario.create");
-  const puedeEditarPerm = can("calendario.update");
-  const puedeBorrarPerm = can("calendario.delete");
 
   // Selector de centro DENTRO de la pantalla (como la agenda de citas), sin tocar el centro de la
   // sesión ni el selector del nav. Uno solo → no se enseña. Handoff calendario-selector-de-centro.
   const centrosRes = useResource<CalendarioCentro[]>(() => getCentrosCalendario());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
+  // Centros donde SÍ puede crear (la escritura sale de ESTE permiso, no de si el centro es el suyo).
+  const escrituraRes = useResource<CalendarioCentro[]>(() => getCentrosEscrituraCalendario());
+  const escrituraIds = new Set((escrituraRes.state.kind === "ok" ? escrituraRes.state.data : []).map((c) => c.id));
+
   const [centroSel, setCentroSel] = React.useState("");
   // Valor mostrado: el elegido, o el de la sesión, o el primero disponible.
   const centroActivo = centroSel || (sessionCentroId && centros.some((c) => c.id === sessionCentroId) ? sessionCentroId : centros[0]?.id) || "";
-  // Ver OTRO centro (no el de la sesión) = solo lectura: crear/editar/borrar van contra el de la sesión.
+  // Ver OTRO centro (≠ el de la sesión): solo para saber si hay que pasar centroId al leer/crear.
   const viendoOtroCentro = !!centroActivo && !!sessionCentroId && centroActivo !== sessionCentroId;
-  const puedeCrear = puedeCrearPerm && !viendoOtroCentro;
-  const puedeEditar = puedeEditarPerm && !viendoOtroCentro;
-  const puedeBorrar = puedeBorrarPerm && !viendoOtroCentro;
+  // Escritura = permiso de creación en el centro elegido (no «es mi centro»). Editar/borrar igual: el BE
+  // vuelve a comprobar, así que no ofrecemos lo que va a fallar con 403.
+  const puedeEscribir = !!centroActivo && escrituraIds.has(centroActivo);
+  const puedeCrear = puedeEscribir;
+  const puedeEditar = puedeEscribir;
+  const puedeBorrar = puedeEscribir;
 
   const [vista, setVista] = React.useState<Vista>("mes");
   const [cursor, setCursor] = React.useState(new Date());
@@ -137,6 +140,8 @@ export function Calendario() {
   }
   const diasSemanaLbl = Array.from({ length: 7 }, (_, i) => fmt(new Date(2026, 10, 1 + i), { weekday: "short" }));
 
+  // Al CREAR en un centro ≠ sesión, el evento debe nacer allí → pasar centroId. En el de la sesión, sin él.
+  const centroIdCrear = viendoOtroCentro ? centroActivo : undefined;
   const modalCommon = { cats, catLabel, puedeBorrar, tRoot, tc, t };
 
   return (
@@ -178,7 +183,7 @@ export function Calendario() {
                 {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
               </SelectContent>
             </Select>
-            {viendoOtroCentro && (
+            {!puedeEscribir && (
               <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{t("soloLectura")}</span>
             )}
           </div>
@@ -285,6 +290,7 @@ export function Calendario() {
           key={modal.evento?.id ?? modal.dia}
           inicial={modal}
           puedeEditar={modal.evento ? puedeEditar : puedeCrear}
+          centroIdCrear={centroIdCrear}
           onClose={() => setModal(null)}
           onSaved={() => { setModal(null); eventosRes.reload(); }}
           {...modalCommon}
@@ -320,13 +326,14 @@ function Fila({ ev, col, cat, onClick, t }: { ev: CalendarioEvento; col: { dot: 
 }
 
 function EventoModal({
-  inicial, cats, catLabel, puedeEditar, puedeBorrar, onClose, onSaved, tRoot, tc, t,
+  inicial, cats, catLabel, puedeEditar, puedeBorrar, centroIdCrear, onClose, onSaved, tRoot, tc, t,
 }: {
   inicial: { evento?: CalendarioEvento; dia: string };
   cats: CalendarioCategoria[];
   catLabel: (c?: CalendarioCategoria) => string;
   puedeEditar: boolean;
   puedeBorrar: boolean;
+  centroIdCrear?: string; // al crear en un centro ≠ sesión, el evento nace allí
   onClose: () => void;
   onSaved: () => void;
   tRoot: ReturnType<typeof useTranslations>;
@@ -356,8 +363,9 @@ function EventoModal({
       categoriaId: categoriaId || null, esGlobal,
     };
     try {
+      // El centroId solo viaja al CREAR en otro centro; editar no cambia el centro del evento.
       if (ev) await actualizarEvento(ev.id, payload);
-      else await crearEvento(payload);
+      else await crearEvento(centroIdCrear ? { ...payload, centroId: centroIdCrear } : payload);
       toast.success(t("guardado"));
       onSaved();
     } catch (e) {

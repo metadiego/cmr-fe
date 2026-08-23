@@ -34,6 +34,9 @@ export interface CrearEventoPayload {
   descripcion?: string | null;
   categoriaId?: string | null;
   esGlobal?: boolean;
+  // Solo al CREAR en un centro distinto al de la sesión: el evento nace en ese centro. Sin él, en el de
+  // la sesión. Requiere permiso de creación allí (si no, 403). NO se manda al editar.
+  centroId?: string | null;
 }
 
 // Centros cuyo calendario puede VER quien pregunta (con nombre). NO usar auth/me/centros: esa trae
@@ -46,6 +49,12 @@ export interface CalendarioCentro {
 }
 export function getCentrosCalendario(): Promise<CalendarioCentro[]> {
   return apiFetch<CalendarioCentro[]>(`/calendario/centros`);
+}
+// Centros donde quien pregunta puede CREAR (filtrado por el permiso de creación). Con esto se decide
+// enseñar «Nuevo evento» / permitir editar-borrar: el modo lectura sale del PERMISO, no de si el centro
+// es el suyo (alguien puede tener escritura concedida en otro centro). Handoff calendario-selector-de-centro.
+export function getCentrosEscrituraCalendario(): Promise<CalendarioCentro[]> {
+  return apiFetch<CalendarioCentro[]>(`/calendario/centros/escritura`);
 }
 
 export function getEventos(desde: string, hasta: string, centroId?: string): Promise<CalendarioEvento[]> {
