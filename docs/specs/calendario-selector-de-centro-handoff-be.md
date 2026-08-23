@@ -28,7 +28,17 @@ Devuelve los centros cuyo calendario puede ver quien pregunta, **con nombre**:
   que al pulsarlas dan 403.
 - **Si devuelve un solo centro, no enseñes el selector.** No hay nada que elegir.
 
-**2. Los eventos de ese centro** — ya existía:
+**2. Dónde puede CREAR** — nuevo:
+
+```
+GET /api/v1/calendario/centros/escritura
+```
+Misma forma que el anterior, pero filtrado por el permiso de creación. **Con esto se decide si
+enseñar «Nuevo evento»**: si el centro elegido no está en esta lista, el calendario va en solo
+lectura. No lo deduzcas de «es o no mi centro» — puede haber alguien con escritura concedida en
+otro centro, y al revés.
+
+**3. Los eventos de ese centro** — ya existía:
 
 ```
 GET /api/v1/calendario/eventos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&centroId=<id>
@@ -45,10 +55,20 @@ GET /api/v1/calendario/eventos?desde=YYYY-MM-DD&hasta=YYYY-MM-DD&centroId=<id>
    cabecera del calendario, como en la agenda de citas, con el centro de la sesión preseleccionado.
 2. Al cambiar de centro, volver a pedir los eventos con `centroId`. **No tocar el centro de la
    sesión** ni el selector del nav: al salir de la pantalla, la persona sigue donde estaba.
-3. Cuando el centro elegido **no es el suyo**, el calendario es de solo lectura: esconde «Nuevo
-   evento» y no dejes editar ni borrar. Crear, editar y borrar siguen yendo contra el centro de la
-   sesión, no contra el elegido — no hay forma de crear un evento en otro centro desde aquí, y es a
-   propósito.
+3. **Solo lectura según el permiso, no según el centro.** Enseña «Nuevo evento» si el centro
+   elegido está en `/calendario/centros/escritura`; si no, esconde la acción. Editar y borrar igual:
+   el backend lo comprueba y responderá 403, así que no ofrezcas lo que va a fallar.
+
+   Esto CAMBIÓ respecto a la primera versión de este documento, que decía que crear iba siempre al
+   centro de la sesión «a propósito». Estaba mal: eso ataba la capacidad al código. Ahora se puede
+   conceder escritura en otro centro desde la pantalla de accesos, y entonces:
+
+   ```
+   POST /api/v1/calendario/eventos   { …, "centroId": "<centro elegido>" }
+   ```
+
+   Con `centroId` el evento nace en ese centro. Sin él, en el de la sesión, como siempre. Si no
+   tiene el permiso allí, 403 — el mismo criterio que la lectura.
 
 ## Caso real que ya funciona
 
