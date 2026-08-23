@@ -1134,7 +1134,10 @@
     "loading": "Loading context…",
     "loadError": "Could not load <code>/auth/me</code>: {message}",
     "myBoards": "My boards",
-    "boardModules": "Modules"
+    "boardModules": "Modules",
+    "en": "at",
+    "verDetalles": "Show details",
+    "ocultarDetalles": "Hide details"
   },
   "settingsTableros": {
     "title": "My boards",

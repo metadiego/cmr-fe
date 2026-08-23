@@ -1134,7 +1134,10 @@
     "loading": "Cargando contexto…",
     "loadError": "No se pudo cargar <code>/auth/me</code>: {message}",
     "myBoards": "Mis tableros",
-    "boardModules": "Módulos"
+    "boardModules": "Módulos",
+    "en": "en",
+    "verDetalles": "Ver detalles",
+    "ocultarDetalles": "Ocultar detalles"
   },
   "settingsTableros": {
     "title": "Mis tableros",

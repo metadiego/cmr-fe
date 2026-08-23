@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 import { getMe, type Me } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/types";
@@ -26,6 +27,11 @@ function toMessage(err: unknown): string {
 // of hooks while skipping the request when a provider is already in the tree.
 export function useMeFetch(enabled: boolean): MeState {
   const [state, setState] = React.useState<MeState>({ kind: "loading" });
+  // Refetch al navegar: el login es un server action y el layout (donde vive el header) NO se remonta,
+  // así que sin esto `me` quedaba con el valor de ANTES del login (anónimo) → «Iniciar sesión» y menú
+  // viejo hasta un F5 manual. El redirect tras login cambia el pathname y dispara este refetch; igual al
+  // cambiar de centro (que además recarga). Handoff avatar-y-sesion-al-entrar (#2 y #3).
+  const pathname = usePathname();
 
   React.useEffect(() => {
     if (!enabled) return;
@@ -36,7 +42,7 @@ export function useMeFetch(enabled: boolean): MeState {
     return () => {
       active = false;
     };
-  }, [enabled]);
+  }, [enabled, pathname]);
 
   return state;
 }
