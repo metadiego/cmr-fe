@@ -17,7 +17,21 @@ donde no puede hacer nada. Lo que se quiere es lo que ya hacen pacientes y citas
 | Pregunta | ¿En qué centro **trabajo**? | ¿Qué estoy **mirando**? |
 | Afecta a | Toda la sesión: facturar, cobrar, agendar | Solo esa pantalla |
 | Se llena con | `GET /auth/me/centros/operativos` | `GET /me/centros-donde-puedo?permiso=…` |
+| Quién lo ve | Solo con el permiso `centros.cambiar` | Cualquiera que tenga el permiso de esa pantalla |
 | Si devuelve uno | **No se enseña** | **No se enseña** |
+
+### El del nav no es para todo el mundo
+
+Cambiar el centro de la sesión mueve dónde se **factura, se cobra y se agenda**. Alguien puede
+emitir una factura en el centro equivocado sin darse cuenta, y eso no se deshace con un clic. Por
+eso depende del permiso **`centros.cambiar`**, que hoy solo tiene gerencia.
+
+**El FE no necesita comprobar el permiso**: `/auth/me/centros/operativos` ya devuelve un único
+centro —el suyo— a quien no lo tiene. Con la regla de «si devuelve uno, no se enseña», el selector
+desaparece solo para quien no debe cambiarse.
+
+La diferencia que importa: **leer no factura**. Quien no puede mudarse de centro sigue pudiendo
+mirar el otro desde cada pantalla, que es lo que no hace daño.
 
 `/auth/me/centros/operativos` devuelve donde la persona tiene un **rol**. Un centro donde solo hay
 un acceso puntual no sale ahí: ofrecerlo invita a mudarse a un sitio donde no puede trabajar.
