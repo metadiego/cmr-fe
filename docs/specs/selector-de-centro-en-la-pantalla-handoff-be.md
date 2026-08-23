@@ -13,6 +13,10 @@
 > - «Nueva Cita» solo si el centro elegido está en `…?permiso=citas.create`
 > - Pedir la agenda con `GET /api/v1/citas/agenda-dia?fecha=…&centroId=<elegido>`
 > - Cambiar de centro ahí **no** toca la sesión.
+> - **Y lo que cuelga del centro cambia con él**: el desplegable de médicos tiene que recargarse
+>   con `GET /api/v1/personal/por-capacidad/medico?centroId=<elegido>`. Hoy enseña los del centro de
+>   la sesión aunque la pantalla mire otro, y así se puede agendar con un médico que no está allí
+>   (visto en pantalla: en Bayamón salían Emma González y Javier Lillo, que son de Caguas).
 
 Backend desplegado y verificado en producción el 23-ago-2026. Esto **sustituye** al handoff del
 calendario: el mismo patrón vale para citas, facturación, inventario y lo que venga.
@@ -89,6 +93,24 @@ salir de la pantalla, la persona sigue donde estaba.
 
 El backend comprueba de verdad: hace falta tener ese centro **y** el permiso de esa acción **en él**.
 Si no, 403. Por eso los dos endpoints de arriba: **no ofrezcas una opción que va a fallar.**
+
+## Todo lo que cuelga del centro se recarga al cambiarlo
+
+Cambiar el centro en la pantalla no es solo cambiar la lista principal: **todos los desplegables que
+dependen del centro tienen que volver a pedirse con ese `centroId`**, o se elige un dato de un centro
+para guardarlo en otro.
+
+| Qué | Cómo pedirlo con el centro elegido |
+|---|---|
+| Médicos y demás personal | `GET /personal/por-capacidad/:capacidad?centroId=…` |
+| Listado de personal | `GET /personal?capacidad=medico&centroId=…` |
+| Pacientes | ya filtran por el centro de la sesión; si la pantalla mira otro, hay que pedirlo — avísanos y lo abrimos igual |
+| Agenda del día | `GET /citas/agenda-dia?fecha=…&centroId=…` |
+| Eventos del calendario | `GET /calendario/eventos?desde=…&hasta=…&centroId=…` |
+
+Comprobado en producción: con la sesión en Bayamón salen sus 10 médicos; pidiendo Caguas, los 5 de
+Caguas. Si un desplegable no se recarga, el usuario ve nombres del centro equivocado y puede guardar
+con ellos.
 
 ## Solo lectura: según el permiso, no según el centro
 
