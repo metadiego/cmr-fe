@@ -1,0 +1,90 @@
+# FE — El selector de centro va EN la pantalla. Un patrón para todas.
+
+Backend desplegado y verificado en producción el 23-ago-2026. Esto **sustituye** al handoff del
+calendario: el mismo patrón vale para citas, facturación, inventario y lo que venga.
+
+## El problema que resuelve
+
+Para que alguien mirara el calendario del otro centro había que darle ese centro, y entonces le
+aparecía el **selector global del nav** — que cambia el contexto de toda la sesión y expone centros
+donde no puede hacer nada. Lo que se quiere es lo que ya hacen pacientes y citas: el selector
+**dentro de la pantalla**, afectando solo a lo que esa pantalla muestra.
+
+## Los dos selectores no son el mismo
+
+| | Selector del **nav** | Selector de la **pantalla** |
+|---|---|---|
+| Pregunta | ¿En qué centro **trabajo**? | ¿Qué estoy **mirando**? |
+| Afecta a | Toda la sesión: facturar, cobrar, agendar | Solo esa pantalla |
+| Se llena con | `GET /auth/me/centros/operativos` | `GET /me/centros-donde-puedo?permiso=…` |
+| Si devuelve uno | **No se enseña** | **No se enseña** |
+
+`/auth/me/centros/operativos` devuelve donde la persona tiene un **rol**. Un centro donde solo hay
+un acceso puntual no sale ahí: ofrecerlo invita a mudarse a un sitio donde no puede trabajar.
+**Deja de llenar el nav con `auth/me/centros`**, que trae todos los centros asignados.
+
+## El endpoint para CUALQUIER pantalla
+
+```
+GET /api/v1/me/centros-donde-puedo?permiso=citas.read
+→ [{ "id": "ef6f87b0-…", "nombre": "CMR Bayamon", "codigo": "bay", … }]
+```
+
+Dime el permiso, te digo en qué centros lo tiene, con nombre. **No hay un endpoint por dominio** y
+no hace falta pedir uno nuevo cuando aparezca una pantalla más.
+
+Por pantalla se piden dos:
+
+| Pantalla | Para llenar el selector | Para decidir si ofrecer las acciones |
+|---|---|---|
+| Citas / agenda | `permiso=citas.read` | `permiso=citas.create` |
+| Calendario | `permiso=calendario.read` | `permiso=calendario.create` |
+| Facturación | `permiso=factura.read` | `permiso=factura.create` |
+| Inventario | `permiso=inventario.read` | `permiso=inventario.ajustar` |
+
+Un permiso que no existe responde **400**, no una lista vacía: así un error de escritura no se
+confunde con «no puedes en ningún sitio».
+
+## Cómo pedir los datos de otro centro
+
+Los endpoints aceptan `centroId`: en la query si es lectura, en el cuerpo si es escritura.
+
+```
+GET  /api/v1/calendario/eventos?desde=…&hasta=…&centroId=<elegido>
+GET  /api/v1/citas/agenda-dia?fecha=…&centroId=<elegido>
+POST /api/v1/calendario/eventos   { …, "centroId": "<elegido>" }
+```
+
+Sin `centroId`, el centro de la sesión, como siempre. **No cambies el centro de la sesión**: al
+salir de la pantalla, la persona sigue donde estaba.
+
+El backend comprueba de verdad: hace falta tener ese centro **y** el permiso de esa acción **en él**.
+Si no, 403. Por eso los dos endpoints de arriba: **no ofrezcas una opción que va a fallar.**
+
+## Solo lectura: según el permiso, no según el centro
+
+Si el centro elegido no está en la lista de escritura, esconde las acciones (crear, editar, borrar) y
+marca la pantalla como solo lectura — el distintivo que ya se puso junto al selector del calendario
+funciona bien. **No lo deduzcas de «es o no mi centro»**: puede haber alguien con escritura concedida
+en otro centro, y al revés.
+
+## Cada uno toca lo suyo (calendario)
+
+Nadie edita ni borra lo que agendó otra persona, salvo el admin. El evento trae su autor, así que la
+decisión se toma sin llamadas extra: enseña editar y borrar solo en los propios. Los ~3.500 eventos
+importados del legado no traen autor y solo el admin puede tocarlos.
+
+## Facilidad de uso: lo que pide el dueño
+
+- Que se vea de un vistazo en qué centro estás y qué estás mirando, sin abrir menús.
+- Cambiar de centro en una pantalla, un clic, y que quede claro que no cambió la sesión.
+- Ninguna opción que falle al pulsarla. Los endpoints existen exactamente para eso.
+- Si solo hay un centro, no se enseña ningún selector: no hay nada que elegir.
+
+## Verificado en producción
+
+| | |
+|---|---|
+| Karola (call center) | agenda en los dos centros, y puede agendar en los dos; nada de facturación |
+| Bonillo (gerente de Caguas) | calendario de los dos, escritura solo en Caguas; nav: solo Caguas |
+| Gerente de un solo centro | un centro en todo: ningún selector |
