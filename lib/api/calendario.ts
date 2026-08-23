@@ -39,23 +39,8 @@ export interface CrearEventoPayload {
   centroId?: string | null;
 }
 
-// Centros cuyo calendario puede VER quien pregunta (con nombre). NO usar auth/me/centros: esa trae
-// todos los centros de la persona y en algunos no puede ver el calendario → el selector ofrecería
-// opciones que dan 403. Uno solo → la pantalla no enseña selector. Handoff calendario-selector-de-centro.
-export interface CalendarioCentro {
-  id: string;
-  nombre: string;
-  codigo?: string | null;
-}
-export function getCentrosCalendario(): Promise<CalendarioCentro[]> {
-  return apiFetch<CalendarioCentro[]>(`/calendario/centros`);
-}
-// Centros donde quien pregunta puede CREAR (filtrado por el permiso de creación). Con esto se decide
-// enseñar «Nuevo evento» / permitir editar-borrar: el modo lectura sale del PERMISO, no de si el centro
-// es el suyo (alguien puede tener escritura concedida en otro centro). Handoff calendario-selector-de-centro.
-export function getCentrosEscrituraCalendario(): Promise<CalendarioCentro[]> {
-  return apiFetch<CalendarioCentro[]>(`/calendario/centros/escritura`);
-}
+// Los centros del selector (leer/escribir) ya NO salen de endpoints por dominio: se piden con el patrón
+// único `getCentrosDondePuedo(permiso)` (lib/api/centers). Handoff selector-de-centro-en-la-pantalla.
 
 export function getEventos(desde: string, hasta: string, centroId?: string): Promise<CalendarioEvento[]> {
   const sp = new URLSearchParams({ desde, hasta });

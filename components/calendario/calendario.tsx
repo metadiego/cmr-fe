@@ -9,18 +9,17 @@ import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Globe02Icon } from "@huge
 import {
   getEventos,
   getCategorias,
-  getCentrosCalendario,
-  getCentrosEscrituraCalendario,
   crearEvento,
   actualizarEvento,
   eliminarEvento,
   type CalendarioEvento,
   type CalendarioCategoria,
-  type CalendarioCentro,
   type CrearEventoPayload,
 } from "@/lib/api/calendario";
 import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
+import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
+import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -63,23 +62,11 @@ export function Calendario() {
   const tRoot = useTranslations();
   const locale = useLocale();
   const me = useMe();
-  const sessionCentroId = me.kind === "ok" ? (me.me.activeClinicId ?? null) : null;
 
-  // Selector de centro DENTRO de la pantalla (como la agenda de citas), sin tocar el centro de la
-  // sesión ni el selector del nav. Uno solo → no se enseña. Handoff calendario-selector-de-centro.
-  const centrosRes = useResource<CalendarioCentro[]>(() => getCentrosCalendario());
-  const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  // Centros donde SÍ puede crear (la escritura sale de ESTE permiso, no de si el centro es el suyo).
-  const escrituraRes = useResource<CalendarioCentro[]>(() => getCentrosEscrituraCalendario());
-  const escrituraIds = new Set((escrituraRes.state.kind === "ok" ? escrituraRes.state.data : []).map((c) => c.id));
-
-  const [centroSel, setCentroSel] = React.useState("");
-  // Valor mostrado: el elegido, o el de la sesión, o el primero disponible.
-  const centroActivo = centroSel || (sessionCentroId && centros.some((c) => c.id === sessionCentroId) ? sessionCentroId : centros[0]?.id) || "";
-  // Ver OTRO centro (≠ el de la sesión): solo para saber si hay que pasar centroId al leer/crear.
-  const viendoOtroCentro = !!centroActivo && !!sessionCentroId && centroActivo !== sessionCentroId;
-  // Escritura = permiso de creación en el centro elegido (no «es mi centro»). Crear solo necesita esto.
-  const puedeEscribir = !!centroActivo && escrituraIds.has(centroActivo);
+  // Selector de centro EN la pantalla (patrón único, no en el nav): lee/escribe por permiso, sin tocar
+  // la sesión. Handoff selector-de-centro-en-la-pantalla.
+  const centro = useCentroPantalla("calendario.read", "calendario.create");
+  const puedeEscribir = centro.puedeEscribir;
   const puedeCrear = puedeEscribir;
 
   // «Cada uno toca lo suyo»: editar/borrar solo eventos PROPIOS, salvo admin. Los del legado no traen
@@ -113,9 +100,8 @@ export function Calendario() {
     return { desde: ymd(h), hasta: ymd(addDias(h, 45)), celdasMes: [], celdasSemana: [] };
   }, [vista, cursor]);
 
-  // Solo mandar centroId al VER OTRO centro; en el de la sesión va sin parámetro (así el BE resuelve el
-  // de la sesión y no da 403 en el propio, p.ej. master sin centro activo). Handoff calendario-selector-de-centro.
-  const fetchCentroId = viendoOtroCentro ? centroActivo : undefined;
+  // Solo mandar centroId al VER OTRO centro; en el de la sesión va sin parámetro (lo resuelve el BE).
+  const fetchCentroId = centro.fetchCentroId;
   const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta, fetchCentroId), [desde, hasta, fetchCentroId]);
   const catsRes = useResource<CalendarioCategoria[]>(() => getCategorias());
   const eventos = eventosRes.state.kind === "ok" ? eventosRes.state.data : [];
@@ -147,7 +133,7 @@ export function Calendario() {
   const diasSemanaLbl = Array.from({ length: 7 }, (_, i) => fmt(new Date(2026, 10, 1 + i), { weekday: "short" }));
 
   // Al CREAR en un centro ≠ sesión, el evento debe nacer allí → pasar centroId. En el de la sesión, sin él.
-  const centroIdCrear = viendoOtroCentro ? centroActivo : undefined;
+  const centroIdCrear = centro.centroIdCrear;
   const modalCommon = { cats, catLabel, tRoot, tc, t };
 
   return (
@@ -180,20 +166,8 @@ export function Calendario() {
         </div>
         {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
 
-        {/* Selector de centro: solo si hay más de uno. Preselecciona el de la sesión. */}
-        {centros.length > 1 && (
-          <div className="flex items-center gap-2">
-            <Select value={centroActivo} onValueChange={setCentroSel}>
-              <SelectTrigger className="w-48" aria-label={t("centroSel")}><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            {!puedeEscribir && (
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{t("soloLectura")}</span>
-            )}
-          </div>
-        )}
+        {/* Selector de centro EN la pantalla (patrón único). Solo si hay más de uno; el de la sesión preseleccionado. */}
+        <CentroPantallaSelector estado={centro} />
 
         {puedeCrear && (
           <Button size="sm" className="ml-auto" onClick={() => setModal({ dia: hoyStr() })}>
