@@ -14,6 +14,7 @@ const SECTIONS: { key: string; href: string }[] = [
   { key: "productos", href: "/inventario/productos" },
   { key: "recepcion", href: "/inventario/recibir-compra" },
   { key: "planificacion", href: "/inventario/planificacion" },
+  { key: "recepcionFactura", href: "/inventario/recepcion-factura" },
   { key: "transferencias", href: "/inventario/transferencias" },
   { key: "recetas", href: "/inventario/recetas" },
   { key: "proveedores", href: "/inventario/proveedores" },

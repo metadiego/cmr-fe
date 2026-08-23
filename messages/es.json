@@ -757,7 +757,8 @@
     "configNumeracion": "Numeración",
     "inventario_viales": "Viales",
     "planificacionCompras": "Planificación de compras",
-    "calendario": "Calendario"
+    "calendario": "Calendario",
+    "recepcionFactura": "Recibir desde factura"
   },
   "admin": {
     "title": "Administración",
@@ -2050,6 +2051,10 @@
         "planificacion": {
           "title": "Planificación de compras",
           "desc": "Cuánto pedir según ventas e inventario de todos los centros."
+        },
+        "recepcionFactura": {
+          "title": "Recibir desde factura",
+          "desc": "Pega la factura del proveedor y empareja; el sistema aprende sus nombres."
         }
       }
     },
@@ -3511,6 +3516,52 @@
       "semana": "Semana",
       "dia": "Día",
       "agenda": "Agenda"
+    }
+  },
+  "recepcionFactura": {
+    "title": "Recibir desde factura",
+    "help": "Pega el texto de la factura o packing list del proveedor; el sistema empareja lo que puede y tú resuelves el resto. Aprende: la próxima compra de ese proveedor llega resuelta sola.",
+    "pegaTexto": "Pega el texto de la factura primero.",
+    "emparejar": "Emparejar",
+    "emparejando": "Emparejando…",
+    "proveedorHint": "Sin proveedor no se puede recordar el emparejamiento para la próxima vez.",
+    "conteo": "{listas} listas · {porRevisar} por revisar",
+    "faltan": "{n} sin emparejar",
+    "faltaEmparejar": "Faltan {n} líneas por emparejar.",
+    "continuar": "Continuar",
+    "confirmarTitulo": "Confirmar recepción",
+    "resumen": "{n} líneas",
+    "recibir": "Recibir",
+    "recibiendo": "Recibiendo…",
+    "recibido": "Compra recibida",
+    "okAprendidos": "Recibido. Aprendí {n} alias — la próxima compra de este proveedor será más rápida.",
+    "otraRecepcion": "Otra recepción",
+    "faltaAlmacen": "Elige el almacén.",
+    "sinSugerencias": "Sin sugerencias — búscalo",
+    "buscarProducto": "Buscar producto…",
+    "origen": {
+      "alias": "Alias del proveedor",
+      "sku": "Por SKU"
+    },
+    "col": {
+      "texto": "Texto del proveedor",
+      "producto": "Producto",
+      "cantidad": "Cant.",
+      "costo": "Costo",
+      "lote": "Lote",
+      "venc": "Vence"
+    },
+    "field": {
+      "proveedor": "Proveedor",
+      "selProveedor": "Elige proveedor",
+      "sinProveedor": "Sin proveedor",
+      "texto": "Texto de la factura / packing list",
+      "textoPh": "Pega aquí una línea por producto…",
+      "almacen": "Almacén",
+      "selAlmacen": "Elige almacén",
+      "factura": "Nº de factura",
+      "fecha": "Fecha",
+      "notas": "Notas"
     }
   }
 }

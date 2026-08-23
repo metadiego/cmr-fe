@@ -757,7 +757,8 @@
     "configNumeracion": "Numbering",
     "inventario_viales": "Vials",
     "planificacionCompras": "Purchase planning",
-    "calendario": "Calendar"
+    "calendario": "Calendar",
+    "recepcionFactura": "Receive from invoice"
   },
   "admin": {
     "title": "Administration",
@@ -2050,6 +2051,10 @@
         "planificacion": {
           "title": "Purchase planning",
           "desc": "How much to buy from sales and all-center stock."
+        },
+        "recepcionFactura": {
+          "title": "Receive from invoice",
+          "desc": "Paste the supplier invoice and match; the system learns their names."
         }
       }
     },
@@ -3511,6 +3516,52 @@
       "semana": "Week",
       "dia": "Day",
       "agenda": "Agenda"
+    }
+  },
+  "recepcionFactura": {
+    "title": "Receive from invoice",
+    "help": "Paste the supplier invoice or packing list; the system matches what it can and you resolve the rest. It learns: the next purchase from that supplier arrives resolved.",
+    "pegaTexto": "Paste the invoice text first.",
+    "emparejar": "Match",
+    "emparejando": "Matching…",
+    "proveedorHint": "Without a supplier the matching cannot be remembered for next time.",
+    "conteo": "{listas} ready · {porRevisar} to review",
+    "faltan": "{n} unmatched",
+    "faltaEmparejar": "{n} lines still need matching.",
+    "continuar": "Continue",
+    "confirmarTitulo": "Confirm reception",
+    "resumen": "{n} lines",
+    "recibir": "Receive",
+    "recibiendo": "Receiving…",
+    "recibido": "Purchase received",
+    "okAprendidos": "Received. Learned {n} aliases — next purchase from this supplier will be faster.",
+    "otraRecepcion": "Another reception",
+    "faltaAlmacen": "Pick the warehouse.",
+    "sinSugerencias": "No suggestions — search it",
+    "buscarProducto": "Search product…",
+    "origen": {
+      "alias": "Supplier alias",
+      "sku": "By SKU"
+    },
+    "col": {
+      "texto": "Supplier text",
+      "producto": "Product",
+      "cantidad": "Qty",
+      "costo": "Cost",
+      "lote": "Lot",
+      "venc": "Expires"
+    },
+    "field": {
+      "proveedor": "Supplier",
+      "selProveedor": "Pick supplier",
+      "sinProveedor": "No supplier",
+      "texto": "Invoice / packing list text",
+      "textoPh": "Paste one line per product…",
+      "almacen": "Warehouse",
+      "selAlmacen": "Pick warehouse",
+      "factura": "Invoice #",
+      "fecha": "Date",
+      "notas": "Notes"
     }
   }
 }

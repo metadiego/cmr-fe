@@ -385,6 +385,74 @@ export function recibirCompraLote(payload: RecibirCompraLotePayload): Promise<Re
   });
 }
 
+// Recepción DESDE el papel del proveedor (foto/pegado → emparejar → confirmar). El emparejamiento se
+// APRENDE por proveedor: mandar el `texto` original de cada línea es lo que crea el alias, para que la
+// próxima compra de ese proveedor llegue resuelta sola. NO escribe stock hasta confirmar. Perm
+// inventario.recibir. Handoff recepcion-desde-factura.
+export interface RecepcionLineaEntrada {
+  texto: string;
+  cantidad?: number | null;
+  costoUnitario?: number | null;
+  numeroLote?: string | null;
+  fechaVencimiento?: string | null;
+}
+export interface RecepcionSugerencia {
+  productoId: string;
+  nombre: string;
+  confianza: number; // 0..1
+}
+export interface RecepcionLineaEmparejada {
+  texto: string;
+  productoId?: string | null;
+  origen?: "alias" | "sku" | null;
+  confirmado: boolean;
+  sugerencias: RecepcionSugerencia[];
+  cantidad?: number | null;
+  costoUnitario?: number | null;
+  numeroLote?: string | null;
+  fechaVencimiento?: string | null;
+}
+export interface EmparejarResult {
+  listas: number;
+  porRevisar: number;
+  lineas: RecepcionLineaEmparejada[];
+}
+export function emparejarRecepcion(
+  lineas: RecepcionLineaEntrada[],
+  proveedorId?: string,
+): Promise<EmparejarResult> {
+  return apiFetch<EmparejarResult>(`/inventario/recepciones/emparejar`, {
+    method: "POST",
+    body: JSON.stringify({ ...(proveedorId ? { proveedorId } : {}), lineas }),
+  });
+}
+export interface ConfirmarRecepcionLinea {
+  productoId: string;
+  texto: string; // ORIGINAL del proveedor → se aprende como alias
+  cantidad: number;
+  costoUnitario?: number | null;
+  numeroLote?: string | null;
+  fechaVencimiento?: string | null;
+}
+export interface ConfirmarRecepcionResult {
+  documentoId: string;
+  lineas?: unknown[];
+  aliasAprendidos?: number;
+}
+export function confirmarRecepcion(payload: {
+  almacenId: string;
+  proveedorId?: string;
+  numeroFacturaCompra?: string;
+  fechaEfectiva?: string;
+  notas?: string;
+  lineas: ConfirmarRecepcionLinea[];
+}): Promise<ConfirmarRecepcionResult> {
+  return apiFetch<ConfirmarRecepcionResult>(`/inventario/recepciones/confirmar`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 // Recibo de una recepción por lote (para volver a verlo tras guardar). Perm inventario.read.
 export interface RecepcionLinea {
   productoId?: string;
