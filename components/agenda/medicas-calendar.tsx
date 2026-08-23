@@ -56,7 +56,9 @@ export function MedicasCalendar() {
   const hasta = toISO(weeks[weeks.length - 1][6]);
 
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
-  const medicosRes = useResource<Personal[]>(() => getMedicos());
+  // Médicos del centro que se está MIRANDO (cuelga del centro): recargar al cambiarlo, o se agendaría con
+  // un médico que no está allí. Handoff selector-de-centro §«Todo lo que cuelga del centro se recarga».
+  const medicosRes = useResource<Personal[]>(() => getMedicos(centro.fetchCentroId), [centro.fetchCentroId]);
   const festivosRes = useResource<Festivo[]>(() => getFestivos(year), [year]);
   const tipos = React.useMemo(
     () => (tiposRes.state.kind === "ok" ? tiposRes.state.data : []),
@@ -68,15 +70,19 @@ export function MedicasCalendar() {
   );
   const festivos = festivosRes.state.kind === "ok" ? festivosRes.state.data : [];
 
+  // Si al cambiar de centro el médico filtrado ya no existe allí, se trata como «todos» (sin resetear
+  // estado — lo prohíbe el React Compiler): así no se filtra por un médico de otro centro.
+  const medicoEfectivo = medico === ALL || medicos.some((m) => m.id === medico) ? medico : ALL;
+
   const { state, reload } = useResource<Cita[]>(
     () =>
       listCitasRango({
         desde,
         hasta,
-        medicoId: medico === ALL ? undefined : medico,
+        medicoId: medicoEfectivo === ALL ? undefined : medicoEfectivo,
         centroId: centro.fetchCentroId,
       }),
-    [desde, hasta, medico, centro.fetchCentroId],
+    [desde, hasta, medicoEfectivo, centro.fetchCentroId],
   );
   const citas = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
@@ -143,7 +149,7 @@ export function MedicasCalendar() {
           <div className="ml-auto flex items-center gap-2">
             {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
             <CentroPantallaSelector estado={centro} />
-            <Select value={medico} onValueChange={setMedico}>
+            <Select value={medicoEfectivo} onValueChange={setMedico}>
               <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={ALL}>{t("allDoctors")}</SelectItem>
