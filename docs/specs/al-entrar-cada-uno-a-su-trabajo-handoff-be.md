@@ -20,8 +20,9 @@ GET /api/v1/me/inicio
 → { "path": "/tablero/frontdesk", "elegida": null }
 ```
 
-Y redirigir a ese `path`. Ya está calculado por persona, a partir de su menú y con el orden del
-trabajo diario: frontdesk, atención, citas, facturación, inventario, pacientes.
+Y redirigir a ese `path`. **Sin suposiciones sobre en qué módulo trabaja cada uno**: el backend manda
+lo que la persona **eligió** y, si no ha elegido, la **primera opción de su propio menú** — el orden
+que ya está curado. Nada de adivinar el área de trabajo.
 
 Verificado hoy en producción:
 
@@ -48,9 +49,11 @@ la pantalla que eligió, `path` vuelve a la deducida y `elegida` sigue mostrando
 entra a un «prohibido» cada mañana. Si `elegida` y `path` no coinciden, puedes avisarle de que su
 pantalla preferida ya no está disponible.
 
-**3. `/dashboard`: dejarla como ajustes, no como aterrizaje.** Lo que hay ahí —Apariencia, Mis
-tableros, Cerrar sesión— tiene sentido colgando del avatar, que es donde la gente lo busca. Como
-pantalla de entrada, no.
+**3. `/dashboard` deja de ser destino: quien llegue ahí, al trabajo.** Corrige lo que decía antes este
+documento («dejarla como ajustes»): no es aterrizaje **ni** una pantalla en la que quedarse. `/dashboard`
+resuelve `GET /me/inicio` igual que la entrada y **redirige** a la pantalla de la persona; solo se queda
+si no tiene ninguna. Lo que había ahí —Apariencia, Mis tableros, Cerrar sesión— vive colgando del
+**avatar**, que es donde la gente lo busca; no hace falta una pantalla de sesión para eso.
 
 ## Por qué no lo arregla el backend solo
 
