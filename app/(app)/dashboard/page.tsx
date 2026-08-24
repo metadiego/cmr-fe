@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { createClient } from "@/lib/supabase/client";
 import { getMe, type Me } from "@/lib/api/auth";
+import { getInicio } from "@/lib/api/preferences";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { ApiError } from "@/lib/api/types";
 import { useCan } from "@/hooks/use-can";
@@ -29,6 +31,7 @@ function iniciales(me: Me): string {
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
   const tCommon = useTranslations("common");
+  const router = useRouter();
   const { can } = useCan();
   // «Mis tableros» solo tiene sentido para quien USA tableros: si el menú de la persona no trae ningún
   // /tablero/* (p.ej. call-center que solo hace Citas), personalizar tableros no aplica → se esconde.
@@ -40,6 +43,23 @@ export default function DashboardPage() {
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
+
+  // Al entrar, cada uno a SU trabajo. Esta pantalla es de sesión, no de trabajo: aterrizar aquí cada
+  // mañana no le sirve a nadie. El BE dice a dónde llevar a la persona —lo que ELLA eligió, o la
+  // primera opción de su menú—; aquí solo se obedece. Se llega igual desde el avatar, a propósito.
+  // Handoff al-entrar-cada-uno-a-su-trabajo-handoff-be.md.
+  React.useEffect(() => {
+    let active = true;
+    getInicio()
+      .then(({ path }) => {
+        if (!active || !path || path === "/dashboard") return;
+        router.replace(path);
+      })
+      .catch(() => {
+        // Si no se puede saber a dónde ir, se queda aquí: es mejor esta pantalla que ninguna.
+      });
+    return () => { active = false; };
+  }, [router]);
 
   React.useEffect(() => {
     let active = true;
