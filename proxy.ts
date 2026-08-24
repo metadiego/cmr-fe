@@ -50,10 +50,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already signed in and landing on /login → send to the dashboard.
+  // Already signed in and landing on /login → a SU trabajo (/inicio resuelve GET /me/inicio), no a «Tu
+  // sesión». Handoff al-entrar-cada-uno-a-su-trabajo.
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/inicio";
     return NextResponse.redirect(url);
   }
 
