@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ThemeEditor } from "@/components/theme/theme-editor";
 import { AvatarUploader } from "@/components/media/avatar-uploader";
-import { InicioPreferencia } from "@/components/settings/inicio-preferencia";
 
 type State =
   | { kind: "loading" }
@@ -111,11 +110,6 @@ export default function AppearancePage() {
       <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
         <h2 className="mb-4 text-sm font-medium">{t("avatarTitle")}</h2>
         <AvatarUploader />
-      </div>
-
-      {/* «Al entrar, llévame a…» — pantalla de entrada personal (capa usuario de preferencias). */}
-      <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
-        <InicioPreferencia />
       </div>
 
       {/* Theme + background (the user preferences layer) */}

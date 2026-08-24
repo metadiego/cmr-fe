@@ -31,6 +31,7 @@ export async function login(
   }
 
   // redirect() throws NEXT_REDIRECT — keep it outside any try/catch.
-  // /inicio resuelve a dónde va cada persona (GET /me/inicio); ya no aterrizamos a todos en «Tu sesión».
-  redirect("/inicio");
+  // Al entrar se aterriza en el INICIO (/dashboard), una página EN BLANCO como el legacy — NO en un
+  // módulo de trabajo. Nada de suponer en qué trabaja cada quien y mandarlo ahí.
+  redirect("/dashboard");
 }

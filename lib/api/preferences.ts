@@ -8,18 +8,6 @@ export interface PublicPreferences {
   effective: ThemeConfig;
 }
 
-// A dónde llevar a la persona AL ENTRAR. `path` ya viene resuelto por el BE (su elección si tiene el
-// permiso; si no, la deducida de su menú con el orden del trabajo diario). `elegida` = lo que pidió (o
-// null). Si `elegida` y `path` difieren, su preferida ya no está disponible → se le puede avisar. `path`
-// null = no tiene ninguna pantalla. Handoff al-entrar-cada-uno-a-su-trabajo.
-export interface Inicio {
-  path: string | null;
-  elegida: string | null;
-}
-export function getInicio(): Promise<Inicio> {
-  return apiFetch<Inicio>("/me/inicio");
-}
-
 export interface PreferenceLayers {
   sistema?: ThemeConfig | null;
   centro?: ThemeConfig | null;

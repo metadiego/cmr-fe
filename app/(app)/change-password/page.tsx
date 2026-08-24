@@ -38,8 +38,7 @@ export default function ChangePasswordPage() {
       toast.success(t("success"));
       // Hard navigation so SessionGate (in the persistent layout) refetches
       // /auth/me and sees mustChangePassword=false — avoids a redirect loop.
-      // /inicio lleva a cada quien a su trabajo (GET /me/inicio).
-      window.location.assign("/inicio");
+      window.location.assign("/dashboard");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setSubmitting(false);
