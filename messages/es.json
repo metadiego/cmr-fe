@@ -2427,7 +2427,8 @@
       "usbDone": "Enviado directo por USB",
       "usbError": "No se pudo imprimir por USB",
       "usbUnsupported": "Este navegador no soporta impresión USB directa (usa Chrome o Edge)."
-    }
+    },
+    "noMatches": "No hay nada con ese texto"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
