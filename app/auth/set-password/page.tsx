@@ -113,8 +113,8 @@ export default function SetPasswordPage() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       toast.success(t("success"));
-      // Hard navigation so the session is read fresh on /dashboard.
-      window.location.assign("/dashboard");
+      // Hard navigation so the session is read fresh; /inicio lleva a cada quien a su trabajo.
+      window.location.assign("/inicio");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setSubmitting(false);
@@ -149,7 +149,7 @@ export default function SetPasswordPage() {
       const { error: upErr } = await supabase.auth.updateUser({ password });
       if (upErr) throw upErr;
       toast.success(t("success"));
-      window.location.assign("/dashboard");
+      window.location.assign("/inicio");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setSubmitting(false);

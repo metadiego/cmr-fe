@@ -3598,5 +3598,22 @@
   "centroSel": {
     "label": "Centro",
     "soloLectura": "Solo lectura"
+  },
+  "inicio": {
+    "llevando": "Llevándote a tu trabajo…",
+    "sinPantalla": {
+      "title": "No tienes ninguna pantalla asignada",
+      "desc": "Habla con tu supervisor para que te den acceso a tu área de trabajo.",
+      "aAjustes": "Ir a ajustes"
+    }
+  },
+  "inicioPref": {
+    "title": "Al entrar, llévame a…",
+    "desc": "Elige la pantalla con la que quieres empezar. Solo te afecta a ti.",
+    "auto": "Automática (según mi trabajo)",
+    "guardar": "Guardar",
+    "guardando": "Guardando…",
+    "guardado": "Guardado",
+    "noDisponible": "Tu pantalla preferida ({elegida}) ya no está disponible; por ahora entras en {actual}."
   }
 }

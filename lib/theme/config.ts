@@ -56,6 +56,12 @@ export interface ThemeConfig {
    * escribe como `--recibo-ancho` y `@page`/`.recibo-print` lo usan. Handoff recibo-termico-sale-en-miniatura.
    */
   recibo?: { anchoMm?: number };
+  /**
+   * Pantalla de ENTRADA elegida por la persona («Al entrar, llévame a…»), p.ej. "/facturacion". Vive en
+   * la capa `usuario` de preferencias. El BE la resuelve en GET /me/inicio (si pierde el permiso de esa
+   * pantalla, cae a la deducida). Handoff al-entrar-cada-uno-a-su-trabajo.
+   */
+  inicio?: string;
 }
 
 // camelCase token key → CSS custom property in globals.css.

@@ -31,5 +31,6 @@ export async function login(
   }
 
   // redirect() throws NEXT_REDIRECT — keep it outside any try/catch.
-  redirect("/dashboard");
+  // /inicio resuelve a dónde va cada persona (GET /me/inicio); ya no aterrizamos a todos en «Tu sesión».
+  redirect("/inicio");
 }

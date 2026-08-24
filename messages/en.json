@@ -3598,5 +3598,22 @@
   "centroSel": {
     "label": "Center",
     "soloLectura": "Read-only"
+  },
+  "inicio": {
+    "llevando": "Taking you to your work…",
+    "sinPantalla": {
+      "title": "You have no screen assigned",
+      "desc": "Ask your supervisor to grant access to your work area.",
+      "aAjustes": "Go to settings"
+    }
+  },
+  "inicioPref": {
+    "title": "On sign-in, take me to…",
+    "desc": "Pick the screen you want to start on. Only affects you.",
+    "auto": "Automatic (based on my work)",
+    "guardar": "Save",
+    "guardando": "Saving…",
+    "guardado": "Saved",
+    "noDisponible": "Your preferred screen ({elegida}) is no longer available; for now you land on {actual}."
   }
 }
