@@ -831,7 +831,10 @@
       "menuEmpty": "No menu items.",
       "menuEditableHelp": "Turn an option on/off for THIS user without changing their role (kept as an exception).",
       "excepcion": "exception",
-      "sinPermiso": "visible to everyone"
+      "sinPermiso": "visible to everyone",
+      "centros": "Centers",
+      "sinExcepciones": "No exceptions",
+      "centrosHelp": "Centers are per-user exceptions: they grant a permission in another center without changing their role or menu. If many people need the same, make it a role."
     },
     "menu": {
       "title": "Dynamic menu",

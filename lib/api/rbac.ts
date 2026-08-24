@@ -147,6 +147,12 @@ export interface AccessOverride {
   centroId?: string | null
 }
 
+// Centro (id + nombre) para los selectores de la ficha de accesos. Handoff centros-por-permiso-del-usuario.
+export interface CentroRef {
+  id: string
+  nombre: string
+}
+
 export interface AccessPermiso {
   clave: string
   modulo: string
@@ -155,6 +161,10 @@ export interface AccessPermiso {
   viaRole: boolean // granted by an assigned role
   override: "grant" | "deny" | null // per-profile exception
   effective: boolean // resolved result
+  // «Centros concedidos»: el permiso suelto en centros AJENOS (no da sesión, no cambia el menú ni el nav).
+  // SIEMPRE array (vacío = sin excepciones, «donde le toque por su rol y sus centros»). Se ven aun en la
+  // vista global. Handoff centros-por-permiso-del-usuario.
+  centrosConcedidos: CentroRef[]
 }
 
 export interface ProfileAccess {
@@ -162,6 +172,8 @@ export interface ProfileAccess {
   overrides: AccessOverride[]
   permisos: AccessPermiso[]
   effectivePermissions: string[]
+  // Todos los centros de la empresa: fuente del selector de la columna «Centros».
+  centrosDisponibles: CentroRef[]
 }
 
 export async function getProfileAccess(
@@ -174,9 +186,25 @@ export async function getProfileAccess(
   return {
     roles: res?.roles ?? [],
     overrides: res?.overrides ?? [],
-    permisos: res?.permisos ?? [],
+    // centrosConcedidos SIEMPRE array aunque el BE lo omita en algún borde.
+    permisos: (res?.permisos ?? []).map((p) => ({ ...p, centrosConcedidos: p.centrosConcedidos ?? [] })),
     effectivePermissions: res?.effectivePermissions ?? [],
+    centrosDisponibles: res?.centrosDisponibles ?? [],
   }
+}
+
+// «Esta persona, ESTE permiso, en ESTOS centros» sin tocar su rol/menú/sesión. Deja los centros de la
+// fila EXACTAMENTE en `centroIds` (crea los que falten, borra los que sobren; [] los quita todos).
+// Idempotente. Devuelve la fila recalculada para repintar solo esa fila. Handoff centros-por-permiso-del-usuario.
+export async function setPermisoCentros(
+  id: string,
+  permisoClave: string,
+  centroIds: string[]
+): Promise<{ clave: string; centrosConcedidos: CentroRef[] }> {
+  return apiFetch(`/profiles/${id}/permisos/${encodeURIComponent(permisoClave)}/centros`, {
+    method: "PUT",
+    body: JSON.stringify({ centroIds }),
+  })
 }
 
 // A preview of the menu the profile would see (each item annotated allowed/required).

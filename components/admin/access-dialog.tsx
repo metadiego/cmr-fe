@@ -12,12 +12,15 @@ import {
   removeRoleFromProfile,
   setProfileOverride,
   removeProfileOverride,
+  setPermisoCentros,
   type Rol,
   type ProfileAccess,
   type AccessPermiso,
+  type CentroRef,
 } from "@/lib/api/rbac"
 import { getCenters, type Centro } from "@/lib/api/centers"
 import { toastError } from "@/lib/api/errors"
+import { cn } from "@/lib/utils"
 import { useResource } from "@/hooks/use-resource"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -230,6 +233,10 @@ function ExceptionsTab({
 }) {
   const t = useTranslations("admin.access")
   const [busy, setBusy] = React.useState<string | null>(null)
+  // Repintado local de la columna «Centros» tras el PUT (la respuesta trae la fila recalculada), para no
+  // recargar toda la ficha. Clave del permiso → sus centros concedidos.
+  const [centrosPorClave, setCentrosPorClave] = React.useState<Record<string, CentroRef[]>>({})
+  const [busyCentros, setBusyCentros] = React.useState<string | null>(null)
 
   if (access.kind === "loading") return <Loading />
   if (access.kind === "fail") return <Fail message={access.message} />
@@ -239,6 +246,7 @@ function ExceptionsTab({
   const overrideByClave = new Map(
     access.data.overrides.map((o) => [o.permisoClave, o])
   )
+  const disponibles = access.data.centrosDisponibles
 
   async function change(p: AccessPermiso, next: TriState) {
     setBusy(p.clave)
@@ -258,48 +266,99 @@ function ExceptionsTab({
     }
   }
 
+  // Centros concedidos vigentes de la fila (el repintado local pisa lo que trajo el fetch).
+  const centrosDe = (p: AccessPermiso): CentroRef[] => centrosPorClave[p.clave] ?? p.centrosConcedidos
+
+  async function toggleCentro(p: AccessPermiso, cid: string) {
+    const actuales = centrosDe(p).map((c) => c.id)
+    const next = actuales.includes(cid) ? actuales.filter((x) => x !== cid) : [...actuales, cid]
+    setBusyCentros(p.clave)
+    try {
+      const fila = await setPermisoCentros(profile.id, p.clave, next)
+      // Deja la fila EXACTAMENTE en la lista devuelta; repinta solo esta fila.
+      setCentrosPorClave((m) => ({ ...m, [p.clave]: fila.centrosConcedidos }))
+      toast.success(t("saved"))
+    } catch (err) {
+      toastError(err)
+    } finally {
+      setBusyCentros(null)
+    }
+  }
+
   return (
     <div className="space-y-4">
+      {/* Los centros de la fila son excepciones POR USUARIO; si a muchos les hace falta lo mismo, es un rol. */}
+      <p className="text-xs text-muted-foreground">{t("centrosHelp")}</p>
       {Object.entries(byModulo).map(([modulo, list]) => (
         <div key={modulo} className="space-y-2">
           <p className="text-sm font-semibold capitalize">{modulo}</p>
           {list.map((p) => {
             const value: TriState = p.override ?? "inherit"
+            const concedidos = new Set(centrosDe(p).map((c) => c.id))
             return (
-              <div
-                key={p.clave}
-                className="flex items-center justify-between gap-3 rounded-md border px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs">{p.accion}</span>
-                    {p.override && (
-                      <Badge variant="outline">{t("exception")}</Badge>
-                    )}
-                    {p.effective && (
-                      <Badge variant="secondary">{t("effective")}</Badge>
+              <div key={p.clave} className="space-y-2 rounded-md border px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs">{p.accion}</span>
+                      {p.override && (
+                        <Badge variant="outline">{t("exception")}</Badge>
+                      )}
+                      {p.effective && (
+                        <Badge variant="secondary">{t("effective")}</Badge>
+                      )}
+                    </div>
+                    {p.descripcion && (
+                      <p className="truncate text-xs text-muted-foreground">
+                        {p.descripcion}
+                      </p>
                     )}
                   </div>
-                  {p.descripcion && (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {p.descripcion}
-                    </p>
-                  )}
+                  <Select
+                    value={value}
+                    disabled={busy === p.clave}
+                    onValueChange={(v) => change(p, v as TriState)}
+                  >
+                    <SelectTrigger className="w-36 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inherit">{t("inherit")}</SelectItem>
+                      <SelectItem value="grant">{t("grant")}</SelectItem>
+                      <SelectItem value="deny">{t("deny")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select
-                  value={value}
-                  disabled={busy === p.clave}
-                  onValueChange={(v) => change(p, v as TriState)}
-                >
-                  <SelectTrigger className="w-36 shrink-0">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="inherit">{t("inherit")}</SelectItem>
-                    <SelectItem value="grant">{t("grant")}</SelectItem>
-                    <SelectItem value="deny">{t("deny")}</SelectItem>
-                  </SelectContent>
-                </Select>
+
+                {/* Columna «Centros»: permiso suelto en centros ajenos. Vacío = sin excepciones (donde le
+                    toque por su rol y sus centros), NO «ninguno». Chips por centro; clic hace el PUT. */}
+                {disponibles.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 border-t pt-2">
+                    <span className="mr-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("centros")}</span>
+                    {concedidos.size === 0 && (
+                      <span className="text-xs italic text-muted-foreground">{t("sinExcepciones")}</span>
+                    )}
+                    {disponibles.map((c) => {
+                      const on = concedidos.has(c.id)
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          disabled={busyCentros === p.clave}
+                          onClick={() => toggleCentro(p, c.id)}
+                          className={cn(
+                            "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-50",
+                            on
+                              ? "border-primary/40 bg-primary/15 text-primary"
+                              : "border-border text-muted-foreground hover:bg-accent"
+                          )}
+                        >
+                          {c.nombre}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )
           })}

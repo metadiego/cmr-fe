@@ -831,7 +831,10 @@
       "menuEmpty": "Sin ítems de menú.",
       "menuEditableHelp": "Enciende o apaga una opción para ESTE usuario sin cambiarle el rol (queda como excepción).",
       "excepcion": "excepción",
-      "sinPermiso": "visible para todos"
+      "sinPermiso": "visible para todos",
+      "centros": "Centros",
+      "sinExcepciones": "Sin excepciones",
+      "centrosHelp": "Los centros son excepciones por usuario: le dan un permiso en un centro ajeno sin cambiar su rol ni su menú. Si a mucha gente le hace falta lo mismo, hazlo un rol."
     },
     "menu": {
       "title": "Menú dinámico",
