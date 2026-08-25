@@ -84,6 +84,9 @@ const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 // El código queda intacto para el futuro; en false todo imprime por el navegador. Cambiar a true para
 // volver a exponer el botón «Opciones de impresión» y la ruta QZ.
 const QZ_PRINT_UI = false;
+// Panel «lo que suma el paciente hoy»: apagado hasta que el BE arregle GET /facturas/resumen-paciente
+// (hoy da 400 con cualquier llamada). Ver docs/specs/resumen-paciente-endpoint-roto-handoff-be.md.
+const RESUMEN_PACIENTE_ENABLED = false;
 
 export default function FacturacionPage() {
   const params = useParams<{ id: string }>();
@@ -611,8 +614,11 @@ export default function FacturacionPage() {
       />
 
       {/* «Lo que suma el paciente hoy»: varias facturas del mismo paciente → total sin calculadora. Solo
-          facturación general y solo si la factura tiene paciente. Handoff resumen-de-facturas-del-paciente. */}
-      {factura.pacienteId && (
+          facturación general y solo si la factura tiene paciente. Handoff resumen-de-facturas-del-paciente.
+          DESACTIVADO: el endpoint GET /facturas/resumen-paciente está roto en prod (valida contradictorio:
+          exige pacienteId como UUID y a la vez lo rechaza como propiedad → 400 con cualquier llamada). Ver
+          docs/specs/resumen-paciente-endpoint-roto-handoff-be.md. Poner en true cuando el BE lo acepte. */}
+      {RESUMEN_PACIENTE_ENABLED && factura.pacienteId && (
         <div className="mb-4 no-print">
           {/* El resumen exige centro (admin/master sin centro → 400). Usar el de la URL o, si falta, el de
               la propia factura (clinicId) → nunca 400 por centro al abrir el panel. */}
