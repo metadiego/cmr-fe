@@ -653,7 +653,8 @@
     "appSettings": "Configuración de la app",
     "boardModules": "Módulos de tablero",
     "profileSoon": "Perfil y preferencias (próximamente)",
-    "myAppearance": "Mi apariencia"
+    "myAppearance": "Mi apariencia",
+    "changePassword": "Cambiar mi contraseña"
   },
   "nav": {
     "home": "Inicio",
@@ -3644,5 +3645,48 @@
     "productos": "Productos",
     "suero": "Suero",
     "consulta": "Consulta"
+  },
+  "configIndex": {
+    "title": "Configuración",
+    "subtitle": "Todo lo que se puede configurar. Cada sección respeta tu permiso.",
+    "sinAcceso": "No tienes secciones de configuración disponibles.",
+    "sec": {
+      "apariencia": {
+        "title": "Apariencia corporativa",
+        "desc": "Colores, radio y fondo del centro."
+      },
+      "menu": {
+        "title": "Menú",
+        "desc": "Qué opciones ve cada rol."
+      },
+      "tableros": {
+        "title": "Tableros",
+        "desc": "Tableros y sus columnas."
+      },
+      "factura": {
+        "title": "Factura",
+        "desc": "Envío gravado, series e impuestos."
+      },
+      "numeracion": {
+        "title": "Numeración",
+        "desc": "Números de facturas y devoluciones."
+      },
+      "formatos": {
+        "title": "Formatos",
+        "desc": "Formatos de impresión."
+      },
+      "datosPaciente": {
+        "title": "Datos del paciente",
+        "desc": "Campos de la ficha del paciente."
+      },
+      "requeridos": {
+        "title": "Requisitos",
+        "desc": "Requisitos por servicio."
+      },
+      "panelEnfermeria": {
+        "title": "Panel de enfermería",
+        "desc": "Configuración del panel de enfermería."
+      }
+    }
   }
 }

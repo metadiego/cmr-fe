@@ -10,6 +10,7 @@ import {
   Settings02Icon,
   DashboardSquare01Icon,
   UserCircleIcon,
+  SquareLock02Icon,
   Logout03Icon,
 } from "@hugeicons/core-free-icons";
 
@@ -155,6 +156,14 @@ export function UserMenu() {
             <Link href="/settings/appearance">
               <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
               {t("myAppearance")}
+            </Link>
+          </DropdownMenuItem>
+          {/* Cambiar la propia contraseña sin depender del admin: antes solo se llegaba a /change-password
+              cuando el sistema forzaba el cambio. Handoff configuracion-y-cambiar-clave. */}
+          <DropdownMenuItem asChild>
+            <Link href="/change-password">
+              <HugeiconsIcon icon={SquareLock02Icon} className="size-4" />
+              {t("changePassword")}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>

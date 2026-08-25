@@ -653,7 +653,8 @@
     "appSettings": "App settings",
     "boardModules": "Board modules",
     "profileSoon": "Profile & preferences (coming soon)",
-    "myAppearance": "My appearance"
+    "myAppearance": "My appearance",
+    "changePassword": "Change my password"
   },
   "nav": {
     "home": "Home",
@@ -3644,5 +3645,48 @@
     "productos": "Products",
     "suero": "IV",
     "consulta": "Consult"
+  },
+  "configIndex": {
+    "title": "Settings",
+    "subtitle": "Everything you can configure. Each section respects your permission.",
+    "sinAcceso": "You have no configuration sections available.",
+    "sec": {
+      "apariencia": {
+        "title": "Corporate appearance",
+        "desc": "Center colors, radius and background."
+      },
+      "menu": {
+        "title": "Menu",
+        "desc": "Which options each role sees."
+      },
+      "tableros": {
+        "title": "Boards",
+        "desc": "Boards and their columns."
+      },
+      "factura": {
+        "title": "Invoice",
+        "desc": "Taxable sending, series and taxes."
+      },
+      "numeracion": {
+        "title": "Numbering",
+        "desc": "Invoice and refund numbers."
+      },
+      "formatos": {
+        "title": "Formats",
+        "desc": "Print formats."
+      },
+      "datosPaciente": {
+        "title": "Patient data",
+        "desc": "Patient record fields."
+      },
+      "requeridos": {
+        "title": "Requirements",
+        "desc": "Requirements per service."
+      },
+      "panelEnfermeria": {
+        "title": "Nursing panel",
+        "desc": "Nursing panel settings."
+      }
+    }
   }
 }
