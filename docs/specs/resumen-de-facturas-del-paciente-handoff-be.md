@@ -34,6 +34,10 @@ GET /api/v1/facturas/resumen-paciente?pacienteId=<uuid>&desde=&hasta=
 
 - `pacienteId` obligatorio. `desde`/`hasta` opcionales en formato `YYYY-MM-DD`; **sin ellas, hoy**,
   que es el caso real: el paciente que está en el mostrador ahora.
+- `estados` opcional (repetible): `borrador`, `emitida`, `devuelta_parcial`, `devuelta_total`. **Sin
+  él manda la configuración del centro** (`facturacion.resumenPacienteEstados`) y, en su defecto,
+  borrador + emitida. No lo fijes en el FE: el dueño quiere poder cambiarlo por centro sin tocar
+  código. `anulada` no se puede pedir — se ve en la lista pero nunca suma.
 - Permiso: `factura.read`, el mismo con el que ya se ve la factura.
 - Solo **facturación general** (láser, suero, productos). Las consultas son otro departamento y no
   aparecen, aunque el paciente tenga una el mismo día.
