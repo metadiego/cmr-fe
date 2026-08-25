@@ -614,7 +614,13 @@ export default function FacturacionPage() {
           facturación general y solo si la factura tiene paciente. Handoff resumen-de-facturas-del-paciente. */}
       {factura.pacienteId && (
         <div className="mb-4 no-print">
-          <ResumenPacientePanel pacienteId={String(factura.pacienteId)} facturaActualId={id} centro={centro} />
+          {/* El resumen exige centro (admin/master sin centro → 400). Usar el de la URL o, si falta, el de
+              la propia factura (clinicId) → nunca 400 por centro al abrir el panel. */}
+          <ResumenPacientePanel
+            pacienteId={String(factura.pacienteId)}
+            facturaActualId={id}
+            centro={centro ?? (factura as { clinicId?: string }).clinicId ?? undefined}
+          />
         </div>
       )}
 
