@@ -1250,7 +1250,9 @@
       "zona": "Zona"
     },
     "no_emitida_pendiente_pago": "No se emitió: la factura tiene saldo pendiente de cobro.",
-    "ya_emitida": "La factura ya estaba emitida (no se renumera)."
+    "ya_emitida": "La factura ya estaba emitida (no se renumera).",
+    "sin_lineas": "Sin líneas",
+    "sin_grupo": "Sin grupo"
   },
   "zona": {
     "rodilla": "Rodilla",
@@ -3619,5 +3621,28 @@
     "guardando": "Guardando…",
     "guardado": "Guardado",
     "noDisponible": "Tu pantalla preferida ({elegida}) ya no está disponible; por ahora entras en {actual}."
+  },
+  "resumenPaciente": {
+    "title": "Lo que suma el paciente hoy",
+    "vacio": "Sin facturas del paciente hoy.",
+    "actual": "Esta factura",
+    "abrir": "Abrir",
+    "devuelto": "devuelto",
+    "devueltoTotal": "Devuelto",
+    "totalGeneral": "Total general",
+    "cobrado": "Cobrado",
+    "pendiente": "Pendiente",
+    "anuladas": "{n} anulada(s) excluida(s) del total.",
+    "col": {
+      "referencia": "Factura",
+      "concepto": "Concepto",
+      "importe": "Importe"
+    }
+  },
+  "grupo": {
+    "laser": "Láser",
+    "productos": "Productos",
+    "suero": "Suero",
+    "consulta": "Consulta"
   }
 }

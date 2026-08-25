@@ -43,6 +43,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
+import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-panel";
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
@@ -608,6 +609,14 @@ export default function FacturacionPage() {
           await refetch();
         }}
       />
+
+      {/* «Lo que suma el paciente hoy»: varias facturas del mismo paciente → total sin calculadora. Solo
+          facturación general y solo si la factura tiene paciente. Handoff resumen-de-facturas-del-paciente. */}
+      {factura.pacienteId && (
+        <div className="mb-4 no-print">
+          <ResumenPacientePanel pacienteId={String(factura.pacienteId)} facturaActualId={id} centro={centro} />
+        </div>
+      )}
 
       {/* Editor keyeado por updatedAt → tras guardar, remonta con los valores del servidor. */}
       <Editor

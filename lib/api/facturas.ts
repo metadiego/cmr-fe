@@ -253,6 +253,44 @@ export function getFactura(id: string, centroId?: string): Promise<FacturaConIte
   return apiFetch<FacturaConItems>(`/facturas/${id}`, {}, centroId);
 }
 
+// «Lo que suma el paciente hoy» — para cobrar sin calculadora cuando arma varias facturas por separado
+// (láser/suero/productos). El BE devuelve el resumen YA SUMADO (por `neto`, que descuenta devoluciones);
+// NO sumar los `total` a mano (mezcla departamentos y no baja lo devuelto). Solo facturación general (las
+// consultas son otro departamento). Sin desde/hasta = hoy. Handoff resumen-de-facturas-del-paciente.
+export interface ResumenFacturaFila {
+  id: string;
+  referencia: string; // nº emitida, nº presupuesto si borrador, o «borrador» — un solo campo, no decidir en el FE
+  estado: string;
+  conceptoLabelKeys: string[]; // claves i18n: grupo.laser, grupo.productos, factura.sin_lineas, factura.sin_grupo
+  total: number;
+  devuelto: number;
+  neto: number; // LO QUE SUMA (total − devuelto)
+  cobrado: number;
+  pendiente: number;
+  cuenta: boolean; // false = se ve pero NO suma (anuladas)
+}
+export interface ResumenPaciente {
+  pacienteId: string;
+  desde?: string;
+  hasta?: string;
+  facturas: ResumenFacturaFila[];
+  totalGeneral: number;
+  totalDevuelto: number;
+  totalCobrado: number;
+  totalPendiente: number;
+  anuladasExcluidas: number;
+}
+export function getResumenPaciente(
+  pacienteId: string,
+  opts?: { desde?: string; hasta?: string },
+  centroId?: string,
+): Promise<ResumenPaciente> {
+  const sp = new URLSearchParams({ pacienteId });
+  if (opts?.desde) sp.set("desde", opts.desde);
+  if (opts?.hasta) sp.set("hasta", opts.hasta);
+  return apiFetch<ResumenPaciente>(`/facturas/resumen-paciente?${sp.toString()}`, {}, centroId);
+}
+
 // Catálogo facturable (productos/servicios) para agregar líneas.
 // `contexto='consulta'` → el BE restringe a los productos de los tipos de cita activos (Consulta,
 // Seguimiento): una factura de consulta médica no ofrece el catálogo físico completo.

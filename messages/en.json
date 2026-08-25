@@ -1250,7 +1250,9 @@
       "zona": "Zone"
     },
     "no_emitida_pendiente_pago": "Not issued: the invoice has a pending balance.",
-    "ya_emitida": "The invoice was already issued (not renumbered)."
+    "ya_emitida": "The invoice was already issued (not renumbered).",
+    "sin_lineas": "No lines",
+    "sin_grupo": "No group"
   },
   "zona": {
     "rodilla": "Knee",
@@ -3619,5 +3621,28 @@
     "guardando": "Saving…",
     "guardado": "Saved",
     "noDisponible": "Your preferred screen ({elegida}) is no longer available; for now you land on {actual}."
+  },
+  "resumenPaciente": {
+    "title": "What the patient owes today",
+    "vacio": "No invoices for this patient today.",
+    "actual": "This invoice",
+    "abrir": "Open",
+    "devuelto": "returned",
+    "devueltoTotal": "Returned",
+    "totalGeneral": "Grand total",
+    "cobrado": "Paid",
+    "pendiente": "Pending",
+    "anuladas": "{n} voided invoice(s) excluded from the total.",
+    "col": {
+      "referencia": "Invoice",
+      "concepto": "Concept",
+      "importe": "Amount"
+    }
+  },
+  "grupo": {
+    "laser": "Laser",
+    "productos": "Products",
+    "suero": "IV",
+    "consulta": "Consult"
   }
 }
