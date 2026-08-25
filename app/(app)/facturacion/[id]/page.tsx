@@ -84,9 +84,9 @@ const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 // El código queda intacto para el futuro; en false todo imprime por el navegador. Cambiar a true para
 // volver a exponer el botón «Opciones de impresión» y la ruta QZ.
 const QZ_PRINT_UI = false;
-// Panel «lo que suma el paciente hoy»: apagado hasta que el BE arregle GET /facturas/resumen-paciente
-// (hoy da 400 con cualquier llamada). Ver docs/specs/resumen-paciente-endpoint-roto-handoff-be.md.
-const RESUMEN_PACIENTE_ENABLED = false;
+// Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
+// pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
+const RESUMEN_PACIENTE_ENABLED = true;
 
 export default function FacturacionPage() {
   const params = useParams<{ id: string }>();
