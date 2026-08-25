@@ -759,7 +759,8 @@
     "inventario_viales": "Vials",
     "planificacionCompras": "Purchase planning",
     "calendario": "Calendar",
-    "recepcionFactura": "Receive from invoice"
+    "recepcionFactura": "Receive from invoice",
+    "configuracion_datos_paciente": "Required patient data"
   },
   "admin": {
     "title": "Administration",
@@ -3688,5 +3689,8 @@
         "desc": "Nursing panel settings."
       }
     }
+  },
+  "configGuard": {
+    "sinPermiso": "You do not have access to this setting. Admins only."
   }
 }

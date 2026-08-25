@@ -759,7 +759,8 @@
     "inventario_viales": "Viales",
     "planificacionCompras": "Planificación de compras",
     "calendario": "Calendario",
-    "recepcionFactura": "Recibir desde factura"
+    "recepcionFactura": "Recibir desde factura",
+    "configuracion_datos_paciente": "Datos obligatorios del paciente"
   },
   "admin": {
     "title": "Administración",
@@ -3688,5 +3689,8 @@
         "desc": "Configuración del panel de enfermería."
       }
     }
+  },
+  "configGuard": {
+    "sinPermiso": "No tienes acceso a esta configuración. Es solo para administradores."
   }
 }

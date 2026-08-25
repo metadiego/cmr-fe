@@ -17,12 +17,12 @@ import { useCan } from "@/hooks/use-can";
 const SECCIONES = [
   { href: "/configuracion/apariencia", permiso: "preferences.update", icon: PaintBoardIcon, key: "apariencia" },
   { href: "/configuracion/menu", permiso: "rbac.read", icon: Menu01Icon, key: "menu" },
-  { href: "/configuracion/tableros", permiso: "tablero.admin", icon: DashboardSquare01Icon, key: "tableros" },
+  { href: "/configuracion/tableros", permiso: "tablero.config", icon: DashboardSquare01Icon, key: "tableros" },
   { href: "/configuracion/factura", permiso: "centro.fiscal.write", icon: InvoiceIcon, key: "factura" },
   { href: "/configuracion/numeracion", permiso: "facturacion.numeracion.write", icon: ListSettingIcon, key: "numeracion" },
   { href: "/configuracion/formatos", permiso: "formatos.config", icon: PrinterIcon, key: "formatos" },
   { href: "/configuracion/datos-paciente", permiso: "pacientes.config", icon: UserAccountIcon, key: "datosPaciente" },
-  { href: "/configuracion/requeridos", permiso: "servicios.update", icon: CheckListIcon, key: "requeridos" },
+  { href: "/configuracion/requeridos", permiso: "servicios.config", icon: CheckListIcon, key: "requeridos" },
   { href: "/configuracion/panel-enfermeria", permiso: "panel.config", icon: StethoscopeIcon, key: "panelEnfermeria" },
 ] as const;
 
