@@ -28,11 +28,15 @@ import {
   type PaqueteDisponibilidad,
   transferirTratamiento,
   getAvisosFrontdesk,
+  getPresentes,
   type FrontdeskAvisosReporte,
+  type PresentesResumen,
 } from "@/lib/api/frontdesk";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { PresentesMarca } from "@/components/frontdesk/presentes-marca";
+import { PRESENTES_DEFAULTS } from "@/lib/presentes-prefs";
 import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
 import { useRouter, usePathname } from "next/navigation";
 import { buscarPaciente } from "@/lib/api/facturas";
@@ -282,6 +286,29 @@ export function FrontdeskBoard() {
   );
   const avisos = avisosRes.state.kind === "ok" ? avisosRes.state.data : null;
   const [avisosOpen, setAvisosOpen] = React.useState(false);
+
+  // Contador de PRESENTES por servicio (la burbuja del legado). Del BE (no se cuenta en el FE): trae todos
+  // los servicios del centro. Se refresca por el mismo SSE (ver refetch). Mientras el endpoint no exista,
+  // getPresentes devuelve null y la barra no muestra contadores. Handoff presentes-por-servicio.
+  const presentesRes = useResource<PresentesResumen | null>(
+    () => (gate.centro ? getPresentes(gate.centro) : Promise.resolve(null)),
+    [gate.centro, fecha],
+  );
+  const presentesPorClave = React.useMemo(() => {
+    const m = new Map<string, number>();
+    if (presentesRes.state.kind === "ok" && presentesRes.state.data) {
+      for (const s of presentesRes.state.data.servicios) m.set(s.clave, s.presentes);
+    }
+    return m;
+  }, [presentesRes.state]);
+  const presentesMax = React.useMemo(() => {
+    let mx = 1;
+    for (const v of presentesPorClave.values()) mx = Math.max(mx, v);
+    return mx;
+  }, [presentesPorClave]);
+  // Preferencias del indicador: por ahora los defaults (el endpoint de preferencias lo confirma el BE;
+  // la corporativa mandará sobre la personal). El contrato de la barra no cambia. Handoff presentes-por-servicio.
+  const presentesPrefs = PRESENTES_DEFAULTS;
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
   const sesiones = React.useMemo(
     () => new Map((sesRes.state.kind === "ok" ? sesRes.state.data : []).map((s) => [s.id, s])),
@@ -291,7 +318,8 @@ export function FrontdeskBoard() {
     boardRes.refresh();
     sesRes.refresh();
     avisosRes.refresh();
-  }, [boardRes, sesRes, avisosRes]);
+    presentesRes.refresh(); // el conteo de presentes se recalcula al marcar presente / asistir (SSE)
+  }, [boardRes, sesRes, avisosRes, presentesRes]);
 
   // En vivo (bus único /tablero/stream, entidad sesion). entrega_sin_saldo → alerta roja persistente.
   const [sinSaldoIds, setSinSaldoIds] = React.useState<Set<string>>(new Set());
@@ -626,6 +654,12 @@ export function FrontdeskBoard() {
                     />
                   )}
                   {s.nombre}
+                  {/* Contador de presentes (la burbuja del legado): color solo donde hay gente. */}
+                  <PresentesMarca
+                    presentes={presentesPorClave.get(s.clave) ?? 0}
+                    prefs={presentesPrefs}
+                    max={presentesMax}
+                  />
                 </button>
               );
             })}

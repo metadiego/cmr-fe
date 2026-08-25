@@ -37,6 +37,31 @@ export function getSesion(id: string): Promise<Sesion> {
   return apiFetch<Sesion>(`/frontdesk/sesiones/${id}`);
 }
 
+// Conteo de PRESENTES por servicio (la burbuja del legado): cuánta gente está ahora en cada terapia.
+// Cuenta SOLO el estado `presente` (en_terapia y asistido no cuentan). Trae TODOS los servicios del
+// centro con presentes:0 incluido (el FE decide esconder vacíos o no). Permiso frontdesk.read. Se refresca
+// por el SSE que la pantalla ya escucha; NO sondear. Handoff presentes-por-servicio.
+export interface PresentePorServicio {
+  servicioId: string;
+  clave: string;
+  labelKey: string;
+  presentes: number;
+}
+export interface PresentesResumen {
+  fecha: string;
+  servicios: PresentePorServicio[];
+  totalPresentes: number;
+}
+export async function getPresentes(centroId?: string): Promise<PresentesResumen | null> {
+  // El endpoint aún se está construyendo en el BE: si no existe (404) o falla, la barra simplemente no
+  // muestra contadores en vez de romperse. En cuanto viva, empieza a pintar solo.
+  try {
+    return await apiFetch<PresentesResumen>(`/frontdesk/presentes`, {}, centroId);
+  } catch {
+    return null;
+  }
+}
+
 // POST /frontdesk/sesiones — schedule a service session on a date (no time).
 // Devuelve la sesión + los `warnings` del BE (cupo excedido / sin cupo) — no bloqueante.
 export async function crearSesion(
