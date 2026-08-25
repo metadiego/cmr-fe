@@ -2,6 +2,21 @@
 
 Backend hecho, probado y con 20 pruebas. Falta el panel.
 
+## OJO: no sumes los totales a mano
+
+Había una spec previa (`cmr-be/docs/specs/total-combinado-borradores-del-paciente.md`) que decía
+llamar a `GET /facturas?pacienteId=&estado=borrador` y sumar los `total` en el FE. **No hagas eso**:
+se probó con datos reales y da un total equivocado por dos motivos.
+
+- Ese endpoint **mezcla los dos departamentos**. Con la paciente Felicita Hernández (récord 14753,
+  Bayamón) devuelve `000282` láser 2.640, `000284` suero 5.000 y `000285` **consulta** 20 (lleva
+  `citaId`). Sumando a mano: **7.660**. Lo que ese mostrador debe cobrar: **7.640**.
+- **Devolver no baja el `total`** de la factura, así que sumar `total` haría cobrar lo ya devuelto.
+  Medido: una factura de 10.603,29 devuelta entera habría inflado el total en esa cantidad.
+
+El endpoint de abajo ya resuelve las dos cosas (y el sobrepago, y el tope de rango). El panel es
+tuyo; la suma, del backend. Decisión del dueño, 24-ago-2026.
+
 ## El problema real
 
 La clínica arma las facturas de un paciente **por separado**, como en el legado: una de láser, otra de
