@@ -101,3 +101,52 @@ Con la sesión real de cada usuario contra `GET /me/menu`, no con la vista previ
 | kdoliveira | inventarios | ninguna |
 
 De los cuatro ítems, un administrador sigue viendo los cuatro.
+
+---
+
+## Añadido 25-ago (tarde): «Configuración de la app» se le muestra a TODO EL MUNDO
+
+`components/user-menu.tsx` línea ~135 pinta el ítem sin comprobar nada:
+
+```tsx
+<DropdownMenuItem asChild>
+  <Link href="/configuracion">…{t("appSettings")}</Link>
+</DropdownMenuItem>
+```
+
+Justo debajo, «Módulos de tablero» sí filtra (`can("tablero.admin")`) y está bien comentado. A este
+se le olvidó. Resultado: un usuario de prueba —o el call-center, o quien solo hace citas— entra a
+Configuración y ve, entre otras, la **apariencia corporativa, que sobrescribe la personal**. Con
+«Mi apariencia» ya tiene lo suyo; lo corporativo no es de él.
+
+### Qué hacer (sin inventar un permiso nuevo)
+
+El BE ya le dice al FE exactamente lo que esa persona puede configurar: el grupo `g-configuracion`
+de `GET /me/menu`. Así que el ítem se muestra **solo si ese grupo le llega con algún hijo**:
+
+```tsx
+// «Configuración de la app» solo a quien tenga algo que configurar: el BE ya filtra el grupo
+// g-configuracion por permiso en /me/menu. Si le llega vacío, no hay nada que abrir — y ahí dentro
+// está la apariencia CORPORATIVA, que sobrescribe la personal, así que no es cosa de cualquiera.
+const puedeConfigurar = (menu ?? []).some(
+  (g) => g.clave === "g-configuracion" && (g.children?.length ?? 0) > 0,
+);
+…
+{puedeConfigurar && (
+  <DropdownMenuItem asChild>
+    <Link href="/configuracion">…{t("appSettings")}</Link>
+  </DropdownMenuItem>
+)}
+```
+
+Derivarlo del menú y no de un permiso fijo tiene una ventaja concreta: cuando el dueño le conceda a
+alguien una sola sección de Configuración (por rol o como excepción a esa persona), el ítem le
+aparece solo, sin tocar el FE ni desplegar.
+
+**Ojo:** «Mi apariencia» y «Cambiar mi contraseña» se quedan como están, visibles para todos. Son de
+cada persona y no llevan permiso.
+
+### Y de paso, dentro de `/configuracion`
+
+La página índice debe pintar **solo las tarjetas que el menú le trae**, no las nueve fijas. Si hoy
+las lista a mano, un usuario ve tarjetas que al abrirlas le dan 403.

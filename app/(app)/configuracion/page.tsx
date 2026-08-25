@@ -8,28 +8,31 @@ import {
   PrinterIcon, UserAccountIcon, CheckListIcon, StethoscopeIcon, ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 
-import { useCan } from "@/hooks/use-can";
+import { useMenu } from "@/hooks/use-menu";
 
-// Índice de Configuración: la puerta de entrada a todo lo configurable. Antes «Configuración de la app»
-// abría /configuracion, que NO tenía page.tsx (404), y parecía que no había nada — las 9 secciones sí
-// existen. Cada tarjeta respeta el permiso de su sección (quien no administra algo, no la ve). Handoff
-// configuracion-y-cambiar-clave.
+// Índice de Configuración: la puerta de entrada a todo lo configurable. Se pintan SOLO las secciones que
+// el BE le manda a esta persona en /me/menu (grupo g-configuracion), NO las nueve fijas: así, al abrir
+// una tarjeta, nunca se topa con un 403, y conceder una sola sección la hace aparecer sin tocar el FE.
+// Cada entrada aporta su icono y sus textos; el menú decide cuáles se ven. Handoff configuracion-delicada-solo-admin.
 const SECCIONES = [
-  { href: "/configuracion/apariencia", permiso: "preferences.update", icon: PaintBoardIcon, key: "apariencia" },
-  { href: "/configuracion/menu", permiso: "rbac.read", icon: Menu01Icon, key: "menu" },
-  { href: "/configuracion/tableros", permiso: "tablero.config", icon: DashboardSquare01Icon, key: "tableros" },
-  { href: "/configuracion/factura", permiso: "centro.fiscal.write", icon: InvoiceIcon, key: "factura" },
-  { href: "/configuracion/numeracion", permiso: "facturacion.numeracion.write", icon: ListSettingIcon, key: "numeracion" },
-  { href: "/configuracion/formatos", permiso: "formatos.config", icon: PrinterIcon, key: "formatos" },
-  { href: "/configuracion/datos-paciente", permiso: "pacientes.config", icon: UserAccountIcon, key: "datosPaciente" },
-  { href: "/configuracion/requeridos", permiso: "servicios.config", icon: CheckListIcon, key: "requeridos" },
-  { href: "/configuracion/panel-enfermeria", permiso: "panel.config", icon: StethoscopeIcon, key: "panelEnfermeria" },
+  { href: "/configuracion/apariencia", icon: PaintBoardIcon, key: "apariencia" },
+  { href: "/configuracion/menu", icon: Menu01Icon, key: "menu" },
+  { href: "/configuracion/tableros", icon: DashboardSquare01Icon, key: "tableros" },
+  { href: "/configuracion/factura", icon: InvoiceIcon, key: "factura" },
+  { href: "/configuracion/numeracion", icon: ListSettingIcon, key: "numeracion" },
+  { href: "/configuracion/formatos", icon: PrinterIcon, key: "formatos" },
+  { href: "/configuracion/datos-paciente", icon: UserAccountIcon, key: "datosPaciente" },
+  { href: "/configuracion/requeridos", icon: CheckListIcon, key: "requeridos" },
+  { href: "/configuracion/panel-enfermeria", icon: StethoscopeIcon, key: "panelEnfermeria" },
 ] as const;
 
 export default function ConfiguracionIndexPage() {
   const t = useTranslations("configIndex");
-  const { can, ready } = useCan();
-  const visibles = SECCIONES.filter((s) => can(s.permiso));
+  const menu = useMenu();
+  // Rutas de configuración que el BE le manda a esta persona; el índice se limita a esas.
+  const rutasDelMenu = new Set(menu.map((m) => m.path).filter(Boolean));
+  const visibles = SECCIONES.filter((s) => rutasDelMenu.has(s.href));
+  const ready = menu.length > 0;
 
   return (
     // Ancho completo: es un panel de administración. Ver norma uso-optimo-de-la-pantalla.

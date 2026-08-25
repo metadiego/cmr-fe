@@ -19,6 +19,7 @@ import { locales, type Locale } from "@/i18n/config";
 import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
+import { useMenu } from "@/hooks/use-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
@@ -42,6 +43,10 @@ export function UserMenu() {
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
   const { can } = useCan();
+  // «Configuración de la app» se deriva del MENÚ (no de un permiso fijo): visible solo si al usuario le
+  // llega alguna sección de configuración (/configuracion/*) en /me/menu.
+  const menu = useMenu();
+  const puedeConfigurar = menu.some((m) => (m.path ?? "").startsWith("/configuracion/"));
   const { theme, setTheme } = useTheme();
   const locale = useLocale() as Locale;
 
@@ -132,12 +137,19 @@ export function UserMenu() {
 
         {/* Ajustes de la app (rutas reales existentes) */}
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/configuracion">
-              <HugeiconsIcon icon={Settings02Icon} className="size-4" />
-              {t("appSettings")}
-            </Link>
-          </DropdownMenuItem>
+          {/* «Configuración de la app» solo a quien tenga algo que configurar: el BE ya filtra el grupo
+              g-configuracion por permiso en /me/menu (sus hijos son /configuracion/*). Si no le llega
+              ninguna sección, no hay nada que abrir — y ahí dentro está la apariencia CORPORATIVA, que
+              pisa la personal, así que no es de cualquiera. Derivado del menú, no de un permiso fijo:
+              conceder una sola sección hace aparecer el ítem solo. Handoff configuracion-delicada-solo-admin. */}
+          {puedeConfigurar && (
+            <DropdownMenuItem asChild>
+              <Link href="/configuracion">
+                <HugeiconsIcon icon={Settings02Icon} className="size-4" />
+                {t("appSettings")}
+              </Link>
+            </DropdownMenuItem>
+          )}
           {/* Módulos de tablero = administración de tableros: solo quien los administra. Un call-center
               que solo hace Citas no debe verlo. */}
           {can("tablero.admin") && (
