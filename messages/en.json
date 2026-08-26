@@ -3758,6 +3758,10 @@
     "rol": "Role",
     "rolPlaceholder": "Pick a role…",
     "dando": "Granting…",
-    "accesoDado": "Access created for {nombre}."
+    "accesoDado": "Access created for {nombre}.",
+    "centros": "Service centers",
+    "centrosAyuda": "Mark where they should appear in the dropdowns. If they cover another center one day, check it; uncheck when they return.",
+    "guardarCentros": "Save centers",
+    "centrosGuardados": "Centers saved"
   }
 }

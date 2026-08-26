@@ -7,7 +7,10 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
 
-import { listPersonal, updatePersonal, type Personal } from "@/lib/api/personal";
+import {
+  listPersonal, updatePersonal, getCargos, getPersonalCentros, updatePersonalCentros,
+  type Personal, type CargoCatalogo, type CentroDePersonal,
+} from "@/lib/api/personal";
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
 import { toastError } from "@/lib/api/errors";
@@ -44,16 +47,14 @@ export default function PersonalPage() {
   );
   const rolesRes = useResource<Rol[]>(() => getRoles());
   const roles = rolesRes.state.kind === "ok" ? rolesRes.state.data : [];
+  // Catálogo de cargos del BE (ruta ya arreglada). Si por lo que sea no llega, se cae a valores del listado.
+  const cargosRes = useResource<CargoCatalogo[]>(() => (gate.centro ? getCargos(gate.centro) : Promise.resolve([])), [gate.centro]);
+  const cargoCatalogo = cargosRes.state.kind === "ok" ? cargosRes.state.data : [];
 
   const [q, setQ] = React.useState("");
   const [selId, setSelId] = React.useState<string>("");
 
-  // Cargos y capacidades: derivados de los valores REALES del personal (el catálogo GET /personal/cargos
-  // colisiona con /personal/:id y da 400; hasta que el BE lo arregle, las opciones salen de los datos).
-  const cargoOpciones = React.useMemo(
-    () => [...new Set(personal.map((p) => p.cargo).filter((c): c is string => !!c))].sort(),
-    [personal],
-  );
+  // Capacidades: derivadas de los valores REALES del personal (no hay catálogo aparte en el handoff).
   const capacidadOpciones = React.useMemo(
     () => [...new Set(personal.flatMap((p) => p.capacidades ?? []))].sort(),
     [personal],
@@ -117,7 +118,7 @@ export default function PersonalPage() {
             <FichaPersonal
               key={sel.id}
               persona={sel}
-              cargoOpciones={cargoOpciones}
+              cargoCatalogo={cargoCatalogo}
               capacidadOpciones={capacidadOpciones}
               roles={roles}
               centro={gate.centro}
@@ -135,10 +136,10 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoOpciones, capacidadOpciones, roles, centro, onChanged,
+  persona, cargoCatalogo, capacidadOpciones, roles, centro, onChanged,
 }: {
   persona: Personal;
-  cargoOpciones: string[];
+  cargoCatalogo: CargoCatalogo[];
   capacidadOpciones: string[];
   roles: Rol[];
   centro?: string;
@@ -151,7 +152,15 @@ function FichaPersonal({
   const [busy, setBusy] = React.useState(false);
   const [darAcceso, setDarAcceso] = React.useState(false);
 
-  const cargos = cargoOpciones.includes(cargo) || !cargo ? cargoOpciones : [...cargoOpciones, cargo];
+  // Etiqueta del cargo desde el catálogo (labelKey traducible; si no, la clave). Incluye el cargo actual
+  // aunque no esté en el catálogo, para no perderlo.
+  const cargoLabel = (clave: string) => {
+    const c = cargoCatalogo.find((x) => x.clave === clave);
+    if (c?.labelKey && tRoot.has(c.labelKey)) return tRoot(c.labelKey);
+    return c?.nombre ?? clave;
+  };
+  const claves = cargoCatalogo.map((c) => c.clave);
+  const cargos = cargo && !claves.includes(cargo) ? [...claves, cargo] : claves;
   const sucio = cargo !== (persona.cargo ?? "") || JSON.stringify([...caps].sort()) !== JSON.stringify([...(persona.capacidades ?? [])].sort());
 
   function toggleCap(c: string) {
@@ -193,7 +202,7 @@ function FichaPersonal({
           <Select value={cargo || undefined} onValueChange={setCargo}>
             <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
             <SelectContent>
-              {cargos.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {cargos.map((c) => <SelectItem key={c} value={c}>{cargoLabel(c)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -223,6 +232,10 @@ function FichaPersonal({
         </div>
       </div>
 
+      {/* Centros de servicio: donde la persona sale en los desplegables. El BE devuelve TODOS los centros
+          con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
+      <CentrosDePersona persona={persona} centro={centro} />
+
       {/* Acceso al sistema */}
       <div className="border-t pt-4">
         <Label className="mb-2 block">{t("acceso")}</Label>
@@ -248,6 +261,73 @@ function FichaPersonal({
           onClose={() => setDarAcceso(false)}
           onDone={() => { setDarAcceso(false); onChanged(); }}
         />
+      )}
+    </div>
+  );
+}
+
+function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: string }) {
+  const t = useTranslations("personalFicha");
+  const tRoot = useTranslations();
+  const res = useResource<CentroDePersonal[]>(() => getPersonalCentros(persona.id, centro), [persona.id, centro]);
+  const base = res.state.kind === "ok" ? res.state.data : [];
+  // Selección local (activos) sobre lo que trae el BE; guardar manda la lista de encendidos.
+  const [activos, setActivos] = React.useState<Set<string> | null>(null);
+  const marcados = activos ?? new Set(base.filter((c) => c.activo).map((c) => c.id));
+  const [busy, setBusy] = React.useState(false);
+  const original = new Set(base.filter((c) => c.activo).map((c) => c.id));
+  const sucio = base.length > 0 && (marcados.size !== original.size || [...marcados].some((id) => !original.has(id)));
+
+  function toggle(id: string) {
+    setActivos(() => {
+      const next = new Set(marcados);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+  async function guardar() {
+    if (busy || !sucio) return;
+    setBusy(true);
+    try {
+      await updatePersonalCentros(persona.id, [...marcados], centro);
+      toast.success(t("centrosGuardados"));
+      setActivos(null);
+      res.reload();
+    } catch (e) {
+      toastError(e, tRoot);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="border-t pt-4">
+      <Label className="mb-1 block">{t("centros")}</Label>
+      <p className="mb-2 text-xs text-muted-foreground">{t("centrosAyuda")}</p>
+      {res.state.kind === "loading" && <p className="text-sm text-muted-foreground">{t("cargando")}</p>}
+      {res.state.kind === "fail" && <p className="text-sm text-destructive">{res.state.message}</p>}
+      <div className="flex flex-wrap gap-2">
+        {base.map((c) => {
+          const on = marcados.has(c.id);
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => toggle(c.id)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
+                on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
+              )}
+            >
+              {on ? "✓ " : ""}{c.nombre}
+            </button>
+          );
+        })}
+      </div>
+      {sucio && (
+        <div className="mt-3 flex justify-end">
+          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCentros")}</Button>
+        </div>
       )}
     </div>
   );

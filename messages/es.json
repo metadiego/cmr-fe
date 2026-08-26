@@ -3758,6 +3758,10 @@
     "rol": "Rol",
     "rolPlaceholder": "Elegir rol…",
     "dando": "Dando acceso…",
-    "accesoDado": "Acceso creado para {nombre}."
+    "accesoDado": "Acceso creado para {nombre}.",
+    "centros": "Centros de servicio",
+    "centrosAyuda": "Marca dónde debe salir en los desplegables. Si un día cubre en otro centro, lo marcas; al volver, lo desmarcas.",
+    "guardarCentros": "Guardar centros",
+    "centrosGuardados": "Centros guardados"
   }
 }

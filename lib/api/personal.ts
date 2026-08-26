@@ -37,10 +37,32 @@ export function updatePersonal(
   return apiFetch<Personal>(`/personal/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
 
-// Centros de SERVICIO donde la persona sale en los desplegables (PUT /personal/:id/centros). OJO: hoy el
-// BE NO expone la LECTURA de este set (GET /personal/:id/centros → 404 y el GET de la ficha no lo trae),
-// así que el FE no puede precargar los checkboxes con seguridad → bloque pendiente. Handoff
-// ficha-de-personal-todo-en-una-pantalla + huecos-lectura-personal.
+// Catálogo de cargos (GET /personal/cargos) → [{ clave, labelKey }]. Ruta arreglada por el BE (antes
+// colisionaba con /personal/:id). Handoff huecos-lectura-personal.
+export interface CargoCatalogo {
+  clave: string;
+  labelKey?: string | null;
+  nombre?: string | null;
+}
+export function getCargos(centroId?: string): Promise<CargoCatalogo[]> {
+  return apiFetch<CargoCatalogo[]>(`/personal/cargos`, {}, centroId);
+}
+
+// Centros de SERVICIO de una persona (LECTURA, GET /personal/:id/centros): devuelve TODOS los centros del
+// sistema con un `activo` por cada uno, YA RESUELTO por el BE (incluye el caso de la ficha sin lista, que
+// aparece activa en su centro de origen). El FE NO replica esa regla — pinta lo que llega. Handoff
+// huecos-lectura-personal.
+export interface CentroDePersonal {
+  id: string;
+  nombre: string;
+  activo: boolean;
+}
+export function getPersonalCentros(id: string, centroId?: string): Promise<CentroDePersonal[]> {
+  return apiFetch<CentroDePersonal[]>(`/personal/${id}/centros`, {}, centroId);
+}
+
+// Guardar los centros ACTIVOS de la persona (PUT /personal/:id/centros { centroIds }). Se manda la lista
+// de los que quedan ENCENDIDOS; el BE deja el set exactamente así.
 export function updatePersonalCentros(id: string, centroIds: string[], centroId?: string): Promise<Personal> {
   return apiFetch<Personal>(`/personal/${id}/centros`, { method: "PUT", body: JSON.stringify({ centroIds }) }, centroId);
 }
