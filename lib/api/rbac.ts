@@ -60,7 +60,9 @@ export interface ClonarAccesoResultado {
   accessMode: { antes: string; ahora: string }
 }
 export function clonarAccesoDe(destinoPerfilId: string, origenPerfilId: string): Promise<ClonarAccesoResultado> {
-  return apiFetch<ClonarAccesoResultado>(`/rbac/profiles/${destinoPerfilId}/clonar-de`, {
+  // Ruta REAL verificada en prod: POST /profiles/:id/clonar-de (NO /rbac/profiles/...; el handoff la
+  // escribió con /rbac y daba 404). Handoff clonar-acceso-de-usuario.
+  return apiFetch<ClonarAccesoResultado>(`/profiles/${destinoPerfilId}/clonar-de`, {
     method: "POST",
     body: JSON.stringify({ origenPerfilId }),
   })
