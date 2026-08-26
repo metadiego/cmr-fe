@@ -654,7 +654,14 @@
     "boardModules": "Board modules",
     "profileSoon": "Profile & preferences (coming soon)",
     "myAppearance": "My appearance",
-    "changePassword": "Change my password"
+    "changePassword": "Change my password",
+    "navVista": "Sidebar menu (beta)",
+    "navVistaClasica": "Classic bar",
+    "navVistaSidebar": "New sidebar"
+  },
+  "navSidebar": {
+    "internalTools": "Internal tools",
+    "backToClassic": "Back to the classic bar"
   },
   "nav": {
     "home": "Home",

@@ -6,7 +6,7 @@ import { IntlProvider } from "@/components/intl-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { PresentationProvider } from "@/components/presentation-provider"
 import { RecoveryRedirect } from "@/components/auth/recovery-redirect"
-import { SiteHeader } from "@/components/site-header";
+import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
@@ -40,8 +40,7 @@ export default async function RootLayout({
           <RecoveryRedirect />
           <ThemeProvider>
             <PresentationProvider>
-              <SiteHeader />
-              <main>{children}</main>
+              <AppShell>{children}</AppShell>
               <Toaster />
             </PresentationProvider>
           </ThemeProvider>

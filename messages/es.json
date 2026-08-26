@@ -654,7 +654,14 @@
     "boardModules": "Módulos de tablero",
     "profileSoon": "Perfil y preferencias (próximamente)",
     "myAppearance": "Mi apariencia",
-    "changePassword": "Cambiar mi contraseña"
+    "changePassword": "Cambiar mi contraseña",
+    "navVista": "Menú lateral (beta)",
+    "navVistaClasica": "Barra clásica",
+    "navVistaSidebar": "Sidebar nuevo"
+  },
+  "navSidebar": {
+    "internalTools": "Herramientas internas",
+    "backToClassic": "Volver a la barra clásica"
   },
   "nav": {
     "home": "Inicio",
