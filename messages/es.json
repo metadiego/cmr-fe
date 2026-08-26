@@ -518,7 +518,8 @@
       "camposFaltantes": "Faltan campos obligatorios: {campos}",
       "emailInvalido": "Escribe un correo válido, p. ej. nombre@dominio.com",
       "requiredLegend": "Campos obligatorios"
-    }
+    },
+    "acciones": "Acciones"
   },
   "common": {
     "toggleTheme": "Cambiar tema",
@@ -3777,5 +3778,19 @@
     "centrosAyuda": "Marca dónde debe salir en los desplegables. Si un día cubre en otro centro, lo marcas; al volver, lo desmarcas.",
     "guardarCentros": "Guardar centros",
     "centrosGuardados": "Centros guardados"
-  }
+  },
+  "acciones": {
+    "subtitle": "Todo su historial, sin salir de aquí.",
+    "compras": "Compras",
+    "servicios": "Servicios",
+    "citas": "Citas médicas",
+    "prescripcion": "Prescripción",
+    "crearCita": "Crear cita médica",
+    "abrir": "Abrir",
+    "sinCompras": "Sin compras.",
+    "sinServicios": "Sin servicios.",
+    "sinCitas": "Sin citas.",
+    "sinPrescripcion": "Sin prescripción."
+  },
+  "clientes": {}
 }

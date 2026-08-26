@@ -68,3 +68,21 @@ export function setNoPrescripcion(citaId: string, on: boolean, centroId?: string
     centroId,
   );
 }
+
+// Historial de PRESCRIPCIÓN médica de un paciente (ficha → Acciones). GET /prescripciones?pacienteId=.
+// Permiso `prescripcion.read`. Handoff acciones-del-paciente-historiales.
+export interface PrescripcionPaciente {
+  id: string;
+  fecha?: string | null;
+  citaId?: string | null;
+  estado?: string | null;
+  grupoLabelKey?: string | null;
+  grupoNombre?: string | null;
+  cantidad?: number | null;
+}
+export async function listPrescripcionesPaciente(pacienteId: string, centroId?: string): Promise<PrescripcionPaciente[]> {
+  const res: unknown = await apiFetch(`/prescripciones?pacienteId=${encodeURIComponent(pacienteId)}`, {}, centroId);
+  if (Array.isArray(res)) return res as PrescripcionPaciente[];
+  const items = (res as { items?: unknown } | null)?.items;
+  return Array.isArray(items) ? (items as PrescripcionPaciente[]) : [];
+}

@@ -25,11 +25,13 @@ export async function listSesionesRango(params: {
   hasta: string;
   servicioId?: string;
   tecnicoId?: string;
+  pacienteId?: string; // historial de servicios de un paciente (ficha → Acciones)
   centroId?: string; // fuerza el centro de la lectura vía X-Tenant-ID (selector de centro EN la pantalla)
 }): Promise<Sesion[]> {
   const sp = new URLSearchParams({ desde: params.desde, hasta: params.hasta });
   if (params.servicioId) sp.set("servicioId", params.servicioId);
   if (params.tecnicoId) sp.set("tecnicoId", params.tecnicoId);
+  if (params.pacienteId) sp.set("pacienteId", params.pacienteId);
   return asArray<Sesion>(await apiFetch(`/frontdesk/sesiones?${sp.toString()}`, {}, params.centroId));
 }
 

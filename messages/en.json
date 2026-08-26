@@ -518,7 +518,8 @@
       "camposFaltantes": "Required fields missing: {campos}",
       "emailInvalido": "Enter a valid email, e.g. name@domain.com",
       "requiredLegend": "Required fields"
-    }
+    },
+    "acciones": "Actions"
   },
   "common": {
     "toggleTheme": "Toggle theme",
@@ -3777,5 +3778,19 @@
     "centrosAyuda": "Mark where they should appear in the dropdowns. If they cover another center one day, check it; uncheck when they return.",
     "guardarCentros": "Save centers",
     "centrosGuardados": "Centers saved"
-  }
+  },
+  "acciones": {
+    "subtitle": "Their whole history, without leaving here.",
+    "compras": "Purchases",
+    "servicios": "Services",
+    "citas": "Medical appointments",
+    "prescripcion": "Prescription",
+    "crearCita": "Create appointment",
+    "abrir": "Open",
+    "sinCompras": "No purchases.",
+    "sinServicios": "No services.",
+    "sinCitas": "No appointments.",
+    "sinPrescripcion": "No prescription."
+  },
+  "clientes": {}
 }

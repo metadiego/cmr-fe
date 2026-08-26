@@ -19,6 +19,7 @@ import { DataTable, type Column } from "@/components/kit/data-table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
 import { Can } from "@/components/kit/can";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
+import { AccionesPacienteSheet } from "@/components/clientes/acciones-paciente-sheet";
 import {
   Select,
   SelectContent,
@@ -38,6 +39,7 @@ export default function ClientesPage() {
   const [page, setPage] = React.useState(1);
   const [q, setQ] = React.useState("");
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
   // The user's centers (with names). Master → all; operativo → their allowed
   // ones. Drives the scope selector and resolves clinicId → name in the table.
@@ -153,6 +155,23 @@ export default function ClientesPage() {
     });
   }
 
+  // «Acciones»: historiales del paciente (compras/servicios/citas/prescripción) + crear cita, sin salir
+  // de la lista. stopPropagation para no navegar a la ficha al pulsarlo. Handoff acciones-del-paciente-historiales.
+  columns.push({
+    key: "acciones",
+    header: "",
+    align: "right",
+    cell: (p) => (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={(e) => { e.stopPropagation(); setAccionesFor(p); }}
+      >
+        {t("acciones")}
+      </Button>
+    ),
+  });
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <div className="flex items-center justify-between gap-4">
@@ -206,6 +225,14 @@ export default function ClientesPage() {
           router.push(`/clientes/${saved.id}`);
         }}
       />
+
+      {accionesFor && (
+        <AccionesPacienteSheet
+          paciente={accionesFor}
+          centro={tenant ?? undefined}
+          onClose={() => setAccionesFor(null)}
+        />
+      )}
     </div>
   );
 }
