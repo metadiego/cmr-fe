@@ -134,11 +134,11 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
   const renderChildren = (nodes: MenuNode[], depth = 0): React.ReactNode =>
     nodes.map((n) =>
       n.tipo === "separador" ? (
-        <div key={n.clave} aria-hidden className="my-1 h-px bg-border/60" style={{ marginLeft: depth * 12 }} />
+        <div key={n.clave} aria-hidden className="my-1 h-px bg-sidebar-border" style={{ marginLeft: depth * 12 }} />
       ) : n.children.length > 0 ? (
         <div key={n.clave} className="flex flex-col gap-0.5">
           <span
-            className="px-2.5 pt-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+            className="px-2.5 pt-1.5 text-[11px] font-semibold uppercase tracking-wide text-sidebar-foreground/50"
             style={{ marginLeft: depth * 12 }}
           >
             {labelOf(n)}
@@ -153,8 +153,8 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
           className={cn(
             "rounded-md px-2.5 py-1.5 text-sm transition-colors",
             isActive(pathname, n.path)
-              ? "bg-accent font-medium text-accent-foreground shadow-[inset_2px_0_0_var(--primary)]"
-              : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+              ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-[inset_2px_0_0_var(--sidebar-primary)]"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
           )}
         >
           {labelOf(n)}
@@ -172,7 +172,7 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
 
       <aside
         className={cn(
-          "hidden shrink-0 flex-col border-r bg-background transition-[width] duration-150 md:flex",
+          "hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-sm transition-[width] duration-150 md:flex",
           collapsed ? "w-14" : "w-64",
         )}
       >
@@ -187,7 +187,7 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
               onClick={() => setCollapsed(true)}
               aria-label={t("collapse")}
               title={t("collapse")}
-              className="rounded-md p-1 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              className="rounded-md p-1 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
             </button>
@@ -199,7 +199,7 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
             onClick={() => setCollapsed(false)}
             aria-label={t("expand")}
             title={t("expand")}
-            className="mx-auto mb-1 rounded-md p-1 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            className="mx-auto mb-1 rounded-md p-1 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4 rotate-180" />
           </button>
@@ -230,8 +230,8 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
                   title={label}
                   aria-label={label}
                   className={cn(
-                    "flex w-full items-center justify-center rounded-md py-2 transition-colors hover:bg-accent/50",
-                    nodeActive(g) ? "text-foreground" : "text-muted-foreground",
+                    "flex w-full items-center justify-center rounded-md py-2 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    nodeActive(g) ? "text-sidebar-primary" : "text-sidebar-foreground/70",
                   )}
                 >
                   {icon ? (
@@ -248,8 +248,8 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
                   type="button"
                   onClick={() => toggleGroup(g.clave)}
                   className={cn(
-                    "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-semibold transition-colors hover:bg-accent/50",
-                    nodeActive(g) ? "text-foreground" : "text-muted-foreground",
+                    "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-semibold transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    nodeActive(g) ? "text-sidebar-primary" : "text-sidebar-foreground/80",
                   )}
                 >
                   {icon ? <HugeiconsIcon icon={icon} className="size-4 opacity-70" /> : null}
@@ -265,12 +265,12 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="space-y-2 border-t p-2">
+        <div className="space-y-2 border-t border-sidebar-border p-2">
           {!collapsed && (
             <button
               type="button"
               onClick={() => setVista("clasica")}
-              className="w-full rounded-md px-2.5 py-1 text-left text-xs text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              className="w-full rounded-md px-2.5 py-1 text-left text-xs text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               {t("backToClassic")}
             </button>
