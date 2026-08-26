@@ -27,6 +27,24 @@ export function listPersonal(
   return apiFetchPaged<Personal>(`/personal?${sp.toString()}`, {}, centroId);
 }
 
+// Editar la ficha: cargo + capacidades (PUT /personal/:id). Verificado en prod. Handoff
+// ficha-de-personal-todo-en-una-pantalla.
+export function updatePersonal(
+  id: string,
+  payload: { cargo?: string | null; capacidades?: string[] },
+  centroId?: string,
+): Promise<Personal> {
+  return apiFetch<Personal>(`/personal/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+
+// Centros de SERVICIO donde la persona sale en los desplegables (PUT /personal/:id/centros). OJO: hoy el
+// BE NO expone la LECTURA de este set (GET /personal/:id/centros → 404 y el GET de la ficha no lo trae),
+// así que el FE no puede precargar los checkboxes con seguridad → bloque pendiente. Handoff
+// ficha-de-personal-todo-en-una-pantalla + huecos-lectura-personal.
+export function updatePersonalCentros(id: string, centroIds: string[], centroId?: string): Promise<Personal> {
+  return apiFetch<Personal>(`/personal/${id}/centros`, { method: "PUT", body: JSON.stringify({ centroIds }) }, centroId);
+}
+
 // Roster por CAPACIDAD (enfermera/tecnico/medico…), agnóstico al tablero: GET /personal/por-capacidad/:cap.
 // Alimenta el selector de enfermera del modal de Notificar aunque la columna fd_enfermera NO esté
 // colocada en ese tablero (p. ej. Atención). Devuelve {id, nombre, apellido}. Verificado en prod.

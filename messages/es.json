@@ -3729,5 +3729,35 @@
   },
   "configGuard": {
     "sinPermiso": "No tienes acceso a esta configuración. Es solo para administradores."
+  },
+  "personalFicha": {
+    "title": "Personal",
+    "subtitle": "Toda la ficha de cada persona en una sola pantalla.",
+    "buscar": "Buscar por nombre o cargo…",
+    "cargando": "Cargando…",
+    "vacio": "Sin personal.",
+    "elegirCentro": "Elige un centro para ver su personal.",
+    "elegirPersona": "Elige una persona de la lista.",
+    "sinCargo": "Sin cargo",
+    "sinCuenta": "sin cuenta de acceso",
+    "conCuenta": "con cuenta de acceso",
+    "cargo": "Cargo",
+    "cargoPlaceholder": "Elegir cargo…",
+    "capacidades": "Hace",
+    "guardarCambios": "Guardar",
+    "guardando": "Guardando…",
+    "guardado": "Guardado",
+    "acceso": "Acceso al sistema",
+    "aprobado": "aprobado",
+    "verUsuario": "Ver usuario",
+    "sinCuentaAyuda": "Sin cuenta de acceso.",
+    "darAcceso": "Dar acceso al sistema",
+    "darAccesoTitulo": "Dar acceso a {nombre}",
+    "darAccesoDesc": "Crea la cuenta, la enlaza a esta ficha, le da el rol y el centro, todo de una vez.",
+    "correo": "Correo",
+    "rol": "Rol",
+    "rolPlaceholder": "Elegir rol…",
+    "dando": "Dando acceso…",
+    "accesoDado": "Acceso creado para {nombre}."
   }
 }

@@ -3729,5 +3729,35 @@
   },
   "configGuard": {
     "sinPermiso": "You do not have access to this setting. Admins only."
+  },
+  "personalFicha": {
+    "title": "Staff",
+    "subtitle": "Each person's whole record on one screen.",
+    "buscar": "Search by name or role…",
+    "cargando": "Loading…",
+    "vacio": "No staff.",
+    "elegirCentro": "Pick a center to see its staff.",
+    "elegirPersona": "Pick a person from the list.",
+    "sinCargo": "No role",
+    "sinCuenta": "no login account",
+    "conCuenta": "has a login account",
+    "cargo": "Job title",
+    "cargoPlaceholder": "Pick a job title…",
+    "capacidades": "Does",
+    "guardarCambios": "Save",
+    "guardando": "Saving…",
+    "guardado": "Saved",
+    "acceso": "System access",
+    "aprobado": "approved",
+    "verUsuario": "View user",
+    "sinCuentaAyuda": "No login account.",
+    "darAcceso": "Grant system access",
+    "darAccesoTitulo": "Grant access to {nombre}",
+    "darAccesoDesc": "Creates the account, links it to this record, sets the role and center, all at once.",
+    "correo": "Email",
+    "rol": "Role",
+    "rolPlaceholder": "Pick a role…",
+    "dando": "Granting…",
+    "accesoDado": "Access created for {nombre}."
   }
 }
