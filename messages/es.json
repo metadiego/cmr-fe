@@ -2484,7 +2484,11 @@
       "usbError": "No se pudo imprimir por USB",
       "usbUnsupported": "Este navegador no soporta impresión USB directa (usa Chrome o Edge)."
     },
-    "noMatches": "No hay nada con ese texto"
+    "noMatches": "No hay nada con ese texto",
+    "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
+    "descuentoUsarMonto": "¿Querías descontar ${valor}? Cambiar a $",
+    "descuentoPasaBase": "El descuento (${valor}) es mayor que el subtotal (${base}).",
+    "descuentoUsarBase": "Regalar el total: ${base}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

@@ -987,7 +987,7 @@ function Editor({
         </div>
 
         {esBorrador && (
-          <DescuentoGlobal disabled={busy} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
+          <DescuentoGlobal disabled={busy} subtotal={subtotal} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
         )}
 
         {esBorrador && esGeneral && (
@@ -2156,10 +2156,19 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
   );
 }
 
-function DescuentoGlobal({ disabled, onApply, applyLabel }: { disabled?: boolean; onApply: (tipo: string, valor: number) => void; applyLabel: string }) {
+function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal }: { disabled?: boolean; onApply: (tipo: string, valor: number) => void; applyLabel: string; subtotal: number }) {
   const t = useTranslations("facturacion");
-  const [tipo, setTipo] = React.useState("porcentaje");
+  // Por defecto MONTO ($): quien escribe «2520» en una caja piensa en dólares; el % es el caso raro y se
+  // elige a propósito. Handoff descuento-global-monto-vs-porcentaje.
+  const [tipo, setTipo] = React.useState("monto");
   const [valor, setValor] = React.useState("");
+  const num = Number(valor);
+  const numOk = valor.trim() !== "" && !Number.isNaN(num) && num >= 0;
+  // Validación EN el control, donde se escribe (no un toast que llega y se pierde):
+  const pctPasa100 = tipo === "porcentaje" && numOk && num > 100;
+  const montoPasaBase = tipo === "monto" && numOk && subtotal > 0 && num > subtotal;
+  const error = pctPasa100 || montoPasaBase;
+
   return (
     <div className="space-y-2 rounded-xl border p-4">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("globalDiscount")}</span>
@@ -2167,13 +2176,37 @@ function DescuentoGlobal({ disabled, onApply, applyLabel }: { disabled?: boolean
         <Select value={tipo} onValueChange={setTipo}>
           <SelectTrigger className="h-9 w-28"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="porcentaje">%</SelectItem>
             <SelectItem value="monto">$</SelectItem>
+            <SelectItem value="porcentaje">%</SelectItem>
           </SelectContent>
         </Select>
-        <Input value={valor} onChange={(e) => setValor(e.target.value)} placeholder="0" className="h-9 flex-1 text-right tabular-nums" inputMode="decimal" />
-        <Button type="button" variant="outline" size="sm" disabled={disabled || valor === ""} onClick={() => onApply(tipo, Math.max(0, Number(valor) || 0))}>{applyLabel}</Button>
+        <Input
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          placeholder="0"
+          aria-invalid={error}
+          className={"h-9 flex-1 text-right tabular-nums " + (error ? "border-destructive focus-visible:ring-destructive" : "")}
+          inputMode="decimal"
+        />
+        <Button type="button" variant="outline" size="sm" disabled={disabled || !numOk || error} onClick={() => onApply(tipo, Math.max(0, num))}>{applyLabel}</Button>
       </div>
+      {/* El error se ve DONDE se escribe, con el atajo para corregirlo en un clic. */}
+      {pctPasa100 && (
+        <p className="text-xs text-destructive">
+          {t("descuentoPctPasa100", { valor: num })}{" "}
+          <button type="button" className="font-medium underline underline-offset-2" onClick={() => setTipo("monto")}>
+            {t("descuentoUsarMonto", { valor: num })}
+          </button>
+        </p>
+      )}
+      {montoPasaBase && (
+        <p className="text-xs text-destructive">
+          {t("descuentoPasaBase", { valor: num, base: subtotal })}{" "}
+          <button type="button" className="font-medium underline underline-offset-2" onClick={() => setValor(String(subtotal))}>
+            {t("descuentoUsarBase", { base: subtotal })}
+          </button>
+        </p>
+      )}
     </div>
   );
 }
