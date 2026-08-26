@@ -2186,6 +2186,7 @@ function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal, descuentoAct
         <Input
           value={valor}
           onChange={(e) => setValor(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !disabled && numOk && !error) { e.preventDefault(); onApply(tipo, Math.max(0, num)); } }}
           placeholder="0"
           aria-invalid={error}
           className={"h-9 flex-1 text-right tabular-nums " + (error ? "border-destructive focus-visible:ring-destructive" : "")}
