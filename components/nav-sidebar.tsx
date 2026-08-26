@@ -94,11 +94,12 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
 
   const devItems = menu.filter((m) => m.clave === "en-desarrollo" || m.clave === "por-desarrollar");
 
-  const [openGroups, setOpenGroups] = React.useState<Set<string>>(
-    () => new Set(domainGroups.map((g) => g.clave)),
-  );
+  // Abiertos por default; se rastrea quién se CERRÓ a mano (arranca vacío, no depende de que
+  // domainGroups ya tenga datos al montar — useMenu() llega vacío mientras carga, así que un Set
+  // de "abiertos" armado en ese momento nunca tendría las claves reales).
+  const [closedGroups, setClosedGroups] = React.useState<Set<string>>(() => new Set());
   const toggleGroup = (clave: string) =>
-    setOpenGroups((prev) => {
+    setClosedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(clave)) next.delete(clave);
       else next.add(clave);
@@ -161,7 +162,7 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
           {domainGroups.map((g) => {
-            const open = openGroups.has(g.clave);
+            const open = !closedGroups.has(g.clave);
             const icon = g.mostrarIcono ? resolveMenuIcon(g.icon) : null;
             return (
               <div key={g.clave} className="flex flex-col">

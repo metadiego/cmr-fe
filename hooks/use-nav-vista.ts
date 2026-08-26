@@ -9,6 +9,15 @@ import * as React from "react";
 const NAV_VISTA_KEY = "cmr_nav_vista";
 export type NavVista = "clasica" | "sidebar";
 
+// Pub-sub a nivel de módulo: AppShell, UserMenu y NavSidebar llaman este hook cada uno por su
+// cuenta (instancias de React.useState independientes). Sin este registro compartido, tocar el
+// toggle en un componente no movía la vista en los demás hasta recargar la página entera —
+// AppShell (quien decide qué se ve) nunca se entera de un setVista() ajeno.
+const subscribers = new Set<(v: NavVista) => void>();
+function notify(v: NavVista) {
+  subscribers.forEach((fn) => fn(v));
+}
+
 export function useNavVista(): [NavVista, (v: NavVista) => void] {
   const [vista, setVistaState] = React.useState<NavVista>("clasica");
   const [restored, setRestored] = React.useState(false);
@@ -19,9 +28,16 @@ export function useNavVista(): [NavVista, (v: NavVista) => void] {
     if (saved === "sidebar" || saved === "clasica") setVistaState(saved);
   }
 
+  React.useEffect(() => {
+    subscribers.add(setVistaState);
+    return () => {
+      subscribers.delete(setVistaState);
+    };
+  }, []);
+
   const setVista = React.useCallback((v: NavVista) => {
-    setVistaState(v);
     if (typeof window !== "undefined") window.localStorage.setItem(NAV_VISTA_KEY, v);
+    notify(v);
   }, []);
 
   return [vista, setVista];
