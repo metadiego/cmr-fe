@@ -47,6 +47,25 @@ export function eliminarPermiso(id: string): Promise<void> {
   return apiFetch<void>(`/permisos/${id}`, { method: "DELETE" })
 }
 
+// «Clonar de»: copia a un perfil el ACCESO de otro (roles + excepciones de permiso + centros de trabajo
+// + modo de acceso). SUMA, no reemplaza (clonar dos veces no duplica). NO copia identidad (nombre/email/
+// avatar/contraseña/ficha/estado/master) ni la apariencia. Permiso `rbac.create`. El perfil destino debe
+// existir ya → invitar primero, clonar después. Handoff clonar-acceso-de-usuario.
+export interface ClonarAccesoResultado {
+  origenPerfilId: string
+  destinoPerfilId: string
+  roles: { copiados: number; yaTenia: number }
+  permisos: { copiados: number; yaTenia: number }
+  asignaciones: { copiados: number; yaTenia: number }
+  accessMode: { antes: string; ahora: string }
+}
+export function clonarAccesoDe(destinoPerfilId: string, origenPerfilId: string): Promise<ClonarAccesoResultado> {
+  return apiFetch<ClonarAccesoResultado>(`/rbac/profiles/${destinoPerfilId}/clonar-de`, {
+    method: "POST",
+    body: JSON.stringify({ origenPerfilId }),
+  })
+}
+
 export async function getRoles(): Promise<Rol[]> {
   return asArray<Rol>(await apiFetch(`/roles`))
 }

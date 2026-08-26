@@ -1020,7 +1020,22 @@
       "vigenteHasta": "Vigente hasta",
       "rol": "Rol",
       "rolPlaceholder": "Elige un rol",
-      "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros."
+      "rolHint": "Opcional. Si eliges rol SIN centro, el rol aplica en TODOS los centros.",
+      "clone": {
+        "label": "Clonar de (opcional)",
+        "hint": "Copia su acceso ahora mismo. Después, cada usuario se administra por separado.",
+        "placeholder": "Buscar por nombre o correo…",
+        "ninguno": "Sin clonar (crear desde cero)",
+        "sinResultados": "Nadie coincide con ese texto",
+        "origenGenerico": "el usuario elegido",
+        "resumen": "Copiado de {origen}:",
+        "roles": "{n} roles ({ya} ya tenía)",
+        "permisos": "{n} excepciones ({ya} ya tenía)",
+        "centros": "{n} centros ({ya} ya tenía)",
+        "modo": "El usuario pasa a modo {modo} (solo lectura), como el original.",
+        "ok": "Acceso copiado de {origen}.",
+        "falloAviso": "El usuario se creó, pero no se pudo copiar el acceso. Reintenta desde su ficha de accesos."
+      }
     },
     "assign": {
       "title": "Asignar centro",

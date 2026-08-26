@@ -1020,7 +1020,22 @@
       "vigenteHasta": "Valid until",
       "rol": "Role",
       "rolPlaceholder": "Pick a role",
-      "rolHint": "Optional. Choosing a role WITHOUT a center grants it in ALL centers."
+      "rolHint": "Optional. Choosing a role WITHOUT a center grants it in ALL centers.",
+      "clone": {
+        "label": "Clone from (optional)",
+        "hint": "Copies their access right now. After that, each user is managed separately.",
+        "placeholder": "Search by name or email…",
+        "ninguno": "Do not clone (start from scratch)",
+        "sinResultados": "Nobody matches that text",
+        "origenGenerico": "the chosen user",
+        "resumen": "Copied from {origen}:",
+        "roles": "{n} roles ({ya} already had)",
+        "permisos": "{n} exceptions ({ya} already had)",
+        "centros": "{n} centers ({ya} already had)",
+        "modo": "The user switches to {modo} mode (read-only), like the original.",
+        "ok": "Access copied from {origen}.",
+        "falloAviso": "The user was created, but access could not be copied. Retry from their access sheet."
+      }
     },
     "assign": {
       "title": "Assign center",

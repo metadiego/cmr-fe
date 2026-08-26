@@ -6,14 +6,16 @@ import { toast } from "sonner";
 
 import {
   inviteUser,
+  getProfiles,
   type InviteResponse,
   type Perfil,
 } from "@/lib/api/profiles";
 import { getCenters } from "@/lib/api/centers";
-import { getRoles } from "@/lib/api/rbac";
+import { getRoles, clonarAccesoDe } from "@/lib/api/rbac";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -67,6 +69,23 @@ export function InviteDialog({
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState<InviteResponse | null>(null);
   const [copied, setCopied] = React.useState(false);
+  // «Clonar de»: copiar el acceso de otro perfil al nuevo (tras invitar). Solo con rbac.create.
+  const { can } = useCan();
+  const puedeClonar = can("rbac.create");
+  const [origenPerfilId, setOrigenPerfilId] = React.useState("");
+  const [origenQuery, setOrigenQuery] = React.useState("");
+  const [origenOpen, setOrigenOpen] = React.useState(false);
+  const [cloneMsg, setCloneMsg] = React.useState<string | null>(null);
+  const { state: perfilesState } = useResource(
+    () => (open && puedeClonar ? getProfiles(1, 200) : Promise.resolve([] as Perfil[])),
+    [open, puedeClonar],
+  );
+  const perfiles = perfilesState.kind === "ok" ? perfilesState.data : [];
+  const nombreDe = (p: Perfil) => [p.nombre, p.apellido].filter(Boolean).join(" ").trim() || p.email || p.id;
+  const origenSel = perfiles.find((p) => p.id === origenPerfilId) ?? null;
+  const origenMatches = origenQuery.trim()
+    ? perfiles.filter((p) => `${nombreDe(p)} ${p.email ?? ""}`.toLowerCase().includes(origenQuery.trim().toLowerCase())).slice(0, 8)
+    : perfiles.slice(0, 8);
 
   const { state: centrosState } = useResource(
     () => (open ? getCenters() : Promise.resolve([])),
@@ -115,6 +134,10 @@ export function InviteDialog({
       setVigenteHasta("");
       setResult(null);
       setCopied(false);
+      setOrigenPerfilId("");
+      setOrigenQuery("");
+      setOrigenOpen(false);
+      setCloneMsg(null);
     }
     onOpenChange(next);
   }
@@ -137,6 +160,25 @@ export function InviteDialog({
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
       toast.success(t("success", { email: res.email }));
+      // «Clonar de»: el perfil ya existe → ahora se copia el acceso del origen. Falla la clonación pero no
+      // el alta: el usuario queda creado y se avisa aparte (se puede reintentar la clonación por su ficha).
+      if (origenPerfilId) {
+        try {
+          const c = await clonarAccesoDe(res.id, origenPerfilId);
+          const origen = origenSel ? nombreDe(origenSel) : t("clone.origenGenerico");
+          const partes = [
+            t("clone.roles", { n: c.roles.copiados, ya: c.roles.yaTenia }),
+            t("clone.permisos", { n: c.permisos.copiados, ya: c.permisos.yaTenia }),
+            t("clone.centros", { n: c.asignaciones.copiados, ya: c.asignaciones.yaTenia }),
+          ].join(" · ");
+          const modo = c.accessMode.antes !== c.accessMode.ahora ? " " + t("clone.modo", { modo: c.accessMode.ahora }) : "";
+          setCloneMsg(t("clone.resumen", { origen }) + " " + partes + modo);
+          toast.success(t("clone.ok", { origen }));
+        } catch (e) {
+          toastError(e, tRoot); // 400 rol reservado / mismo perfil · 404 no existe → mensaje del BE
+          setCloneMsg(t("clone.falloAviso"));
+        }
+      }
       onInvited?.();
       setResult(res);
     } catch (err) {
@@ -282,6 +324,47 @@ export function InviteDialog({
                   </SelectContent>
                 </Select>
               </Field>
+
+              {/* «Clonar de» (opcional): copia el acceso de otro usuario tras invitar. Buscador por nombre
+                  o email. Solo con rbac.create. Handoff clonar-acceso-de-usuario. */}
+              {puedeClonar && (
+                <Field label={t("clone.label")} hint={t("clone.hint")}>
+                  <div className="relative">
+                    <Input
+                      value={origenOpen ? origenQuery : (origenSel ? nombreDe(origenSel) : "")}
+                      onChange={(e) => { setOrigenQuery(e.target.value); if (!origenOpen) setOrigenOpen(true); }}
+                      onFocus={() => setOrigenOpen(true)}
+                      onBlur={() => setTimeout(() => setOrigenOpen(false), 150)}
+                      placeholder={t("clone.placeholder")}
+                    />
+                    {origenOpen && (
+                      <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                        <button
+                          type="button"
+                          className="flex w-full items-center rounded px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-accent"
+                          onMouseDown={(e) => { e.preventDefault(); setOrigenPerfilId(""); setOrigenQuery(""); setOrigenOpen(false); }}
+                        >
+                          {t("clone.ninguno")}
+                        </button>
+                        {origenMatches.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className="flex w-full flex-col rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+                            onMouseDown={(e) => { e.preventDefault(); setOrigenPerfilId(p.id); setOrigenQuery(""); setOrigenOpen(false); }}
+                          >
+                            <span className="font-medium">{nombreDe(p)}</span>
+                            {p.email && <span className="text-xs text-muted-foreground">{p.email}</span>}
+                          </button>
+                        ))}
+                        {origenMatches.length === 0 && (
+                          <p className="px-2 py-2 text-xs text-muted-foreground">{t("clone.sinResultados")}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Field>
+              )}
             </div>
 
             <DialogFooter>
@@ -322,6 +405,12 @@ export function InviteDialog({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">{t("created")}</p>
+            )}
+
+            {cloneMsg && (
+              <p className="mt-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-primary">
+                {cloneMsg}
+              </p>
             )}
 
             {!!result.avisos?.length && (
