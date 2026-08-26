@@ -791,9 +791,12 @@
       "selectRole": "Pick a role",
       "loading": "Loading…",
       "empty": "Pick a role to get started.",
+      "retry": "Retry",
       "save": "Save",
       "saving": "Saving…",
-      "saved": "Role editor saved."
+      "saved": "Role editor saved.",
+      "savedMenuOnly": "Menu saved, but permissions failed: {error}",
+      "savedPermisosOnly": "Permissions saved, but menu failed: {error}"
     },
     "rbac": {
       "title": "Roles & permissions",

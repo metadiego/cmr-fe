@@ -60,7 +60,11 @@ export function EditorRolUnificado() {
   // setRolePermisos reemplaza el set completo, así que lo no tocado aquí debe seguir viajando.
   const [permisosRol, setPermisosRol] = React.useState<Set<string>>(new Set())
   const [submitting, setSubmitting] = React.useState(false)
-  const loadingRole = !!roleId && tree?.forRole !== roleId
+  // Por-id (no un booleano): si falla, distingue "cargando" de "el rol X falló" en un reintento
+  // (la carga se reintenta por botón, no automáticamente, así que un cambio de rol no la limpia
+  // salvo que la nueva carga arranque).
+  const [loadError, setLoadError] = React.useState<{ forRole: string; message: string } | null>(null)
+  const loadingRole = !!roleId && tree?.forRole !== roleId && loadError?.forRole !== roleId
 
   React.useEffect(() => {
     let active = true
@@ -75,14 +79,13 @@ export function EditorRolUnificado() {
     }
   }, [])
 
-  React.useEffect(() => {
-    // El selector no ofrece "ninguno": roleId solo pasa de "" a un id real, nunca al revés.
-    if (!roleId) return
+  const loadRole = React.useCallback((id: string) => {
     let active = true
-    Promise.all([getRoleMenu(roleId), getRolePermisos(roleId)])
+    Promise.all([getRoleMenu(id), getRolePermisos(id)])
       .then(([menu, permisosDelRol]) => {
         if (!active) return
-        setTree({ forRole: roleId, nodes: buildTree(menu) })
+        setLoadError(null)
+        setTree({ forRole: id, nodes: buildTree(menu) })
         setVisibles(
           new Set(
             menu
@@ -92,11 +95,20 @@ export function EditorRolUnificado() {
         )
         setPermisosRol(new Set(permisosDelRol))
       })
-      .catch((err) => active && toast.error(apiErrorMessage(err)))
+      .catch((err) => {
+        if (!active) return
+        setLoadError({ forRole: id, message: apiErrorMessage(err) })
+      })
     return () => {
       active = false
     }
-  }, [roleId])
+  }, [])
+
+  React.useEffect(() => {
+    // El selector no ofrece "ninguno": roleId solo pasa de "" a un id real, nunca al revés.
+    if (!roleId) return
+    return loadRole(roleId)
+  }, [roleId, loadRole])
 
   function labelDe(n: ProfileMenuItem): string {
     if (n.labelCustom) return n.labelCustom
@@ -124,16 +136,24 @@ export function EditorRolUnificado() {
   async function onSubmit() {
     if (!roleId) return
     setSubmitting(true)
-    try {
-      await Promise.all([
-        setRoleMenu(roleId, [...visibles]),
-        setRolePermisos(roleId, [...permisosRol]),
-      ])
+    // allSettled, no Promise.all: son 2 PUT de reemplazo completo independientes — si UNO falla,
+    // el otro pudo haber quedado guardado. El aviso debe decir cuál, no un error genérico que deje
+    // sin saber qué de verdad se guardó.
+    const [menuResult, permisosResult] = await Promise.allSettled([
+      setRoleMenu(roleId, [...visibles]),
+      setRolePermisos(roleId, [...permisosRol]),
+    ])
+    setSubmitting(false)
+    if (menuResult.status === "fulfilled" && permisosResult.status === "fulfilled") {
       toast.success(t("saved"))
-    } catch (err) {
-      toast.error(apiErrorMessage(err))
-    } finally {
-      setSubmitting(false)
+    } else if (menuResult.status === "fulfilled" && permisosResult.status === "rejected") {
+      toast.error(t("savedMenuOnly", { error: apiErrorMessage(permisosResult.reason) }))
+    } else if (permisosResult.status === "fulfilled" && menuResult.status === "rejected") {
+      toast.error(t("savedPermisosOnly", { error: apiErrorMessage(menuResult.reason) }))
+    } else if (menuResult.status === "rejected") {
+      toast.error(apiErrorMessage(menuResult.reason))
+    } else if (permisosResult.status === "rejected") {
+      toast.error(apiErrorMessage(permisosResult.reason))
     }
   }
 
@@ -151,31 +171,36 @@ export function EditorRolUnificado() {
     }
     const modulo = n.requiresPermiso?.split(".")[0]
     const verbos = modulo ? permisos.filter((p) => p.modulo === modulo) : []
+    // parentClave es texto libre (menu-admin.tsx): un ítem real puede terminar anidado bajo OTRO
+    // ítem, no solo bajo un grupo. Si no se recorren sus children acá, quedan invisibles y sin
+    // forma de editarlos en esta pantalla.
     return (
-      <div
-        key={n.clave}
-        className="flex flex-wrap items-center gap-3 border-b py-2"
-        style={{ marginLeft: (depth - 1) * 16 }}
-      >
-        <Switch
-          checked={visibles.has(n.clave)}
-          onCheckedChange={(v) => toggleVisible(n.clave, v)}
-          aria-label={labelDe(n)}
-        />
-        <span className="min-w-40 text-sm">{labelDe(n)}</span>
-        {verbos.length > 0 && (
-          <div className="flex flex-wrap gap-3">
-            {verbos.map((p) => (
-              <label key={p.clave} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Checkbox
-                  checked={permisosRol.has(p.clave)}
-                  onCheckedChange={(v) => toggleVerbo(p.clave, v === true)}
-                />
-                <span className="font-mono">{p.accion}</span>
-              </label>
-            ))}
-          </div>
-        )}
+      <div key={n.clave}>
+        <div
+          className="flex flex-wrap items-center gap-3 border-b py-2"
+          style={{ marginLeft: (depth - 1) * 16 }}
+        >
+          <Switch
+            checked={visibles.has(n.clave)}
+            onCheckedChange={(v) => toggleVisible(n.clave, v)}
+            aria-label={labelDe(n)}
+          />
+          <span className="min-w-40 text-sm">{labelDe(n)}</span>
+          {verbos.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {verbos.map((p) => (
+                <label key={p.clave} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Checkbox
+                    checked={permisosRol.has(p.clave)}
+                    onCheckedChange={(v) => toggleVerbo(p.clave, v === true)}
+                  />
+                  <span className="font-mono">{p.accion}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        {n.children.map((c) => renderNode(c, depth + 1))}
       </div>
     )
   }
@@ -202,8 +227,23 @@ export function EditorRolUnificado() {
 
       {!roleId && <p className="text-sm text-muted-foreground">{t("empty")}</p>}
       {roleId && loadingRole && <p className="text-sm text-muted-foreground">{t("loading")}</p>}
+      {roleId && loadError?.forRole === roleId && (
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-destructive">{loadError.message}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setLoadError(null)
+              loadRole(roleId)
+            }}
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      )}
 
-      {roleId && tree && !loadingRole && (
+      {roleId && tree && !loadingRole && !loadError && (
         <>
           <div className="rounded-md border px-3">
             {tree.nodes.map((n) => renderNode(n, 1))}

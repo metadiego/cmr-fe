@@ -791,9 +791,12 @@
       "selectRole": "Elige un rol",
       "loading": "Cargando…",
       "empty": "Elige un rol para empezar.",
+      "retry": "Reintentar",
       "save": "Guardar",
       "saving": "Guardando…",
-      "saved": "Editor de rol guardado."
+      "saved": "Editor de rol guardado.",
+      "savedMenuOnly": "Se guardó el menú, pero fallaron los permisos: {error}",
+      "savedPermisosOnly": "Se guardaron los permisos, pero falló el menú: {error}"
     },
     "rbac": {
       "title": "Roles y permisos",
