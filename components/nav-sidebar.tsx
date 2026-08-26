@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { isActive } from "@/lib/nav";
 import { resolveMenuIcon } from "@/lib/menu-icons";
 import { useMenu } from "@/hooks/use-menu";
-import { useMe, isAdmin } from "@/hooks/use-me";
+import { useMe } from "@/hooks/use-me";
 import { useNavVista } from "@/hooks/use-nav-vista";
 import { SiteHeader } from "@/components/site-header";
 import { CenterSelector } from "@/components/center-selector";
@@ -68,8 +68,11 @@ function buildMenuTree(items: MenuTreeInput[]): MenuNode[] {
 
 // Sidebar de navegación (beta, opcional — ver hooks/use-nav-vista.ts). Mismos datos que la barra
 // clásica (/me/menu vía useMenu()), solo reordenados en vertical con grupos colapsables y
-// buscador arriba. "En desarrollo"/"Por desarrollar" (herramientas de desarrollo, solo
-// admin/master) bajan a un enlace chico al fondo en vez de competir con los grupos reales.
+// buscador arriba. "En desarrollo"/"Por desarrollar" NO se replican acá: son buckets sintéticos
+// que arma site-header.tsx con su propia lógica de rutas (no existen así en /me/menu), y el dueño
+// las marcó como herramientas de admin de baja prioridad que van a desaparecer — replicar esa
+// lógica solo para esto no valía la duplicación. Quien las necesite usa "Volver a la barra
+// clásica" mientras tanto.
 export function NavSidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const tRoot = useTranslations();
@@ -77,7 +80,6 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
   const menu = useMenu();
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
-  const esAdmin = !!session && isAdmin(session);
   const [, setVista] = useNavVista();
 
   const domainGroups = buildMenuTree(menu)
@@ -91,8 +93,6 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
   };
   const nodeActive = (n: MenuNode): boolean =>
     (!!n.path && n.path !== "#" && isActive(pathname, n.path)) || n.children.some(nodeActive);
-
-  const devItems = menu.filter((m) => m.clave === "en-desarrollo" || m.clave === "por-desarrollar");
 
   // Abiertos por default; se rastrea quién se CERRÓ a mano (arranca vacío, no depende de que
   // domainGroups ya tenga datos al montar — useMenu() llega vacío mientras carga, así que un Set
@@ -188,22 +188,6 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="space-y-2 border-t p-2">
-          {esAdmin && devItems.length > 0 && (
-            <details className="rounded-md px-2.5 py-1 text-xs text-muted-foreground">
-              <summary className="cursor-pointer select-none">{t("internalTools")}</summary>
-              <div className="mt-1 flex flex-col gap-0.5">
-                {devItems.map((d) => (
-                  <Link
-                    key={d.clave}
-                    href={d.path}
-                    className="rounded-md px-2 py-1 hover:bg-accent/50 hover:text-foreground"
-                  >
-                    {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.labelKey}
-                  </Link>
-                ))}
-              </div>
-            </details>
-          )}
           <button
             type="button"
             onClick={() => setVista("clasica")}
