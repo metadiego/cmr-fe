@@ -987,7 +987,7 @@ function Editor({
         </div>
 
         {esBorrador && (
-          <DescuentoGlobal disabled={busy} subtotal={subtotal} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
+          <DescuentoGlobal disabled={busy} subtotal={subtotal} descuentoActual={descuento} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
         )}
 
         {esBorrador && esGeneral && (
@@ -2159,7 +2159,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
   );
 }
 
-function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal }: { disabled?: boolean; onApply: (tipo: string, valor: number) => void; applyLabel: string; subtotal: number }) {
+function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal, descuentoActual = 0 }: { disabled?: boolean; onApply: (tipo: string, valor: number) => void; applyLabel: string; subtotal: number; descuentoActual?: number }) {
   const t = useTranslations("facturacion");
   // Por defecto MONTO ($): quien escribe «2520» en una caja piensa en dólares; el % es el caso raro y se
   // elige a propósito. Handoff descuento-global-monto-vs-porcentaje.
@@ -2192,7 +2192,16 @@ function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal }: { disabled
           inputMode="decimal"
         />
         <Button type="button" variant="outline" size="sm" disabled={disabled || !numOk || error} onClick={() => onApply(tipo, Math.max(0, num))}>{applyLabel}</Button>
+        {/* Quitar el descuento aplicado: manda monto 0 (el motor lo deja en subtotal sin descuento). */}
+        {descuentoActual > 0 && (
+          <Button type="button" variant="ghost" size="sm" className="text-destructive" disabled={disabled} onClick={() => { setValor(""); onApply("monto", 0); }}>
+            {t("removeDiscount")}
+          </Button>
+        )}
       </div>
+      {descuentoActual > 0 && (
+        <p className="text-xs text-muted-foreground">{t("descuentoActual", { monto: descuentoActual })}</p>
+      )}
       {/* El error se ve DONDE se escribe, con el atajo para corregirlo en un clic. */}
       {pctPasa100 && (
         <p className="text-xs text-destructive">

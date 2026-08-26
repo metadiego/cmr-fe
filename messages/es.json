@@ -2488,7 +2488,9 @@
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
     "descuentoUsarMonto": "¿Querías descontar ${valor}? Cambiar a $",
     "descuentoPasaBase": "El descuento (${valor}) es mayor que el subtotal (${base}).",
-    "descuentoUsarBase": "Regalar el total: ${base}"
+    "descuentoUsarBase": "Regalar el total: ${base}",
+    "removeDiscount": "Quitar descuento",
+    "descuentoActual": "Descuento aplicado: ${monto}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

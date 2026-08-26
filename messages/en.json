@@ -2488,7 +2488,9 @@
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
     "descuentoUsarMonto": "Did you mean ${valor} off? Switch to $",
     "descuentoPasaBase": "The discount (${valor}) is larger than the subtotal (${base}).",
-    "descuentoUsarBase": "Give the whole total: ${base}"
+    "descuentoUsarBase": "Give the whole total: ${base}",
+    "removeDiscount": "Remove discount",
+    "descuentoActual": "Discount applied: ${monto}"
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
