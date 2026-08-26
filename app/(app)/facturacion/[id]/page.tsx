@@ -84,6 +84,9 @@ const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 // El código queda intacto para el futuro; en false todo imprime por el navegador. Cambiar a true para
 // volver a exponer el botón «Opciones de impresión» y la ruta QZ.
 const QZ_PRINT_UI = false;
+// Botón «Probar USB directo» (impresión WebUSB): OCULTO por ahora (no funcional/experimental). El código
+// queda para el futuro; poner en true para volver a mostrarlo.
+const USB_TEST_UI = false;
 // Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
 // pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
 const RESUMEN_PACIENTE_ENABLED = true;
@@ -466,10 +469,13 @@ export default function FacturacionPage() {
             <HugeiconsIcon icon={PrinterIcon} className="size-4" />
             {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
           </Button>
-          {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge. */}
-          <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
-            {t("print.usbTest")}
-          </Button>
+          {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge.
+              OCULTO tras USB_TEST_UI: el código queda para el futuro. */}
+          {USB_TEST_UI && (
+            <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
+              {t("print.usbTest")}
+            </Button>
+          )}
           {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
               software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
               imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
