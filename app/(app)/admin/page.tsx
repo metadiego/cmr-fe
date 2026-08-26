@@ -10,6 +10,7 @@ import { ThemeSettings } from "@/components/admin/theme-settings";
 import { RbacSettings } from "@/components/admin/rbac-settings";
 import { PermisosCatalogo } from "@/components/admin/permisos-catalogo";
 import { MenuAdmin } from "@/components/admin/menu-admin";
+import { EditorRolUnificado } from "@/components/admin/editor-rol";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminPage() {
@@ -29,6 +30,7 @@ export default function AdminPage() {
             <TabsTrigger value="roles">{t("tabs.roles")}</TabsTrigger>
             <TabsTrigger value="permisos">{t("tabs.permisos")}</TabsTrigger>
             <TabsTrigger value="menu">{t("tabs.menu")}</TabsTrigger>
+            <TabsTrigger value="editorRol">{t("tabs.editorRol")}</TabsTrigger>
             <TabsTrigger value="pending">{t("tabs.pending")}</TabsTrigger>
           </TabsList>
 
@@ -54,6 +56,10 @@ export default function AdminPage() {
 
           <TabsContent value="menu" className="mt-4">
             <MenuAdmin />
+          </TabsContent>
+
+          <TabsContent value="editorRol" className="mt-4">
+            <EditorRolUnificado />
           </TabsContent>
 
           <TabsContent value="pending" className="mt-4">
