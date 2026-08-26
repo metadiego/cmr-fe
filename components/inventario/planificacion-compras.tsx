@@ -320,8 +320,9 @@ export function PlanificacionCompras() {
                       <Input
                         key={`${po.id}:${p.poCantidades?.[po.id] ?? 0}`}
                         type="number"
+                        min={0}
                         defaultValue={p.poCantidades?.[po.id] ?? 0}
-                        onBlur={(e) => editarCantidad(po.id, p.productoId, e.target.value, p.poCantidades?.[po.id] ?? 0)}
+                        onBlur={(e) => editarCantidad(po.id, p.productoId, String(Math.max(0, Number(e.target.value) || 0)), p.poCantidades?.[po.id] ?? 0)}
                         className="h-7 w-20 text-right tabular-nums"
                       />
                     </td>

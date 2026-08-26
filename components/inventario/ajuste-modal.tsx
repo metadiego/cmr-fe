@@ -202,9 +202,10 @@ export function AjusteModal({
                   id="aj-contado"
                   type="number"
                   step="any"
+                  min={0}
                   inputMode="decimal"
                   value={contado}
-                  onChange={(e) => setContado(e.target.value)}
+                  onChange={(e) => { const v = e.target.value; setContado(v.trim() !== "" && Number(v) < 0 ? "0" : v); }}
                   placeholder={String(objetivo.stockActual)}
                 />
                 <p className="text-xs text-muted-foreground">

@@ -395,7 +395,7 @@ function DevolverForm({
                           <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
                         </td>
                         <td className="px-3 py-1.5 text-right">
-                          <Input type="number" disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => setCompPrecio((m) => ({ ...m, [key]: e.target.value }))} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
+                          <Input type="number" min={0} disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => { const v = e.target.value; setCompPrecio((m) => ({ ...m, [key]: v.trim() !== "" && Number(v) < 0 ? "0" : v })); }} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
                         </td>
                       </tr>
                     );
