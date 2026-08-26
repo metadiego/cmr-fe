@@ -221,10 +221,14 @@ function DevolverForm({
   const refundDe = (it: FacturaItem) => (precio[it.id]?.trim() ? Number(precio[it.id]) : defaultRefund(it));
 
   // Al cambiar cantidad en "como facturada", auto-rellena el reembolso EXACTO (editable). precio_base no toca.
+  // Se topa al DISPONIBLE (no se puede devolver más de lo que queda): el atributo max no bloquea el tecleo.
   function onQtyChange(it: FacturaItem, val: string) {
-    (esEntrega(it) ? setSes : setCant)((m) => ({ ...m, [it.id]: val }));
+    const disp = dispDe(it);
+    const q0 = Number(val || 0);
+    const val2 = val.trim() !== "" && q0 > disp ? String(disp) : val;
+    (esEntrega(it) ? setSes : setCant)((m) => ({ ...m, [it.id]: val2 }));
     if (politica === "como_facturada") {
-      const q = Number(val || 0);
+      const q = Number(val2 || 0);
       setPrecio((m) => ({ ...m, [it.id]: q > 0 ? exactRefund(it, q).toFixed(2) : "" }));
     }
   }
@@ -369,9 +373,9 @@ function DevolverForm({
                     </td>
                     <td className="px-3 py-2 text-right">
                       <Input
-                        type="number" placeholder={defaultRefund(it) ? defaultRefund(it).toFixed(2) : "0.00"}
+                        type="number" min={0} placeholder={defaultRefund(it) ? defaultRefund(it).toFixed(2) : "0.00"}
                         value={precio[it.id] ?? ""}
-                        onChange={(e) => setPrecio((m) => ({ ...m, [it.id]: e.target.value }))}
+                        onChange={(e) => { const v = e.target.value; setPrecio((m) => ({ ...m, [it.id]: v.trim() !== "" && Number(v) < 0 ? "0" : v })); }}
                         className="h-8 w-24 text-right tabular-nums"
                       />
                     </td>
