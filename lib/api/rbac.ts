@@ -134,13 +134,18 @@ export function updateRole(
 // Assign a role to a profile (POST). Se asigna GLOBAL: NO se manda centroId (el centro donde trabaja
 // alguien vive en sus asignaciones de centro, no en la del rol; un rol multi-centro rechaza centroId).
 // Handoff HANDOFF-rol-multicentro-y-preparacion-legado.
+// `centroId` acota el rol a un centro (perfiles_roles = perfilId+rolId+centroId): así una persona puede
+// ser Gerente en un centro y Facturación en otro a la vez. SIN centroId el rol es GLOBAL (todos los
+// centros); un rol `todosLosCentros` SOLO se asigna global (el BE rechaza acotarlo). Handoff
+// roles-por-centro-en-la-ui. Verificado en prod (POST 201, aparece en access?centroId=).
 export function assignRoleToProfile(
   profileId: string,
-  rolClave: string
+  rolClave: string,
+  centroId?: string
 ): Promise<unknown> {
   return apiFetch(`/profiles/${profileId}/roles`, {
     method: "POST",
-    body: JSON.stringify({ rolClave }),
+    body: JSON.stringify(centroId ? { rolClave, centroId } : { rolClave }),
   })
 }
 

@@ -19,6 +19,7 @@ import {
   type CentroRef,
 } from "@/lib/api/rbac"
 import { getCenters, type Centro } from "@/lib/api/centers"
+import { AccessPorCentroTab } from "@/components/admin/access-por-centro-tab"
 import { toastError } from "@/lib/api/errors"
 import { cn } from "@/lib/utils"
 import { useResource } from "@/hooks/use-resource"
@@ -119,9 +120,16 @@ function AccessPanel({ profile }: { profile: Perfil }) {
       <Tabs defaultValue="roles">
         <TabsList>
           <TabsTrigger value="roles">{t("tabs.roles")}</TabsTrigger>
+          <TabsTrigger value="porCentro">{t("tabs.porCentro")}</TabsTrigger>
           <TabsTrigger value="exceptions">{t("tabs.exceptions")}</TabsTrigger>
           <TabsTrigger value="menu">{t("tabs.menu")}</TabsTrigger>
         </TabsList>
+
+        {/* Un rol distinto por centro (perfil+rol+centro): tabla por centro + roles globales. Handoff
+            roles-por-centro-en-la-ui. No depende del selector de ámbito de arriba: gestiona todos los centros. */}
+        <TabsContent value="porCentro" className="mt-4">
+          <AccessPorCentroTab profile={profile} />
+        </TabsContent>
 
         <TabsContent value="roles" className="mt-4">
           <RolesTab

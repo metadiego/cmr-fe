@@ -842,7 +842,8 @@
       "tabs": {
         "roles": "Roles",
         "exceptions": "Excepciones",
-        "menu": "Menú"
+        "menu": "Menú",
+        "porCentro": "Por centro"
       },
       "saved": "Guardado.",
       "exception": "excepción",
@@ -858,7 +859,20 @@
       "sinPermiso": "visible para todos",
       "centros": "Centros",
       "sinExcepciones": "Sin excepciones",
-      "centrosHelp": "Los centros son excepciones por usuario: le dan un permiso en un centro ajeno sin cambiar su rol ni su menú. Si a mucha gente le hace falta lo mismo, hazlo un rol."
+      "centrosHelp": "Los centros son excepciones por usuario: le dan un permiso en un centro ajeno sin cambiar su rol ni su menú. Si a mucha gente le hace falta lo mismo, hazlo un rol.",
+      "porCentro": "Por centro",
+      "porCentroAyuda": "Un rol distinto en cada centro. El interruptor le da o le quita el centro sin borrar nada; los roles globales van aparte.",
+      "colCentro": "Centro",
+      "colActivo": "Activo",
+      "colRoles": "Roles en este centro",
+      "sinRolCentro": "Sin rol aquí",
+      "anadirRol": "+ Añadir rol",
+      "anadirCentro": "Añadir centro:",
+      "elegirCentro": "Elegir centro…",
+      "sinCentros": "Sin centros asignados.",
+      "rolesGlobales": "Roles en TODOS los centros",
+      "sinRolesGlobales": "Ninguno",
+      "anadir": "+ Añadir"
     },
     "menu": {
       "title": "Menú dinámico",

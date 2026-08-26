@@ -842,7 +842,8 @@
       "tabs": {
         "roles": "Roles",
         "exceptions": "Exceptions",
-        "menu": "Menu"
+        "menu": "Menu",
+        "porCentro": "By center"
       },
       "saved": "Saved.",
       "exception": "exception",
@@ -858,7 +859,20 @@
       "sinPermiso": "visible to everyone",
       "centros": "Centers",
       "sinExcepciones": "No exceptions",
-      "centrosHelp": "Centers are per-user exceptions: they grant a permission in another center without changing their role or menu. If many people need the same, make it a role."
+      "centrosHelp": "Centers are per-user exceptions: they grant a permission in another center without changing their role or menu. If many people need the same, make it a role.",
+      "porCentro": "By center",
+      "porCentroAyuda": "A different role in each center. The switch grants or removes the center without deleting anything; global roles are listed apart.",
+      "colCentro": "Center",
+      "colActivo": "Active",
+      "colRoles": "Roles in this center",
+      "sinRolCentro": "No role here",
+      "anadirRol": "+ Add role",
+      "anadirCentro": "Add center:",
+      "elegirCentro": "Pick center…",
+      "sinCentros": "No centers assigned.",
+      "rolesGlobales": "Roles in ALL centers",
+      "sinRolesGlobales": "None",
+      "anadir": "+ Add"
     },
     "menu": {
       "title": "Dynamic menu",
