@@ -782,7 +782,18 @@
       "theme": "Tema",
       "roles": "Roles",
       "menu": "Menú",
-      "permisos": "Permisos"
+      "permisos": "Permisos",
+      "editorRol": "Editor de Rol (beta)"
+    },
+    "editorRol": {
+      "title": "Editor de Rol unificado (beta)",
+      "help": "Elige un rol y ajusta qué ve y qué puede hacer, todo en una pantalla. No reemplaza Roles/Permisos/Menú todavía.",
+      "selectRole": "Elige un rol",
+      "loading": "Cargando…",
+      "empty": "Elige un rol para empezar.",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saved": "Editor de rol guardado."
     },
     "rbac": {
       "title": "Roles y permisos",

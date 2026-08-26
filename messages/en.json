@@ -782,7 +782,18 @@
       "theme": "Theme",
       "roles": "Roles",
       "menu": "Menu",
-      "permisos": "Permissions"
+      "permisos": "Permissions",
+      "editorRol": "Role editor (beta)"
+    },
+    "editorRol": {
+      "title": "Unified role editor (beta)",
+      "help": "Pick a role and adjust what it sees and what it can do, in one screen. Doesn't replace Roles/Permissions/Menu yet.",
+      "selectRole": "Pick a role",
+      "loading": "Loading…",
+      "empty": "Pick a role to get started.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Role editor saved."
     },
     "rbac": {
       "title": "Roles & permissions",
