@@ -2083,19 +2083,9 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
           onPick={pick}
         />
       </label>
-      <label className="flex w-20 flex-col gap-1">
-        <Lbl>{t("qty")}</Lbl>
-        <Input
-          data-flow
-          value={cant}
-          onChange={(e) => setCant(e.target.value)}
-          onFocus={selectOnFocus}
-          onKeyDown={onFlowKey}
-          className="h-9 text-right tabular-nums"
-          inputMode="numeric"
-        />
-      </label>
-      {/* Columnas dinámicas del producto (días/áreas/sesiones/dosis) + selects declarados (p. ej. ZONA). */}
+      {/* Columnas dinámicas del producto (áreas/días/sesiones/dosis) + selects declarados (p. ej. ZONA).
+          Van ANTES de Cantidad: primero áreas y días (así se lee «áreas × días»), Cantidad después. El
+          Enter fluye producto → áreas → días → Cantidad → Agregar. Handoff descuento-… (posición). */}
       {capturables.map((c) => {
         const requeridoVacio = c.requerido && String(metaShown(c.clave)).trim() === "";
         if (esSelectCaptura(c)) {
@@ -2132,6 +2122,19 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
           </label>
         );
       })}
+      {/* Cantidad DESPUÉS de áreas/días. Con dosis, ya viene pre-calculada; queda editable. */}
+      <label className="flex w-20 flex-col gap-1">
+        <Lbl>{t("qty")}</Lbl>
+        <Input
+          data-flow
+          value={cant}
+          onChange={(e) => setCant(e.target.value)}
+          onFocus={selectOnFocus}
+          onKeyDown={onFlowKey}
+          className="h-9 text-right tabular-nums"
+          inputMode="numeric"
+        />
+      </label>
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
         <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
