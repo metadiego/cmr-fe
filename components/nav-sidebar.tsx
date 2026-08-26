@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowDown01Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowLeft01Icon, Stethoscope02Icon } from "@hugeicons/core-free-icons";
 
 import { cn } from "@/lib/utils";
 import { isActive } from "@/lib/nav";
@@ -106,6 +106,31 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
       return next;
     });
 
+  // Retráctil: un riel de solo iconos (por dispositivo, localStorage). Solo le importa a este
+  // componente — a diferencia de la vista clásica/sidebar, nadie más necesita saber si está
+  // colapsado, así que no hace falta el pub-sub de hooks/use-nav-vista.ts.
+  const COLLAPSE_KEY = "cmr_nav_sidebar_collapsed";
+  const [collapsed, setCollapsedState] = React.useState(false);
+  const [collapseRestored, setCollapseRestored] = React.useState(false);
+  if (!collapseRestored && typeof window !== "undefined") {
+    setCollapseRestored(true);
+    if (window.localStorage.getItem(COLLAPSE_KEY) === "1") setCollapsedState(true);
+  }
+  function setCollapsed(v: boolean) {
+    setCollapsedState(v);
+    if (typeof window !== "undefined") window.localStorage.setItem(COLLAPSE_KEY, v ? "1" : "0");
+  }
+  // Clic en el ícono de un grupo mientras está colapsado: expande el riel Y abre ese grupo, en vez
+  // de no poder mostrar sus hijos en un ancho de solo-ícono.
+  function expandirYAbrir(clave: string) {
+    setCollapsed(false);
+    setClosedGroups((prev) => {
+      const next = new Set(prev);
+      next.delete(clave);
+      return next;
+    });
+  }
+
   const renderChildren = (nodes: MenuNode[], depth = 0): React.ReactNode =>
     nodes.map((n) =>
       n.tipo === "separador" ? (
@@ -145,25 +170,78 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
         <SiteHeader />
       </div>
 
-      <aside className="hidden w-64 shrink-0 flex-col border-r bg-background md:flex">
-        <div className="flex items-center gap-2 px-3 py-3.5 font-semibold tracking-tight">
-          <span className="grid size-7 place-items-center rounded-md bg-primary text-primary-foreground">
+      <aside
+        className={cn(
+          "hidden shrink-0 flex-col border-r bg-background transition-[width] duration-150 md:flex",
+          collapsed ? "w-14" : "w-64",
+        )}
+      >
+        <div className={cn("flex items-center gap-2 px-3 py-3.5 font-semibold tracking-tight", collapsed && "justify-center px-0")}>
+          <span className="grid size-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
             <HugeiconsIcon icon={Stethoscope02Icon} className="size-4" />
           </span>
-          <span className="text-base">CMR</span>
+          {!collapsed && <span className="flex-1 truncate text-base">CMR</span>}
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={() => setCollapsed(true)}
+              aria-label={t("collapse")}
+              title={t("collapse")}
+              className="rounded-md p-1 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+            </button>
+          )}
         </div>
+        {collapsed && (
+          <button
+            type="button"
+            onClick={() => setCollapsed(false)}
+            aria-label={t("expand")}
+            title={t("expand")}
+            className="mx-auto mb-1 rounded-md p-1 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4 rotate-180" />
+          </button>
+        )}
 
-        <div className="px-2 pb-2">
-          <CenterSelector />
-        </div>
-        <div className="px-2 pb-2">
-          <SearchBar className="w-full" />
-        </div>
+        {!collapsed && (
+          <>
+            <div className="px-2 pb-2">
+              <CenterSelector />
+            </div>
+            <div className="px-2 pb-2">
+              <SearchBar className="w-full" />
+            </div>
+          </>
+        )}
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
           {domainGroups.map((g) => {
             const open = !closedGroups.has(g.clave);
             const icon = g.mostrarIcono ? resolveMenuIcon(g.icon) : null;
+            const label = labelOf(g);
+            if (collapsed) {
+              return (
+                <button
+                  key={g.clave}
+                  type="button"
+                  onClick={() => expandirYAbrir(g.clave)}
+                  title={label}
+                  aria-label={label}
+                  className={cn(
+                    "flex w-full items-center justify-center rounded-md py-2 transition-colors hover:bg-accent/50",
+                    nodeActive(g) ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  {icon ? (
+                    <HugeiconsIcon icon={icon} className="size-4" />
+                  ) : (
+                    <span className="text-[11px] font-bold uppercase">{label.charAt(0)}</span>
+                  )}
+                </button>
+              );
+            }
             return (
               <div key={g.clave} className="flex flex-col">
                 <button
@@ -175,7 +253,7 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
                   )}
                 >
                   {icon ? <HugeiconsIcon icon={icon} className="size-4 opacity-70" /> : null}
-                  <span className="flex-1 truncate">{labelOf(g)}</span>
+                  <span className="flex-1 truncate">{label}</span>
                   <HugeiconsIcon
                     icon={ArrowDown01Icon}
                     className={cn("size-3.5 shrink-0 opacity-60 transition-transform", open && "-rotate-180")}
@@ -188,16 +266,18 @@ export function NavSidebar({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="space-y-2 border-t p-2">
-          <button
-            type="button"
-            onClick={() => setVista("clasica")}
-            className="w-full rounded-md px-2.5 py-1 text-left text-xs text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-          >
-            {t("backToClassic")}
-          </button>
-          <div className="flex items-center gap-2 px-1">
+          {!collapsed && (
+            <button
+              type="button"
+              onClick={() => setVista("clasica")}
+              className="w-full rounded-md px-2.5 py-1 text-left text-xs text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            >
+              {t("backToClassic")}
+            </button>
+          )}
+          <div className={cn("flex items-center gap-2", collapsed ? "justify-center" : "px-1")}>
             <UserMenu />
-            {session && (
+            {!collapsed && session && (
               <span className="truncate text-sm font-medium">
                 {[session.nombre, session.apellido].filter(Boolean).join(" ").trim() || session.email}
               </span>

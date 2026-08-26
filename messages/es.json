@@ -660,7 +660,9 @@
     "navVistaSidebar": "Sidebar nuevo"
   },
   "navSidebar": {
-    "backToClassic": "Volver a la barra clásica"
+    "backToClassic": "Volver a la barra clásica",
+    "collapse": "Colapsar",
+    "expand": "Expandir"
   },
   "nav": {
     "home": "Inicio",

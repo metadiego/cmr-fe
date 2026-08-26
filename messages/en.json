@@ -660,7 +660,9 @@
     "navVistaSidebar": "New sidebar"
   },
   "navSidebar": {
-    "backToClassic": "Back to the classic bar"
+    "backToClassic": "Back to the classic bar",
+    "collapse": "Collapse",
+    "expand": "Expand"
   },
   "nav": {
     "home": "Home",
