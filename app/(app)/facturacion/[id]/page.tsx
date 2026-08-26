@@ -54,7 +54,7 @@ import { printEscPosWebUsb, webUsbSupported } from "@/lib/print/webusb";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PrinterIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import { PrinterIcon, MoreHorizontalIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -2192,10 +2192,19 @@ function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal, descuentoAct
           inputMode="decimal"
         />
         <Button type="button" variant="outline" size="sm" disabled={disabled || !numOk || error} onClick={() => onApply(tipo, Math.max(0, num))}>{applyLabel}</Button>
-        {/* Quitar el descuento aplicado: manda monto 0 (el motor lo deja en subtotal sin descuento). */}
+        {/* Quitar el descuento aplicado: X discreta (manda monto 0). Título/aria para que se entienda. */}
         {descuentoActual > 0 && (
-          <Button type="button" variant="ghost" size="sm" className="text-destructive" disabled={disabled} onClick={() => { setValor(""); onApply("monto", 0); }}>
-            {t("removeDiscount")}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-9 shrink-0 text-muted-foreground hover:text-destructive"
+            disabled={disabled}
+            title={t("removeDiscount")}
+            aria-label={t("removeDiscount")}
+            onClick={() => { setValor(""); onApply("monto", 0); }}
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
           </Button>
         )}
       </div>
