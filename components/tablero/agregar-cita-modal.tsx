@@ -77,6 +77,15 @@ export function AgregarCitaModal({
     };
   }, [tablero, centroId]);
 
+  // Al elegir paciente: traer SU médico asignado (paciente.medicoId, cuyo valor coincide con el value de
+  // la opción). Si no tiene, queda «sin médico» — NUNCA null. El usuario puede cambiarlo aquí. El value de
+  // las opciones de médico ES el medicoId (verificado). Handoff: nueva cita en Atención precarga el médico.
+  function onPickPaciente(p: Paciente | null) {
+    setPaciente(p);
+    const mid = p ? String((p as { medicoId?: string | null }).medicoId ?? "") : "";
+    setMedicoId(mid || NO_MEDICO);
+  }
+
   const tipo = tipos.find((x) => x.id === tipoId);
   const medicoRequerido = !!tipo?.requiereMedico && !esPrimeraVez;
   const canSubmit = !!paciente && !!tipoId && (!medicoRequerido || medicoId !== NO_MEDICO) && !busy;
@@ -123,7 +132,7 @@ export function AgregarCitaModal({
 
         <div className="space-y-4 px-6 py-5">
           <Field label={t("patient")}>
-            <PacienteSelect value={paciente} onChange={setPaciente} />
+            <PacienteSelect value={paciente} onChange={onPickPaciente} />
           </Field>
 
           <Field label={t("type")}>
