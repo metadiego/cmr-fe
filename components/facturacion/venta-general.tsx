@@ -82,7 +82,15 @@ function Finder({
   const [sel, setSel] = React.useState<PacienteBusqueda | null>(null);
   const [creating, setCreating] = React.useState(false);
   const [tipoPrecioId, setTipoPrecioId] = React.useState("");
-  const [medicoId, setMedicoId] = React.useState("");
+  // null = todavía no lo tocó el usuario para ESTE paciente → usar el medicoId del paciente
+  // (issue #39). Cualquier otro valor (incluido "") = el usuario lo cambió a mano, no pisarlo.
+  const [medicoOverride, setMedicoOverride] = React.useState<string | null>(null);
+  const [medicoOverridePara, setMedicoOverridePara] = React.useState<string | null>(null);
+  if (medicoOverridePara !== (sel?.id ?? null)) {
+    setMedicoOverridePara(sel?.id ?? null);
+    setMedicoOverride(null);
+  }
+  const medicoId = medicoOverride ?? sel?.medicoId ?? "";
   const [medioId, setMedioId] = React.useState("");
   // Facturar a un tercero (empresa/otra persona). Vacío = se factura al paciente.
   const [terceroOpen, setTerceroOpen] = React.useState(false);
@@ -210,7 +218,7 @@ function Finder({
         {medicos.length > 0 && (
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("medico")}</span>
-            <Select value={medicoId || "__none__"} onValueChange={(v) => setMedicoId(v === "__none__" ? "" : v)}>
+            <Select value={medicoId || "__none__"} onValueChange={(v) => setMedicoOverride(v === "__none__" ? "" : v)}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">{t("sinMedico")}</SelectItem>
