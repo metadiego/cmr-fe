@@ -1894,7 +1894,9 @@
         "almacen": "Warehouse",
         "lote": "Lot / expiry",
         "cantidad": "Quantity",
-        "total": "Total"
+        "total": "Total",
+        "alcanza": "Enough for",
+        "de": "of"
       },
       "modo": {
         "a_la_venta": "leaves when billed",

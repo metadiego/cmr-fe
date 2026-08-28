@@ -1894,7 +1894,9 @@
         "almacen": "Almacén",
         "lote": "Lote / vence",
         "cantidad": "Cantidad",
-        "total": "Total"
+        "total": "Total",
+        "alcanza": "Alcanza para",
+        "de": "de"
       },
       "modo": {
         "a_la_venta": "sale al facturar",

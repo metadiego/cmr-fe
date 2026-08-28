@@ -220,15 +220,19 @@ export default function StockPage() {
                       {resumen.items.map((r, i) => (
                         <tr key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer hover:bg-muted/30" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                           <td className="px-3 py-2">
-                            <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                            {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                            <span className="flex items-center gap-1.5">
+                              <EstadoDot estado={r.estado} />
+                              <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
+                              {r.nombreTecnico && <span className="text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                            </span>
                             <span className="block text-xs text-muted-foreground">{r.sku}{r.modoDescarga ? ` · ${t(`modo.${r.modoDescarga}` as const)}` : ""}</span>
+                            <Equivalencias items={r.equivalencias} t={t} />
                           </td>
                           <td className="px-3 py-2 text-muted-foreground">{r.almacenNombre ?? "—"}</td>
                           <td className="px-3 py-2">
                             <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
                           </td>
-                          <td className="px-3 py-2 text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} /></td>
+                          <td className="px-3 py-2 text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} unidad={r.unidadClave} /></td>
                           <td className="px-3 py-2 text-right">
                             <Button
                               variant="outline"
@@ -258,15 +262,16 @@ export default function StockPage() {
                     <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-xl border p-3" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
+                          <div className="flex items-center gap-1.5"><EstadoDot estado={r.estado} /><span className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</span></div>
                           <div className="truncate text-xs text-muted-foreground">{r.sku}{r.nombreTecnico ? ` · ${r.nombreTecnico}` : ""}</div>
                         </div>
-                        <Cantidad valor={r.cantidad} negativo={r.negativo} />
+                        <Cantidad valor={r.cantidad} negativo={r.negativo} unidad={r.unidadClave} />
                       </div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{r.almacenNombre ?? "—"}</span>
                         <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
                       </div>
+                      <Equivalencias items={r.equivalencias} t={t} />
                     </div>
                   ))}
                 </div>
@@ -378,11 +383,41 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 // Números GRANDES y a la derecha (regla del dueño): se comparan de un vistazo; negativo en rojo, sin
 // explicación. `bold` (el Total) va un punto mayor.
-function Cantidad({ valor, negativo, bold }: { valor: number; negativo: boolean; bold?: boolean }) {
+// La cifra NUNCA sola: se acompaña de la unidad (g/mg/ml/u). unidadClave puede venir null → sin sufijo
+// (no inventar «u.»). Handoff visor-de-existencias.
+function Cantidad({ valor, negativo, bold, unidad }: { valor: number; negativo: boolean; bold?: boolean; unidad?: string | null }) {
   return (
     <span className={"tabular-nums " + (bold ? "text-lg font-bold " : "text-base ") + (negativo ? "font-semibold text-destructive" : "")}>
-      {valor}
+      {nf.format(valor)}{unidad ? <span className="ml-1 text-xs font-normal text-muted-foreground">{unidad}</span> : null}
     </span>
+  );
+}
+
+// Semáforo YA resuelto por el BE (no recalcular). Punto de color solo cuando NO es normal — pintar medio
+// catálogo el primer día enseña a ignorar el color. Handoff visor-de-existencias.
+const ESTADO_COLOR: Record<string, string> = {
+  negativo: "bg-red-500",
+  vencido: "bg-red-800",
+  por_vencer: "bg-amber-500",
+  bajo_minimo: "bg-amber-400/70",
+};
+function EstadoDot({ estado }: { estado?: string | null }) {
+  const c = estado ? ESTADO_COLOR[estado] : undefined;
+  if (!c) return null;
+  return <span className={"inline-block size-2 shrink-0 rounded-full " + c} aria-label={estado ?? ""} title={estado ?? ""} />;
+}
+
+// «Alcanza para N de X»: equivalencias ordenadas de menor a mayor dosis. Vacío = no es insumo (no pintar).
+function Equivalencias({ items, t }: { items?: { nombre?: string | null; dosis?: number | null; rinde?: number | null }[]; t: (k: string) => string }) {
+  const eq = (items ?? []).filter((e) => (e.rinde ?? 0) > 0);
+  if (eq.length === 0) return null;
+  return (
+    <p className="text-xs text-muted-foreground">
+      <span className="font-medium">{t("col.alcanza")}</span>{" "}
+      {eq.map((e, i) => (
+        <span key={i}>{i > 0 ? " · " : ""}<span className="font-semibold text-foreground tabular-nums">{e.rinde}</span> {t("col.de")} {e.nombre ?? (e.dosis != null ? `${e.dosis}` : "?")}</span>
+      ))}
+    </p>
   );
 }
 

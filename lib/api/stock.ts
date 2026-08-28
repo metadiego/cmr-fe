@@ -24,7 +24,20 @@ export type StockResumenFila = {
   vencido: boolean;
   porVencer: boolean;
   modoDescarga?: StockModoDescarga | null;
+  // Campos nuevos del visor genérico (handoff visor-de-existencias). Todos pueden faltar en datos viejos.
+  unidad?: string | null; // nombre largo (respaldo)
+  unidadClave?: string | null; // g|mg|ml|u → i18n; NUNCA pintar la cifra sola. Puede venir null (no pintar sufijo)
+  stockMinimo?: number | null; // mínimo del centro; null = sin mínimo, no avisar
+  bajoMinimo?: boolean;
+  esInventariable?: boolean;
+  // Semáforo YA resuelto por el BE (no recalcular): prioridad negativo>vencido>por_vencer>bajo_minimo>normal.
+  estado?: "negativo" | "vencido" | "por_vencer" | "bajo_minimo" | "normal" | string | null;
+  rinde?: number | null; // atajo cuando hay UNA presentación; si varias, null → usar equivalencias
+  // «Alcanza para N de X»: ordenadas de menor a mayor dosis. [] = no es insumo de nada (no pintar).
+  equivalencias?: { sku?: string | null; nombre?: string | null; dosis?: number | null; rinde?: number | null }[];
 };
+
+export type StockEquivalencia = NonNullable<StockResumenFila["equivalencias"]>[number];
 
 export type StockResumenParams = {
   q?: string;
