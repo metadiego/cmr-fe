@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Settings02Icon,
@@ -48,7 +47,6 @@ export function UserMenu() {
   // llega alguna sección de configuración (/configuracion/*) en /me/menu.
   const menu = useMenu();
   const puedeConfigurar = menu.some((m) => (m.path ?? "").startsWith("/configuracion/"));
-  const { theme, setTheme } = useTheme();
   const locale = useLocale() as Locale;
   const [navVista, setNavVista] = useNavVista();
 
@@ -111,17 +109,6 @@ export function UserMenu() {
             <span className="truncate text-xs font-normal text-muted-foreground">{email}</span>
           ) : null}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-
-        {/* Tema */}
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {t("theme")}
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">{t("themeLight")}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">{t("themeDark")}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">{t("themeSystem")}</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
 
         {/* Idioma */}
