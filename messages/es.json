@@ -3510,15 +3510,17 @@
     "sinConsumos": "Sin consumos en este rango.",
     "sinNumero": "sin número",
     "historicos": "Viales anteriores ({n})",
-    "col.fecha": "Hora",
-    "col.paciente": "Paciente",
-    "col.dosis": "Dosis",
-    "col.vial": "Vial",
-    "estado.abierto": "abierto",
-    "estado.agotado": "agotado",
-    "estado.descartado": "descartado",
     "col": {
+      "fecha": "Hora",
+      "paciente": "Paciente",
+      "dosis": "Dosis",
+      "vial": "Vial",
       "factura": "Factura"
+    },
+    "estado": {
+      "abierto": "abierto",
+      "agotado": "agotado",
+      "descartado": "descartado"
     },
     "verFactura": "Ver factura"
   },

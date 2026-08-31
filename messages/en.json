@@ -3510,15 +3510,17 @@
     "sinConsumos": "No doses in this range.",
     "sinNumero": "no number",
     "historicos": "Previous vials ({n})",
-    "col.fecha": "Time",
-    "col.paciente": "Patient",
-    "col.dosis": "Dose",
-    "col.vial": "Vial",
-    "estado.abierto": "open",
-    "estado.agotado": "empty",
-    "estado.descartado": "discarded",
     "col": {
+      "fecha": "Time",
+      "paciente": "Patient",
+      "dosis": "Dose",
+      "vial": "Vial",
       "factura": "Invoice"
+    },
+    "estado": {
+      "abierto": "open",
+      "agotado": "empty",
+      "descartado": "discarded"
     },
     "verFactura": "View invoice"
   },
