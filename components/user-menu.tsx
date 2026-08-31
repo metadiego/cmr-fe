@@ -19,7 +19,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { useMenu } from "@/hooks/use-menu";
-import { useNavVista } from "@/hooks/use-nav-vista";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
@@ -48,7 +47,6 @@ export function UserMenu() {
   const menu = useMenu();
   const puedeConfigurar = menu.some((m) => (m.path ?? "").startsWith("/configuracion/"));
   const locale = useLocale() as Locale;
-  const [navVista, setNavVista] = useNavVista();
 
   const [signingOut, setSigningOut] = React.useState(false);
   async function signOut() {
@@ -121,17 +119,6 @@ export function UserMenu() {
               {t(`lang_${l}`)}
             </DropdownMenuRadioItem>
           ))}
-        </DropdownMenuRadioGroup>
-        <DropdownMenuSeparator />
-
-        {/* Menú lateral (beta, opcional, por dispositivo) — la barra clásica sigue de default;
-            ver hooks/use-nav-vista.ts y docs/plans/menu-principal-sidebar-opcional.md. */}
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {t("navVista")}
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={navVista} onValueChange={(v) => setNavVista(v as "clasica" | "sidebar")}>
-          <DropdownMenuRadioItem value="clasica">{t("navVistaClasica")}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="sidebar">{t("navVistaSidebar")}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
 
