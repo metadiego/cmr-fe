@@ -283,14 +283,18 @@ function KpiCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "relative flex min-w-[7rem] flex-col gap-1 overflow-hidden rounded-xl bg-card px-4 py-3 text-left text-card-foreground",
-        "ring-1 ring-foreground/10 shadow-sm transition-colors",
-        active ? "ring-primary/60 bg-primary/5" : "hover:ring-primary/40",
+        "group flex min-w-[7rem] flex-col gap-1.5 rounded-2xl bg-card px-4 py-3 text-left text-card-foreground transition-all",
+        "shadow-[0_1px_2px_rgba(16,32,64,0.04),0_8px_20px_-12px_rgba(16,32,64,0.15)]",
+        active
+          ? "bg-primary/[0.04] ring-2 ring-primary/50"
+          : "ring-1 ring-foreground/10 hover:ring-foreground/20 hover:shadow-[0_2px_6px_rgba(16,32,64,0.06),0_14px_28px_-12px_rgba(16,32,64,0.2)]",
       )}
     >
-      <span className="absolute inset-y-0 left-0 w-1" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} />
-      <span className="text-2xl font-bold tabular-nums leading-none">{count}</span>
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="flex items-center gap-1.5">
+        {color && <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden />}
+        <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      </span>
+      <span className="text-2xl font-bold leading-none tabular-nums text-foreground">{count}</span>
     </button>
   );
 }

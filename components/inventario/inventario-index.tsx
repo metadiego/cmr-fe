@@ -34,7 +34,7 @@ export function InventarioIndex() {
           <Link
             key={s.key}
             href={s.href}
-            className="group flex flex-col justify-between rounded-xl border p-5 transition-colors hover:border-primary/50 hover:bg-accent/40"
+            className="group flex flex-col justify-between rounded-2xl bg-card p-5 shadow-[0_1px_2px_rgba(16,32,64,0.04),0_8px_20px_-12px_rgba(16,32,64,0.15)] ring-1 ring-foreground/10 transition-all hover:ring-primary/30 hover:shadow-[0_2px_6px_rgba(16,32,64,0.06),0_16px_32px_-12px_rgba(16,32,64,0.22)]"
           >
             <div>
               <h2 className="font-semibold">{t(`sections.${s.key}.title`)}</h2>

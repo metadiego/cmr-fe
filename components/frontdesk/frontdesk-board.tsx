@@ -937,7 +937,7 @@ function TotalesDia({ totales, servicio }: { totales: FrontdeskTotal[]; servicio
         return (
           <div
             key={x.columna}
-            className="flex items-center gap-4 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5"
+            className="flex items-center gap-4 rounded-xl bg-card bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
           >
             <div className="flex flex-col">
               <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -986,8 +986,10 @@ function KpiTile({
       type="button"
       onClick={onClick}
       className={
-        "flex min-w-24 flex-col items-start rounded-xl border px-3 py-2 text-left transition-all " +
-        (active ? "border-primary ring-1 ring-primary/40 bg-primary/5" : "hover:bg-muted/50")
+        "group flex min-w-24 flex-col items-start gap-1 rounded-2xl bg-card px-4 py-3 text-left transition-all shadow-[0_1px_2px_rgba(16,32,64,0.04),0_8px_20px_-12px_rgba(16,32,64,0.15)] " +
+        (active
+          ? "bg-primary/[0.04] ring-2 ring-primary/50"
+          : "ring-1 ring-foreground/10 hover:ring-foreground/20 hover:shadow-[0_2px_6px_rgba(16,32,64,0.06),0_14px_28px_-12px_rgba(16,32,64,0.2)]")
       }
     >
       <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">

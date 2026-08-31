@@ -199,10 +199,7 @@ export function AlertasBell() {
                       return (
                         <div
                           key={a.id}
-                          className={cn(
-                            "group flex items-start gap-2 rounded-md border border-l-4 bg-card px-2.5 py-2 shadow-sm transition-colors hover:bg-accent/50",
-                            c?.border ?? "border-l-transparent",
-                          )}
+                          className="group flex items-start gap-2 rounded-lg bg-card px-2.5 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 transition-colors hover:bg-accent/50"
                         >
                           <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", c?.dot ?? SEV_DOT[a.severidad] ?? "bg-muted")} />
                           <button
