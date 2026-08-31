@@ -15,11 +15,11 @@ import { Input } from "@/components/ui/input";
 // tope (se dice). Permiso factura.retroactivo (lo aplica el BE). Handoff rol-multicentro-y-preparacion-legado.
 function toneDe(estado: string): string {
   switch (estado) {
-    case "pendiente": return "bg-amber-500/15 text-amber-700 dark:text-amber-400";
-    case "al_dia": return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
-    case "record_ambiguo": return "bg-sky-500/15 text-sky-700 dark:text-sky-400";
+    case "pendiente": return "bg-warning text-warning-foreground";
+    case "al_dia": return "bg-success text-success-foreground";
+    case "record_ambiguo": return "bg-info text-info-foreground";
     case "sin_record": return "bg-muted text-muted-foreground";
-    case "error": return "bg-destructive/15 text-destructive";
+    case "error": return "bg-destructive/10 text-destructive";
     default: return "bg-muted text-muted-foreground";
   }
 }
@@ -65,7 +65,7 @@ export default function PreparacionLegadoPage() {
       {data && (
         <>
           {data.omitidos > 0 && (
-            <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+            <div className="mt-4 rounded-lg border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
               {t("omitidos", { mostrados: filas.length, total: data.total })}
             </div>
           )}

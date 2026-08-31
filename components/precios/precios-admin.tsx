@@ -295,7 +295,7 @@ export function PreciosAdmin() {
                     {isEditing ? (
                       <div className="flex justify-end gap-1">
                         <Button size="icon" variant="ghost" disabled={saving} onClick={() => save(row)}>
-                          <HugeiconsIcon icon={Tick01Icon} className="size-4 text-green-600" />
+                          <HugeiconsIcon icon={Tick01Icon} className="size-4 text-success-foreground" />
                         </Button>
                         <Button size="icon" variant="ghost" disabled={saving} onClick={() => setEditingId(null)}>
                           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />

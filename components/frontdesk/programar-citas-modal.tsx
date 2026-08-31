@@ -306,7 +306,7 @@ export function ProgramarCitasModal({
                           (activa ? "ring-2 ring-primary " : "") +
                           (lleno
                             ? "bg-destructive/10 text-destructive line-through"
-                            : "bg-emerald-500/12 text-emerald-700 dark:text-emerald-400")
+                            : "bg-success text-success-foreground")
                         }
                       >
                         {h.hora}<span className="opacity-70">·{h.vacios}</span>
@@ -359,9 +359,9 @@ export function ProgramarCitasModal({
 
           {/* Disponibilidad (informativa) */}
           {disp != null && (
-            <div className={"rounded-lg px-3 py-2 text-sm " + (excede ? "bg-amber-500/10 text-amber-700 dark:text-amber-400" : "bg-muted/40 text-muted-foreground")}>
+            <div className={"rounded-lg px-3 py-2 text-sm " + (excede ? "bg-warning text-warning-foreground" : "bg-muted/40 text-muted-foreground")}>
               {t("pendientes", { n: Number(disp.pendienteTotal ?? 0) })}
-              {excede && <Badge variant="secondary" className="ml-2 bg-amber-500/20 text-[10px]">{t("excede")}</Badge>}
+              {excede && <Badge variant="secondary" className="ml-2 bg-warning text-[10px]">{t("excede")}</Badge>}
             </div>
           )}
         </div>

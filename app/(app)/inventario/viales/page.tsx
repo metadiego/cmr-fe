@@ -218,7 +218,7 @@ export default function VialesPage() {
                       )}
                     </p>
                     {reporte.activo.remanente < 0 && (
-                      <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs text-amber-700 dark:text-amber-400">
+                      <p className="rounded-md border border-warning/40 bg-warning px-2 py-1 text-xs text-warning-foreground">
                         {t("remanenteNegativo")}
                       </p>
                     )}

@@ -90,7 +90,7 @@ export function CambiarEmailDialog({
               <span className="text-xs text-destructive">{t("invalido")}</span>
             )}
           </label>
-          <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+          <p className="rounded-lg bg-warning px-3 py-2 text-xs text-warning-foreground">
             {t("aviso")}
           </p>
           {error && (

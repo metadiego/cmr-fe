@@ -121,7 +121,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">{tRoot(def?.panel.labelKey ?? "panel.enfermeria")}</h1>
-          <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-emerald-500" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
+          <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
         </div>
         <div className="flex items-center gap-2">
           {!alarma.armado.current && (
@@ -178,7 +178,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
       {/* Cola */}
       {pendientes.length > 1 && (
-        <div className="fixed bottom-4 right-4 rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
+        <div className="fixed bottom-4 right-4 rounded-full bg-warning-foreground px-4 py-2 text-sm font-bold text-white shadow-lg">
           {t("enCola", { n: pendientes.length - 1 })}
         </div>
       )}

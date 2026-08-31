@@ -240,8 +240,8 @@ function FichaPersonal({
       <div className="border-t pt-4">
         <Label className="mb-2 block">{t("acceso")}</Label>
         {persona.perfilId ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm">
-            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-success/40 bg-success px-3 py-2 text-sm">
+            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success-foreground" />
             <span>{persona.email || t("conCuenta")}{persona.perfilId ? ` · ${t("aprobado")}` : ""}</span>
             <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
           </div>

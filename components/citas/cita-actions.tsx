@@ -392,7 +392,7 @@ function RescheduleDialog({
           )}
 
           {availability && hora && availability.vacios === 0 && (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
               {t("noCupo", { hora })}
               {availability.next && (
                 <button

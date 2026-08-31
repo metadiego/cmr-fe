@@ -122,8 +122,8 @@ export default function CuadreGeneralPage() {
       {state.kind === "ok" && (
         <>
           {cajeroActivo && (
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm">
-              <span className="font-medium text-blue-700 dark:text-blue-300">
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-info/40 bg-info px-4 py-2.5 text-sm">
+              <span className="font-medium text-info-foreground">
                 {t("who.acotado", { cajero: cajeroActivo })}
               </span>
               <Button variant="outline" size="sm" className="h-8 no-print" onClick={() => setUsuarioId(null)}>
@@ -164,11 +164,11 @@ function CuadreCard({
 }) {
   const head =
     tono === "total"
-      ? "bg-blue-600 text-white"
+      ? "bg-primary text-primary-foreground"
       : tono === "general"
         ? "bg-emerald-500/90 text-white"
         : "bg-teal-500/90 text-white";
-  const body = tono === "total" ? "bg-blue-600/90 text-white" : tono === "general" ? "bg-emerald-500/15" : "bg-teal-500/15";
+  const body = tono === "total" ? "bg-primary/90 text-primary-foreground" : tono === "general" ? "bg-emerald-500/15" : "bg-teal-500/15";
   const filas: Metodo[] = [
     { key: "__efectivo__", label: t("efectivo"), monto: d.efectivo },
     ...d.tarjetas,

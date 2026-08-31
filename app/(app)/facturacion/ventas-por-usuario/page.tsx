@@ -138,11 +138,11 @@ export default function VentasPorUsuarioPage() {
                 const sinUsuario = r.usuarioId == null;
                 const pct = maxTotal > 0 ? Math.max(2, Math.round((Math.abs(r.total) / maxTotal) * 100)) : 0;
                 return (
-                  <tr key={r.usuarioId ?? `__sin__${i}`} className={"hover:bg-muted/30 " + (sinUsuario ? "bg-amber-500/5" : "")}>
+                  <tr key={r.usuarioId ?? `__sin__${i}`} className={"hover:bg-muted/30 " + (sinUsuario ? "bg-warning" : "")}>
                     <td className="px-3 py-2">
-                      <span className={"font-medium " + (sinUsuario ? "text-amber-700 dark:text-amber-400" : "")}>{nombreDe(r)}</span>
+                      <span className={"font-medium " + (sinUsuario ? "text-warning-foreground" : "")}>{nombreDe(r)}</span>
                       <div className="mt-1 h-1.5 w-full max-w-[280px] overflow-hidden rounded-full bg-muted">
-                        <div className={"h-full rounded-full " + (sinUsuario ? "bg-amber-500" : "bg-primary")} style={{ width: `${pct}%` }} />
+                        <div className={"h-full rounded-full " + (sinUsuario ? "bg-warning-foreground" : "bg-primary")} style={{ width: `${pct}%` }} />
                       </div>
                     </td>
                     <td className="px-3 py-2 text-right text-base font-bold tabular-nums">{money(r.total)}</td>

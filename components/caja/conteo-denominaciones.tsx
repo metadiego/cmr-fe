@@ -44,7 +44,7 @@ export function ConteoDenominaciones({
       <div className="border-b px-4 py-3">
         <h3 className="text-sm font-semibold">{t("title")}</h3>
         {hint && (
-          <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">⚠ {hint}</p>
+          <p className="mt-0.5 text-xs text-warning-foreground">⚠ {hint}</p>
         )}
       </div>
       {ordenadas.length === 0 ? (

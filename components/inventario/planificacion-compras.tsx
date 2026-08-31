@@ -334,8 +334,8 @@ export function PlanificacionCompras() {
                   <td className="px-3 py-2">
                     <span className={cn(
                       "inline-block rounded-full px-2 py-0.5 text-xs font-semibold",
-                      p.pedir >= 2 ? "bg-red-500/15 text-red-600 dark:text-red-400"
-                        : p.pedir === 1 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                      p.pedir >= 2 ? "bg-destructive/10 text-destructive"
+                        : p.pedir === 1 ? "bg-warning text-warning-foreground"
                           : "bg-muted text-muted-foreground",
                     )}>{p.pedir}</span>
                   </td>

@@ -48,9 +48,9 @@ const ESTADO_BADGE: Record<string, "secondary" | "outline" | "destructive"> = {
 };
 
 const SEV_DOT: Record<string, string> = {
-  info: "bg-sky-500",
-  warning: "bg-amber-500",
-  critica: "bg-red-500",
+  info: "bg-info-foreground",
+  warning: "bg-warning-foreground",
+  critica: "bg-destructive",
 };
 
 // Página del dominio único Comunicaciones: Alertas (canal interno) + Plantillas

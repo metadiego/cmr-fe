@@ -35,12 +35,12 @@ import {
 // El color de la categoría es una clave SEMÁNTICA (no un hex) → se mapea a la paleta una vez, como la
 // campanita. `dot` para el punto, `chip` para la píldora del evento.
 const COLOR: Record<string, { chip: string; dot: string }> = {
-  rojo: { chip: "bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30", dot: "bg-red-500" },
-  azul: { chip: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30", dot: "bg-sky-500" },
+  rojo: { chip: "bg-destructive/10 text-destructive border-destructive/30", dot: "bg-destructive" },
+  azul: { chip: "bg-info text-info-foreground border-info/40", dot: "bg-info-foreground" },
   violeta: { chip: "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30", dot: "bg-violet-500" },
-  ambar: { chip: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30", dot: "bg-amber-500" },
+  ambar: { chip: "bg-warning text-warning-foreground border-warning/40", dot: "bg-warning-foreground" },
   gris: { chip: "bg-muted text-muted-foreground border-border", dot: "bg-muted-foreground/60" },
-  verde: { chip: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30", dot: "bg-emerald-500" },
+  verde: { chip: "bg-success text-success-foreground border-success/40", dot: "bg-success-foreground" },
 };
 type Vista = "mes" | "semana" | "dia" | "agenda";
 

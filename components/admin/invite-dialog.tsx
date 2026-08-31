@@ -231,7 +231,7 @@ export function InviteDialog({
                   </SelectContent>
                 </Select>
                 {personalId && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                  <p className="text-xs text-success-foreground">
                     {t("personaEnlazando", {
                       nombre: (() => { const p = sinCuenta.find((x) => x.id === personalId); return p ? `${p.nombre} ${p.apellido ?? ""}`.trim() : ""; })(),
                     })}
@@ -414,7 +414,7 @@ export function InviteDialog({
             )}
 
             {!!result.avisos?.length && (
-              <ul className="mt-2 space-y-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+              <ul className="mt-2 space-y-1 rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
                 {result.avisos.map((a, i) => (
                   <li key={i}>{tRoot.has(a) ? tRoot(a) : a}</li>
                 ))}

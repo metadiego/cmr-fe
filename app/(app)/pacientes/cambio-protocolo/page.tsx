@@ -247,7 +247,7 @@ export default function CambioProtocoloPage() {
               <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivoPlaceholder")} />
             </div>
 
-            <p className="flex items-start gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            <p className="flex items-start gap-2 rounded-lg bg-warning px-3 py-2 text-xs text-warning-foreground">
               <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
               {t("aviso")}
             </p>

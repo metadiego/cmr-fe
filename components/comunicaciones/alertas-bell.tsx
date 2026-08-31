@@ -32,19 +32,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const SEV_DOT: Record<string, string> = {
-  info: "bg-sky-500",
-  warning: "bg-amber-500",
-  critica: "bg-red-500",
+  info: "bg-info-foreground",
+  warning: "bg-warning-foreground",
+  critica: "bg-destructive",
 };
 
 // La CLAVE de color (verde|ambar|rojo|azul|violeta|gris) que manda el BE se mapea AQUÍ, UNA vez, a la
 // paleta — no un mapa por clave de alerta (eso lo prohíbe el handoff). `dot` = punto; `border` = filo
 // izquierdo de la tarjeta apilada; `text` = rótulo del grupo por dominio. Handoff alertas-color-campanita.
 const COLOR: Record<string, { dot: string; border: string; text: string }> = {
-  verde: { dot: "bg-emerald-500", border: "border-l-emerald-500", text: "text-emerald-600 dark:text-emerald-400" },
-  ambar: { dot: "bg-amber-500", border: "border-l-amber-500", text: "text-amber-600 dark:text-amber-400" },
-  rojo: { dot: "bg-red-500", border: "border-l-red-500", text: "text-red-600 dark:text-red-400" },
-  azul: { dot: "bg-sky-500", border: "border-l-sky-500", text: "text-sky-600 dark:text-sky-400" },
+  verde: { dot: "bg-success-foreground", border: "border-l-success-foreground", text: "text-success-foreground" },
+  ambar: { dot: "bg-warning-foreground", border: "border-l-warning-foreground", text: "text-warning-foreground" },
+  rojo: { dot: "bg-destructive", border: "border-l-destructive", text: "text-destructive" },
+  azul: { dot: "bg-info-foreground", border: "border-l-info-foreground", text: "text-info-foreground" },
   violeta: { dot: "bg-violet-500", border: "border-l-violet-500", text: "text-violet-600 dark:text-violet-400" },
   gris: { dot: "bg-muted-foreground/60", border: "border-l-muted-foreground/40", text: "text-muted-foreground" },
 };
@@ -147,7 +147,7 @@ export function AlertasBell() {
             // "no hay nada" con "no pude cargar".
             <span
               title={t("loadError")}
-              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-amber-500 ring-2 ring-background"
+              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-warning-foreground ring-2 ring-background"
             />
           ) : noLeidas > 0 ? (
             <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
@@ -220,7 +220,7 @@ export function AlertasBell() {
                                 title={t("resolver")}
                                 disabled={busyId === a.id}
                                 onClick={() => act(a.id, resolverAlerta)}
-                                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-green-600"
+                                className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-success-foreground"
                               >
                                 <HugeiconsIcon icon={Tick01Icon} className="size-4" />
                               </button>

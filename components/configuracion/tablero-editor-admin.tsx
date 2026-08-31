@@ -244,10 +244,10 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
     <div
       className={
         "mb-4 rounded-xl border px-4 py-3 " +
-        (warning ? "border-amber-500/30 bg-amber-500/5" : "bg-muted/30")
+        (warning ? "border-warning/40 bg-warning" : "bg-muted/30")
       }
     >
-      <p className={"text-sm font-semibold " + (warning ? "text-amber-700 dark:text-amber-400" : "")}>{title}</p>
+      <p className={"text-sm font-semibold " + (warning ? "text-warning-foreground" : "")}>{title}</p>
       <p className="mt-0.5 text-sm text-muted-foreground">{body}</p>
     </div>
   );

@@ -435,7 +435,7 @@ function DevolverForm({
         <div className="rounded-xl border p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
-            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>{money(Math.abs(neto))}</span>
+            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-success-foreground" : "text-destructive")}>{money(Math.abs(neto))}</span>
           </div>
           {excedeTotal && (
             <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura.total)) })}</p>

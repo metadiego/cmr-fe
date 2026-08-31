@@ -347,7 +347,7 @@ function Preview({ servicioClave, centroId }: { servicioClave: string; centroId?
           {horas.map((h) => (
             <div key={h.hora} className="flex items-center justify-between rounded px-2 py-1 text-xs tabular-nums odd:bg-background/60">
               <span className="font-mono">{h.hora}</span>
-              <span className={h.vacios <= 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}>
+              <span className={h.vacios <= 0 ? "text-destructive" : "text-success-foreground"}>
                 {t("cupos.previewCell", { agendadas: h.agendadas, cupo: h.cupo, vacios: h.vacios })}
               </span>
             </div>

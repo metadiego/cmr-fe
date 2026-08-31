@@ -180,9 +180,9 @@ function LineaRow({ linea, t }: { linea: DescargaLinea; t: (k: string, v?: Recor
 function ModoChip({ modo, t }: { modo: DescargaModo; t: (k: string) => string }) {
   const cls =
     modo === "a_la_entrega"
-      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+      ? "bg-warning text-warning-foreground"
       : modo === "no_descarga"
         ? "bg-muted text-muted-foreground"
-        : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
+        : "bg-success text-success-foreground";
   return <span className={"rounded-full px-2 py-0.5 text-[11px] font-medium " + cls}>{t(`modo.${modo}`)}</span>;
 }

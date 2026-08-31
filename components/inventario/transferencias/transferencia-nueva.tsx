@@ -146,7 +146,7 @@ export function TransferenciaNueva() {
           </Select>
           {/* Destino sin almacén: se avisa (no se esconde) para que no busquen el centro en vano. */}
           {destinoSinAlmacen && (
-            <span className="mt-1 text-xs text-amber-600 dark:text-amber-400">{t("field.destinoSinAlmacen")}</span>
+            <span className="mt-1 text-xs text-warning-foreground">{t("field.destinoSinAlmacen")}</span>
           )}
         </Field>
         <div className="sm:col-span-2">

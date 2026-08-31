@@ -150,9 +150,9 @@ export function ResumenPagos({
           className={cn(
             "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
             estado === "ok"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              ? "bg-success text-success-foreground"
               : estado === "over"
-                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                ? "bg-warning text-warning-foreground"
                 : "bg-destructive/10 text-destructive",
           )}
         >

@@ -126,10 +126,10 @@ export function DiaView({ fecha }: { fecha: string }) {
         </Link>
         <h1 className="text-xl font-semibold capitalize">{fechaLabel}</h1>
         {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
             <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
             </span>
             {t("dia.live")}
           </span>
@@ -288,7 +288,7 @@ function CentroSheet({
             className={
               f.bloqueaAgenda
                 ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
-                : "rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-400"
+                : "rounded bg-info px-2 py-0.5 text-xs text-info-foreground"
             }
           >
             {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}
@@ -296,7 +296,7 @@ function CentroSheet({
           </span>
         ))}
         {centro.notasDia.filter((n) => n.activo).map((n) => (
-          <span key={n.id} className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">
+          <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">
             📌 {n.contenido}
           </span>
         ))}
@@ -433,8 +433,8 @@ function CeldaCita({
 
 function Kpi({ label, value, tono }: { label: string; value: number; tono?: "ok" | "warn" | "muted" }) {
   const color =
-    tono === "ok" ? "text-emerald-600 dark:text-emerald-400"
-    : tono === "warn" ? "text-amber-600 dark:text-amber-400"
+    tono === "ok" ? "text-success-foreground"
+    : tono === "warn" ? "text-warning-foreground"
     : tono === "muted" ? "text-muted-foreground"
     : "text-primary";
   return (
@@ -528,14 +528,14 @@ function CentroSheetV2({
               className={
                 f.bloqueaAgenda
                   ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
-                  : "rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-400"
+                  : "rounded bg-info px-2 py-0.5 text-xs text-info-foreground"
               }
             >
               {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}{f.bloqueaAgenda ? ` — ${t("dia.closed")}` : ""}
             </span>
           ))}
           {centro.notasDia.filter((n) => n.activo).map((n) => (
-            <span key={n.id} className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">📌 {n.contenido}</span>
+            <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">📌 {n.contenido}</span>
           ))}
         </div>
       )}

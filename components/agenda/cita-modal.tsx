@@ -348,8 +348,8 @@ export function CitaModal({
           </Field>
 
           {warn && (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
-              <p className="font-medium text-amber-700 dark:text-amber-400">{t("overlapWarn")}</p>
+            <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
+              <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
               <ul className="mt-1 text-xs text-muted-foreground">
                 {warn.map((c) => (
                   <li key={c.citaId}>· {c.hora}–{c.horaFin}</li>

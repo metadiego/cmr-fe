@@ -56,7 +56,7 @@ export function CodigoAccesoDialog({
                 {copiado ? t("copiado") : t("copiar")}
               </Button>
             </div>
-            <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            <p className="rounded-lg bg-warning px-3 py-2 text-xs text-warning-foreground">
               {t("aviso", { min: codigo.expiraEnMinutos })}
             </p>
             <p className="text-xs text-muted-foreground">{t("comoUsar")}</p>

@@ -208,7 +208,7 @@ export function CuadreDetalle({
           </div>
           {/* Exonerado > 0: decisión que contabilidad debe ver → aviso ámbar + las facturas. */}
           {hayExonerado && (
-            <div className="m-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-700 dark:text-amber-400">
+            <div className="m-4 rounded-lg border border-warning/40 bg-warning px-3 py-2.5 text-sm text-warning-foreground">
               <p className="flex items-center gap-1.5 font-medium">
                 <HugeiconsIcon icon={Alert02Icon} className="size-4" /> {td("exoneradoAviso")}
               </p>

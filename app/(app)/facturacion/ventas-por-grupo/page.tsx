@@ -163,7 +163,7 @@ export default function VentasPorGrupoPage() {
           {/* CUADRE: la garantía de que el reporte se puede creer. */}
           <div className="mt-6">
             {data.cuadre.cuadra ? (
-              <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <div className="inline-flex items-center gap-2 rounded-lg border border-success/40 bg-success px-3 py-2 text-sm font-medium text-success-foreground">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />
                 {t("cuadra", { total: money(data.cuadre.totalFacturas) })}
               </div>
@@ -242,20 +242,20 @@ function GrupoRow({ g, rotulo, maxNeto, sinClasLabel, mega }: { g: ReporteGrupoF
   const esSinClas = g.clave === "sin_clasificar";
   const pct = maxNeto > 0 ? Math.max(2, Math.round((Math.abs(g.neto) / maxNeto) * 100)) : 0;
   return (
-    <tr className={"hover:bg-muted/30 " + (esSinClas ? "bg-amber-500/5" : "")}>
+    <tr className={"hover:bg-muted/30 " + (esSinClas ? "bg-warning" : "")}>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
           {esSinClas && (
-            <span title={sinClasLabel} className="text-amber-600 dark:text-amber-400">
+            <span title={sinClasLabel} className="text-warning-foreground">
               <HugeiconsIcon icon={Alert02Icon} className="size-4" />
             </span>
           )}
-          <span className={"font-medium " + (esSinClas ? "text-amber-700 dark:text-amber-400" : "")}>{rotulo}</span>
+          <span className={"font-medium " + (esSinClas ? "text-warning-foreground" : "")}>{rotulo}</span>
           {mega && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{mega}</span>}
         </div>
         {/* Barra proporcional al neto: de un vistazo, qué se mueve. */}
         <div className="mt-1 h-1.5 w-full max-w-[240px] overflow-hidden rounded-full bg-muted">
-          <div className={"h-full rounded-full " + (esSinClas ? "bg-amber-500" : "bg-primary")} style={{ width: `${pct}%` }} />
+          <div className={"h-full rounded-full " + (esSinClas ? "bg-warning-foreground" : "bg-primary")} style={{ width: `${pct}%` }} />
         </div>
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.facturado)}</td>

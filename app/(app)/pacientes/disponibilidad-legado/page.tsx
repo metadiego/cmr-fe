@@ -114,7 +114,7 @@ export default function DisponibilidadLegadoPage() {
       </form>
 
       {aviso && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
           <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
           <span>{aviso}</span>
         </div>

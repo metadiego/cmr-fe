@@ -163,7 +163,7 @@ export function AjusteModal({
         </DialogHeader>
 
         {sinAlmacen ? (
-          <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
             {t("sinAlmacen")}
           </p>
         ) : (

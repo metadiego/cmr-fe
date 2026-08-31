@@ -475,7 +475,7 @@ function Tile({
         className={cn(
           "text-lg font-semibold tabular-nums",
           tone === "error" && "text-destructive",
-          tone === "ok" && "text-emerald-600 dark:text-emerald-400",
+          tone === "ok" && "text-success-foreground",
         )}
       >
         {value}

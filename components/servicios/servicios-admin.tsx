@@ -309,7 +309,7 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
                         onCheckedChange={() => toggleActivo(f.rep)}
                         aria-label={t("field.activo")}
                       />
-                      <span className={"text-xs " + (f.rep.activo ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+                      <span className={"text-xs " + (f.rep.activo ? "text-success-foreground" : "text-muted-foreground")}>
                         {f.rep.activo ? t("active") : t("inactive")}
                       </span>
                     </label>
@@ -361,7 +361,7 @@ function DiffChip({
         </span>
       }
     >
-      <Badge variant="outline" className="ml-1.5 cursor-help border-amber-500/50 text-[10px] text-amber-600 dark:text-amber-400">
+      <Badge variant="outline" className="ml-1.5 cursor-help border-warning/40 text-[10px] text-warning-foreground">
         {t("difPorCentro")}
       </Badge>
     </Tooltip>

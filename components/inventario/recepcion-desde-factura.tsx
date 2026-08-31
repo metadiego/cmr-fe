@@ -163,7 +163,7 @@ export function RecepcionDesdeFactura() {
       <p className="mb-5 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
 
       {aprendidos !== null && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm">
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-success/40 bg-success px-4 py-3 text-sm">
           <span className="font-medium">{t("okAprendidos", { n: aprendidos })}</span>
           <Button variant="outline" size="sm" className="ml-auto" onClick={reiniciar}>{t("otraRecepcion")}</Button>
         </div>
@@ -196,7 +196,7 @@ export function RecepcionDesdeFactura() {
         <>
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <span className="text-sm font-medium">{t("conteo", { listas: conteo.listas, porRevisar: conteo.porRevisar })}</span>
-            {sinEmparejar > 0 && <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">{t("faltan", { n: sinEmparejar })}</span>}
+            {sinEmparejar > 0 && <span className="rounded-full bg-warning px-2 py-0.5 text-xs font-medium text-warning-foreground">{t("faltan", { n: sinEmparejar })}</span>}
             <div className="ml-auto flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setPaso("captura")}>{tc("back")}</Button>
               <Button size="sm" onClick={() => setPaso("confirmar")} disabled={filas.length === 0}>{t("continuar")}</Button>
@@ -204,13 +204,13 @@ export function RecepcionDesdeFactura() {
           </div>
           <div className="space-y-2">
             {filas.map((f, i) => (
-              <div key={i} className={cn("rounded-xl border p-3", !f.productoId && "border-amber-500/40 bg-amber-500/5")}>
+              <div key={i} className={cn("rounded-xl border p-3", !f.productoId && "border-warning/40 bg-warning")}>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
                   {/* Texto del proveedor */}
                   <div className="lg:col-span-4">
                     <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("col.texto")}</div>
                     <div className="font-mono text-sm">{f.texto}</div>
-                    {f.confirmado && <span className="mt-1 inline-block rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">{t(`origen.${f.origen ?? "alias"}`)}</span>}
+                    {f.confirmado && <span className="mt-1 inline-block rounded bg-success px-1.5 py-0.5 text-[10px] font-semibold text-success-foreground">{t(`origen.${f.origen ?? "alias"}`)}</span>}
                   </div>
                   {/* Producto: sugerencias + buscar */}
                   <div className="lg:col-span-4">
@@ -230,7 +230,7 @@ export function RecepcionDesdeFactura() {
                       onChange={(id, prod) => setFila(i, { productoId: id, productoNombre: prod?.nombre ?? "" })}
                       placeholder={t("buscarProducto")}
                     />
-                    {f.productoNombre && <div className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">✓ {f.productoNombre}</div>}
+                    {f.productoNombre && <div className="mt-1 text-xs text-success-foreground">✓ {f.productoNombre}</div>}
                   </div>
                   {/* Cantidad / costo / lote / venc */}
                   <div className="grid grid-cols-2 gap-2 lg:col-span-4 lg:grid-cols-4">

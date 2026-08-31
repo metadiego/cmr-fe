@@ -82,7 +82,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
                   {t("vialDe", { capacidad: nf.format(Number(v.capacidadTotal ?? 0)), unidad })}
                 </span>
                 {excedido > 0 ? (
-                  <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                  <span className="rounded-md bg-warning px-2 py-0.5 text-xs font-semibold text-warning-foreground">
                     {t("excedido", { n: nf.format(excedido), unidad })}
                   </span>
                 ) : (
@@ -95,7 +95,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
               {/* Barra de uso: cuánto se ha consumido de ESE vial. */}
               <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className={"h-full rounded-full " + (excedido > 0 ? "bg-amber-500" : pct >= 80 ? "bg-amber-500" : "bg-primary")}
+                  className={"h-full rounded-full " + (excedido > 0 ? "bg-warning-foreground" : pct >= 80 ? "bg-warning-foreground" : "bg-primary")}
                   style={{ width: `${excedido > 0 ? 100 : pct}%` }}
                 />
               </div>

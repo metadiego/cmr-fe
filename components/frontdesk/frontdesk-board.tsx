@@ -545,10 +545,10 @@ export function FrontdeskBoard() {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
         {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
             <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
             </span>
             {t("live")}
           </span>
@@ -732,7 +732,7 @@ export function FrontdeskBoard() {
                 className={
                   "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition " +
                   (avisos.total > 0
-                    ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-300"
+                    ? "border-warning/40 bg-warning text-warning-foreground hover:bg-warning/80"
                     : "border-border bg-muted/40 text-muted-foreground")
                 }
               >
@@ -887,7 +887,7 @@ export function FrontdeskBoard() {
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="inline-block rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+                          <span className="inline-block rounded-full bg-warning px-2 py-0.5 text-[11px] font-semibold text-warning-foreground">
                             {t.has(`avisos.tipo.${a.tipo}`) ? t(`avisos.tipo.${a.tipo}`) : a.tipo}
                           </span>
                           <span className="truncate font-medium">{a.paciente ?? "—"}</span>
@@ -1295,7 +1295,7 @@ function FilaSesion({
       if (cancelada) return <span className="text-xs text-muted-foreground">—</span>;
       if (stamp) {
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-[11px] font-semibold text-success-foreground">
             <HugeiconsIcon icon={Tick02Icon} className="size-3" />
             {fmtHora(stamp)}
           </span>
@@ -1639,7 +1639,7 @@ function FilaSesion({
                   <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {t("dosis.avisoNoComprada.eligiendo")}
                   </div>
-                  <div className="mt-1 font-semibold text-amber-600 dark:text-amber-400">
+                  <div className="mt-1 font-semibold text-warning-foreground">
                     {dosisAviso.eligiendo}
                   </div>
                 </div>
@@ -2039,7 +2039,7 @@ function SesionesCell({
             })}
             <div className="mt-1 flex items-center justify-between border-t pt-1.5 text-sm font-semibold">
               <span>{t("pendienteTotal")}</span>
-              <span className={"tabular-nums " + (agotado ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}>
+              <span className={"tabular-nums " + (agotado ? "text-destructive" : "text-success-foreground")}>
                 {Number(disp.pendienteTotal ?? 0)}
               </span>
             </div>
@@ -2361,7 +2361,7 @@ function HistorialModal({
                     <td className="px-3 py-2.5">
                       <Badge
                         variant="secondary"
-                        className={r.estado === "asistido" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : undefined}
+                        className={r.estado === "asistido" ? "bg-success text-success-foreground" : undefined}
                       >
                         {t.has(`histEstadoVal.${r.estado}`) ? t(`histEstadoVal.${r.estado}`) : (r.estado || "—")}
                       </Badge>
@@ -2508,9 +2508,9 @@ function ComprasModal({
 // Stat compacto para la tira de totales del modal de compras.
 function ComprasStat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={"rounded-lg border px-3 py-2 " + (highlight ? "border-amber-500/40 bg-amber-500/10" : "")}>
+    <div className={"rounded-lg border px-3 py-2 " + (highlight ? "border-warning/40 bg-warning" : "")}>
       <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={"text-lg font-bold tabular-nums " + (highlight ? "text-amber-600 dark:text-amber-400" : "")}>{value}</div>
+      <div className={"text-lg font-bold tabular-nums " + (highlight ? "text-warning-foreground" : "")}>{value}</div>
     </div>
   );
 }
@@ -2556,7 +2556,7 @@ function ComprasTabla({
               <td className="px-3 py-2 text-right tabular-nums">{num(f.entregadas)}</td>
               <td className="px-3 py-2 text-right tabular-nums">
                 {(f.pendientes ?? 0) > 0 ? (
-                  <span className="font-semibold text-amber-600 dark:text-amber-400">{num(f.pendientes)}</span>
+                  <span className="font-semibold text-warning-foreground">{num(f.pendientes)}</span>
                 ) : (
                   <span className="text-muted-foreground">{num(f.pendientes)}</span>
                 )}

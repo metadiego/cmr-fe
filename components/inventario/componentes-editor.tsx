@@ -362,7 +362,7 @@ function ComponenteRow({
               )}
             </div>
           ) : comp.opcional ? (
-            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-600 dark:text-amber-400">
+            <span className="rounded-full bg-warning px-2 py-0.5 font-medium text-warning-foreground">
               {t("opcional")} +{money(comp.precioIncremental)}{comp.incluidoPorDefecto ? ` · ${t("porDefecto")}` : ""}
             </span>
           ) : (
