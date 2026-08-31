@@ -15,6 +15,21 @@ import { FacturaRowActions } from "@/components/facturacion/factura-row-actions"
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { PageContainer, PageHeader } from "@/components/ui/page";
+import {
+  DataTable,
+  TableEmpty,
+  TableError,
+  TableLoading,
+} from "@/components/ui/data-table";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
 import {
   Select,
@@ -37,13 +52,13 @@ function isoDay(d: Date) {
 
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("facturacionList.estado");
-  const tone =
+  const variant =
     estado === "borrador"
-      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+      ? "warning"
       : estado === "anulada" || estado.startsWith("devuelta")
-        ? "bg-destructive/15 text-destructive"
-        : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
-  return <span className={"rounded-full px-2.5 py-1 text-xs font-semibold " + tone}>{t.has(estado) ? t(estado) : estado || "—"}</span>;
+        ? "destructive"
+        : "success";
+  return <Badge variant={variant}>{t.has(estado) ? t(estado) : estado || "—"}</Badge>;
 }
 
 // Lista de facturas UNIFORME para General y Consultas (mismo motor de tablero del BE). Solo cambia el
@@ -147,34 +162,36 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{esConsulta ? t("titleConsulta") : t("title")}</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={devolucionesHref}>{t("devoluciones")}</Link>
-          </Button>
-          {!esConsulta && (
-            <>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href={`/facturacion/general?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={esConsulta ? t("titleConsulta") : t("title")}
+        actions={
+          <>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={devolucionesHref}>{t("devoluciones")}</Link>
+            </Button>
+            {!esConsulta && (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href={`/facturacion/general?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
+                </Button>
+              </>
+            )}
+          </>
+        }
+      />
 
       {gate.cargando ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+        <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
       ) : gate.sinCentro ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
+        <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="mt-8 max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
-        <div className="mt-6 space-y-4">
+        <>
           {gate.puedeCambiar && (
             <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 text-sm">
               <span className="text-muted-foreground">
@@ -247,46 +264,44 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             </div>
           )}
 
-          <div className="overflow-x-auto rounded-xl border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/60">
-                <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  {/* Ordinal: nº de línea (orden en que se ven), no un dato de la factura. */}
-                  <th className="w-10 px-3 py-2 text-right font-semibold" aria-label={t("colNum")}>#</th>
-                  {columnas.map((c) => (
-                    <th key={c.clave} className="px-3 py-2 font-semibold">{tRoot(c.labelKey)}</th>
-                  ))}
-                  <th className="px-3 py-2 text-right font-semibold">{tRoot("fac.col.acciones")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {state.kind === "loading" && (
-                  <tr><td colSpan={columnas.length + 2} className="px-3 py-8 text-center text-muted-foreground">{tRoot("common.loading")}</td></tr>
-                )}
-                {state.kind === "fail" && (
-                  <tr><td colSpan={columnas.length + 2} className="px-3 py-8 text-center text-destructive">{tRoot("common.error")}</td></tr>
-                )}
-                {state.kind === "ok" && filas.length === 0 && (
-                  <tr><td colSpan={columnas.length + 2} className="px-3 py-8 text-center text-muted-foreground">{rangoEsHoy ? t("emptyHoy") : t("empty")}</td></tr>
-                )}
-                {filas.map((f, i) => (
-                  <tr key={f.id} className="cursor-pointer hover:bg-muted/30" onClick={() => router.push(detalleHref(f.id))}>
-                    {/* Ordinal continuo (con paginación: (page-1)*limit + i + 1; hoy la lista es de una página). */}
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{i + 1}</td>
-                    {columnas.map((c) => (
-                      <td key={c.clave} className="px-3 py-2">{renderCelda(c, f)}</td>
-                    ))}
-                    <td className="px-3 py-2 text-right">
-                      <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={gate.centro} onChanged={reload} />
-                    </td>
-                  </tr>
+          <DataTable>
+            <TableHeader>
+              <TableRow>
+                {/* Ordinal: nº de línea (orden en que se ven), no un dato de la factura. */}
+                <TableHead className="w-10 text-right" aria-label={t("colNum")}>#</TableHead>
+                {columnas.map((c) => (
+                  <TableHead key={c.clave}>{tRoot(c.labelKey)}</TableHead>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                <TableHead className="text-right">{tRoot("fac.col.acciones")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {state.kind === "loading" && (
+                <TableLoading colSpan={columnas.length + 2}>{tRoot("common.loading")}</TableLoading>
+              )}
+              {state.kind === "fail" && (
+                <TableError colSpan={columnas.length + 2}>{tRoot("common.error")}</TableError>
+              )}
+              {state.kind === "ok" && filas.length === 0 && (
+                <TableEmpty colSpan={columnas.length + 2}>{rangoEsHoy ? t("emptyHoy") : t("empty")}</TableEmpty>
+              )}
+              {filas.map((f, i) => (
+                <TableRow key={f.id} className="cursor-pointer" onClick={() => router.push(detalleHref(f.id))}>
+                  {/* Ordinal continuo (con paginación: (page-1)*limit + i + 1; hoy la lista es de una página). */}
+                  <TableCell className="text-right tabular-nums text-muted-foreground">{i + 1}</TableCell>
+                  {columnas.map((c) => (
+                    <TableCell key={c.clave}>{renderCelda(c, f)}</TableCell>
+                  ))}
+                  <TableCell className="text-right">
+                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={gate.centro} onChanged={reload} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </DataTable>
+        </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

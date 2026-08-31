@@ -16,6 +16,21 @@ import { toastError } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { PageContainer, PageHeader } from "@/components/ui/page";
+import {
+  DataTable,
+  TableEmpty,
+  TableError,
+  TableLoading,
+} from "@/components/ui/data-table";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
@@ -48,8 +63,8 @@ const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
 
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("devoluciones.estado");
-  const tone = estado === "anulada" ? "bg-destructive/15 text-destructive" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
-  return <span className={"rounded-full px-2.5 py-1 text-xs font-semibold " + tone}>{t.has(estado) ? t(estado) : estado || "—"}</span>;
+  const variant = estado === "anulada" ? "destructive" : "success";
+  return <Badge variant={variant}>{t.has(estado) ? t(estado) : estado || "—"}</Badge>;
 }
 
 // Lista de devoluciones UNIFORME para General y Consultas. Solo cambia el `contexto` (filtro del BE) y el
@@ -99,20 +114,20 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{esConsulta ? t("titleConsulta") : t("title")}</h1>
-        <Button variant="outline" size="sm" asChild><Link href={facturasHref}>{t("verFacturas")}</Link></Button>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={esConsulta ? t("titleConsulta") : t("title")}
+        actions={<Button variant="outline" size="sm" asChild><Link href={facturasHref}>{t("verFacturas")}</Link></Button>}
+      />
 
       {gate.cargando ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+        <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
       ) : gate.sinCentro ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
+        <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="mt-8 max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
-        <div className="mt-6 space-y-4">
+        <>
           {gate.puedeCambiar && (
             <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 text-sm">
               <span className="text-muted-foreground">{tRoot("facturacion.general.centroLabel")} <span className="font-medium text-foreground">{gate.centroNombre}</span></span>
@@ -132,60 +147,58 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
             <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label={t("to")} className="h-8 w-[150px]" />
           </ListToolbar>
 
-          <div className="overflow-x-auto rounded-xl border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/60">
-                <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-3 py-2 font-semibold">{t("col.devolucion")}</th>
-                  <th className="px-3 py-2 font-semibold">{t("col.fecha")}</th>
-                  <th className="px-3 py-2 font-semibold">{t("col.tipo")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("col.monto")}</th>
-                  <th className="px-3 py-2 font-semibold">{t("col.estado")}</th>
-                  <th className="px-3 py-2 font-semibold">{t("col.motivo")}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{t("col.acciones")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {state.kind === "loading" && <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">{tRoot("common.loading")}</td></tr>}
-                {state.kind === "fail" && <tr><td colSpan={7} className="px-3 py-8 text-center text-destructive">{tRoot("common.error")}</td></tr>}
-                {state.kind === "ok" && rows.length === 0 && <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>}
-                {rows.map((d) => (
-                  <tr key={d.id} className="hover:bg-muted/30">
-                    <td className="px-3 py-2">
-                      <span className="block font-mono font-medium tabular-nums">{d.numeroDisplay ?? "—"}</span>
-                      {d.facturaNumero && (
-                        <span className="block text-xs text-muted-foreground">{t("fromInvoice", { n: d.facturaNumero })}</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 tabular-nums">{formatFechaSolo(d.fecha ?? d.createdAt) || "—"}</td>
-                    <td className="px-3 py-2">{t.has(`tipo.${d.tipo}`) ? t(`tipo.${d.tipo}`) : d.tipo}</td>
-                    <td className="px-3 py-2 text-right font-medium tabular-nums">{money(d.montoDevuelto)}</td>
-                    <td className="px-3 py-2"><EstadoBadge estado={String(d.estado ?? "")} /></td>
-                    <td className="px-3 py-2 max-w-[16rem] truncate text-muted-foreground" title={d.motivo ?? ""}>{d.motivo ?? "—"}</td>
-                    <td className="px-3 py-2 text-right">
-                      <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-8" aria-label={t("col.acciones")}>
-                              <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onSelect={() => router.push(`/facturacion/${d.facturaId}/devoluciones/${d.id}/recibo${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => router.push(detalleHref(d.facturaId))}>{t("verFactura")}</DropdownMenuItem>
-                            {d.estado === "activa" && can("factura.devolver") && (
-                              <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <DataTable>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("col.devolucion")}</TableHead>
+                <TableHead>{t("col.fecha")}</TableHead>
+                <TableHead>{t("col.tipo")}</TableHead>
+                <TableHead className="text-right">{t("col.monto")}</TableHead>
+                <TableHead>{t("col.estado")}</TableHead>
+                <TableHead>{t("col.motivo")}</TableHead>
+                <TableHead className="text-right">{t("col.acciones")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {state.kind === "loading" && <TableLoading colSpan={7}>{tRoot("common.loading")}</TableLoading>}
+              {state.kind === "fail" && <TableError colSpan={7}>{tRoot("common.error")}</TableError>}
+              {state.kind === "ok" && rows.length === 0 && <TableEmpty colSpan={7}>{t("empty")}</TableEmpty>}
+              {rows.map((d) => (
+                <TableRow key={d.id}>
+                  <TableCell>
+                    <span className="block font-mono font-medium tabular-nums">{d.numeroDisplay ?? "—"}</span>
+                    {d.facturaNumero && (
+                      <span className="block text-xs text-muted-foreground">{t("fromInvoice", { n: d.facturaNumero })}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="tabular-nums">{formatFechaSolo(d.fecha ?? d.createdAt) || "—"}</TableCell>
+                  <TableCell>{t.has(`tipo.${d.tipo}`) ? t(`tipo.${d.tipo}`) : d.tipo}</TableCell>
+                  <TableCell className="text-right font-medium tabular-nums">{money(d.montoDevuelto)}</TableCell>
+                  <TableCell><EstadoBadge estado={String(d.estado ?? "")} /></TableCell>
+                  <TableCell className="max-w-[16rem] truncate text-muted-foreground" title={d.motivo ?? ""}>{d.motivo ?? "—"}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="size-8" aria-label={t("col.acciones")}>
+                            <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => router.push(`/facturacion/${d.facturaId}/devoluciones/${d.id}/recibo${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => router.push(detalleHref(d.facturaId))}>{t("verFactura")}</DropdownMenuItem>
+                          {d.estado === "activa" && can("factura.devolver") && (
+                            <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </DataTable>
+        </>
       )}
 
       <AlertDialog open={!!anular} onOpenChange={(o) => !o && setAnular(null)}>
@@ -201,6 +214,6 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }
