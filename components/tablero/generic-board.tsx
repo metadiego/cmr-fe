@@ -283,11 +283,10 @@ function KpiCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "group flex min-w-[7rem] flex-col gap-1.5 rounded-2xl bg-card px-4 py-3 text-left text-card-foreground transition-all",
-        "shadow-[0_1px_2px_rgba(16,32,64,0.04),0_8px_20px_-12px_rgba(16,32,64,0.15)]",
+        "group flex min-w-[7rem] flex-col gap-1.5 rounded-lg bg-card px-4 py-3 text-left text-card-foreground shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors",
         active
           ? "bg-primary/[0.04] ring-2 ring-primary/50"
-          : "ring-1 ring-foreground/10 hover:ring-foreground/20 hover:shadow-[0_2px_6px_rgba(16,32,64,0.06),0_14px_28px_-12px_rgba(16,32,64,0.2)]",
+          : "ring-1 ring-foreground/10 hover:ring-foreground/20",
       )}
     >
       <span className="flex items-center gap-1.5">

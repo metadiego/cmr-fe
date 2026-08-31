@@ -76,7 +76,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
           const remanente = Number(v.remanente ?? 0);
           const excedido = Number(v.excedido ?? 0);
           return (
-            <li key={v.id} className="rounded-xl bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+            <li key={v.id} className="rounded-lg bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-sm font-medium">
                   {t("vialDe", { capacidad: nf.format(Number(v.capacidadTotal ?? 0)), unidad })}

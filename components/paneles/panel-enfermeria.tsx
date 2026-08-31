@@ -159,7 +159,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                   return (
                     <div
                       key={p.id}
-                      className="flex flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 ring-1 ring-foreground/10 shadow-[0_1px_2px_rgba(16,32,64,0.04),0_8px_20px_-12px_rgba(16,32,64,0.15)] transition-shadow hover:shadow-[0_2px_6px_rgba(16,32,64,0.06),0_16px_32px_-12px_rgba(16,32,64,0.22)]"
+                      className="flex flex-col gap-2 rounded-lg bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex min-w-0 items-center gap-2.5">
