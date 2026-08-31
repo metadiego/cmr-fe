@@ -17,6 +17,10 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro } from "@/lib/tenant";
 import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
+import { cn } from "@/lib/utils";
+import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Segmented, SegmentedButton } from "@/components/ui/segmented";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -129,56 +133,58 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   }, [failMsg, subTipo, subTipos]);
 
   return (
-    <div className="w-full px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold">
-          {registro ? tRoot(registro.labelKey) : tablero}
-        </h1>
-        {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-            {t("live")}
-          </span>
-        )}
-        <div className="ml-auto flex items-center gap-2">
-          <Input type="date" className="h-9 w-40" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-          {centros.length > 1 && (
-            <Select value={centroId} onValueChange={setPicked}>
-              <SelectTrigger className="h-9 w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {registro?.entidad === "cita" && can("citas.create") && centroId && (
-            <Button size="sm" onClick={() => setAdding(true)}>{t("addCita")}</Button>
-          )}
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={registro ? tRoot(registro.labelKey) : tablero}
+        actions={
+          <>
+            {live && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success-foreground">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+                </span>
+                {t("live")}
+              </span>
+            )}
+            <Input type="date" className="h-9 w-40" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+            {centros.length > 1 && (
+              <Select value={centroId} onValueChange={setPicked}>
+                <SelectTrigger className="h-9 w-48"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {centros.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {registro?.entidad === "cita" && can("citas.create") && centroId && (
+              <Button size="sm" onClick={() => setAdding(true)}>{t("addCita")}</Button>
+            )}
+          </>
+        }
+      />
 
       {subTipos.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-1">
-          <SubChip active={subTipo === ""} onClick={() => setSubTipo("")}>{t("all")}</SubChip>
+        <Segmented>
+          <SegmentedButton active={subTipo === ""} onClick={() => setSubTipo("")}>
+            {t("all")}
+          </SegmentedButton>
           {subTipos.map((s) => (
-            <SubChip key={s.clave} active={subTipo === s.clave} onClick={() => setSubTipo(s.clave)}>
+            <SegmentedButton key={s.clave} active={subTipo === s.clave} onClick={() => setSubTipo(s.clave)}>
               {tRoot(s.labelKey)}
-            </SubChip>
+            </SegmentedButton>
           ))}
-        </div>
+        </Segmented>
       )}
 
       {(defRes.state.kind === "loading" || filasRes.state.kind === "loading") && (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       )}
       {filasRes.state.kind === "fail" && (
-        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {filasRes.state.message}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{filasRes.state.message}</AlertDescription>
+        </Alert>
       )}
 
       {data && def && (() => {
@@ -195,7 +201,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
         const filtered = estadoFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
         return (
           <>
-            <div className="mb-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               <KpiCard label={t("all")} count={base.length} active={estadoFiltro === ""} onClick={() => setEstadoFiltro("")} />
               {kpiEstados.map((e) => (
                 <KpiCard
@@ -252,10 +258,12 @@ export function GenericBoard({ tablero }: { tablero: string }) {
           onSaved={filasRes.refresh}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
+// Card-styled filter button (native <button> for a11y — Card itself renders a
+// <div>, and this needs real click/keyboard/aria-pressed semantics like before).
 function KpiCard({
   label,
   count,
@@ -274,37 +282,15 @@ function KpiCard({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={
-        "relative flex min-w-[7rem] flex-col gap-1 overflow-hidden rounded-xl border px-4 py-3 text-left transition-colors " +
-        (active ? "border-primary/60 bg-primary/5" : "hover:border-primary/40")
-      }
+      className={cn(
+        "relative flex min-w-[7rem] flex-col gap-1 overflow-hidden rounded-xl bg-card px-4 py-3 text-left text-card-foreground",
+        "ring-1 ring-foreground/10 shadow-sm transition-colors",
+        active ? "ring-primary/60 bg-primary/5" : "hover:ring-primary/40",
+      )}
     >
       <span className="absolute inset-y-0 left-0 w-1" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} />
       <span className="text-2xl font-bold tabular-nums leading-none">{count}</span>
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
-    </button>
-  );
-}
-
-function SubChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        "rounded-md border px-3 py-1 text-sm transition-colors " +
-        (active ? "border-primary bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:text-foreground")
-      }
-    >
-      {children}
     </button>
   );
 }

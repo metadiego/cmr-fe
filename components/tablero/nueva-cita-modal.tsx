@@ -421,7 +421,7 @@ export function NuevaCitaModal({
             <Button
               type="button"
               variant="outline"
-              className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
+              className="border-success/40 text-success-foreground hover:bg-success/10"
               onClick={onAlta}
               disabled={anyBusy}
             >
