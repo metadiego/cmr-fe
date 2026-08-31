@@ -34,6 +34,11 @@ function tonoDe(audio?: string | null): Tono {
   return (audio && TONOS[audio]) || TONO_DEFAULT;
 }
 
+// Tinte suave (~12% alfa) a partir de un color hex del BE; si no es hex de 6 dígitos, sin tinte.
+function tinteHex(color?: string | null): string | undefined {
+  return color && /^#[0-9a-f]{6}$/i.test(color) ? `${color}1f` : undefined;
+}
+
 // Alarma sin assets: beep en loop con WebAudio (requiere un primer gesto por autoplay del navegador).
 function useAlarma() {
   const ctxRef = React.useRef<AudioContext | null>(null);
@@ -138,30 +143,52 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
       <div className="space-y-5">
         {secciones.map((s) => (
           <section key={s.id}>
-            <div className="mb-2 flex items-center gap-2">
+            <div className="mb-3 flex items-center gap-2">
               <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
               <h2 className="text-lg font-semibold">{tRoot(s.labelKey)}</h2>
             </div>
             {s.visible ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {personal.map((p) => {
                   const cont = contByPersona.get(p.id);
                   const nSec = cont?.porSeccion?.[s.clave] ?? 0;
                   const est = estatusById.get(p.id);
                   const pc = colorForName(p.nombre);
+                  const activo = nSec > 0;
+                  const tint = tinteHex(s.color);
                   return (
-                    <div key={p.id} className="rounded-xl border p-3" style={{ borderLeftColor: pc, borderLeftWidth: 4 }}>
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="truncate text-base font-semibold">{p.nombre}</span>
-                        <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-lg font-bold tabular-nums" style={{ color: s.color ?? undefined }}>{nSec}</span>
+                    <div
+                      key={p.id}
+                      className="flex flex-col gap-2 rounded-2xl bg-card px-4 py-3.5 ring-1 ring-foreground/10 shadow-[0_1px_2px_rgba(16,32,64,0.04),0_8px_20px_-12px_rgba(16,32,64,0.15)] transition-shadow hover:shadow-[0_2px_6px_rgba(16,32,64,0.06),0_16px_32px_-12px_rgba(16,32,64,0.22)]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          {/* Punto de color por enfermera: identidad estable, discreta. */}
+                          <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: pc }} aria-hidden />
+                          <span className="truncate text-[15px] font-semibold text-foreground">{p.nombre}</span>
+                        </div>
+                        <span
+                          className={
+                            "inline-grid h-7 min-w-[1.75rem] shrink-0 place-items-center rounded-full px-2 text-sm font-bold tabular-nums " +
+                            (activo ? (tint ? "" : "bg-primary/10 text-primary") : "bg-muted text-muted-foreground")
+                          }
+                          style={activo && tint ? { backgroundColor: tint, color: s.color ?? undefined } : undefined}
+                        >
+                          {nSec}
+                        </span>
                       </div>
                       {cont && Object.keys(cont.porSeccion || {}).length > 1 && (
-                        <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
-                          {secciones.map((sx) => <span key={sx.clave}>{tRoot(sx.labelKey)} {cont.porSeccion?.[sx.clave] ?? 0}</span>)}
+                        <div className="flex flex-wrap gap-x-2.5 gap-y-1 border-t border-foreground/5 pt-2 text-[11px] text-muted-foreground">
+                          {secciones.map((sx) => (
+                            <span key={sx.clave} className="tabular-nums">
+                              {tRoot(sx.labelKey)}{" "}
+                              <span className="font-semibold text-foreground/70">{cont.porSeccion?.[sx.clave] ?? 0}</span>
+                            </span>
+                          ))}
                         </div>
                       )}
                       {est && (est.labelKey || est.label) && (
-                        <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
+                        <span className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
                           {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
                         </span>
                       )}
