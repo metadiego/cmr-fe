@@ -1,4 +1,4 @@
-import { Geist_Mono, Public_Sans } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import { getLocale, getMessages } from "next-intl/server"
 
 import "./globals.css"
@@ -10,9 +10,9 @@ import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
-const publicSans = Public_Sans({subsets:['latin'],variable:'--font-sans'})
+const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"] })
 
-const fontMono = Geist_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
@@ -31,7 +31,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", publicSans.variable)}
+      className={cn("antialiased", geistMono.variable, "font-sans", geistSans.variable)}
     >
       <body>
         {/* Inherits locale + messages from the request config; adds graceful
