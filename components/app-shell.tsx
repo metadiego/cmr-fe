@@ -24,7 +24,20 @@ import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
 // SidebarMenuButton pinta
 // un Tooltip (tooltip-radix) en modo colapsado-a-iconos y sin este provider el
 // colapso truena en runtime.
+// Rutas públicas/auth que se pintan SIN el shell (sin rail ni header): son pantallas
+// standalone (login, set-password, pendiente de aprobación). Antes el shell clásico las
+// envolvía con una barra superior mínima; el rail navy completo aquí sobra y estorba.
+const BARE_PREFIXES = ["/login", "/auth", "/pending"];
+
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  if (BARE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return <>{children}</>;
+  }
+  return <ShellChrome>{children}</ShellChrome>;
+}
+
+function ShellChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const tRoot = useTranslations();
   const menu = useMenu();
@@ -48,7 +61,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
+          {/* Header blanco fijo (no bg-background): el branding del centro sobreescribe
+              --background a un índigo oscuro; forzamos blanco para el chrome tipo EHR. */}
+          <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4">
             <SidebarTrigger />
             <span className="text-sm font-semibold">{sectionTitle}</span>
             <div className="ml-auto flex items-center gap-2">
@@ -58,7 +73,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <UserMenu />
             </div>
           </header>
-          <main className="flex-1 p-6">{children}</main>
+          {/* Lienzo estándar off-white (EHR): cubre el --app-bg-image de branding para
+              que ninguna página lo deje traslucir; las tarjetas blancas resaltan encima. */}
+          <main className="flex-1 bg-muted p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
