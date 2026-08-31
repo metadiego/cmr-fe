@@ -15,6 +15,9 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from "@/components/ui/sheet";
@@ -84,12 +87,14 @@ export function AccionesPacienteSheet({
 
 function Seccion({ icon, titulo, children }: { icon: typeof InvoiceIcon; titulo: string; children: React.ReactNode }) {
   return (
-    <section>
-      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
-        <HugeiconsIcon icon={icon} className="size-4 text-muted-foreground" /> {titulo}
-      </h3>
-      {children}
-    </section>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <HugeiconsIcon icon={icon} className="size-4 text-muted-foreground" /> {titulo}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
 
@@ -109,7 +114,7 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
     [pid, centro],
   );
   if (res.state.kind === "loading") return <Cargando />;
-  if (res.state.kind === "fail") return <p className="text-xs text-destructive">{res.state.message}</p>;
+  if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const facturas = res.state.data;
   if (facturas.length === 0) return <Vacio>{t("sinCompras")}</Vacio>;
   const numDoc = (f: Factura) => (f as { numero?: string }).numero || (f as { numeroPresupuesto?: string }).numeroPresupuesto || (f as { numeroLegacy?: string }).numeroLegacy || "—";
@@ -143,7 +148,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
   const servRes = useResource<Servicio[]>(() => (centro ? getServicios(centro) : Promise.resolve([])), [centro]);
   const servName = new Map((servRes.state.kind === "ok" ? servRes.state.data : []).map((s) => [s.id, s.nombre]));
   if (res.state.kind === "loading") return <Cargando />;
-  if (res.state.kind === "fail") return <p className="text-xs text-destructive">{res.state.message}</p>;
+  if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const ses = res.state.data;
   if (ses.length === 0) return <Vacio>{t("sinServicios")}</Vacio>;
   return (
@@ -153,7 +158,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
           <span className="min-w-0 truncate">{servName.get(s.servicioId) ?? s.servicioId}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs">
             <span className="text-muted-foreground tabular-nums">{s.fecha}</span>
-            <span className="rounded-full bg-muted px-2 py-0.5">{tRoot.has(`estado.${s.estado}`) ? tRoot(`estado.${s.estado}`) : s.estado}</span>
+            <Badge variant="outline">{tRoot.has(`estado.${s.estado}`) ? tRoot(`estado.${s.estado}`) : s.estado}</Badge>
           </span>
         </li>
       ))}
@@ -165,7 +170,7 @@ function Citas({ pid, centro }: { pid: string; centro?: string }) {
   const t = useTranslations("acciones");
   const res = useResource<Cita[]>(() => listCitas({ pacienteId: pid, limit: 100 }, centro).then((r) => r.items), [pid, centro]);
   if (res.state.kind === "loading") return <Cargando />;
-  if (res.state.kind === "fail") return <p className="text-xs text-destructive">{res.state.message}</p>;
+  if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const citas = res.state.data;
   if (citas.length === 0) return <Vacio>{t("sinCitas")}</Vacio>;
   return (
@@ -173,7 +178,7 @@ function Citas({ pid, centro }: { pid: string; centro?: string }) {
       {citas.map((c) => (
         <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="tabular-nums">{c.fecha}{c.hora ? ` · ${c.hora}` : ""}</span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{c.estado}</span>
+          <Badge variant="outline">{c.estado}</Badge>
         </li>
       ))}
     </ul>

@@ -10,12 +10,25 @@ import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro } from "@/lib/tenant";
 import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
-import { useResource, type ResourceState } from "@/hooks/use-resource";
+import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
 import type { Paginated } from "@/lib/api/types";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DataTable, type Column } from "@/components/kit/data-table";
+import {
+  DataTable,
+  TableEmpty,
+  TableError,
+  TableLoading,
+} from "@/components/ui/data-table";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ListToolbar } from "@/components/kit/list-toolbar";
 import { Can } from "@/components/kit/can";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
@@ -35,6 +48,7 @@ const ALL_CENTERS = "__all__";
 
 export default function ClientesPage() {
   const t = useTranslations("patients");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const [page, setPage] = React.useState(1);
   const [q, setQ] = React.useState("");
@@ -94,128 +108,134 @@ export default function ClientesPage() {
     setScopeChoice(value);
   }
 
-  // DataTable renders a rows array + an optional pagination footer; split the
-  // Paginated result into those two shapes.
-  const rows: ResourceState<Paciente[]> =
-    state.kind === "ok" ? { kind: "ok", data: state.data.items } : state;
-  const pagination =
-    state.kind === "ok"
-      ? { meta: state.data.pagination, onPageChange: setPage }
-      : undefined;
-
-  const columns: Column<Paciente>[] = [
-    {
-      // Número indexado (posición en la lista): (página-1)*límite + fila + 1. A la izquierda del récord.
-      key: "index",
-      header: "#",
-      align: "right",
-      className: "w-10 tabular-nums text-muted-foreground",
-      cell: (_p, i) => (page - 1) * LIMIT + i + 1,
-    },
-    {
-      key: "record",
-      header: t("columns.record"),
-      className: "tabular-nums",
-      cell: (p) => p.record ?? "—",
-    },
-    {
-      key: "name",
-      header: t("columns.name"),
-      cell: (p) => (
-        <span className="font-medium">
-          {[p.nombres, p.apellidos].filter(Boolean).join(" ")}
-        </span>
-      ),
-    },
-    { key: "docId", header: t("columns.docId"), cell: (p) => p.docId ?? "—" },
-    { key: "phone", header: t("columns.phone"), cell: (p) => p.telefono ?? "—" },
-    { key: "email", header: t("columns.email"), cell: (p) => p.email ?? "—" },
-    {
-      key: "status",
-      header: t("columns.status"),
-      cell: (p) =>
-        p.activo ? (
-          <Badge variant="secondary">{t("active")}</Badge>
-        ) : (
-          <Badge variant="outline">{t("inactive")}</Badge>
-        ),
-    },
-  ];
-
-  // In the "all centers" view, show which center each patient belongs to.
-  if (showCentroCol) {
-    columns.push({
-      key: "centro",
-      header: t("columns.centro"),
-      cell: (p) => (
-        <Badge variant="outline">
-          {(p.clinicId && centroName.get(p.clinicId)) || "—"}
-        </Badge>
-      ),
-    });
-  }
-
-  // «Acciones»: historiales del paciente (compras/servicios/citas/prescripción) + crear cita, sin salir
-  // de la lista. stopPropagation para no navegar a la ficha al pulsarlo. Handoff acciones-del-paciente-historiales.
-  columns.push({
-    key: "acciones",
-    header: "",
-    align: "right",
-    cell: (p) => (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={(e) => { e.stopPropagation(); setAccionesFor(p); }}
-      >
-        {t("acciones")}
-      </Button>
-    ),
-  });
+  // Total table columns: index, record, name, docId, phone, email, status,
+  // [centro], acciones — drives the colSpan of the loading/empty/error rows.
+  const colCount = 8 + (showCentroCol ? 1 : 0);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Can permiso="pacientes.create">
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <HugeiconsIcon icon={Add01Icon} className="size-4" />
-            {t("new")}
-          </Button>
-        </Can>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        count={state.kind === "ok" ? state.data.pagination.total : undefined}
+        actions={
+          <Can permiso="pacientes.create">
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <HugeiconsIcon icon={Add01Icon} className="size-4" />
+              {t("new")}
+            </Button>
+          </Can>
+        }
+      />
 
-      <div className="mt-6 space-y-4">
-        <ListToolbar
-          search={q}
-          onSearchChange={onSearch}
-          searchPlaceholder={t("searchPlaceholder")}
-        >
-          {multiCentro && (
-            <Select value={scope || undefined} onValueChange={onScopeChange}>
-              <SelectTrigger size="sm" className="w-[190px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {puedeCombinado && (
-                  <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
-                )}
-                {centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <ListToolbar
+        search={q}
+        onSearchChange={onSearch}
+        searchPlaceholder={t("searchPlaceholder")}
+      >
+        {multiCentro && (
+          <Select value={scope || undefined} onValueChange={onScopeChange}>
+            <SelectTrigger size="sm" className="w-[190px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {puedeCombinado && (
+                <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
+              )}
+              {centros.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.nombre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </ListToolbar>
+
+      <DataTable>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-10 text-right tabular-nums text-muted-foreground">
+              #
+            </TableHead>
+            <TableHead className="tabular-nums">{t("columns.record")}</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.docId")}</TableHead>
+            <TableHead>{t("columns.phone")}</TableHead>
+            <TableHead>{t("columns.email")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
+            {showCentroCol && <TableHead>{t("columns.centro")}</TableHead>}
+            <TableHead className="text-right" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {state.kind === "loading" && (
+            <TableLoading colSpan={colCount}>{tCommon("loading")}</TableLoading>
           )}
-        </ListToolbar>
-        <DataTable
-          columns={columns}
-          state={rows}
-          getRowKey={(p) => p.id}
-          onRowClick={(p) => router.push(`/clientes/${p.id}`)}
-          pagination={pagination}
+          {state.kind === "fail" && (
+            <TableError colSpan={colCount}>{state.message}</TableError>
+          )}
+          {state.kind === "ok" && state.data.items.length === 0 && (
+            <TableEmpty colSpan={colCount}>{tCommon("empty")}</TableEmpty>
+          )}
+          {state.kind === "ok" &&
+            state.data.items.map((p, i) => (
+              <TableRow
+                key={p.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/clientes/${p.id}`)}
+              >
+                <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
+                  {(page - 1) * LIMIT + i + 1}
+                </TableCell>
+                <TableCell className="tabular-nums">{p.record ?? "—"}</TableCell>
+                <TableCell>
+                  <span className="font-medium">
+                    {[p.nombres, p.apellidos].filter(Boolean).join(" ")}
+                  </span>
+                </TableCell>
+                <TableCell>{p.docId ?? "—"}</TableCell>
+                <TableCell>{p.telefono ?? "—"}</TableCell>
+                <TableCell>{p.email ?? "—"}</TableCell>
+                <TableCell>
+                  {p.activo ? (
+                    <Badge variant="success">{t("active")}</Badge>
+                  ) : (
+                    <Badge variant="outline">{t("inactive")}</Badge>
+                  )}
+                </TableCell>
+                {showCentroCol && (
+                  <TableCell>
+                    <Badge variant="outline">
+                      {(p.clinicId && centroName.get(p.clinicId)) || "—"}
+                    </Badge>
+                  </TableCell>
+                )}
+                <TableCell className="text-right">
+                  {/* «Acciones»: historiales del paciente (compras/servicios/citas/prescripción) +
+                      crear cita, sin salir de la lista. stopPropagation para no navegar a la ficha
+                      al pulsarlo. Handoff acciones-del-paciente-historiales. */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAccionesFor(p);
+                    }}
+                  >
+                    {t("acciones")}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+      </DataTable>
+
+      {state.kind === "ok" && state.data.items.length > 0 && (
+        <PaginationFooter
+          meta={state.data.pagination}
+          onPageChange={setPage}
         />
-      </div>
+      )}
 
       <PacienteFormSheet
         open={createOpen}
@@ -233,6 +253,47 @@ export default function ClientesPage() {
           onClose={() => setAccionesFor(null)}
         />
       )}
+    </PageContainer>
+  );
+}
+
+// Same range/prev/next footer as components/kit/data-table.tsx's
+// PaginationFooter (not exported there) — kept local since the page now
+// composes the table by hand instead of going through the generic wrapper.
+function PaginationFooter({
+  meta,
+  onPageChange,
+}: {
+  meta: { total: number; page: number; limit: number };
+  onPageChange: (page: number) => void;
+}) {
+  const t = useTranslations("common");
+  const { total, page, limit } = meta;
+  const pages = Math.max(1, Math.ceil(total / Math.max(1, limit)));
+  const from = total === 0 ? 0 : (page - 1) * limit + 1;
+  const to = Math.min(total, page * limit);
+
+  return (
+    <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <span>{t("pagination.range", { from, to, total })}</span>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+        >
+          {t("pagination.prev")}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={page >= pages}
+          onClick={() => onPageChange(page + 1)}
+        >
+          {t("pagination.next")}
+        </Button>
+      </div>
     </div>
   );
 }
