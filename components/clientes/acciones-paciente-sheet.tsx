@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Calendar03Icon, InvoiceIcon, StethoscopeIcon, TestTube01Icon, Add01Icon } from "@hugeicons/core-free-icons";
+import { Calendar03Icon, InvoiceIcon, StethoscopeIcon, Add01Icon } from "@hugeicons/core-free-icons";
 
 import type { Paciente } from "@/lib/api/pacientes";
 import { listFacturas, type Factura } from "@/lib/api/facturas";
@@ -12,7 +12,6 @@ import { listCitas, getTiposCita, type Cita, type TipoCita } from "@/lib/api/cit
 import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getMedicos, type Personal } from "@/lib/api/personal";
-import { listPrescripcionesPaciente, type PrescripcionPaciente } from "@/lib/api/prescripcion";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ import {
 } from "@/components/ui/sheet";
 import { CitaModal } from "@/components/agenda/cita-modal";
 
-// «Acciones» del paciente: sus historiales SIN salir de la ficha — compras, servicios, citas, prescripción
+// «Acciones» del paciente: sus historiales SIN salir de la ficha — compras, servicios, citas
 // y crear cita médica. Cada sección con su permiso y su estado vacío honesto. Handoff
 // acciones-del-paciente-historiales.
 const money = (v: unknown) => `$${(Number(v) || 0).toFixed(2)}`;
@@ -65,11 +64,6 @@ export function AccionesPacienteSheet({
           {can("citas.read") && (
             <Seccion icon={Calendar03Icon} titulo={t("citas")}>
               <Citas pid={pid} centro={centro} />
-            </Seccion>
-          )}
-          {can("prescripcion.read") && (
-            <Seccion icon={TestTube01Icon} titulo={t("prescripcion")}>
-              <Prescripcion pid={pid} centro={centro} />
             </Seccion>
           )}
 
@@ -180,29 +174,6 @@ function Citas({ pid, centro }: { pid: string; centro?: string }) {
         <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="tabular-nums">{c.fecha}{c.hora ? ` · ${c.hora}` : ""}</span>
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{c.estado}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Prescripcion({ pid, centro }: { pid: string; centro?: string }) {
-  const t = useTranslations("acciones");
-  const tRoot = useTranslations();
-  const res = useResource<PrescripcionPaciente[]>(() => listPrescripcionesPaciente(pid, centro), [pid, centro]);
-  if (res.state.kind === "loading") return <Cargando />;
-  if (res.state.kind === "fail") return <p className="text-xs text-destructive">{res.state.message}</p>;
-  const items = res.state.data;
-  if (items.length === 0) return <Vacio>{t("sinPrescripcion")}</Vacio>;
-  return (
-    <ul className="divide-y rounded-md border">
-      {items.map((p) => (
-        <li key={p.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-          <span className="min-w-0 truncate">
-            {p.grupoNombre || (p.grupoLabelKey && tRoot.has(p.grupoLabelKey) ? tRoot(p.grupoLabelKey) : p.grupoLabelKey) || "—"}
-            {p.cantidad ? ` ×${p.cantidad}` : ""}
-          </span>
-          <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{p.fecha ?? ""}</span>
         </li>
       ))}
     </ul>

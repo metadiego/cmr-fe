@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 
 // Settings › Módulos del modal (ADMIN, gate `tablero.admin`). Conectar/desconectar
-// módulos pluggables del modal de post-acción por tablero (hoy: Prescripción).
+// módulos pluggables del modal de post-acción por tablero (hoy: Agendar cita).
 // Reusable: sirve para cualquier tablero con modal.
 export default function SettingsModalModulosPage() {
   const t = useTranslations("settingsModulos");

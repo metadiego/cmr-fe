@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 // viene del catálogo del BE (GET /tablero/modal/modulos?postAccion=, BE-3); el
 // estado plugged/unplugged por-tablero se guarda en el OVERRIDE de render de la
 // composición (`render.<clave>=false` = desconectado; ausente = enchufado). BE ya
-// fusiona render por-tablero. Ver docs/specs/prescripcion-obligatoria-y-modulos-modal-fe-request.md
+// fusiona render por-tablero.
 
 // Solo los overrides de composición (los que difieren del catálogo). Así el toggle
 // preserva `postAccion` (override) sin congelar `group/transition/estampa` (catálogo).

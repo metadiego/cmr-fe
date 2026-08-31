@@ -31,7 +31,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { PrescripcionGrid } from "@/components/tablero/prescripcion-grid";
 
 const NO_MEDICO = "__none__";
 
@@ -66,8 +65,7 @@ function fmtFechaCorta(iso: string, locale: string): string {
 
 // Modal de AGENDAMIENTO tras marcar ASISTIDO (por `render.postAccion`, no hardcode).
 // UI "ficha de atención": héroe con avatar + línea de tiempo de la visita recién
-// completada + agenda rápida de la próxima. Prescripción es plug-and-play (catálogo
-// 404 → oculta). Ver docs/specs/ap-board — handoff PR #35.
+// completada + agenda rápida de la próxima. Ver docs/specs/ap-board — handoff PR #35.
 export function NuevaCitaModal({
   tablero,
   fila,
@@ -79,7 +77,7 @@ export function NuevaCitaModal({
   tablero: string;
   fila: CitaFila;
   centroId?: string;
-  render?: Record<string, unknown> | null; // config por-tablero de la columna (postAccion, prescripcion…)
+  render?: Record<string, unknown> | null; // config por-tablero de la columna (postAccion, agendar_cita…)
   onClose: () => void;
   onSaved?: () => void;
 }) {
@@ -88,12 +86,7 @@ export function NuevaCitaModal({
   const locale = useLocale();
   const { can } = useCan();
 
-  // Módulo prescripción PLUGGED por config (por-tablero). Ausente = enchufado
-  // (default true); admin lo apaga con render.prescripcion:false. Cero hardcode.
-  const prescripcionEnabled = render?.prescripcion !== false;
-  const prescripcionRequerida = render?.prescripcionRequerida !== false; // obligatoria por defecto cuando está plugged
   const agendarEnabled = render?.agendar_cita !== false; // módulo de agendamiento (plugged por config)
-  const [prescripcionOk, setPrescripcionOk] = React.useState(true);
 
   const pacienteId = String(fila.pacienteId ?? "");
   const paciente = String(fila.paciente ?? fila.pacienteNombre ?? "");
@@ -250,8 +243,6 @@ export function NuevaCitaModal({
   }
 
   const anyBusy = busy !== null;
-  // Obligatoriedad de prescripción: bloquea finalizar si está plugged+requerida y no resuelta.
-  const bloqueaPrescripcion = prescripcionEnabled && prescripcionRequerida && !prescripcionOk;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -413,25 +404,17 @@ export function NuevaCitaModal({
           </label>
           </>
           )}
-
-          {/* Prescripción: plugged por config (render.prescripcion) + auto-oculta si no hay catálogo. */}
-          {prescripcionEnabled && fila.id && (
-            <PrescripcionGrid citaId={fila.id} centroId={centroId} onValidity={setPrescripcionOk} />
-          )}
         </div>
 
         {/* Pie */}
         <div className="shrink-0 flex flex-col gap-2 border-t bg-muted/30 px-6 py-4">
-          {bloqueaPrescripcion && (
-            <p className="text-xs text-amber-600 dark:text-amber-400">{t("prescriptionRequired")}</p>
-          )}
           <div className="flex items-center gap-2">
           <Button type="button" variant="ghost" onClick={onSalir} disabled={anyBusy}>
             {t("exit")}
           </Button>
           <div className="ml-auto flex items-center gap-2">
             {canWrite && agendarEnabled && (
-              <Button type="button" variant="outline" onClick={onAbierto} disabled={anyBusy || tipos.length === 0 || bloqueaPrescripcion}>
+              <Button type="button" variant="outline" onClick={onAbierto} disabled={anyBusy || tipos.length === 0}>
                 {t("open")}
               </Button>
             )}
@@ -440,12 +423,12 @@ export function NuevaCitaModal({
               variant="outline"
               className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-400"
               onClick={onAlta}
-              disabled={anyBusy || bloqueaPrescripcion}
+              disabled={anyBusy}
             >
               {t("discharge")}
             </Button>
             {canWrite && agendarEnabled && (
-              <Button type="button" onClick={onGuardar} disabled={anyBusy || !tipoId || !fecha || bloqueaPrescripcion}>
+              <Button type="button" onClick={onGuardar} disabled={anyBusy || !tipoId || !fecha}>
                 {t("save")}
               </Button>
             )}

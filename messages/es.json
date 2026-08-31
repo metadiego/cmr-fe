@@ -1268,13 +1268,7 @@
     "stepPresent": "Presente",
     "stepConsult": "En consulta",
     "stepAttended": "Atendido",
-    "now": "ahora",
-    "prescriptionRequired": "Selecciona una prescripción o marca «Sin prescripción» para continuar."
-  },
-  "prescripcion": {
-    "title": "Prescripción",
-    "none": "Sin prescripción",
-    "required": "Obligatorio: ingresa una cantidad o marca «Sin prescripción»."
+    "now": "ahora"
   },
   "settingsModulos": {
     "title": "Módulos del modal",
@@ -1293,9 +1287,6 @@
     "modulo": {
       "agendar_cita": {
         "desc": "Agenda la próxima cita del paciente."
-      },
-      "prescripcion": {
-        "desc": "Muestra la grilla de prescripción dentro del modal de atención."
       }
     }
   },
@@ -3792,13 +3783,11 @@
     "compras": "Compras",
     "servicios": "Servicios",
     "citas": "Citas médicas",
-    "prescripcion": "Prescripción",
     "crearCita": "Crear cita médica",
     "abrir": "Abrir",
     "sinCompras": "Sin compras.",
     "sinServicios": "Sin servicios.",
-    "sinCitas": "Sin citas.",
-    "sinPrescripcion": "Sin prescripción."
+    "sinCitas": "Sin citas."
   },
   "clientes": {}
 }

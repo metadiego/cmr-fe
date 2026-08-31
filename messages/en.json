@@ -1268,13 +1268,7 @@
     "stepPresent": "Present",
     "stepConsult": "In consult",
     "stepAttended": "Attended",
-    "now": "now",
-    "prescriptionRequired": "Select a prescription or mark “No prescription” to continue."
-  },
-  "prescripcion": {
-    "title": "Prescription",
-    "none": "No prescription",
-    "required": "Required: enter a quantity or mark “No prescription”."
+    "now": "now"
   },
   "settingsModulos": {
     "title": "Modal modules",
@@ -1293,9 +1287,6 @@
     "modulo": {
       "agendar_cita": {
         "desc": "Schedule the patient's next appointment."
-      },
-      "prescripcion": {
-        "desc": "Show the prescription grid inside the attention modal."
       }
     }
   },
@@ -3792,13 +3783,11 @@
     "compras": "Purchases",
     "servicios": "Services",
     "citas": "Medical appointments",
-    "prescripcion": "Prescription",
     "crearCita": "Create appointment",
     "abrir": "Open",
     "sinCompras": "No purchases.",
     "sinServicios": "No services.",
-    "sinCitas": "No appointments.",
-    "sinPrescripcion": "No prescription."
+    "sinCitas": "No appointments."
   },
   "clientes": {}
 }
