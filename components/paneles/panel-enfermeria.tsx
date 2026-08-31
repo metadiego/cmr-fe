@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Sun01Icon, Moon02Icon, VolumeHighIcon } from "@hugeicons/core-free-icons";
+import { VolumeHighIcon } from "@hugeicons/core-free-icons";
 
 import {
   getPanelDefinicion,
@@ -20,7 +20,6 @@ import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
 
 const CLAVE = "enfermeria";
-const THEME_KEY = "cmr_panel_theme";
 
 // Tono por SECCIÓN: el nombre lógico (`panel_secciones.audio`) decide cómo suena, para que la enfermera
 // sepa cuál sonó sin mirar la pantalla. Se distinguen de verdad (una quinta + otro timbre, no 880 vs 900).
@@ -68,11 +67,6 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const { can } = useCan();
   const puedeAceptar = can("panel.aceptar");
   const puedeCancelar = can("panel.notificar");
-
-  const [dark, setDark] = React.useState(false);
-  const [restored, setRestored] = React.useState(false);
-  if (!restored && typeof window !== "undefined") { setRestored(true); setDark(window.localStorage.getItem(THEME_KEY) === "dark"); }
-  const toggleTheme = () => setDark((d) => { const n = !d; if (typeof window !== "undefined") window.localStorage.setItem(THEME_KEY, n ? "dark" : "light"); return n; });
 
   const defRes = useResource<PanelDefinicion>(() => getPanelDefinicion(CLAVE, centro), [centro]);
   const [notifs, setNotifs] = React.useState<PanelNotificacion[]>([]);
@@ -122,116 +116,111 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   }
 
   return (
-    <div className={dark ? "dark" : ""}>
-      <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
-        {/* Barra */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight">{tRoot(def?.panel.labelKey ?? "panel.enfermeria")}</h1>
-            <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-emerald-500" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
-          </div>
-          <div className="flex items-center gap-2">
-            {!alarma.armado.current && (
-              <button type="button" onClick={alarma.armar} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium" title={t("activarSonido")}>
-                <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
-              </button>
-            )}
-            <button type="button" onClick={toggleTheme} className="rounded-md border p-2" aria-label={t("tema")}>
-              <HugeiconsIcon icon={dark ? Sun01Icon : Moon02Icon} className="size-4" />
+    <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
+      {/* Barra */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">{tRoot(def?.panel.labelKey ?? "panel.enfermeria")}</h1>
+          <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-emerald-500" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
+        </div>
+        <div className="flex items-center gap-2">
+          {!alarma.armado.current && (
+            <button type="button" onClick={alarma.armar} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium" title={t("activarSonido")}>
+              <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
             </button>
-          </div>
+          )}
         </div>
-
-        {/* Secciones + muro de tarjetas por enfermera */}
-        {defRes.state.kind === "loading" && <p className="text-muted-foreground">…</p>}
-        {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
-        <div className="space-y-5">
-          {secciones.map((s) => (
-            <section key={s.id}>
-              <div className="mb-2 flex items-center gap-2">
-                <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
-                <h2 className="text-lg font-semibold">{tRoot(s.labelKey)}</h2>
-              </div>
-              {s.visible ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  {personal.map((p) => {
-                    const cont = contByPersona.get(p.id);
-                    const nSec = cont?.porSeccion?.[s.clave] ?? 0;
-                    const est = estatusById.get(p.id);
-                    const pc = colorForName(p.nombre);
-                    return (
-                      <div key={p.id} className="rounded-xl border p-3" style={{ borderLeftColor: pc, borderLeftWidth: 4 }}>
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="truncate text-base font-semibold">{p.nombre}</span>
-                          <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-lg font-bold tabular-nums" style={{ color: s.color ?? undefined }}>{nSec}</span>
-                        </div>
-                        {cont && Object.keys(cont.porSeccion || {}).length > 1 && (
-                          <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
-                            {secciones.map((sx) => <span key={sx.clave}>{tRoot(sx.labelKey)} {cont.porSeccion?.[sx.clave] ?? 0}</span>)}
-                          </div>
-                        )}
-                        {est && (est.labelKey || est.label) && (
-                          <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
-                            {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="h-3 w-full rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
-              )}
-            </section>
-          ))}
-        </div>
-
-        {/* Cola */}
-        {pendientes.length > 1 && (
-          <div className="fixed bottom-4 right-4 rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
-            {t("enCola", { n: pendientes.length - 1 })}
-          </div>
-        )}
-
-        {/* Aviso entrante a pantalla completa. La sección (color/nombre) se resuelve de la definición
-            por seccionId; el nombre/récord del paciente y el servicio los enriquece el BE en el payload. */}
-        {actual && (() => {
-          const sec = secciones.find((s) => s.id === actual.seccionId) ?? secciones.find((s) => s.clave === actual.seccion);
-          const color = actual.color ?? sec?.color ?? "#111827";
-          const secLabel = sec ? tRoot(sec.labelKey) : (actual.seccion ?? "");
-          return (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: color + "F2" }}>
-            <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">{secLabel}</p>
-            <h2 className="mt-2 text-center text-5xl font-black text-white md:text-6xl">{actual.pacienteNombre ?? "—"}</h2>
-            {actual.record && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.record}</p>}
-            {actual.servicioNombre && <p className="text-lg text-white/80">{actual.servicioNombre}</p>}
-            <div className="mt-8 grid w-full max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
-              {personal.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  disabled={!puedeAceptar}
-                  onClick={() => aceptar(actual.id, p.id)}
-                  className="min-h-[88px] rounded-2xl bg-white/95 p-4 text-xl font-bold text-neutral-900 shadow-lg transition-transform active:scale-95 disabled:opacity-60"
-                >
-                  {p.nombre}
-                </button>
-              ))}
-            </div>
-            {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
-            {puedeCancelar && (
-              <button
-                type="button"
-                onClick={() => cancelar(actual.id)}
-                className="mt-6 rounded-lg border border-white/40 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
-              >
-                {t("cancelarAviso")}
-              </button>
-            )}
-          </div>
-          );
-        })()}
       </div>
+
+      {/* Secciones + muro de tarjetas por enfermera */}
+      {defRes.state.kind === "loading" && <p className="text-muted-foreground">…</p>}
+      {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
+      <div className="space-y-5">
+        {secciones.map((s) => (
+          <section key={s.id}>
+            <div className="mb-2 flex items-center gap-2">
+              <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
+              <h2 className="text-lg font-semibold">{tRoot(s.labelKey)}</h2>
+            </div>
+            {s.visible ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {personal.map((p) => {
+                  const cont = contByPersona.get(p.id);
+                  const nSec = cont?.porSeccion?.[s.clave] ?? 0;
+                  const est = estatusById.get(p.id);
+                  const pc = colorForName(p.nombre);
+                  return (
+                    <div key={p.id} className="rounded-xl border p-3" style={{ borderLeftColor: pc, borderLeftWidth: 4 }}>
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="truncate text-base font-semibold">{p.nombre}</span>
+                        <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-lg font-bold tabular-nums" style={{ color: s.color ?? undefined }}>{nSec}</span>
+                      </div>
+                      {cont && Object.keys(cont.porSeccion || {}).length > 1 && (
+                        <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-muted-foreground">
+                          {secciones.map((sx) => <span key={sx.clave}>{tRoot(sx.labelKey)} {cont.porSeccion?.[sx.clave] ?? 0}</span>)}
+                        </div>
+                      )}
+                      {est && (est.labelKey || est.label) && (
+                        <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium" style={est.color ? { backgroundColor: `${est.color}22`, color: est.color } : undefined}>
+                          {est.labelKey && tRoot.has(est.labelKey) ? tRoot(est.labelKey) : est.label}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="h-3 w-full rounded" style={{ backgroundColor: s.color ?? undefined }} aria-hidden />
+            )}
+          </section>
+        ))}
+      </div>
+
+      {/* Cola */}
+      {pendientes.length > 1 && (
+        <div className="fixed bottom-4 right-4 rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
+          {t("enCola", { n: pendientes.length - 1 })}
+        </div>
+      )}
+
+      {/* Aviso entrante a pantalla completa. La sección (color/nombre) se resuelve de la definición
+          por seccionId; el nombre/récord del paciente y el servicio los enriquece el BE en el payload. */}
+      {actual && (() => {
+        const sec = secciones.find((s) => s.id === actual.seccionId) ?? secciones.find((s) => s.clave === actual.seccion);
+        const color = actual.color ?? sec?.color ?? "#111827";
+        const secLabel = sec ? tRoot(sec.labelKey) : (actual.seccion ?? "");
+        return (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: color + "F2" }}>
+          <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">{secLabel}</p>
+          <h2 className="mt-2 text-center text-5xl font-black text-white md:text-6xl">{actual.pacienteNombre ?? "—"}</h2>
+          {actual.record && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.record}</p>}
+          {actual.servicioNombre && <p className="text-lg text-white/80">{actual.servicioNombre}</p>}
+          <div className="mt-8 grid w-full max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
+            {personal.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                disabled={!puedeAceptar}
+                onClick={() => aceptar(actual.id, p.id)}
+                className="min-h-[88px] rounded-2xl bg-white/95 p-4 text-xl font-bold text-neutral-900 shadow-lg transition-transform active:scale-95 disabled:opacity-60"
+              >
+                {p.nombre}
+              </button>
+            ))}
+          </div>
+          {!puedeAceptar && <p className="mt-4 text-sm text-white/80">{t("soloEnfermeria")}</p>}
+          {puedeCancelar && (
+            <button
+              type="button"
+              onClick={() => cancelar(actual.id)}
+              className="mt-6 rounded-lg border border-white/40 px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10"
+            >
+              {t("cancelarAviso")}
+            </button>
+          )}
+        </div>
+        );
+      })()}
     </div>
   );
 }
