@@ -414,7 +414,7 @@ const ESTADO_COLOR: Record<string, string> = {
   negativo: "bg-destructive",
   vencido: "bg-destructive",
   por_vencer: "bg-warning",
-  bajo_minimo: "bg-warning",
+  bajo_minimo: "bg-warning/70",
 };
 function EstadoDot({ estado }: { estado?: string | null }) {
   const c = estado ? ESTADO_COLOR[estado] : undefined;
