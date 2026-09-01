@@ -122,7 +122,7 @@ export default function CuadreGeneralPage() {
       {state.kind === "ok" && (
         <>
           {cajeroActivo && (
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-info/40 bg-info px-4 py-2.5 text-sm">
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-info/40 bg-info px-4 py-2.5 text-sm">
               <span className="font-medium text-info-foreground">
                 {t("who.acotado", { cajero: cajeroActivo })}
               </span>

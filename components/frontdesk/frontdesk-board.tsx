@@ -1911,7 +1911,7 @@ function TransferirTratamientoDialog({
                     key={m}
                     type="button"
                     onClick={() => setModo(m)}
-                    className={"flex-1 rounded-lg border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
+                    className={"flex-1 rounded-md border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
                   >
                     <span className="block font-medium">{t(`transferir.${m}`)}</span>
                     <span className="block text-[11px] text-muted-foreground">{t(`transferir.${m}Ayuda`)}</span>

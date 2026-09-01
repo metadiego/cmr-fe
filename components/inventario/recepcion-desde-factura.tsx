@@ -163,7 +163,7 @@ export function RecepcionDesdeFactura() {
       <p className="mb-5 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
 
       {aprendidos !== null && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-success/40 bg-success px-4 py-3 text-sm">
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
           <span className="font-medium">{t("okAprendidos", { n: aprendidos })}</span>
           <Button variant="outline" size="sm" className="ml-auto" onClick={reiniciar}>{t("otraRecepcion")}</Button>
         </div>

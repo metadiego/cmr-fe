@@ -141,7 +141,7 @@ export function DiaView({ fecha }: { fecha: string }) {
               type="button"
               onClick={() => pickVista("clasica")}
               className={
-                "rounded px-2.5 py-1 font-medium transition-colors " +
+                "rounded-md px-2.5 py-1 font-medium transition-colors " +
                 (vista === "clasica" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
               }
             >
@@ -151,7 +151,7 @@ export function DiaView({ fecha }: { fecha: string }) {
               type="button"
               onClick={() => pickVista("nueva")}
               className={
-                "rounded px-2.5 py-1 font-medium transition-colors " +
+                "rounded-md px-2.5 py-1 font-medium transition-colors " +
                 (vista === "nueva" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
               }
             >
@@ -303,7 +303,7 @@ function CentroSheet({
       </div>
 
       {bloqueado && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {t("dia.closedNotice")}
         </div>
       )}
@@ -541,7 +541,7 @@ function CentroSheetV2({
       )}
 
       {bloqueado && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {t("dia.closedNotice")}
         </div>
       )}

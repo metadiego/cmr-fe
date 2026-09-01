@@ -125,7 +125,7 @@ export default function PersonalPage() {
               onChanged={() => listRes.reload()}
             />
           ) : (
-            <div className="flex min-h-[40vh] items-center justify-center rounded-xl border border-dashed text-sm text-muted-foreground">
+            <div className="flex min-h-[40vh] items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
               {t("elegirPersona")}
             </div>
           )}
@@ -240,8 +240,8 @@ function FichaPersonal({
       <div className="border-t pt-4">
         <Label className="mb-2 block">{t("acceso")}</Label>
         {persona.perfilId ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-success/40 bg-success px-3 py-2 text-sm">
-            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success-foreground" />
+          <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
+            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
             <span>{persona.email || t("conCuenta")}{persona.perfilId ? ` · ${t("aprobado")}` : ""}</span>
             <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
           </div>

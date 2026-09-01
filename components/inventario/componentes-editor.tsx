@@ -208,7 +208,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
           </Select>
         </label>
         {allowOpcional && (
-          <div className="flex w-full flex-wrap items-end gap-3 rounded-lg border border-dashed p-3">
+          <div className="flex w-full flex-wrap items-end gap-3 rounded-md border border-dashed p-3">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={nuevoOpcional} onChange={(e) => setNuevoOpcional(e.target.checked)} />
               {t("opcional")}

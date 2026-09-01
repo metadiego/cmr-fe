@@ -181,7 +181,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
         </div>
         {transfer.motivo && <p className="mt-1 text-sm text-muted-foreground">{transfer.motivo}</p>}
         {!esDestino && transfer.estado === "pendiente" && (
-          <p className="mt-3 rounded-lg border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
+          <p className="mt-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
             {t("soloDestino", { centro: centroName(transfer.clinicDestinoId) })}
           </p>
         )}

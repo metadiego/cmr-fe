@@ -19,7 +19,7 @@ export default function ConfigPanelEnfermeriaPage() {
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-6 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
       {ready && !can("panel.config") ? (
-        <p className="rounded-lg border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
           {t("noPermission")}
         </p>
       ) : (

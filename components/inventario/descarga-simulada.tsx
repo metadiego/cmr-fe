@@ -92,7 +92,7 @@ export function DescargaSimuladaPanel({ productoId }: { productoId: string }) {
             {data.avisos.length > 0 && (
               <div className="space-y-1.5">
                 {data.avisos.map((a, i) => (
-                  <div key={i} className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <div key={i} className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                     <HugeiconsIcon icon={Alert01Icon} className="mt-0.5 size-4 shrink-0" />
                     <span>
                       {a.tipo === "duplicado"
@@ -134,7 +134,7 @@ export function DescargaSimuladaPanel({ productoId }: { productoId: string }) {
 
             {/* Estimados: se reportan pero NO descuentan → aparte y en gris. */}
             {data.estimados.length > 0 && (
-              <div className="rounded-lg border border-dashed bg-muted/20 p-3">
+              <div className="rounded-md border border-dashed bg-muted/20 p-3">
                 <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("estimadosTitulo")}</div>
                 <ul className="space-y-0.5 text-sm text-muted-foreground">
                   {data.estimados.map((e, i) => (

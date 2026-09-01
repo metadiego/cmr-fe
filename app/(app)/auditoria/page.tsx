@@ -25,7 +25,7 @@ export default function AuditoriaPage() {
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-6 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
       {ready && me.kind === "ok" && !autorizado ? (
-        <p className="rounded-lg border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
           {t("noPermission")}
         </p>
       ) : (

@@ -153,7 +153,7 @@ function PermisoNuevoDialog({ onClose, onSaved, tRoot, tc, t }: {
           </label>
           {/* Preview EN VIVO de cómo se parte la clave — enseña la convención sin explicarla. */}
           {clave.trim() && (
-            <div className={valido ? "rounded-md border bg-muted/40 px-3 py-2 text-xs" : "rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive"}>
+            <div className={valido ? "rounded-md border bg-muted/40 px-3 py-2 text-xs" : "rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"}>
               {valido ? (
                 <span><span className="font-medium">{t("field.modulo")}:</span> <code className="font-mono">{modulo}</code> · <span className="font-medium">{t("field.accion")}:</span> <code className="font-mono">{accion}</code></span>
               ) : t("formatoInvalido")}

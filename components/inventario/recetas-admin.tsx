@@ -74,7 +74,7 @@ export function RecetasAdmin() {
         {/* Editor de receta */}
         <div>
           {!selected ? (
-            <div className="rounded-xl border border-dashed px-4 py-16 text-center text-sm text-muted-foreground">
+            <div className="rounded-md border border-dashed px-4 py-16 text-center text-sm text-muted-foreground">
               {t("pickCompuesto")}
             </div>
           ) : (

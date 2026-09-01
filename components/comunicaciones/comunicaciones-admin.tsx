@@ -63,7 +63,7 @@ export function ComunicacionesAdmin() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
-        <div className="inline-flex rounded-lg border p-0.5">
+        <div className="inline-flex rounded-md border p-0.5">
           {(["alertas", "notificaciones", "plantillas"] as const).map((m) => (
             <button
               key={m}
@@ -124,7 +124,7 @@ function AlertasPanel() {
       </div>
     );
   if (alertas.length === 0)
-    return <p className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
+    return <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
 
   return (
     <div className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">

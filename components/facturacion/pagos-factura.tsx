@@ -109,7 +109,7 @@ export function PagosFactura({
       )}
 
       {!pagado && (
-        <div className="flex items-center justify-between rounded-lg bg-warning px-2.5 py-1.5 text-sm">
+        <div className="flex items-center justify-between rounded-md border border-warning/40 bg-warning px-2.5 py-1.5 text-sm">
           <span className="text-warning-foreground">{t("balance")}</span>
           <span className="font-semibold tabular-nums text-warning-foreground">{money(saldo)}</span>
         </div>
@@ -312,7 +312,7 @@ function PagoAddRow({
   }
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-2">
+    <div className="space-y-1.5 rounded-md border border-primary/30 bg-primary/5 px-2.5 py-2">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("addPayment")}</span>
       <Select value={formaId} onValueChange={setFormaId}>
         <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>

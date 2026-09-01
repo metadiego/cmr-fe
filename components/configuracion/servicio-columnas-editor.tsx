@@ -263,7 +263,7 @@ export function ServicioColumnasEditor() {
       </div>
 
       {!sel ? (
-        <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
           {t("colElegirServicioHint")}
         </p>
       ) : colsRes.state.kind === "loading" || catRes.state.kind === "loading" ? (
@@ -271,7 +271,7 @@ export function ServicioColumnasEditor() {
       ) : (
         <>
           {seleccion.size >= 2 && (
-            <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
               <span className="text-sm text-muted-foreground">{t("colSeleccion", { n: seleccion.size })}</span>
               <Button size="sm" disabled={busy} onClick={() => agrupar("auto")}>{t("colAgrupar")}</Button>
               <Button size="sm" variant="outline" disabled={busy} onClick={() => agrupar(null)}>{t("colSueltas")}</Button>

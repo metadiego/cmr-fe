@@ -163,12 +163,12 @@ export default function VentasPorGrupoPage() {
           {/* CUADRE: la garantía de que el reporte se puede creer. */}
           <div className="mt-6">
             {data.cuadre.cuadra ? (
-              <div className="inline-flex items-center gap-2 rounded-lg border border-success/40 bg-success px-3 py-2 text-sm font-medium text-success-foreground">
+              <div className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-sm font-medium text-success">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />
                 {t("cuadra", { total: money(data.cuadre.totalFacturas) })}
               </div>
             ) : (
-              <div className="inline-flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+              <div className="inline-flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
                 <HugeiconsIcon icon={Alert02Icon} className="size-4" />
                 {t("noCuadra", { diferencia: money(data.cuadre.diferencia) })}
               </div>

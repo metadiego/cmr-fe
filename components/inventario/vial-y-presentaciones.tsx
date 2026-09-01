@@ -67,7 +67,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
       <h3 className="text-sm font-semibold">{t("abiertosTitle")}</h3>
       {state.kind === "loading" && <p className="text-xs text-muted-foreground">{t("cargando")}</p>}
       {state.kind === "ok" && viales.length === 0 && (
-        <p className="rounded-lg border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">{t("sinAbiertos")}</p>
+        <p className="rounded-md border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">{t("sinAbiertos")}</p>
       )}
       <ul className="space-y-2">
         {viales.map((v) => {
@@ -195,8 +195,8 @@ function Presentaciones({
             <li
               key={p.id}
               className={
-                "flex items-center gap-3 rounded-lg border px-3 py-2 " +
-                (p.esDefault ? "border-primary bg-primary/5 " : "") +
+                "flex items-center gap-3 rounded-md border px-3 py-2 " +
+                (p.esDefault ? "border-primary bg-primary/10 text-primary " : "") +
                 (p.activo === false ? "opacity-50" : "")
               }
             >
@@ -232,7 +232,7 @@ function Presentaciones({
       </ul>
 
       {creando ? (
-        <div className="space-y-2 rounded-lg border border-dashed p-3">
+        <div className="space-y-2 rounded-md border border-dashed p-3">
           <Input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder={t("nombrePlaceholder")} className="h-8" />
           <div className="flex gap-2">
             <Input value={contenido} onChange={(e) => setContenido(e.target.value)} inputMode="decimal" placeholder={t("contenidoPlaceholder")} className="h-8 w-28" />

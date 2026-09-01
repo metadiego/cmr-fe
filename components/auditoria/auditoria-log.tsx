@@ -591,7 +591,7 @@ function DetalleSheet({
             <CopiableCampo label="requestId" value={row.requestId} onCopy={onCopy} vacio={t("sinDato")} />
             <CopiableCampo label="IP" value={row.ip} onCopy={onCopy} vacio={t("sinDato")} />
             {row.resultado === "error" ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3">
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
                 <p className="text-xs font-semibold text-destructive">{row.errorCode ?? t("error")}</p>
                 {row.errorMensaje ? <p className="mt-1 text-xs">{row.errorMensaje}</p> : null}
               </div>

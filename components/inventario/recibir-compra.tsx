@@ -136,8 +136,8 @@ export function RecibirCompra() {
       <p className="mb-6 mt-1 max-w-3xl text-sm text-muted-foreground">{t("helpLote")}</p>
 
       {reciboId && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-success/40 bg-success px-4 py-3 text-sm">
-          <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 text-success-foreground" />
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
+          <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 text-success" />
           <span className="font-medium">{t("reciboOk", { id: reciboId })}</span>
           <Button variant="outline" size="sm" className="ml-auto" onClick={() => setReciboId(null)}>
             {t("nuevaRecepcion")}

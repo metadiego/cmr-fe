@@ -166,7 +166,7 @@ export function CuposConfig() {
               type="button"
               onClick={() => setMode(m)}
               className={
-                "rounded px-3 py-1 text-sm transition-colors " +
+                "rounded-md px-3 py-1 text-sm transition-colors " +
                 (mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
               }
             >

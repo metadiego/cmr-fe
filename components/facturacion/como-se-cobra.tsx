@@ -210,7 +210,7 @@ export function ComoSeCobra({
       </div>
 
       {extra.length === 0 && (
-        <p className="rounded-lg border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
+        <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
           ⚠️ {t("extraEmptyWarning")}
         </p>
       )}
@@ -407,7 +407,7 @@ function NuevoCampoDialog({
                   type="button"
                   onClick={() => setTipo(op.value)}
                   className={cn(
-                    "flex-1 rounded-lg border px-3 py-2 text-sm transition-colors",
+                    "flex-1 rounded-md border px-3 py-2 text-sm transition-colors",
                     tipo === op.value ? "border-primary bg-primary/10" : "border-border hover:bg-accent/40",
                   )}
                 >

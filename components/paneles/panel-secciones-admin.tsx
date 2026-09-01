@@ -254,7 +254,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
         ) : state.kind === "fail" ? (
           <p className="text-sm text-destructive">{state.message}</p>
         ) : secciones.length === 0 ? (
-          <p className="rounded-lg border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
+          <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
             {t("vacio")}
           </p>
         ) : (

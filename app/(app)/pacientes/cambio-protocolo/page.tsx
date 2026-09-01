@@ -166,7 +166,7 @@ export default function CambioProtocoloPage() {
             <h2 className="text-sm font-semibold">{t("paso1")}</h2>
             {pendRes.state.kind === "loading" && <p className="text-xs text-muted-foreground">{tc("loading")}</p>}
             {pendRes.state.kind === "ok" && pendientes.length === 0 && (
-              <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">{t("sinPendientes")}</p>
+              <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">{t("sinPendientes")}</p>
             )}
             <ul className="space-y-2">
               {pendientes.map((p) => {
@@ -247,7 +247,7 @@ export default function CambioProtocoloPage() {
               <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivoPlaceholder")} />
             </div>
 
-            <p className="flex items-start gap-2 rounded-lg bg-warning px-3 py-2 text-xs text-warning-foreground">
+            <p className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
               <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
               {t("aviso")}
             </p>

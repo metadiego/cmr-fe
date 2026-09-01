@@ -76,7 +76,7 @@ export function PacienteSelect({
         autoComplete="off"
       />
       {open && debounced.length >= 1 && (
-        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover p-1 shadow-md">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
           {state.kind === "loading" && (
             <p className="px-2 py-1.5 text-sm text-muted-foreground">{t("searching")}</p>
           )}

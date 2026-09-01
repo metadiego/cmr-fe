@@ -180,7 +180,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                       const sel = ((d.desdeEstados as string[]) || []).includes(es.clave);
                       return (
                         <button key={es.clave} type="button" onClick={() => patch({ desdeEstados: toggle((d.desdeEstados as string[]) || [], es.clave) })}
-                          className={"rounded border px-2 py-0.5 text-xs " + (sel ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground")}>
+                          className={"rounded-md border px-2 py-0.5 text-xs " + (sel ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground")}>
                           {tRoot(es.labelKey)}
                         </button>
                       );
@@ -189,7 +189,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                   </div>
                 </Field>
                 <Field label={t("trA")}>
-                  <select className="h-9 w-full rounded-md border bg-background px-2 text-sm" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
+                  <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
                     <option value="">—</option>
                     {estados.map((es) => <option key={es.clave} value={es.clave}>{tRoot(es.labelKey)}</option>)}
                   </select>
@@ -243,8 +243,9 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
   return (
     <div
       className={
-        "mb-4 rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3 " +
-        (warning ? "bg-warning" : "bg-card")
+        warning
+          ? "mb-4 rounded-md border border-warning/40 bg-warning px-4 py-3"
+          : "mb-4 rounded-md ring-1 ring-foreground/10 bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3"
       }
     >
       <p className={"text-sm font-semibold " + (warning ? "text-warning-foreground" : "")}>{title}</p>

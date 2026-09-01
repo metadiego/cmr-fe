@@ -65,7 +65,7 @@ export default function PreparacionLegadoPage() {
       {data && (
         <>
           {data.omitidos > 0 && (
-            <div className="mt-4 rounded-lg border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
+            <div className="mt-4 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
               {t("omitidos", { mostrados: filas.length, total: data.total })}
             </div>
           )}

@@ -1035,7 +1035,7 @@ function Editor({
         )}
 
         {!esBorrador && esGeneral && sesionesPorEntregar > 0 && (
-          <div className="rounded-xl border border-info/30 bg-info/5 px-4 py-3 text-sm text-info-foreground">
+          <div className="rounded-md border border-info/40 bg-info px-4 py-3 text-sm text-info-foreground">
             {t("sesionesPorEntregar", { n: sesionesPorEntregar })}
           </div>
         )}
@@ -1472,7 +1472,7 @@ function PersonalizarKitDialog({
                 );
               })}
               {added.map((r) => (
-                <li key={r.productoId} className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2">
+                <li key={r.productoId} className="flex items-center justify-between gap-3 rounded-md border border-primary/40 bg-primary/5 px-3 py-2">
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{r.nombre}<span className="ml-2 text-[11px] text-primary">{t("kit.agregado")}</span></span>
                   <span className="tabular-nums text-sm">×{r.cantidad}</span>
                   <button type="button" onClick={() => setAdded((a) => a.filter((x) => x.productoId !== r.productoId))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
@@ -1482,7 +1482,7 @@ function PersonalizarKitDialog({
 
             {/* Agregar componente: solo con permiso fino (el BE lo exige; no mostramos la puerta si no se abre). */}
             {puedeAgregar && (
-              <div className="flex items-end gap-2 rounded-lg border border-dashed p-3">
+              <div className="flex items-end gap-2 rounded-md border border-dashed p-3">
                 <div className="min-w-0 flex-1">
                   <Lbl>{t("kit.agregarComponente")}</Lbl>
                   <ProductoPicker
@@ -2106,7 +2106,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
   }
 
   return (
-    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-wrap">
+    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-md border border-dashed p-3 md:flex md:flex-wrap">
       <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
         <Lbl>{t("addItem")}</Lbl>
         <CatalogoCombobox

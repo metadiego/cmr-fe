@@ -114,7 +114,7 @@ export default function DisponibilidadLegadoPage() {
       </form>
 
       {aviso && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
+        <div className="mt-4 flex items-start gap-2 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
           <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
           <span>{aviso}</span>
         </div>
@@ -181,7 +181,7 @@ export default function DisponibilidadLegadoPage() {
               ))}
             </ul>
           ) : (
-            <p className="mt-3 rounded-lg border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">{t("sinItems")}</p>
+            <p className="mt-3 rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">{t("sinItems")}</p>
           )}
 
           <div className="mt-4 flex justify-end gap-2">

@@ -168,7 +168,7 @@ function Finder({
 
       {/* Paciente SELECCIONADO: banner claro (no queda duda de que el clic funcionó) con acción a la vista. */}
       {sel ? (
-        <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2.5">
+        <div className="mb-4 flex items-center gap-3 rounded-md border border-primary/40 bg-primary/5 px-3 py-2.5">
           <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-primary" />
           <div className="min-w-0 flex-1">
             <div className="truncate font-medium">{nombre(sel)}</div>

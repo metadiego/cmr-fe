@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 // `border-destructive/30 bg-destructive/10 …` que hoy vive duplicado en varios
 // componentes; los nuevos usos deben venir aquí.
 const alertVariants = cva(
-  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
+  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-md border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
   {
     variants: {
       variant: {
@@ -18,6 +18,8 @@ const alertVariants = cva(
           "border-warning/40 bg-warning text-warning-foreground",
         success:
           "border-success/30 bg-success/10 text-success [&>svg]:text-success",
+        info:
+          "border-info/40 bg-info text-info-foreground",
       },
     },
     defaultVariants: {

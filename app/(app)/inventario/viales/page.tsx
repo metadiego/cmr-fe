@@ -162,7 +162,7 @@ export default function VialesPage() {
       </div>
 
       {!productoId && (
-        <p className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
           {t("elijeProducto")}
         </p>
       )}

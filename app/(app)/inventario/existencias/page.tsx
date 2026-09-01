@@ -133,7 +133,7 @@ export default function StockPage() {
         count={t("totalProductos", { n: nf.format(total) })}
         actions={
           <>
-            <div className="inline-flex rounded-lg border p-0.5">
+            <div className="inline-flex rounded-md border p-0.5">
               {(["centro", "consolidado"] as const).map((v) => (
                 <button
                   key={v}
@@ -449,7 +449,7 @@ function Lote({ numero, fecha, vencido, porVencer, tVencido, tPorVencer }: { num
 }
 
 function Vacio({ texto }: { texto: string }) {
-  return <p className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{texto}</p>;
+  return <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{texto}</p>;
 }
 
 // Clic en un producto → DESGLOSE: dónde está (almacén/lote) y en qué estado (físico, reservado,

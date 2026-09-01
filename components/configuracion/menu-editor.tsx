@@ -533,7 +533,7 @@ export function MenuEditor() {
                     title={ic.name}
                     onClick={() => setIcon(it, ic.name)}
                     className={cn(
-                      "grid size-8 place-items-center rounded hover:bg-accent",
+                      "grid size-8 place-items-center rounded-md hover:bg-accent",
                       it.icon === ic.name && "bg-accent ring-1 ring-primary",
                     )}
                   >

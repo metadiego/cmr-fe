@@ -158,7 +158,7 @@ export function Calendario() {
               key={v}
               type="button"
               onClick={() => setVista(v)}
-              className={cn("rounded px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+              className={cn("rounded-md px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
             >
               {t(`vista.${v}`)}
             </button>
@@ -178,7 +178,7 @@ export function Calendario() {
 
       {/* MES */}
       {vista === "mes" && (
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border bg-border">
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
           {diasSemanaLbl.map((d, i) => (
             <div key={i} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{d}</div>
           ))}
@@ -202,7 +202,7 @@ export function Calendario() {
 
       {/* SEMANA */}
       {vista === "semana" && (
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border bg-border">
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
           {celdasSemana.map((cel) => (
             <div key={ymd(cel)} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {fmt(cel, { weekday: "short" })} {cel.getDate()}
