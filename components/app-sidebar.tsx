@@ -8,6 +8,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Stethoscope02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { isActive } from "@/lib/nav";
+import { routeForClave } from "@/lib/nav/manifest";
 import { NAV_MANIFEST } from "@/lib/nav-manifest";
 import { resolveMenuIcon } from "@/lib/menu-icons";
 import { buildNavGroups, type NavNode } from "@/lib/nav/nav-groups";
@@ -201,8 +202,11 @@ export function AppSidebar() {
         </Collapsible>
       ) : (
         <SidebarMenuSubItem key={n.clave}>
-          <SidebarMenuSubButton asChild isActive={isActive(pathname, n.path)}>
-            <Link href={n.path}>
+          <SidebarMenuSubButton
+            asChild
+            isActive={isActive(pathname, routeForClave(n.clave, n.path))}
+          >
+            <Link href={routeForClave(n.clave, n.path)}>
               {nodeIcon(n)}
               <span>{labelOf(n)}</span>
             </Link>
@@ -245,10 +249,10 @@ export function AppSidebar() {
         <SidebarMenuItem key={n.clave}>
           <SidebarMenuButton
             asChild
-            isActive={isActive(pathname, n.path)}
+            isActive={isActive(pathname, routeForClave(n.clave, n.path))}
             tooltip={labelOf(n)}
           >
-            <Link href={n.path}>
+            <Link href={routeForClave(n.clave, n.path)}>
               {nodeIcon(n)}
               <span>{labelOf(n)}</span>
             </Link>
