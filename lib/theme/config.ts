@@ -1,4 +1,5 @@
 // lib/theme/config.ts
+import { deriveBrandVars } from "./brand";
 // The token vocabulary the FE owns. The BE stores theme config as a free JSONB
 // blob (config por capas #51) and resolves the EFFECTIVE config by precedence
 // (override → user → center → system); the FE just paints `effective` by mapping
@@ -58,9 +59,10 @@ export interface ThemeConfig {
   recibo?: { anchoMm?: number };
 }
 
-// Redesign navy (2026-08): el color-theming por-centro está en PAUSA — el sistema de
-// diseño (globals.css) es la única fuente de color. El mapa token→CSS-var se removió
-// junto con su aplicación (ver configToCssVars). `config.colors` se ignora.
+// Redesign navy (2026-09): el ÚNICO color personalizable es el color de marca
+// (`colors.primary`), elegido de una lista pre-aprobada (ver lib/theme/brand.ts).
+// De ese primario se derivan solo 6 variables de acento; el resto del color, el radio y
+// la tipografía los fija el sistema de diseño (globals.css) y NO se aplican desde config.
 
 // Translate an effective ThemeConfig into the CSS variables to set on <html>.
 // Unknown/empty keys are ignored so a missing config paints nothing (the
@@ -69,15 +71,13 @@ export function configToCssVars(config: ThemeConfig | null | undefined): Record<
   const vars: Record<string, string> = {};
   if (!config) return vars;
 
-  // COLOR y --app-bg-image: intencionalmente NO se aplican. Los temas por-centro
-  // guardados venían del diseño oscuro anterior y su índigo se filtraba a
-  // fondos/píldoras/dropdowns/headers vía --background/--foreground/--card/--secondary…
-  // El sistema de diseño claro (globals.css) manda en color. El branding solo aporta
-  // radio, tipografía y ancho de recibo (funcionales, no cromáticos).
-  if (config.radius) vars["--radius"] = config.radius;
-  if (config.font?.sans) vars["--font-sans"] = config.font.sans;
-  if (config.font?.heading) vars["--font-heading"] = config.font.heading;
-  // Ancho imprimible del recibo térmico por centro; si el BE no lo manda, el CSS deja el default 72mm.
+  // Color de marca: se aplica SOLO la familia de acento derivada del primario
+  // (primary/ring/sidebar-primary/sidebar-ring/accent/accent-foreground). Fondos, texto,
+  // tarjetas, estados, radio y tipografía los manda el diseño — no se tocan desde aquí.
+  Object.assign(vars, deriveBrandVars(config.colors?.primary));
+
+  // Ancho imprimible del recibo térmico por centro (funcional, no cromático); si el BE no
+  // lo manda, el CSS deja el default 72mm.
   const ancho = Number(config.recibo?.anchoMm);
   if (Number.isFinite(ancho) && ancho > 0) vars["--recibo-ancho"] = `${ancho}mm`;
 
