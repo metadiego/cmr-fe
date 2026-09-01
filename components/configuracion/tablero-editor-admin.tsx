@@ -34,6 +34,7 @@ import { ColumnasTab } from "@/components/configuracion/columnas-tab";
 import { ServicioColumnasEditor } from "@/components/configuracion/servicio-columnas-editor";
 import { ServiciosAdmin } from "@/components/servicios/servicios-admin";
 import { Field } from "@/components/kit/form-dialog";
+import { PageContainer } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,12 +60,16 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
   const estados = estadosRes.state.kind === "ok" ? estadosRes.state.data : [];
 
   if (ready && !can("tablero.admin")) {
-    return <p className="mx-auto max-w-5xl px-6 py-16 text-center text-sm text-muted-foreground">{t("noAccess")}</p>;
+    return (
+      <PageContainer>
+        <p className="text-center text-sm text-muted-foreground">{t("noAccess")}</p>
+      </PageContainer>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+    <PageContainer>
+      <div className="flex flex-wrap items-center gap-3">
         <Link href="/configuracion/tableros" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
         <h1 className="text-xl font-semibold">{registro ? tRoot(registro.labelKey) : clave}</h1>
         <Badge variant="secondary" className="font-mono">{clave}</Badge>
@@ -234,7 +239,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           </Seccion>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }
 

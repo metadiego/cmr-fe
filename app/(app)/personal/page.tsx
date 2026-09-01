@@ -26,6 +26,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { PageContainer } from "@/components/ui/page";
 
 // Ficha de personal: TODO en una pantalla, sin saltar. Lista a la izquierda, ficha de la persona a la
 // derecha (identidad, cargo/capacidades y «Dar acceso al sistema»). El objetivo del dueño: uno o dos
@@ -69,7 +70,7 @@ export default function PersonalPage() {
   const sel = personal.find((p) => p.id === selId) ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-none px-6 py-8 2xl:px-10">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
 
@@ -131,7 +132,7 @@ export default function PersonalPage() {
           )}
         </section>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

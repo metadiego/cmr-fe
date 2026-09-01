@@ -9,6 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { ComponentesEditor } from "@/components/inventario/componentes-editor";
+import { PageContainer } from "@/components/ui/page";
 
 // Recetas de compuestos (§1 roadmap): un derivado (tipo=compuesto) consume N componentes
 // (base|unico) en cantidad+unidad. Editor bill-of-materials (extraído a ComponentesEditor,
@@ -36,7 +37,7 @@ export function RecetasAdmin() {
   const selected = compuestos.find((p) => p.id === selId) ?? null;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
@@ -82,7 +83,7 @@ export function RecetasAdmin() {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

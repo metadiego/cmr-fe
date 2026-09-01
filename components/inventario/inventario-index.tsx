@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { PageContainer } from "@/components/ui/page";
 
 // (c) Índice/subnav de Inventario: un solo punto de entrada que amarra las secciones ya
 // existentes (sin rutas paralelas ni duplicados). Solo enlaza rutas REALES.
@@ -25,7 +26,7 @@ const SECTIONS: { key: string; href: string }[] = [
 export function InventarioIndex() {
   const t = useTranslations("inventario.index");
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-8 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
@@ -52,6 +53,6 @@ export function InventarioIndex() {
           </Link>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

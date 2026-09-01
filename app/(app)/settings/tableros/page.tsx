@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { getTableros, type TableroRegistro } from "@/lib/api/tablero";
 import { useResource } from "@/hooks/use-resource";
 import { PersonalizarTablero } from "@/components/tablero/personalizar-panel";
+import { PageContainer } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,7 @@ export default function SettingsTablerosPage() {
   const tablero = picked || boards[0]?.clave || "";
 
   return (
-    <div className="mx-auto max-w-md px-6 py-12">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
 
@@ -53,6 +54,6 @@ export default function SettingsTablerosPage() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

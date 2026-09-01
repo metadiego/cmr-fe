@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { DerivarPrecios } from "@/components/precios/derivar-precios";
 import { ListasPrecio } from "@/components/precios/listas-precio";
+import { PageContainer } from "@/components/ui/page";
 
 const PAGE_SIZE = 50;
 const money = (v: number) =>
@@ -150,8 +151,8 @@ export function PreciosAdmin() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+    <PageContainer>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <div className="inline-flex rounded-lg border p-0.5">
           {(["catalogo", "listas", "derivar"] as const).map((m) => (
@@ -171,7 +172,7 @@ export function PreciosAdmin() {
           ))}
         </div>
       </div>
-      <p className="mb-4 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <p className="max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
       {mode === "listas" ? (
         <ListasPrecio
@@ -338,6 +339,6 @@ export function PreciosAdmin() {
       )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

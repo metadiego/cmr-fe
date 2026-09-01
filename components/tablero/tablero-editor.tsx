@@ -19,6 +19,7 @@ import { toBlocks, moveBlock, flatten, normalize } from "@/lib/tablero/column-bl
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { PageContainer } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -39,8 +40,8 @@ export function TableroEditor({ tablero }: { tablero: string }) {
   const sig = catalog.map((c) => c.id).join(",") + "|" + efectivas.map((e) => `${e.clave}:${e.orden}`).join(",");
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+    <PageContainer>
+      <div className="flex flex-wrap items-center gap-3">
         <Link
           href="/citas"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -51,7 +52,7 @@ export function TableroEditor({ tablero }: { tablero: string }) {
         <h1 className="text-xl font-semibold">{t("title")}</h1>
         <Badge variant="secondary" className="ml-1">{tablero}</Badge>
       </div>
-      <p className="mb-4 text-sm text-muted-foreground">{t("help")}</p>
+      <p className="text-sm text-muted-foreground">{t("help")}</p>
 
       {loading && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {!loading && (
@@ -66,7 +67,7 @@ export function TableroEditor({ tablero }: { tablero: string }) {
           }}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

@@ -56,6 +56,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
+import { PageContainer } from "@/components/ui/page";
 
 // slug estable para la clave (= clave del tablero/pestaña).
 function slugify(s: string) {
@@ -215,8 +216,8 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
     }
   }
 
-  return (
-    <div className={embedded ? "" : "mx-auto max-w-5xl px-6 py-10"}>
+  const content = (
+    <>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         {!embedded && <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>}
         <div className={"flex items-center gap-2 " + (embedded ? "w-full justify-between" : "")}>
@@ -335,8 +336,10 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
         onOpenChange={setOpen}
         onSaved={reload}
       />
-    </div>
+    </>
   );
+
+  return embedded ? content : <PageContainer>{content}</PageContainer>;
 }
 
 // Indicador "≠ por centro" con tooltip que lista el valor de cada centro (data-driven).

@@ -8,6 +8,7 @@ import { getMyCentros, updateDatosFiscales, type Centro, type DatosFiscalesPaylo
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { PageContainer } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,7 +33,7 @@ export default function ConfigFacturaPage() {
   const selected = centros.find((c) => c.id === centroId) ?? centros[0] ?? null;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
@@ -57,7 +58,7 @@ export default function ConfigFacturaPage() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

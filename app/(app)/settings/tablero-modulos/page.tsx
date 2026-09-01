@@ -9,6 +9,7 @@ import { getActiveCentro } from "@/lib/tenant";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { ModalModulosConfig } from "@/components/configuracion/modal-modulos-config";
+import { PageContainer } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -37,11 +38,15 @@ export default function SettingsModalModulosPage() {
   const centroId = pickedCentro || (active && centros.some((c) => c.id === active) ? active : centros[0]?.id) || "";
 
   if (ready && !can("tablero.admin")) {
-    return <p className="mx-auto max-w-lg px-6 py-16 text-center text-sm text-muted-foreground">{t("noAccess")}</p>;
+    return (
+      <PageContainer>
+        <p className="text-center text-sm text-muted-foreground">{t("noAccess")}</p>
+      </PageContainer>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-lg px-6 py-12">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
 
@@ -89,6 +94,6 @@ export default function SettingsModalModulosPage() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

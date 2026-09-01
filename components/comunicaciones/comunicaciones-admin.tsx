@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { PageContainer } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -60,8 +61,8 @@ export function ComunicacionesAdmin() {
   const [mode, setMode] = React.useState<"alertas" | "notificaciones" | "plantillas">("alertas");
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+    <PageContainer>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
         <div className="inline-flex rounded-md border p-0.5">
           {(["alertas", "notificaciones", "plantillas"] as const).map((m) => (
@@ -79,7 +80,7 @@ export function ComunicacionesAdmin() {
           ))}
         </div>
       </div>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("pageHelp")}</p>
+      <p className="max-w-2xl text-sm text-muted-foreground">{t("pageHelp")}</p>
 
       {mode === "alertas" ? (
         <AlertasPanel />
@@ -88,7 +89,7 @@ export function ComunicacionesAdmin() {
       ) : (
         <PlantillasPanel />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

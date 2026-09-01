@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { PageContainer } from "@/components/ui/page";
 
 // Fechas por defecto: del 1° del mes a hoy (Date del navegador; permitido en cliente).
 function isoDay(d: Date) {
@@ -80,7 +81,7 @@ export default function ConsumoInsumosPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <PageContainer>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
@@ -179,7 +180,7 @@ export default function ConsumoInsumosPage() {
       </div>
 
       <p className="mt-3 text-xs text-muted-foreground">{t("footnote")}</p>
-    </div>
+    </PageContainer>
   );
 }
 

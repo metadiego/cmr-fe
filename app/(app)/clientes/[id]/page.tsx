@@ -46,6 +46,7 @@ import {
   ageFrom,
   colorFromString,
 } from "@/components/clientes/helpers";
+import { PageContainer } from "@/components/ui/page";
 
 export default function PacienteDetailPage() {
   const t = useTranslations("patients");
@@ -57,7 +58,7 @@ export default function PacienteDetailPage() {
   const { state, reload } = useResource<Paciente>(() => getPaciente(id), [id]);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <button
         onClick={() => router.push("/clientes")}
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -91,7 +92,7 @@ export default function PacienteDetailPage() {
           onSaved={() => reload()}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

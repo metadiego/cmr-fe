@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
+import { PageContainer } from "@/components/ui/page";
 
 type Linea = { key: string; productoId: string; cantidad: string };
 let seq = 0;
@@ -109,7 +110,7 @@ export function TransferenciaNueva() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
@@ -192,7 +193,7 @@ export function TransferenciaNueva() {
       <div className="mt-5 flex justify-end">
         <Button onClick={onSubmit} disabled={!canSubmit}>{busy ? t("creando") : t("crear")}</Button>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

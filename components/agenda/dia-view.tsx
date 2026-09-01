@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CitaModal } from "@/components/agenda/cita-modal";
+import { PageContainer } from "@/components/ui/page";
 
 const ALL = "__all__";
 const CENTRO_KEY = "cmr_agenda_centro";
@@ -115,7 +116,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   const centrosData = data?.centros ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <PageContainer>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link
           href="/citas"
@@ -238,7 +239,7 @@ export function DiaView({ fecha }: { fecha: string }) {
           onSaved={reload}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

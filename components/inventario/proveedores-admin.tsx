@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PageContainer } from "@/components/ui/page";
 
 export function ProveedoresAdmin() {
   const t = useTranslations("inventario.prov");
@@ -76,7 +77,7 @@ export function ProveedoresAdmin() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <PageContainer>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         <Button size="sm" onClick={openNew}>
@@ -168,7 +169,7 @@ export function ProveedoresAdmin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }
 

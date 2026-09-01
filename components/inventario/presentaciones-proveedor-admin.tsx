@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PPFormSheet } from "@/components/inventario/pp-form-sheet";
+import { PageContainer } from "@/components/ui/page";
 
 export function PresentacionesProveedorAdmin() {
   const t = useTranslations("inventario.pp");
@@ -88,7 +89,7 @@ export function PresentacionesProveedorAdmin() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <PageContainer>
       <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
         {productoId && (
@@ -223,6 +224,6 @@ export function PresentacionesProveedorAdmin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

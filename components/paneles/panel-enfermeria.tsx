@@ -18,6 +18,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
+import { PageContainer } from "@/components/ui/page";
 
 const CLAVE = "enfermeria";
 
@@ -121,9 +122,9 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
+    <PageContainer>
       {/* Barra */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">{tRoot(def?.panel.labelKey ?? "panel.enfermeria")}</h1>
           <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
@@ -248,6 +249,6 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
         </div>
         );
       })()}
-    </div>
+    </PageContainer>
   );
 }

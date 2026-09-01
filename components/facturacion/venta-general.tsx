@@ -15,6 +15,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { PageContainer } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,12 +37,12 @@ export function VentaGeneral() {
   const gate = useCentroGate();
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-12">
-      <Link href="/facturacion" className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+    <PageContainer>
+      <Link href="/facturacion" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         ← {t("verLista")}
       </Link>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("help")}</p>
+      <p className="text-sm text-muted-foreground">{t("help")}</p>
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
@@ -59,7 +60,7 @@ export function VentaGeneral() {
           onCambiarCentro={gate.cambiarCentro}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

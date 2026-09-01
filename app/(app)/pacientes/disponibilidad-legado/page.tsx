@@ -17,6 +17,7 @@ import { ApiError } from "@/lib/api/types";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageContainer } from "@/components/ui/page";
 
 // Cargar disponibilidad heredada del legado por número de récord. Como un récord puede corresponder a
 // VARIAS personas, si el BE responde 409 RECORD_AMBIGUO NO se muestra error: se deja ELEGIR a la persona
@@ -97,7 +98,7 @@ export default function DisponibilidadLegadoPage() {
   const items = Array.isArray(diag?.items) ? (diag!.items as unknown[]) : [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("help")}</p>
 
@@ -190,7 +191,7 @@ export default function DisponibilidadLegadoPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

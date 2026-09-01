@@ -36,6 +36,7 @@ import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
+import { PageContainer } from "@/components/ui/page";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -151,10 +152,10 @@ function Shell({
 }) {
   const t = useTranslations("caja");
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <PageContainer>
       <div
         className={cn(
-          "mb-1 flex flex-wrap items-center gap-3 border-l-4 pl-3",
+          "flex flex-wrap items-center gap-3 border-l-4 pl-3",
           division === "consulta" ? "border-l-sky-500" : "border-l-emerald-500",
         )}
       >
@@ -167,9 +168,9 @@ function Shell({
           </Badge>
         )}
       </div>
-      <p className="mb-6 pl-3 text-sm text-muted-foreground">{t("help")}</p>
+      <p className="pl-3 text-sm text-muted-foreground">{t("help")}</p>
       {children}
-    </div>
+    </PageContainer>
   );
 }
 

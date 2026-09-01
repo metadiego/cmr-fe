@@ -9,6 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { useMenu } from "@/hooks/use-menu";
+import { PageContainer } from "@/components/ui/page";
 
 // Índice de Configuración: la puerta de entrada a todo lo configurable. Se pintan SOLO las secciones que
 // el BE le manda a esta persona en /me/menu (grupo g-configuracion), NO las nueve fijas: así, al abrir
@@ -35,8 +36,7 @@ export default function ConfiguracionIndexPage() {
   const ready = menu.length > 0;
 
   return (
-    // Ancho completo: es un panel de administración. Ver norma uso-optimo-de-la-pantalla.
-    <div className="mx-auto w-full max-w-none px-6 py-8 2xl:px-10">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
 
@@ -66,6 +66,6 @@ export default function ConfiguracionIndexPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

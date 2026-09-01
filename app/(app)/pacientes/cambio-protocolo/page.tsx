@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
+import { PageContainer } from "@/components/ui/page";
 
 // Cambio de protocolo: el médico deja SIN EFECTO sesiones pendientes del paciente y las reemplaza por
 // otras. Reusa el catálogo de facturación para elegir los nuevos productos. Todo-o-nada; el BE avisa si
@@ -143,14 +144,14 @@ export default function CambioProtocoloPage() {
   }
 
   if (!puede) {
-    return <div className="w-full px-6 py-10"><p className="text-sm text-muted-foreground">{tRoot("common.forbidden")}</p></div>;
+    return <PageContainer><p className="text-sm text-muted-foreground">{tRoot("common.forbidden")}</p></PageContainer>;
   }
   if (gate.necesitaPicker) {
-    return <div className="mx-auto max-w-xl px-6 py-10"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>;
+    return <PageContainer><CentroPicker centros={gate.centros} onPick={gate.pick} /></PageContainer>;
   }
 
   return (
-    <div className="w-full px-6 py-8">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
 
@@ -258,7 +259,7 @@ export default function CambioProtocoloPage() {
           </section>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

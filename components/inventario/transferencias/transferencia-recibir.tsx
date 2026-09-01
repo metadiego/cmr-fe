@@ -40,6 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PageContainer } from "@/components/ui/page";
 
 const num = (v: number | string | null | undefined) => Number(v ?? 0) || 0;
 
@@ -154,19 +155,19 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   }
 
   if (state.kind === "loading") {
-    return <div className="mx-auto max-w-3xl px-6 py-10 text-sm text-muted-foreground">{tc("loading")}</div>;
+    return <PageContainer className="text-sm text-muted-foreground">{tc("loading")}</PageContainer>;
   }
   if (state.kind === "fail" || !transfer) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-10 text-center">
+      <PageContainer className="text-center">
         <p className="text-sm text-muted-foreground">{tc("error")}</p>
         <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
@@ -284,6 +285,6 @@ export function TransferenciaRecibir({ id }: { id: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

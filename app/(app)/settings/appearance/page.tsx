@@ -12,6 +12,7 @@ import type { ThemeConfig } from "@/lib/theme/config";
 import { mezclarSoloTema } from "@/lib/theme/mezclar-capa";
 import { uploadMedia } from "@/lib/api/media";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { PageContainer } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ThemeEditor } from "@/components/theme/theme-editor";
@@ -102,7 +103,7 @@ export default function AppearancePage() {
   const hasBackground = state.kind === "ok" && !!state.config.background?.imageUrl;
 
   return (
-    <div className="mx-auto max-w-md px-6 py-12">
+    <PageContainer>
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
 
@@ -180,6 +181,6 @@ export default function AppearancePage() {
           </>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

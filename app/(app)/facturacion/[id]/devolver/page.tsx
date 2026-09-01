@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer } from "@/components/ui/page";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -78,7 +79,7 @@ export default function DevolverFacturaPage() {
   const pacNombre = pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "";
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <PageContainer>
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {tf("back")}</Link>
 
       <div className="mt-3 rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
@@ -116,7 +117,7 @@ export default function DevolverFacturaPage() {
       ) : (
         <DevolverForm key={factura!.id} factura={factura!} formas={formas} id={id} centro={centro} backHref={backHref} />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
