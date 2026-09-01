@@ -7,8 +7,8 @@ import type { ResourceState } from "@/hooks/use-resource";
 import type { ApiMeta } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { DataTable as DataTableFrame } from "@/components/ui/data-table";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -87,7 +87,7 @@ export function DataTable<T>({
 
   return (
     <div className="space-y-3">
-      <Table>
+      <DataTableFrame>
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
@@ -112,7 +112,7 @@ export function DataTable<T>({
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </DataTableFrame>
 
       {pagination && (
         <PaginationFooter

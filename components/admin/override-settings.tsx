@@ -18,13 +18,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -131,7 +131,7 @@ export function OverrideSettings() {
         (state.overrides.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         ) : (
-          <Table>
+          <DataTable>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("name")}</TableHead>
@@ -167,7 +167,7 @@ export function OverrideSettings() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </DataTable>
         ))}
 
       <CreateOverrideDialog

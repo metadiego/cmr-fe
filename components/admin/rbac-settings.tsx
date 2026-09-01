@@ -25,13 +25,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { DataTable } from "@/components/ui/data-table"
 import {
   Dialog,
   DialogContent,
@@ -119,7 +119,7 @@ export function RbacSettings() {
         </p>
       )}
       {state.kind === "ok" && (
-        <Table>
+        <DataTable>
           <TableHeader>
             <TableRow>
               <TableHead>{t("clave")}</TableHead>
@@ -176,7 +176,7 @@ export function RbacSettings() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </DataTable>
       )}
 
       <CreateRoleDialog
