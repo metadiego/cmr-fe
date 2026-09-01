@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { isActive } from "@/lib/nav";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
+import { MeProvider } from "@/components/me-provider";
 import { TooltipProvider } from "@/components/ui/tooltip-radix";
 import {
   SidebarInset,
@@ -34,7 +35,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (BARE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return <>{children}</>;
   }
-  return <ShellChrome>{children}</ShellChrome>;
+  // MeProvider envuelve TODO el shell (rail + header + página) para que compartan UNA sola sesión /auth/me.
+  // Antes vivía en app/(app)/layout.tsx, DEBAJO del shell → el rail y el header quedaban FUERA del provider
+  // y hacían sus propios fetches locales de /auth/me (useMe + useCan). Uno de esos fetches en estado no-ok
+  // (carrera/transitorio) dejaba al rail sin permisos → buildNavGroups filtraba todo → nav vacío + "Iniciar
+  // sesión" aunque la página (su propio provider) estuviera logueada. Una sola fuente elimina ese desfase.
+  return (
+    <MeProvider>
+      <ShellChrome>{children}</ShellChrome>
+    </MeProvider>
+  );
 }
 
 function ShellChrome({ children }: { children: React.ReactNode }) {

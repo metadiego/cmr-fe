@@ -19,7 +19,10 @@ export function useMenu(): MenuItem[] {
     let active = true;
     getMyMenu()
       .then((list) => active && setItems(list))
-      .catch(() => active && setItems([]));
+      // NO vaciar la nav ante un error TRANSITORIO al navegar (401 por rotación de token, red): eso hacía
+      // que la barra desapareciera intermitentemente. Se conserva el último menú bueno; si la sesión murió
+      // de verdad, la capa de API (rawRequest) muestra el aviso y redirige a /login.
+      .catch(() => {});
     return () => {
       active = false;
     };
