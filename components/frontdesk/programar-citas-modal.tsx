@@ -79,7 +79,7 @@ export function ProgramarCitasModal({
   // Paciente: preseleccionado (desde el tablero) o buscado (desde Citar).
   const [sel, setSel] = React.useState<PacienteBusqueda | null>(null);
   const pacienteId = pacienteIdProp ?? sel?.id ?? "";
-  const pacienteNombre = pacienteNombreProp ?? (sel ? `${sel.nombres ?? ""} ${sel.apellidos ?? ""}`.trim() : "");
+  const pacienteNombre = pacienteNombreProp ?? (sel ? (sel.nombreMostrar || `${sel.nombres ?? ""} ${sel.apellidos ?? ""}`.trim()) : "");
 
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
@@ -240,7 +240,7 @@ export function ProgramarCitasModal({
                     ) : (
                       resultados.map((p) => (
                         <button key={p.id} type="button" onClick={() => { setSel(p); setQ(""); }} className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50">
-                          <span className="font-medium">{`${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim() || "—"}</span>
+                          <span className="font-medium">{(p.nombreMostrar || `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim()) || "—"}</span>
                           {(p.record || p.telefono) && <span className="text-[11px] text-muted-foreground">{[p.record && `${t("recordLabel")} ${p.record}`, p.telefono].filter(Boolean).join(" · ")}</span>}
                         </button>
                       ))

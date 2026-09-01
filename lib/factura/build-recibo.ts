@@ -124,7 +124,7 @@ export function buildRecibo(
     estado: String(f.estado ?? ""),
     anulada: String(f.estado ?? "") === "anulada",
     paciente: {
-      nombre: pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "",
+      nombre: pac ? ((pac as { nombreMostrar?: string | null }).nombreMostrar || [pac.nombres, pac.apellidos].filter(Boolean).join(" ")) : "",
       record: pac?.record ?? null,
       docId: pac?.docId ?? null,
     },
@@ -184,7 +184,7 @@ export function buildReciboDevolucion(
     estado: String(d.estado ?? ""),
     anulada: String(d.estado ?? "") === "anulada",
     paciente: {
-      nombre: pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "",
+      nombre: pac ? ((pac as { nombreMostrar?: string | null }).nombreMostrar || [pac.nombres, pac.apellidos].filter(Boolean).join(" ")) : "",
       record: pac?.record ?? null,
       docId: pac?.docId ?? null,
     },

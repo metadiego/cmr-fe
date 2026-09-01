@@ -190,7 +190,7 @@ export default function ClientesPage() {
                 <TableCell className="tabular-nums">{p.record ?? "—"}</TableCell>
                 <TableCell>
                   <span className="font-medium">
-                    {[p.nombres, p.apellidos].filter(Boolean).join(" ")}
+                    {(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}
                   </span>
                 </TableCell>
                 <TableCell>{p.docId ?? "—"}</TableCell>

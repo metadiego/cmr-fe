@@ -119,7 +119,7 @@ function Finder({
   );
   const shown = term.length >= 2 ? (res.state.kind === "ok" ? res.state.data : []) : [];
   const loading = res.state.kind === "loading" && term.length >= 2;
-  const nombre = (p: PacienteBusqueda) => `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim() || t("sinNombre");
+  const nombre = (p: PacienteBusqueda) => (p.nombreMostrar || `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim()) || t("sinNombre");
 
   async function iniciar() {
     if (!sel || creating) return;

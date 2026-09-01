@@ -402,7 +402,7 @@ export default function FacturacionPage() {
   // El encabezado y el "Volver" deben reflejarlo (no mezclar: una venta general NO dice "Facturar consulta").
   const esGeneral = !factura.citaId;
   const backHref = esGeneral ? "/facturacion" : "/tablero/atencion";
-  const nombre = paciente ? [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ") : "";
+  const nombre = paciente ? (paciente.nombreMostrar || [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ")) : "";
   const record = paciente?.record ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
   // emisor/medico/numeroDisplay/paciente) — sin fallbacks del FE.
@@ -1621,7 +1621,7 @@ function CambiarPacienteDialog({
   );
   const shown = term.length >= 2 && res.state.kind === "ok" ? res.state.data : [];
   const loading = res.state.kind === "loading" && term.length >= 2;
-  const nombre = (p: PacienteBusqueda) => `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim() || t("patient");
+  const nombre = (p: PacienteBusqueda) => (p.nombreMostrar || `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim()) || t("patient");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

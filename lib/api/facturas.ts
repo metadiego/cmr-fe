@@ -63,6 +63,7 @@ export type FacturaConItems = Omit<Factura, "creadoPor" | "emitidoPor"> & {
   paciente?: {
     nombres?: string;
     apellidos?: string | null;
+    nombreMostrar?: string | null; // compuesto por el BE (apellido primero); usar para MOSTRAR
     record?: string | null;
     docId?: string | null;
   } | null;
@@ -196,7 +197,7 @@ export function crearFactura(payload: CrearFacturaPayload, centroId?: string): P
 }
 
 // Búsqueda de paciente para el POS (nombre/record/doc). Devuelve entidades de paciente.
-export type PacienteBusqueda = components["schemas"]["PacienteEntity"];
+export type PacienteBusqueda = components["schemas"]["PacienteEntity"] & { nombreMostrar?: string | null };
 export function buscarPaciente(q: string, centroId?: string): Promise<PacienteBusqueda[]> {
   return apiFetch<PacienteBusqueda[]>(
     `/facturas/buscar-paciente?q=${encodeURIComponent(q)}`,

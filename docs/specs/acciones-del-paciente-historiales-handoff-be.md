@@ -178,3 +178,33 @@ nunca va a emitir nada ni a sacar un presupuesto**. Reimprimir y ya.
 - La hora es la **del centro** (`centros.zonaHoraria`), no la del servidor: un papel con una hora que
   no es la de la clínica no aclara nada.
 - No hizo falta columna nueva: cada impresión ya quedaba en la auditoría, y de ahí sale la cuenta.
+
+---
+
+## ✅ CORREGIDO Y VERIFICADO EN PRODUCCIÓN (26-ago, 13:25) — ya puedes cerrar la impresión
+
+Tenías razón: el endpoint **no** devolvía lo que este handoff prometía. Eran dos fallos del BE, los
+dos arreglados y comprobados con la llamada real, dos veces seguidas sobre la misma factura:
+
+```
+impresión 1 → HTTP 201  numero: 000049 | documento: factura
+              copia: true | vecesAntes: 3 | "REIMPRESIÓN · 08/26/2026, 1:25 p. m."
+impresión 2 → HTTP 201  numero: 000049 | documento: factura
+              copia: true | vecesAntes: 4 | "REIMPRESIÓN · 08/26/2026, 1:25 p. m."
+```
+
+Qué estaba mal:
+
+1. **`numero` no venía en la raíz**, solo dentro de `factura`. Este handoff decía que en la raíz, así
+   que el error era mío. **Ahora viene en las dos salidas**: el número de la factura, o el del
+   presupuesto si eso es lo que sale. `factura.numero` sigue existiendo igual.
+2. **La marca llegaba siempre `reimpresion:false, vecesAntes:0`**, aunque la factura se hubiera
+   impreso tres veces: el contador miraba `audit_logs.entidadId`, que el interceptor deja VACÍO en
+   este endpoint —el id viaja en la ruta—. Ahora cuenta bien: fíjate cómo `vecesAntes` sube de 3 a 4
+   entre las dos llamadas.
+
+La forma de la respuesta queda encerrada en `imprimir-devuelve-lo-prometido.spec.ts`: si alguien la
+cambia, salta en el CI y no cuando tú ya tengas la pantalla hecha.
+
+**Lo que hay que pintar**: el `numero` de la raíz como número del documento, y la `leyenda` tal cual
+al pie del papel cuando venga no vacía. Nada más.
