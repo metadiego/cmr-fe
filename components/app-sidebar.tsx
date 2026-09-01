@@ -50,6 +50,9 @@ function useNavOpenState() {
   React.useEffect(() => {
     try {
       const raw = window.localStorage.getItem(NAV_OPEN_KEY);
+      // Lectura ÚNICA al montar (hidratación: server = todo cerrado). Es el patrón recomendado para
+      // localStorage; el setState aquí no encadena renders (corre una vez). Ver react.dev/you-might-not-need-an-effect.
+      // eslint-disable-next-line
       if (raw) setOpen(JSON.parse(raw) as Record<string, boolean>);
     } catch {
       /* localStorage no disponible: se queda con el default (todo cerrado). */
