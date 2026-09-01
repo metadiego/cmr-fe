@@ -81,7 +81,7 @@ export default function DevolverFacturaPage() {
     <div className="mx-auto max-w-7xl px-6 py-6">
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {tf("back")}</Link>
 
-      <div className="mt-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
+      <div className="mt-3 rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
@@ -327,7 +327,7 @@ function DevolverForm({
 
   return (
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
-      <section className="overflow-x-auto rounded-xl border">
+      <section className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -408,7 +408,7 @@ function DevolverForm({
       </section>
 
       <aside className="space-y-4 lg:sticky lg:top-6 h-fit">
-        <div className="space-y-3 rounded-xl border p-4">
+        <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("policy")}</span>
             <Select value={politica} onValueChange={(v) => cambiarPolitica(v as "como_facturada" | "precio_base")}>
@@ -432,7 +432,7 @@ function DevolverForm({
           </label>
         </div>
 
-        <div className="rounded-xl border p-4">
+        <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
             <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-success-foreground" : "text-destructive")}>{money(Math.abs(neto))}</span>

@@ -70,7 +70,7 @@ export function DataTable<T>({
 
   if (state.kind === "fail") {
     return (
-      <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+      <div className="space-y-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <p>{state.message}</p>
         {onReload && (
           <Button size="sm" variant="outline" onClick={onReload}>

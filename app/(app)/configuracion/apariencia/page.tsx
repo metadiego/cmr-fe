@@ -190,7 +190,7 @@ export default function AparienciaCorporativaPage() {
       {/* Dos columnas en pantallas anchas: se usa todo el ancho, sin desperdiciar los lados. */}
       <div className="grid gap-6 xl:grid-cols-2">
         {puedeSistema && (
-          <section className="rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+          <section className="rounded-md ring-1 ring-foreground/10 bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] backdrop-blur">
             <h2 className="text-sm font-medium">{t("systemTitle")}</h2>
             <p className="mb-4 text-xs text-muted-foreground">{t("systemHint")}</p>
             {sistema.kind === "loading" && (
@@ -220,7 +220,7 @@ export default function AparienciaCorporativaPage() {
         )}
 
         {puedeSistema && (
-          <section className="rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+          <section className="rounded-md ring-1 ring-foreground/10 bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] backdrop-blur">
             <h2 className="text-sm font-medium">{t("centroTitle")}</h2>
             <p className="mb-4 text-xs text-muted-foreground">{t("centroHint")}</p>
             <div className="mb-4 space-y-2">
@@ -275,7 +275,7 @@ export default function AparienciaCorporativaPage() {
         )}
 
         {puedeOverride && (
-          <section className="rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur xl:col-span-2">
+          <section className="rounded-md ring-1 ring-foreground/10 bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] backdrop-blur xl:col-span-2">
             <h2 className="text-sm font-medium">{t("overrideTitle")}</h2>
             <p className="mb-4 text-xs text-muted-foreground">{t("overrideHint")}</p>
 

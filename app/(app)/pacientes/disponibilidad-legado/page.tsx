@@ -122,7 +122,7 @@ export default function DisponibilidadLegadoPage() {
 
       {/* Récord ambiguo: elegir a la persona (no es error). */}
       {candidatos && (
-        <div className="mt-6 rounded-xl border p-4">
+        <div className="mt-6 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex items-center gap-2 text-sm font-medium">
             <HugeiconsIcon icon={UserMultiple02Icon} className="size-4 text-primary" />
             {t("ambiguoTitulo", { record: record.trim(), n: candidatos.length })}
@@ -158,7 +158,7 @@ export default function DisponibilidadLegadoPage() {
 
       {/* Revisar y confirmar la carga para la persona elegida. */}
       {diag && !candidatos && (
-        <div className="mt-6 rounded-xl border p-4">
+        <div className="mt-6 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("cargarPara")}</div>
@@ -173,7 +173,7 @@ export default function DisponibilidadLegadoPage() {
           </div>
 
           {items.length > 0 ? (
-            <ul className="mt-3 divide-y rounded-lg border text-sm">
+            <ul className="mt-3 divide-y rounded-md ring-1 ring-foreground/10 text-sm">
               {items.map((it, i) => (
                 <li key={i} className="px-3 py-2">
                   <ItemResumen it={it} />

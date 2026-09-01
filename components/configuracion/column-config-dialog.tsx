@@ -203,7 +203,7 @@ export function ColumnConfigDialog({
 
       {/* Config específica por tipo */}
       {tipo === "select" && (
-        <div className="grid grid-cols-2 gap-3 rounded-md border bg-muted/30 p-3">
+        <div className="grid grid-cols-2 gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
           <Field label={t("cfgOptionsSource")}>
             <Select value={optionsSource} onValueChange={setOptionsSource}>
               <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
@@ -229,7 +229,7 @@ export function ColumnConfigDialog({
       )}
 
       {tipo === "toggle" && (
-        <div className="grid grid-cols-2 gap-3 rounded-md border bg-muted/30 p-3">
+        <div className="grid grid-cols-2 gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
           <Field label={t("cfgTransition")}>
             <Select value={transition} onValueChange={setTransition}>
               <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
@@ -248,7 +248,7 @@ export function ColumnConfigDialog({
       )}
 
       {tipo === "derivado" && (
-        <div className="rounded-md border bg-muted/30 p-3">
+        <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
           <Field label={t("cfgCompute")} hint={t("cfgComputeHint")}>
             <Input value={compute} onChange={(e) => setCompute(e.target.value)} placeholder="esperaMin" />
           </Field>
@@ -258,7 +258,7 @@ export function ColumnConfigDialog({
       {tipo === "accion" && (
         <>
           <AccionesEditor actions={actions} onChange={setActions} />
-          <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+          <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
             <label className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={mostrarAsignado}
@@ -333,7 +333,7 @@ function ProductosGrupoConfig({
   };
 
   return (
-    <div className="space-y-3 rounded-md border bg-muted/30 p-3">
+    <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
       <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("cfgProductosTitle")}</span>
       <Field label={t("cfgGrupoAlterno")}>
         <Select value={grupoSel || GRUPO_SERVICIO} onValueChange={(v) => onGrupo(v === GRUPO_SERVICIO ? "" : v)}>
@@ -410,7 +410,7 @@ function AccionesEditor({ actions, onChange }: { actions: AccionRow[]; onChange:
     onChange(actions.map((a, idx) => (idx === i ? { ...a, [k]: v } : a)));
   }
   return (
-    <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+    <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("cfgActions")}</span>
         <Button type="button" size="sm" variant="outline" onClick={() => onChange([...actions, { key: "", labelKey: "", kind: "link" }])}>

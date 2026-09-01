@@ -283,7 +283,7 @@ function KpiCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "group flex min-w-[7rem] flex-col gap-1.5 rounded-lg bg-card px-4 py-3 text-left text-card-foreground shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors",
+        "group flex min-w-[7rem] flex-col gap-1.5 rounded-md bg-card px-4 py-3 text-left text-card-foreground shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors",
         active
           ? "bg-primary/[0.04] ring-2 ring-primary/50"
           : "ring-1 ring-foreground/10 hover:ring-foreground/20",

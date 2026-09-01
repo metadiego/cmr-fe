@@ -143,7 +143,7 @@ export default function EstadisticasDiariasPage() {
       </div>
 
       {/* Rango + Generar */}
-      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -178,7 +178,7 @@ export default function EstadisticasDiariasPage() {
 function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string }) {
   const vacio = data.atencionMedica.total === 0 && data.servicios.length === 0 && !data.ingresoBruto;
   return (
-    <div className="card rounded-xl border bg-card p-6">
+    <div className="card rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-center">
         <h2 className="text-xl font-bold">C.M.R. — {centro}</h2>
         <div className="fecha text-sm text-muted-foreground">{fecha}</div>

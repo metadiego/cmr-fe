@@ -493,7 +493,7 @@ function Editor({
           {/* Inicio (fondo de apertura) — input con aplicar/limpiar (calca CMA). En consolidado no
               se edita: el Inicio es la suma de los fondos de cada cajero (se ve en el resumen). */}
           {!esConsolidado && (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3">
+            <div className="flex flex-wrap items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3">
               <Label htmlFor="inicio" className="text-sm font-medium">
                 {t("payments.opening")}
               </Label>

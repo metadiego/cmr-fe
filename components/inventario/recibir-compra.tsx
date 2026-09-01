@@ -147,7 +147,7 @@ export function RecibirCompra() {
 
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Cabecera común (un tercio) */}
-        <div className="space-y-4 rounded-xl border p-5 lg:col-span-1">
+        <div className="space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] lg:col-span-1">
           <h2 className="text-sm font-semibold">{t("cabecera")}</h2>
           <Row label={t("field.almacen")}>
             <Select value={almacenId} onValueChange={setAlmacenId}>
@@ -180,11 +180,11 @@ export function RecibirCompra() {
         </div>
 
         {/* Carrito de líneas (dos tercios) */}
-        <div className="space-y-4 rounded-xl border p-5 lg:col-span-2">
+        <div className="space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] lg:col-span-2">
           <h2 className="text-sm font-semibold">{t("lineas")}</h2>
 
           {/* Agregar línea */}
-          <div className="grid grid-cols-1 gap-2 rounded-lg bg-muted/30 p-3 sm:grid-cols-12">
+          <div className="grid grid-cols-1 gap-2 rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] sm:grid-cols-12">
             <div className="sm:col-span-5">
               <ProductoPicker
                 value={pId}
@@ -207,7 +207,7 @@ export function RecibirCompra() {
           {lineas.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("sinLineas")}</p>
           ) : (
-            <div className="overflow-x-auto rounded-lg border">
+            <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-xs text-muted-foreground">
                   <tr>

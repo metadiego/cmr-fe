@@ -172,7 +172,7 @@ export default function CambioProtocoloPage() {
               {pendientes.map((p) => {
                 const marcado = origenSel.has(p.id);
                 return (
-                  <li key={p.id} className={"rounded-lg border px-3 py-2 " + (marcado ? "border-primary bg-primary/5" : "")}>
+                  <li key={p.id} className={"rounded-md ring-1 ring-foreground/10 px-3 py-2 " + (marcado ? "border-primary bg-primary/5" : "")}>
                     <label className="flex items-start gap-2">
                       <Checkbox checked={marcado} onCheckedChange={() => toggleOrigen(p.id)} className="mt-0.5" />
                       <span className="min-w-0 flex-1">
@@ -206,7 +206,7 @@ export default function CambioProtocoloPage() {
             <h2 className="text-sm font-semibold">{t("paso2")}</h2>
             <div className="space-y-2">
               {lineas.map((l) => (
-                <div key={l.key} className="rounded-lg border p-2">
+                <div key={l.key} className="rounded-md bg-card p-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                   <div className="flex items-center gap-2">
                     <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
                       <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>

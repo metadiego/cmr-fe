@@ -263,7 +263,7 @@ function SemanaGrid({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>
@@ -337,7 +337,7 @@ function Preview({ servicioClave, centroId }: { servicioClave: string; centroId?
   );
   const horas = horasRes.state.kind === "ok" ? horasRes.state.data : [];
   return (
-    <aside className="h-fit rounded-xl border bg-muted/20 p-4 lg:sticky lg:top-6">
+    <aside className="h-fit rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 lg:sticky lg:top-6">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("cupos.previewTitle")}</span>
       <Input type="date" className="mt-2 h-9" value={fecha} onChange={(e) => setFecha(e.target.value)} />
       {!fecha && <p className="mt-3 text-xs text-muted-foreground">{t("cupos.previewPick")}</p>}

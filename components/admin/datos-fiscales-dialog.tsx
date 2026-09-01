@@ -160,7 +160,7 @@ export function DatosFiscalesDialog({
           ))}
         </div>
 
-        <div className="mt-4 flex items-start justify-between gap-4 rounded-lg border p-3">
+        <div className="mt-4 flex items-start justify-between gap-4 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="space-y-0.5">
             <Label htmlFor="frontdesk-autopresente">{t("autopresenteLabel")}</Label>
             <p className="text-xs text-muted-foreground">{t("autopresenteHelp")}</p>

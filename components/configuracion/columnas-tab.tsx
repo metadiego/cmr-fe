@@ -301,9 +301,9 @@ function ColumnasEditor({
                 onDrop={(e) => { e.preventDefault(); if (dragBi != null) reorderBlocks(dragBi, bi); setDragBi(null); }}
                 onDragEnd={() => setDragBi(null)}
                 className={
-                  "flex items-stretch overflow-hidden rounded-md border transition " +
+                  "flex items-stretch overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] transition " +
                   (dragBi === bi ? "opacity-40 " : "") +
-                  (dragBi != null && dragBi !== bi ? "hover:border-primary hover:ring-1 hover:ring-primary/40 " : "")
+                  (dragBi != null && dragBi !== bi ? "hover:ring-1 hover:ring-primary/40 " : "")
                 }
               >
                 {/* Asa para arrastrar + flechas (accesibilidad / ajuste fino). Arrastrar el bloque lo reubica. */}
@@ -352,7 +352,7 @@ function ColumnasEditor({
         {nonMembers.length === 0 ? (
           <p className="text-xs text-muted-foreground">{t("colCatalogEmpty")}</p>
         ) : (
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             {nonMembers.map((c) => (
               <li key={c.id} className="flex items-center gap-3 px-3 py-2 opacity-80">
                 <span className="text-sm font-medium">{tRoot(c.labelKey)}</span>

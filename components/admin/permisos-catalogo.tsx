@@ -75,7 +75,7 @@ export function PermisosCatalogo() {
       {res.state.kind === "fail" && <p className="text-sm text-destructive">{res.state.message}</p>}
 
       {res.state.kind === "ok" && (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-[11px] uppercase tracking-wide text-muted-foreground">
               <tr className="border-b text-left">

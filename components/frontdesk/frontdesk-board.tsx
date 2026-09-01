@@ -760,7 +760,7 @@ export function FrontdeskBoard() {
           )}
 
           {board && !cargando && (
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <table className="w-full text-sm">
                 <thead className="bg-muted/60">
                   <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -883,7 +883,7 @@ export function FrontdeskBoard() {
                         if (a.paciente) setQ(a.paciente);
                         setAvisosOpen(false);
                       }}
-                      className="flex w-full items-start justify-between gap-3 rounded-lg border bg-card p-3 text-left transition hover:bg-accent/50"
+                      className="flex w-full items-start justify-between gap-3 rounded-md bg-card p-3 text-left ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] transition hover:bg-accent/50"
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
@@ -937,7 +937,7 @@ function TotalesDia({ totales, servicio }: { totales: FrontdeskTotal[]; servicio
         return (
           <div
             key={x.columna}
-            className="flex items-center gap-4 rounded-lg bg-card bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
+            className="flex items-center gap-4 rounded-md bg-card bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
           >
             <div className="flex flex-col">
               <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -986,7 +986,7 @@ function KpiTile({
       type="button"
       onClick={onClick}
       className={
-        "group flex min-w-24 flex-col items-start gap-1 rounded-lg bg-card px-4 py-3 text-left shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors " +
+        "group flex min-w-24 flex-col items-start gap-1 rounded-md bg-card px-4 py-3 text-left shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors " +
         (active
           ? "bg-primary/[0.04] ring-2 ring-primary/50"
           : "ring-1 ring-foreground/10 hover:ring-foreground/20")
@@ -1760,7 +1760,7 @@ function CorregirDisponibilidadDialog({
         </DialogHeader>
         {paquete && (
           <div className="space-y-3">
-            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
               {paquete.multiplicadores && (
                 <span className="ml-2 text-muted-foreground">
@@ -1881,7 +1881,7 @@ function TransferirTratamientoDialog({
         </DialogHeader>
         {paquete && (
           <div className="space-y-3">
-            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
               <span className="ml-2 text-muted-foreground">{t("transferir.pendientes", { n: pendientes })}</span>
             </div>
@@ -2510,7 +2510,12 @@ function ComprasModal({
 // Stat compacto para la tira de totales del modal de compras.
 function ComprasStat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={"rounded-lg border px-3 py-2 " + (highlight ? "border-warning/40 bg-warning" : "")}>
+    <div
+      className={
+        "rounded-md px-3 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] " +
+        (highlight ? "bg-warning ring-1 ring-warning/40" : "bg-card ring-1 ring-foreground/10")
+      }
+    >
       <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className={"text-lg font-bold tabular-nums " + (highlight ? "text-warning-foreground" : "")}>{value}</div>
     </div>
@@ -2532,7 +2537,7 @@ function ComprasTabla({
   conFecha?: boolean;
 }) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <table className="w-full text-sm">
         <thead className="bg-muted/60">
           <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

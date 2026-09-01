@@ -158,7 +158,7 @@ export function ProfileCentrosDialog({
             asigState.data.map((a) => (
               <div
                 key={a.id}
-                className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-md bg-card px-3 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
               >
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium">
@@ -200,7 +200,7 @@ export function ProfileCentrosDialog({
         </div>
 
         {/* Alta de asignación */}
-        <div className="space-y-3 rounded-lg border p-3">
+        <div className="space-y-3 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>{t("centro")}</Label>

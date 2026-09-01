@@ -189,7 +189,7 @@ export function PPFormSheet({
           </Field>
 
           {/* factorABase — la pieza clave: se resalta. */}
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+          <div className="rounded-md bg-primary/5 p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <Field label={t("field.factorABase")} hint={t("field.factorABaseHint")}>
               <Input
                 inputMode="decimal"

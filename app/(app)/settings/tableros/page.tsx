@@ -30,7 +30,7 @@ export default function SettingsTablerosPage() {
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
 
-      <div className="mt-6 rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+      <div className="mt-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
         <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("selectBoard")}
         </label>

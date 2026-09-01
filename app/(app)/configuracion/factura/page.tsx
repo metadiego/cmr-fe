@@ -133,7 +133,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="space-y-6">
         {/* Encabezado */}
-        <section className="space-y-4 rounded-xl border p-5">
+        <section className="space-y-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
           <h2 className="text-sm font-semibold">{t("headerTitle")}</h2>
           <Field label={t("f.logoUrl")} hint={t("f.logoUrlHint")}>
             <Input value={form.logoUrl} onChange={(e) => set("logoUrl", e.target.value)} placeholder="https://…" />
@@ -157,7 +157,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
         </section>
 
         {/* Pie */}
-        <section className="space-y-3 rounded-xl border p-5">
+        <section className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
           <h2 className="text-sm font-semibold">{t("footerTitle")}</h2>
           <Field label={t("f.pieFactura")} hint={t("f.pieFacturaHint")}>
             <Textarea rows={4} value={form.pieFactura} onChange={(e) => set("pieFactura", e.target.value)} />
@@ -165,7 +165,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
         </section>
 
         {/* Enganche facturación ↔ frontdesk */}
-        <section className="space-y-3 rounded-xl border p-5">
+        <section className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
           <h2 className="text-sm font-semibold">{t("autopresenteTitle")}</h2>
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-0.5">
@@ -187,7 +187,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
       </div>
 
       {/* Vista previa (branding del recibo, en vivo) */}
-      <aside className="lg:sticky lg:top-6 h-fit rounded-xl border bg-muted/20 p-4">
+      <aside className="lg:sticky lg:top-6 h-fit rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("preview")}</span>
         <div className="mt-3 space-y-1 rounded-lg bg-background p-4 text-center text-xs">
           {form.logoUrl.trim() ? (

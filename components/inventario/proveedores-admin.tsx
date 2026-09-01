@@ -86,7 +86,7 @@ export function ProveedoresAdmin() {
       </div>
       <p className="mb-6 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">

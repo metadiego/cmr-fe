@@ -423,7 +423,7 @@ function ExpandedAmp({
   const items = state.kind === "ok" ? state.data : [];
 
   return (
-    <div className="rounded-lg border bg-background">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="flex items-center justify-between border-b px-3 py-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("sectionTitle")}
@@ -741,7 +741,7 @@ function ProductoForm({
                   : t("field.grupoFacturacionHelpSin")}
               </p>
               {nuevoGrupo ? (
-                <div className="space-y-2 rounded-lg border p-2">
+                <div className="space-y-2 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                   <Input
                     placeholder={t("grupoClave")}
                     value={ngClave}
@@ -833,7 +833,7 @@ function ProductoForm({
 
           {/* Contenido del envase (opcional): cuánto trae el frasco/caja + su unidad + unidades por envase.
               Simple y opcional; con esto la receta calcula cuántas aplicaciones rinde un vial (contenido ÷ dosis). */}
-          <div className="rounded-lg border bg-muted/20 p-3">
+          <div className="rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("field.envaseTitle")}</span>
               <span className="text-[11px] text-muted-foreground">{t("field.opcional")}</span>

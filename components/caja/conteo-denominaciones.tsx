@@ -40,7 +40,7 @@ export function ConteoDenominaciones({
   );
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="border-b px-4 py-3">
         <h3 className="text-sm font-semibold">{t("title")}</h3>
         {hint && (

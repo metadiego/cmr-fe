@@ -272,7 +272,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border bg-card p-5">
+    <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <h2 className="mb-4 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         {title}
       </h2>

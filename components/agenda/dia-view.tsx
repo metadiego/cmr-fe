@@ -273,7 +273,7 @@ function CentroSheet({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3 text-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3 text-sm">
         <span className="font-semibold">{centro.nombre}</span>
         <span className="text-muted-foreground">
           {t("dia.summary", {
@@ -321,7 +321,7 @@ function CentroSheet({
                   {tipo.citas.length}/{tipo.cupo}
                 </span>
               </h3>
-              <div className="overflow-x-auto rounded-md border">
+              <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/40 text-xs text-muted-foreground">
                     <tr>
@@ -438,7 +438,7 @@ function Kpi({ label, value, tono }: { label: string; value: number; tono?: "ok"
     : tono === "muted" ? "text-muted-foreground"
     : "text-primary";
   return (
-    <div className="rounded-lg border bg-card px-3 py-2">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
       <div className={"text-xl font-bold tabular-nums " + color}>{value}</div>
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
@@ -554,7 +554,7 @@ function CentroSheetV2({
             return (
               <div
                 key={f.hora}
-                className={"min-w-[9.5rem] shrink-0 rounded-lg border p-2 " + (conCitas ? "border-primary/40 bg-primary/5" : "bg-card")}
+                className={"min-w-[9.5rem] shrink-0 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2 " + (conCitas ? "ring-primary/40 bg-primary/5" : "ring-foreground/10 bg-card")}
               >
                 <div className="mb-1 font-mono text-xs font-semibold">{f.hora}</div>
                 <div className="space-y-0.5">
@@ -598,7 +598,7 @@ function CentroSheetV2({
       </div>
 
       {/* UNA sola tabla de citas del día — MISMAS columnas y celdas que la clásica. */}
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>

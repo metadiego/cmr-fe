@@ -106,7 +106,7 @@ export default function VialesPage() {
       </header>
 
       {/* Filtros: el producto manda; el resto acota. */}
-      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border bg-card/40 p-4">
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="min-w-64 flex-1 space-y-1.5">
           <Label htmlFor="v-producto">{t("producto")}</Label>
           <Select value={productoId} onValueChange={setProductoId}>
@@ -181,7 +181,7 @@ export default function VialesPage() {
         <>
           {/* INVENTARIO VISUAL: lo que se entiende sin leer. */}
           <div className="mb-6 grid gap-4 md:grid-cols-3">
-            <section className="rounded-xl border bg-card/60 p-5">
+            <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <h2 className="mb-4 text-sm font-medium">{t("enInventario")}</h2>
               <div className="flex items-center gap-5">
                 <PilaDeFrascos cantidad={reporte.cerrados} />
@@ -196,7 +196,7 @@ export default function VialesPage() {
               </div>
             </section>
 
-            <section className="rounded-xl border bg-card/60 p-5 md:col-span-2">
+            <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] md:col-span-2">
               <h2 className="mb-4 text-sm font-medium">{t("vialActivo")}</h2>
               {reporte.activo ? (
                 <div className="flex items-center gap-6">
@@ -231,7 +231,7 @@ export default function VialesPage() {
           </div>
 
           {/* DETALLE: de qué vial salió cada dosis. */}
-          <section className="rounded-xl border">
+          <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-sm font-medium">{t("consumos")}</h2>
               <span className="text-xs text-muted-foreground">
@@ -332,7 +332,7 @@ export default function VialesPage() {
 
           {/* HISTÓRICO: secundario, que no compita con lo que importa. */}
           {reporte.historicos.length > 0 && (
-            <details className="mt-4 rounded-xl border px-4 py-3">
+            <details className="mt-4 rounded-md bg-card px-4 py-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <summary className="cursor-pointer text-sm font-medium">
                 {t("historicos", { n: reporte.historicos.length })}
               </summary>

@@ -243,8 +243,8 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
   return (
     <div
       className={
-        "mb-4 rounded-xl border px-4 py-3 " +
-        (warning ? "border-warning/40 bg-warning" : "bg-muted/30")
+        "mb-4 rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3 " +
+        (warning ? "bg-warning" : "bg-card")
       }
     >
       <p className={"text-sm font-semibold " + (warning ? "text-warning-foreground" : "")}>{title}</p>
@@ -256,7 +256,7 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
 // Sección apilada dentro de "Avanzado" (Estados/Transiciones/… dejan de ser pestañas sueltas).
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8 rounded-xl border p-4">
+    <section className="mb-8 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{titulo}</h2>
       {children}
     </section>
@@ -335,7 +335,7 @@ function PublicarTab({ clave, labelKey, icon }: { clave: string; labelKey: strin
   return (
     <div className="max-w-lg space-y-4">
       <p className="text-sm text-muted-foreground">{t("publicarHelp")}</p>
-      <div className="rounded-md border p-3 text-sm">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3 text-sm">
         <div>{t("menuPath")}: <span className="font-mono">{path}</span></div>
         <div className="mt-1">
           {existing ? <Badge variant="secondary">{t("published")}</Badge> : <Badge variant="outline">{t("notPublished")}</Badge>}

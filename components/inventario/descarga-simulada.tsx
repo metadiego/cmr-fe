@@ -64,7 +64,7 @@ export function DescargaSimuladaPanel({ productoId }: { productoId: string }) {
   }, [data]);
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/40 px-4 py-2.5">
         <div className="flex items-center gap-2 text-sm font-semibold">
           <HugeiconsIcon icon={PackageIcon} className="size-4" />

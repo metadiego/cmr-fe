@@ -138,7 +138,7 @@ function Contenido({
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
       {/* Master: lista de grupos */}
-      <div className="rounded-xl border">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="grid grid-cols-[1fr_6rem_4rem] gap-x-3 border-b px-4 py-2.5 text-xs font-medium text-muted-foreground">
           <span>{t("group")}</span>
           <span>{t("division")}</span>
@@ -186,7 +186,7 @@ function Contenido({
           onChanged={onChanged}
         />
       ) : (
-        <div className="flex items-center justify-center rounded-xl border p-8 text-sm text-muted-foreground">
+        <div className="flex items-center justify-center rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-8 text-sm text-muted-foreground">
           {t("selectGroup")}
         </div>
       )}
@@ -277,7 +277,7 @@ function DetalleGrupo({
   return (
     <div className="space-y-4">
       {/* Datos del grupo */}
-      <div className="space-y-3 rounded-xl border p-4">
+      <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">{label(grupo.labelKey, grupo.clave)}</h3>
           <span className="text-xs text-muted-foreground">{grupo.clave}</span>
@@ -326,7 +326,7 @@ function DetalleGrupo({
           <TabsTrigger value="cobro">{t("tabComoSeCobra")}</TabsTrigger>
         </TabsList>
         <TabsContent value="productos">
-          <div className="rounded-xl border">
+          <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <div className="flex items-center justify-between border-b px-4 py-2.5">
               <h3 className="text-sm font-semibold">{t("membership")}</h3>
               <Button size="sm" onClick={guardarMembresia} disabled={savingMembresia}>

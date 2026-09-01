@@ -2208,7 +2208,7 @@ function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal, descuentoAct
   const error = pctPasa100 || montoPasaBase;
 
   return (
-    <div className="space-y-2 rounded-xl border p-4">
+    <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("globalDiscount")}</span>
       <div className="flex items-center gap-2">
         <Select value={tipo} onValueChange={setTipo}>

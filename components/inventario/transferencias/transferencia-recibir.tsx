@@ -172,7 +172,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       </button>
 
       {/* Cabecera */}
-      <div className="mb-6 rounded-xl border p-5">
+      <div className="mb-6 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-semibold tracking-tight">
             {centroName(transfer.clinicOrigenId)} → {centroName(transfer.clinicDestinoId)}
@@ -188,7 +188,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       </div>
 
       {/* Líneas */}
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

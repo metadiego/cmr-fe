@@ -127,7 +127,7 @@ function AlertasPanel() {
     return <p className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
 
   return (
-    <div className="divide-y rounded-xl border">
+    <div className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {alertas.map((a) => {
         const clickable = !!alertaHref(a);
         return (
@@ -163,7 +163,7 @@ function NotificacionesPanel() {
   };
 
   return (
-    <div className="overflow-x-auto rounded-xl border">
+    <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <table className="w-full text-sm">
         <thead className="bg-muted/60">
           <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -222,7 +222,7 @@ function PlantillasPanel() {
           <Button size="sm" onClick={() => setCreateOpen(true)}>{t("nuevaPlantilla")}</Button>
         </div>
       )}
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

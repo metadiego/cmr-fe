@@ -215,7 +215,7 @@ export function ProgramarCitasModal({
           {/* Paciente: buscar solo si no vino preseleccionado */}
           {!pacienteIdProp && (
             sel ? (
-              <div className="flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2.5">
+              <div className="flex items-center gap-3 rounded-md bg-primary/5 px-3 py-2.5 ring-1 ring-primary/40 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{pacienteNombre}</div>
@@ -234,7 +234,7 @@ export function ProgramarCitasModal({
                   <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("buscarPh")} className="border-0 px-0 shadow-none focus-visible:ring-0" />
                 </div>
                 {term.length >= 2 && (
-                  <div className="mt-2 max-h-56 overflow-y-auto rounded-md border">
+                  <div className="mt-2 max-h-56 overflow-y-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                     {resultados.length === 0 ? (
                       <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("sinResultados")}</p>
                     ) : (
@@ -287,7 +287,7 @@ export function ProgramarCitasModal({
             </div>
             {/* Cupos por hora del día elegido (vacíos por hora): ayuda a ver si hay espacio. Informativo. */}
             {nuevaFecha && horas.length > 0 && (
-              <div className="mt-1 rounded-lg border bg-muted/20 p-2">
+              <div className="mt-1 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("cuposDia")}</p>
                 <div className="flex flex-wrap gap-1">
                   {horas.map((h) => {
@@ -340,7 +340,7 @@ export function ProgramarCitasModal({
 
           {/* Agenda existente del paciente (próximas), coloreada por servicio — para no doblar citas */}
           {pacienteId && agenda.length > 0 && (
-            <div className="rounded-lg border bg-muted/20 p-2.5">
+            <div className="rounded-md bg-card p-2.5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("proximas")}</p>
               <div className="flex flex-wrap gap-1.5">
                 {agenda.map((a, i) => (

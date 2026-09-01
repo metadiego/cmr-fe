@@ -143,7 +143,7 @@ export default function EstadisticasServiciosPage() {
       ) : (
         <>
           {/* Filtros de rango */}
-          <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+          <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
               <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -200,7 +200,7 @@ export default function EstadisticasServiciosPage() {
                     {data.general.length === 0 ? (
                       <p className="text-sm text-muted-foreground">{t("sinDatos")}</p>
                     ) : (
-                      <div className="overflow-x-auto rounded-xl border">
+                      <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                         <table className="w-full text-sm">
                           <thead className="bg-muted/60">
                             <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -256,7 +256,7 @@ export default function EstadisticasServiciosPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border px-4 py-3">
+    <div className="rounded-md bg-card px-4 py-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="text-2xl font-bold tabular-nums">{value}</div>
     </div>
@@ -268,7 +268,7 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
   const t = useTranslations("estadisticasServicios");
   return (
     <div className="space-y-5">
-      <div className="rounded-lg border bg-muted/30 px-4 py-2 text-sm">
+      <div className="rounded-md bg-card px-4 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <span className="font-semibold">{servicio.nombre}</span>
         <span className="ml-2 text-muted-foreground">
           {t("resumenServicio", { sesiones: servicio.sesiones, participaciones: servicio.participaciones, pacientes: servicio.pacientes })}
@@ -284,7 +284,7 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
               {t.has(`rol.${r.rol}`) ? t(`rol.${r.rol}`) : capitalizar(r.rol)}
               <span className="ml-2 font-normal text-muted-foreground">· {t("participacionesDivisor", { n: r.participaciones })}</span>
             </h3>
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <table className="w-full text-sm">
                 <thead className="bg-muted/60">
                   <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">

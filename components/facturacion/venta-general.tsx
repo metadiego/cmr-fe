@@ -181,7 +181,7 @@ function Finder({
           </button>
         </div>
       ) : (
-        <div className="mb-4 max-h-80 overflow-y-auto rounded-md border">
+        <div className="mb-4 max-h-80 overflow-y-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           {loading && <p className="px-3 py-4 text-center text-sm text-muted-foreground">{t("searching")}</p>}
           {!loading && term.length < 2 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>}
           {!loading && term.length >= 2 && shown.length === 0 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>}
@@ -242,7 +242,7 @@ function Finder({
       </div>
 
       {/* Facturar a un tercero (empresa u otra persona) */}
-      <div className="mb-4 rounded-lg border">
+      <div className="mb-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <button type="button" onClick={() => setTerceroOpen((o) => !o)} className="flex w-full items-center justify-between px-3 py-2 text-sm">
           <span className="font-medium">{t("terceroTitle")}</span>
           <span className="text-xs text-primary">{terceroOpen ? t("terceroHide") : t("terceroShow")}</span>

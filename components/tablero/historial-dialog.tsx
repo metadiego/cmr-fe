@@ -60,7 +60,7 @@ export function HistorialDialog({
             const p = ev.payload ?? {};
             const columna = (p as { columna?: string }).columna;
             return (
-              <li key={ev.id} className="rounded-md border p-3 text-sm">
+              <li key={ev.id} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3 text-sm">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{tRoot(`appointments.actions.event.${ev.tipo}`)}</span>
                   <span className="text-xs text-muted-foreground">{fmt(ev.createdAt)}</span>

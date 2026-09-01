@@ -176,7 +176,7 @@ function CuadreCard({
   ];
   const rowText = tono === "total" ? "text-white" : "";
   return (
-    <div className={"overflow-hidden rounded-xl border " + (destacado ? "shadow-md" : "")}>
+    <div className="overflow-hidden rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className={"px-4 py-2.5 text-center text-sm font-bold uppercase tracking-wide " + head}>{title}</div>
       <div className={body}>
         {filas.map((f) => (
@@ -208,7 +208,7 @@ function WhoBilled({
   // Aviso honesto si la Σ por cajero NO da el total del día: es defecto del BE, no se maquilla.
   const descuadre = Math.abs(suma - total) > 0.005;
   return (
-    <div className="overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="bg-muted/60 px-4 py-2.5 text-sm font-bold uppercase tracking-wide">{t("who.title")}</div>
       {cajeros.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">{t("who.empty")}</p>

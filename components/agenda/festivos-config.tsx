@@ -139,7 +139,7 @@ export function FestivosConfig({ year }: { year: number }) {
         <span className="ml-auto text-sm text-muted-foreground">{year}</span>
       </div>
 
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>
@@ -194,7 +194,7 @@ export function FestivosConfig({ year }: { year: number }) {
       </div>
 
       {/* Add holiday */}
-      <div className="flex flex-wrap items-end gap-3 rounded-md border bg-card p-3">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
         <div className="space-y-1">
           <label className="block text-xs text-muted-foreground">{t("festivos.date")}</label>
           <Input type="date" className="h-9 w-40" value={fecha} onChange={(e) => setFecha(e.target.value)} />

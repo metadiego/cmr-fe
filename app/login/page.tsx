@@ -39,7 +39,7 @@ function LoginForm() {
         </span>
         <span className="text-lg font-semibold tracking-tight">CMR</span>
       </div>
-      <div className="w-full max-w-sm rounded-xl border bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+      <div className="w-full max-w-sm rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("subtitle")}

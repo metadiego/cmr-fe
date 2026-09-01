@@ -152,7 +152,7 @@ export function NurseStatusButton({
               const color = tipo?.color ?? null;
               const label = tipo ? tipoLabel(tipo) : a.statusTipoId ?? "";
               return (
-                <li key={a.personalId} className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm">
+                <li key={a.personalId} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                   <span className="min-w-0 truncate">{nombreDe(a)}</span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={color ? { backgroundColor: `${color}22`, color } : undefined}>

@@ -106,7 +106,7 @@ export function ConfigAltaAdmin() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div className="rounded-lg border">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2.5">
           <span className="text-sm font-medium">{tf("nombres")}</span>
           <span className="text-xs text-muted-foreground">{t("siempre")}</span>

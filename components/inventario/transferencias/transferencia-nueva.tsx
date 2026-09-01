@@ -117,7 +117,7 @@ export function TransferenciaNueva() {
       <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("newHelp")}</p>
 
       {/* Cabecera */}
-      <div className="grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
+      <div className="grid gap-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] sm:grid-cols-2">
         <Field label={t("field.origen")}>
           <Input value={centroName(origenId)} disabled />
         </Field>
@@ -157,7 +157,7 @@ export function TransferenciaNueva() {
       </div>
 
       {/* Líneas */}
-      <div className="mt-5 rounded-xl border">
+      <div className="mt-5 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="flex items-center justify-between border-b px-4 py-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("lineas")}</span>
           <Button variant="outline" size="sm" onClick={() => setLineas((p) => [...p, nuevaLinea()])}>

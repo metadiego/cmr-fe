@@ -8,7 +8,7 @@ function DataTable({ className, children, ...props }: React.ComponentProps<"div"
     <div
       data-slot="data-table"
       className={cn(
-        "overflow-hidden rounded-xl border bg-card shadow-sm shadow-[rgba(16,32,64,0.06)]",
+        "overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]",
         className,
       )}
       {...props}

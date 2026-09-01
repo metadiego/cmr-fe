@@ -44,7 +44,7 @@ export function RecetasAdmin() {
         {/* Lista de compuestos */}
         <div className="space-y-3">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchCompuesto")} />
-          <div className="overflow-hidden rounded-xl border">
+          <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             {compRes.state.kind === "loading" && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">{tc("loading")}</p>
             )}

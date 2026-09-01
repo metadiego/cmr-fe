@@ -71,7 +71,7 @@ export function PagosFactura({
   const pagado = saldo <= 0.001;
 
   return (
-    <div className="space-y-2 rounded-xl border p-4">
+    <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("title")}</span>
         <span className="text-xs text-muted-foreground">

@@ -49,7 +49,7 @@ export default function PreparacionLegadoPage() {
       <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
       <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
 
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("dias")}</span>
           <Input value={dias} onChange={(e) => setDias(e.target.value)} inputMode="numeric" className="h-9 w-[120px]" />
@@ -69,7 +69,7 @@ export default function PreparacionLegadoPage() {
               {t("omitidos", { mostrados: filas.length, total: data.total })}
             </div>
           )}
-          <div className="mt-4 overflow-x-auto rounded-xl border">
+          <div className="mt-4 overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

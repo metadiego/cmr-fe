@@ -153,7 +153,7 @@ function SerieRow({
   }
 
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <div className="flex items-baseline justify-between gap-3">
         <div>
           <div className="text-sm font-semibold">{label}</div>

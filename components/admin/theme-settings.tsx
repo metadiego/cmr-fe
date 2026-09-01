@@ -155,7 +155,7 @@ function LayerThemeForm({
   }
 
   return (
-    <div className="max-w-md rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+    <div className="max-w-md rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
       <ThemeEditor
         value={state.config}
         onChange={(config) => setState({ kind: "ok", config })}

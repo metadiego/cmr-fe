@@ -331,7 +331,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
       </div>
 
       {/* Derecha: formulario de la sección seleccionada / alta */}
-      <aside className="rounded-lg border bg-muted/30 p-4">
+      <aside className="rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h2 className="mb-3 text-sm font-semibold">
           {creando ? t("nueva") : selId ? t("editar") : t("elegir")}
         </h2>

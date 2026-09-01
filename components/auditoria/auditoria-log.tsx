@@ -469,7 +469,7 @@ function Tile({
   tone?: "ok" | "error";
 }) {
   return (
-    <div className="min-w-[7rem] rounded-lg border bg-card px-3 py-2">
+    <div className="min-w-[7rem] rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div
         className={cn(

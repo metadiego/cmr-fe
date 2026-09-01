@@ -50,7 +50,7 @@ export default function ConfiguracionIndexPage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group flex items-start gap-3 rounded-xl border bg-card/60 p-4 shadow-sm transition-colors hover:bg-accent/40"
+              className="group flex items-start gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 transition-colors hover:bg-accent/40"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <HugeiconsIcon icon={s.icon} className="size-5" />

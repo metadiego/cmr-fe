@@ -211,7 +211,7 @@ export function PlanificacionCompras() {
       <p className="mb-4 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
 
       {/* Parámetros (los edita la gerencia; sobrescriben la config solo para esta consulta) */}
-      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border p-4">
+      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <Campo label={t("param.meses")}><Input className="w-20" inputMode="numeric" value={meses} onChange={(e) => setMeses(e.target.value)} /></Campo>
         <Campo label={t("param.criterio1")}><Input className="w-20" inputMode="decimal" value={c1} onChange={(e) => setC1(e.target.value)} /></Campo>
         <Campo label={t("param.criterio2")}><Input className="w-20" inputMode="decimal" value={c2} onChange={(e) => setC2(e.target.value)} /></Campo>
@@ -221,7 +221,7 @@ export function PlanificacionCompras() {
       </div>
 
       {/* Convertir la recomendación en ORDEN. El BE exige proveedor + almacén → explícitos (sin asumir). */}
-      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-xl border p-4">
+      <div className="mb-5 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <span className="mb-1.5 text-sm font-semibold">{t("crearTitulo")}</span>
         <Campo label={t("field.proveedor")}>
           <Select value={proveedorId} onValueChange={setProveedorId}>
@@ -267,7 +267,7 @@ export function PlanificacionCompras() {
       )}
 
       {data && (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-[11px] uppercase tracking-wide text-muted-foreground">
               <tr className="border-b text-right">

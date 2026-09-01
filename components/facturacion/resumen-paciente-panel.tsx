@@ -43,7 +43,7 @@ export function ResumenPacientePanel({
   const data = res.state.kind === "ok" ? res.state.data : null;
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}

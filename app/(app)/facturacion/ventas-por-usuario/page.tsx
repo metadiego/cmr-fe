@@ -88,7 +88,7 @@ export default function VentasPorUsuarioPage() {
         </div>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -122,7 +122,7 @@ export default function VentasPorUsuarioPage() {
       )}
 
       {state.kind === "ok" && (
-        <div className="mt-4 overflow-x-auto rounded-xl border">
+        <div className="mt-4 overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <table className="w-full text-sm">
             <thead className="bg-muted/60">
               <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

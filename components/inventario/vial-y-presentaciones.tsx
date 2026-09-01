@@ -44,7 +44,7 @@ export function VialYPresentaciones({ productoId }: { productoId: string }) {
   const un = (id?: string | null) => (id ? unidadNombre.get(id) ?? "" : "");
 
   return (
-    <div className="space-y-5 rounded-xl border p-4">
+    <div className="space-y-5 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <VialesAbiertos productoId={productoId} un={un} t={t} />
       <Presentaciones productoId={productoId} un={un} unidades={unidadesRes.state.kind === "ok" ? unidadesRes.state.data : []} t={t} />
     </div>
@@ -76,7 +76,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
           const remanente = Number(v.remanente ?? 0);
           const excedido = Number(v.excedido ?? 0);
           return (
-            <li key={v.id} className="rounded-lg bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+            <li key={v.id} className="rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-sm font-medium">
                   {t("vialDe", { capacidad: nf.format(Number(v.capacidadTotal ?? 0)), unidad })}

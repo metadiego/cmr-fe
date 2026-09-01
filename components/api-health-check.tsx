@@ -52,7 +52,7 @@ export function ApiHealthCheck() {
   const fail = result.kind === "fail";
 
   return (
-    <div className="w-full max-w-md rounded-lg border bg-card/60 p-5 text-left shadow-sm backdrop-blur">
+    <div className="w-full max-w-md rounded-md bg-card p-5 text-left shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold">{t("title")}</h2>
@@ -73,9 +73,9 @@ export function ApiHealthCheck() {
       {(ok || fail) && (
         <div
           className={cn(
-            "mt-4 rounded-md border p-3",
-            ok && "border-success/30 bg-success/10",
-            fail && "border-destructive/30 bg-destructive/10",
+            "mt-4 rounded-md p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10",
+            ok && "bg-success/10",
+            fail && "bg-destructive/10",
           )}
         >
           <div className="flex items-center gap-2 text-sm font-medium">

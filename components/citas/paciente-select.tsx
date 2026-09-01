@@ -38,7 +38,7 @@ export function PacienteSelect({
 
   if (value) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2">
+      <div className="flex items-center justify-between gap-2 rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <span className="truncate text-sm font-medium">
           {[value.nombres, value.apellidos].filter(Boolean).join(" ")}
           {value.docId && (

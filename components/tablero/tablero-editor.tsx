@@ -214,7 +214,7 @@ function Editor({
           // Bloque encadenado (2+ columnas con el mismo group): tarjeta con badge + un solo control de mover.
           if (b.group && b.items.length > 1) {
             return (
-              <li key={`g-${b.group}`} className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+              <li key={`g-${b.group}`} className="rounded-md bg-primary/5 ring-1 ring-primary/30 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                 <div className="flex items-center gap-3">
                   {mover}
                   <div className="flex-1 space-y-1.5">
@@ -232,7 +232,7 @@ function Editor({
           // Fila suelta (o grupo de 1): tarjeta simple.
           const r = b.items[0];
           return (
-            <li key={r.columnaId} className="flex items-center gap-3 rounded-lg border px-3 py-2">
+            <li key={r.columnaId} className="flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
               {mover}
               <div className="flex-1">{itemRow(r)}</div>
             </li>

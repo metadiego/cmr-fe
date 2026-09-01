@@ -274,7 +274,7 @@ export default function StockPage() {
                 {/* Móvil: cada fila es una TARJETA (nombre + cuánto hay grande a la derecha; almacén/lote debajo). */}
                 <div className="space-y-2 md:hidden">
                   {resumen.items.map((r, i) => (
-                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-lg bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5"><EstadoDot estado={r.estado} /><span className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</span></div>
@@ -328,7 +328,7 @@ export default function StockPage() {
                 {/* Móvil: tarjeta por producto con el Total grande y el desglose por centro debajo. */}
                 <div className="space-y-2 md:hidden">
                   {consol.items.map((r) => (
-                    <div key={`m-${r.productoId}`} className="cursor-pointer rounded-lg bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                    <div key={`m-${r.productoId}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>

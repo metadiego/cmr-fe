@@ -218,7 +218,7 @@ export function AmpEditorSheet({
           </button>
 
           {advanced && (
-            <div className="grid gap-4 rounded-lg border bg-muted/20 p-3">
+            <div className="grid gap-4 rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <div className="grid grid-cols-2 gap-3">
                 <Field label={t("field.concentracion")}>
                   <Input

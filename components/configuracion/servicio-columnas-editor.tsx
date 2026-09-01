@@ -294,10 +294,10 @@ export function ServicioColumnasEditor() {
                 onDrop={activa ? (e) => { e.preventDefault(); if (dragClave) soltar(dragClave, clave); setDragClave(null); } : undefined}
                 onDragEnd={() => setDragClave(null)}
                 className={
-                  "flex items-center gap-3 rounded-lg border px-3 py-2 transition " +
+                  "flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2 transition " +
                   (activa ? "" : "opacity-60 ") +
                   (dragClave === clave ? "opacity-40 " : "") +
-                  (dragClave && dragClave !== clave && activa ? "hover:border-primary hover:ring-1 hover:ring-primary/40 " : "")
+                  (dragClave && dragClave !== clave && activa ? "hover:ring-1 hover:ring-primary/40 " : "")
                 }
               >
                 <div className="flex items-center gap-1">

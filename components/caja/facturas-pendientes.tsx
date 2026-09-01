@@ -55,7 +55,7 @@ export function FacturasPendientes({
   }, [ids, centroId]);
 
   return (
-    <div className="rounded-xl border">
+    <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="border-b px-4 py-2.5">
         <h3 className="text-sm font-semibold">{t("title")}</h3>
       </div>

@@ -170,7 +170,7 @@ export function RecepcionDesdeFactura() {
       )}
 
       {aprendidos === null && paso === "captura" && (
-        <div className="max-w-2xl space-y-4 rounded-xl border p-5">
+        <div className="max-w-2xl space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("field.proveedor")}</span>
             <Select value={proveedorId || NONE} onValueChange={(v) => setProveedorId(v === NONE ? "" : v)}>
@@ -204,7 +204,7 @@ export function RecepcionDesdeFactura() {
           </div>
           <div className="space-y-2">
             {filas.map((f, i) => (
-              <div key={i} className={cn("rounded-xl border p-3", !f.productoId && "border-warning/40 bg-warning")}>
+              <div key={i} className={cn("rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]", !f.productoId && "bg-warning ring-warning/40")}>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
                   {/* Texto del proveedor */}
                   <div className="lg:col-span-4">
@@ -247,7 +247,7 @@ export function RecepcionDesdeFactura() {
       )}
 
       {aprendidos === null && paso === "confirmar" && (
-        <div className="max-w-2xl space-y-4 rounded-xl border p-5">
+        <div className="max-w-2xl space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <h2 className="text-sm font-semibold">{t("confirmarTitulo")}</h2>
           <div className="grid grid-cols-2 gap-3">
             <Campo label={t("field.almacen")}>

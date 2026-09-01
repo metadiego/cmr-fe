@@ -226,7 +226,7 @@ export function Calendario() {
 
       {/* DÍA */}
       {vista === "dia" && (
-        <div className="rounded-xl border">
+        <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <div className="divide-y">
             {eventosDe(ymd(cursor)).length === 0 ? (
               <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t("sinEventos")}</p>
@@ -242,11 +242,11 @@ export function Calendario() {
         <div className="space-y-4">
           {(() => {
             const dias = [...new Set(eventos.map((e) => e.dia))].sort();
-            if (dias.length === 0) return <p className="rounded-xl border px-4 py-10 text-center text-sm text-muted-foreground">{t("sinProximos")}</p>;
+            if (dias.length === 0) return <p className="rounded-md bg-card px-4 py-10 text-center text-sm text-muted-foreground ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">{t("sinProximos")}</p>;
             return dias.map((d) => (
               <div key={d}>
                 <div className="mb-1 text-sm font-semibold capitalize">{fmt(new Date(d + "T12:00:00"), { weekday: "long", day: "numeric", month: "long" })}</div>
-                <div className="divide-y rounded-xl border">
+                <div className="divide-y overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                   {eventos.filter((e) => e.dia === d).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoriaId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.dia })} t={t} />)}
                 </div>
               </div>

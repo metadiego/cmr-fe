@@ -245,7 +245,7 @@ export function EditorRolUnificado() {
 
       {roleId && tree && !loadingRole && !loadError && (
         <>
-          <div className="rounded-md border px-3">
+          <div className="rounded-md bg-card px-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
             {tree.nodes.map((n) => renderNode(n, 1))}
           </div>
           <Button onClick={onSubmit} disabled={submitting}>

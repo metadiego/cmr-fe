@@ -141,7 +141,7 @@ export function CuadreDetalle({
       </div>
 
       {/* 0. Conteo de efectivo (sellado / consolidado): cantidad · valor · monto, de mayor a menor. */}
-      <section className="rounded-xl border">
+      <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h3 className="flex items-center justify-between border-b px-4 py-2.5 text-sm font-semibold">
           <span>{td("conteoEfectivo")}</span>
           {conteo && conteo.cajeros > 1 && (
@@ -185,7 +185,7 @@ export function CuadreDetalle({
 
       {/* 1. Bloque tributario */}
       {trib && (
-        <section className="rounded-xl border">
+        <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <h3 className="border-b px-4 py-2.5 text-sm font-semibold">{td("tributario")}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -228,7 +228,7 @@ export function CuadreDetalle({
       )}
 
       {/* 2. Documentos del día */}
-      <section className="rounded-xl border">
+      <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h3 className="border-b px-4 py-2.5 text-sm font-semibold">
           {td("documentos")} <span className="font-normal text-muted-foreground">({documentos.length})</span>
         </h3>
@@ -269,7 +269,7 @@ export function CuadreDetalle({
 
       {/* 3. Devoluciones del día — bloque aparte, en rojo, con signo. */}
       {devoluciones.length > 0 && (
-        <section className="rounded-xl border border-destructive/30">
+        <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <h3 className="border-b border-destructive/20 px-4 py-2.5 text-sm font-semibold text-destructive">
             {td("devoluciones")} <span className="font-normal">({devoluciones.length})</span>
           </h3>

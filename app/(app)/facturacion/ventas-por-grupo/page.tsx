@@ -124,7 +124,7 @@ export default function VentasPorGrupoPage() {
       </div>
 
       {/* Filtros */}
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -179,7 +179,7 @@ export default function VentasPorGrupoPage() {
           {megasUtiles.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {megasUtiles.map((m) => (
-                <div key={m.clave} className="rounded-lg border bg-muted/30 px-3 py-2">
+                <div key={m.clave} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     {tRoot.has(`fac.megagrupo.${m.clave}`) ? tRoot(`fac.megagrupo.${m.clave}`) : titleCase(m.clave)}
                   </div>
@@ -191,7 +191,7 @@ export default function VentasPorGrupoPage() {
           )}
 
           {/* Tabla por grupo (orden del BE: neto desc). Neto es la columna protagonista. */}
-          <div className="mt-4 overflow-x-auto rounded-xl border">
+          <div className="mt-4 overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

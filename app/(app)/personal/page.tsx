@@ -181,7 +181,7 @@ function FichaPersonal({
   }
 
   return (
-    <div className="space-y-6 rounded-xl border bg-card/60 p-6 shadow-sm">
+    <div className="space-y-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       {/* Identidad */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">

@@ -86,7 +86,7 @@ export function TransferenciasList() {
 
       {/* PENDIENTES (bandeja de trabajo) */}
       <h2 className="mb-2 text-sm font-semibold">{t("pendientesTitulo")}</h2>
-      <div className="mb-8 overflow-x-auto rounded-xl border">
+      <div className="mb-8 overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -162,7 +162,7 @@ export function TransferenciasList() {
           </Select>
         </div>
       </div>
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

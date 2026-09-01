@@ -103,7 +103,7 @@ export function ListasPrecio({
   return (
     <div className="space-y-5">
       {/* Crear nueva lista */}
-      <div className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <label className="flex flex-1 flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("newName")}</span>
           <Input
@@ -137,7 +137,7 @@ export function ListasPrecio({
       </div>
 
       {/* Tabla de listas */}
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

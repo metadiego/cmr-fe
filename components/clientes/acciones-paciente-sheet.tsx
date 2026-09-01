@@ -119,7 +119,7 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
   if (facturas.length === 0) return <Vacio>{t("sinCompras")}</Vacio>;
   const numDoc = (f: Factura) => (f as { numero?: string }).numero || (f as { numeroPresupuesto?: string }).numeroPresupuesto || (f as { numeroLegacy?: string }).numeroLegacy || "—";
   return (
-    <ul className="divide-y rounded-md border">
+    <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {facturas.map((f) => (
         <li key={f.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="min-w-0">
@@ -152,7 +152,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
   const ses = res.state.data;
   if (ses.length === 0) return <Vacio>{t("sinServicios")}</Vacio>;
   return (
-    <ul className="divide-y rounded-md border">
+    <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {ses.map((s) => (
         <li key={s.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="min-w-0 truncate">{servName.get(s.servicioId) ?? s.servicioId}</span>
@@ -174,7 +174,7 @@ function Citas({ pid, centro }: { pid: string; centro?: string }) {
   const citas = res.state.data;
   if (citas.length === 0) return <Vacio>{t("sinCitas")}</Vacio>;
   return (
-    <ul className="divide-y rounded-md border">
+    <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {citas.map((c) => (
         <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="tabular-nums">{c.fecha}{c.hora ? ` · ${c.hora}` : ""}</span>
