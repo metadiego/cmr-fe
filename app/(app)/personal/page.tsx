@@ -73,9 +73,9 @@ export default function PersonalPage() {
     <PageContainer>
       <PageHeader title={t("title")} description={t("subtitle")} />
 
-      {gate.necesitaPicker && <p className="mt-6 text-sm text-muted-foreground">{t("elegirCentro")}</p>}
+      {gate.necesitaPicker && <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Lista */}
         <aside className="space-y-2">
           <div className="relative">

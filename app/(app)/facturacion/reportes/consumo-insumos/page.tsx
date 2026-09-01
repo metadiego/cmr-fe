@@ -98,7 +98,7 @@ export default function ConsumoInsumosPage() {
       />
 
       {/* Filtros */}
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -122,14 +122,14 @@ export default function ConsumoInsumosPage() {
       </div>
 
       {/* KPIs */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Kpi label={t("kpi.insumos")} value={num(rows.length)} />
         <Kpi label={t("kpi.unidades")} value={num(totalUnidades)} />
         <Kpi label={t("kpi.facturas")} value={num(totalFacturas)} />
       </div>
 
       {/* Tabla */}
-      <div className="mt-4 overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -179,7 +179,7 @@ export default function ConsumoInsumosPage() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">{t("footnote")}</p>
+      <p className="text-xs text-muted-foreground">{t("footnote")}</p>
     </PageContainer>
   );
 }

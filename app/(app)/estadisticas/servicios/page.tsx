@@ -136,15 +136,15 @@ export default function EstadisticasServiciosPage() {
       />
 
       {gate.cargando ? (
-        <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : gate.sinCentro ? (
-        <p className="mt-6 text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
+        <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="mt-6 max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
           {/* Filtros de rango */}
-          <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
+          <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
               <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -160,7 +160,7 @@ export default function EstadisticasServiciosPage() {
           </div>
 
           {/* Región imprimible: membrete (solo print) + totales + pestañas */}
-          <div ref={printRef} className="mt-6">
+          <div ref={printRef}>
             {/* Membrete solo para impresión */}
             <div className="solo-print membrete">
               {/* eslint-disable-next-line @next/next/no-img-element */}

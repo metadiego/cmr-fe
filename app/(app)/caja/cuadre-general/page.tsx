@@ -115,15 +115,15 @@ export default function CuadreGeneralPage() {
         }
       />
 
-      {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
+      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
 
       {state.kind === "ok" && (
         <>
           {cajeroActivo && (
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-md border border-info/40 bg-info px-4 py-2.5 text-sm">
+            <div className="flex flex-wrap items-center gap-3 rounded-md border border-info/40 bg-info px-4 py-2.5 text-sm">
               <span className="font-medium text-info-foreground">
                 {t("who.acotado", { cajero: cajeroActivo })}
               </span>
@@ -132,14 +132,14 @@ export default function CuadreGeneralPage() {
               </Button>
             </div>
           )}
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <CuadreCard title={t("general")} tono="general" d={general} totalLabel={t("totalDivision", { division: t("general") })} t={t} />
             <CuadreCard title={t("consulta")} tono="consulta" d={consulta} totalLabel={t("totalDivision", { division: t("consulta") })} t={t} />
           </div>
-          <div className="mt-4 max-w-xl">
+          <div className="max-w-xl">
             <CuadreCard title={t("totalGeneral")} tono="total" d={total} totalLabel={t("totalGeneralRow")} t={t} destacado />
           </div>
-          <div className="mt-4 max-w-xl">
+          <div className="max-w-xl">
             <WhoBilled cajeros={porCajero} total={total.total} activeUsuarioId={usuarioId} onPick={setUsuarioId} t={t} />
           </div>
         </>

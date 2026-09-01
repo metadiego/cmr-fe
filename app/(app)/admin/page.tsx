@@ -22,7 +22,7 @@ export default function AdminPage() {
       <PageContainer>
         <PageHeader title={t("title")} />
 
-        <Tabs defaultValue="users" className="mt-6">
+        <Tabs defaultValue="users">
           <TabsList>
             <TabsTrigger value="users">{t("tabs.users")}</TabsTrigger>
             <TabsTrigger value="centers">{t("tabs.centers")}</TabsTrigger>

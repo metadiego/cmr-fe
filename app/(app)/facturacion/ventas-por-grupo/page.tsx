@@ -125,7 +125,7 @@ export default function VentasPorGrupoPage() {
       />
 
       {/* Filtros */}
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -154,15 +154,15 @@ export default function VentasPorGrupoPage() {
         </div>
       </div>
 
-      {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
+      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
 
       {data && (
         <>
           {/* CUADRE: la garantía de que el reporte se puede creer. */}
-          <div className="mt-6">
+          <div>
             {data.cuadre.cuadra ? (
               <div className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-sm font-medium text-success">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />
@@ -178,7 +178,7 @@ export default function VentasPorGrupoPage() {
 
           {/* Subtotales por MEGAGRUPO (del BE, sin recalcular). Solo si agrupan 2+ grupos. */}
           {megasUtiles.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {megasUtiles.map((m) => (
                 <div key={m.clave} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -192,7 +192,7 @@ export default function VentasPorGrupoPage() {
           )}
 
           {/* Tabla por grupo (orden del BE: neto desc). Neto es la columna protagonista. */}
-          <div className="mt-4 overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+          <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

@@ -40,11 +40,11 @@ export default function ConfiguracionIndexPage() {
       <PageHeader title={t("title")} description={t("subtitle")} />
 
       {ready && visibles.length === 0 ? (
-        <p className="mt-8 rounded-xl border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
           {t("sinAcceso")}
         </p>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {visibles.map((s) => (
             <Link
               key={s.href}

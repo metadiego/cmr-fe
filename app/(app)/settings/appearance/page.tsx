@@ -107,13 +107,13 @@ export default function AppearancePage() {
       <PageHeader title={t("title")} description={t("description")} />
 
       {/* Avatar (profile media, independent of the theme layers) */}
-      <div className="mt-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
+      <div className="rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
         <h2 className="mb-4 text-sm font-medium">{t("avatarTitle")}</h2>
         <AvatarUploader />
       </div>
 
       {/* Theme + background (the user preferences layer) */}
-      <div className="mt-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
+      <div className="rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
         {state.kind === "loading" && (
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
         )}

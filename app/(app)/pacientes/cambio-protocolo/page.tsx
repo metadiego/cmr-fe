@@ -154,13 +154,13 @@ export default function CambioProtocoloPage() {
     <PageContainer>
       <PageHeader title={t("title")} description={t("help")} />
 
-      <div className="mt-6 max-w-md">
+      <div className="max-w-md">
         <Label>{t("paciente")}</Label>
         <PacienteSelect value={paciente} onChange={setPaciente} />
       </div>
 
       {pacienteId && (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Paso 1: qué se reemplaza */}
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">{t("paso1")}</h2>

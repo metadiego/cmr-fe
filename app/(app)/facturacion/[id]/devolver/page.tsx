@@ -105,18 +105,18 @@ export default function DevolverFacturaPage() {
       )}
 
       {facturaState.kind === "loading" ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tc("loading")}</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : facturaState.kind === "fail" ? (
-        <div className="mt-8 flex flex-col items-start gap-3">
+        <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-destructive">
             {isRateLimited(facturaState.message) ? tRoot("common.rateLimited") : facturaState.message}
           </p>
           <Button variant="outline" size="sm" onClick={recargarFactura}>{tRoot("common.retry")}</Button>
         </div>
       ) : items.length === 0 ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tf("noItems")}</p>
+        <p className="text-sm text-muted-foreground">{tf("noItems")}</p>
       ) : !["emitida", "devuelta_parcial"].includes(String(factura?.estado)) ? (
-        <div className="mt-8 flex flex-col items-start gap-3">
+        <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-muted-foreground">{t("returnOnlyIssued")}</p>
           <Button variant="outline" size="sm" asChild><Link href={backHref}>{tf("back")}</Link></Button>
         </div>

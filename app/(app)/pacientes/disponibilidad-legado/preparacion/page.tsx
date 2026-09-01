@@ -49,7 +49,7 @@ export default function PreparacionLegadoPage() {
     <PageContainer>
       <PageHeader title={t("title")} description={t("help")} />
 
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("dias")}</span>
           <Input value={dias} onChange={(e) => setDias(e.target.value)} inputMode="numeric" className="h-9 w-[120px]" />
@@ -57,19 +57,19 @@ export default function PreparacionLegadoPage() {
         <Button onClick={buscar} className="h-9">{t("buscar")}</Button>
       </div>
 
-      {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
+      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
 
       {data && (
         <>
           {data.omitidos > 0 && (
-            <div className="mt-4 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
+            <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
               {t("omitidos", { mostrados: filas.length, total: data.total })}
             </div>
           )}
-          <div className="mt-4 overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+          <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
