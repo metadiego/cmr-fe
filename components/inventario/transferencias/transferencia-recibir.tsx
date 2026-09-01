@@ -40,7 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const num = (v: number | string | null | undefined) => Number(v ?? 0) || 0;
 
@@ -174,13 +174,11 @@ export function TransferenciaRecibir({ id }: { id: string }) {
 
       {/* Cabecera */}
       <div className="mb-6 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">
-            {centroName(transfer.clinicOrigenId)} → {centroName(transfer.clinicDestinoId)}
-          </h1>
-          <Badge variant={ESTADO_VARIANT[transfer.estado] ?? "outline"}>{t(`estado.${transfer.estado}`)}</Badge>
-        </div>
-        {transfer.motivo && <p className="mt-1 text-sm text-muted-foreground">{transfer.motivo}</p>}
+        <PageHeader
+          title={`${centroName(transfer.clinicOrigenId)} → ${centroName(transfer.clinicDestinoId)}`}
+          description={transfer.motivo}
+          actions={<Badge variant={ESTADO_VARIANT[transfer.estado] ?? "outline"}>{t(`estado.${transfer.estado}`)}</Badge>}
+        />
         {!esDestino && transfer.estado === "pendiente" && (
           <p className="mt-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
             {t("soloDestino", { centro: centroName(transfer.clinicDestinoId) })}

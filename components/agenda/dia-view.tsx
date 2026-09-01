@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CitaModal } from "@/components/agenda/cita-modal";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const ALL = "__all__";
 const CENTRO_KEY = "cmr_agenda_centro";
@@ -117,70 +117,72 @@ export function DiaView({ fecha }: { fecha: string }) {
 
   return (
     <PageContainer>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link
-          href="/citas"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {t("today")}
-        </Link>
-        <h1 className="text-xl font-semibold capitalize">{fechaLabel}</h1>
-        {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
-            </span>
-            {t("dia.live")}
-          </span>
-        )}
-        <div className="ml-auto flex items-center gap-2">
-          {/* Toggle de vista (por dispositivo). La clásica es el default e intacta. */}
-          <div className="inline-flex rounded-md border p-0.5 text-xs">
-            <button
-              type="button"
-              onClick={() => pickVista("clasica")}
-              className={
-                "rounded-md px-2.5 py-1 font-medium transition-colors " +
-                (vista === "clasica" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
-              }
-            >
-              {t("dia.vistaClasica")}
-            </button>
-            <button
-              type="button"
-              onClick={() => pickVista("nueva")}
-              className={
-                "rounded-md px-2.5 py-1 font-medium transition-colors " +
-                (vista === "nueva" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
-              }
-            >
-              {t("dia.vistaNueva")}
-            </button>
-          </div>
-          <Can permiso="citas.config">
+      <PageHeader
+        title={<span className="capitalize">{fechaLabel}</span>}
+        actions={
+          <>
             <Link
-              href="/citas/agenda/cupos"
-              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              href="/citas"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <HugeiconsIcon icon={Settings02Icon} className="size-4" />
-              {t("cupos.configure")}
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              {t("today")}
             </Link>
-          </Can>
-          <Select value={centro} onValueChange={pickCentro}>
-            <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {puedeCombinado && (
-                <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
-              )}
-              {centros.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+            {live && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+                </span>
+                {t("dia.live")}
+              </span>
+            )}
+            {/* Toggle de vista (por dispositivo). La clásica es el default e intacta. */}
+            <div className="inline-flex rounded-md border p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => pickVista("clasica")}
+                className={
+                  "rounded-md px-2.5 py-1 font-medium transition-colors " +
+                  (vista === "clasica" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {t("dia.vistaClasica")}
+              </button>
+              <button
+                type="button"
+                onClick={() => pickVista("nueva")}
+                className={
+                  "rounded-md px-2.5 py-1 font-medium transition-colors " +
+                  (vista === "nueva" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {t("dia.vistaNueva")}
+              </button>
+            </div>
+            <Can permiso="citas.config">
+              <Link
+                href="/citas/agenda/cupos"
+                className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <HugeiconsIcon icon={Settings02Icon} className="size-4" />
+                {t("cupos.configure")}
+              </Link>
+            </Can>
+            <Select value={centro} onValueChange={pickCentro}>
+              <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {puedeCombinado && (
+                  <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
+                )}
+                {centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        }
+      />
 
       {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (

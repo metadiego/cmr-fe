@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { useCan } from "@/hooks/use-can";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { MenuEditor } from "@/components/configuracion/menu-editor";
 
 // Configuración → Editor del menú (arrastrar y soltar, hasta 4 niveles). CRUD contra /menu
@@ -14,8 +14,7 @@ export default function ConfigMenuPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
       {ready && !can("rbac.read") ? (
         <p className="text-sm text-muted-foreground">{t("noPermission")}</p>
       ) : (

@@ -12,7 +12,7 @@ import type { ThemeConfig } from "@/lib/theme/config";
 import { mezclarSoloTema } from "@/lib/theme/mezclar-capa";
 import { uploadMedia } from "@/lib/api/media";
 import { apiErrorMessage } from "@/lib/api/errors";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ThemeEditor } from "@/components/theme/theme-editor";
@@ -104,8 +104,7 @@ export default function AppearancePage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+      <PageHeader title={t("title")} description={t("description")} />
 
       {/* Avatar (profile media, independent of the theme layers) */}
       <div className="mt-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">

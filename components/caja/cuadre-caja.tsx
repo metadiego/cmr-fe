@@ -36,8 +36,7 @@ import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
-import { PageContainer } from "@/components/ui/page";
-import { cn } from "@/lib/utils";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -153,22 +152,17 @@ function Shell({
   const t = useTranslations("caja");
   return (
     <PageContainer>
-      <div
-        className={cn(
-          "flex flex-wrap items-center gap-3 border-l-4 pl-3",
-          division === "consulta" ? "border-l-sky-500" : "border-l-emerald-500",
-        )}
-      >
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("title")} — {t(`division.${division}`)}
-        </h1>
-        {centroNombre && (
-          <Badge variant="secondary" className="font-normal">
-            {centroNombre}
-          </Badge>
-        )}
-      </div>
-      <p className="pl-3 text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader
+        title={<>{t("title")} — {t(`division.${division}`)}</>}
+        description={t("help")}
+        count={
+          centroNombre && (
+            <Badge variant="secondary" className="font-normal">
+              {centroNombre}
+            </Badge>
+          )
+        }
+      />
       {children}
     </PageContainer>
   );

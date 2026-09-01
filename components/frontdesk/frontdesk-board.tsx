@@ -54,6 +54,7 @@ import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-moda
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -540,79 +541,82 @@ export function FrontdeskBoard() {
   const cargando = boardRes.state.kind === "loading" || defRes.state.kind === "loading";
 
   return (
-    <div className="w-full px-6 py-6">
-      {/* Header */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
-        {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        count={
+          live && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+              </span>
+              {t("live")}
             </span>
-            {t("live")}
-          </span>
-        )}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <NurseStatusButton fecha={fecha} centro={gate.centro} />
-          <Input
-            type="date"
-            className="h-9 w-40"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            aria-label={t("fecha")}
-          />
-          {puedeRango && (
+          )
+        }
+        actions={
+          <>
+            <NurseStatusButton fecha={fecha} centro={gate.centro} />
             <Input
               type="date"
               className="h-9 w-40"
-              value={hasta}
-              min={fecha}
-              onChange={(e) => setHasta(e.target.value)}
-              aria-label={t("hasta")}
-              title={t("rangoHint")}
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              aria-label={t("fecha")}
             />
-          )}
-          {gate.puedeCambiar && gate.centro && (
-            <Select value={gate.centro} onValueChange={gate.pick}>
-              <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {gate.centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
-              y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
-              las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
-          {accionesEfectivas.length > 0 && (
-            <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {accionesEfectivas.map((a) => {
-                const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
-                const icon = ACCION_ICON[a.icon ?? ""];
-                return (
-                  <Button
-                    key={a.clave}
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 gap-1.5"
-                    onClick={() => dispatchAccion(a)}
-                  >
-                    {icon && <HugeiconsIcon icon={icon} className="size-4" />}
-                    {label}
-                  </Button>
-                );
-              })}
-            </div>
-          )}
-          {can("citas.create") && (
-            <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
-              {t("citar")}
-            </Button>
-          )}
-        </div>
-      </div>
+            {puedeRango && (
+              <Input
+                type="date"
+                className="h-9 w-40"
+                value={hasta}
+                min={fecha}
+                onChange={(e) => setHasta(e.target.value)}
+                aria-label={t("hasta")}
+                title={t("rangoHint")}
+              />
+            )}
+            {gate.puedeCambiar && gate.centro && (
+              <Select value={gate.centro} onValueChange={gate.pick}>
+                <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {gate.centros.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
+                y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
+                las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
+            {accionesEfectivas.length > 0 && (
+              <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {accionesEfectivas.map((a) => {
+                  const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
+                  const icon = ACCION_ICON[a.icon ?? ""];
+                  return (
+                    <Button
+                      key={a.clave}
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 gap-1.5"
+                      onClick={() => dispatchAccion(a)}
+                    >
+                      {icon && <HugeiconsIcon icon={icon} className="size-4" />}
+                      {label}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+            {can("citas.create") && (
+              <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
+                {t("citar")}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
@@ -910,7 +914,7 @@ export function FrontdeskBoard() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
 

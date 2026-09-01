@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -82,21 +82,27 @@ export default function DevolverFacturaPage() {
     <PageContainer>
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {tf("back")}</Link>
 
-      <div className="mt-3 rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
-            <h1 className="truncate text-xl font-semibold tracking-tight">{pacNombre || t("returnTitle")}</h1>
-          </div>
-          {factura?.numero != null && (
+      <PageHeader
+        title={
+          <>
+            <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
+            {pacNombre || t("returnTitle")}
+          </>
+        }
+        count={
+          factura?.numero != null && (
             <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
               {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
             </span>
-          )}
+          )
+        }
+      />
+      {/* Resumen de la factura (referencia): subtotal, descuento (%/$), impuesto (detalle al click), total */}
+      {factura && (
+        <div className="rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
+          <ResumenFactura factura={factura} />
         </div>
-        {/* Resumen de la factura (referencia): subtotal, descuento (%/$), impuesto (detalle al click), total */}
-        {factura && <ResumenFactura factura={factura} />}
-      </div>
+      )}
 
       {facturaState.kind === "loading" ? (
         <p className="mt-8 text-sm text-muted-foreground">{tc("loading")}</p>

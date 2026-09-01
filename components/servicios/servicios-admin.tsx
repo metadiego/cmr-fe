@@ -56,7 +56,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // slug estable para la clave (= clave del tablero/pestaña).
 function slugify(s: string) {
@@ -216,35 +216,43 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
     }
   }
 
+  // Selector de centro + alta: en la página va en las actions del PageHeader; embedded conserva su
+  // propia barra (ver más abajo), sin PageHeader.
+  const toolbar = (
+    <>
+      {centros.length > 1 && (
+        <Select value={esTodos ? TODOS : centro} onValueChange={setCentroSel}>
+          <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {/* "Todos los centros" solo para quien puede editar multicentro (RBAC cosmético). */}
+            {puedeMulti && <SelectItem value={TODOS}>{t("centro.todos")}</SelectItem>}
+            {centros.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+      {/* Alta siempre por-centro-en-todos (flujo actual); en modo Todos se oculta para no confundir. */}
+      {!esTodos && (
+        <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}>
+          <HugeiconsIcon icon={Add01Icon} className="size-4" />
+          {t("new")}
+        </Button>
+      )}
+    </>
+  );
+  const ayuda = esTodos ? t("helpTodos") : t("helpMultiCentro");
+
   const content = (
     <>
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        {!embedded && <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>}
-        <div className={"flex items-center gap-2 " + (embedded ? "w-full justify-between" : "")}>
-          {centros.length > 1 && (
-            <Select value={esTodos ? TODOS : centro} onValueChange={setCentroSel}>
-              <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {/* "Todos los centros" solo para quien puede editar multicentro (RBAC cosmético). */}
-                {puedeMulti && <SelectItem value={TODOS}>{t("centro.todos")}</SelectItem>}
-                {centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {/* Alta siempre por-centro-en-todos (flujo actual); en modo Todos se oculta para no confundir. */}
-          {!esTodos && (
-            <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}>
-              <HugeiconsIcon icon={Add01Icon} className="size-4" />
-              {t("new")}
-            </Button>
-          )}
+      {embedded && (
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex w-full items-center justify-between gap-2">
+            {toolbar}
+          </div>
         </div>
-      </div>
-      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
-        {esTodos ? t("helpTodos") : t("helpMultiCentro")}
-      </p>
+      )}
+      {embedded && <p className="mb-6 max-w-2xl text-sm text-muted-foreground">{ayuda}</p>}
 
       <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
@@ -339,7 +347,14 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
     </>
   );
 
-  return embedded ? content : <PageContainer>{content}</PageContainer>;
+  return embedded ? (
+    content
+  ) : (
+    <PageContainer>
+      <PageHeader title={t("title")} description={ayuda} actions={toolbar} />
+      {content}
+    </PageContainer>
+  );
 }
 
 // Indicador "≠ por centro" con tooltip que lista el valor de cada centro (data-driven).

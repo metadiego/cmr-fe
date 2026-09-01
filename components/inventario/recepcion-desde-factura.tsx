@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const NONE = "__none__";
 const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
@@ -158,9 +159,8 @@ export function RecepcionDesdeFactura() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-5 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {aprendidos !== null && (
         <div className="mb-6 flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
@@ -274,7 +274,7 @@ export function RecepcionDesdeFactura() {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

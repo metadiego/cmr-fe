@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const ESTADO_VARIANT: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
   pendiente: "secondary",
@@ -72,17 +73,19 @@ export function TransferenciasList() {
   const historial = histRes.state.kind === "ok" ? histRes.state.data : [];
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Button size="sm" asChild>
-          <Link href="/inventario/transferencias/nueva">
-            <HugeiconsIcon icon={Add01Icon} className="size-4" />
-            {t("new")}
-          </Link>
-        </Button>
-      </div>
-      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <Button size="sm" asChild>
+            <Link href="/inventario/transferencias/nueva">
+              <HugeiconsIcon icon={Add01Icon} className="size-4" />
+              {t("new")}
+            </Link>
+          </Button>
+        }
+      />
 
       {/* PENDIENTES (bandeja de trabajo) */}
       <h2 className="mb-2 text-sm font-semibold">{t("pendientesTitulo")}</h2>
@@ -204,6 +207,6 @@ export function TransferenciasList() {
           </tbody>
         </table>
       </div>
-    </div>
+    </PageContainer>
   );
 }

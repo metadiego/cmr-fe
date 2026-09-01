@@ -34,7 +34,7 @@ import { ColumnasTab } from "@/components/configuracion/columnas-tab";
 import { ServicioColumnasEditor } from "@/components/configuracion/servicio-columnas-editor";
 import { ServiciosAdmin } from "@/components/servicios/servicios-admin";
 import { Field } from "@/components/kit/form-dialog";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,11 +69,11 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-center gap-3">
-        <Link href="/configuracion/tableros" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
-        <h1 className="text-xl font-semibold">{registro ? tRoot(registro.labelKey) : clave}</h1>
-        <Badge variant="secondary" className="font-mono">{clave}</Badge>
-      </div>
+      <Link href="/configuracion/tableros" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
+      <PageHeader
+        title={registro ? tRoot(registro.labelKey) : clave}
+        actions={<Badge variant="secondary" className="font-mono">{clave}</Badge>}
+      />
 
       {/* Simplificación (pedido del dueño 2026-07-22): 3 pestañas claras — lo que el negocio usa a diario
           (Servicios/Columnas) al frente, y TODO lo técnico del motor en un solo "Avanzado". */}

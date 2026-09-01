@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { getTableros, type TableroRegistro } from "@/lib/api/tablero";
 import { useResource } from "@/hooks/use-resource";
 import { PersonalizarTablero } from "@/components/tablero/personalizar-panel";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -28,8 +28,7 @@ export default function SettingsTablerosPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+      <PageHeader title={t("title")} description={t("description")} />
 
       <div className="mt-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
         <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">

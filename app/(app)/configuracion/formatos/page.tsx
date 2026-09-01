@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { useCan } from "@/hooks/use-can";
 import { useCentroGate } from "@/hooks/use-centro-gate";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { FormatosAdmin } from "@/components/formatos/formatos-admin";
 
@@ -18,8 +18,7 @@ export default function ConfigFormatosPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
       {ready && !can("formatos.config") ? (
         <p className="text-sm text-muted-foreground">{t("sinPermiso")}</p>
       ) : necesitaPicker ? (

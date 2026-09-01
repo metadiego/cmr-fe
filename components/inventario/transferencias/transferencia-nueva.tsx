@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 type Linea = { key: string; productoId: string; cantidad: string };
 let seq = 0;
@@ -114,8 +114,7 @@ export function TransferenciaNueva() {
       <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("newTitle")}</h1>
-      <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("newHelp")}</p>
+      <PageHeader title={t("newTitle")} description={t("newHelp")} />
 
       {/* Cabecera */}
       <div className="grid gap-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] sm:grid-cols-2">

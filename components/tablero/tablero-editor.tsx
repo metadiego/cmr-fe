@@ -19,7 +19,7 @@ import { toBlocks, moveBlock, flatten, normalize } from "@/lib/tablero/column-bl
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -41,18 +41,22 @@ export function TableroEditor({ tablero }: { tablero: string }) {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href="/citas"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {tc("back")}
-        </Link>
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        <Badge variant="secondary" className="ml-1">{tablero}</Badge>
-      </div>
-      <p className="text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        count={<Badge variant="secondary">{tablero}</Badge>}
+        actions={
+          <>
+            <Link
+              href="/citas"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              {tc("back")}
+            </Link>
+          </>
+        }
+      />
 
       {loading && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {!loading && (

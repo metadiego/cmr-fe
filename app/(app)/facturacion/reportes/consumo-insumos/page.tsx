@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Fechas por defecto: del 1° del mes a hoy (Date del navegador; permitido en cliente).
 function isoDay(d: Date) {
@@ -82,20 +82,20 @@ export default function ConsumoInsumosPage() {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={rows.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={rows.length === 0}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex gap-2 no-print">
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={rows.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()} disabled={rows.length === 0}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
       {/* Filtros */}
       <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">

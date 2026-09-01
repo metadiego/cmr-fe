@@ -13,7 +13,7 @@ import {
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,8 +42,7 @@ export default function ConfigNumeracionPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {centrosRes.state.kind === "loading" ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>

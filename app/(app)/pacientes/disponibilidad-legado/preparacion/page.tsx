@@ -9,6 +9,7 @@ import { getPreparacionLegado, type PreparacionLegado, type PreparacionFila } fr
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Preparación del legado: pacientes con cita próxima a quienes falta cargar disponibilidad heredada. El
 // `estado` colorea la fila; `pendiente` es lo accionable (botón cargar). `omitidos`>0 = hay más que el
@@ -45,9 +46,8 @@ export default function PreparacionLegadoPage() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
         <label className="flex flex-col gap-1.5">
@@ -91,7 +91,7 @@ export default function PreparacionLegadoPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { DerivarPrecios } from "@/components/precios/derivar-precios";
 import { ListasPrecio } from "@/components/precios/listas-precio";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const PAGE_SIZE = 50;
 const money = (v: number) =>
@@ -152,27 +152,31 @@ export function PreciosAdmin() {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <div className="inline-flex rounded-lg border p-0.5">
-          {(["catalogo", "listas", "derivar"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => { setCloneName(undefined); setMode(m); }}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                mode === m
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t(`mode.${m}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <p className="max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <>
+            <div className="inline-flex rounded-lg border p-0.5">
+              {(["catalogo", "listas", "derivar"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => { setCloneName(undefined); setMode(m); }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    mode === m
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`mode.${m}`)}
+                </button>
+              ))}
+            </div>
+          </>
+        }
+      />
 
       {mode === "listas" ? (
         <ListasPrecio

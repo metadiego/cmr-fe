@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -62,25 +62,29 @@ export function ComunicacionesAdmin() {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
-        <div className="inline-flex rounded-md border p-0.5">
-          {(["alertas", "notificaciones", "plantillas"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                mode === m ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t(`tab.${m}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <p className="max-w-2xl text-sm text-muted-foreground">{t("pageHelp")}</p>
+      <PageHeader
+        title={t("pageTitle")}
+        description={t("pageHelp")}
+        actions={
+          <>
+            <div className="inline-flex rounded-md border p-0.5">
+              {(["alertas", "notificaciones", "plantillas"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    mode === m ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`tab.${m}`)}
+                </button>
+              ))}
+            </div>
+          </>
+        }
+      />
 
       {mode === "alertas" ? (
         <AlertasPanel />

@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cambio de protocolo: el médico deja SIN EFECTO sesiones pendientes del paciente y las reemplaza por
 // otras. Reusa el catálogo de facturación para elegir los nuevos productos. Todo-o-nada; el BE avisa si
@@ -152,8 +152,7 @@ export default function CambioProtocoloPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
 
       <div className="mt-6 max-w-md">
         <Label>{t("paciente")}</Label>

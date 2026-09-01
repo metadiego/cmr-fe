@@ -18,7 +18,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const CLAVE = "enfermeria";
 
@@ -123,20 +123,19 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   return (
     <PageContainer>
-      {/* Barra */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">{tRoot(def?.panel.labelKey ?? "panel.enfermeria")}</h1>
-          <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
-        </div>
-        <div className="flex items-center gap-2">
-          {!alarma.armado.current && (
-            <button type="button" onClick={alarma.armar} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium" title={t("activarSonido")}>
-              <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title={tRoot(def?.panel.labelKey ?? "panel.enfermeria")}
+        actions={
+          <>
+            <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
+            {!alarma.armado.current && (
+              <button type="button" onClick={alarma.armar} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium" title={t("activarSonido")}>
+                <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
+              </button>
+            )}
+          </>
+        }
+      />
 
       {/* Secciones + muro de tarjetas por enfermera */}
       {defRes.state.kind === "loading" && <p className="text-muted-foreground">…</p>}

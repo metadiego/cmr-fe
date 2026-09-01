@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { AuditoriaLog } from "@/components/auditoria/auditoria-log";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Roles que el BE exige para /auditoria (además del permiso auditoria.read). Gate cosmético: sin esto,
 // un usuario con el permiso pero sin el rol recibía el 403 del BE como error genérico de tabla.
@@ -21,9 +22,8 @@ export default function AuditoriaPage() {
   const autorizado = can("auditoria.read") && tieneRol;
 
   return (
-    <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
       {ready && me.kind === "ok" && !autorizado ? (
         <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
           {t("noPermission")}
@@ -31,6 +31,6 @@ export default function AuditoriaPage() {
       ) : (
         <AuditoriaLog />
       )}
-    </div>
+    </PageContainer>
   );
 }

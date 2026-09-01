@@ -21,6 +21,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
 import { ComoSeCobra } from "@/components/facturacion/como-se-cobra";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,27 +74,29 @@ export function GruposAdmin() {
 
   if (!puede) {
     return (
-      <div className="w-full px-6 py-8">
+      <PageContainer>
         <p className="text-sm text-muted-foreground">{t("denied")}</p>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        {bundle.state.kind === "ok" && (
-          <NuevoGrupo
-            divisiones={bundle.state.data.divisiones}
-            onCreated={(g) => {
-              bundle.reload();
-              setSelId(g.id);
-            }}
-          />
-        )}
-      </div>
-      <p className="mb-6 text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          bundle.state.kind === "ok" && (
+            <NuevoGrupo
+              divisiones={bundle.state.data.divisiones}
+              onCreated={(g) => {
+                bundle.reload();
+                setSelId(g.id);
+              }}
+            />
+          )
+        }
+      />
 
       {bundle.state.kind === "loading" ? (
         <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
@@ -110,7 +113,7 @@ export function GruposAdmin() {
           onChanged={bundle.reload}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

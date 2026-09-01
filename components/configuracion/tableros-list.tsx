@@ -16,7 +16,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -78,13 +78,11 @@ export function TablerosList() {
 
   return (
     <PageContainer>
-      <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        <div className="ml-auto">
-          <Button onClick={() => setOpen(true)}>{t("new")}</Button>
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={<Button onClick={() => setOpen(true)}>{t("new")}</Button>}
+      />
 
       <DataTable
         columns={columns}

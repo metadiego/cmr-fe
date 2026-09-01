@@ -21,6 +21,7 @@ import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { ThemeEditor } from "@/components/theme/theme-editor";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -174,18 +175,15 @@ export default function AparienciaCorporativaPage() {
 
   if (!puedeSistema && !puedeOverride) {
     return (
-      <div className="px-6 py-12">
+      <PageContainer>
         <p className="text-sm text-muted-foreground">{t("noAccess")}</p>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("description")}</p>
-      </header>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("description")} />
 
       {/* Dos columnas en pantallas anchas: se usa todo el ancho, sin desperdiciar los lados. */}
       <div className="grid gap-6 xl:grid-cols-2">
@@ -333,6 +331,6 @@ export default function AparienciaCorporativaPage() {
           </section>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

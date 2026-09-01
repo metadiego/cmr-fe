@@ -38,7 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 export function ProveedoresAdmin() {
   const t = useTranslations("inventario.prov");
@@ -78,14 +78,16 @@ export function ProveedoresAdmin() {
 
   return (
     <PageContainer>
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Button size="sm" onClick={openNew}>
-          <HugeiconsIcon icon={Add01Icon} className="size-4" />
-          {t("new")}
-        </Button>
-      </div>
-      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <Button size="sm" onClick={openNew}>
+            <HugeiconsIcon icon={Add01Icon} className="size-4" />
+            {t("new")}
+          </Button>
+        }
+      />
 
       <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">

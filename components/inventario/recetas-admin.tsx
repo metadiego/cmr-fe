@@ -9,7 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { ComponentesEditor } from "@/components/inventario/componentes-editor";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Recetas de compuestos (§1 roadmap): un derivado (tipo=compuesto) consume N componentes
 // (base|unico) en cantidad+unidad. Editor bill-of-materials (extraído a ComponentesEditor,
@@ -38,8 +38,7 @@ export function RecetasAdmin() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
 
       <div className="grid gap-6 md:grid-cols-[280px_1fr]">
         {/* Lista de compuestos */}

@@ -10,6 +10,7 @@ import { getReporteDia, type ReporteDia } from "@/lib/api/caja";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cuadre general: ventas del día por DIVISIÓN (General = productos+suero+láser; Consulta) desglosadas por
 // forma de pago, más un TOTAL GENERAL que las suma. Todo sale del reporte del día del BE (una llamada por
@@ -96,23 +97,23 @@ export default function CuadreGeneralPage() {
   const cajeroActivo = usuarioId ? (porCajero.find((c) => c.usuarioId === usuarioId)?.nombre ?? usuarioId.slice(0, 8)) : null;
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex items-end gap-2 no-print">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("fecha")}</span>
-            <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="h-9 w-[160px]" />
-          </label>
-          <Button className="h-9" onClick={() => setQuery(fecha)}>{t("buscar")}</Button>
-          <Button variant="outline" size="sm" className="h-9" onClick={() => window.print()} disabled={state.kind !== "ok"}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex items-end gap-2 no-print">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">{t("fecha")}</span>
+              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="h-9 w-[160px]" />
+            </label>
+            <Button className="h-9" onClick={() => setQuery(fecha)}>{t("buscar")}</Button>
+            <Button variant="outline" size="sm" className="h-9" onClick={() => window.print()} disabled={state.kind !== "ok"}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
       {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
@@ -143,7 +144,7 @@ export default function CuadreGeneralPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

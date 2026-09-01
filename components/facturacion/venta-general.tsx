@@ -15,7 +15,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,8 +41,7 @@ export function VentaGeneral() {
       <Link href="/facturacion" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         ← {t("verLista")}
       </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>

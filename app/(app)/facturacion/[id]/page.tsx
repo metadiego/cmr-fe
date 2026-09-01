@@ -71,7 +71,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
@@ -425,12 +425,31 @@ export default function FacturacionPage() {
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {t("back")}</Link>
 
       {/* Cabecera */}
-      <Card className="bg-gradient-to-br from-primary/10 to-transparent">
-      <CardContent className="flex flex-wrap items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-xl font-semibold tracking-tight">{nombre || t("patient")}</h1>
+      <PageHeader
+        title={
+          <>
+            <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
+            {nombre || t("patient")}
+          </>
+        }
+        description={
+          <>
+            {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
+            {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
+                el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
+            <UsuarioResponsable
+              factura={factura}
+              puedeEditar={can("factura.update")}
+              onCorregir={() => setUsuarioOpen(true)}
+              label={t("atendidoPor")}
+              integracionLabel={t("integracion")}
+              sinUsuarioLabel={t("sinUsuario")}
+              corregirLabel={t("corregirUsuario")}
+            />
+          </>
+        }
+        actions={
+          <>
             {/* Corregir paciente sin descartar (solo borrador de venta general; consulta va ligada a la cita). */}
             {esGeneral && estado === "borrador" && (
               <button
@@ -441,90 +460,75 @@ export default function FacturacionPage() {
                 {t("cambiarPaciente")}
               </button>
             )}
-          </div>
-          {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
-          {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
-              el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
-          <UsuarioResponsable
-            factura={factura}
-            puedeEditar={can("factura.update")}
-            onCorregir={() => setUsuarioOpen(true)}
-            label={t("atendidoPor")}
-            integracionLabel={t("integracion")}
-            sinUsuarioLabel={t("sinUsuario")}
-            corregirLabel={t("corregirUsuario")}
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          {record && (
-            <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
-          )}
-          {factura.numero != null && (
-            <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
-              {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
-            </span>
-          )}
-          <EstadoBadge estado={estado} />
-          {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
-          {presupuestoNum && (
-            <Badge variant="warning" className="font-mono tabular-nums">
-              {t("presupuestoNum", { num: presupuestoNum })}
-            </Badge>
-          )}
-          {esGeneral && estado === "borrador" && (
-            <Button variant="outline" size="sm" className="no-print" onClick={() => setCabeceraOpen(true)}>
-              {t("editarCabecera")}
+            {record && (
+              <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
+            )}
+            {factura.numero != null && (
+              <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
+                {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
+              </span>
+            )}
+            <EstadoBadge estado={estado} />
+            {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
+            {presupuestoNum && (
+              <Badge variant="warning" className="font-mono tabular-nums">
+                {t("presupuestoNum", { num: presupuestoNum })}
+              </Badge>
+            )}
+            {esGeneral && estado === "borrador" && (
+              <Button variant="outline" size="sm" className="no-print" onClick={() => setCabeceraOpen(true)}>
+                {t("editarCabecera")}
+              </Button>
+            )}
+            {esGeneral && estado === "borrador" && (
+              <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
+                {t("descartar")}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+              {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
             </Button>
-          )}
-          {esGeneral && estado === "borrador" && (
-            <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
-              {t("descartar")}
-            </Button>
-          )}
-          <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-            {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
-          </Button>
-          {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge.
-              OCULTO tras USB_TEST_UI: el código queda para el futuro. */}
-          {USB_TEST_UI && (
-            <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
-              {t("print.usbTest")}
-            </Button>
-          )}
-          {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
-              software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
-              imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
-          {QZ_PRINT_UI && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="no-print text-xs text-muted-foreground"
-              onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
-            >
-              {t("print.options")}
-              {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
-            </Button>
-          )}
-          {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
-              EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
-          {estado === "emitida" && can("factura.reparar") && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="no-print size-9" aria-label={t("acciones")}>
-                  <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setRegenOpen(true); }}>
-                  {t("regen.accion")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </CardContent>
-      </Card>
+            {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge.
+                OCULTO tras USB_TEST_UI: el código queda para el futuro. */}
+            {USB_TEST_UI && (
+              <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
+                {t("print.usbTest")}
+              </Button>
+            )}
+            {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
+                software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
+                imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
+            {QZ_PRINT_UI && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="no-print text-xs text-muted-foreground"
+                onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
+              >
+                {t("print.options")}
+                {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
+              </Button>
+            )}
+            {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
+                EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
+            {estado === "emitida" && can("factura.reparar") && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="no-print size-9" aria-label={t("acciones")}>
+                    <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setRegenOpen(true); }}>
+                    {t("regen.accion")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </>
+        }
+      />
 
       {/* Opciones de impresión (por dispositivo, en localStorage). El navegador es el default; la térmica
           por QZ Tray es opcional y con respaldo automático al navegador si falla. */}

@@ -22,6 +22,7 @@ import {
 import { Frasco, PilaDeFrascos } from "@/components/inventario/frasco";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -99,11 +100,8 @@ export default function VialesPage() {
   );
 
   return (
-    <div className="w-full px-6 py-6">
-      <header className="mb-5">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("titulo")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitulo")}</p>
-      </header>
+    <PageContainer>
+      <PageHeader title={t("titulo")} description={t("subtitulo")} />
 
       {/* Filtros: el producto manda; el resto acota. */}
       <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
@@ -350,6 +348,6 @@ export default function VialesPage() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

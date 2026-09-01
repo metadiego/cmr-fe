@@ -26,7 +26,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Ficha de personal: TODO en una pantalla, sin saltar. Lista a la izquierda, ficha de la persona a la
 // derecha (identidad, cargo/capacidades y «Dar acceso al sistema»). El objetivo del dueño: uno o dos
@@ -71,8 +71,7 @@ export default function PersonalPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       {gate.necesitaPicker && <p className="mt-6 text-sm text-muted-foreground">{t("elegirCentro")}</p>}
 

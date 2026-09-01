@@ -9,7 +9,7 @@ import { getActiveCentro } from "@/lib/tenant";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { ModalModulosConfig } from "@/components/configuracion/modal-modulos-config";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -47,8 +47,7 @@ export default function SettingsModalModulosPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+      <PageHeader title={t("title")} description={t("description")} />
 
       <div className="mt-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 backdrop-blur">
         <div className="grid gap-3 sm:grid-cols-2">

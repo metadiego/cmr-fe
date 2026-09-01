@@ -13,6 +13,7 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const EMPTY: EstadisticasServicios = {
   totales: { sesiones: 0, pacientes: 0, participaciones: 0, serviciosActivos: 0 },
@@ -117,22 +118,22 @@ export default function EstadisticasServiciosPage() {
   }
 
   return (
-    <div className="w-full px-6 py-6">
+    <PageContainer>
       {/* Título + acciones */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || data.general.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => imprimirReporte(printRef.current, t("title"))} disabled={!data}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || data.general.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => imprimirReporte(printRef.current, t("title"))} disabled={!data}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </>
+        }
+      />
 
       {gate.cargando ? (
         <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>
@@ -250,7 +251,7 @@ export default function EstadisticasServiciosPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

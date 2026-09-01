@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Date del navegador (permitido en cliente). Semana = lunes→hoy.
 function isoDay(d: Date) {
@@ -107,21 +108,21 @@ export default function VentasPorGrupoPage() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || grupos.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={!data}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex gap-2 no-print">
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || grupos.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()} disabled={!data}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
       {/* Filtros */}
       <div className="mt-6 flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
@@ -234,7 +235,7 @@ export default function VentasPorGrupoPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

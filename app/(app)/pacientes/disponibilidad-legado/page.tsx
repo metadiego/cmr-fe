@@ -17,7 +17,7 @@ import { ApiError } from "@/lib/api/types";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cargar disponibilidad heredada del legado por número de récord. Como un récord puede corresponder a
 // VARIAS personas, si el BE responde 409 RECORD_AMBIGUO NO se muestra error: se deja ELEGIR a la persona
@@ -99,8 +99,7 @@ export default function DisponibilidadLegadoPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {/* Buscar por récord */}
       <form

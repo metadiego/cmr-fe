@@ -12,7 +12,7 @@ import { PermisosCatalogo } from "@/components/admin/permisos-catalogo";
 import { MenuAdmin } from "@/components/admin/menu-admin";
 import { EditorRolUnificado } from "@/components/admin/editor-rol";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 export default function AdminPage() {
   const t = useTranslations("admin");
@@ -20,7 +20,7 @@ export default function AdminPage() {
   return (
     <AdminGuard>
       <PageContainer>
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <PageHeader title={t("title")} />
 
         <Tabs defaultValue="users" className="mt-6">
           <TabsList>

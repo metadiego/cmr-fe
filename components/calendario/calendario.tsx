@@ -22,6 +22,7 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -137,44 +138,48 @@ export function Calendario() {
   const modalCommon = { cats, catLabel, tRoot, tc, t };
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold capitalize tracking-tight">{titulo}</h1>
-        {vista !== "agenda" && (
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(-1)} aria-label={t("anterior")}>
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>{t("hoy")}</Button>
-            <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(1)} aria-label={t("siguiente")}>
-              <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-            </Button>
-          </div>
-        )}
-        {/* Selector de vista */}
-        <div className="inline-flex rounded-md border p-0.5 text-xs">
-          {(["mes", "semana", "dia", "agenda"] as Vista[]).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setVista(v)}
-              className={cn("rounded-md px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
-            >
-              {t(`vista.${v}`)}
-            </button>
-          ))}
-        </div>
-        {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
+    <PageContainer>
+      <PageHeader
+        title={<span className="capitalize">{titulo}</span>}
+        actions={
+          <>
+            {vista !== "agenda" && (
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(-1)} aria-label={t("anterior")}>
+                  <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>{t("hoy")}</Button>
+                <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(1)} aria-label={t("siguiente")}>
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+                </Button>
+              </div>
+            )}
+            {/* Selector de vista */}
+            <div className="inline-flex rounded-md border p-0.5 text-xs">
+              {(["mes", "semana", "dia", "agenda"] as Vista[]).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVista(v)}
+                  className={cn("rounded-md px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {t(`vista.${v}`)}
+                </button>
+              ))}
+            </div>
+            {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
 
-        {/* Selector de centro EN la pantalla (patrón único). Solo si hay más de uno; el de la sesión preseleccionado. */}
-        <CentroPantallaSelector estado={centro} />
+            {/* Selector de centro EN la pantalla (patrón único). Solo si hay más de uno; el de la sesión preseleccionado. */}
+            <CentroPantallaSelector estado={centro} />
 
-        {puedeCrear && (
-          <Button size="sm" className="ml-auto" onClick={() => setModal({ dia: hoyStr() })}>
-            <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("nuevo")}
-          </Button>
-        )}
-      </div>
+            {puedeCrear && (
+              <Button size="sm" onClick={() => setModal({ dia: hoyStr() })}>
+                <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("nuevo")}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {/* MES */}
       {vista === "mes" && (
@@ -277,7 +282,7 @@ export function Calendario() {
           {...modalCommon}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

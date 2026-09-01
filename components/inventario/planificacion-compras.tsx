@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const nfmt = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 const n = (v: number) => nfmt.format(Number(v) || 0);
@@ -65,7 +66,11 @@ export function PlanificacionCompras() {
   const [creando, setCreando] = React.useState(false);
 
   if (!can("compras.planificar")) {
-    return <div className="w-full px-6 py-16 text-center text-sm text-muted-foreground">{tc("forbidden")}</div>;
+    return (
+      <PageContainer>
+        <p className="text-center text-sm text-muted-foreground">{tc("forbidden")}</p>
+      </PageContainer>
+    );
   }
 
   function aplicar() {
@@ -200,15 +205,17 @@ export function PlanificacionCompras() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={imprimir} disabled={!data}>{t("imprimir")}</Button>
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data}>{t("exportar")}</Button>
-        </div>
-      </div>
-      <p className="mb-4 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={imprimir} disabled={!data}>{t("imprimir")}</Button>
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data}>{t("exportar")}</Button>
+          </>
+        }
+      />
 
       {/* Parámetros (los edita la gerencia; sobrescriben la config solo para esta consulta) */}
       <div className="mb-5 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
@@ -347,7 +354,7 @@ export function PlanificacionCompras() {
           </table>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

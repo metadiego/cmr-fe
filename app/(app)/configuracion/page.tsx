@@ -9,7 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { useMenu } from "@/hooks/use-menu";
-import { PageContainer } from "@/components/ui/page";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Índice de Configuración: la puerta de entrada a todo lo configurable. Se pintan SOLO las secciones que
 // el BE le manda a esta persona en /me/menu (grupo g-configuracion), NO las nueve fijas: así, al abrir
@@ -37,8 +37,7 @@ export default function ConfiguracionIndexPage() {
 
   return (
     <PageContainer>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       {ready && visibles.length === 0 ? (
         <p className="mt-8 rounded-xl border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
