@@ -123,7 +123,7 @@ export default function ClientesPage() {
       header: t("columns.name"),
       cell: (p) => (
         <span className="font-medium">
-          {[p.nombres, p.apellidos].filter(Boolean).join(" ")}
+          {(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}
         </span>
       ),
     },

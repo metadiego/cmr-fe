@@ -40,7 +40,7 @@ export function PacienteSelect({
     return (
       <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2">
         <span className="truncate text-sm font-medium">
-          {[value.nombres, value.apellidos].filter(Boolean).join(" ")}
+          {(value.nombreMostrar || [value.nombres, value.apellidos].filter(Boolean).join(" "))}
           {value.docId && (
             <span className="ml-2 font-mono text-xs text-muted-foreground">
               ID {value.docId}
@@ -95,7 +95,7 @@ export function PacienteSelect({
                 className="flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent"
               >
                 <span className="truncate">
-                  {[p.nombres, p.apellidos].filter(Boolean).join(" ")}
+                  {(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}
                 </span>
                 {p.docId && (
                   <span className="font-mono text-xs text-muted-foreground">

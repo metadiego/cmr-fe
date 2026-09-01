@@ -75,7 +75,7 @@ export default function DevolverFacturaPage() {
 
   const backHref = `/facturacion/${id}${centro ? `?centro=${centro}` : ""}`;
   const pac = factura?.paciente;
-  const pacNombre = pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "";
+  const pacNombre = pac ? (pac.nombreMostrar || [pac.nombres, pac.apellidos].filter(Boolean).join(" ")) : "";
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">

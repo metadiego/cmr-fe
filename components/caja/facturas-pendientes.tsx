@@ -40,7 +40,7 @@ export function FacturasPendientes({
     Promise.all(
       ids.map((id) =>
         getPaciente(id, centroId)
-          .then((p) => [id, [p.nombres, p.apellidos].filter(Boolean).join(" ").trim()] as const)
+          .then((p) => [id, (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")).trim()] as const)
           .catch(() => [id, ""] as const),
       ),
     ).then((pares) => {

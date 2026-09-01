@@ -100,7 +100,7 @@ export function MedicasCalendar() {
     const map = new Map<string, AgendaEvent[]>();
     for (const c of citas) {
       const p = pacientes[c.pacienteId];
-      const label = p ? [p.nombres, p.apellidos].filter(Boolean).join(" ") : "…";
+      const label = p ? (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")) : "…";
       const color = colorDeEvento(
         null,
         tipoById.get(c.tipoCitaId)?.color,
@@ -214,7 +214,7 @@ export function MedicasCalendar() {
                       {(p.nombres?.[0] ?? "") + (p.apellidos?.[0] ?? "")}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate">{[p.nombres, p.apellidos].filter(Boolean).join(" ")}</span>
+                      <span className="block truncate">{(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}</span>
                       {p.telefono && <span className="block truncate text-xs text-muted-foreground">{p.telefono}</span>}
                     </span>
                   </button>

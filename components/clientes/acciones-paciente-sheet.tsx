@@ -25,7 +25,7 @@ import { CitaModal } from "@/components/agenda/cita-modal";
 // y crear cita médica. Cada sección con su permiso y su estado vacío honesto. Handoff
 // acciones-del-paciente-historiales.
 const money = (v: unknown) => `$${(Number(v) || 0).toFixed(2)}`;
-const nombreDe = (p: Paciente) => [p.nombres, p.apellidos].filter(Boolean).join(" ").trim();
+const nombreDe = (p: Paciente) => (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")).trim();
 // Rango por defecto para servicios (obligan desde/hasta): el año en curso. Fecha fija (no Date.now en SSR).
 const AÑO = "2026";
 

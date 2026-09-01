@@ -3,7 +3,7 @@ import { apiFetch, apiFetchPaged } from "./client";
 import type { Paginated } from "./types";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
-export type Paciente = components["schemas"]["PacienteEntity"];
+export type Paciente = components["schemas"]["PacienteEntity"] & { nombreMostrar?: string | null };
 export type CreatePacientePayload = components["schemas"]["CreatePacienteDto"];
 export type UpdatePacientePayload = components["schemas"]["UpdatePacienteDto"];
 

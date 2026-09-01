@@ -82,7 +82,7 @@ export function ServiciosCalendar() {
     const map = new Map<string, AgendaEvent[]>();
     for (const s of sesiones) {
       const p = pacientes[s.pacienteId];
-      const label = p ? [p.nombres, p.apellidos].filter(Boolean).join(" ") : "…";
+      const label = p ? (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")) : "…";
       const color = servById.get(s.servicioId)?.color ?? "#4a90d9";
       const arr = map.get(s.fecha) ?? [];
       arr.push({ id: s.id, hora: null, label, color });
@@ -189,7 +189,7 @@ export function ServiciosCalendar() {
                       {(p.nombres?.[0] ?? "") + (p.apellidos?.[0] ?? "")}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate">{[p.nombres, p.apellidos].filter(Boolean).join(" ")}</span>
+                      <span className="block truncate">{(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}</span>
                       {p.telefono && <span className="block truncate text-xs text-muted-foreground">{p.telefono}</span>}
                     </span>
                   </button>

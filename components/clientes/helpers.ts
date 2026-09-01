@@ -1,7 +1,10 @@
 import type { Paciente } from "@/lib/api/pacientes";
 
-// Display full name; falls back to "—" when a patient has no name at all.
-export function fullName(p: Pick<Paciente, "nombres" | "apellidos">): string {
+// Nombre para MOSTRAR: SIEMPRE prefiere `nombreMostrar` (lo compone el BE por config del centro —
+// apellido primero por defecto); solo si faltara, compone como respaldo. NO componer el orden aquí.
+// Handoff nombre-del-paciente.
+export function fullName(p: { nombres?: string | null; apellidos?: string | null; nombreMostrar?: string | null }): string {
+  if (p.nombreMostrar && p.nombreMostrar.trim()) return p.nombreMostrar.trim();
   const name = [p.nombres, p.apellidos].filter(Boolean).join(" ").trim();
   return name || "—";
 }
