@@ -26,6 +26,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Ficha de personal: TODO en una pantalla, sin saltar. Lista a la izquierda, ficha de la persona a la
 // derecha (identidad, cargo/capacidades y «Dar acceso al sistema»). El objetivo del dueño: uno o dos
@@ -69,13 +70,12 @@ export default function PersonalPage() {
   const sel = personal.find((p) => p.id === selId) ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-none px-6 py-8 2xl:px-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
-      {gate.necesitaPicker && <p className="mt-6 text-sm text-muted-foreground">{t("elegirCentro")}</p>}
+      {gate.necesitaPicker && <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>}
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Lista */}
         <aside className="space-y-2">
           <div className="relative">
@@ -125,13 +125,13 @@ export default function PersonalPage() {
               onChanged={() => listRes.reload()}
             />
           ) : (
-            <div className="flex min-h-[40vh] items-center justify-center rounded-xl border border-dashed text-sm text-muted-foreground">
+            <div className="flex min-h-[40vh] items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
               {t("elegirPersona")}
             </div>
           )}
         </section>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -181,7 +181,7 @@ function FichaPersonal({
   }
 
   return (
-    <div className="space-y-6 rounded-xl border bg-card/60 p-6 shadow-sm">
+    <div className="space-y-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       {/* Identidad */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -240,8 +240,8 @@ function FichaPersonal({
       <div className="border-t pt-4">
         <Label className="mb-2 block">{t("acceso")}</Label>
         {persona.perfilId ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm">
-            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
+            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
             <span>{persona.email || t("conCuenta")}{persona.perfilId ? ` · ${t("aprobado")}` : ""}</span>
             <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
           </div>

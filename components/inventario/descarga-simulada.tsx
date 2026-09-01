@@ -64,7 +64,7 @@ export function DescargaSimuladaPanel({ productoId }: { productoId: string }) {
   }, [data]);
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/40 px-4 py-2.5">
         <div className="flex items-center gap-2 text-sm font-semibold">
           <HugeiconsIcon icon={PackageIcon} className="size-4" />
@@ -92,7 +92,7 @@ export function DescargaSimuladaPanel({ productoId }: { productoId: string }) {
             {data.avisos.length > 0 && (
               <div className="space-y-1.5">
                 {data.avisos.map((a, i) => (
-                  <div key={i} className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <div key={i} className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                     <HugeiconsIcon icon={Alert01Icon} className="mt-0.5 size-4 shrink-0" />
                     <span>
                       {a.tipo === "duplicado"
@@ -134,7 +134,7 @@ export function DescargaSimuladaPanel({ productoId }: { productoId: string }) {
 
             {/* Estimados: se reportan pero NO descuentan → aparte y en gris. */}
             {data.estimados.length > 0 && (
-              <div className="rounded-lg border border-dashed bg-muted/20 p-3">
+              <div className="rounded-md border border-dashed bg-muted/20 p-3">
                 <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("estimadosTitulo")}</div>
                 <ul className="space-y-0.5 text-sm text-muted-foreground">
                   {data.estimados.map((e, i) => (
@@ -180,9 +180,9 @@ function LineaRow({ linea, t }: { linea: DescargaLinea; t: (k: string, v?: Recor
 function ModoChip({ modo, t }: { modo: DescargaModo; t: (k: string) => string }) {
   const cls =
     modo === "a_la_entrega"
-      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+      ? "bg-warning text-warning-foreground"
       : modo === "no_descarga"
         ? "bg-muted text-muted-foreground"
-        : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
+        : "bg-success text-success-foreground";
   return <span className={"rounded-full px-2 py-0.5 text-[11px] font-medium " + cls}>{t(`modo.${modo}`)}</span>;
 }

@@ -13,6 +13,7 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const EMPTY: EstadisticasServicios = {
   totales: { sesiones: 0, pacientes: 0, participaciones: 0, serviciosActivos: 0 },
@@ -117,33 +118,33 @@ export default function EstadisticasServiciosPage() {
   }
 
   return (
-    <div className="w-full px-6 py-6">
+    <PageContainer>
       {/* Título + acciones */}
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || data.general.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => imprimirReporte(printRef.current, t("title"))} disabled={!data}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || data.general.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => imprimirReporte(printRef.current, t("title"))} disabled={!data}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </>
+        }
+      />
 
       {gate.cargando ? (
-        <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : gate.sinCentro ? (
-        <p className="mt-6 text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
+        <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="mt-6 max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
           {/* Filtros de rango */}
-          <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+          <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
               <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -159,7 +160,7 @@ export default function EstadisticasServiciosPage() {
           </div>
 
           {/* Región imprimible: membrete (solo print) + totales + pestañas */}
-          <div ref={printRef} className="mt-6">
+          <div ref={printRef}>
             {/* Membrete solo para impresión */}
             <div className="solo-print membrete">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -200,7 +201,7 @@ export default function EstadisticasServiciosPage() {
                     {data.general.length === 0 ? (
                       <p className="text-sm text-muted-foreground">{t("sinDatos")}</p>
                     ) : (
-                      <div className="overflow-x-auto rounded-xl border">
+                      <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                         <table className="w-full text-sm">
                           <thead className="bg-muted/60">
                             <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -250,13 +251,13 @@ export default function EstadisticasServiciosPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border px-4 py-3">
+    <div className="rounded-md bg-card px-4 py-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="text-2xl font-bold tabular-nums">{value}</div>
     </div>
@@ -268,7 +269,7 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
   const t = useTranslations("estadisticasServicios");
   return (
     <div className="space-y-5">
-      <div className="rounded-lg border bg-muted/30 px-4 py-2 text-sm">
+      <div className="rounded-md bg-card px-4 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <span className="font-semibold">{servicio.nombre}</span>
         <span className="ml-2 text-muted-foreground">
           {t("resumenServicio", { sesiones: servicio.sesiones, participaciones: servicio.participaciones, pacientes: servicio.pacientes })}
@@ -284,7 +285,7 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
               {t.has(`rol.${r.rol}`) ? t(`rol.${r.rol}`) : capitalizar(r.rol)}
               <span className="ml-2 font-normal text-muted-foreground">· {t("participacionesDivisor", { n: r.participaciones })}</span>
             </h3>
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <table className="w-full text-sm">
                 <thead className="bg-muted/60">
                   <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">

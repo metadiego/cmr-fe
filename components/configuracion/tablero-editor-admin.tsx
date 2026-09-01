@@ -34,6 +34,7 @@ import { ColumnasTab } from "@/components/configuracion/columnas-tab";
 import { ServicioColumnasEditor } from "@/components/configuracion/servicio-columnas-editor";
 import { ServiciosAdmin } from "@/components/servicios/servicios-admin";
 import { Field } from "@/components/kit/form-dialog";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,16 +60,20 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
   const estados = estadosRes.state.kind === "ok" ? estadosRes.state.data : [];
 
   if (ready && !can("tablero.admin")) {
-    return <p className="mx-auto max-w-5xl px-6 py-16 text-center text-sm text-muted-foreground">{t("noAccess")}</p>;
+    return (
+      <PageContainer>
+        <p className="text-center text-sm text-muted-foreground">{t("noAccess")}</p>
+      </PageContainer>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link href="/configuracion/tableros" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
-        <h1 className="text-xl font-semibold">{registro ? tRoot(registro.labelKey) : clave}</h1>
-        <Badge variant="secondary" className="font-mono">{clave}</Badge>
-      </div>
+    <PageContainer>
+      <Link href="/configuracion/tableros" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
+      <PageHeader
+        title={registro ? tRoot(registro.labelKey) : clave}
+        actions={<Badge variant="secondary" className="font-mono">{clave}</Badge>}
+      />
 
       {/* Simplificación (pedido del dueño 2026-07-22): 3 pestañas claras — lo que el negocio usa a diario
           (Servicios/Columnas) al frente, y TODO lo técnico del motor en un solo "Avanzado". */}
@@ -180,7 +185,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                       const sel = ((d.desdeEstados as string[]) || []).includes(es.clave);
                       return (
                         <button key={es.clave} type="button" onClick={() => patch({ desdeEstados: toggle((d.desdeEstados as string[]) || [], es.clave) })}
-                          className={"rounded border px-2 py-0.5 text-xs " + (sel ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground")}>
+                          className={"rounded-md border px-2 py-0.5 text-xs " + (sel ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground")}>
                           {tRoot(es.labelKey)}
                         </button>
                       );
@@ -189,7 +194,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                   </div>
                 </Field>
                 <Field label={t("trA")}>
-                  <select className="h-9 w-full rounded-md border bg-background px-2 text-sm" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
+                  <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
                     <option value="">—</option>
                     {estados.map((es) => <option key={es.clave} value={es.clave}>{tRoot(es.labelKey)}</option>)}
                   </select>
@@ -234,7 +239,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
           </Seccion>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -243,11 +248,12 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
   return (
     <div
       className={
-        "mb-4 rounded-xl border px-4 py-3 " +
-        (warning ? "border-amber-500/30 bg-amber-500/5" : "bg-muted/30")
+        warning
+          ? "mb-4 rounded-md border border-warning/40 bg-warning px-4 py-3"
+          : "mb-4 rounded-md ring-1 ring-foreground/10 bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3"
       }
     >
-      <p className={"text-sm font-semibold " + (warning ? "text-amber-700 dark:text-amber-400" : "")}>{title}</p>
+      <p className={"text-sm font-semibold " + (warning ? "text-warning-foreground" : "")}>{title}</p>
       <p className="mt-0.5 text-sm text-muted-foreground">{body}</p>
     </div>
   );
@@ -256,7 +262,7 @@ function IntroCard({ title, body, warning }: { title: string; body: string; warn
 // Sección apilada dentro de "Avanzado" (Estados/Transiciones/… dejan de ser pestañas sueltas).
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8 rounded-xl border p-4">
+    <section className="mb-8 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">{titulo}</h2>
       {children}
     </section>
@@ -335,7 +341,7 @@ function PublicarTab({ clave, labelKey, icon }: { clave: string; labelKey: strin
   return (
     <div className="max-w-lg space-y-4">
       <p className="text-sm text-muted-foreground">{t("publicarHelp")}</p>
-      <div className="rounded-md border p-3 text-sm">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3 text-sm">
         <div>{t("menuPath")}: <span className="font-mono">{path}</span></div>
         <div className="mt-1">
           {existing ? <Badge variant="secondary">{t("published")}</Badge> : <Badge variant="outline">{t("notPublished")}</Badge>}

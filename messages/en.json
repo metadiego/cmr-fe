@@ -903,10 +903,10 @@
       "permisoSinPermiso": "No permission (visible to everyone)"
     },
     "theme": {
-      "systemTitle": "System theme",
-      "systemHelp": "The default theme for the whole network (base layer).",
-      "centerTitle": "Per-center theme",
-      "centerHelp": "A center's own theme; takes precedence over the system one.",
+      "systemTitle": "System brand color",
+      "systemHelp": "The default brand color for the whole network (base layer).",
+      "centerTitle": "Per-center brand color",
+      "centerHelp": "A center's own brand color; takes precedence over the system one.",
       "selectCenter": "Center",
       "loading": "Loading…",
       "save": "Save",
@@ -1203,34 +1203,21 @@
   },
   "appearance": {
     "title": "Appearance",
-    "description": "Customize your account's colors and style.",
-    "loading": "Loading…",
-    "primary": "Primary color",
-    "accent": "Accent color",
-    "background": "Background",
-    "radius": "Corner radius",
-    "radiusDefault": "Default",
-    "radius_none": "None",
-    "radius_small": "Small",
-    "radius_medium": "Medium",
-    "radius_large": "Large",
-    "save": "Save",
-    "saving": "Saving…",
-    "reset": "Reset",
-    "saved": "Appearance saved.",
-    "resetDone": "Appearance reset.",
+    "description": "Your profile photo.",
+    "brandColor": "Brand color",
+    "brandHint": "The rest of the design is generated from this color to keep everything cohesive.",
+    "brand_navy": "Navy",
+    "brand_ocean": "Ocean",
+    "brand_teal": "Teal",
+    "brand_emerald": "Emerald",
+    "brand_violet": "Violet",
+    "brand_rose": "Rose",
     "avatarTitle": "Profile photo",
     "avatarUpload": "Upload photo",
     "avatarRemove": "Remove",
     "avatarSaved": "Photo updated.",
     "avatarRemoved": "Photo removed.",
-    "uploading": "Uploading…",
-    "backgroundTitle": "Background image",
-    "backgroundUpload": "Upload image",
-    "backgroundChange": "Change image",
-    "backgroundRemove": "Remove background",
-    "backgroundSaved": "Background updated.",
-    "backgroundRemoved": "Background removed."
+    "uploading": "Uploading…"
   },
   "apiHealth": {
     "title": "API connection test",
@@ -1268,13 +1255,7 @@
     "stepPresent": "Present",
     "stepConsult": "In consult",
     "stepAttended": "Attended",
-    "now": "now",
-    "prescriptionRequired": "Select a prescription or mark “No prescription” to continue."
-  },
-  "prescripcion": {
-    "title": "Prescription",
-    "none": "No prescription",
-    "required": "Required: enter a quantity or mark “No prescription”."
+    "now": "now"
   },
   "settingsModulos": {
     "title": "Modal modules",
@@ -1293,9 +1274,6 @@
     "modulo": {
       "agendar_cita": {
         "desc": "Schedule the patient's next appointment."
-      },
-      "prescripcion": {
-        "desc": "Show the prescription grid inside the attention modal."
       }
     }
   },
@@ -3425,13 +3403,13 @@
     "title": "Corporate appearance",
     "description": "What everyone sees by default, each center’s own look, and temporary changes that override everyone while active. Your personal appearance is set from your avatar.",
     "systemTitle": "System",
-    "systemHint": "What everyone sees when they have nothing of their own.",
+    "systemHint": "The default brand color, for anyone without their own.",
     "centroTitle": "Per center",
-    "centroHint": "Overrides the system look for that center’s people.",
+    "centroHint": "That center's brand color; overrides the system one for its people.",
     "centroLabel": "Center",
     "centroPlaceholder": "Pick a center",
     "overrideTitle": "Temporary changes (overrides)",
-    "overrideHint": "While one is active it wins over everything else, including each user’s personal look. It is created from the colors currently in “System”.",
+    "overrideHint": "While one is active it wins over everything else. It is created from the brand color currently in “System”.",
     "overrideName": "Name",
     "overrideNamePlaceholder": "Anniversary campaign",
     "overrideUntil": "Until",
@@ -3519,15 +3497,17 @@
     "sinConsumos": "No doses in this range.",
     "sinNumero": "no number",
     "historicos": "Previous vials ({n})",
-    "col.fecha": "Time",
-    "col.paciente": "Patient",
-    "col.dosis": "Dose",
-    "col.vial": "Vial",
-    "estado.abierto": "open",
-    "estado.agotado": "empty",
-    "estado.descartado": "discarded",
     "col": {
+      "fecha": "Time",
+      "paciente": "Patient",
+      "dosis": "Dose",
+      "vial": "Vial",
       "factura": "Invoice"
+    },
+    "estado": {
+      "abierto": "open",
+      "agotado": "empty",
+      "descartado": "discarded"
     },
     "verFactura": "View invoice"
   },
@@ -3792,13 +3772,11 @@
     "compras": "Purchases",
     "servicios": "Services",
     "citas": "Medical appointments",
-    "prescripcion": "Prescription",
     "crearCita": "Create appointment",
     "abrir": "Open",
     "sinCompras": "No purchases.",
     "sinServicios": "No services.",
-    "sinCitas": "No appointments.",
-    "sinPrescripcion": "No prescription."
+    "sinCitas": "No appointments."
   },
   "clientes": {}
 }

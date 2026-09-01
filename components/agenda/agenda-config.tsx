@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CuposConfig } from "@/components/agenda/cupos-config";
 import { CuposServicioConfig } from "@/components/agenda/cupos-servicio-config";
 import { FestivosConfig } from "@/components/agenda/festivos-config";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Config hub for Citas Médicas scheduling: hourly capacity (cupos) + holidays.
 export function AgendaConfig() {
@@ -17,17 +18,21 @@ export function AgendaConfig() {
   const year = new Date().getFullYear();
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link
-          href="/citas"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {t("today")}
-        </Link>
-        <h1 className="text-xl font-semibold">{t("cupos.title")}</h1>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("cupos.title")}
+        actions={
+          <>
+            <Link
+              href="/citas"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              {t("today")}
+            </Link>
+          </>
+        }
+      />
 
       <Tabs defaultValue="cupos">
         <TabsList className="mb-4">
@@ -45,6 +50,6 @@ export function AgendaConfig() {
           <FestivosConfig year={year} />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

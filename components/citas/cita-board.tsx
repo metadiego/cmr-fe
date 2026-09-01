@@ -73,7 +73,7 @@ export function CitaBoard({
               .map((c) => (
                 <div
                   key={c.id}
-                  className="rounded-md border bg-card p-3 shadow-sm"
+                  className="rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-mono text-xs text-muted-foreground">

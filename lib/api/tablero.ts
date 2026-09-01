@@ -248,7 +248,7 @@ export function colorColumna(
 // POST /tablero/composicion — set one column's per-tablero `render` override
 // (merges over the catalog render; composición wins). Single-column upsert; does
 // NOT touch orden/visible/color. Used to plug/unplug modal modules per board
-// (e.g. { prescripcion:false }). Send the FULL render object (BE replaces it).
+// (e.g. { agendar_cita:false }). Send the FULL render object (BE replaces it).
 export function setComposicionRender(
   tablero: string,
   columnaId: string,

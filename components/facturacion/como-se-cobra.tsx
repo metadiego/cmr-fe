@@ -189,7 +189,7 @@ export function ComoSeCobra({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border p-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
         <Select value={copyFrom} onValueChange={setCopyFrom}>
           <SelectTrigger className="h-9 w-60">
             <SelectValue placeholder={t("copyFromPlaceholder")} />
@@ -210,7 +210,7 @@ export function ComoSeCobra({
       </div>
 
       {extra.length === 0 && (
-        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-400">
+        <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
           ⚠️ {t("extraEmptyWarning")}
         </p>
       )}
@@ -232,7 +232,7 @@ export function ComoSeCobra({
         {t("addField")}
       </Button>
 
-      <div className="rounded-xl border p-3">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
         <p className="mb-2 text-xs font-medium text-muted-foreground">{t("fabricaTitle")}</p>
         <div className="flex flex-wrap gap-1.5">
           {deFabrica.map((c) => (
@@ -299,7 +299,7 @@ function CampoExtra({
   const multiplica = col.rol === "multiplicador";
 
   return (
-    <div className="space-y-3 rounded-xl border p-3">
+    <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
       <div className="flex items-center justify-between gap-3">
         <Input
           value={nombre}
@@ -407,7 +407,7 @@ function NuevoCampoDialog({
                   type="button"
                   onClick={() => setTipo(op.value)}
                   className={cn(
-                    "flex-1 rounded-lg border px-3 py-2 text-sm transition-colors",
+                    "flex-1 rounded-md border px-3 py-2 text-sm transition-colors",
                     tipo === op.value ? "border-primary bg-primary/10" : "border-border hover:bg-accent/40",
                   )}
                 >

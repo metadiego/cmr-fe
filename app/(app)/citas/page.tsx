@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicasCalendar } from "@/components/agenda/medicas-calendar";
 import { ServiciosCalendar } from "@/components/agenda/servicios-calendar";
+import { PageContainer } from "@/components/ui/page";
 
 // Agenda: two calendars over the same shell — medical appointments (citas, with
 // time) and service sessions (frontdesk, by day). `?tab=servicios` deep-links
@@ -23,7 +24,7 @@ export default function CitasPage() {
   const volver = params.get("volver");
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-8">
+    <PageContainer>
       {volver && (
         <Button
           variant="ghost"
@@ -47,6 +48,6 @@ export default function CitasPage() {
           <ServiciosCalendar />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

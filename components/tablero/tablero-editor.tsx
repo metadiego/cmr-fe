@@ -19,6 +19,7 @@ import { toBlocks, moveBlock, flatten, normalize } from "@/lib/tablero/column-bl
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -39,19 +40,23 @@ export function TableroEditor({ tablero }: { tablero: string }) {
   const sig = catalog.map((c) => c.id).join(",") + "|" + efectivas.map((e) => `${e.clave}:${e.orden}`).join(",");
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link
-          href="/citas"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {tc("back")}
-        </Link>
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        <Badge variant="secondary" className="ml-1">{tablero}</Badge>
-      </div>
-      <p className="mb-4 text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        count={<Badge variant="secondary">{tablero}</Badge>}
+        actions={
+          <>
+            <Link
+              href="/citas"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              {tc("back")}
+            </Link>
+          </>
+        }
+      />
 
       {loading && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {!loading && (
@@ -66,7 +71,7 @@ export function TableroEditor({ tablero }: { tablero: string }) {
           }}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -214,7 +219,7 @@ function Editor({
           // Bloque encadenado (2+ columnas con el mismo group): tarjeta con badge + un solo control de mover.
           if (b.group && b.items.length > 1) {
             return (
-              <li key={`g-${b.group}`} className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+              <li key={`g-${b.group}`} className="rounded-md bg-primary/5 ring-1 ring-primary/30 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                 <div className="flex items-center gap-3">
                   {mover}
                   <div className="flex-1 space-y-1.5">
@@ -232,7 +237,7 @@ function Editor({
           // Fila suelta (o grupo de 1): tarjeta simple.
           const r = b.items[0];
           return (
-            <li key={r.columnaId} className="flex items-center gap-3 rounded-lg border px-3 py-2">
+            <li key={r.columnaId} className="flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
               {mover}
               <div className="flex-1">{itemRow(r)}</div>
             </li>

@@ -44,7 +44,7 @@ export function VialYPresentaciones({ productoId }: { productoId: string }) {
   const un = (id?: string | null) => (id ? unidadNombre.get(id) ?? "" : "");
 
   return (
-    <div className="space-y-5 rounded-xl border p-4">
+    <div className="space-y-5 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <VialesAbiertos productoId={productoId} un={un} t={t} />
       <Presentaciones productoId={productoId} un={un} unidades={unidadesRes.state.kind === "ok" ? unidadesRes.state.data : []} t={t} />
     </div>
@@ -67,7 +67,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
       <h3 className="text-sm font-semibold">{t("abiertosTitle")}</h3>
       {state.kind === "loading" && <p className="text-xs text-muted-foreground">{t("cargando")}</p>}
       {state.kind === "ok" && viales.length === 0 && (
-        <p className="rounded-lg border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">{t("sinAbiertos")}</p>
+        <p className="rounded-md border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">{t("sinAbiertos")}</p>
       )}
       <ul className="space-y-2">
         {viales.map((v) => {
@@ -76,13 +76,13 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
           const remanente = Number(v.remanente ?? 0);
           const excedido = Number(v.excedido ?? 0);
           return (
-            <li key={v.id} className="rounded-lg border p-3">
+            <li key={v.id} className="rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-sm font-medium">
                   {t("vialDe", { capacidad: nf.format(Number(v.capacidadTotal ?? 0)), unidad })}
                 </span>
                 {excedido > 0 ? (
-                  <span className="rounded-md bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                  <span className="rounded-md bg-warning px-2 py-0.5 text-xs font-semibold text-warning-foreground">
                     {t("excedido", { n: nf.format(excedido), unidad })}
                   </span>
                 ) : (
@@ -95,7 +95,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
               {/* Barra de uso: cuánto se ha consumido de ESE vial. */}
               <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className={"h-full rounded-full " + (excedido > 0 ? "bg-amber-500" : pct >= 80 ? "bg-amber-500" : "bg-primary")}
+                  className={"h-full rounded-full " + (excedido > 0 ? "bg-warning-foreground" : pct >= 80 ? "bg-warning-foreground" : "bg-primary")}
                   style={{ width: `${excedido > 0 ? 100 : pct}%` }}
                 />
               </div>
@@ -195,8 +195,8 @@ function Presentaciones({
             <li
               key={p.id}
               className={
-                "flex items-center gap-3 rounded-lg border px-3 py-2 " +
-                (p.esDefault ? "border-primary bg-primary/5 " : "") +
+                "flex items-center gap-3 rounded-md border px-3 py-2 " +
+                (p.esDefault ? "border-primary bg-primary/10 text-primary " : "") +
                 (p.activo === false ? "opacity-50" : "")
               }
             >
@@ -232,7 +232,7 @@ function Presentaciones({
       </ul>
 
       {creando ? (
-        <div className="space-y-2 rounded-lg border border-dashed p-3">
+        <div className="space-y-2 rounded-md border border-dashed p-3">
           <Input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder={t("nombrePlaceholder")} className="h-8" />
           <div className="flex gap-2">
             <Input value={contenido} onChange={(e) => setContenido(e.target.value)} inputMode="decimal" placeholder={t("contenidoPlaceholder")} className="h-8 w-28" />

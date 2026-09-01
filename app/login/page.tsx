@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Suspense, useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Stethoscope02Icon } from "@hugeicons/core-free-icons";
 
 import { login, type LoginState } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -30,8 +32,14 @@ function LoginForm() {
   const expirada = useSearchParams().has("expired");
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-6 py-16">
-      <div className="rounded-xl border bg-card/60 p-6 shadow-sm backdrop-blur">
+    <div className="flex min-h-svh flex-col items-center justify-center gap-5 bg-muted px-6 py-12">
+      <div className="flex items-center gap-2">
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
+          <HugeiconsIcon icon={Stethoscope02Icon} className="size-5" />
+        </span>
+        <span className="text-lg font-semibold tracking-tight">CMR</span>
+      </div>
+      <div className="w-full max-w-sm rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("subtitle")}
@@ -87,7 +95,7 @@ function LoginForm() {
         </form>
       </div>
 
-      <p className="mt-4 text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         <Link href="/" className="hover:text-foreground">
           {t("backHome")}
         </Link>

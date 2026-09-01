@@ -112,13 +112,10 @@ export function CitaModal({
   const claveInicial = (estados.find((e) => e.esInicial)?.clave ?? "programada") as
     | "programada"
     | "confirmada";
-  const [estadoCrear, setEstadoCrear] = React.useState<"programada" | "confirmada">(claveInicial);
-  // El catálogo llega por red: cuando resuelve, se adopta su estado inicial (salvo que el usuario ya
-  // haya elegido a mano — para eso está `tocado`).
-  const [estadoTocado, setEstadoTocado] = React.useState(false);
-  React.useEffect(() => {
-    if (!estadoTocado) setEstadoCrear(claveInicial);
-  }, [claveInicial, estadoTocado]);
+  // El catálogo llega por red: el estado se DERIVA de su inicial hasta que el usuario elija a mano
+  // (sin setState en efecto, que dispara renders en cascada / lo marca el React Compiler).
+  const [estadoElegido, setEstadoElegido] = React.useState<"programada" | "confirmada" | null>(null);
+  const estadoCrear = estadoElegido ?? claveInicial;
   const [motivo, setMotivo] = React.useState(cita?.motivo ?? "");
   const [notas, setNotas] = React.useState(cita?.notas ?? "");
   const [submitting, setSubmitting] = React.useState(false);
@@ -306,8 +303,7 @@ export function CitaModal({
                 // Al crear: elegir con qué estado nace (allowlist BE). Confirmada = entra al tablero de
                 // Atención de una vez. Colores/etiquetas del catálogo (data-driven).
                 <Select value={estadoCrear} onValueChange={(v) => {
-                    setEstadoTocado(true);
-                    setEstadoCrear(v as "programada" | "confirmada");
+                    setEstadoElegido(v as "programada" | "confirmada");
                   }}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -348,8 +344,8 @@ export function CitaModal({
           </Field>
 
           {warn && (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
-              <p className="font-medium text-amber-700 dark:text-amber-400">{t("overlapWarn")}</p>
+            <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
+              <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
               <ul className="mt-1 text-xs text-muted-foreground">
                 {warn.map((c) => (
                   <li key={c.citaId}>· {c.hora}–{c.horaFin}</li>

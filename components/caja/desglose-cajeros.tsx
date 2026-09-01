@@ -25,7 +25,7 @@ export function DesgloseCajeros({
 
   if (cajeros.length === 0) {
     return (
-      <div className="rounded-xl border p-4">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <h3 className="mb-1 text-sm font-semibold">{t("title")}</h3>
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       </div>
@@ -39,7 +39,7 @@ export function DesgloseCajeros({
   );
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="grid grid-cols-[1fr_7rem_7rem] gap-x-3 border-b px-4 py-2.5 text-xs font-medium text-muted-foreground">
         <span className="text-sm font-semibold text-foreground">{t("title")}</span>
         <span className="text-right">{t("cash")}</span>

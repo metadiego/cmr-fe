@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // (c) Índice/subnav de Inventario: un solo punto de entrada que amarra las secciones ya
 // existentes (sin rutas paralelas ni duplicados). Solo enlaza rutas REALES.
@@ -25,16 +26,15 @@ const SECTIONS: { key: string; href: string }[] = [
 export function InventarioIndex() {
   const t = useTranslations("inventario.index");
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-8 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((s) => (
           <Link
             key={s.key}
             href={s.href}
-            className="group flex flex-col justify-between rounded-xl border p-5 transition-colors hover:border-primary/50 hover:bg-accent/40"
+            className="group flex flex-col justify-between rounded-md bg-card p-5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 transition-colors hover:bg-accent/30 hover:ring-primary/30"
           >
             <div>
               <h2 className="font-semibold">{t(`sections.${s.key}.title`)}</h2>
@@ -52,6 +52,6 @@ export function InventarioIndex() {
           </Link>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

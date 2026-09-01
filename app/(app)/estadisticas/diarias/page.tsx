@@ -11,6 +11,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const nf = new Intl.NumberFormat("en-US");
@@ -127,23 +128,22 @@ export default function EstadisticasDiariasPage() {
   }
 
   return (
-    <div className="w-full px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        {/* Botones de exportación (no salen en la impresión). */}
-        <div className="flex flex-wrap gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={imprimir} disabled={!cards.length}><HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}</Button>
-          <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
-          <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
-          <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={imprimir} disabled={!cards.length}><HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}</Button>
+            <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
+            <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
+            <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
+          </>
+        }
+      />
 
       {/* Rango + Generar */}
-      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -171,14 +171,14 @@ export default function EstadisticasDiariasPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string }) {
   const vacio = data.atencionMedica.total === 0 && data.servicios.length === 0 && !data.ingresoBruto;
   return (
-    <div className="card rounded-xl border bg-card p-6">
+    <div className="card rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-center">
         <h2 className="text-xl font-bold">C.M.R. — {centro}</h2>
         <div className="fecha text-sm text-muted-foreground">{fecha}</div>

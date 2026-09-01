@@ -151,7 +151,7 @@ export function DerivarPrecios({
   return (
     <div className="space-y-6">
       {/* Config */}
-      <div className="grid gap-5 rounded-xl border p-5 md:grid-cols-2">
+      <div className="grid gap-5 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5 md:grid-cols-2">
         {/* Origen */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold">{t("origen")}</h3>
@@ -292,7 +292,7 @@ export function DerivarPrecios({
 
       {/* Preview */}
       {preview && (
-        <div className="rounded-xl border">
+        <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3 text-sm">
             <Badge variant="secondary">{t("total", { n: preview.total })}</Badge>
             <Badge variant={preview.aplicados > 0 ? "default" : "outline"}>
@@ -302,7 +302,7 @@ export function DerivarPrecios({
               <span className="text-muted-foreground">{t("nothingToApply")}</span>
             )}
           </div>
-          <div className="max-h-[420px] overflow-y-auto">
+          <div className="max-h-[420px] overflow-y-auto overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

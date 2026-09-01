@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Settings02Icon,
@@ -20,7 +19,6 @@ import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { useMenu } from "@/hooks/use-menu";
-import { useNavVista } from "@/hooks/use-nav-vista";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
@@ -48,9 +46,7 @@ export function UserMenu() {
   // llega alguna sección de configuración (/configuracion/*) en /me/menu.
   const menu = useMenu();
   const puedeConfigurar = menu.some((m) => (m.path ?? "").startsWith("/configuracion/"));
-  const { theme, setTheme } = useTheme();
   const locale = useLocale() as Locale;
-  const [navVista, setNavVista] = useNavVista();
 
   const [signingOut, setSigningOut] = React.useState(false);
   async function signOut() {
@@ -113,17 +109,6 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {/* Tema */}
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {t("theme")}
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">{t("themeLight")}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">{t("themeDark")}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">{t("themeSystem")}</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-        <DropdownMenuSeparator />
-
         {/* Idioma */}
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           {t("language")}
@@ -134,17 +119,6 @@ export function UserMenu() {
               {t(`lang_${l}`)}
             </DropdownMenuRadioItem>
           ))}
-        </DropdownMenuRadioGroup>
-        <DropdownMenuSeparator />
-
-        {/* Menú lateral (beta, opcional, por dispositivo) — la barra clásica sigue de default;
-            ver hooks/use-nav-vista.ts y docs/plans/menu-principal-sidebar-opcional.md. */}
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          {t("navVista")}
-        </DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={navVista} onValueChange={(v) => setNavVista(v as "clasica" | "sidebar")}>
-          <DropdownMenuRadioItem value="clasica">{t("navVistaClasica")}</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="sidebar">{t("navVistaSidebar")}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
 

@@ -263,7 +263,7 @@ function SemanaGrid({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>
@@ -337,7 +337,7 @@ function Preview({ servicioClave, centroId }: { servicioClave: string; centroId?
   );
   const horas = horasRes.state.kind === "ok" ? horasRes.state.data : [];
   return (
-    <aside className="h-fit rounded-xl border bg-muted/20 p-4 lg:sticky lg:top-6">
+    <aside className="h-fit rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 lg:sticky lg:top-6">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("cupos.previewTitle")}</span>
       <Input type="date" className="mt-2 h-9" value={fecha} onChange={(e) => setFecha(e.target.value)} />
       {!fecha && <p className="mt-3 text-xs text-muted-foreground">{t("cupos.previewPick")}</p>}
@@ -347,7 +347,7 @@ function Preview({ servicioClave, centroId }: { servicioClave: string; centroId?
           {horas.map((h) => (
             <div key={h.hora} className="flex items-center justify-between rounded px-2 py-1 text-xs tabular-nums odd:bg-background/60">
               <span className="font-mono">{h.hora}</span>
-              <span className={h.vacios <= 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}>
+              <span className={h.vacios <= 0 ? "text-destructive" : "text-success-foreground"}>
                 {t("cupos.previewCell", { agendadas: h.agendadas, cupo: h.cupo, vacios: h.vacios })}
               </span>
             </div>

@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -72,23 +73,23 @@ export default function VentasPorUsuarioPage() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={rows.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={rows.length === 0}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex gap-2 no-print">
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={rows.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()} disabled={rows.length === 0}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -116,13 +117,13 @@ export default function VentasPorUsuarioPage() {
         </div>
       </div>
 
-      {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
+      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
 
       {state.kind === "ok" && (
-        <div className="mt-4 overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <table className="w-full text-sm">
             <thead className="bg-muted/60">
               <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -138,11 +139,11 @@ export default function VentasPorUsuarioPage() {
                 const sinUsuario = r.usuarioId == null;
                 const pct = maxTotal > 0 ? Math.max(2, Math.round((Math.abs(r.total) / maxTotal) * 100)) : 0;
                 return (
-                  <tr key={r.usuarioId ?? `__sin__${i}`} className={"hover:bg-muted/30 " + (sinUsuario ? "bg-amber-500/5" : "")}>
+                  <tr key={r.usuarioId ?? `__sin__${i}`} className={"hover:bg-muted/30 " + (sinUsuario ? "bg-warning" : "")}>
                     <td className="px-3 py-2">
-                      <span className={"font-medium " + (sinUsuario ? "text-amber-700 dark:text-amber-400" : "")}>{nombreDe(r)}</span>
+                      <span className={"font-medium " + (sinUsuario ? "text-warning-foreground" : "")}>{nombreDe(r)}</span>
                       <div className="mt-1 h-1.5 w-full max-w-[280px] overflow-hidden rounded-full bg-muted">
-                        <div className={"h-full rounded-full " + (sinUsuario ? "bg-amber-500" : "bg-primary")} style={{ width: `${pct}%` }} />
+                        <div className={"h-full rounded-full " + (sinUsuario ? "bg-warning-foreground" : "bg-primary")} style={{ width: `${pct}%` }} />
                       </div>
                     </td>
                     <td className="px-3 py-2 text-right text-base font-bold tabular-nums">{money(r.total)}</td>
@@ -161,7 +162,7 @@ export default function VentasPorUsuarioPage() {
           </table>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

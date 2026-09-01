@@ -103,7 +103,7 @@ export function ProductoPicker({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover shadow-md">
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
           <div className="flex items-center gap-2 border-b px-3 py-2">
             <HugeiconsIcon icon={Search01Icon} className="size-4 opacity-60" />
             <Input

@@ -104,7 +104,7 @@ export function AccionesModal({
             <p className="px-1 py-3 text-sm text-muted-foreground">{t("noActions")}</p>
           )}
           {actions.map((a) => {
-            const cls = "flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50";
+            const cls = "flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50";
             if (a.kind === "link" && a.href) {
               return (
                 <Link key={a.key} href={resolve(a.href, fila)} onClick={() => setOpen(false)} className={cls}>

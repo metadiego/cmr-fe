@@ -39,14 +39,6 @@ export default async function Page() {
         </div>
 
         <ApiHealthCheck />
-
-        <p className="font-mono text-xs text-muted-foreground">
-          {t.rich("themeHint", {
-            kbd: (chunks) => (
-              <kbd className="rounded border px-1">{chunks}</kbd>
-            ),
-          })}
-        </p>
       </section>
     </div>
   );

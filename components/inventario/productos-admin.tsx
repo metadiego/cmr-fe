@@ -44,6 +44,21 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip } from "@/components/ui/tooltip";
+import { PageContainer, PageHeader } from "@/components/ui/page";
+import {
+  DataTable,
+  TableEmpty,
+  TableError,
+  TableLoading,
+} from "@/components/ui/data-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -147,23 +162,25 @@ export function ProductosAdmin() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Button
-          size="sm"
-          onClick={() => {
-            setEditing(null);
-            setFormOpen(true);
-          }}
-        >
-          <HugeiconsIcon icon={Add01Icon} className="size-4" />
-          {t("new")}
-        </Button>
-      </div>
-      <p className="mb-4 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        actions={
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditing(null);
+              setFormOpen(true);
+            }}
+          >
+            <HugeiconsIcon icon={Add01Icon} className="size-4" />
+            {t("new")}
+          </Button>
+        }
+      />
+      <p className="max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -185,134 +202,125 @@ export function ProductosAdmin() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
-            <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="w-8 px-2 py-2" />
-              <th className="px-3 py-2 font-semibold">{t("col.nombre")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.sku")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.tipo")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.proveedor")}</th>
-              <th className="px-3 py-2 font-semibold">{t("col.activo")}</th>
-              <th className="px-3 py-2" />
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {state.kind === "loading" &&
-              Array.from({ length: 6 }).map((_, i) => (
-                <tr key={`sk-${i}`}>
-                  <td colSpan={7} className="px-3 py-3">
-                    <div className="h-4 w-full animate-pulse rounded bg-muted" />
-                  </td>
-                </tr>
-              ))}
-            {state.kind === "fail" && (
-              <tr>
-                <td colSpan={7} className="px-3 py-8 text-center">
-                  <p className="text-sm text-muted-foreground">{tc("error")}</p>
-                  <Button variant="outline" size="sm" className="mt-2" onClick={reload}>
-                    {tc("retry")}
-                  </Button>
-                </td>
-              </tr>
-            )}
-            {state.kind === "ok" && rows.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
-                  {debounced ? t("noResults", { q: debounced }) : t("empty")}
-                </td>
-              </tr>
-            )}
-            {rows.map((p) => {
-              const isOpen = expanded.has(p.id);
-              return (
-                <React.Fragment key={p.id}>
-                  <tr className="hover:bg-muted/30">
-                    <td className="px-2 py-2">
-                      <button
-                        type="button"
-                        onClick={() => toggleExpand(p.id)}
-                        className="grid size-6 place-items-center rounded hover:bg-muted"
-                        aria-label={isOpen ? tc("collapse") : tc("expand")}
+      <DataTable>
+        <TableHeader className="sticky top-0 z-10 bg-card">
+          <TableRow>
+            <TableHead className="w-8" />
+            <TableHead>{t("col.nombre")}</TableHead>
+            <TableHead>{t("col.sku")}</TableHead>
+            <TableHead>{t("col.tipo")}</TableHead>
+            <TableHead>{t("col.proveedor")}</TableHead>
+            <TableHead>{t("col.activo")}</TableHead>
+            <TableHead className="text-right" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {state.kind === "loading" && (
+            <TableLoading colSpan={7}>{tc("loading")}</TableLoading>
+          )}
+          {state.kind === "fail" && (
+            <TableError colSpan={7}>
+              <div className="flex flex-col items-center gap-2">
+                <span>{tc("error")}</span>
+                <Button variant="outline" size="sm" onClick={reload}>
+                  {tc("retry")}
+                </Button>
+              </div>
+            </TableError>
+          )}
+          {state.kind === "ok" && rows.length === 0 && (
+            <TableEmpty colSpan={7}>
+              {debounced ? t("noResults", { q: debounced }) : t("empty")}
+            </TableEmpty>
+          )}
+          {rows.map((p) => {
+            const isOpen = expanded.has(p.id);
+            return (
+              <React.Fragment key={p.id}>
+                <TableRow>
+                  <TableCell>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(p.id)}
+                      className="grid size-6 place-items-center rounded hover:bg-muted"
+                      aria-label={isOpen ? tc("collapse") : tc("expand")}
+                    >
+                      <HugeiconsIcon
+                        icon={isOpen ? ArrowDown01Icon : ArrowRight01Icon}
+                        className="size-4 text-muted-foreground"
+                      />
+                    </button>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {p.nombre}
+                    {p.nombreTecnico && <span className="ml-2 text-xs font-normal text-muted-foreground">· {p.nombreTecnico}</span>}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs">{p.sku ?? "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{t(`tipo.${p.tipo}`)}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <ProveedorCell proveedores={p.proveedores} />
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={p.activo ? "success" : "outline"}>
+                      {p.activo ? t("active") : t("inactive")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      {p.tipo === "compuesto" && (
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/inventario/recetas?compuestoId=${p.id}`}>
+                            {t("editarReceta")}
+                          </Link>
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setInsumosSheet({ productoId: p.id, productoNombre: p.nombre })}
                       >
-                        <HugeiconsIcon
-                          icon={isOpen ? ArrowDown01Icon : ArrowRight01Icon}
-                          className="size-4 text-muted-foreground"
-                        />
-                      </button>
-                    </td>
-                    <td className="px-3 py-2 font-medium">
-                      {p.nombre}
-                      {p.nombreTecnico && <span className="ml-2 text-xs font-normal text-muted-foreground">· {p.nombreTecnico}</span>}
-                    </td>
-                    <td className="px-3 py-2 font-mono text-xs">{p.sku ?? "—"}</td>
-                    <td className="px-3 py-2">
-                      <Badge variant="outline">{t(`tipo.${p.tipo}`)}</Badge>
-                    </td>
-                    <td className="px-3 py-2">
-                      <ProveedorCell proveedores={p.proveedores} />
-                    </td>
-                    <td className="px-3 py-2">
-                      <Badge variant={p.activo ? "secondary" : "outline"}>
-                        {p.activo ? t("active") : t("inactive")}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      <div className="flex justify-end gap-1">
-                        {p.tipo === "compuesto" && (
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link href={`/inventario/recetas?compuestoId=${p.id}`}>
-                              {t("editarReceta")}
-                            </Link>
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setInsumosSheet({ productoId: p.id, productoNombre: p.nombre })}
-                        >
-                          {t("editarInsumos")}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditing(p);
-                            setFormOpen(true);
-                          }}
-                        >
-                          {tc("edit")}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                  {isOpen && (
-                    <tr>
-                      <td colSpan={7} className="bg-muted/20 px-3 py-3">
-                        <ExpandedAmp
-                          producto={p}
-                          reloadToken={ampReloadToken}
-                          onNew={() =>
-                            setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp: null })
-                          }
-                          onEdit={(amp) =>
-                            setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp })
-                          }
-                        />
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                        {t("editarInsumos")}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditing(p);
+                          setFormOpen(true);
+                        }}
+                      >
+                        {tc("edit")}
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+                {isOpen && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={7} className="bg-muted/20">
+                      <ExpandedAmp
+                        producto={p}
+                        reloadToken={ampReloadToken}
+                        onNew={() =>
+                          setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp: null })
+                        }
+                        onEdit={(amp) =>
+                          setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp })
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </TableBody>
+      </DataTable>
 
       {/* Paginación */}
       {total > 0 && (
-        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{t("totalCount", { total })}</span>
           <div className="flex items-center gap-2">
             <Button
@@ -369,7 +377,7 @@ export function ProductosAdmin() {
           onOpenChange={(o) => !o && setInsumosSheet(null)}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -415,7 +423,7 @@ function ExpandedAmp({
   const items = state.kind === "ok" ? state.data : [];
 
   return (
-    <div className="rounded-lg border bg-background">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="flex items-center justify-between border-b px-3 py-2">
         <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("sectionTitle")}
@@ -432,30 +440,30 @@ function ExpandedAmp({
         <p className="px-3 py-4 text-sm text-muted-foreground">{t("empty")}</p>
       )}
       {items.length > 0 && (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="px-3 py-1.5 font-semibold">{t("col.presentacion")}</th>
-              <th className="px-3 py-1.5 font-semibold">{t("col.contenido")}</th>
-              <th className="px-3 py-1.5" />
-            </tr>
-          </thead>
-          <tbody className="divide-y">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="py-1.5">{t("col.presentacion")}</TableHead>
+              <TableHead className="py-1.5">{t("col.contenido")}</TableHead>
+              <TableHead className="py-1.5" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {items.map((a) => (
-              <tr key={a.id} className="hover:bg-muted/30">
-                <td className="px-3 py-1.5">{a.nombre}</td>
-                <td className="px-3 py-1.5 tabular-nums text-muted-foreground">
+              <TableRow key={a.id}>
+                <TableCell className="py-1.5">{a.nombre}</TableCell>
+                <TableCell className="py-1.5 tabular-nums text-muted-foreground">
                   {a.contenidoPorEmpaque ?? "—"}
-                </td>
-                <td className="px-3 py-1.5 text-right">
+                </TableCell>
+                <TableCell className="py-1.5 text-right">
                   <Button variant="ghost" size="sm" onClick={() => onEdit(a)}>
                     {tc("edit")}
                   </Button>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
     </div>
   );
@@ -733,7 +741,7 @@ function ProductoForm({
                   : t("field.grupoFacturacionHelpSin")}
               </p>
               {nuevoGrupo ? (
-                <div className="space-y-2 rounded-lg border p-2">
+                <div className="space-y-2 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                   <Input
                     placeholder={t("grupoClave")}
                     value={ngClave}
@@ -825,7 +833,7 @@ function ProductoForm({
 
           {/* Contenido del envase (opcional): cuánto trae el frasco/caja + su unidad + unidades por envase.
               Simple y opcional; con esto la receta calcula cuántas aplicaciones rinde un vial (contenido ÷ dosis). */}
-          <div className="rounded-lg border bg-muted/20 p-3">
+          <div className="rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("field.envaseTitle")}</span>
               <span className="text-[11px] text-muted-foreground">{t("field.opcional")}</span>

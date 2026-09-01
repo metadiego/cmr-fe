@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
   Select,
   SelectContent,
@@ -48,9 +49,9 @@ const ESTADO_BADGE: Record<string, "secondary" | "outline" | "destructive"> = {
 };
 
 const SEV_DOT: Record<string, string> = {
-  info: "bg-sky-500",
-  warning: "bg-amber-500",
-  critica: "bg-red-500",
+  info: "bg-info-foreground",
+  warning: "bg-warning-foreground",
+  critica: "bg-destructive",
 };
 
 // Página del dominio único Comunicaciones: Alertas (canal interno) + Plantillas
@@ -60,26 +61,30 @@ export function ComunicacionesAdmin() {
   const [mode, setMode] = React.useState<"alertas" | "notificaciones" | "plantillas">("alertas");
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
-        <div className="inline-flex rounded-lg border p-0.5">
-          {(["alertas", "notificaciones", "plantillas"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                mode === m ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t(`tab.${m}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("pageHelp")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("pageTitle")}
+        description={t("pageHelp")}
+        actions={
+          <>
+            <div className="inline-flex rounded-md border p-0.5">
+              {(["alertas", "notificaciones", "plantillas"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    mode === m ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`tab.${m}`)}
+                </button>
+              ))}
+            </div>
+          </>
+        }
+      />
 
       {mode === "alertas" ? (
         <AlertasPanel />
@@ -88,7 +93,7 @@ export function ComunicacionesAdmin() {
       ) : (
         <PlantillasPanel />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -124,10 +129,10 @@ function AlertasPanel() {
       </div>
     );
   if (alertas.length === 0)
-    return <p className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
+    return <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
 
   return (
-    <div className="divide-y rounded-xl border">
+    <div className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {alertas.map((a) => {
         const clickable = !!alertaHref(a);
         return (
@@ -163,7 +168,7 @@ function NotificacionesPanel() {
   };
 
   return (
-    <div className="overflow-x-auto rounded-xl border">
+    <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <table className="w-full text-sm">
         <thead className="bg-muted/60">
           <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -222,7 +227,7 @@ function PlantillasPanel() {
           <Button size="sm" onClick={() => setCreateOpen(true)}>{t("nuevaPlantilla")}</Button>
         </div>
       )}
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">

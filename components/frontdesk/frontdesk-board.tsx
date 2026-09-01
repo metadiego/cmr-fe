@@ -54,6 +54,7 @@ import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-moda
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -540,79 +541,82 @@ export function FrontdeskBoard() {
   const cargando = boardRes.state.kind === "loading" || defRes.state.kind === "loading";
 
   return (
-    <div className="w-full px-6 py-6">
-      {/* Header */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
-        {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        count={
+          live && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+                <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+              </span>
+              {t("live")}
             </span>
-            {t("live")}
-          </span>
-        )}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <NurseStatusButton fecha={fecha} centro={gate.centro} />
-          <Input
-            type="date"
-            className="h-9 w-40"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            aria-label={t("fecha")}
-          />
-          {puedeRango && (
+          )
+        }
+        actions={
+          <>
+            <NurseStatusButton fecha={fecha} centro={gate.centro} />
             <Input
               type="date"
               className="h-9 w-40"
-              value={hasta}
-              min={fecha}
-              onChange={(e) => setHasta(e.target.value)}
-              aria-label={t("hasta")}
-              title={t("rangoHint")}
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              aria-label={t("fecha")}
             />
-          )}
-          {gate.puedeCambiar && gate.centro && (
-            <Select value={gate.centro} onValueChange={gate.pick}>
-              <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {gate.centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
-              y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
-              las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
-          {accionesEfectivas.length > 0 && (
-            <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {accionesEfectivas.map((a) => {
-                const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
-                const icon = ACCION_ICON[a.icon ?? ""];
-                return (
-                  <Button
-                    key={a.clave}
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 gap-1.5"
-                    onClick={() => dispatchAccion(a)}
-                  >
-                    {icon && <HugeiconsIcon icon={icon} className="size-4" />}
-                    {label}
-                  </Button>
-                );
-              })}
-            </div>
-          )}
-          {can("citas.create") && (
-            <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
-              {t("citar")}
-            </Button>
-          )}
-        </div>
-      </div>
+            {puedeRango && (
+              <Input
+                type="date"
+                className="h-9 w-40"
+                value={hasta}
+                min={fecha}
+                onChange={(e) => setHasta(e.target.value)}
+                aria-label={t("hasta")}
+                title={t("rangoHint")}
+              />
+            )}
+            {gate.puedeCambiar && gate.centro && (
+              <Select value={gate.centro} onValueChange={gate.pick}>
+                <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {gate.centros.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
+                y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
+                las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
+            {accionesEfectivas.length > 0 && (
+              <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {accionesEfectivas.map((a) => {
+                  const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
+                  const icon = ACCION_ICON[a.icon ?? ""];
+                  return (
+                    <Button
+                      key={a.clave}
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 gap-1.5"
+                      onClick={() => dispatchAccion(a)}
+                    >
+                      {icon && <HugeiconsIcon icon={icon} className="size-4" />}
+                      {label}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+            {can("citas.create") && (
+              <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
+                {t("citar")}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
@@ -732,7 +736,7 @@ export function FrontdeskBoard() {
                 className={
                   "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition " +
                   (avisos.total > 0
-                    ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-300"
+                    ? "border-warning/40 bg-warning text-warning-foreground hover:bg-warning/80"
                     : "border-border bg-muted/40 text-muted-foreground")
                 }
               >
@@ -760,7 +764,7 @@ export function FrontdeskBoard() {
           )}
 
           {board && !cargando && (
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <table className="w-full text-sm">
                 <thead className="bg-muted/60">
                   <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -883,11 +887,11 @@ export function FrontdeskBoard() {
                         if (a.paciente) setQ(a.paciente);
                         setAvisosOpen(false);
                       }}
-                      className="flex w-full items-start justify-between gap-3 rounded-lg border bg-card p-3 text-left transition hover:bg-accent/50"
+                      className="flex w-full items-start justify-between gap-3 rounded-md bg-card p-3 text-left ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] transition hover:bg-accent/50"
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="inline-block rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+                          <span className="inline-block rounded-full bg-warning px-2 py-0.5 text-[11px] font-semibold text-warning-foreground">
                             {t.has(`avisos.tipo.${a.tipo}`) ? t(`avisos.tipo.${a.tipo}`) : a.tipo}
                           </span>
                           <span className="truncate font-medium">{a.paciente ?? "—"}</span>
@@ -910,7 +914,7 @@ export function FrontdeskBoard() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -937,7 +941,7 @@ function TotalesDia({ totales, servicio }: { totales: FrontdeskTotal[]; servicio
         return (
           <div
             key={x.columna}
-            className="flex items-center gap-4 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5"
+            className="flex items-center gap-4 rounded-md bg-card bg-gradient-to-br from-primary/10 to-transparent px-4 py-2.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
           >
             <div className="flex flex-col">
               <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -986,8 +990,10 @@ function KpiTile({
       type="button"
       onClick={onClick}
       className={
-        "flex min-w-24 flex-col items-start rounded-xl border px-3 py-2 text-left transition-all " +
-        (active ? "border-primary ring-1 ring-primary/40 bg-primary/5" : "hover:bg-muted/50")
+        "group flex min-w-24 flex-col items-start gap-1 rounded-md bg-card px-4 py-3 text-left shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors " +
+        (active
+          ? "bg-primary/[0.04] ring-2 ring-primary/50"
+          : "ring-1 ring-foreground/10 hover:ring-foreground/20")
       }
     >
       <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -1295,7 +1301,7 @@ function FilaSesion({
       if (cancelada) return <span className="text-xs text-muted-foreground">—</span>;
       if (stamp) {
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-[11px] font-semibold text-success-foreground">
             <HugeiconsIcon icon={Tick02Icon} className="size-3" />
             {fmtHora(stamp)}
           </span>
@@ -1639,7 +1645,7 @@ function FilaSesion({
                   <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {t("dosis.avisoNoComprada.eligiendo")}
                   </div>
-                  <div className="mt-1 font-semibold text-amber-600 dark:text-amber-400">
+                  <div className="mt-1 font-semibold text-warning-foreground">
                     {dosisAviso.eligiendo}
                   </div>
                 </div>
@@ -1758,7 +1764,7 @@ function CorregirDisponibilidadDialog({
         </DialogHeader>
         {paquete && (
           <div className="space-y-3">
-            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
               {paquete.multiplicadores && (
                 <span className="ml-2 text-muted-foreground">
@@ -1879,7 +1885,7 @@ function TransferirTratamientoDialog({
         </DialogHeader>
         {paquete && (
           <div className="space-y-3">
-            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm">
+            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
               <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
               <span className="ml-2 text-muted-foreground">{t("transferir.pendientes", { n: pendientes })}</span>
             </div>
@@ -1909,7 +1915,7 @@ function TransferirTratamientoDialog({
                     key={m}
                     type="button"
                     onClick={() => setModo(m)}
-                    className={"flex-1 rounded-lg border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
+                    className={"flex-1 rounded-md border px-3 py-2 text-left text-sm " + (modo === m ? "border-primary bg-primary/10" : "hover:bg-muted")}
                   >
                     <span className="block font-medium">{t(`transferir.${m}`)}</span>
                     <span className="block text-[11px] text-muted-foreground">{t(`transferir.${m}Ayuda`)}</span>
@@ -2039,7 +2045,7 @@ function SesionesCell({
             })}
             <div className="mt-1 flex items-center justify-between border-t pt-1.5 text-sm font-semibold">
               <span>{t("pendienteTotal")}</span>
-              <span className={"tabular-nums " + (agotado ? "text-destructive" : "text-emerald-600 dark:text-emerald-400")}>
+              <span className={"tabular-nums " + (agotado ? "text-destructive" : "text-success-foreground")}>
                 {Number(disp.pendienteTotal ?? 0)}
               </span>
             </div>
@@ -2361,7 +2367,7 @@ function HistorialModal({
                     <td className="px-3 py-2.5">
                       <Badge
                         variant="secondary"
-                        className={r.estado === "asistido" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : undefined}
+                        className={r.estado === "asistido" ? "bg-success text-success-foreground" : undefined}
                       >
                         {t.has(`histEstadoVal.${r.estado}`) ? t(`histEstadoVal.${r.estado}`) : (r.estado || "—")}
                       </Badge>
@@ -2508,9 +2514,14 @@ function ComprasModal({
 // Stat compacto para la tira de totales del modal de compras.
 function ComprasStat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={"rounded-lg border px-3 py-2 " + (highlight ? "border-amber-500/40 bg-amber-500/10" : "")}>
+    <div
+      className={
+        "rounded-md px-3 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] " +
+        (highlight ? "bg-warning ring-1 ring-warning/40" : "bg-card ring-1 ring-foreground/10")
+      }
+    >
       <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={"text-lg font-bold tabular-nums " + (highlight ? "text-amber-600 dark:text-amber-400" : "")}>{value}</div>
+      <div className={"text-lg font-bold tabular-nums " + (highlight ? "text-warning-foreground" : "")}>{value}</div>
     </div>
   );
 }
@@ -2530,7 +2541,7 @@ function ComprasTabla({
   conFecha?: boolean;
 }) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <table className="w-full text-sm">
         <thead className="bg-muted/60">
           <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -2556,7 +2567,7 @@ function ComprasTabla({
               <td className="px-3 py-2 text-right tabular-nums">{num(f.entregadas)}</td>
               <td className="px-3 py-2 text-right tabular-nums">
                 {(f.pendientes ?? 0) > 0 ? (
-                  <span className="font-semibold text-amber-600 dark:text-amber-400">{num(f.pendientes)}</span>
+                  <span className="font-semibold text-warning-foreground">{num(f.pendientes)}</span>
                 ) : (
                   <span className="text-muted-foreground">{num(f.pendientes)}</span>
                 )}

@@ -21,6 +21,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
 import { ComoSeCobra } from "@/components/facturacion/como-se-cobra";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,27 +74,29 @@ export function GruposAdmin() {
 
   if (!puede) {
     return (
-      <div className="w-full px-6 py-8">
+      <PageContainer>
         <p className="text-sm text-muted-foreground">{t("denied")}</p>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        {bundle.state.kind === "ok" && (
-          <NuevoGrupo
-            divisiones={bundle.state.data.divisiones}
-            onCreated={(g) => {
-              bundle.reload();
-              setSelId(g.id);
-            }}
-          />
-        )}
-      </div>
-      <p className="mb-6 text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          bundle.state.kind === "ok" && (
+            <NuevoGrupo
+              divisiones={bundle.state.data.divisiones}
+              onCreated={(g) => {
+                bundle.reload();
+                setSelId(g.id);
+              }}
+            />
+          )
+        }
+      />
 
       {bundle.state.kind === "loading" ? (
         <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
@@ -110,7 +113,7 @@ export function GruposAdmin() {
           onChanged={bundle.reload}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -138,7 +141,7 @@ function Contenido({
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
       {/* Master: lista de grupos */}
-      <div className="rounded-xl border">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="grid grid-cols-[1fr_6rem_4rem] gap-x-3 border-b px-4 py-2.5 text-xs font-medium text-muted-foreground">
           <span>{t("group")}</span>
           <span>{t("division")}</span>
@@ -186,7 +189,7 @@ function Contenido({
           onChanged={onChanged}
         />
       ) : (
-        <div className="flex items-center justify-center rounded-xl border p-8 text-sm text-muted-foreground">
+        <div className="flex items-center justify-center rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-8 text-sm text-muted-foreground">
           {t("selectGroup")}
         </div>
       )}
@@ -277,7 +280,7 @@ function DetalleGrupo({
   return (
     <div className="space-y-4">
       {/* Datos del grupo */}
-      <div className="space-y-3 rounded-xl border p-4">
+      <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">{label(grupo.labelKey, grupo.clave)}</h3>
           <span className="text-xs text-muted-foreground">{grupo.clave}</span>
@@ -326,7 +329,7 @@ function DetalleGrupo({
           <TabsTrigger value="cobro">{t("tabComoSeCobra")}</TabsTrigger>
         </TabsList>
         <TabsContent value="productos">
-          <div className="rounded-xl border">
+          <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <div className="flex items-center justify-between border-b px-4 py-2.5">
               <h3 className="text-sm font-semibold">{t("membership")}</h3>
               <Button size="sm" onClick={guardarMembresia} disabled={savingMembresia}>

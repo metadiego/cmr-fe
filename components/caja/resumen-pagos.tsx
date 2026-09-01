@@ -78,7 +78,7 @@ export function ResumenPagos({
   return (
     <div className="space-y-4 lg:sticky lg:top-20">
       {/* Tarjetas */}
-      <section className="rounded-xl border">
+      <section className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h3 className="border-b px-4 py-2.5 text-sm font-semibold">{tp("cards")}</h3>
         {detalle.tarjetas.length === 0 ? (
           <p className="px-4 py-3 text-sm text-muted-foreground">{tp("noOther")}</p>
@@ -112,7 +112,7 @@ export function ResumenPagos({
       </section>
 
       {/* Otros medios */}
-      <section className="rounded-xl border">
+      <section className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h3 className="border-b px-4 py-2.5 text-sm font-semibold">{tp("otherMethods")}</h3>
         {detalle.otros.length === 0 ? (
           <p className="px-4 py-3 text-sm text-muted-foreground">{tp("noOther")}</p>
@@ -132,7 +132,7 @@ export function ResumenPagos({
       </section>
 
       {/* Resumen general (modelo CMA) */}
-      <section className="space-y-1 rounded-xl border p-4">
+      <section className="space-y-1 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <h3 className="mb-2 text-sm font-semibold">{tp("general")}</h3>
         <Row label={tp("opening")} value={money(inicio)} />
         <Row label={tp("salesCash")} value={money(salesCash)} />
@@ -150,9 +150,9 @@ export function ResumenPagos({
           className={cn(
             "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
             estado === "ok"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+              ? "bg-success text-success-foreground"
               : estado === "over"
-                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                ? "bg-warning text-warning-foreground"
                 : "bg-destructive/10 text-destructive",
           )}
         >
@@ -201,7 +201,7 @@ export function ResumenPagos({
           )}
         </div>
         {emailOpen && canEmail && (
-          <div className="flex items-end gap-2 rounded-lg border p-3">
+          <div className="flex items-end gap-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
             <div className="flex-1 space-y-1">
               <Label htmlFor="caja-email" className="text-xs">
                 {t("emailPrompt")}

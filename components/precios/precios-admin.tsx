@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { DerivarPrecios } from "@/components/precios/derivar-precios";
 import { ListasPrecio } from "@/components/precios/listas-precio";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const PAGE_SIZE = 50;
 const money = (v: number) =>
@@ -150,28 +151,32 @@ export function PreciosAdmin() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <div className="inline-flex rounded-lg border p-0.5">
-          {(["catalogo", "listas", "derivar"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => { setCloneName(undefined); setMode(m); }}
-              className={cn(
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                mode === m
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t(`mode.${m}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <p className="mb-4 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <>
+            <div className="inline-flex rounded-lg border p-0.5">
+              {(["catalogo", "listas", "derivar"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => { setCloneName(undefined); setMode(m); }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    mode === m
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`mode.${m}`)}
+                </button>
+              ))}
+            </div>
+          </>
+        }
+      />
 
       {mode === "listas" ? (
         <ListasPrecio
@@ -222,7 +227,7 @@ export function PreciosAdmin() {
         </Select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -295,7 +300,7 @@ export function PreciosAdmin() {
                     {isEditing ? (
                       <div className="flex justify-end gap-1">
                         <Button size="icon" variant="ghost" disabled={saving} onClick={() => save(row)}>
-                          <HugeiconsIcon icon={Tick01Icon} className="size-4 text-green-600" />
+                          <HugeiconsIcon icon={Tick01Icon} className="size-4 text-success-foreground" />
                         </Button>
                         <Button size="icon" variant="ghost" disabled={saving} onClick={() => setEditingId(null)}>
                           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
@@ -338,6 +343,6 @@ export function PreciosAdmin() {
       )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

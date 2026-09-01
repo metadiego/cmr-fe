@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Fechas por defecto: del 1° del mes a hoy (Date del navegador; permitido en cliente).
 function isoDay(d: Date) {
@@ -80,24 +81,24 @@ export default function ConsumoInsumosPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={rows.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={rows.length === 0}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex gap-2 no-print">
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={rows.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()} disabled={rows.length === 0}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
       {/* Filtros */}
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -121,14 +122,14 @@ export default function ConsumoInsumosPage() {
       </div>
 
       {/* KPIs */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Kpi label={t("kpi.insumos")} value={num(rows.length)} />
         <Kpi label={t("kpi.unidades")} value={num(totalUnidades)} />
         <Kpi label={t("kpi.facturas")} value={num(totalFacturas)} />
       </div>
 
       {/* Tabla */}
-      <div className="mt-4 overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -178,14 +179,14 @@ export default function ConsumoInsumosPage() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">{t("footnote")}</p>
-    </div>
+      <p className="text-xs text-muted-foreground">{t("footnote")}</p>
+    </PageContainer>
   );
 }
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border bg-gradient-to-br from-primary/5 to-transparent px-4 py-3">
+    <div className="rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/5 to-transparent px-4 py-3">
       <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="mt-1 text-2xl font-bold tabular-nums">{value}</div>
     </div>

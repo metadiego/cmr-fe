@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -78,45 +79,51 @@ export default function DevolverFacturaPage() {
   const pacNombre = pac ? (pac.nombreMostrar || [pac.nombres, pac.apellidos].filter(Boolean).join(" ")) : "";
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <PageContainer>
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {tf("back")}</Link>
 
-      <div className="mt-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
-            <h1 className="truncate text-xl font-semibold tracking-tight">{pacNombre || t("returnTitle")}</h1>
-          </div>
-          {factura?.numero != null && (
+      <PageHeader
+        title={
+          <>
+            <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
+            {pacNombre || t("returnTitle")}
+          </>
+        }
+        count={
+          factura?.numero != null && (
             <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
               {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
             </span>
-          )}
+          )
+        }
+      />
+      {/* Resumen de la factura (referencia): subtotal, descuento (%/$), impuesto (detalle al click), total */}
+      {factura && (
+        <div className="rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
+          <ResumenFactura factura={factura} />
         </div>
-        {/* Resumen de la factura (referencia): subtotal, descuento (%/$), impuesto (detalle al click), total */}
-        {factura && <ResumenFactura factura={factura} />}
-      </div>
+      )}
 
       {facturaState.kind === "loading" ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tc("loading")}</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : facturaState.kind === "fail" ? (
-        <div className="mt-8 flex flex-col items-start gap-3">
+        <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-destructive">
             {isRateLimited(facturaState.message) ? tRoot("common.rateLimited") : facturaState.message}
           </p>
           <Button variant="outline" size="sm" onClick={recargarFactura}>{tRoot("common.retry")}</Button>
         </div>
       ) : items.length === 0 ? (
-        <p className="mt-8 text-sm text-muted-foreground">{tf("noItems")}</p>
+        <p className="text-sm text-muted-foreground">{tf("noItems")}</p>
       ) : !["emitida", "devuelta_parcial"].includes(String(factura?.estado)) ? (
-        <div className="mt-8 flex flex-col items-start gap-3">
+        <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-muted-foreground">{t("returnOnlyIssued")}</p>
           <Button variant="outline" size="sm" asChild><Link href={backHref}>{tf("back")}</Link></Button>
         </div>
       ) : (
         <DevolverForm key={factura!.id} factura={factura!} formas={formas} id={id} centro={centro} backHref={backHref} />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -327,7 +334,7 @@ function DevolverForm({
 
   return (
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
-      <section className="overflow-x-auto rounded-xl border">
+      <section className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -408,7 +415,7 @@ function DevolverForm({
       </section>
 
       <aside className="space-y-4 lg:sticky lg:top-6 h-fit">
-        <div className="space-y-3 rounded-xl border p-4">
+        <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("policy")}</span>
             <Select value={politica} onValueChange={(v) => cambiarPolitica(v as "como_facturada" | "precio_base")}>
@@ -432,10 +439,10 @@ function DevolverForm({
           </label>
         </div>
 
-        <div className="rounded-xl border p-4">
+        <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">{neto >= 0 ? t("netRefund") : t("netOwed")}</span>
-            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>{money(Math.abs(neto))}</span>
+            <span className={"text-xl font-bold tabular-nums " + (neto >= 0 ? "text-success-foreground" : "text-destructive")}>{money(Math.abs(neto))}</span>
           </div>
           {excedeTotal && (
             <p className="mt-2 text-xs text-destructive">{t("netExceeds", { total: money(n(factura.total)) })}</p>

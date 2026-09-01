@@ -15,6 +15,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,12 +37,11 @@ export function VentaGeneral() {
   const gate = useCentroGate();
 
   return (
-    <div className="mx-auto max-w-xl px-6 py-12">
-      <Link href="/facturacion" className="mb-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+    <PageContainer>
+      <Link href="/facturacion" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         ← {t("verLista")}
       </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("help")}</p>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
@@ -59,7 +59,7 @@ export function VentaGeneral() {
           onCambiarCentro={gate.cambiarCentro}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -168,7 +168,7 @@ function Finder({
 
       {/* Paciente SELECCIONADO: banner claro (no queda duda de que el clic funcionó) con acción a la vista. */}
       {sel ? (
-        <div className="mb-4 flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2.5">
+        <div className="mb-4 flex items-center gap-3 rounded-md border border-primary/40 bg-primary/5 px-3 py-2.5">
           <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5 shrink-0 text-primary" />
           <div className="min-w-0 flex-1">
             <div className="truncate font-medium">{nombre(sel)}</div>
@@ -181,7 +181,7 @@ function Finder({
           </button>
         </div>
       ) : (
-        <div className="mb-4 max-h-80 overflow-y-auto rounded-md border">
+        <div className="mb-4 max-h-80 overflow-y-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           {loading && <p className="px-3 py-4 text-center text-sm text-muted-foreground">{t("searching")}</p>}
           {!loading && term.length < 2 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>}
           {!loading && term.length >= 2 && shown.length === 0 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>}
@@ -242,7 +242,7 @@ function Finder({
       </div>
 
       {/* Facturar a un tercero (empresa u otra persona) */}
-      <div className="mb-4 rounded-lg border">
+      <div className="mb-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <button type="button" onClick={() => setTerceroOpen((o) => !o)} className="flex w-full items-center justify-between px-3 py-2 text-sm">
           <span className="font-medium">{t("terceroTitle")}</span>
           <span className="text-xs text-primary">{terceroOpen ? t("terceroHide") : t("terceroShow")}</span>

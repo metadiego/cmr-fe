@@ -17,6 +17,7 @@ import { ApiError } from "@/lib/api/types";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cargar disponibilidad heredada del legado por número de récord. Como un récord puede corresponder a
 // VARIAS personas, si el BE responde 409 RECORD_AMBIGUO NO se muestra error: se deja ELEGIR a la persona
@@ -97,13 +98,12 @@ export default function DisponibilidadLegadoPage() {
   const items = Array.isArray(diag?.items) ? (diag!.items as unknown[]) : [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {/* Buscar por récord */}
       <form
-        className="mt-6 flex items-end gap-2"
+        className="flex items-end gap-2"
         onSubmit={(e) => { e.preventDefault(); diagnosticar(record); }}
       >
         <label className="flex flex-col gap-1.5">
@@ -114,7 +114,7 @@ export default function DisponibilidadLegadoPage() {
       </form>
 
       {aviso && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+        <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
           <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
           <span>{aviso}</span>
         </div>
@@ -122,7 +122,7 @@ export default function DisponibilidadLegadoPage() {
 
       {/* Récord ambiguo: elegir a la persona (no es error). */}
       {candidatos && (
-        <div className="mt-6 rounded-xl border p-4">
+        <div className="rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex items-center gap-2 text-sm font-medium">
             <HugeiconsIcon icon={UserMultiple02Icon} className="size-4 text-primary" />
             {t("ambiguoTitulo", { record: record.trim(), n: candidatos.length })}
@@ -158,7 +158,7 @@ export default function DisponibilidadLegadoPage() {
 
       {/* Revisar y confirmar la carga para la persona elegida. */}
       {diag && !candidatos && (
-        <div className="mt-6 rounded-xl border p-4">
+        <div className="rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div>
               <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("cargarPara")}</div>
@@ -173,7 +173,7 @@ export default function DisponibilidadLegadoPage() {
           </div>
 
           {items.length > 0 ? (
-            <ul className="mt-3 divide-y rounded-lg border text-sm">
+            <ul className="mt-3 divide-y rounded-md ring-1 ring-foreground/10 text-sm">
               {items.map((it, i) => (
                 <li key={i} className="px-3 py-2">
                   <ItemResumen it={it} />
@@ -181,7 +181,7 @@ export default function DisponibilidadLegadoPage() {
               ))}
             </ul>
           ) : (
-            <p className="mt-3 rounded-lg border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">{t("sinItems")}</p>
+            <p className="mt-3 rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">{t("sinItems")}</p>
           )}
 
           <div className="mt-4 flex justify-end gap-2">
@@ -190,7 +190,7 @@ export default function DisponibilidadLegadoPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

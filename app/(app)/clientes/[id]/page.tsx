@@ -46,6 +46,7 @@ import {
   ageFrom,
   colorFromString,
 } from "@/components/clientes/helpers";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 export default function PacienteDetailPage() {
   const t = useTranslations("patients");
@@ -57,7 +58,7 @@ export default function PacienteDetailPage() {
   const { state, reload } = useResource<Paciente>(() => getPaciente(id), [id]);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <button
         onClick={() => router.push("/clientes")}
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -91,7 +92,7 @@ export default function PacienteDetailPage() {
           onSaved={() => reload()}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -152,60 +153,63 @@ function PacienteDetail({
         </Avatar>
 
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-2xl font-semibold tracking-tight">
-            {fullName(p)}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {p.docId && (
-              <Badge variant="outline" className="font-mono">
-                ID {p.docId}
-              </Badge>
-            )}
-            {p.activo ? (
-              <Badge variant="secondary">{t("active")}</Badge>
-            ) : (
-              <Badge variant="outline">{t("inactive")}</Badge>
-            )}
-            {age !== null && (
-              <span className="text-sm text-muted-foreground">
-                {t("yearsOld", { age })}
+          <PageHeader
+            title={fullName(p)}
+            description={
+              <span className="inline-flex flex-wrap items-center gap-2">
+                {p.docId && (
+                  <Badge variant="outline" className="font-mono">
+                    ID {p.docId}
+                  </Badge>
+                )}
+                {p.activo ? (
+                  <Badge variant="secondary">{t("active")}</Badge>
+                ) : (
+                  <Badge variant="outline">{t("inactive")}</Badge>
+                )}
+                {age !== null && (
+                  <span className="text-sm text-muted-foreground">
+                    {t("yearsOld", { age })}
+                  </span>
+                )}
               </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex shrink-0 gap-2">
-          {!p.activo && (
-            <Can permiso="pacientes.update">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={reactivate}
-                disabled={busy}
-              >
-                {t("reactivate")}
-              </Button>
-            </Can>
-          )}
-          <Can permiso="pacientes.update">
-            <Button variant="outline" size="sm" onClick={onEdit}>
-              <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
-              {t("edit")}
-            </Button>
-          </Can>
-          {p.activo && (
-            <Can permiso="pacientes.delete">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-                onClick={() => setConfirmOpen(true)}
-                disabled={busy}
-              >
-                {t("deactivate")}
-              </Button>
-            </Can>
-          )}
+            }
+            actions={
+              <>
+                {!p.activo && (
+                  <Can permiso="pacientes.update">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={reactivate}
+                      disabled={busy}
+                    >
+                      {t("reactivate")}
+                    </Button>
+                  </Can>
+                )}
+                <Can permiso="pacientes.update">
+                  <Button variant="outline" size="sm" onClick={onEdit}>
+                    <HugeiconsIcon icon={PencilEdit02Icon} className="size-4" />
+                    {t("edit")}
+                  </Button>
+                </Can>
+                {p.activo && (
+                  <Can permiso="pacientes.delete">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setConfirmOpen(true)}
+                      disabled={busy}
+                    >
+                      {t("deactivate")}
+                    </Button>
+                  </Can>
+                )}
+              </>
+            }
+          />
         </div>
       </div>
 
@@ -272,7 +276,7 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lg border bg-card p-5">
+    <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <h2 className="mb-4 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         {title}
       </h2>

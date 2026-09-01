@@ -60,7 +60,7 @@ function FacturaCell({ value }: { value: unknown }) {
         {f.total != null && <span className="font-semibold tabular-nums">{money(f.total)}</span>}
       </div>
       {sub && <span className="truncate text-muted-foreground">{sub}</span>}
-      {saldo > 0 && <span className="font-medium text-amber-600 dark:text-amber-400">{t("balance")}: {money(saldo)}</span>}
+      {saldo > 0 && <span className="font-medium text-warning-foreground">{t("balance")}: {money(saldo)}</span>}
     </div>
   );
 }
@@ -381,7 +381,7 @@ export function TableroDinamico({
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border">
+    <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <table className="w-full text-sm">
         <thead className="bg-muted/40 text-xs text-muted-foreground">
           <tr>

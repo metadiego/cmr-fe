@@ -17,6 +17,18 @@ import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { Paginated } from "@/lib/api/types";
 import { AjusteModal, type AjusteObjetivo } from "@/components/inventario/ajuste-modal";
 
@@ -115,40 +127,43 @@ export default function StockPage() {
   }, [vista, consol, gate.centros]);
 
   return (
-    <div className="w-full px-6 py-6">
-      {/* Título + conmutador de vista */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
-        <div className="inline-flex rounded-lg border p-0.5">
-          {(["centro", "consolidado"] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => { setVista(v); resetPage(); }}
-              className={"rounded-md px-3 py-1.5 text-sm font-medium transition-colors " + (vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
-            >
-              {t(`vista.${v}`)}
-            </button>
-          ))}
-        </div>
-        {/* Selector de centro (admin). En consolidado, "Todos" = combinado. */}
-        {gate.puedeCambiar && (
-          <Select
-            value={vista === "centro" ? centroCentro : (centroSel === "" ? TODOS : centroSel)}
-            onValueChange={(v) => { setCentroSelRaw(v === TODOS ? "" : v); setAlmacenId(""); resetPage(); }}
-          >
-            <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {vista === "consolidado" && <SelectItem value={TODOS}>{t("todosCentros")}</SelectItem>}
-              {gate.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        )}
-        <span className="ml-auto text-sm text-muted-foreground">{t("totalProductos", { n: nf.format(total) })}</span>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        count={t("totalProductos", { n: nf.format(total) })}
+        actions={
+          <>
+            <div className="inline-flex rounded-md border p-0.5">
+              {(["centro", "consolidado"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => { setVista(v); resetPage(); }}
+                  className={"rounded-md px-3 py-1.5 text-sm font-medium transition-colors " + (vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {t(`vista.${v}`)}
+                </button>
+              ))}
+            </div>
+            {/* Selector de centro (admin). En consolidado, "Todos" = combinado. */}
+            {gate.puedeCambiar && (
+              <Select
+                value={vista === "centro" ? centroCentro : (centroSel === "" ? TODOS : centroSel)}
+                onValueChange={(v) => { setCentroSelRaw(v === TODOS ? "" : v); setAlmacenId(""); resetPage(); }}
+              >
+                <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {vista === "consolidado" && <SelectItem value={TODOS}>{t("todosCentros")}</SelectItem>}
+                  {gate.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
+          </>
+        }
+      />
 
       {/* Barra de filtros: buscador + chips */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -195,7 +210,9 @@ export default function StockPage() {
         <>
           {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
           {(vista === "centro" ? resumenRes.state.kind === "fail" : consolRes.state.kind === "fail") && (
-            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{tc("error")}</p>
+            <Alert variant="destructive">
+              <AlertDescription>{tc("error")}</AlertDescription>
+            </Alert>
           )}
 
           {/* POR CENTRO */}
@@ -205,61 +222,59 @@ export default function StockPage() {
             ) : (
               <>
                 {/* md+: tabla. La cabecera sale del BE; sin scroll lateral en pantallas normales. */}
-                <div className="hidden overflow-x-auto rounded-xl border md:block">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-muted/60">
-                      <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                        <th className="px-3 py-2 font-semibold">{t("col.producto")}</th>
-                        <th className="px-3 py-2 font-semibold">{t("col.almacen")}</th>
-                        <th className="px-3 py-2 font-semibold">{t("col.lote")}</th>
-                        <th className="px-3 py-2 text-right font-semibold">{t("col.cantidad")}</th>
-                        <th className="px-3 py-2 text-right font-semibold sr-only">{tAj("titulo")}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {resumen.items.map((r, i) => (
-                        <tr key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer hover:bg-muted/30" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
-                          <td className="px-3 py-2">
-                            <span className="flex items-center gap-1.5">
-                              <EstadoDot estado={r.estado} />
-                              <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                              {r.nombreTecnico && <span className="text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">{r.sku}{r.modoDescarga ? ` · ${t(`modo.${r.modoDescarga}` as const)}` : ""}</span>
-                            <Equivalencias items={r.equivalencias} t={t} />
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">{r.almacenNombre ?? "—"}</td>
-                          <td className="px-3 py-2">
-                            <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
-                          </td>
-                          <td className="px-3 py-2 text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} unidad={r.unidadClave} /></td>
-                          <td className="px-3 py-2 text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAjusteDe({
-                                  productoId: r.productoId,
-                                  nombre: r.nombre ?? r.sku ?? "—",
-                                  almacenId: r.almacenId ?? null,
-                                  almacenNombre: r.almacenNombre ?? null,
-                                  stockActual: Number(r.cantidad) || 0,
-                                });
-                              }}
-                            >
-                              {tAj("boton")}
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable className="hidden md:block">
+                  <TableHeader className="sticky top-0 z-10 bg-card">
+                    <TableRow>
+                      <TableHead>{t("col.producto")}</TableHead>
+                      <TableHead>{t("col.almacen")}</TableHead>
+                      <TableHead>{t("col.lote")}</TableHead>
+                      <TableHead className="text-right">{t("col.cantidad")}</TableHead>
+                      <TableHead className="text-right sr-only">{tAj("titulo")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {resumen.items.map((r, i) => (
+                      <TableRow key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                        <TableCell className="whitespace-normal">
+                          <span className="flex items-center gap-1.5">
+                            <EstadoDot estado={r.estado} />
+                            <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
+                            {r.nombreTecnico && <span className="text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">{r.sku}{r.modoDescarga ? ` · ${t(`modo.${r.modoDescarga}` as const)}` : ""}</span>
+                          <Equivalencias items={r.equivalencias} t={t} />
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{r.almacenNombre ?? "—"}</TableCell>
+                        <TableCell>
+                          <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
+                        </TableCell>
+                        <TableCell className="text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} unidad={r.unidadClave} /></TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAjusteDe({
+                                productoId: r.productoId,
+                                nombre: r.nombre ?? r.sku ?? "—",
+                                almacenId: r.almacenId ?? null,
+                                almacenNombre: r.almacenNombre ?? null,
+                                stockActual: Number(r.cantidad) || 0,
+                              });
+                            }}
+                          >
+                            {tAj("boton")}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </DataTable>
                 {/* Móvil: cada fila es una TARJETA (nombre + cuánto hay grande a la derecha; almacén/lote debajo). */}
                 <div className="space-y-2 md:hidden">
                   {resumen.items.map((r, i) => (
-                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-xl border p-3" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5"><EstadoDot estado={r.estado} /><span className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</span></div>
@@ -285,37 +300,35 @@ export default function StockPage() {
               <Vacio texto={t("vacioConsolidado")} />
             ) : (
               <>
-                <div className="hidden overflow-x-auto rounded-xl border md:block">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-muted/60">
-                      <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                        <th className="px-3 py-2 font-semibold">{t("col.producto")}</th>
-                        {colCentros.map((c) => <th key={c.id} className="px-3 py-2 text-right font-semibold">{c.nombre}</th>)}
-                        <th className="px-3 py-2 text-right font-semibold">{t("col.total")}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {consol.items.map((r) => (
-                        <tr key={r.productoId} className="cursor-pointer hover:bg-muted/30" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
-                          <td className="px-3 py-2">
-                            <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                            {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
-                            <span className="block text-xs text-muted-foreground">{r.sku}</span>
-                          </td>
-                          {colCentros.map((c) => {
-                            const v = r.porCentro?.[c.id] ?? 0;
-                            return <td key={c.id} className="px-3 py-2 text-right"><Cantidad valor={v} negativo={v < 0} /></td>;
-                          })}
-                          <td className="px-3 py-2 text-right"><Cantidad valor={r.total} negativo={r.negativo} bold /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable className="hidden md:block">
+                  <TableHeader className="sticky top-0 z-10 bg-card">
+                    <TableRow>
+                      <TableHead>{t("col.producto")}</TableHead>
+                      {colCentros.map((c) => <TableHead key={c.id} className="text-right">{c.nombre}</TableHead>)}
+                      <TableHead className="text-right">{t("col.total")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {consol.items.map((r) => (
+                      <TableRow key={r.productoId} className="cursor-pointer" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                        <TableCell className="whitespace-normal">
+                          <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
+                          {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                          <span className="block text-xs text-muted-foreground">{r.sku}</span>
+                        </TableCell>
+                        {colCentros.map((c) => {
+                          const v = r.porCentro?.[c.id] ?? 0;
+                          return <TableCell key={c.id} className="text-right"><Cantidad valor={v} negativo={v < 0} /></TableCell>;
+                        })}
+                        <TableCell className="text-right"><Cantidad valor={r.total} negativo={r.negativo} bold /></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </DataTable>
                 {/* Móvil: tarjeta por producto con el Total grande y el desglose por centro debajo. */}
                 <div className="space-y-2 md:hidden">
                   {consol.items.map((r) => (
-                    <div key={`m-${r.productoId}`} className="cursor-pointer rounded-xl border p-3" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                    <div key={`m-${r.productoId}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
@@ -365,7 +378,7 @@ export default function StockPage() {
           onHecho={() => resumenRes.reload()}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -395,11 +408,13 @@ function Cantidad({ valor, negativo, bold, unidad }: { valor: number; negativo: 
 
 // Semáforo YA resuelto por el BE (no recalcular). Punto de color solo cuando NO es normal — pintar medio
 // catálogo el primer día enseña a ignorar el color. Handoff visor-de-existencias.
+// Colores via tokens semánticos (no raw emerald/amber/red): rojo→destructive, amber→warning. Mismos
+// estados/severidad que antes, solo cambia la fuente del color.
 const ESTADO_COLOR: Record<string, string> = {
-  negativo: "bg-red-500",
-  vencido: "bg-red-800",
-  por_vencer: "bg-amber-500",
-  bajo_minimo: "bg-amber-400/70",
+  negativo: "bg-destructive",
+  vencido: "bg-destructive",
+  por_vencer: "bg-warning",
+  bajo_minimo: "bg-warning/70",
 };
 function EstadoDot({ estado }: { estado?: string | null }) {
   const c = estado ? ESTADO_COLOR[estado] : undefined;
@@ -423,18 +438,18 @@ function Equivalencias({ items, t }: { items?: { nombre?: string | null; dosis?:
 
 function Lote({ numero, fecha, vencido, porVencer, tVencido, tPorVencer }: { numero?: string | null; fecha?: string | null; vencido: boolean; porVencer: boolean; tVencido: string; tPorVencer: string }) {
   if (!numero && !fecha) return <span className="text-muted-foreground">—</span>;
-  const dot = vencido ? "bg-destructive" : porVencer ? "bg-amber-500" : "";
+  const dot = vencido ? "bg-destructive" : porVencer ? "bg-warning" : "";
   return (
     <span className="inline-flex items-center gap-1.5">
       {dot && <span className={"inline-block size-2 shrink-0 rounded-full " + dot} aria-hidden />}
       <span className="tabular-nums">{numero ?? "—"}</span>
-      {fecha && <span className={"text-xs " + (vencido ? "text-destructive" : porVencer ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>{fmtFecha(fecha)}{vencido ? ` · ${tVencido}` : porVencer ? ` · ${tPorVencer}` : ""}</span>}
+      {fecha && <span className={"text-xs " + (vencido ? "text-destructive" : porVencer ? "text-warning-foreground" : "text-muted-foreground")}>{fmtFecha(fecha)}{vencido ? ` · ${tVencido}` : porVencer ? ` · ${tPorVencer}` : ""}</span>}
     </span>
   );
 }
 
 function Vacio({ texto }: { texto: string }) {
-  return <p className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{texto}</p>;
+  return <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{texto}</p>;
 }
 
 // Clic en un producto → DESGLOSE: dónde está (almacén/lote) y en qué estado (físico, reservado,
@@ -500,49 +515,49 @@ function DetalleModal({
 
         <div className="p-5">
           {error ? (
-            <p className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-6 text-center text-sm text-destructive">{error}</p>
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           ) : filas === null ? (
             <p className="px-4 py-12 text-center text-sm text-muted-foreground">{tc("loading")}</p>
           ) : filas.length === 0 ? (
             <Vacio texto={t("detalle.vacio")} />
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">{t("detalle.almacen")}</th>
-                      <th className="py-2 pr-3 font-medium">{t("detalle.lote")}</th>
-                      {cols.map((c) => (
-                        <th key={String(c.key)} className="py-2 pl-3 text-right font-medium">{c.label}</th>
-                      ))}
-                      <th className="py-2 pl-3 text-right font-medium">{t("detalle.cantidad")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filas.map((f, i) => (
-                      <tr key={`${f.almacenId ?? ""}-${f.loteId ?? ""}-${i}`} className="border-b last:border-0">
-                        <td className="py-2 pr-3">{f.almacenNombre ?? "—"}</td>
-                        <td className="py-2 pr-3 tabular-nums">{f.numeroLote ?? "—"}</td>
-                        {cols.map((c) => (
-                          <td key={String(c.key)} className="py-2 pl-3 text-right tabular-nums">{nf.format(Number(f[c.key] ?? 0))}</td>
-                        ))}
-                        <td className="py-2 pl-3 text-right">
-                          <Cantidad valor={f.cantidad} negativo={!!f.negativo || f.cantidad < 0} />
-                        </td>
-                      </tr>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("detalle.almacen")}</TableHead>
+                    <TableHead>{t("detalle.lote")}</TableHead>
+                    {cols.map((c) => (
+                      <TableHead key={String(c.key)} className="text-right">{c.label}</TableHead>
                     ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2">
-                      <td className="py-2 pr-3 font-semibold" colSpan={2 + cols.length}>{t("detalle.total")}</td>
-                      <td className="py-2 pl-3 text-right">
-                        <Cantidad valor={total} negativo={total < 0} bold />
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                    <TableHead className="text-right">{t("detalle.cantidad")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filas.map((f, i) => (
+                    <TableRow key={`${f.almacenId ?? ""}-${f.loteId ?? ""}-${i}`}>
+                      <TableCell>{f.almacenNombre ?? "—"}</TableCell>
+                      <TableCell className="tabular-nums">{f.numeroLote ?? "—"}</TableCell>
+                      {cols.map((c) => (
+                        <TableCell key={String(c.key)} className="text-right tabular-nums">{nf.format(Number(f[c.key] ?? 0))}</TableCell>
+                      ))}
+                      <TableCell className="text-right">
+                        <Cantidad valor={f.cantidad} negativo={!!f.negativo || f.cantidad < 0} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell className="font-semibold" colSpan={2 + cols.length}>{t("detalle.total")}</TableCell>
+                    <TableCell className="text-right">
+                      <Cantidad valor={total} negativo={total < 0} bold />
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
+              </Table>
 
               <p className="mt-4 rounded-xl bg-muted/40 px-4 py-3 text-xs text-muted-foreground">{t("detalle.notaMovimientos")}</p>
             </>

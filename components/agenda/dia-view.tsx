@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CitaModal } from "@/components/agenda/cita-modal";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const ALL = "__all__";
 const CENTRO_KEY = "cmr_agenda_centro";
@@ -115,71 +116,73 @@ export function DiaView({ fecha }: { fecha: string }) {
   const centrosData = data?.centros ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Link
-          href="/citas"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {t("today")}
-        </Link>
-        <h1 className="text-xl font-semibold capitalize">{fechaLabel}</h1>
-        {live && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
-            </span>
-            {t("dia.live")}
-          </span>
-        )}
-        <div className="ml-auto flex items-center gap-2">
-          {/* Toggle de vista (por dispositivo). La clásica es el default e intacta. */}
-          <div className="inline-flex rounded-md border p-0.5 text-xs">
-            <button
-              type="button"
-              onClick={() => pickVista("clasica")}
-              className={
-                "rounded px-2.5 py-1 font-medium transition-colors " +
-                (vista === "clasica" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
-              }
-            >
-              {t("dia.vistaClasica")}
-            </button>
-            <button
-              type="button"
-              onClick={() => pickVista("nueva")}
-              className={
-                "rounded px-2.5 py-1 font-medium transition-colors " +
-                (vista === "nueva" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
-              }
-            >
-              {t("dia.vistaNueva")}
-            </button>
-          </div>
-          <Can permiso="citas.config">
+    <PageContainer>
+      <PageHeader
+        title={<span className="capitalize">{fechaLabel}</span>}
+        actions={
+          <>
             <Link
-              href="/citas/agenda/cupos"
-              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              href="/citas"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <HugeiconsIcon icon={Settings02Icon} className="size-4" />
-              {t("cupos.configure")}
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+              {t("today")}
             </Link>
-          </Can>
-          <Select value={centro} onValueChange={pickCentro}>
-            <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {puedeCombinado && (
-                <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
-              )}
-              {centros.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+            {live && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
+                  <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
+                </span>
+                {t("dia.live")}
+              </span>
+            )}
+            {/* Toggle de vista (por dispositivo). La clásica es el default e intacta. */}
+            <div className="inline-flex rounded-md border p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => pickVista("clasica")}
+                className={
+                  "rounded-md px-2.5 py-1 font-medium transition-colors " +
+                  (vista === "clasica" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {t("dia.vistaClasica")}
+              </button>
+              <button
+                type="button"
+                onClick={() => pickVista("nueva")}
+                className={
+                  "rounded-md px-2.5 py-1 font-medium transition-colors " +
+                  (vista === "nueva" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
+                }
+              >
+                {t("dia.vistaNueva")}
+              </button>
+            </div>
+            <Can permiso="citas.config">
+              <Link
+                href="/citas/agenda/cupos"
+                className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <HugeiconsIcon icon={Settings02Icon} className="size-4" />
+                {t("cupos.configure")}
+              </Link>
+            </Can>
+            <Select value={centro} onValueChange={pickCentro}>
+              <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {puedeCombinado && (
+                  <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
+                )}
+                {centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        }
+      />
 
       {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
@@ -238,7 +241,7 @@ export function DiaView({ fecha }: { fecha: string }) {
           onSaved={reload}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -273,7 +276,7 @@ function CentroSheet({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3 text-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3 text-sm">
         <span className="font-semibold">{centro.nombre}</span>
         <span className="text-muted-foreground">
           {t("dia.summary", {
@@ -288,7 +291,7 @@ function CentroSheet({
             className={
               f.bloqueaAgenda
                 ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
-                : "rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-400"
+                : "rounded bg-info px-2 py-0.5 text-xs text-info-foreground"
             }
           >
             {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}
@@ -296,14 +299,14 @@ function CentroSheet({
           </span>
         ))}
         {centro.notasDia.filter((n) => n.activo).map((n) => (
-          <span key={n.id} className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">
+          <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">
             📌 {n.contenido}
           </span>
         ))}
       </div>
 
       {bloqueado && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {t("dia.closedNotice")}
         </div>
       )}
@@ -321,7 +324,7 @@ function CentroSheet({
                   {tipo.citas.length}/{tipo.cupo}
                 </span>
               </h3>
-              <div className="overflow-x-auto rounded-md border">
+              <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/40 text-xs text-muted-foreground">
                     <tr>
@@ -433,12 +436,12 @@ function CeldaCita({
 
 function Kpi({ label, value, tono }: { label: string; value: number; tono?: "ok" | "warn" | "muted" }) {
   const color =
-    tono === "ok" ? "text-emerald-600 dark:text-emerald-400"
-    : tono === "warn" ? "text-amber-600 dark:text-amber-400"
+    tono === "ok" ? "text-success-foreground"
+    : tono === "warn" ? "text-warning-foreground"
     : tono === "muted" ? "text-muted-foreground"
     : "text-primary";
   return (
-    <div className="rounded-lg border bg-card px-3 py-2">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
       <div className={"text-xl font-bold tabular-nums " + color}>{value}</div>
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
@@ -528,20 +531,20 @@ function CentroSheetV2({
               className={
                 f.bloqueaAgenda
                   ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
-                  : "rounded bg-sky-500/10 px-2 py-0.5 text-xs text-sky-700 dark:text-sky-400"
+                  : "rounded bg-info px-2 py-0.5 text-xs text-info-foreground"
               }
             >
               {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}{f.bloqueaAgenda ? ` — ${t("dia.closed")}` : ""}
             </span>
           ))}
           {centro.notasDia.filter((n) => n.activo).map((n) => (
-            <span key={n.id} className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">📌 {n.contenido}</span>
+            <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">📌 {n.contenido}</span>
           ))}
         </div>
       )}
 
       {bloqueado && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {t("dia.closedNotice")}
         </div>
       )}
@@ -554,7 +557,7 @@ function CentroSheetV2({
             return (
               <div
                 key={f.hora}
-                className={"min-w-[9.5rem] shrink-0 rounded-lg border p-2 " + (conCitas ? "border-primary/40 bg-primary/5" : "bg-card")}
+                className={"min-w-[9.5rem] shrink-0 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2 " + (conCitas ? "ring-primary/40 bg-primary/5" : "ring-foreground/10 bg-card")}
               >
                 <div className="mb-1 font-mono text-xs font-semibold">{f.hora}</div>
                 <div className="space-y-0.5">
@@ -598,7 +601,7 @@ function CentroSheetV2({
       </div>
 
       {/* UNA sola tabla de citas del día — MISMAS columnas y celdas que la clásica. */}
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>

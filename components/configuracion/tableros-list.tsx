@@ -16,6 +16,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +40,11 @@ export function TablerosList() {
   const [open, setOpen] = React.useState(false);
 
   if (ready && !can("tablero.admin")) {
-    return <p className="mx-auto max-w-5xl px-6 py-16 text-center text-sm text-muted-foreground">{t("noAccess")}</p>;
+    return (
+      <PageContainer>
+        <p className="text-center text-sm text-muted-foreground">{t("noAccess")}</p>
+      </PageContainer>
+    );
   }
 
   const columns: Column<TableroRegistro>[] = [
@@ -72,14 +77,12 @@ export function TablerosList() {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        <div className="ml-auto">
-          <Button onClick={() => setOpen(true)}>{t("new")}</Button>
-        </div>
-      </div>
-      <p className="mb-4 text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={<Button onClick={() => setOpen(true)}>{t("new")}</Button>}
+      />
 
       <DataTable
         columns={columns}
@@ -90,7 +93,7 @@ export function TablerosList() {
       />
 
       {open && <CrearTableroDialog onClose={() => setOpen(false)} onSaved={reload} />}
-    </div>
+    </PageContainer>
   );
 }
 

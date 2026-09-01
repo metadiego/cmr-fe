@@ -166,7 +166,7 @@ export function CuposConfig() {
               type="button"
               onClick={() => setMode(m)}
               className={
-                "rounded px-3 py-1 text-sm transition-colors " +
+                "rounded-md px-3 py-1 text-sm transition-colors " +
                 (mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")
               }
             >
@@ -387,7 +387,7 @@ function CuposGrid({
 
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>

@@ -22,6 +22,7 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,12 +36,12 @@ import {
 // El color de la categoría es una clave SEMÁNTICA (no un hex) → se mapea a la paleta una vez, como la
 // campanita. `dot` para el punto, `chip` para la píldora del evento.
 const COLOR: Record<string, { chip: string; dot: string }> = {
-  rojo: { chip: "bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30", dot: "bg-red-500" },
-  azul: { chip: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30", dot: "bg-sky-500" },
+  rojo: { chip: "bg-destructive/10 text-destructive border-destructive/30", dot: "bg-destructive" },
+  azul: { chip: "bg-info text-info-foreground border-info/40", dot: "bg-info-foreground" },
   violeta: { chip: "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30", dot: "bg-violet-500" },
-  ambar: { chip: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30", dot: "bg-amber-500" },
+  ambar: { chip: "bg-warning text-warning-foreground border-warning/40", dot: "bg-warning-foreground" },
   gris: { chip: "bg-muted text-muted-foreground border-border", dot: "bg-muted-foreground/60" },
-  verde: { chip: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30", dot: "bg-emerald-500" },
+  verde: { chip: "bg-success text-success-foreground border-success/40", dot: "bg-success-foreground" },
 };
 type Vista = "mes" | "semana" | "dia" | "agenda";
 
@@ -137,48 +138,52 @@ export function Calendario() {
   const modalCommon = { cats, catLabel, tRoot, tc, t };
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold capitalize tracking-tight">{titulo}</h1>
-        {vista !== "agenda" && (
-          <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(-1)} aria-label={t("anterior")}>
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>{t("hoy")}</Button>
-            <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(1)} aria-label={t("siguiente")}>
-              <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-            </Button>
-          </div>
-        )}
-        {/* Selector de vista */}
-        <div className="inline-flex rounded-md border p-0.5 text-xs">
-          {(["mes", "semana", "dia", "agenda"] as Vista[]).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setVista(v)}
-              className={cn("rounded px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
-            >
-              {t(`vista.${v}`)}
-            </button>
-          ))}
-        </div>
-        {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
+    <PageContainer>
+      <PageHeader
+        title={<span className="capitalize">{titulo}</span>}
+        actions={
+          <>
+            {vista !== "agenda" && (
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(-1)} aria-label={t("anterior")}>
+                  <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>{t("hoy")}</Button>
+                <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(1)} aria-label={t("siguiente")}>
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
+                </Button>
+              </div>
+            )}
+            {/* Selector de vista */}
+            <div className="inline-flex rounded-md border p-0.5 text-xs">
+              {(["mes", "semana", "dia", "agenda"] as Vista[]).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVista(v)}
+                  className={cn("rounded-md px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+                >
+                  {t(`vista.${v}`)}
+                </button>
+              ))}
+            </div>
+            {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
 
-        {/* Selector de centro EN la pantalla (patrón único). Solo si hay más de uno; el de la sesión preseleccionado. */}
-        <CentroPantallaSelector estado={centro} />
+            {/* Selector de centro EN la pantalla (patrón único). Solo si hay más de uno; el de la sesión preseleccionado. */}
+            <CentroPantallaSelector estado={centro} />
 
-        {puedeCrear && (
-          <Button size="sm" className="ml-auto" onClick={() => setModal({ dia: hoyStr() })}>
-            <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("nuevo")}
-          </Button>
-        )}
-      </div>
+            {puedeCrear && (
+              <Button size="sm" onClick={() => setModal({ dia: hoyStr() })}>
+                <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("nuevo")}
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {/* MES */}
       {vista === "mes" && (
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border bg-border">
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
           {diasSemanaLbl.map((d, i) => (
             <div key={i} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{d}</div>
           ))}
@@ -202,7 +207,7 @@ export function Calendario() {
 
       {/* SEMANA */}
       {vista === "semana" && (
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-xl border bg-border">
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
           {celdasSemana.map((cel) => (
             <div key={ymd(cel)} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {fmt(cel, { weekday: "short" })} {cel.getDate()}
@@ -226,7 +231,7 @@ export function Calendario() {
 
       {/* DÍA */}
       {vista === "dia" && (
-        <div className="rounded-xl border">
+        <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <div className="divide-y">
             {eventosDe(ymd(cursor)).length === 0 ? (
               <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t("sinEventos")}</p>
@@ -242,11 +247,11 @@ export function Calendario() {
         <div className="space-y-4">
           {(() => {
             const dias = [...new Set(eventos.map((e) => e.dia))].sort();
-            if (dias.length === 0) return <p className="rounded-xl border px-4 py-10 text-center text-sm text-muted-foreground">{t("sinProximos")}</p>;
+            if (dias.length === 0) return <p className="rounded-md bg-card px-4 py-10 text-center text-sm text-muted-foreground ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">{t("sinProximos")}</p>;
             return dias.map((d) => (
               <div key={d}>
                 <div className="mb-1 text-sm font-semibold capitalize">{fmt(new Date(d + "T12:00:00"), { weekday: "long", day: "numeric", month: "long" })}</div>
-                <div className="divide-y rounded-xl border">
+                <div className="divide-y overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                   {eventos.filter((e) => e.dia === d).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoriaId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.dia })} t={t} />)}
                 </div>
               </div>
@@ -277,7 +282,7 @@ export function Calendario() {
           {...modalCommon}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 

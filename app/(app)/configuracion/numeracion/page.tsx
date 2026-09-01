@@ -13,6 +13,7 @@ import {
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,9 +41,8 @@ export default function ConfigNumeracionPage() {
   const selected = centros.find((c) => c.id === centroId) ?? centros[0] ?? null;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {centrosRes.state.kind === "loading" ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
@@ -73,7 +73,7 @@ export default function ConfigNumeracionPage() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -153,7 +153,7 @@ function SerieRow({
   }
 
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <div className="flex items-baseline justify-between gap-3">
         <div>
           <div className="text-sm font-semibold">{label}</div>

@@ -392,7 +392,7 @@ function RescheduleDialog({
           )}
 
           {availability && hora && availability.vacios === 0 && (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
               {t("noCupo", { hora })}
               {availability.next && (
                 <button
@@ -502,7 +502,7 @@ function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void })
           {events.map((ev) => {
             const rows = diff(ev);
             return (
-              <li key={ev.id} className="rounded-md border p-3 text-sm">
+              <li key={ev.id} className="rounded-md bg-card p-3 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-medium">{t(`event.${ev.tipo}`)}</span>
                   <span className="text-xs text-muted-foreground">{fmt(ev.createdAt)}</span>

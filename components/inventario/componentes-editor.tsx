@@ -140,7 +140,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
 
   return (
     <div className="space-y-4">
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -186,7 +186,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
       )}
 
       {/* Agregar componente/insumo */}
-      <div className="flex flex-wrap items-end gap-3 rounded-xl border p-4">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <label className="flex min-w-[220px] flex-1 flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("addComponente")}</span>
           <ProductoPicker value={nuevoId} onChange={(id) => setNuevoId(id)} placeholder={t("selectComponente")} />
@@ -208,7 +208,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
           </Select>
         </label>
         {allowOpcional && (
-          <div className="flex w-full flex-wrap items-end gap-3 rounded-lg border border-dashed p-3">
+          <div className="flex w-full flex-wrap items-end gap-3 rounded-md border border-dashed p-3">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={nuevoOpcional} onChange={(e) => setNuevoOpcional(e.target.checked)} />
               {t("opcional")}
@@ -362,7 +362,7 @@ function ComponenteRow({
               )}
             </div>
           ) : comp.opcional ? (
-            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-600 dark:text-amber-400">
+            <span className="rounded-full bg-warning px-2 py-0.5 font-medium text-warning-foreground">
               {t("opcional")} +{money(comp.precioIncremental)}{comp.incluidoPorDefecto ? ` · ${t("porDefecto")}` : ""}
             </span>
           ) : (

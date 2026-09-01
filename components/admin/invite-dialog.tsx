@@ -231,7 +231,7 @@ export function InviteDialog({
                   </SelectContent>
                 </Select>
                 {personalId && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                  <p className="text-xs text-success-foreground">
                     {t("personaEnlazando", {
                       nombre: (() => { const p = sinCuenta.find((x) => x.id === personalId); return p ? `${p.nombre} ${p.apellido ?? ""}`.trim() : ""; })(),
                     })}
@@ -288,7 +288,7 @@ export function InviteDialog({
                 </Select>
               </Field>
               {centroId && (
-                <div className="space-y-2 rounded-lg border p-3">
+                <div className="space-y-2 rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                   <label className="flex items-center gap-3 text-sm">
                     <Checkbox
                       checked={temporal}
@@ -396,7 +396,7 @@ export function InviteDialog({
               </p>
             ) : result.tempPassword ? (
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded-md border bg-muted px-3 py-2 font-mono text-sm break-all">
+                <code className="flex-1 rounded-md bg-card px-3 py-2 font-mono text-sm break-all shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                   {result.tempPassword}
                 </code>
                 <Button variant="outline" onClick={copyTemp}>
@@ -414,7 +414,7 @@ export function InviteDialog({
             )}
 
             {!!result.avisos?.length && (
-              <ul className="mt-2 space-y-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+              <ul className="mt-2 space-y-1 rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
                 {result.avisos.map((a, i) => (
                   <li key={i}>{tRoot.has(a) ? tRoot(a) : a}</li>
                 ))}

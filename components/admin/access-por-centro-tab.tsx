@@ -77,7 +77,7 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">{t("porCentroAyuda")}</p>
 
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <table className="w-full text-sm">
           <thead className="bg-muted/60 text-[11px] uppercase tracking-wide text-muted-foreground">
             <tr className="text-left">
@@ -148,7 +148,7 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
       )}
 
       {/* Roles GLOBALES (todos los centros): sin centro, no se acotan */}
-      <div className="rounded-xl border p-3">
+      <div className="rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rolesGlobales")}</p>
         <div className="flex flex-wrap items-center gap-1.5">
           {rolesGlobalesPerfil.map((r) => (

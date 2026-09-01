@@ -254,7 +254,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
         ) : state.kind === "fail" ? (
           <p className="text-sm text-destructive">{state.message}</p>
         ) : secciones.length === 0 ? (
-          <p className="rounded-lg border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
+          <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
             {t("vacio")}
           </p>
         ) : (
@@ -331,7 +331,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
       </div>
 
       {/* Derecha: formulario de la sección seleccionada / alta */}
-      <aside className="rounded-lg border bg-muted/30 p-4">
+      <aside className="rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h2 className="mb-3 text-sm font-semibold">
           {creando ? t("nueva") : selId ? t("editar") : t("elegir")}
         </h2>

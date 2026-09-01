@@ -106,7 +106,7 @@ export function ConfigAltaAdmin() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div className="rounded-lg border">
+      <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2.5">
           <span className="text-sm font-medium">{tf("nombres")}</span>
           <span className="text-xs text-muted-foreground">{t("siempre")}</span>
@@ -139,7 +139,7 @@ export function ConfigAltaAdmin() {
         </div>
       </div>
       {alcance === "todos" ? (
-        <p className="rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+        <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
           {t("alcanceAviso")}
         </p>
       ) : null}

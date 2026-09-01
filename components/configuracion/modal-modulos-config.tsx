@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 // viene del catálogo del BE (GET /tablero/modal/modulos?postAccion=, BE-3); el
 // estado plugged/unplugged por-tablero se guarda en el OVERRIDE de render de la
 // composición (`render.<clave>=false` = desconectado; ausente = enchufado). BE ya
-// fusiona render por-tablero. Ver docs/specs/prescripcion-obligatoria-y-modulos-modal-fe-request.md
+// fusiona render por-tablero.
 
 // Solo los overrides de composición (los que difieren del catálogo). Así el toggle
 // preserva `postAccion` (override) sin congelar `group/transition/estampa` (catálogo).
@@ -107,7 +107,7 @@ export function ModalModulosConfig({ tablero, centroId }: { tablero: string; cen
       {modulos.map((m) => {
         const enabled = mergedRender?.[m.clave] !== false;
         return (
-          <div key={m.clave} className="flex items-center gap-4 rounded-xl border bg-card/60 p-4 shadow-sm">
+          <div key={m.clave} className="flex items-center gap-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
             <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-lg font-semibold text-primary">
               {tRoot(m.labelKey).charAt(0)}
             </div>

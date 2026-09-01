@@ -59,7 +59,7 @@ export function MonthCalendar({
               className={cn(
                 "min-h-28 border-r border-b p-1.5 text-left align-top transition-colors hover:bg-accent/40",
                 !inMonth && "bg-muted/20 text-muted-foreground",
-                fest && "bg-rose-500/5",
+                fest && "bg-destructive/10",
               )}
             >
               <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export function MonthCalendar({
                   {date.getDate()}
                 </span>
                 {fest && (
-                  <span className="truncate text-[10px] text-rose-500" title={fest.nombre}>
+                  <span className="truncate text-[10px] text-destructive" title={fest.nombre}>
                     {fest.nombre}
                   </span>
                 )}

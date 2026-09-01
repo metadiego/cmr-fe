@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const NONE = "__none__";
 const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
@@ -158,19 +159,18 @@ export function RecepcionDesdeFactura() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-5 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       {aprendidos !== null && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm">
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
           <span className="font-medium">{t("okAprendidos", { n: aprendidos })}</span>
           <Button variant="outline" size="sm" className="ml-auto" onClick={reiniciar}>{t("otraRecepcion")}</Button>
         </div>
       )}
 
       {aprendidos === null && paso === "captura" && (
-        <div className="max-w-2xl space-y-4 rounded-xl border p-5">
+        <div className="max-w-2xl space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("field.proveedor")}</span>
             <Select value={proveedorId || NONE} onValueChange={(v) => setProveedorId(v === NONE ? "" : v)}>
@@ -196,7 +196,7 @@ export function RecepcionDesdeFactura() {
         <>
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <span className="text-sm font-medium">{t("conteo", { listas: conteo.listas, porRevisar: conteo.porRevisar })}</span>
-            {sinEmparejar > 0 && <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">{t("faltan", { n: sinEmparejar })}</span>}
+            {sinEmparejar > 0 && <span className="rounded-full bg-warning px-2 py-0.5 text-xs font-medium text-warning-foreground">{t("faltan", { n: sinEmparejar })}</span>}
             <div className="ml-auto flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setPaso("captura")}>{tc("back")}</Button>
               <Button size="sm" onClick={() => setPaso("confirmar")} disabled={filas.length === 0}>{t("continuar")}</Button>
@@ -204,13 +204,13 @@ export function RecepcionDesdeFactura() {
           </div>
           <div className="space-y-2">
             {filas.map((f, i) => (
-              <div key={i} className={cn("rounded-xl border p-3", !f.productoId && "border-amber-500/40 bg-amber-500/5")}>
+              <div key={i} className={cn("rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]", !f.productoId && "bg-warning ring-warning/40")}>
                 <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
                   {/* Texto del proveedor */}
                   <div className="lg:col-span-4">
                     <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("col.texto")}</div>
                     <div className="font-mono text-sm">{f.texto}</div>
-                    {f.confirmado && <span className="mt-1 inline-block rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">{t(`origen.${f.origen ?? "alias"}`)}</span>}
+                    {f.confirmado && <span className="mt-1 inline-block rounded bg-success px-1.5 py-0.5 text-[10px] font-semibold text-success-foreground">{t(`origen.${f.origen ?? "alias"}`)}</span>}
                   </div>
                   {/* Producto: sugerencias + buscar */}
                   <div className="lg:col-span-4">
@@ -230,7 +230,7 @@ export function RecepcionDesdeFactura() {
                       onChange={(id, prod) => setFila(i, { productoId: id, productoNombre: prod?.nombre ?? "" })}
                       placeholder={t("buscarProducto")}
                     />
-                    {f.productoNombre && <div className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">✓ {f.productoNombre}</div>}
+                    {f.productoNombre && <div className="mt-1 text-xs text-success-foreground">✓ {f.productoNombre}</div>}
                   </div>
                   {/* Cantidad / costo / lote / venc */}
                   <div className="grid grid-cols-2 gap-2 lg:col-span-4 lg:grid-cols-4">
@@ -247,7 +247,7 @@ export function RecepcionDesdeFactura() {
       )}
 
       {aprendidos === null && paso === "confirmar" && (
-        <div className="max-w-2xl space-y-4 rounded-xl border p-5">
+        <div className="max-w-2xl space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <h2 className="text-sm font-semibold">{t("confirmarTitulo")}</h2>
           <div className="grid grid-cols-2 gap-3">
             <Campo label={t("field.almacen")}>
@@ -274,7 +274,7 @@ export function RecepcionDesdeFactura() {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

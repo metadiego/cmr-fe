@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Date del navegador (permitido en cliente). Semana = lunes→hoy.
 function isoDay(d: Date) {
@@ -107,24 +108,24 @@ export default function VentasPorGrupoPage() {
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || grupos.length === 0}>
-            <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={!data}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex gap-2 no-print">
+            <Button variant="outline" size="sm" onClick={exportarCsv} disabled={!data || grupos.length === 0}>
+              <HugeiconsIcon icon={Download04Icon} className="size-4" /> {t("exportCsv")}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => window.print()} disabled={!data}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
       {/* Filtros */}
-      <div className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border p-4 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
@@ -153,22 +154,22 @@ export default function VentasPorGrupoPage() {
         </div>
       </div>
 
-      {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
+      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
 
       {data && (
         <>
           {/* CUADRE: la garantía de que el reporte se puede creer. */}
-          <div className="mt-6">
+          <div>
             {data.cuadre.cuadra ? (
-              <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <div className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-sm font-medium text-success">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />
                 {t("cuadra", { total: money(data.cuadre.totalFacturas) })}
               </div>
             ) : (
-              <div className="inline-flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+              <div className="inline-flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
                 <HugeiconsIcon icon={Alert02Icon} className="size-4" />
                 {t("noCuadra", { diferencia: money(data.cuadre.diferencia) })}
               </div>
@@ -177,9 +178,9 @@ export default function VentasPorGrupoPage() {
 
           {/* Subtotales por MEGAGRUPO (del BE, sin recalcular). Solo si agrupan 2+ grupos. */}
           {megasUtiles.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {megasUtiles.map((m) => (
-                <div key={m.clave} className="rounded-lg border bg-muted/30 px-3 py-2">
+                <div key={m.clave} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     {tRoot.has(`fac.megagrupo.${m.clave}`) ? tRoot(`fac.megagrupo.${m.clave}`) : titleCase(m.clave)}
                   </div>
@@ -191,7 +192,7 @@ export default function VentasPorGrupoPage() {
           )}
 
           {/* Tabla por grupo (orden del BE: neto desc). Neto es la columna protagonista. */}
-          <div className="mt-4 overflow-x-auto rounded-xl border">
+          <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <table className="w-full text-sm">
               <thead className="bg-muted/60">
                 <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -234,7 +235,7 @@ export default function VentasPorGrupoPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -242,20 +243,20 @@ function GrupoRow({ g, rotulo, maxNeto, sinClasLabel, mega }: { g: ReporteGrupoF
   const esSinClas = g.clave === "sin_clasificar";
   const pct = maxNeto > 0 ? Math.max(2, Math.round((Math.abs(g.neto) / maxNeto) * 100)) : 0;
   return (
-    <tr className={"hover:bg-muted/30 " + (esSinClas ? "bg-amber-500/5" : "")}>
+    <tr className={"hover:bg-muted/30 " + (esSinClas ? "bg-warning" : "")}>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
           {esSinClas && (
-            <span title={sinClasLabel} className="text-amber-600 dark:text-amber-400">
+            <span title={sinClasLabel} className="text-warning-foreground">
               <HugeiconsIcon icon={Alert02Icon} className="size-4" />
             </span>
           )}
-          <span className={"font-medium " + (esSinClas ? "text-amber-700 dark:text-amber-400" : "")}>{rotulo}</span>
+          <span className={"font-medium " + (esSinClas ? "text-warning-foreground" : "")}>{rotulo}</span>
           {mega && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{mega}</span>}
         </div>
         {/* Barra proporcional al neto: de un vistazo, qué se mueve. */}
         <div className="mt-1 h-1.5 w-full max-w-[240px] overflow-hidden rounded-full bg-muted">
-          <div className={"h-full rounded-full " + (esSinClas ? "bg-amber-500" : "bg-primary")} style={{ width: `${pct}%` }} />
+          <div className={"h-full rounded-full " + (esSinClas ? "bg-warning-foreground" : "bg-primary")} style={{ width: `${pct}%` }} />
         </div>
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.facturado)}</td>

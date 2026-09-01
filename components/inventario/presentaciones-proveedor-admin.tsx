@@ -31,6 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PPFormSheet } from "@/components/inventario/pp-form-sheet";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 export function PresentacionesProveedorAdmin() {
   const t = useTranslations("inventario.pp");
@@ -88,17 +89,19 @@ export function PresentacionesProveedorAdmin() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        {productoId && (
-          <Button size="sm" onClick={openNew}>
-            <HugeiconsIcon icon={Add01Icon} className="size-4" />
-            {t("new")}
-          </Button>
-        )}
-      </div>
-      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          productoId && (
+            <Button size="sm" onClick={openNew}>
+              <HugeiconsIcon icon={Add01Icon} className="size-4" />
+              {t("new")}
+            </Button>
+          )
+        }
+      />
 
       <div className="mb-6 max-w-md">
         <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
@@ -112,11 +115,11 @@ export function PresentacionesProveedorAdmin() {
       </div>
 
       {!productoId ? (
-        <p className="rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
           {t("pickProducto")}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -223,6 +226,6 @@ export function PresentacionesProveedorAdmin() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

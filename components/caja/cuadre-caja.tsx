@@ -36,7 +36,7 @@ import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
-import { cn } from "@/lib/utils";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -151,25 +151,20 @@ function Shell({
 }) {
   const t = useTranslations("caja");
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <div
-        className={cn(
-          "mb-1 flex flex-wrap items-center gap-3 border-l-4 pl-3",
-          division === "consulta" ? "border-l-sky-500" : "border-l-emerald-500",
-        )}
-      >
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("title")} — {t(`division.${division}`)}
-        </h1>
-        {centroNombre && (
-          <Badge variant="secondary" className="font-normal">
-            {centroNombre}
-          </Badge>
-        )}
-      </div>
-      <p className="mb-6 pl-3 text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader
+        title={<>{t("title")} — {t(`division.${division}`)}</>}
+        description={t("help")}
+        count={
+          centroNombre && (
+            <Badge variant="secondary" className="font-normal">
+              {centroNombre}
+            </Badge>
+          )
+        }
+      />
       {children}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -493,7 +488,7 @@ function Editor({
           {/* Inicio (fondo de apertura) — input con aplicar/limpiar (calca CMA). En consolidado no
               se edita: el Inicio es la suma de los fondos de cada cajero (se ve en el resumen). */}
           {!esConsolidado && (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3">
+            <div className="flex flex-wrap items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3">
               <Label htmlFor="inicio" className="text-sm font-medium">
                 {t("payments.opening")}
               </Label>

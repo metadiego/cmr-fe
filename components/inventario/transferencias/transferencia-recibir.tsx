@@ -40,6 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const num = (v: number | string | null | undefined) => Number(v ?? 0) || 0;
 
@@ -154,41 +155,39 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   }
 
   if (state.kind === "loading") {
-    return <div className="mx-auto max-w-3xl px-6 py-10 text-sm text-muted-foreground">{tc("loading")}</div>;
+    return <PageContainer className="text-sm text-muted-foreground">{tc("loading")}</PageContainer>;
   }
   if (state.kind === "fail" || !transfer) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-10 text-center">
+      <PageContainer className="text-center">
         <p className="text-sm text-muted-foreground">{tc("error")}</p>
         <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
 
       {/* Cabecera */}
-      <div className="mb-6 rounded-xl border p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">
-            {centroName(transfer.clinicOrigenId)} → {centroName(transfer.clinicDestinoId)}
-          </h1>
-          <Badge variant={ESTADO_VARIANT[transfer.estado] ?? "outline"}>{t(`estado.${transfer.estado}`)}</Badge>
-        </div>
-        {transfer.motivo && <p className="mt-1 text-sm text-muted-foreground">{transfer.motivo}</p>}
+      <div className="mb-6 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <PageHeader
+          title={`${centroName(transfer.clinicOrigenId)} → ${centroName(transfer.clinicDestinoId)}`}
+          description={transfer.motivo}
+          actions={<Badge variant={ESTADO_VARIANT[transfer.estado] ?? "outline"}>{t(`estado.${transfer.estado}`)}</Badge>}
+        />
         {!esDestino && transfer.estado === "pendiente" && (
-          <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          <p className="mt-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
             {t("soloDestino", { centro: centroName(transfer.clinicDestinoId) })}
           </p>
         )}
       </div>
 
       {/* Líneas */}
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">
             <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -284,6 +283,6 @@ export function TransferenciaRecibir({ id }: { id: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

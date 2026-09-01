@@ -469,13 +469,13 @@ function Tile({
   tone?: "ok" | "error";
 }) {
   return (
-    <div className="min-w-[7rem] rounded-lg border bg-card px-3 py-2">
+    <div className="min-w-[7rem] rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div
         className={cn(
           "text-lg font-semibold tabular-nums",
           tone === "error" && "text-destructive",
-          tone === "ok" && "text-emerald-600 dark:text-emerald-400",
+          tone === "ok" && "text-success-foreground",
         )}
       >
         {value}
@@ -591,7 +591,7 @@ function DetalleSheet({
             <CopiableCampo label="requestId" value={row.requestId} onCopy={onCopy} vacio={t("sinDato")} />
             <CopiableCampo label="IP" value={row.ip} onCopy={onCopy} vacio={t("sinDato")} />
             {row.resultado === "error" ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3">
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
                 <p className="text-xs font-semibold text-destructive">{row.errorCode ?? t("error")}</p>
                 {row.errorMensaje ? <p className="mt-1 text-xs">{row.errorMensaje}</p> : null}
               </div>

@@ -71,7 +71,7 @@ export function PagosFactura({
   const pagado = saldo <= 0.001;
 
   return (
-    <div className="space-y-2 rounded-xl border p-4">
+    <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("title")}</span>
         <span className="text-xs text-muted-foreground">
@@ -109,9 +109,9 @@ export function PagosFactura({
       )}
 
       {!pagado && (
-        <div className="flex items-center justify-between rounded-lg bg-amber-500/10 px-2.5 py-1.5 text-sm">
-          <span className="text-amber-700 dark:text-amber-400">{t("balance")}</span>
-          <span className="font-semibold tabular-nums text-amber-700 dark:text-amber-400">{money(saldo)}</span>
+        <div className="flex items-center justify-between rounded-md border border-warning/40 bg-warning px-2.5 py-1.5 text-sm">
+          <span className="text-warning-foreground">{t("balance")}</span>
+          <span className="font-semibold tabular-nums text-warning-foreground">{money(saldo)}</span>
         </div>
       )}
 
@@ -142,7 +142,7 @@ function TipoBadge({ tipo }: { tipo?: string }) {
     <span
       className={
         "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold " +
-        (esReembolso ? "bg-destructive/15 text-destructive" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400")
+        (esReembolso ? "bg-destructive/15 text-destructive" : "bg-success text-success-foreground")
       }
     >
       {esReembolso ? t("refund") : t("payment")}
@@ -312,7 +312,7 @@ function PagoAddRow({
   }
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-2">
+    <div className="space-y-1.5 rounded-md border border-primary/30 bg-primary/5 px-2.5 py-2">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("addPayment")}</span>
       <Select value={formaId} onValueChange={setFormaId}>
         <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>

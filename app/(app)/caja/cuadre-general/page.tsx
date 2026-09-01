@@ -10,6 +10,7 @@ import { getReporteDia, type ReporteDia } from "@/lib/api/caja";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cuadre general: ventas del día por DIVISIÓN (General = productos+suero+láser; Consulta) desglosadas por
 // forma de pago, más un TOTAL GENERAL que las suma. Todo sale del reporte del día del BE (una llamada por
@@ -96,34 +97,34 @@ export default function CuadreGeneralPage() {
   const cajeroActivo = usuarioId ? (porCajero.find((c) => c.usuarioId === usuarioId)?.nombre ?? usuarioId.slice(0, 8)) : null;
 
   return (
-    <div className="w-full px-6 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
-        </div>
-        <div className="flex items-end gap-2 no-print">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("fecha")}</span>
-            <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="h-9 w-[160px]" />
-          </label>
-          <Button className="h-9" onClick={() => setQuery(fecha)}>{t("buscar")}</Button>
-          <Button variant="outline" size="sm" className="h-9" onClick={() => window.print()} disabled={state.kind !== "ok"}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title={t("title")}
+        description={t("help")}
+        actions={
+          <div className="flex items-end gap-2 no-print">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">{t("fecha")}</span>
+              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="h-9 w-[160px]" />
+            </label>
+            <Button className="h-9" onClick={() => setQuery(fecha)}>{t("buscar")}</Button>
+            <Button variant="outline" size="sm" className="h-9" onClick={() => window.print()} disabled={state.kind !== "ok"}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}
+            </Button>
+          </div>
+        }
+      />
 
-      {state.kind === "loading" && <p className="mt-6 text-sm text-muted-foreground">{tc("loading")}</p>}
+      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
-        <p className="mt-6 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
 
       {state.kind === "ok" && (
         <>
           {cajeroActivo && (
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-2.5 text-sm">
-              <span className="font-medium text-blue-700 dark:text-blue-300">
+            <div className="flex flex-wrap items-center gap-3 rounded-md border border-info/40 bg-info px-4 py-2.5 text-sm">
+              <span className="font-medium text-info-foreground">
                 {t("who.acotado", { cajero: cajeroActivo })}
               </span>
               <Button variant="outline" size="sm" className="h-8 no-print" onClick={() => setUsuarioId(null)}>
@@ -131,19 +132,19 @@ export default function CuadreGeneralPage() {
               </Button>
             </div>
           )}
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <CuadreCard title={t("general")} tono="general" d={general} totalLabel={t("totalDivision", { division: t("general") })} t={t} />
             <CuadreCard title={t("consulta")} tono="consulta" d={consulta} totalLabel={t("totalDivision", { division: t("consulta") })} t={t} />
           </div>
-          <div className="mt-4 max-w-xl">
+          <div className="max-w-xl">
             <CuadreCard title={t("totalGeneral")} tono="total" d={total} totalLabel={t("totalGeneralRow")} t={t} destacado />
           </div>
-          <div className="mt-4 max-w-xl">
+          <div className="max-w-xl">
             <WhoBilled cajeros={porCajero} total={total.total} activeUsuarioId={usuarioId} onPick={setUsuarioId} t={t} />
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -164,11 +165,11 @@ function CuadreCard({
 }) {
   const head =
     tono === "total"
-      ? "bg-blue-600 text-white"
+      ? "bg-primary text-primary-foreground"
       : tono === "general"
         ? "bg-emerald-500/90 text-white"
         : "bg-teal-500/90 text-white";
-  const body = tono === "total" ? "bg-blue-600/90 text-white" : tono === "general" ? "bg-emerald-500/15" : "bg-teal-500/15";
+  const body = tono === "total" ? "bg-primary/90 text-primary-foreground" : tono === "general" ? "bg-emerald-500/15" : "bg-teal-500/15";
   const filas: Metodo[] = [
     { key: "__efectivo__", label: t("efectivo"), monto: d.efectivo },
     ...d.tarjetas,
@@ -176,7 +177,7 @@ function CuadreCard({
   ];
   const rowText = tono === "total" ? "text-white" : "";
   return (
-    <div className={"overflow-hidden rounded-xl border " + (destacado ? "shadow-md" : "")}>
+    <div className="overflow-hidden rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className={"px-4 py-2.5 text-center text-sm font-bold uppercase tracking-wide " + head}>{title}</div>
       <div className={body}>
         {filas.map((f) => (
@@ -208,7 +209,7 @@ function WhoBilled({
   // Aviso honesto si la Σ por cajero NO da el total del día: es defecto del BE, no se maquilla.
   const descuadre = Math.abs(suma - total) > 0.005;
   return (
-    <div className="overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="bg-muted/60 px-4 py-2.5 text-sm font-bold uppercase tracking-wide">{t("who.title")}</div>
       {cajeros.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">{t("who.empty")}</p>

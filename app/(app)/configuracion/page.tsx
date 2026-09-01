@@ -9,6 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { useMenu } from "@/hooks/use-menu";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Índice de Configuración: la puerta de entrada a todo lo configurable. Se pintan SOLO las secciones que
 // el BE le manda a esta persona en /me/menu (grupo g-configuracion), NO las nueve fijas: así, al abrir
@@ -35,22 +36,20 @@ export default function ConfiguracionIndexPage() {
   const ready = menu.length > 0;
 
   return (
-    // Ancho completo: es un panel de administración. Ver norma uso-optimo-de-la-pantalla.
-    <div className="mx-auto w-full max-w-none px-6 py-8 2xl:px-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       {ready && visibles.length === 0 ? (
-        <p className="mt-8 rounded-xl border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
           {t("sinAcceso")}
         </p>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {visibles.map((s) => (
             <Link
               key={s.href}
               href={s.href}
-              className="group flex items-start gap-3 rounded-xl border bg-card/60 p-4 shadow-sm transition-colors hover:bg-accent/40"
+              className="group flex items-start gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 transition-colors hover:bg-accent/40"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <HugeiconsIcon icon={s.icon} className="size-5" />
@@ -66,6 +65,6 @@ export default function ConfiguracionIndexPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

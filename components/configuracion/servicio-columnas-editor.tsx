@@ -263,7 +263,7 @@ export function ServicioColumnasEditor() {
       </div>
 
       {!sel ? (
-        <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
           {t("colElegirServicioHint")}
         </p>
       ) : colsRes.state.kind === "loading" || catRes.state.kind === "loading" ? (
@@ -271,7 +271,7 @@ export function ServicioColumnasEditor() {
       ) : (
         <>
           {seleccion.size >= 2 && (
-            <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
               <span className="text-sm text-muted-foreground">{t("colSeleccion", { n: seleccion.size })}</span>
               <Button size="sm" disabled={busy} onClick={() => agrupar("auto")}>{t("colAgrupar")}</Button>
               <Button size="sm" variant="outline" disabled={busy} onClick={() => agrupar(null)}>{t("colSueltas")}</Button>
@@ -294,10 +294,10 @@ export function ServicioColumnasEditor() {
                 onDrop={activa ? (e) => { e.preventDefault(); if (dragClave) soltar(dragClave, clave); setDragClave(null); } : undefined}
                 onDragEnd={() => setDragClave(null)}
                 className={
-                  "flex items-center gap-3 rounded-lg border px-3 py-2 transition " +
+                  "flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2 transition " +
                   (activa ? "" : "opacity-60 ") +
                   (dragClave === clave ? "opacity-40 " : "") +
-                  (dragClave && dragClave !== clave && activa ? "hover:border-primary hover:ring-1 hover:ring-primary/40 " : "")
+                  (dragClave && dragClave !== clave && activa ? "hover:ring-1 hover:ring-primary/40 " : "")
                 }
               >
                 <div className="flex items-center gap-1">

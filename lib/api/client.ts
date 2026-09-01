@@ -1,3 +1,5 @@
+import type { Session, SupabaseClient } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { getActiveCentro } from "@/lib/tenant";
@@ -11,6 +13,25 @@ import {
 
 // Margen para considerar un access token "por vencer" y refrescarlo ANTES de la llamada (segundos).
 const REFRESH_MARGEN_S = 60;
+
+// Refresh DEDUPLICADO. Varias peticiones concurrentes cerca del vencimiento del token llamaban cada una a
+// refreshSession(). El refresh token de Supabase ROTA (un solo uso): refrescos concurrentes consumen el
+// mismo token → los perdedores reciben "Already Used", gotrue limpia la sesión en memoria y getSession()
+// pasa a devolver null → las siguientes llamadas van SIN Authorization → 401. Compartiendo UNA sola promesa
+// de refresh entre las llamadas concurrentes se elimina la carrera.
+let refreshEnVuelo: Promise<Session | null> | null = null;
+function refreshDeduped(supabase: SupabaseClient): Promise<Session | null> {
+  if (!refreshEnVuelo) {
+    refreshEnVuelo = supabase.auth
+      .refreshSession()
+      .then(({ data }) => data.session ?? null)
+      .catch(() => null)
+      .finally(() => {
+        refreshEnVuelo = null;
+      });
+  }
+  return refreshEnVuelo;
+}
 
 // Reads the current Supabase session (browser) and builds auth + tenant headers.
 // No session → no headers (the BE will respond 401, surfaced as an ApiError).
@@ -26,21 +47,21 @@ async function authHeaders(
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Refresh PROACTIVO: si el token ya venció o le quedan <60s, refrescarlo antes de mandar la llamada para
-  // no enviar un token muerto (raíz del 401 tras ~15 min, QA-001). Solo cuando hace falta; si el refresh
-  // token también murió, se envía lo que haya y el 401 se maneja abajo (aviso claro).
   if (session?.expires_at) {
+    // Refresh PROACTIVO (deduplicado): si el token ya venció o le quedan <60s, refrescarlo antes de mandar
+    // la llamada para no enviar un token muerto (raíz del 401 tras ~15 min, QA-001). Si el refresh falla
+    // (red o refresh token muerto) seguimos con el token actual y el 401 se maneja abajo (aviso claro).
     const restanteS = session.expires_at - Math.floor(Date.now() / 1000);
     if (restanteS < REFRESH_MARGEN_S) {
-      // Con try/catch: si el refresh proactivo falla por red, seguimos con el token actual (aún puede
-      // servir unos segundos) y, si el BE lo rechaza, lo maneja el path del 401. No romper la petición aquí.
-      try {
-        const { data } = await supabase.auth.refreshSession();
-        if (data.session) session = data.session;
-      } catch {
-        /* red caída: seguir con la sesión actual */
-      }
+      const refreshed = await refreshDeduped(supabase);
+      if (refreshed) session = refreshed;
     }
+  } else if (!session) {
+    // getSession() devolvió null pese a haber sesión (ventana durante una rotación de token o una firma
+    // concurrente). Mandar la petición SIN token daría un 401 que la app interpreta como "deslogueado"
+    // (nav vacío + "Iniciar sesión"). En su lugar intentamos recuperar la sesión con un refresh
+    // deduplicado; si de verdad no hay sesión, `refreshSession` devuelve null y seguimos sin token.
+    session = await refreshDeduped(supabase);
   }
 
   const headers: Record<string, string> = {};
@@ -85,15 +106,12 @@ async function rawRequest<T>(
 
   let { res, teniaToken } = await doFetch();
 
-  // 401 con token adjunto = el BE rechazó nuestra sesión. Intentar UN refresh y reintentar (recuperación
-  // silenciosa cuando el refresh token sigue vivo). Solo si el REFRESH FALLA se considera la sesión muerta
-  // → aviso CLARO + login (QA-001). Si el refresh funciona pero el reintento SIGUE en 401, NO es sesión
-  // caducada (p. ej. 401 de recurso/tenant): se deja surgir como ApiError normal y NO se expulsa al usuario.
+  // 401 con token adjunto = el BE rechazó nuestra sesión. Intentar UN refresh (deduplicado) y reintentar
+  // (recuperación silenciosa cuando el refresh token sigue vivo). Solo si el REFRESH FALLA se considera la
+  // sesión muerta → aviso CLARO + login (QA-001). Si el refresh funciona pero el reintento SIGUE en 401, NO
+  // es sesión caducada (p. ej. 401 de recurso/tenant): se deja surgir como ApiError normal y NO se expulsa.
   if (res.status === 401 && teniaToken) {
-    const refreshed = await createClient()
-      .auth.refreshSession()
-      .then(({ data }) => !!data.session)
-      .catch(() => false);
+    const refreshed = await refreshDeduped(createClient());
     if (refreshed) {
       ({ res, teniaToken } = await doFetch());
     } else {

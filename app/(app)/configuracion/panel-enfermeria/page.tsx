@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { useCan } from "@/hooks/use-can";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 import { PanelSeccionesAdmin } from "@/components/paneles/panel-secciones-admin";
 
 // Configuración → Panel de enfermería: CRUD de las SECCIONES del panel (definir qué avisos hay).
@@ -15,16 +16,15 @@ export default function ConfigPanelEnfermeriaPage() {
   const { can, ready } = useCan();
 
   return (
-    <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
       {ready && !can("panel.config") ? (
-        <p className="rounded-lg border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
+        <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
           {t("noPermission")}
         </p>
       ) : (
         <PanelSeccionesAdmin clave={PANEL_CLAVE} />
       )}
-    </div>
+    </PageContainer>
   );
 }

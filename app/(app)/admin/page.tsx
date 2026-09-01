@@ -12,17 +12,17 @@ import { PermisosCatalogo } from "@/components/admin/permisos-catalogo";
 import { MenuAdmin } from "@/components/admin/menu-admin";
 import { EditorRolUnificado } from "@/components/admin/editor-rol";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 export default function AdminPage() {
   const t = useTranslations("admin");
 
   return (
     <AdminGuard>
-      {/* Ancho completo: la administración de usuarios/roles necesita la pantalla entera. */}
-      <div className="mx-auto w-full max-w-none px-6 py-8 2xl:px-10">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+      <PageContainer>
+        <PageHeader title={t("title")} />
 
-        <Tabs defaultValue="users" className="mt-6">
+        <Tabs defaultValue="users">
           <TabsList>
             <TabsTrigger value="users">{t("tabs.users")}</TabsTrigger>
             <TabsTrigger value="centers">{t("tabs.centers")}</TabsTrigger>
@@ -66,7 +66,7 @@ export default function AdminPage() {
             <PendingProfiles />
           </TabsContent>
         </Tabs>
-      </div>
+      </PageContainer>
     </AdminGuard>
   );
 }

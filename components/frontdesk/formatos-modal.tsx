@@ -158,7 +158,7 @@ export function FormatosModal({
                     key={r.id}
                     type="button"
                     onClick={() => elegir(r)}
-                    className="rounded-lg border p-4 text-left transition-colors hover:border-primary hover:bg-primary/5"
+                    className="rounded-md border p-4 text-left transition-colors hover:border-primary hover:bg-primary/5"
                   >
                     <div className="font-medium">{r.labelKey && t.has(r.labelKey) ? t(r.labelKey) : r.name ?? r.id}</div>
                     <div className="text-xs text-muted-foreground">{t("generarFormato")}</div>

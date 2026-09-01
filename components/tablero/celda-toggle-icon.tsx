@@ -102,7 +102,7 @@ export function CeldaToggleIcon({
         aria-label={tooltip}
         aria-pressed={active}
         className={
-          "grid size-8 place-items-center rounded-lg border transition-colors disabled:opacity-40 " +
+          "grid size-8 place-items-center rounded-md border transition-colors disabled:opacity-40 " +
           (active
             ? "border-primary bg-primary/15 text-primary"
             : "border-border text-muted-foreground hover:bg-muted hover:text-foreground")

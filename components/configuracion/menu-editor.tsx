@@ -533,7 +533,7 @@ export function MenuEditor() {
                     title={ic.name}
                     onClick={() => setIcon(it, ic.name)}
                     className={cn(
-                      "grid size-8 place-items-center rounded hover:bg-accent",
+                      "grid size-8 place-items-center rounded-md hover:bg-accent",
                       it.icon === ic.name && "bg-accent ring-1 ring-primary",
                     )}
                   >
@@ -632,7 +632,7 @@ export function MenuEditor() {
       </div>
 
       {/* Panel: rutas disponibles del manifiesto */}
-      <aside className="rounded-lg border bg-muted/30 p-3">
+      <aside className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
         <h2 className="text-sm font-semibold">{t("availableTitle")}</h2>
         <p className="mb-3 mt-1 text-xs text-muted-foreground">{t("availableHelp")}</p>
         <div className="flex flex-col gap-1">
@@ -642,7 +642,7 @@ export function MenuEditor() {
             availableRoutes.map((r) => (
               <div
                 key={r.path}
-                className="flex items-center gap-2 rounded-md border bg-card px-2 py-1.5 text-sm"
+                className="flex items-center gap-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-2 py-1.5 text-sm"
               >
                 <span className="flex-1 truncate">
                   <span className="font-medium">{tRoot.has(r.labelKey) ? tRoot(r.labelKey) : r.labelKey}</span>

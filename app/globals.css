@@ -55,90 +55,52 @@
 }
 
 :root {
+    --radius: 0.5rem;
+
     --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
+    --foreground: oklch(0.24 0.06 262);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
+    --card-foreground: oklch(0.24 0.06 262);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.488 0.243 264.376);
-    --primary-foreground: oklch(0.97 0.014 254.604);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.24 0.06 262);
+    --primary: oklch(0.53 0.10 250);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.94 0.004 255);
+    --secondary-foreground: oklch(0.34 0.02 258);
+    --muted: oklch(0.975 0.004 250);
+    --muted-foreground: oklch(0.66 0.02 255);
+    --accent: oklch(0.94 0.03 255);
+    --accent-foreground: oklch(0.33 0.06 250);
     --destructive: oklch(0.577 0.245 27.325);
-    --success: oklch(0.62 0.15 162);
-    --success-foreground: oklch(0.98 0.02 162);
-    --warning: oklch(0.75 0.16 70);
-    --warning-foreground: oklch(0.27 0.05 70);
-    --info: oklch(0.6 0.13 240);
-    --info-foreground: oklch(0.98 0.02 240);
+    --destructive-foreground: oklch(1 0 0);
+    --border: oklch(0.92 0.006 255);
+    --input: oklch(0.92 0.006 255);
+    --ring: oklch(0.53 0.10 250);
+
+    --success: oklch(0.95 0.03 150);
+    --success-foreground: oklch(0.45 0.10 150);
+    --warning: oklch(0.96 0.04 75);
+    --warning-foreground: oklch(0.50 0.10 75);
+    --info: oklch(0.94 0.03 255);
+    --info-foreground: oklch(0.33 0.06 250);
+
     --overlay: oklch(0 0 0 / 0.8);
     --app-bg-image: none;
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.546 0.245 262.881);
-    --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
-}
 
-/* Deep-indigo dark theme. Everything is tinted toward hue ~264 (indigo/blue)
-   so backgrounds, cards, borders and muted surfaces read as one cohesive
-   navy palette rather than neutral gray. */
-.dark {
-    --background: oklch(0.19 0.045 264);
-    --foreground: oklch(0.97 0.012 264);
-    --card: oklch(0.23 0.05 264);
-    --card-foreground: oklch(0.97 0.012 264);
-    --popover: oklch(0.23 0.05 264);
-    --popover-foreground: oklch(0.97 0.012 264);
-    --primary: oklch(0.62 0.2 264);
-    --primary-foreground: oklch(0.98 0.01 264);
-    --secondary: oklch(0.28 0.05 264);
-    --secondary-foreground: oklch(0.97 0.012 264);
-    --muted: oklch(0.27 0.045 264);
-    --muted-foreground: oklch(0.72 0.045 264);
-    --accent: oklch(0.32 0.06 264);
-    --accent-foreground: oklch(0.98 0.01 264);
-    --destructive: oklch(0.704 0.191 22.216);
-    --success: oklch(0.7 0.15 162);
-    --success-foreground: oklch(0.2 0.04 162);
-    --warning: oklch(0.8 0.15 75);
-    --warning-foreground: oklch(0.25 0.05 75);
-    --info: oklch(0.7 0.14 240);
-    --info-foreground: oklch(0.2 0.04 240);
-    --overlay: oklch(0 0 0 / 0.8);
-    --border: oklch(0.7 0.06 264 / 16%);
-    --input: oklch(0.7 0.06 264 / 20%);
-    --ring: oklch(0.62 0.16 264);
-    --chart-1: oklch(0.62 0.2 264);
-    --chart-2: oklch(0.7 0.15 230);
-    --chart-3: oklch(0.78 0.13 200);
-    --chart-4: oklch(0.55 0.18 280);
-    --chart-5: oklch(0.5 0.16 295);
-    --sidebar: oklch(0.21 0.05 264);
-    --sidebar-foreground: oklch(0.97 0.012 264);
-    --sidebar-primary: oklch(0.62 0.2 264);
-    --sidebar-primary-foreground: oklch(0.98 0.01 264);
-    --sidebar-accent: oklch(0.32 0.06 264);
-    --sidebar-accent-foreground: oklch(0.98 0.01 264);
-    --sidebar-border: oklch(0.7 0.06 264 / 16%);
-    --sidebar-ring: oklch(0.62 0.16 264);
+    --chart-1: oklch(0.53 0.10 250);
+    --chart-2: oklch(0.47 0.09 252);
+    --chart-3: oklch(0.40 0.08 255);
+    --chart-4: oklch(0.33 0.06 250);
+    --chart-5: oklch(0.24 0.06 262);
+
+    --sidebar: oklch(0.24 0.06 262);
+    --sidebar-foreground: oklch(0.84 0.03 255);
+    --sidebar-primary: oklch(0.53 0.10 250);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(1 0 0 / 6%);
+    --sidebar-accent-foreground: oklch(1 0 0);
+    --sidebar-border: oklch(1 0 0 / 7%);
+    --sidebar-ring: oklch(0.53 0.10 250);
 }
 
 @layer base {
@@ -248,4 +210,23 @@
    cada reporte los muestra con su propio CSS. Ver estadísticas de servicios. */
 .solo-print {
   display: none;
+}
+
+/* Animación de expandir/colapsar para el nav plegable (Radix Collapsible). Usa la
+   variable de altura que Radix expone para animar sin JS. */
+@keyframes collapsible-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
 }

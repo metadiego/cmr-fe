@@ -9,6 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { ComponentesEditor } from "@/components/inventario/componentes-editor";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Recetas de compuestos (§1 roadmap): un derivado (tipo=compuesto) consume N componentes
 // (base|unico) en cantidad+unidad. Editor bill-of-materials (extraído a ComponentesEditor,
@@ -36,15 +37,14 @@ export function RecetasAdmin() {
   const selected = compuestos.find((p) => p.id === selId) ?? null;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
       <div className="grid gap-6 md:grid-cols-[280px_1fr]">
         {/* Lista de compuestos */}
         <div className="space-y-3">
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchCompuesto")} />
-          <div className="overflow-hidden rounded-xl border">
+          <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             {compRes.state.kind === "loading" && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">{tc("loading")}</p>
             )}
@@ -74,7 +74,7 @@ export function RecetasAdmin() {
         {/* Editor de receta */}
         <div>
           {!selected ? (
-            <div className="rounded-xl border border-dashed px-4 py-16 text-center text-sm text-muted-foreground">
+            <div className="rounded-md border border-dashed px-4 py-16 text-center text-sm text-muted-foreground">
               {t("pickCompuesto")}
             </div>
           ) : (
@@ -82,7 +82,7 @@ export function RecetasAdmin() {
           )}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

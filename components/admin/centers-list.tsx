@@ -13,13 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -85,7 +85,7 @@ export function CentersList() {
         (state.centers.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("centers.empty")}</p>
         ) : (
-          <Table>
+          <DataTable>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("centers.name")}</TableHead>
@@ -116,7 +116,7 @@ export function CentersList() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </DataTable>
         ))}
 
       <CreateCenterDialog

@@ -903,10 +903,10 @@
       "permisoSinPermiso": "Sin permiso (visible para todos)"
     },
     "theme": {
-      "systemTitle": "Tema del sistema",
-      "systemHelp": "El tema por defecto para toda la red (capa base).",
-      "centerTitle": "Tema por centro",
-      "centerHelp": "Tema propio de un centro; prevalece sobre el del sistema.",
+      "systemTitle": "Color de marca del sistema",
+      "systemHelp": "El color de marca por defecto para toda la red (capa base).",
+      "centerTitle": "Color de marca por centro",
+      "centerHelp": "El color de marca propio de un centro; prevalece sobre el del sistema.",
       "selectCenter": "Centro",
       "loading": "Cargando…",
       "save": "Guardar",
@@ -1203,34 +1203,21 @@
   },
   "appearance": {
     "title": "Apariencia",
-    "description": "Personaliza los colores y el estilo de tu cuenta.",
-    "loading": "Cargando…",
-    "primary": "Color principal",
-    "accent": "Color de acento",
-    "background": "Fondo",
-    "radius": "Redondeo",
-    "radiusDefault": "Por defecto",
-    "radius_none": "Ninguno",
-    "radius_small": "Pequeño",
-    "radius_medium": "Mediano",
-    "radius_large": "Grande",
-    "save": "Guardar",
-    "saving": "Guardando…",
-    "reset": "Restablecer",
-    "saved": "Apariencia guardada.",
-    "resetDone": "Apariencia restablecida.",
+    "description": "Tu foto de perfil.",
+    "brandColor": "Color de marca",
+    "brandHint": "El resto del diseño se genera a partir de este color para mantener todo coherente.",
+    "brand_navy": "Azul marino",
+    "brand_ocean": "Océano",
+    "brand_teal": "Verde azulado",
+    "brand_emerald": "Esmeralda",
+    "brand_violet": "Violeta",
+    "brand_rose": "Rosa",
     "avatarTitle": "Foto de perfil",
     "avatarUpload": "Subir foto",
     "avatarRemove": "Quitar",
     "avatarSaved": "Foto actualizada.",
     "avatarRemoved": "Foto eliminada.",
-    "uploading": "Subiendo…",
-    "backgroundTitle": "Imagen de fondo",
-    "backgroundUpload": "Subir imagen",
-    "backgroundChange": "Cambiar imagen",
-    "backgroundRemove": "Quitar fondo",
-    "backgroundSaved": "Fondo actualizado.",
-    "backgroundRemoved": "Fondo eliminado."
+    "uploading": "Subiendo…"
   },
   "apiHealth": {
     "title": "Prueba de conexión con el API",
@@ -1268,13 +1255,7 @@
     "stepPresent": "Presente",
     "stepConsult": "En consulta",
     "stepAttended": "Atendido",
-    "now": "ahora",
-    "prescriptionRequired": "Selecciona una prescripción o marca «Sin prescripción» para continuar."
-  },
-  "prescripcion": {
-    "title": "Prescripción",
-    "none": "Sin prescripción",
-    "required": "Obligatorio: ingresa una cantidad o marca «Sin prescripción»."
+    "now": "ahora"
   },
   "settingsModulos": {
     "title": "Módulos del modal",
@@ -1293,9 +1274,6 @@
     "modulo": {
       "agendar_cita": {
         "desc": "Agenda la próxima cita del paciente."
-      },
-      "prescripcion": {
-        "desc": "Muestra la grilla de prescripción dentro del modal de atención."
       }
     }
   },
@@ -3425,13 +3403,13 @@
     "title": "Apariencia corporativa",
     "description": "La apariencia que ven todos por defecto, la de cada centro, y los cambios temporales que pisan a todo el mundo mientras estén activos. Tu apariencia personal se cambia desde tu avatar.",
     "systemTitle": "Sistema",
-    "systemHint": "Lo que ve todo el mundo cuando no tiene nada propio.",
+    "systemHint": "El color de marca por defecto, para quien no tenga uno propio.",
     "centroTitle": "Por centro",
-    "centroHint": "Pisa la del sistema para la gente de ese centro.",
+    "centroHint": "El color de marca de ese centro; pisa al del sistema para su gente.",
     "centroLabel": "Centro",
     "centroPlaceholder": "Elige un centro",
     "overrideTitle": "Cambios temporales (overrides)",
-    "overrideHint": "Mientras uno esté activo, manda sobre todo lo demás, incluida la apariencia personal de cada usuario. Se crea con los colores que tengas ahora mismo en «Sistema».",
+    "overrideHint": "Mientras uno esté activo, manda sobre todo lo demás. Se crea con el color de marca que tengas ahora mismo en «Sistema».",
     "overrideName": "Nombre",
     "overrideNamePlaceholder": "Campaña de aniversario",
     "overrideUntil": "Hasta",
@@ -3519,15 +3497,17 @@
     "sinConsumos": "Sin consumos en este rango.",
     "sinNumero": "sin número",
     "historicos": "Viales anteriores ({n})",
-    "col.fecha": "Hora",
-    "col.paciente": "Paciente",
-    "col.dosis": "Dosis",
-    "col.vial": "Vial",
-    "estado.abierto": "abierto",
-    "estado.agotado": "agotado",
-    "estado.descartado": "descartado",
     "col": {
+      "fecha": "Hora",
+      "paciente": "Paciente",
+      "dosis": "Dosis",
+      "vial": "Vial",
       "factura": "Factura"
+    },
+    "estado": {
+      "abierto": "abierto",
+      "agotado": "agotado",
+      "descartado": "descartado"
     },
     "verFactura": "Ver factura"
   },
@@ -3792,13 +3772,11 @@
     "compras": "Compras",
     "servicios": "Servicios",
     "citas": "Citas médicas",
-    "prescripcion": "Prescripción",
     "crearCita": "Crear cita médica",
     "abrir": "Abrir",
     "sinCompras": "Sin compras.",
     "sinServicios": "Sin servicios.",
-    "sinCitas": "Sin citas.",
-    "sinPrescripcion": "Sin prescripción."
+    "sinCitas": "Sin citas."
   },
   "clientes": {}
 }

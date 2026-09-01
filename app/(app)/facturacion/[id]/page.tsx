@@ -70,6 +70,21 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import {
+  DataTable,
+  TableEmpty,
+} from "@/components/ui/data-table";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -379,8 +394,8 @@ export default function FacturacionPage() {
     }, 8000);
   }
 
-  if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
-  if (!factura) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p>;
+  if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
+  if (!factura) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p></PageContainer>;
 
   const estado = String(factura.estado ?? "");
   // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
@@ -406,15 +421,35 @@ export default function FacturacionPage() {
   const esPresupuesto = estado === "borrador" && n(factura.total) - n(factura.montoAbonado) > 0.005;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <PageContainer>
       <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {t("back")}</Link>
 
       {/* Cabecera */}
-      <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
-        <div className="min-w-0 flex-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-xl font-semibold tracking-tight">{nombre || t("patient")}</h1>
+      <PageHeader
+        title={
+          <>
+            <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
+            {nombre || t("patient")}
+          </>
+        }
+        description={
+          <>
+            {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
+            {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
+                el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
+            <UsuarioResponsable
+              factura={factura}
+              puedeEditar={can("factura.update")}
+              onCorregir={() => setUsuarioOpen(true)}
+              label={t("atendidoPor")}
+              integracionLabel={t("integracion")}
+              sinUsuarioLabel={t("sinUsuario")}
+              corregirLabel={t("corregirUsuario")}
+            />
+          </>
+        }
+        actions={
+          <>
             {/* Corregir paciente sin descartar (solo borrador de venta general; consulta va ligada a la cita). */}
             {esGeneral && estado === "borrador" && (
               <button
@@ -425,89 +460,75 @@ export default function FacturacionPage() {
                 {t("cambiarPaciente")}
               </button>
             )}
-          </div>
-          {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
-          {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
-              el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
-          <UsuarioResponsable
-            factura={factura}
-            puedeEditar={can("factura.update")}
-            onCorregir={() => setUsuarioOpen(true)}
-            label={t("atendidoPor")}
-            integracionLabel={t("integracion")}
-            sinUsuarioLabel={t("sinUsuario")}
-            corregirLabel={t("corregirUsuario")}
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          {record && (
-            <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
-          )}
-          {factura.numero != null && (
-            <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
-              {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
-            </span>
-          )}
-          <EstadoBadge estado={estado} />
-          {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
-          {presupuestoNum && (
-            <span className="rounded-md bg-amber-500/15 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums text-amber-700 ring-1 ring-amber-500/30 dark:text-amber-400">
-              {t("presupuestoNum", { num: presupuestoNum })}
-            </span>
-          )}
-          {esGeneral && estado === "borrador" && (
-            <Button variant="outline" size="sm" className="no-print" onClick={() => setCabeceraOpen(true)}>
-              {t("editarCabecera")}
+            {record && (
+              <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
+            )}
+            {factura.numero != null && (
+              <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
+                {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
+              </span>
+            )}
+            <EstadoBadge estado={estado} />
+            {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
+            {presupuestoNum && (
+              <Badge variant="warning" className="font-mono tabular-nums">
+                {t("presupuestoNum", { num: presupuestoNum })}
+              </Badge>
+            )}
+            {esGeneral && estado === "borrador" && (
+              <Button variant="outline" size="sm" className="no-print" onClick={() => setCabeceraOpen(true)}>
+                {t("editarCabecera")}
+              </Button>
+            )}
+            {esGeneral && estado === "borrador" && (
+              <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
+                {t("descartar")}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+              {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
             </Button>
-          )}
-          {esGeneral && estado === "borrador" && (
-            <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
-              {t("descartar")}
-            </Button>
-          )}
-          <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-            {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
-          </Button>
-          {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge.
-              OCULTO tras USB_TEST_UI: el código queda para el futuro. */}
-          {USB_TEST_UI && (
-            <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
-              {t("print.usbTest")}
-            </Button>
-          )}
-          {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
-              software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
-              imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
-          {QZ_PRINT_UI && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="no-print text-xs text-muted-foreground"
-              onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
-            >
-              {t("print.options")}
-              {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
-            </Button>
-          )}
-          {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
-              EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
-          {estado === "emitida" && can("factura.reparar") && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="no-print size-9" aria-label={t("acciones")}>
-                  <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setRegenOpen(true); }}>
-                  {t("regen.accion")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </div>
+            {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge.
+                OCULTO tras USB_TEST_UI: el código queda para el futuro. */}
+            {USB_TEST_UI && (
+              <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
+                {t("print.usbTest")}
+              </Button>
+            )}
+            {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
+                software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
+                imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
+            {QZ_PRINT_UI && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="no-print text-xs text-muted-foreground"
+                onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
+              >
+                {t("print.options")}
+                {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
+              </Button>
+            )}
+            {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
+                EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
+            {estado === "emitida" && can("factura.reparar") && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="no-print size-9" aria-label={t("acciones")}>
+                    <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setRegenOpen(true); }}>
+                    {t("regen.accion")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </>
+        }
+      />
 
       {/* Opciones de impresión (por dispositivo, en localStorage). El navegador es el default; la térmica
           por QZ Tray es opcional y con respaldo automático al navegador si falla. */}
@@ -649,21 +670,23 @@ export default function FacturacionPage() {
       />
 
       {/* Vista previa del recibo térmico 80mm (el print CSS lo aísla al imprimir). */}
-      <section className="mt-8">
-        <div className="mb-3 flex items-center justify-between no-print">
-          <h2 className="text-sm font-semibold text-muted-foreground">{tRoot("receipt.previewTitle")}</h2>
-          <Button variant="outline" size="sm" onClick={imprimir}>
-            <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-            {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
-          </Button>
-        </div>
-        <div className="flex justify-center rounded-xl border bg-muted/30 p-6">
+      <Card>
+        <CardHeader className="no-print">
+          <CardTitle className="text-muted-foreground">{tRoot("receipt.previewTitle")}</CardTitle>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={imprimir}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+              {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex justify-center rounded-xl bg-muted/30 py-6">
           <div className="shadow-lg ring-1 ring-border">
             <ReciboTermico recibo={recibo} />
           </div>
-        </div>
-      </section>
-    </div>
+        </CardContent>
+      </Card>
+    </PageContainer>
   );
 }
 
@@ -822,141 +845,145 @@ function Editor({
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
       {/* Líneas */}
       <section className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold">{t("items")}</h2>
-          {esGeneral && listaNombre && (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-              {t("listaLabel", { lista: listaNombre })}
-            </span>
-          )}
-        </div>
-        <div className="overflow-x-auto rounded-xl border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40 text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="px-3 py-2 font-semibold">{t("concept")}</th>
-                <th className="w-20 px-3 py-2 text-right font-semibold">{t("qty")}</th>
-                <th className="w-28 px-3 py-2 text-right font-semibold">{t("price")}</th>
-                {esGeneral && <th className="w-20 px-3 py-2 text-center font-semibold">{t("ivu")}</th>}
-                <th className="w-28 px-3 py-2 text-right font-semibold">{t("lineTotal")}</th>
-                {esBorrador && <th className="w-10 px-3 py-2" />}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {serverItems.length === 0 && (
-                <tr><td colSpan={4 + (esGeneral ? 1 : 0) + (esBorrador ? 1 : 0)} className="px-3 py-6 text-center text-muted-foreground">{t("noItems")}</td></tr>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {t("items")}
+              {esGeneral && listaNombre && (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                  {t("listaLabel", { lista: listaNombre })}
+                </span>
               )}
-              {serverItems.map((it) => {
-                const e = edits[it.id] ?? { cantidad: n(it.cantidad), precioUnitario: n(it.precioUnitario) };
-                return (
-                  <tr key={it.id}>
-                    <td className="px-3 py-2">
-                      <span>{it.descripcion ?? "—"}</span>
-                      {esBorrador && esKit(it) && (
-                        <button
-                          type="button"
-                          onClick={() => setOpcItemId(it.id)}
-                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
-                        >
-                          {t("opcionales")}
-                        </button>
-                      )}
-                      {esBorrador && esKit(it) && (
-                        <button
-                          type="button"
-                          onClick={() => setKitItem(it)}
-                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
-                        >
-                          {t("kit.abrir")}
-                        </button>
-                      )}
-                      {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
-                      {multsDe(it) && (
-                        <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
-                      )}
-                      {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
-                          data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
-                      {impuestosDeLinea(it).length > 0 && (
-                        <span className="block text-[11px] text-muted-foreground">
-                          {impuestosDeLinea(it).map((im, i) => (
-                            <span key={i}>
-                              {i > 0 ? " · " : ""}
-                              {(im.nombre || "") + (im.tasa != null ? ` ${im.tasa}%` : "")}: {money(im.monto)}
-                            </span>
-                          ))}
-                        </span>
-                      )}
-                      {/* Corregir el impuesto de una línea EMITIDA (recomputa totales, puede dejar saldo).
-                          Solo con permiso factura.reparar — el sistema deja arreglar, no bloquear. */}
-                      {!esBorrador && esGeneral && can("factura.reparar") && (
-                        <button
-                          type="button"
-                          onClick={() => setImpuestoItem(it)}
-                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
-                        >
-                          {t("corregirImpuesto.abrir")}
-                        </button>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
-                      {multsDe(it) ? (
-                        <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
-                      ) : esBorrador ? (
-                        <Input
-                          value={String(e.cantidad)}
-                          onChange={(ev) => setEdit(it.id, { cantidad: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
-                          onBlur={() => persist(it)}
-                          className="h-7 w-16 text-right tabular-nums" inputMode="numeric" disabled={busy}
-                        />
-                      ) : <span className="tabular-nums">{n(it.cantidad)}</span>}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {esBorrador ? (
-                        <Input
-                          value={String(e.precioUnitario)}
-                          onChange={(ev) => setEdit(it.id, { precioUnitario: Math.max(0, Number(ev.target.value) || 0) })}
-                          onBlur={() => persist(it)}
-                          className="h-7 w-24 text-right tabular-nums" inputMode="decimal" disabled={busy}
-                        />
-                      ) : <span className="tabular-nums">{money(it.precioUnitario)}</span>}
-                    </td>
-                    {esGeneral && (
-                      <td className="px-3 py-2 text-center">
-                        {esBorrador ? (
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("concept")}</TableHead>
+                  <TableHead className="w-20 text-right">{t("qty")}</TableHead>
+                  <TableHead className="w-28 text-right">{t("price")}</TableHead>
+                  {esGeneral && <TableHead className="w-20 text-center">{t("ivu")}</TableHead>}
+                  <TableHead className="w-28 text-right">{t("lineTotal")}</TableHead>
+                  {esBorrador && <TableHead className="w-10" />}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {serverItems.length === 0 && (
+                  <TableEmpty colSpan={4 + (esGeneral ? 1 : 0) + (esBorrador ? 1 : 0)}>{t("noItems")}</TableEmpty>
+                )}
+                {serverItems.map((it) => {
+                  const e = edits[it.id] ?? { cantidad: n(it.cantidad), precioUnitario: n(it.precioUnitario) };
+                  return (
+                    <TableRow key={it.id}>
+                      <TableCell>
+                        <span>{it.descripcion ?? "—"}</span>
+                        {esBorrador && esKit(it) && (
                           <button
                             type="button"
-                            onClick={() => toggleGravado(it)}
-                            disabled={busy}
-                            className={
-                              "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
-                              (it.gravado
-                                ? "bg-sky-500/15 text-sky-600 dark:text-sky-400"
-                                : "bg-muted text-muted-foreground")
-                            }
-                            title={t("ivuToggleHint")}
+                            onClick={() => setOpcItemId(it.id)}
+                            className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
                           >
-                            {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                            {t("opcionales")}
                           </button>
-                        ) : (
-                          <span className="text-[11px] text-muted-foreground">
-                            {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                        )}
+                        {esBorrador && esKit(it) && (
+                          <button
+                            type="button"
+                            onClick={() => setKitItem(it)}
+                            className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                          >
+                            {t("kit.abrir")}
+                          </button>
+                        )}
+                        {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
+                        {multsDe(it) && (
+                          <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
+                        )}
+                        {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
+                            data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
+                        {impuestosDeLinea(it).length > 0 && (
+                          <span className="block text-[11px] text-muted-foreground">
+                            {impuestosDeLinea(it).map((im, i) => (
+                              <span key={i}>
+                                {i > 0 ? " · " : ""}
+                                {(im.nombre || "") + (im.tasa != null ? ` ${im.tasa}%` : "")}: {money(im.monto)}
+                              </span>
+                            ))}
                           </span>
                         )}
-                      </td>
-                    )}
-                    <td className="px-3 py-2 text-right font-medium tabular-nums">{money(lineTotal(it))}</td>
-                    {esBorrador && (
-                      <td className="px-3 py-2 text-right">
-                        <button type="button" onClick={() => run(() => eliminarItem(id, it.id, centro))} disabled={busy} aria-label={t("remove")} className="text-destructive hover:opacity-70 disabled:opacity-40">×</button>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                        {/* Corregir el impuesto de una línea EMITIDA (recomputa totales, puede dejar saldo).
+                            Solo con permiso factura.reparar — el sistema deja arreglar, no bloquear. */}
+                        {!esBorrador && esGeneral && can("factura.reparar") && (
+                          <button
+                            type="button"
+                            onClick={() => setImpuestoItem(it)}
+                            className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                          >
+                            {t("corregirImpuesto.abrir")}
+                          </button>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
+                        {multsDe(it) ? (
+                          <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
+                        ) : esBorrador ? (
+                          <Input
+                            value={String(e.cantidad)}
+                            onChange={(ev) => setEdit(it.id, { cantidad: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
+                            onBlur={() => persist(it)}
+                            className="h-7 w-16 text-right tabular-nums" inputMode="numeric" disabled={busy}
+                          />
+                        ) : <span className="tabular-nums">{n(it.cantidad)}</span>}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {esBorrador ? (
+                          <Input
+                            value={String(e.precioUnitario)}
+                            onChange={(ev) => setEdit(it.id, { precioUnitario: Math.max(0, Number(ev.target.value) || 0) })}
+                            onBlur={() => persist(it)}
+                            className="h-7 w-24 text-right tabular-nums" inputMode="decimal" disabled={busy}
+                          />
+                        ) : <span className="tabular-nums">{money(it.precioUnitario)}</span>}
+                      </TableCell>
+                      {esGeneral && (
+                        <TableCell className="text-center">
+                          {esBorrador ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleGravado(it)}
+                              disabled={busy}
+                              className={
+                                "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
+                                (it.gravado
+                                  ? "bg-info/15 text-info-foreground"
+                                  : "bg-muted text-muted-foreground")
+                              }
+                              title={t("ivuToggleHint")}
+                            >
+                              {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground">
+                              {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                            </span>
+                          )}
+                        </TableCell>
+                      )}
+                      <TableCell className="text-right font-medium tabular-nums">{money(lineTotal(it))}</TableCell>
+                      {esBorrador && (
+                        <TableCell className="text-right">
+                          <button type="button" onClick={() => run(() => eliminarItem(id, it.id, centro))} disabled={busy} aria-label={t("remove")} className="text-destructive hover:opacity-70 disabled:opacity-40">×</button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </DataTable>
+          </CardContent>
+        </Card>
 
         {esBorrador && (
           <AddItem
@@ -972,7 +999,8 @@ function Editor({
 
       {/* Resumen + acciones */}
       <aside className="space-y-4">
-        <div className="space-y-2 rounded-xl border p-4">
+        <Card>
+        <CardContent className="space-y-2">
           <Row label={t("subtotal")} value={money(subtotal)} />
           <Row label={t("discount")} value={`- ${money(descuento)}`} />
           {impuestosDesglose.length > 0
@@ -990,7 +1018,8 @@ function Editor({
             onSet={(m) => run(() => setEnvio(id, m, centro))}
           />
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
-        </div>
+        </CardContent>
+        </Card>
 
         {esBorrador && (
           <DescuentoGlobal disabled={busy} subtotal={subtotal} descuentoActual={descuento} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
@@ -1010,7 +1039,7 @@ function Editor({
         )}
 
         {!esBorrador && esGeneral && sesionesPorEntregar > 0 && (
-          <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-sm text-sky-700 dark:text-sky-400">
+          <div className="rounded-md border border-info/40 bg-info px-4 py-3 text-sm text-info-foreground">
             {t("sesionesPorEntregar", { n: sesionesPorEntregar })}
           </div>
         )}
@@ -1131,26 +1160,30 @@ function RegenerarDisponibilidadDialog({
         ) : (
           <div className="space-y-3 text-sm">
             {res.creados > 0 ? (
-              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-emerald-700 dark:text-emerald-400">
-                <p className="font-medium">{t("regen.creados", { n: res.creados })}</p>
-                <ul className="mt-1 list-disc pl-5">
-                  {res.detalle.map((d, i) => (
-                    <li key={i}>{t("regen.linea", { sesiones: d.sesiones ?? 0, sku: d.sku ?? "—" })}</li>
-                  ))}
-                </ul>
-              </div>
+              <Alert variant="success">
+                <AlertTitle>{t("regen.creados", { n: res.creados })}</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc pl-5">
+                    {res.detalle.map((d, i) => (
+                      <li key={i}>{t("regen.linea", { sesiones: d.sesiones ?? 0, sku: d.sku ?? "—" })}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
             ) : (
               <p className="rounded-md border bg-muted/40 px-3 py-2 text-muted-foreground">{t("regen.nada")}</p>
             )}
             {!!res.sugerencias?.length && (
-              <div className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-amber-700 dark:text-amber-400">
-                <p className="font-medium">{t("regen.sugerenciasTitulo")}</p>
-                <ul className="mt-1 list-disc pl-5">
-                  {res.sugerencias.map((s, i) => (
-                    <li key={i}>{t("regen.sugerencia", { sku: s.sku ?? "—" })}</li>
-                  ))}
-                </ul>
-              </div>
+              <Alert variant="warning">
+                <AlertTitle>{t("regen.sugerenciasTitulo")}</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc pl-5">
+                    {res.sugerencias.map((s, i) => (
+                      <li key={i}>{t("regen.sugerencia", { sku: s.sku ?? "—" })}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
             )}
             <div className="flex justify-end">
               <Button onClick={() => handleOpenChange(false)}>{t("regen.listo")}</Button>
@@ -1163,12 +1196,12 @@ function RegenerarDisponibilidadDialog({
 }
 
 function EstadoBadge({ estado }: { estado: string }) {
-  const tone =
-    estado === "borrador" ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
-    : estado === "anulada" ? "bg-destructive/15 text-destructive"
-    : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
+  const variant =
+    estado === "borrador" ? "warning"
+    : estado === "anulada" ? "destructive"
+    : "success";
   const label = estado ? estado.charAt(0).toUpperCase() + estado.slice(1) : "—";
-  return <span className={"rounded-full px-2.5 py-1 text-xs font-semibold " + tone}>{label}</span>;
+  return <Badge variant={variant}>{label}</Badge>;
 }
 
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
@@ -1443,7 +1476,7 @@ function PersonalizarKitDialog({
                 );
               })}
               {added.map((r) => (
-                <li key={r.productoId} className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 px-3 py-2">
+                <li key={r.productoId} className="flex items-center justify-between gap-3 rounded-md border border-primary/40 bg-primary/5 px-3 py-2">
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{r.nombre}<span className="ml-2 text-[11px] text-primary">{t("kit.agregado")}</span></span>
                   <span className="tabular-nums text-sm">×{r.cantidad}</span>
                   <button type="button" onClick={() => setAdded((a) => a.filter((x) => x.productoId !== r.productoId))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
@@ -1453,7 +1486,7 @@ function PersonalizarKitDialog({
 
             {/* Agregar componente: solo con permiso fino (el BE lo exige; no mostramos la puerta si no se abre). */}
             {puedeAgregar && (
-              <div className="flex items-end gap-2 rounded-lg border border-dashed p-3">
+              <div className="flex items-end gap-2 rounded-md border border-dashed p-3">
                 <div className="min-w-0 flex-1">
                   <Lbl>{t("kit.agregarComponente")}</Lbl>
                   <ProductoPicker
@@ -1545,9 +1578,9 @@ function CorregirImpuestoDialog({
               </SelectContent>
             </Select>
           </label>
-          <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
-            {t("corregirImpuesto.aviso")}
-          </p>
+          <Alert variant="warning" className="text-xs">
+            <AlertDescription>{t("corregirImpuesto.aviso")}</AlertDescription>
+          </Alert>
           <div className="flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
             <Button size="sm" onClick={guardar} disabled={saving}>{tc("save")}</Button>
@@ -2077,7 +2110,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
   }
 
   return (
-    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-xl border border-dashed p-3 md:flex md:flex-wrap">
+    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-md border border-dashed p-3 md:flex md:flex-wrap">
       <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
         <Lbl>{t("addItem")}</Lbl>
         <CatalogoCombobox
@@ -2151,7 +2184,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
           <button
             type="button"
             onClick={() => setGravadoOverride(!gravadoEff)}
-            className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravadoEff ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "text-muted-foreground")}
+            className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravadoEff ? "bg-info/15 text-info-foreground" : "text-muted-foreground")}
             title={t("ivuToggleHint")}
           >
             {gravadoEff ? t("ivuGravado") : t("ivuExento")}
@@ -2179,7 +2212,7 @@ function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal, descuentoAct
   const error = pctPasa100 || montoPasaBase;
 
   return (
-    <div className="space-y-2 rounded-xl border p-4">
+    <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("globalDiscount")}</span>
       <div className="flex items-center gap-2">
         <Select value={tipo} onValueChange={setTipo}>

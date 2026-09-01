@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 type Linea = { key: string; productoId: string; cantidad: string };
 let seq = 0;
@@ -109,15 +110,14 @@ export function TransferenciaNueva() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <PageContainer>
       <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
-      <h1 className="text-2xl font-semibold tracking-tight">{t("newTitle")}</h1>
-      <p className="mb-6 mt-1 text-sm text-muted-foreground">{t("newHelp")}</p>
+      <PageHeader title={t("newTitle")} description={t("newHelp")} />
 
       {/* Cabecera */}
-      <div className="grid gap-4 rounded-xl border p-5 sm:grid-cols-2">
+      <div className="grid gap-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] sm:grid-cols-2">
         <Field label={t("field.origen")}>
           <Input value={centroName(origenId)} disabled />
         </Field>
@@ -146,7 +146,7 @@ export function TransferenciaNueva() {
           </Select>
           {/* Destino sin almacén: se avisa (no se esconde) para que no busquen el centro en vano. */}
           {destinoSinAlmacen && (
-            <span className="mt-1 text-xs text-amber-600 dark:text-amber-400">{t("field.destinoSinAlmacen")}</span>
+            <span className="mt-1 text-xs text-warning-foreground">{t("field.destinoSinAlmacen")}</span>
           )}
         </Field>
         <div className="sm:col-span-2">
@@ -157,7 +157,7 @@ export function TransferenciaNueva() {
       </div>
 
       {/* Líneas */}
-      <div className="mt-5 rounded-xl border">
+      <div className="mt-5 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="flex items-center justify-between border-b px-4 py-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("lineas")}</span>
           <Button variant="outline" size="sm" onClick={() => setLineas((p) => [...p, nuevaLinea()])}>
@@ -192,7 +192,7 @@ export function TransferenciaNueva() {
       <div className="mt-5 flex justify-end">
         <Button onClick={onSubmit} disabled={!canSubmit}>{busy ? t("creando") : t("crear")}</Button>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

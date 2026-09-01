@@ -15,13 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -123,7 +123,7 @@ export function PendingProfiles() {
 
   return (
     <>
-      <Table>
+      <DataTable>
         <TableHeader>
           <TableRow>
             <TableHead>{t("columns.email")}</TableHead>
@@ -162,7 +162,7 @@ export function PendingProfiles() {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </DataTable>
 
       <Dialog
         open={reject !== null}

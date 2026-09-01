@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Delete02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
+import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cambio de protocolo: el médico deja SIN EFECTO sesiones pendientes del paciente y las reemplaza por
 // otras. Reusa el catálogo de facturación para elegir los nuevos productos. Todo-o-nada; el BE avisa si
@@ -143,36 +144,35 @@ export default function CambioProtocoloPage() {
   }
 
   if (!puede) {
-    return <div className="w-full px-6 py-10"><p className="text-sm text-muted-foreground">{tRoot("common.forbidden")}</p></div>;
+    return <PageContainer><p className="text-sm text-muted-foreground">{tRoot("common.forbidden")}</p></PageContainer>;
   }
   if (gate.necesitaPicker) {
-    return <div className="mx-auto max-w-xl px-6 py-10"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>;
+    return <PageContainer><CentroPicker centros={gate.centros} onPick={gate.pick} /></PageContainer>;
   }
 
   return (
-    <div className="w-full px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-      <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{t("help")}</p>
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("help")} />
 
-      <div className="mt-6 max-w-md">
+      <div className="max-w-md">
         <Label>{t("paciente")}</Label>
         <PacienteSelect value={paciente} onChange={setPaciente} />
       </div>
 
       {pacienteId && (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* Paso 1: qué se reemplaza */}
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">{t("paso1")}</h2>
             {pendRes.state.kind === "loading" && <p className="text-xs text-muted-foreground">{tc("loading")}</p>}
             {pendRes.state.kind === "ok" && pendientes.length === 0 && (
-              <p className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">{t("sinPendientes")}</p>
+              <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">{t("sinPendientes")}</p>
             )}
             <ul className="space-y-2">
               {pendientes.map((p) => {
                 const marcado = origenSel.has(p.id);
                 return (
-                  <li key={p.id} className={"rounded-lg border px-3 py-2 " + (marcado ? "border-primary bg-primary/5" : "")}>
+                  <li key={p.id} className={"rounded-md ring-1 ring-foreground/10 px-3 py-2 " + (marcado ? "border-primary bg-primary/5" : "")}>
                     <label className="flex items-start gap-2">
                       <Checkbox checked={marcado} onCheckedChange={() => toggleOrigen(p.id)} className="mt-0.5" />
                       <span className="min-w-0 flex-1">
@@ -206,7 +206,7 @@ export default function CambioProtocoloPage() {
             <h2 className="text-sm font-semibold">{t("paso2")}</h2>
             <div className="space-y-2">
               {lineas.map((l) => (
-                <div key={l.key} className="rounded-lg border p-2">
+                <div key={l.key} className="rounded-md bg-card p-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                   <div className="flex items-center gap-2">
                     <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
                       <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>
@@ -247,7 +247,7 @@ export default function CambioProtocoloPage() {
               <Input value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder={t("motivoPlaceholder")} />
             </div>
 
-            <p className="flex items-start gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            <p className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
               <HugeiconsIcon icon={Alert02Icon} className="mt-0.5 size-4 shrink-0" />
               {t("aviso")}
             </p>
@@ -258,7 +258,7 @@ export default function CambioProtocoloPage() {
           </section>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 

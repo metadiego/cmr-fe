@@ -1,4 +1,5 @@
 // lib/theme/config.ts
+import { deriveBrandVars } from "./brand";
 // The token vocabulary the FE owns. The BE stores theme config as a free JSONB
 // blob (config por capas #51) and resolves the EFFECTIVE config by precedence
 // (override → user → center → system); the FE just paints `effective` by mapping
@@ -58,30 +59,10 @@ export interface ThemeConfig {
   recibo?: { anchoMm?: number };
 }
 
-// camelCase token key → CSS custom property in globals.css.
-const COLOR_VAR: Record<ThemeColorKey, string> = {
-  background: "--background",
-  foreground: "--foreground",
-  card: "--card",
-  cardForeground: "--card-foreground",
-  popover: "--popover",
-  popoverForeground: "--popover-foreground",
-  primary: "--primary",
-  primaryForeground: "--primary-foreground",
-  secondary: "--secondary",
-  secondaryForeground: "--secondary-foreground",
-  muted: "--muted",
-  mutedForeground: "--muted-foreground",
-  accent: "--accent",
-  accentForeground: "--accent-foreground",
-  destructive: "--destructive",
-  success: "--success",
-  warning: "--warning",
-  info: "--info",
-  border: "--border",
-  input: "--input",
-  ring: "--ring",
-};
+// Redesign navy (2026-09): el ÚNICO color personalizable es el color de marca
+// (`colors.primary`), elegido de una lista pre-aprobada (ver lib/theme/brand.ts).
+// De ese primario se derivan solo 6 variables de acento; el resto del color, el radio y
+// la tipografía los fija el sistema de diseño (globals.css) y NO se aplican desde config.
 
 // Translate an effective ThemeConfig into the CSS variables to set on <html>.
 // Unknown/empty keys are ignored so a missing config paints nothing (the
@@ -90,20 +71,13 @@ export function configToCssVars(config: ThemeConfig | null | undefined): Record<
   const vars: Record<string, string> = {};
   if (!config) return vars;
 
-  if (config.colors) {
-    for (const [key, value] of Object.entries(config.colors)) {
-      const cssVar = COLOR_VAR[key as ThemeColorKey];
-      if (cssVar && value) vars[cssVar] = value;
-    }
-  }
-  if (config.radius) vars["--radius"] = config.radius;
-  if (config.font?.sans) vars["--font-sans"] = config.font.sans;
-  if (config.font?.heading) vars["--font-heading"] = config.font.heading;
-  if (config.background?.imageUrl) {
-    // CSS.escape isn't needed for a URL inside url("…"); quote it.
-    vars["--app-bg-image"] = `url("${config.background.imageUrl}")`;
-  }
-  // Ancho imprimible del recibo térmico por centro; si el BE no lo manda, el CSS deja el default 72mm.
+  // Color de marca: se aplica SOLO la familia de acento derivada del primario
+  // (primary/ring/sidebar-primary/sidebar-ring/accent/accent-foreground). Fondos, texto,
+  // tarjetas, estados, radio y tipografía los manda el diseño — no se tocan desde aquí.
+  Object.assign(vars, deriveBrandVars(config.colors?.primary));
+
+  // Ancho imprimible del recibo térmico por centro (funcional, no cromático); si el BE no
+  // lo manda, el CSS deja el default 72mm.
   const ancho = Number(config.recibo?.anchoMm);
   if (Number.isFinite(ancho) && ancho > 0) vars["--recibo-ancho"] = `${ancho}mm`;
 

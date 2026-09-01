@@ -49,14 +49,14 @@ export function CodigoAccesoDialog({
         </DialogHeader>
         {codigo && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3 rounded-xl border bg-muted/40 px-4 py-3">
+            <div className="flex items-center justify-between gap-3 rounded-md bg-card px-4 py-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <span className="select-all font-mono text-2xl font-bold tracking-[0.2em]">{codigo.codigo}</span>
               <Button variant="outline" size="sm" onClick={copiar}>
                 <HugeiconsIcon icon={copiado ? CheckmarkCircle02Icon : Copy01Icon} className="size-4" />
                 {copiado ? t("copiado") : t("copiar")}
               </Button>
             </div>
-            <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+            <p className="rounded-lg bg-warning px-3 py-2 text-xs text-warning-foreground">
               {t("aviso", { min: codigo.expiraEnMinutos })}
             </p>
             <p className="text-xs text-muted-foreground">{t("comoUsar")}</p>

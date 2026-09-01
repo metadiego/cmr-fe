@@ -59,7 +59,7 @@ export function FormatosAdmin({ centro }: { centro?: string }) {
 
       {!editing && (
         <div className="space-y-2">
-          <div className="overflow-x-auto rounded-md border">
+          <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
             <table className="w-full text-sm">
               <thead className="bg-muted/40 text-xs text-muted-foreground">
                 <tr>
@@ -174,7 +174,7 @@ function FormatoEditor({
   }
 
   return (
-    <div className="space-y-4 rounded-xl border p-5">
+    <div className="space-y-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t("titulo")}><Input value={titulo} onChange={(e) => setTitulo(e.target.value)} /></Field>
         <Field label={t("clave")}><Input value={clave} onChange={(e) => setClave(e.target.value)} disabled={!!formato} className="font-mono" /></Field>
