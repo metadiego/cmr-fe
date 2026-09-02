@@ -74,7 +74,7 @@ export default function DevolverFacturaPage() {
   const items = factura?.items ?? [];
   const formas = (formasRes.state.kind === "ok" ? formasRes.state.data : []).filter((f) => f.activo !== false);
 
-  const backHref = `/facturacion/${id}${centro ? `?centro=${centro}` : ""}`;
+  const backHref = `/billing/invoices/${id}${centro ? `?centro=${centro}` : ""}`;
   const pac = factura?.paciente;
   const pacNombre = pac ? [pac.nombres, pac.apellidos].filter(Boolean).join(" ") : "";
 

@@ -71,7 +71,7 @@ export function AccionesModal({
       const f = await facturarCita(String(fila.id), centroId);
       setOpen(false);
       const q = centroId ? `?centro=${centroId}` : "";
-      router.push(`/facturacion/${(f as { id: string }).id}${q}`);
+      router.push(`/billing/invoices/${(f as { id: string }).id}${q}`);
     } catch (err) {
       toastError(err, tRoot);
     } finally {

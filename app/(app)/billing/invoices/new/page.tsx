@@ -11,7 +11,7 @@ export default async function FacturacionGeneralPage({
 }) {
   const sp = await searchParams;
   if (sp?.nuevo !== "1") {
-    redirect(`/facturacion${sp?.centro ? `?centro=${sp.centro}` : ""}`);
+    redirect(`/billing/invoices${sp?.centro ? `?centro=${sp.centro}` : ""}`);
   }
   return <VentaGeneral />;
 }

@@ -298,7 +298,7 @@ export default function VialesPage() {
                           {/* Nada aislado: la dosis enlaza a su FACTURA. null = carga vieja sin sesión. */}
                           <td className="px-4 py-2">
                             {c.facturaId ? (
-                              <Link href={`/facturacion/${c.facturaId}`} className="font-medium text-primary hover:underline">
+                              <Link href={`/billing/invoices/${c.facturaId}`} className="font-medium text-primary hover:underline">
                                 {c.facturaNumero ? `#${c.facturaNumero}` : t("verFactura")}
                               </Link>
                             ) : (

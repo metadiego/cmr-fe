@@ -32,10 +32,10 @@ test("unknown clave with no bePath returns '#'", () => {
   assert.equal(routeForClave("nope", undefined), "#");
 });
 
-// Byte-identity guard: for every SEEDED clave that maps to a real FE route,
-// the resolver returns exactly today's path (the fix is the sole exception).
-// These pairs mirror cmr-be/src/scripts/menu-items.ts as of 2026-09-01.
-test("byte-identity: seeded claves resolve to their current FE path", () => {
+// Manifest contract: every seeded clave (from cmr-be/src/scripts/menu-items.ts)
+// resolves to its FE route. Billing/reports rows are English (Phase 1); the rest
+// remain at their pre-rename paths until their category's PR lands.
+test("seeded claves resolve to their FE route", () => {
   const SEED: Array<[string, string]> = [
     ["citas", "/citas"],
     ["cupos", "/citas/agenda/cupos"],
@@ -43,22 +43,22 @@ test("byte-identity: seeded claves resolve to their current FE path", () => {
     ["atencion", "/tablero/atencion"],
     ["clientes", "/clientes"],
     ["comunicaciones", "/comunicaciones"],
-    ["facturacion", "/facturacion"],
-    ["consultas", "/consultas"],
-    ["grupos-facturacion", "/facturacion/grupos"],
-    ["facturacion-devoluciones", "/facturacion/devoluciones"],
-    ["consultas-devoluciones", "/consultas/devoluciones"],
-    ["consumo-insumos", "/facturacion/reportes/consumo-insumos"],
-    ["caja-consulta", "/caja/consulta"],
-    ["caja-general", "/caja/general"],
+    ["facturacion", "/billing/invoices"],
+    ["consultas", "/billing/consultations"],
+    ["grupos-facturacion", "/billing/groups"],
+    ["facturacion-devoluciones", "/billing/returns"],
+    ["consultas-devoluciones", "/billing/consultations/returns"],
+    ["consumo-insumos", "/reports/supply-consumption"],
+    ["caja-consulta", "/billing/cash/consultation"],
+    ["caja-general", "/billing/cash/general"],
     ["precios", "/precios"],
     ["frontdesk", "/tablero/frontdesk"],
     ["servicios", "/tablero/servicios"],
     ["panel-enfermeria", "/panel/enfermeria"],
     ["config-formatos", "/configuracion/formatos"],
     ["estadisticas-servicios", "/estadisticas/servicios"],
-    ["ventas-por-grupo", "/facturacion/ventas-por-grupo"],
-    ["ventas-por-usuario", "/facturacion/ventas-por-usuario"],
+    ["ventas-por-grupo", "/reports/sales-by-group"],
+    ["ventas-por-usuario", "/reports/sales-by-user"],
     ["estadisticas-diarias", "/estadisticas/diarias"],
     ["inventario-index", "/inventario"],
     ["inventario-existencias", "/inventario/existencias"],

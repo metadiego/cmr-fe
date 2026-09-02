@@ -30,15 +30,15 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "clientes", route: "/clientes" },
   { clave: "cambio-de-protocolo", route: "/pacientes/cambio-protocolo" }, // FIX: BE seed 404s
   { clave: "comunicaciones", route: "/comunicaciones" },
-  // Facturación / caja
-  { clave: "facturacion", route: "/facturacion" },
-  { clave: "consultas", route: "/consultas" },
-  { clave: "grupos-facturacion", route: "/facturacion/grupos" },
-  { clave: "facturacion-devoluciones", route: "/facturacion/devoluciones" },
-  { clave: "consultas-devoluciones", route: "/consultas/devoluciones" },
-  { clave: "consumo-insumos", route: "/facturacion/reportes/consumo-insumos" },
-  { clave: "caja-consulta", route: "/caja/consulta" },
-  { clave: "caja-general", route: "/caja/general" },
+  // Facturación / caja  (Phase 1: billing)
+  { clave: "facturacion", route: "/billing/invoices" },
+  { clave: "consultas", route: "/billing/consultations" },
+  { clave: "grupos-facturacion", route: "/billing/groups" },
+  { clave: "facturacion-devoluciones", route: "/billing/returns" },
+  { clave: "consultas-devoluciones", route: "/billing/consultations/returns" },
+  { clave: "consumo-insumos", route: "/reports/supply-consumption" },
+  { clave: "caja-consulta", route: "/billing/cash/consultation" },
+  { clave: "caja-general", route: "/billing/cash/general" },
   // Servicios / boards / reportes
   { clave: "frontdesk", route: "/tablero/frontdesk" },
   { clave: "servicios", route: "/tablero/servicios" },
@@ -46,8 +46,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "config-formatos", route: "/configuracion/formatos" },
   { clave: "estadisticas-servicios", route: "/estadisticas/servicios" },
   { clave: "estadisticas-diarias", route: "/estadisticas/diarias" },
-  { clave: "ventas-por-grupo", route: "/facturacion/ventas-por-grupo" },
-  { clave: "ventas-por-usuario", route: "/facturacion/ventas-por-usuario" },
+  { clave: "ventas-por-grupo", route: "/reports/sales-by-group" },
+  { clave: "ventas-por-usuario", route: "/reports/sales-by-user" },
   // Inventario
   { clave: "inventario-index", route: "/inventario" },
   { clave: "inventario-existencias", route: "/inventario/existencias" },

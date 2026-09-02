@@ -190,7 +190,7 @@ export default function FacturacionPage() {
     setDescartando(true);
     try {
       await descartarFactura(id, centro);
-      router.push(centro ? `/facturacion?centro=${centro}` : "/facturacion");
+      router.push(centro ? `/billing/invoices?centro=${centro}` : "/billing/invoices");
     } catch (err) {
       toastError(err, tRoot);
       setDescartando(false);
@@ -401,7 +401,7 @@ export default function FacturacionPage() {
   // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
   // El encabezado y el "Volver" deben reflejarlo (no mezclar: una venta general NO dice "Facturar consulta").
   const esGeneral = !factura.citaId;
-  const backHref = esGeneral ? "/facturacion" : "/tablero/atencion";
+  const backHref = esGeneral ? "/billing/invoices" : "/tablero/atencion";
   const nombre = paciente ? [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ") : "";
   const record = paciente?.record ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/

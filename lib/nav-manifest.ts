@@ -25,23 +25,23 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/pacientes/disponibilidad-legado/preparacion", labelKey: "nav.preparacionLegado" },
   // Comunicaciones
   { path: "/comunicaciones", labelKey: "nav.comunicaciones" },
-  // Facturación
-  { path: "/facturacion", labelKey: "nav.facturacion" },
-  { path: "/facturacion/general", labelKey: "nav.facturacion_general" },
-  { path: "/facturacion/grupos", labelKey: "nav.gruposFacturacion" },
-  { path: "/facturacion/devoluciones", labelKey: "nav.devoluciones" },
-  { path: "/facturacion/reportes/consumo-insumos", labelKey: "nav.consumoInsumos" },
-  { path: "/facturacion/ventas-por-grupo", labelKey: "nav.ventasPorGrupo" },
-  { path: "/facturacion/ventas-por-usuario", labelKey: "nav.ventasPorUsuario" },
-  { path: "/consultas", labelKey: "nav.facturacionConsultas" },
-  { path: "/consultas/devoluciones", labelKey: "nav.devolucionesConsultas" },
+  // Facturación → Billing (route-reorg Phase 1)
+  { path: "/billing/invoices", labelKey: "nav.facturacion" },
+  { path: "/billing/invoices/new", labelKey: "nav.facturacion_general" },
+  { path: "/billing/groups", labelKey: "nav.gruposFacturacion" },
+  { path: "/billing/returns", labelKey: "nav.devoluciones" },
+  { path: "/reports/supply-consumption", labelKey: "nav.consumoInsumos" },
+  { path: "/reports/sales-by-group", labelKey: "nav.ventasPorGrupo" },
+  { path: "/reports/sales-by-user", labelKey: "nav.ventasPorUsuario" },
+  { path: "/billing/consultations", labelKey: "nav.facturacionConsultas" },
+  { path: "/billing/consultations/returns", labelKey: "nav.devolucionesConsultas" },
   // Estadísticas (el BE ya siembra el ítem en /me/menu; aquí para dedup/manifiesto)
   { path: "/estadisticas/servicios", labelKey: "nav.estadisticas_servicios" },
   { path: "/estadisticas/diarias", labelKey: "nav.estadisticas_diarias" },
   // Cuadre de caja — destinos SEPARADOS por división (no mezclar). Tienen UI → "En desarrollo".
-  { path: "/caja/consulta", labelKey: "nav.cajaConsultas" },
-  { path: "/caja/general", labelKey: "nav.cajaGeneral" },
-  { path: "/caja/cuadre-general", labelKey: "nav.cuadreGeneral" },
+  { path: "/billing/cash/consultation", labelKey: "nav.cajaConsultas" },
+  { path: "/billing/cash/general", labelKey: "nav.cajaGeneral" },
+  { path: "/billing/cash/summary", labelKey: "nav.cuadreGeneral" },
   // Inventario
   { path: "/inventario", labelKey: "nav.inventario" },
   { path: "/inventario/existencias", labelKey: "nav.inventario_existencias" },
