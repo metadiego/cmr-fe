@@ -29,7 +29,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "atencion", route: "/boards/atencion" },
   { clave: "clientes", route: "/patients" },
   { clave: "cambio-de-protocolo", route: "/patients/protocol-change" }, // (was the /pacientes 404-fix; now final English route)
-  { clave: "comunicaciones", route: "/comunicaciones" },
+  { clave: "comunicaciones", route: "/communications" },
   // Facturación / caja  (Phase 1: billing)
   { clave: "facturacion", route: "/billing/invoices" },
   { clave: "consultas", route: "/billing/consultations" },

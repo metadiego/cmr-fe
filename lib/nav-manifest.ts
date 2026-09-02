@@ -25,7 +25,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/patients/protocol-change", labelKey: "nav.cambioProtocolo" },
   { path: "/patients/legacy-availability/preparation", labelKey: "nav.preparacionLegado" },
   // Comunicaciones
-  { path: "/comunicaciones", labelKey: "nav.comunicaciones" },
+  { path: "/communications", labelKey: "nav.comunicaciones" },
   // Facturación → Billing (route-reorg Phase 1)
   { path: "/billing/invoices", labelKey: "nav.facturacion" },
   { path: "/billing/invoices/new", labelKey: "nav.facturacion_general" },

@@ -116,7 +116,7 @@ export function AppSidebar() {
     "/inventory/recipes",
     "/inventory/prices",
     "/configuration/services",
-    "/comunicaciones",
+    "/communications",
     "/admin",
     "/configuration",
   ];

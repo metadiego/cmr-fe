@@ -42,7 +42,7 @@ test("seeded claves resolve to their FE route", () => {
     ["calendario", "/scheduling/calendar"],
     ["atencion", "/boards/atencion"],
     ["clientes", "/patients"],
-    ["comunicaciones", "/comunicaciones"],
+    ["comunicaciones", "/communications"],
     ["facturacion", "/billing/invoices"],
     ["consultas", "/billing/consultations"],
     ["grupos-facturacion", "/billing/groups"],
