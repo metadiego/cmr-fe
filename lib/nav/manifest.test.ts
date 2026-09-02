@@ -6,7 +6,7 @@ import { routeForClave, NAV_MANIFEST } from "./manifest.ts";
 // Rule 1: a known clave resolves to its manifest route (ignores bePath).
 test("known clave resolves to its manifest route", () => {
   assert.equal(routeForClave("citas", "/ignored"), "/citas");
-  assert.equal(routeForClave("inventario-existencias", undefined), "/inventario/existencias");
+  assert.equal(routeForClave("inventario-existencias", undefined), "/inventory/stock");
 });
 
 // Deliberate fix: cambio-de-protocolo points at the WORKING FE folder, not the
@@ -51,7 +51,7 @@ test("seeded claves resolve to their FE route", () => {
     ["consumo-insumos", "/reports/supply-consumption"],
     ["caja-consulta", "/billing/cash/consultation"],
     ["caja-general", "/billing/cash/general"],
-    ["precios", "/precios"],
+    ["precios", "/inventory/prices"],
     ["frontdesk", "/tablero/frontdesk"],
     ["servicios", "/tablero/servicios"],
     ["panel-enfermeria", "/panel/enfermeria"],
@@ -60,15 +60,15 @@ test("seeded claves resolve to their FE route", () => {
     ["ventas-por-grupo", "/reports/sales-by-group"],
     ["ventas-por-usuario", "/reports/sales-by-user"],
     ["estadisticas-diarias", "/estadisticas/diarias"],
-    ["inventario-index", "/inventario"],
-    ["inventario-existencias", "/inventario/existencias"],
-    ["inventario-viales", "/inventario/viales"],
-    ["inventario-productos", "/inventario/productos"],
-    ["inventario-proveedores", "/inventario/proveedores"],
-    ["inventario-amp", "/inventario/presentaciones-proveedor"],
-    ["inventario-recibir", "/inventario/recibir-compra"],
-    ["inventario-recetas", "/inventario/recetas"],
-    ["inventario-transferencias", "/inventario/transferencias"],
+    ["inventario-index", "/inventory"],
+    ["inventario-existencias", "/inventory/stock"],
+    ["inventario-viales", "/inventory/vials"],
+    ["inventario-productos", "/inventory/products"],
+    ["inventario-proveedores", "/inventory/suppliers"],
+    ["inventario-amp", "/inventory/supplier-presentations"],
+    ["inventario-recibir", "/inventory/receive-purchase"],
+    ["inventario-recetas", "/inventory/recipes"],
+    ["inventario-transferencias", "/inventory/transfers"],
     ["configuracion-tableros", "/configuracion/tableros"],
     ["configuracion-modulos", "/settings/tablero-modulos"],
     ["mis-tableros", "/settings/tableros"],
