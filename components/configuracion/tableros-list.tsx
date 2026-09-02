@@ -68,7 +68,7 @@ export function TablerosList() {
           <Link href={r.ruta ?? `/tablero/${r.clave}`} className="text-sm text-primary hover:underline">
             {t("open")}
           </Link>
-          <Link href={`/configuracion/tableros/${r.clave}`} className="text-sm text-primary hover:underline">
+          <Link href={`/configuration/boards/${r.clave}`} className="text-sm text-primary hover:underline">
             {t("edit")}
           </Link>
         </div>

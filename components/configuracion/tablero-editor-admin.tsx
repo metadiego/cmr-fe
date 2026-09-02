@@ -69,7 +69,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
 
   return (
     <PageContainer>
-      <Link href="/configuracion/tableros" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
+      <Link href="/configuration/boards" className="text-sm text-muted-foreground hover:text-foreground">← {tc("back")}</Link>
       <PageHeader
         title={registro ? tRoot(registro.labelKey) : clave}
         actions={<Badge variant="secondary" className="font-mono">{clave}</Badge>}

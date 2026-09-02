@@ -43,7 +43,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "frontdesk", route: "/tablero/frontdesk" },
   { clave: "servicios", route: "/tablero/servicios" },
   { clave: "panel-enfermeria", route: "/panel/enfermeria" },
-  { clave: "config-formatos", route: "/configuracion/formatos" },
+  { clave: "config-formatos", route: "/configuration/formats" },
   { clave: "estadisticas-servicios", route: "/reports/services" },
   { clave: "estadisticas-diarias", route: "/reports/daily" },
   { clave: "ventas-por-grupo", route: "/reports/sales-by-group" },
@@ -60,17 +60,17 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "inventario-transferencias", route: "/inventory/transfers" },
   { clave: "precios", route: "/inventory/prices" },
   // Configuración / admin / staff / auditoría
-  { clave: "configuracion-tableros", route: "/configuracion/tableros" },
-  { clave: "configuracion-modulos", route: "/settings/tablero-modulos" },
-  { clave: "mis-tableros", route: "/settings/tableros" },
-  { clave: "servicios-config", route: "/servicios" },
-  { clave: "config-factura", route: "/configuracion/factura" },
-  { clave: "config-requeridos", route: "/configuracion/requeridos" },
-  { clave: "config-datos-paciente", route: "/configuracion/datos-paciente" },
-  { clave: "configuracion-apariencia", route: "/configuracion/apariencia" },
-  { clave: "admin", route: "/admin" },
-  { clave: "personal", route: "/personal" },
-  { clave: "auditoria", route: "/auditoria" },
+  { clave: "configuracion-tableros", route: "/configuration/boards" },
+  { clave: "configuracion-modulos", route: "/configuration/board-modules" },
+  { clave: "mis-tableros", route: "/settings/tableros" }, // orphan — deleted in Phase 3
+  { clave: "servicios-config", route: "/configuration/services" },
+  { clave: "config-factura", route: "/configuration/invoice" },
+  { clave: "config-requeridos", route: "/configuration/required-fields" },
+  { clave: "config-datos-paciente", route: "/configuration/patient-fields" },
+  { clave: "configuracion-apariencia", route: "/configuration/appearance" },
+  { clave: "admin", route: "/admin" }, // top-level (decision #1) — unchanged
+  { clave: "personal", route: "/configuration/staff" }, // staff folded in (decision #5)
+  { clave: "auditoria", route: "/configuration/audit" },
   // Raíces sueltas
   { clave: "home", route: "/" },
   { clave: "dashboard", route: "/dashboard" },

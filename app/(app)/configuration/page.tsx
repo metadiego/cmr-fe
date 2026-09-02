@@ -9,6 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { useMenu } from "@/hooks/use-menu";
+import { routeForClave } from "@/lib/nav/manifest";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Índice de Configuración: la puerta de entrada a todo lo configurable. Se pintan SOLO las secciones que
@@ -16,22 +17,24 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 // una tarjeta, nunca se topa con un 403, y conceder una sola sección la hace aparecer sin tocar el FE.
 // Cada entrada aporta su icono y sus textos; el menú decide cuáles se ven. Handoff configuracion-delicada-solo-admin.
 const SECCIONES = [
-  { href: "/configuracion/apariencia", icon: PaintBoardIcon, key: "apariencia" },
-  { href: "/configuracion/menu", icon: Menu01Icon, key: "menu" },
-  { href: "/configuracion/tableros", icon: DashboardSquare01Icon, key: "tableros" },
-  { href: "/configuracion/factura", icon: InvoiceIcon, key: "factura" },
-  { href: "/configuracion/numeracion", icon: ListSettingIcon, key: "numeracion" },
-  { href: "/configuracion/formatos", icon: PrinterIcon, key: "formatos" },
-  { href: "/configuracion/datos-paciente", icon: UserAccountIcon, key: "datosPaciente" },
-  { href: "/configuracion/requeridos", icon: CheckListIcon, key: "requeridos" },
-  { href: "/configuracion/panel-enfermeria", icon: StethoscopeIcon, key: "panelEnfermeria" },
+  { href: "/configuration/appearance", icon: PaintBoardIcon, key: "apariencia" },
+  { href: "/configuration/menu", icon: Menu01Icon, key: "menu" },
+  { href: "/configuration/boards", icon: DashboardSquare01Icon, key: "tableros" },
+  { href: "/configuration/invoice", icon: InvoiceIcon, key: "factura" },
+  { href: "/configuration/numbering", icon: ListSettingIcon, key: "numeracion" },
+  { href: "/configuration/formats", icon: PrinterIcon, key: "formatos" },
+  { href: "/configuration/patient-fields", icon: UserAccountIcon, key: "datosPaciente" },
+  { href: "/configuration/required-fields", icon: CheckListIcon, key: "requeridos" },
+  { href: "/configuration/nursing-panel", icon: StethoscopeIcon, key: "panelEnfermeria" },
 ] as const;
 
 export default function ConfiguracionIndexPage() {
   const t = useTranslations("configIndex");
   const menu = useMenu();
   // Rutas de configuración que el BE le manda a esta persona; el índice se limita a esas.
-  const rutasDelMenu = new Set(menu.map((m) => m.path).filter(Boolean));
+  // Se comparan RUTAS RESUELTAS (routeForClave) porque el BE sigue mandando paths viejos (/configuracion/*)
+  // mientras el FE ya usa /configuration/* — sin resolver, el índice no mostraría nada.
+  const rutasDelMenu = new Set(menu.map((m) => routeForClave(m.clave, m.path)));
   const visibles = SECCIONES.filter((s) => rutasDelMenu.has(s.href));
   const ready = menu.length > 0;
 

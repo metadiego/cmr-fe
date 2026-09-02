@@ -115,11 +115,10 @@ export function AppSidebar() {
     "/inventory/receive-purchase",
     "/inventory/recipes",
     "/inventory/prices",
-    "/servicios",
+    "/configuration/services",
     "/comunicaciones",
     "/admin",
-    "/configuracion/tableros",
-    "/settings",
+    "/configuration",
   ];
   const KNOWN_ROUTES = [...REAL_ROUTES, ...NAV_MANIFEST.map((r) => r.path)];
   const hasPage = (p: string) =>

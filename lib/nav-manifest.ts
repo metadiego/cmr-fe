@@ -12,7 +12,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/dashboard", labelKey: "nav.dashboard" },
   // Citas → Scheduling (route-reorg Phase 1)
   { path: "/scheduling/appointments", labelKey: "nav.citas" },
-  { path: "/personal", labelKey: "nav.personal" },
+  { path: "/configuration/staff", labelKey: "nav.personal" },
   { path: "/scheduling/calendar", labelKey: "nav.calendario" },
   { path: "/scheduling/slots", labelKey: "nav.cupos" },
   // Board-column config rides here on an interim path; Phase 1 configuration moves it to /configuration/boards/columns.
@@ -57,20 +57,20 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/inventory/planning", labelKey: "nav.planificacionCompras" },
   // Precios / Servicios
   { path: "/inventory/prices", labelKey: "nav.precios" },
-  { path: "/servicios", labelKey: "nav.servicios_config" },
-  // Configuración / Admin
+  { path: "/configuration/services", labelKey: "nav.servicios_config" },
+  // Configuración / Admin → Configuration (route-reorg Phase 1)
   { path: "/panel/enfermeria", labelKey: "nav.panelEnfermeria" },
-  { path: "/configuracion/factura", labelKey: "nav.configFactura" },
-  { path: "/configuracion/numeracion", labelKey: "nav.configNumeracion" },
-  { path: "/configuracion/requeridos", labelKey: "nav.requisitos_servicio" },
-  { path: "/configuracion/formatos", labelKey: "nav.configFormatos" },
-  { path: "/configuracion/tableros", labelKey: "nav.constructorTableros" },
-  { path: "/configuracion/menu", labelKey: "nav.menuEditor" },
-  { path: "/configuracion/panel-enfermeria", labelKey: "nav.panelEnfermeriaConfig" },
-  { path: "/configuracion/datos-paciente", labelKey: "nav.datosPaciente" },
-  { path: "/auditoria", labelKey: "nav.auditoria" },
+  { path: "/configuration/invoice", labelKey: "nav.configFactura" },
+  { path: "/configuration/numbering", labelKey: "nav.configNumeracion" },
+  { path: "/configuration/required-fields", labelKey: "nav.requisitos_servicio" },
+  { path: "/configuration/formats", labelKey: "nav.configFormatos" },
+  { path: "/configuration/boards", labelKey: "nav.constructorTableros" },
+  { path: "/configuration/menu", labelKey: "nav.menuEditor" },
+  { path: "/configuration/nursing-panel", labelKey: "nav.panelEnfermeriaConfig" },
+  { path: "/configuration/patient-fields", labelKey: "nav.datosPaciente" },
+  { path: "/configuration/audit", labelKey: "nav.auditoria" },
   { path: "/admin", labelKey: "nav.admin" },
-  { path: "/settings/appearance", labelKey: "nav.appearance" },
-  { path: "/settings/tablero-modulos", labelKey: "nav.tableroModulos" },
-  { path: "/settings/tableros", labelKey: "nav.tablerosSettings" },
+  { path: "/configuration/preferences/appearance", labelKey: "nav.appearance" },
+  { path: "/configuration/board-modules", labelKey: "nav.tableroModulos" },
+  { path: "/settings/tableros", labelKey: "nav.tablerosSettings" }, // orphan — deleted in Phase 3
 ];

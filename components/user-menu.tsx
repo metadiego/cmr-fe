@@ -19,6 +19,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { useMenu } from "@/hooks/use-menu";
+import { routeForClave } from "@/lib/nav/manifest";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
@@ -45,7 +46,7 @@ export function UserMenu() {
   // «Configuración de la app» se deriva del MENÚ (no de un permiso fijo): visible solo si al usuario le
   // llega alguna sección de configuración (/configuracion/*) en /me/menu.
   const menu = useMenu();
-  const puedeConfigurar = menu.some((m) => (m.path ?? "").startsWith("/configuracion/"));
+  const puedeConfigurar = menu.some((m) => routeForClave(m.clave, m.path).startsWith("/configuration/"));
   const locale = useLocale() as Locale;
 
   const [signingOut, setSigningOut] = React.useState(false);
@@ -131,7 +132,7 @@ export function UserMenu() {
               conceder una sola sección hace aparecer el ítem solo. Handoff configuracion-delicada-solo-admin. */}
           {puedeConfigurar && (
             <DropdownMenuItem asChild>
-              <Link href="/configuracion">
+              <Link href="/configuration">
                 <HugeiconsIcon icon={Settings02Icon} className="size-4" />
                 {t("appSettings")}
               </Link>
@@ -141,7 +142,7 @@ export function UserMenu() {
               que solo hace Citas no debe verlo. */}
           {can("tablero.admin") && (
             <DropdownMenuItem asChild>
-              <Link href="/settings/tablero-modulos">
+              <Link href="/configuration/board-modules">
                 <HugeiconsIcon icon={DashboardSquare01Icon} className="size-4" />
                 {t("boardModules")}
               </Link>
@@ -152,7 +153,7 @@ export function UserMenu() {
               colores—; la corporativa (sistema, centro y overrides) vive en Configuración.
               See docs/specs/apariencia-personal-en-el-avatar-y-corporativa-en-configuracion.md */}
           <DropdownMenuItem asChild>
-            <Link href="/settings/appearance">
+            <Link href="/configuration/preferences/appearance">
               <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
               {t("myAppearance")}
             </Link>
