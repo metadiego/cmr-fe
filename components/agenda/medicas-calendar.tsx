@@ -181,10 +181,10 @@ export function MedicasCalendar() {
             weekdays={weekdays}
             eventsByDate={eventsByDate}
             festivos={festivos}
-            onDayClick={(iso) => router.push(`/citas/agenda/${iso}`)}
+            onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}`)}
             onEventClick={(id) => {
               const c = citaById.get(id);
-              router.push(`/citas/agenda/${c ? c.fecha : ""}`);
+              router.push(`/scheduling/appointments/${c ? c.fecha : ""}`);
             }}
           />
         )}

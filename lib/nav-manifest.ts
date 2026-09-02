@@ -10,12 +10,13 @@ export interface NavRoute {
 
 export const NAV_MANIFEST: NavRoute[] = [
   { path: "/dashboard", labelKey: "nav.dashboard" },
-  // Citas
-  { path: "/citas", labelKey: "nav.citas" },
+  // Citas → Scheduling (route-reorg Phase 1)
+  { path: "/scheduling/appointments", labelKey: "nav.citas" },
   { path: "/personal", labelKey: "nav.personal" },
-  { path: "/calendario", labelKey: "nav.calendario" },
-  { path: "/citas/agenda/cupos", labelKey: "nav.cupos" },
-  { path: "/citas/config/columnas", labelKey: "nav.columnasCitas" },
+  { path: "/scheduling/calendar", labelKey: "nav.calendario" },
+  { path: "/scheduling/slots", labelKey: "nav.cupos" },
+  // Board-column config rides here on an interim path; Phase 1 configuration moves it to /configuration/boards/columns.
+  { path: "/scheduling/appointments/config/columnas", labelKey: "nav.columnasCitas" },
   // "Frontdesk" (/tablero/frontdesk) y "Atención" (/tablero/atencion) los sirve el BE en /me/menu; NO se
   // declaran aquí. Tampoco `/tablero/citas` (tablero inexistente) ni `/atencion` (alias): duplicaban ítems.
   // Clientes

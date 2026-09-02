@@ -23,9 +23,9 @@ export type NavEntry = {
 
 export const NAV_MANIFEST: NavEntry[] = [
   // Agenda / pacientes
-  { clave: "citas", route: "/citas" },
-  { clave: "cupos", route: "/citas/agenda/cupos" },
-  { clave: "calendario", route: "/calendario" },
+  { clave: "citas", route: "/scheduling/appointments" },
+  { clave: "cupos", route: "/scheduling/slots" },
+  { clave: "calendario", route: "/scheduling/calendar" },
   { clave: "atencion", route: "/tablero/atencion" },
   { clave: "clientes", route: "/clientes" },
   { clave: "cambio-de-protocolo", route: "/pacientes/cambio-protocolo" }, // FIX: BE seed 404s

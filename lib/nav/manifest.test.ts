@@ -5,7 +5,7 @@ import { routeForClave, NAV_MANIFEST } from "./manifest.ts";
 
 // Rule 1: a known clave resolves to its manifest route (ignores bePath).
 test("known clave resolves to its manifest route", () => {
-  assert.equal(routeForClave("citas", "/ignored"), "/citas");
+  assert.equal(routeForClave("citas", "/ignored"), "/scheduling/appointments");
   assert.equal(routeForClave("inventario-existencias", undefined), "/inventory/stock");
 });
 
@@ -37,9 +37,9 @@ test("unknown clave with no bePath returns '#'", () => {
 // remain at their pre-rename paths until their category's PR lands.
 test("seeded claves resolve to their FE route", () => {
   const SEED: Array<[string, string]> = [
-    ["citas", "/citas"],
-    ["cupos", "/citas/agenda/cupos"],
-    ["calendario", "/calendario"],
+    ["citas", "/scheduling/appointments"],
+    ["cupos", "/scheduling/slots"],
+    ["calendario", "/scheduling/calendar"],
     ["atencion", "/tablero/atencion"],
     ["clientes", "/clientes"],
     ["comunicaciones", "/comunicaciones"],
