@@ -44,8 +44,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "servicios", route: "/tablero/servicios" },
   { clave: "panel-enfermeria", route: "/panel/enfermeria" },
   { clave: "config-formatos", route: "/configuracion/formatos" },
-  { clave: "estadisticas-servicios", route: "/estadisticas/servicios" },
-  { clave: "estadisticas-diarias", route: "/estadisticas/diarias" },
+  { clave: "estadisticas-servicios", route: "/reports/services" },
+  { clave: "estadisticas-diarias", route: "/reports/daily" },
   { clave: "ventas-por-grupo", route: "/reports/sales-by-group" },
   { clave: "ventas-por-usuario", route: "/reports/sales-by-user" },
   // Inventario → Inventory (Phase 1)

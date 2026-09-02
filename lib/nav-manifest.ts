@@ -37,8 +37,8 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/billing/consultations", labelKey: "nav.facturacionConsultas" },
   { path: "/billing/consultations/returns", labelKey: "nav.devolucionesConsultas" },
   // Estadísticas (el BE ya siembra el ítem en /me/menu; aquí para dedup/manifiesto)
-  { path: "/estadisticas/servicios", labelKey: "nav.estadisticas_servicios" },
-  { path: "/estadisticas/diarias", labelKey: "nav.estadisticas_diarias" },
+  { path: "/reports/services", labelKey: "nav.estadisticas_servicios" },
+  { path: "/reports/daily", labelKey: "nav.estadisticas_diarias" },
   // Cuadre de caja — destinos SEPARADOS por división (no mezclar). Tienen UI → "En desarrollo".
   { path: "/billing/cash/consultation", labelKey: "nav.cajaConsultas" },
   { path: "/billing/cash/general", labelKey: "nav.cajaGeneral" },
