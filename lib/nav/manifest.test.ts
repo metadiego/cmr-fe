@@ -1,7 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { routeForClave, NAV_MANIFEST } from "./manifest.ts";
+import {
+  routeForClave,
+  NAV_MANIFEST,
+  NAV_GROUPS,
+  groupForClave,
+  orderForClave,
+} from "./manifest.ts";
 
 // Rule 1: a known clave resolves to its manifest route (ignores bePath).
 test("known clave resolves to its manifest route", () => {
@@ -89,4 +95,33 @@ test("seeded claves resolve to their FE route", () => {
   for (const [clave, expected] of SEED) {
     assert.equal(routeForClave(clave, "/SENTINEL_BE_PATH"), expected, `clave ${clave}`);
   }
+});
+
+// ---- Phase 2: FE-owned groups --------------------------------------------
+
+test("every manifest entry declares a valid group", () => {
+  const valid = new Set(NAV_GROUPS.map((g) => g.key));
+  for (const e of NAV_MANIFEST) {
+    assert.ok(valid.has(e.group), `${e.clave} has invalid group ${e.group}`);
+  }
+});
+
+test("groupForClave / orderForClave resolve known claves", () => {
+  assert.equal(groupForClave("facturacion"), "billing");
+  assert.equal(groupForClave("inventario-existencias"), "inventory");
+  assert.equal(groupForClave("personal"), "configuration"); // staff folded in (decision #5)
+  assert.equal(groupForClave("admin"), "admin"); // top-level (decision #1)
+  assert.equal(typeof orderForClave("facturacion"), "number");
+});
+
+test("unknown clave has no group and sorts last", () => {
+  assert.equal(groupForClave("operaciones"), undefined);
+  assert.equal(orderForClave("operaciones"), Number.MAX_SAFE_INTEGER);
+});
+
+test("NAV_GROUPS is the 9-group taxonomy in order", () => {
+  assert.deepEqual(
+    NAV_GROUPS.map((g) => g.key),
+    ["scheduling", "patients", "services", "billing", "reports", "inventory", "communications", "admin", "configuration"],
+  );
 });

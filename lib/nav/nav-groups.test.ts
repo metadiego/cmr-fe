@@ -3,93 +3,70 @@ import assert from "node:assert/strict";
 
 import { buildNavGroups, type NavMenuItem } from "./nav-groups.ts";
 
-// The nav rail is driven by the BE menu (`GET /me/menu`, hooks/use-menu.ts →
-// lib/api/menu.ts MenuItem). buildNavGroups reproduces the CURRENT shell's
-// domain-group construction (components/site-header.tsx): a flat, permission-
-// aware list of items is nested by `parentClave`, and only the group ROOTS
-// (`tipo === "grupo"` OR a `g-` clave) that still have visible children are
-// kept. An item is visible when it has no `permisoClave` OR `can(permisoClave)`.
+// Phase 2: buildNavGroups groups by the FE manifest (lib/nav/manifest.ts),
+// NOT by BE parentClave. It keeps the permission filter, drops BE group headers
+// + separators + loose roots (home/dashboard), and drops empty groups.
 
-test("hides items whose permiso the user lacks (empty group is dropped)", () => {
+test("groups destinations by their manifest group, in NAV_GROUPS order", () => {
   const items: NavMenuItem[] = [
-    { clave: "g-fac", labelKey: "nav.g_fac", tipo: "grupo", path: "#" },
-    { clave: "fac-a", labelKey: "nav.a", path: "/facturacion/a", parentClave: "g-fac" },
-    {
-      clave: "fac-b",
-      labelKey: "nav.b",
-      path: "/facturacion/b",
-      parentClave: "g-fac",
-      permisoClave: "facturacion.b",
-    },
-  ];
-  const groups = buildNavGroups(items, (p) => p !== "facturacion.b");
-  assert.equal(groups.length, 1);
-  assert.equal(groups[0].clave, "g-fac");
-  assert.deepEqual(
-    groups[0].children.map((c) => c.path),
-    ["/facturacion/a"],
-  );
-});
-
-test("keeps items with no permiso requirement even when can() always denies", () => {
-  const items: NavMenuItem[] = [
-    { clave: "g-inv", labelKey: "nav.g_inv", tipo: "grupo", path: "#" },
-    { clave: "inv-a", labelKey: "nav.a", path: "/inventario/a", parentClave: "g-inv" },
-  ];
-  const groups = buildNavGroups(items, () => false);
-  assert.equal(groups.length, 1);
-  assert.deepEqual(
-    groups[0].children.map((c) => c.path),
-    ["/inventario/a"],
-  );
-});
-
-test("drops group roots that have no visible children", () => {
-  const items: NavMenuItem[] = [
-    { clave: "g-empty", labelKey: "nav.g_empty", tipo: "grupo", path: "#" },
-    {
-      clave: "child",
-      labelKey: "nav.c",
-      path: "/x",
-      parentClave: "g-empty",
-      permisoClave: "x.read",
-    },
-  ];
-  const groups = buildNavGroups(items, () => false);
-  assert.equal(groups.length, 0);
-});
-
-test("recognises group roots by tipo 'grupo' OR a 'g-' clave prefix", () => {
-  const items: NavMenuItem[] = [
-    // Legacy: no tipo, but the g- prefix marks it as a group.
-    { clave: "g-legacy", labelKey: "nav.legacy", path: "#" },
-    { clave: "leg-a", labelKey: "nav.a", path: "/legacy/a", parentClave: "g-legacy" },
-    // A plain top-level item (not a group root) must NOT appear as a group.
-    { clave: "solo", labelKey: "nav.solo", tipo: "item", path: "/solo" },
+    // arrive out of order + across BE parents; the FE manifest decides grouping/order
+    { clave: "precios", labelKey: "nav.precios", path: "/x", parentClave: "g-facturacion" },
+    { clave: "facturacion", labelKey: "nav.facturacion", path: "/x", parentClave: "g-facturacion" },
+    { clave: "citas", labelKey: "nav.citas", path: "/x", parentClave: "g-agenda" },
   ];
   const groups = buildNavGroups(items, () => true);
+  // scheduling before billing before inventory (NAV_GROUPS order); precios lands in inventory
+  assert.deepEqual(groups.map((g) => g.clave), ["scheduling", "billing", "inventory"]);
   assert.deepEqual(
-    groups.map((g) => g.clave),
-    ["g-legacy"],
+    groups.find((g) => g.clave === "inventory")!.children.map((c) => c.clave),
+    ["precios"],
   );
 });
 
-test("nests children by parentClave, preserving arrival order", () => {
+test("orders items within a group by manifest order", () => {
   const items: NavMenuItem[] = [
-    { clave: "g-a", labelKey: "nav.g_a", tipo: "grupo", path: "#" },
-    { clave: "a1", labelKey: "nav.a1", path: "/a/1", parentClave: "g-a" },
-    { clave: "a-sub", labelKey: "nav.a_sub", tipo: "grupo", path: "#", parentClave: "g-a" },
-    { clave: "a2", labelKey: "nav.a2", path: "/a/2", parentClave: "a-sub" },
+    { clave: "consultas", labelKey: "n", path: "/x", parentClave: "g-facturacion" }, // billing order 2
+    { clave: "facturacion", labelKey: "n", path: "/x", parentClave: "g-facturacion" }, // billing order 1
   ];
   const groups = buildNavGroups(items, () => true);
+  assert.deepEqual(groups[0].children.map((c) => c.clave), ["facturacion", "consultas"]);
+});
+
+test("permission filter still applies (empty group dropped)", () => {
+  const items: NavMenuItem[] = [
+    { clave: "facturacion", labelKey: "n", path: "/x", parentClave: "g-facturacion", permisoClave: "factura.read" },
+  ];
+  assert.equal(buildNavGroups(items, () => false).length, 0);
+});
+
+test("drops BE group-header rows and separators", () => {
+  const items: NavMenuItem[] = [
+    { clave: "g-facturacion", labelKey: "n", tipo: "grupo", path: "#" },
+    { clave: "facturacion", labelKey: "n", path: "/x", parentClave: "g-facturacion" },
+  ];
+  const groups = buildNavGroups(items, () => true);
+  assert.deepEqual(groups.map((g) => g.clave), ["billing"]);
+});
+
+test("does not surface home/dashboard as domain leaves", () => {
+  const items: NavMenuItem[] = [
+    { clave: "home", labelKey: "nav.home", path: "/" },
+    { clave: "dashboard", labelKey: "nav.dashboard", path: "/dashboard" },
+    { clave: "facturacion", labelKey: "n", path: "/x", parentClave: "g-facturacion" },
+  ];
+  const groups = buildNavGroups(items, () => true);
+  assert.deepEqual(groups.map((g) => g.clave), ["billing"]);
+  assert.deepEqual(groups[0].children.map((c) => c.clave), ["facturacion"]);
+});
+
+test("unknown clave falls back to a BE-parent group (nothing lost)", () => {
+  const items: NavMenuItem[] = [
+    { clave: "g-monitoreo", labelKey: "nav.grupo.monitoreo", tipo: "grupo", path: "#" },
+    { clave: "operaciones", labelKey: "nav.operaciones", path: "/boards/operaciones", parentClave: "g-monitoreo" },
+  ];
+  const groups = buildNavGroups(items, () => true);
+  // one fallback group, keyed by the BE parent, carrying the unknown board
   assert.equal(groups.length, 1);
-  assert.deepEqual(
-    groups[0].children.map((c) => c.clave),
-    ["a1", "a-sub"],
-  );
-  const sub = groups[0].children.find((c) => c.clave === "a-sub")!;
-  assert.deepEqual(
-    sub.children.map((c) => c.path),
-    ["/a/2"],
-  );
+  assert.equal(groups[0].clave, "g-monitoreo");
+  assert.deepEqual(groups[0].children.map((c) => c.clave), ["operaciones"]);
 });

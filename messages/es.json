@@ -697,7 +697,16 @@
       "servicios": "Servicios",
       "inventario": "Inventario",
       "configuracion": "Configuración",
-      "monitoreo": "Monitoreo"
+      "monitoreo": "Monitoreo",
+      "scheduling": "Agenda",
+      "patients": "Pacientes",
+      "services": "Servicios",
+      "billing": "Facturación",
+      "reports": "Reportes",
+      "inventory": "Inventario",
+      "communications": "Comunicaciones",
+      "admin": "Administración",
+      "configuration": "Configuración"
     },
     "cupos": "Cupos",
     "columnas": "Columnas del tablero",
