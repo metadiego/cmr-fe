@@ -59,7 +59,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/inventory/prices", labelKey: "nav.precios" },
   { path: "/configuration/services", labelKey: "nav.servicios_config" },
   // Configuración / Admin → Configuration (route-reorg Phase 1)
-  { path: "/panel/enfermeria", labelKey: "nav.panelEnfermeria" },
+  { path: "/services/nursing-panel", labelKey: "nav.panelEnfermeria" },
   { path: "/configuration/invoice", labelKey: "nav.configFactura" },
   { path: "/configuration/numbering", labelKey: "nav.configNumeracion" },
   { path: "/configuration/required-fields", labelKey: "nav.requisitos_servicio" },

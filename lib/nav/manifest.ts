@@ -26,7 +26,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "citas", route: "/scheduling/appointments" },
   { clave: "cupos", route: "/scheduling/slots" },
   { clave: "calendario", route: "/scheduling/calendar" },
-  { clave: "atencion", route: "/tablero/atencion" },
+  { clave: "atencion", route: "/boards/atencion" },
   { clave: "clientes", route: "/patients" },
   { clave: "cambio-de-protocolo", route: "/patients/protocol-change" }, // (was the /pacientes 404-fix; now final English route)
   { clave: "comunicaciones", route: "/comunicaciones" },
@@ -40,9 +40,9 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "caja-consulta", route: "/billing/cash/consultation" },
   { clave: "caja-general", route: "/billing/cash/general" },
   // Servicios / boards / reportes
-  { clave: "frontdesk", route: "/tablero/frontdesk" },
-  { clave: "servicios", route: "/tablero/servicios" },
-  { clave: "panel-enfermeria", route: "/panel/enfermeria" },
+  { clave: "frontdesk", route: "/boards/frontdesk" },
+  { clave: "servicios", route: "/boards/servicios" },
+  { clave: "panel-enfermeria", route: "/services/nursing-panel" },
   { clave: "config-formatos", route: "/configuration/formats" },
   { clave: "estadisticas-servicios", route: "/reports/services" },
   { clave: "estadisticas-diarias", route: "/reports/daily" },

@@ -5,5 +5,5 @@ import { redirect } from "next/navigation";
 // aparece en el menú (se quitó del manifiesto); se conserva solo por si alguien tiene la URL guardada,
 // redirigiendo al destino correcto. Antes redirigía a /tablero/citas, un tablero que no existe.
 export default function AtencionPage() {
-  redirect("/tablero/atencion");
+  redirect("/boards/atencion");
 }

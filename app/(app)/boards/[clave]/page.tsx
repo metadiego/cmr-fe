@@ -14,7 +14,7 @@ export default async function TableroPage({
 }) {
   const { clave } = await params;
   // 'servicios' era el alias legacy del frontdesk → consolidar en la clave canónica.
-  if (clave === "servicios") redirect("/tablero/frontdesk");
+  if (clave === "servicios") redirect("/boards/frontdesk");
   if (clave === "frontdesk") return <FrontdeskBoard />;
   return <GenericBoard tablero={clave} />;
 }

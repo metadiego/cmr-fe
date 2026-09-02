@@ -320,7 +320,7 @@ function PublicarTab({ clave, labelKey, icon }: { clave: string; labelKey: strin
   const t = useTranslations("configuracion.tableros");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
-  const path = `/tablero/${clave}`;
+  const path = `/boards/${clave}`;
   const { state, reload } = useResource<MenuItem[]>(() => getAllMenu());
   const existing = state.kind === "ok" ? state.data.find((m) => m.path === path) : undefined;
   const [busy, setBusy] = React.useState(false);

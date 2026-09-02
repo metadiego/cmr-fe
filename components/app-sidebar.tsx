@@ -108,7 +108,7 @@ export function AppSidebar() {
     "/patients",
     "/scheduling",
     "/billing",
-    "/tablero",
+    "/boards",
     "/inventory/products",
     "/inventory/suppliers",
     "/inventory/supplier-presentations",

@@ -65,7 +65,7 @@ export function TablerosList() {
       align: "right",
       cell: (r) => (
         <div className="flex items-center justify-end gap-4">
-          <Link href={r.ruta ?? `/tablero/${r.clave}`} className="text-sm text-primary hover:underline">
+          <Link href={r.ruta ?? `/boards/${r.clave}`} className="text-sm text-primary hover:underline">
             {t("open")}
           </Link>
           <Link href={`/configuration/boards/${r.clave}`} className="text-sm text-primary hover:underline">
