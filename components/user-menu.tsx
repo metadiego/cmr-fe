@@ -15,6 +15,8 @@ import {
 
 import { setLocale } from "@/i18n/locale-actions";
 import { locales, type Locale } from "@/i18n/config";
+import { setMyLanguage } from "@/lib/api/preferences";
+import { toastError } from "@/lib/api/errors";
 import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
@@ -38,6 +40,7 @@ import {
 // BE solo expone el email; cuando exponga un nombre, se usa aquí sin más cambios).
 export function UserMenu() {
   const t = useTranslations("userMenu");
+  const tRoot = useTranslations();
   const router = useRouter();
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
@@ -81,9 +84,19 @@ export function UserMenu() {
     .slice(0, 2)
     .toUpperCase();
 
+  // Idiomas elegibles: la lista que manda el BE en /auth/me (agregar un idioma es una fila del
+  // BE, no un despliegue del FE). Si aún no cargó, cae a los locales compilados. Handoff idioma-por-usuario.
+  const idiomas =
+    session.idiomasDisponibles && session.idiomasDisponibles.length > 0
+      ? session.idiomasDisponibles
+      : (locales as readonly string[]);
+
   function changeLocale(next: string) {
     if (next === locale) return;
+    // Doble escritura: la cookie (setLocale) hace que el render del servidor salga ya en el nuevo
+    // idioma sin recargar; el PUT /me/preferences lo RECUERDA para esta persona en cualquier equipo.
     void setLocale(next as Locale).then(() => router.refresh());
+    void setMyLanguage(next).catch((e) => toastError(e, tRoot));
   }
 
   return (
@@ -114,9 +127,9 @@ export function UserMenu() {
           {t("language")}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={locale} onValueChange={changeLocale}>
-          {locales.map((l) => (
+          {idiomas.map((l) => (
             <DropdownMenuRadioItem key={l} value={l}>
-              {t(`lang_${l}`)}
+              {tRoot.has(`userMenu.lang_${l}`) ? t(`lang_${l}`) : l.toUpperCase()}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

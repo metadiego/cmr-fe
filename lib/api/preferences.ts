@@ -38,6 +38,19 @@ export function updateMyPreferences(config: ThemeConfig): Promise<ThemeConfig> {
   });
 }
 
+// Guarda SOLO el idioma en la capa del usuario. El PUT reemplaza la capa entera, así que
+// primero leemos la capa `usuario` vigente y MEZCLAMOS el idioma para no borrar la apariencia
+// personal (colores, radio, fondo). `null` vuelve al defecto (quita la clave). El BE rechaza
+// con 400 (labelKey preferencias.idiomaNoDisponible) un idioma fuera de la lista; el selector
+// solo ofrece los de /auth/me, así que no debería pasar. Handoff idioma-por-usuario.
+export async function setMyLanguage(idioma: string | null): Promise<ThemeConfig> {
+  const prefs = await getMyPreferences();
+  const usuario: ThemeConfig = { ...(prefs.layers.usuario ?? {}) };
+  if (idioma) usuario.idioma = idioma;
+  else delete usuario.idioma;
+  return updateMyPreferences(usuario);
+}
+
 // --- Admin layers (admin/master). GET/PUT return the layer's config blob. ---
 
 export function getSystemPreferences(): Promise<ThemeConfig> {

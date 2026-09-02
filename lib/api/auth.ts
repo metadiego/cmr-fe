@@ -31,6 +31,11 @@ export interface Me {
   mustChangePassword?: boolean;
   // Public URL of the user's avatar (Supabase Storage), or null.
   avatarUrl?: string | null;
+  // Idioma de la interfaz ya RESUELTO por el BE para esta persona ("en" si nunca eligió),
+  // y la lista de los que puede elegir (hoy ["en","es"]). El FE pinta el selector con esa
+  // lista y aplica `idioma` al arrancar. Handoff idioma-por-usuario.
+  idioma?: string;
+  idiomasDisponibles?: string[];
 }
 
 export function getMe(): Promise<Me> {

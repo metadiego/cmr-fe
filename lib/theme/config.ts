@@ -57,6 +57,13 @@ export interface ThemeConfig {
    * escribe como `--recibo-ancho` y `@page`/`.recibo-print` lo usan. Handoff recibo-termico-sale-en-miniatura.
    */
   recibo?: { anchoMm?: number };
+  /**
+   * Idioma de la interfaz elegido por la persona (capa `usuario`). El BE lo resuelve por
+   * precedencia y lo devuelve ya resuelto en /auth/me (`idioma`) + la lista elegible
+   * (`idiomasDisponibles`). Vive en el mismo blob de config que la apariencia, así que al
+   * guardarlo hay que MEZCLARLO con la capa del usuario (no reemplazarla). Handoff idioma-por-usuario.
+   */
+  idioma?: string;
 }
 
 // Redesign navy (2026-09): el ÚNICO color personalizable es el color de marca

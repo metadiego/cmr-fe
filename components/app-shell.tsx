@@ -17,6 +17,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { CenterSelector } from "@/components/center-selector";
 import { SearchBar } from "@/components/search-bar";
 import { UserMenu } from "@/components/user-menu";
+import { LocaleSync } from "@/components/locale-sync";
 import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
 
 // Shell ÚNICO: rail navy (AppSidebar) + inset con header y contenido. Reemplaza el
@@ -68,6 +69,8 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <TooltipProvider>
+      {/* Aplica el idioma del usuario al arrancar (cookie ↔ /auth/me). No pinta nada. */}
+      <LocaleSync />
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
