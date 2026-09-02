@@ -277,7 +277,7 @@ export default function VialesPage() {
                                     (pacienteId ya viene del reporte). Si no hay id, texto plano. */}
                                 {c.pacienteId ? (
                                   <Link
-                                    href={`/clientes/${c.pacienteId}`}
+                                    href={`/patients/${c.pacienteId}`}
                                     className="font-medium text-primary hover:underline"
                                   >
                                     {c.paciente}

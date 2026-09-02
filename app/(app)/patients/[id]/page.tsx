@@ -60,7 +60,7 @@ export default function PacienteDetailPage() {
   return (
     <PageContainer>
       <button
-        onClick={() => router.push("/clientes")}
+        onClick={() => router.push("/patients")}
         className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
@@ -80,7 +80,7 @@ export default function PacienteDetailPage() {
           p={state.data}
           onEdit={() => setEditOpen(true)}
           onChanged={reload}
-          onDeleted={() => router.push("/clientes")}
+          onDeleted={() => router.push("/patients")}
         />
       )}
 

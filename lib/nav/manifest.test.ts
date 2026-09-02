@@ -11,8 +11,8 @@ test("known clave resolves to its manifest route", () => {
 
 // Deliberate fix: cambio-de-protocolo points at the WORKING FE folder, not the
 // broken BE seed path (/pacientes/cambio-de-protocolo 404s today).
-test("cambio-de-protocolo resolves to the working FE route (fixes the 404)", () => {
-  assert.equal(routeForClave("cambio-de-protocolo", "/pacientes/cambio-de-protocolo"), "/pacientes/cambio-protocolo");
+test("cambio-de-protocolo resolves to its FE route (also fixes the old BE-seed 404)", () => {
+  assert.equal(routeForClave("cambio-de-protocolo", "/pacientes/cambio-de-protocolo"), "/patients/protocol-change");
 });
 
 // Rule 2: an UNKNOWN clave whose BE path is a dynamic board → /boards/ rewrite.
@@ -41,7 +41,7 @@ test("seeded claves resolve to their FE route", () => {
     ["cupos", "/scheduling/slots"],
     ["calendario", "/scheduling/calendar"],
     ["atencion", "/tablero/atencion"],
-    ["clientes", "/clientes"],
+    ["clientes", "/patients"],
     ["comunicaciones", "/comunicaciones"],
     ["facturacion", "/billing/invoices"],
     ["consultas", "/billing/consultations"],

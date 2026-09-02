@@ -19,11 +19,11 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/scheduling/appointments/config/columnas", labelKey: "nav.columnasCitas" },
   // "Frontdesk" (/tablero/frontdesk) y "Atención" (/tablero/atencion) los sirve el BE en /me/menu; NO se
   // declaran aquí. Tampoco `/tablero/citas` (tablero inexistente) ni `/atencion` (alias): duplicaban ítems.
-  // Clientes
-  { path: "/clientes", labelKey: "nav.clientes" },
-  { path: "/pacientes/disponibilidad-legado", labelKey: "nav.dispLegado" },
-  { path: "/pacientes/cambio-protocolo", labelKey: "nav.cambioProtocolo" },
-  { path: "/pacientes/disponibilidad-legado/preparacion", labelKey: "nav.preparacionLegado" },
+  // Clientes → Patients (route-reorg Phase 1)
+  { path: "/patients", labelKey: "nav.clientes" },
+  { path: "/patients/legacy-availability", labelKey: "nav.dispLegado" },
+  { path: "/patients/protocol-change", labelKey: "nav.cambioProtocolo" },
+  { path: "/patients/legacy-availability/preparation", labelKey: "nav.preparacionLegado" },
   // Comunicaciones
   { path: "/comunicaciones", labelKey: "nav.comunicaciones" },
   // Facturación → Billing (route-reorg Phase 1)

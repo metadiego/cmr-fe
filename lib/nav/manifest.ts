@@ -27,8 +27,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "cupos", route: "/scheduling/slots" },
   { clave: "calendario", route: "/scheduling/calendar" },
   { clave: "atencion", route: "/tablero/atencion" },
-  { clave: "clientes", route: "/clientes" },
-  { clave: "cambio-de-protocolo", route: "/pacientes/cambio-protocolo" }, // FIX: BE seed 404s
+  { clave: "clientes", route: "/patients" },
+  { clave: "cambio-de-protocolo", route: "/patients/protocol-change" }, // (was the /pacientes 404-fix; now final English route)
   { clave: "comunicaciones", route: "/comunicaciones" },
   // Facturación / caja  (Phase 1: billing)
   { clave: "facturacion", route: "/billing/invoices" },

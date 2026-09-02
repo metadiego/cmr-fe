@@ -431,7 +431,7 @@ function AccionesEditor({ actions, onChange }: { actions: AccionRow[]; onChange:
           </Select>
           <Input value={a.icon ?? ""} onChange={(e) => patch(i, "icon", e.target.value)} placeholder={t("cfgActionIcon")} />
           {a.kind === "link" && (
-            <Input className="col-span-2" value={a.href ?? ""} onChange={(e) => patch(i, "href", e.target.value)} placeholder="/clientes/:pacienteId" />
+            <Input className="col-span-2" value={a.href ?? ""} onChange={(e) => patch(i, "href", e.target.value)} placeholder="/patients/:pacienteId" />
           )}
           <Button type="button" size="sm" variant="ghost" className="col-span-2 justify-self-end text-destructive" onClick={() => onChange(actions.filter((_, idx) => idx !== i))}>
             {t("cfgRemove")}

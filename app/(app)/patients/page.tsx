@@ -182,7 +182,7 @@ export default function ClientesPage() {
               <TableRow
                 key={p.id}
                 className="cursor-pointer"
-                onClick={() => router.push(`/clientes/${p.id}`)}
+                onClick={() => router.push(`/patients/${p.id}`)}
               >
                 <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
                   {(page - 1) * LIMIT + i + 1}
@@ -242,7 +242,7 @@ export default function ClientesPage() {
         onOpenChange={setCreateOpen}
         onSaved={(saved) => {
           reload();
-          router.push(`/clientes/${saved.id}`);
+          router.push(`/patients/${saved.id}`);
         }}
       />
 

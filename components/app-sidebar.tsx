@@ -105,7 +105,7 @@ export function AppSidebar() {
   const REAL_ROUTES = [
     "/dashboard",
     "/inventory",
-    "/clientes",
+    "/patients",
     "/scheduling",
     "/billing",
     "/tablero",

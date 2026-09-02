@@ -115,7 +115,7 @@ function Row({ f, t, centro }: { f: PreparacionFila; t: ReturnType<typeof useTra
       <td className="px-3 py-2 text-right">
         {(f.estado === "pendiente" || f.estado === "record_ambiguo") && (
           <Button asChild size="sm" variant="outline">
-            <Link href={`/pacientes/disponibilidad-legado${centro ? `?centro=${centro}` : ""}`}>{t("cargar")}</Link>
+            <Link href={`/patients/legacy-availability${centro ? `?centro=${centro}` : ""}`}>{t("cargar")}</Link>
           </Button>
         )}
       </td>
