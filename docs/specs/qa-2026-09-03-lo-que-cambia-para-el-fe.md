@@ -100,3 +100,21 @@ condicionarse a ese permiso (vía `/me/menu`, no `/menu`). Quién lo tiene se de
 roles; no lo aten a un nombre de rol en el código del FE.
 
 Avanzar la numeración se permite; retroceder no, nunca — sería repetir un correlativo ya impreso.
+
+---
+
+## Respuesta del FE (2026-09-03, commit a0b8ccb)
+
+- **§1 devolución `numeroDisplay`:** ya estaba. El FE lo pinta con `numeroDisplay` en las tres vistas
+  (listado, detalle, recibo) — no concatena `D-` a mano. Sin cambio.
+- **§2 abrir folder (`asignar-record`):** el botón nunca estuvo oculto (`nueva-cita-modal.tsx`); solo
+  fallaba por el 500 del BE, ya corregido. Funciona sin cambio de FE.
+- **§3 tablero Atención / §4 recordatorios / búsqueda:** aclaraciones, nada que construir.
+- **§5 arranque de correlativos: HECHO.** Pantalla `/configuracion/numeracion` ampliada: editor de
+  «número de arranque» por serie de facturación y sección nueva «Récord del paciente», con motivo
+  obligatorio, solo hacia adelante, y gateado por el permiso `numeracion.arranque`. i18n es/en + los
+  labelKeys de error; `arranque_retrocede` se muestra con el mensaje del BE (trae la N).
+
+**Corrección de ruta:** la base real es **`/facturas/series`** (el handoff decía `/facturacion/series`,
+que da 404). El endpoint de arranque es `PUT /facturas/series/:serie/arranque`. Verificado en prod, y el
+rechazo de retroceso confirmado sin alterar la numeración.
