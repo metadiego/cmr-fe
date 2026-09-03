@@ -88,9 +88,18 @@ export function buildNavGroups(
     }
   }
 
-  const groupRoot = (clave: string, labelKey: string, children: NavNode[]): NavNode => ({
+  // Cada raíz de sección lleva un icono (todas las categorías de primer nivel lo muestran):
+  // el del grupo FE, o —para buckets de fallback— el del contenedor del BE, o "folder" por defecto.
+  const groupRoot = (
+    clave: string,
+    labelKey: string,
+    icon: string,
+    children: NavNode[],
+  ): NavNode => ({
     clave,
     labelKey,
+    icon,
+    mostrarIcono: true,
     tipo: "grupo",
     path: "#",
     children,
@@ -100,14 +109,14 @@ export function buildNavGroups(
   // 4a. Grupos FE en orden de taxonomía, solo los no vacíos.
   for (const g of NAV_GROUPS) {
     const children = buckets.get(g.key);
-    if (children && children.length > 0) out.push(groupRoot(g.key, g.labelKey, children));
+    if (children && children.length > 0) out.push(groupRoot(g.key, g.labelKey, g.icon, children));
   }
   // 4b. Buckets de fallback (tableros dinámicos / desconocidos) al final.
   for (const [key, children] of buckets) {
     if (!key.startsWith("be:") || children.length === 0) continue;
     const parentClave = key.slice("be:".length);
     const parent = beParents.get(parentClave);
-    out.push(groupRoot(parentClave, parent?.labelKey ?? parentClave, children));
+    out.push(groupRoot(parentClave, parent?.labelKey ?? parentClave, parent?.icon ?? "folder", children));
   }
   return out;
 }
