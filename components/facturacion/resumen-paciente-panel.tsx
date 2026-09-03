@@ -106,7 +106,7 @@ export function ResumenPacientePanel({
                           <td className="px-2 py-1.5 text-right">
                             {!actual && (
                               <Link
-                                href={centro ? `/facturacion/${f.id}?centro=${centro}` : `/facturacion/${f.id}`}
+                                href={centro ? `/billing/invoices/${f.id}?centro=${centro}` : `/billing/invoices/${f.id}`}
                                 className="text-xs font-medium text-primary hover:underline"
                               >
                                 {t("abrir")}

@@ -271,7 +271,7 @@ export function ProductosAdmin() {
                     <div className="flex justify-end gap-1">
                       {p.tipo === "compuesto" && (
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/inventario/recetas?compuestoId=${p.id}`}>
+                          <Link href={`/inventory/recipes?compuestoId=${p.id}`}>
                             {t("editarReceta")}
                           </Link>
                         </Button>

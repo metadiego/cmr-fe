@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { NAV_MANIFEST } from "@/lib/nav-manifest";
+import { groupForClave, routeForClave } from "@/lib/nav/manifest";
 import { MENU_ICONS, resolveMenuIcon } from "@/lib/menu-icons";
 import {
   getAllMenu,
@@ -419,8 +420,14 @@ export function MenuEditor() {
     const isOver = over?.id === it.id;
     const esGrupo = it.tipo === "grupo";
     const esSeparador = it.tipo === "separador";
+    // Ítem gobernado por el manifiesto FE (lib/nav/manifest.ts): su RUTA, GRUPO y
+    // ORDEN los decide el código, no el BE. Reordenar/mover aquí no afecta al rail,
+    // así que se bloquea el arrastre y la ruta se muestra en solo-lectura. El
+    // labelCustom por-centro, la visibilidad, el permiso y el icono SÍ siguen editables.
+    const feKnown = !esGrupo && !esSeparador && !!groupForClave(it.clave);
+    const feRoute = feKnown ? routeForClave(it.clave, it.path) : it.path;
     const dragProps = {
-      draggable: true,
+      draggable: !feKnown,
       onDragStart: () => setDragId(it.id),
       onDragEnd: () => {
         setDragId(null);
@@ -477,9 +484,15 @@ export function MenuEditor() {
             !it.visible && "opacity-60",
           )}
         >
-          <span className="cursor-grab text-muted-foreground" aria-hidden>
-            <HugeiconsIcon icon={Menu01Icon} className="size-4" />
-          </span>
+          {feKnown ? (
+            <span className="text-muted-foreground/50" aria-hidden title={t("feManaged")}>
+              <HugeiconsIcon icon={LockedIcon} className="size-4" />
+            </span>
+          ) : (
+            <span className="cursor-grab text-muted-foreground" aria-hidden>
+              <HugeiconsIcon icon={Menu01Icon} className="size-4" />
+            </span>
+          )}
           {editing?.id === it.id ? (
             <Input
               autoFocus
@@ -503,8 +516,13 @@ export function MenuEditor() {
                 <HugeiconsIcon icon={resolveMenuIcon(it.icon)!} className="size-4 text-muted-foreground" />
               ) : null}
               <span className={cn("truncate font-medium", esGrupo && "font-semibold")}>{label(it)}</span>
-              {!esGrupo && it.path && it.path !== "#" ? (
-                <span className="ml-1 truncate text-xs text-muted-foreground">{it.path}</span>
+              {!esGrupo && feRoute && feRoute !== "#" ? (
+                <span
+                  className="ml-1 truncate text-xs text-muted-foreground"
+                  title={feKnown ? t("feManaged") : undefined}
+                >
+                  {feRoute}
+                </span>
               ) : null}
             </span>
           )}

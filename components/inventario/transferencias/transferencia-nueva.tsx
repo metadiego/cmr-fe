@@ -102,7 +102,7 @@ export function TransferenciaNueva() {
       };
       await crearTransferencia(payload);
       toast.success(t("creadaOk"));
-      router.push("/inventario/transferencias");
+      router.push("/inventory/transfers");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setBusy(false);
@@ -111,7 +111,7 @@ export function TransferenciaNueva() {
 
   return (
     <PageContainer>
-      <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
+      <button type="button" onClick={() => router.push("/inventory/transfers")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
       <PageHeader title={t("newTitle")} description={t("newHelp")} />

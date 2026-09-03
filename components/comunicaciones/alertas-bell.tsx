@@ -161,7 +161,7 @@ export function AlertasBell() {
           <span className="text-sm font-semibold">{t("title")}</span>
           <button
             type="button"
-            onClick={() => router.push("/comunicaciones")}
+            onClick={() => router.push("/communications")}
             className="text-xs font-medium text-primary hover:underline"
           >
             {t("verTodas")}

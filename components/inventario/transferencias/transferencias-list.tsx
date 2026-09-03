@@ -79,7 +79,7 @@ export function TransferenciasList() {
         description={t("help")}
         actions={
           <Button size="sm" asChild>
-            <Link href="/inventario/transferencias/nueva">
+            <Link href="/inventory/transfers/new">
               <HugeiconsIcon icon={Add01Icon} className="size-4" />
               {t("new")}
             </Link>
@@ -126,7 +126,7 @@ export function TransferenciasList() {
                   <td className="px-3 py-2 text-muted-foreground">{tr.motivo ?? "—"}</td>
                   <td className="px-3 py-2 text-right">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/inventario/transferencias/${tr.id}`}>{porRecibir ? t("recibirAprobar") : tc("view")}</Link>
+                      <Link href={`/inventory/transfers/${tr.id}`}>{porRecibir ? t("recibirAprobar") : tc("view")}</Link>
                     </Button>
                   </td>
                 </tr>
@@ -199,7 +199,7 @@ export function TransferenciasList() {
                 <td className="px-3 py-2 text-muted-foreground">{tr.motivo ?? "—"}</td>
                 <td className="px-3 py-2 text-right">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/inventario/transferencias/${tr.id}`}>{tc("view")}</Link>
+                    <Link href={`/inventory/transfers/${tr.id}`}>{tc("view")}</Link>
                   </Button>
                 </td>
               </tr>

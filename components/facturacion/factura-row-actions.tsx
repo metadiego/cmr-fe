@@ -33,7 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 // Acciones por factura (handoff fe-devoluciones-lista-y-acciones, slices A–D):
 //  Ver/Imprimir → detalle · Editar → detalle (borrador) · Email → POST /facturas/:id/email ·
-//  Devolución → PÁGINA COMPLETA /facturacion/:id/devolver (tabla ancha) · Anular → /anular (motivo).
+//  Devolución → PÁGINA COMPLETA /billing/invoices/:id/return (tabla ancha) · Anular → /anular (motivo).
 //  Timing: GET /politica-devolucion resalta Anular (mismo día) vs Devolver ("· sugerido").
 export function FacturaRowActions({
   facturaId,
@@ -62,8 +62,8 @@ export function FacturaRowActions({
   const puedeDevolver = (esEmitida || estado === "devuelta_parcial") && can("factura.devolver");
   const puedeEmail = !esBorrador && can("notificaciones.create");
 
-  const href = centroId ? `/facturacion/${facturaId}?centro=${centroId}` : `/facturacion/${facturaId}`;
-  const devolverHref = centroId ? `/facturacion/${facturaId}/devolver?centro=${centroId}` : `/facturacion/${facturaId}/devolver`;
+  const href = centroId ? `/billing/invoices/${facturaId}?centro=${centroId}` : `/billing/invoices/${facturaId}`;
+  const devolverHref = centroId ? `/billing/invoices/${facturaId}/return?centro=${centroId}` : `/billing/invoices/${facturaId}/return`;
 
   async function anular() {
     if (!motivo.trim() || busy) return;

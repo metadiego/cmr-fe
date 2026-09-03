@@ -182,7 +182,7 @@ export function FrontdeskBoard() {
   function dispatchAccion(a: AccionTablero) {
     if (a.handler === "abrir_citas_servicio") {
       // Abre la vista de Citas de Servicio (consultar/crear) y le pasa el origen para "Volver".
-      router.push(`/citas?tab=servicios&volver=${encodeURIComponent(pathname)}`);
+      router.push(`/scheduling/appointments?tab=servicios&volver=${encodeURIComponent(pathname)}`);
     }
   }
   // Acción DEFAULT del FE: "Citas de servicio" siempre disponible en el riel aunque el BE aún no la
