@@ -144,9 +144,9 @@ const POSTACCION_PROGRAMAR = "programar_citas";
 
 // Sello de hora por estado del flujo — mapeo del contrato del BE (FrontdeskSesionEntity), único punto.
 const STAMP_FIELD: Record<string, keyof Sesion> = {
-  presente: "presenteEn",
-  en_terapia: "terapiaInEn",
-  asistido: "asistidoEn",
+  presente: "presentAt",
+  en_terapia: "therapyStartedAt",
+  asistido: "attendedAt",
 };
 
 // ————————————————————————————————————————————————————————————————————————————
@@ -168,8 +168,8 @@ export function FrontdeskBoard() {
   // el slot toolbar SOLO las de handler que el FE sabe ejecutar (HANDLERS_FE) → enchufar/quitar por dato.
   const regRes = useResource<TableroRegistro[]>(() => getTableros(), []);
   const acciones = React.useMemo(() => {
-    const reg = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === "servicios");
-    return (reg?.acciones ?? [])
+    const reg = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.slug === "servicios");
+    return (reg?.actions ?? [])
       .filter(
         (a) =>
           a.visible !== false &&
@@ -234,30 +234,30 @@ export function FrontdeskBoard() {
   const servicios = React.useMemo(
     () =>
       (servRes.state.kind === "ok" ? servRes.state.data : [])
-        .filter((s) => s.activo !== false)
-        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre)),
+        .filter((s) => s.active !== false)
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
   const defRes = useResource<TableroDefinicion>(
-    () => (gate.centro ? getDefinicion("servicios", gate.centro) : Promise.resolve({ estados: [], transiciones: [], columnas: [], subTipos: [] } as unknown as TableroDefinicion)),
+    () => (gate.centro ? getDefinicion("servicios", gate.centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [gate.centro],
   );
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
-  const estados = React.useMemo(() => def?.estados ?? [], [def]);
+  const estados = React.useMemo(() => def?.statuses ?? [], [def]);
   const estadoDe = React.useCallback(
-    (clave: string) => estados.find((e) => e.clave === clave),
+    (clave: string) => estados.find((e) => e.slug === clave),
     [estados],
   );
   // Pasos del flujo = estados (en su orden) que tienen transición homónima (presente/en_terapia/asistido).
   const flujo = React.useMemo(() => {
-    const trans = new Set((def?.transiciones ?? []).map((x) => x.clave));
-    return estados.filter((e) => trans.has(e.clave) && STAMP_FIELD[e.clave]);
+    const trans = new Set((def?.transitions ?? []).map((x) => x.slug));
+    return estados.filter((e) => trans.has(e.slug) && STAMP_FIELD[e.slug]);
   }, [def, estados]);
 
   // Tab efectivo derivado (primer servicio por defecto) — sin efecto, sin renders en cascada. Si el tab
   // elegido ya no existe en este centro (servicio apagado ahí), cae al primero disponible.
-  const tabEfectivo = servicios.some((s) => s.clave === tab) ? tab : (servicios[0]?.clave ?? "");
-  const servicioActivo = servicios.find((s) => s.clave === tabEfectivo);
+  const tabEfectivo = servicios.some((s) => s.slug === tab) ? tab : (servicios[0]?.slug ?? "");
+  const servicioActivo = servicios.find((s) => s.slug === tabEfectivo);
 
   // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
   // pacienteId, datos) unidas por id. El FE solo une; no recalcula.
@@ -265,7 +265,7 @@ export function FrontdeskBoard() {
     () =>
       gate.centro && tabEfectivo
         ? getFrontdeskTablero(tabEfectivo, fecha, gate.centro, rango)
-        : Promise.resolve({ columnas: [], filas: [] }),
+        : Promise.resolve({ columns: [], rows: [] }),
     [gate.centro, tabEfectivo, fecha, rango?.hasta],
   );
   const sesRes = useResource<Sesion[]>(
@@ -298,7 +298,7 @@ export function FrontdeskBoard() {
   const presentesPorClave = React.useMemo(() => {
     const m = new Map<string, number>();
     if (presentesRes.state.kind === "ok" && presentesRes.state.data) {
-      for (const s of presentesRes.state.data.servicios) m.set(s.clave, s.presentes);
+      for (const s of presentesRes.state.data.services) m.set(s.slug, s.present);
     }
     return m;
   }, [presentesRes.state]);
@@ -330,7 +330,7 @@ export function FrontdeskBoard() {
     enabled: !!gate.centro,
     onInvalidate: refetch,
     onEvent: (e) => {
-      if (String(e.accion ?? "").includes("sin_saldo")) {
+      if (String(e.action ?? "").includes("sin_saldo")) {
         setSinSaldoIds((prev) => new Set(prev).add(e.id));
         toast.error(t("entregaSinSaldo"));
       }
@@ -361,14 +361,14 @@ export function FrontdeskBoard() {
   // del grupo — paridad con Atención; nunca se pintan además como columnas sueltas (bug del doble pintado).
   const flujoCols = React.useMemo(
     () =>
-      (board?.columnas ?? [])
+      (board?.columns ?? [])
         .filter((c) => c.tipo === "toggle" && (c.render as { group?: string } | null)?.group)
         .sort((a, b) => a.orden - b.orden),
     [board],
   );
   const columnas = React.useMemo(
     () =>
-      (board?.columnas ?? [])
+      (board?.columns ?? [])
         .filter(
           (c) =>
             c.clave !== "fd_acciones" &&
@@ -381,7 +381,7 @@ export function FrontdeskBoard() {
   const colsRender = React.useMemo<({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[]>(() => {
     const out: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[] = [];
     let puesto = false;
-    for (const c of (board?.columnas ?? []).slice().sort((a, b) => a.orden - b.orden)) {
+    for (const c of (board?.columns ?? []).slice().sort((a, b) => a.orden - b.orden)) {
       if (c.clave === "fd_acciones") continue;
       if (c.tipo === "toggle" && (c.render as { group?: string } | null)?.group) {
         if (!puesto) {
@@ -394,7 +394,7 @@ export function FrontdeskBoard() {
     }
     // Fallback (tableros SIN columnas toggle): flujo derivado de la definición. Si hay toggles —
     // agrupados o sueltos — el flujo ya vive en ellos y NO se agrega columna extra (evita doble pintado).
-    const hayToggles = (board?.columnas ?? []).some((c) => c.tipo === "toggle");
+    const hayToggles = (board?.columns ?? []).some((c) => c.tipo === "toggle");
     if (!puesto && !hayToggles) out.push({ kind: "flujo" });
     return out;
   }, [board]);
@@ -405,7 +405,7 @@ export function FrontdeskBoard() {
   React.useEffect(() => {
     // Columnas con opciones: selects editables + inputs con datalist (texto editable con optionsSource,
     // p. ej. fd_protocolo). Ambos consumen GET /tablero/opciones.
-    const selects = (board?.columnas ?? []).filter(
+    const selects = (board?.columns ?? []).filter(
       (c) => c.editable && (c.tipo === "select" || !!(c.render as { optionsSource?: string } | null)?.optionsSource),
     );
     if (!selects.length || !tabEfectivo || !gate.centro) return;
@@ -434,7 +434,7 @@ export function FrontdeskBoard() {
   // board se recarga (asistir consume una) o cambia la fecha — ambas cambian la ref de `board`/`sesiones`.
   const hayDosis = React.useMemo(
     () =>
-      (board?.columnas ?? []).some(
+      (board?.columns ?? []).some(
         (c) => (c.render as { optionsSource?: string } | null)?.optionsSource === "productos_grupo",
       ),
     [board],
@@ -447,8 +447,8 @@ export function FrontdeskBoard() {
     const ids = hayDosis
       ? Array.from(
           new Set(
-            (board?.filas ?? [])
-              .map((f) => sesiones.get(f.id)?.pacienteId)
+            (board?.rows ?? [])
+              .map((f) => sesiones.get(f.id)?.patientId)
               .filter((x): x is string => !!x),
           ),
         )
@@ -471,18 +471,18 @@ export function FrontdeskBoard() {
   // Estado de una fila: PREFERIR el `estado` top-level que ahora manda el BE en cada fila (PR #195, la
   // verdad del flujo), con respaldo a la columna proyectada `fd_estado` y a la entidad de sesión.
   const estadoFila = React.useCallback(
-    (f: FrontdeskFila) => String(f.estado ?? f.fd_estado ?? sesiones.get(f.id)?.estado ?? ""),
+    (f: FrontdeskFila) => String(f.estado ?? f.fd_estado ?? sesiones.get(f.id)?.status ?? ""),
     [sesiones],
   );
 
   // Filtro compuesto: búsqueda (texto de fila O pacienteId) → ocultar canceladas → KPI de estado.
   const visibles = React.useMemo(() => {
-    const filas = board?.filas ?? [];
+    const filas = board?.rows ?? [];
     const conBusqueda = filas.filter((f) => {
       const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
       const porTexto = coincide(textos, q);
       const ses = sesiones.get(f.id);
-      const porPaciente = !!pacienteIds && !!ses && pacienteIds.has(String(ses.pacienteId));
+      const porPaciente = !!pacienteIds && !!ses && pacienteIds.has(String(ses.patientId));
       return q.trim().length >= 2 ? porTexto || porPaciente : porTexto;
     });
     // Ocultar canceladas (salvo que el filtro explícito sea justamente "cancelada").
@@ -526,7 +526,7 @@ export function FrontdeskBoard() {
 
   // KPIs sobre el set buscado (sin el filtro de estado, para que los conteos guíen).
   const kpis = React.useMemo(() => {
-    const filas = board?.filas ?? [];
+    const filas = board?.rows ?? [];
     const counts = new Map<string, number>();
     for (const f of filas) {
       const e = estadoFila(f);
@@ -581,7 +581,7 @@ export function FrontdeskBoard() {
                 <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {gate.centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -637,12 +637,12 @@ export function FrontdeskBoard() {
               {t("todosTab")}
             </button>
             {servicios.map((s) => {
-              const activo = s.clave === tabEfectivo;
+              const activo = s.slug === tabEfectivo;
               return (
                 <button
                   key={s.id}
                   type="button"
-                  onClick={() => { setTab(s.clave); setEstadoFiltro(""); }}
+                  onClick={() => { setTab(s.slug); setEstadoFiltro(""); }}
                   className={
                     "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors " +
                     (activo
@@ -657,10 +657,10 @@ export function FrontdeskBoard() {
                       aria-hidden
                     />
                   )}
-                  {s.nombre}
+                  {s.name}
                   {/* Contador de presentes (la burbuja del legado): color solo donde hay gente. */}
                   <PresentesMarca
-                    presentes={presentesPorClave.get(s.clave) ?? 0}
+                    presentes={presentesPorClave.get(s.slug) ?? 0}
                     prefs={presentesPrefs}
                     max={presentesMax}
                   />
@@ -713,15 +713,15 @@ export function FrontdeskBoard() {
               onClick={() => setEstadoFiltro("")}
             />
             {estados
-              .filter((e) => (kpis.counts.get(e.clave) ?? 0) > 0)
+              .filter((e) => (kpis.counts.get(e.slug) ?? 0) > 0)
               .map((e) => (
                 <KpiTile
-                  key={e.clave}
+                  key={e.slug}
                   label={tRoot(e.labelKey)}
-                  count={kpis.counts.get(e.clave) ?? 0}
+                  count={kpis.counts.get(e.slug) ?? 0}
                   color={e.color}
-                  active={estadoFiltro === e.clave}
-                  onClick={() => setEstadoFiltro(estadoFiltro === e.clave ? "" : e.clave)}
+                  active={estadoFiltro === e.slug}
+                  onClick={() => setEstadoFiltro(estadoFiltro === e.slug ? "" : e.slug)}
                 />
               ))}
           </div>
@@ -752,8 +752,8 @@ export function FrontdeskBoard() {
           )}
 
           {/* Contador del DÍA (gramos → viales): se activa solo al abrir la pestaña del servicio. */}
-          {board?.totales && board.totales.length > 0 && (
-            <TotalesDia totales={board.totales} servicio={servicioActivo?.nombre} />
+          {board?.totals && board.totals.length > 0 && (
+            <TotalesDia totales={board.totals} servicio={servicioActivo?.name} />
           )}
 
           {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
@@ -803,18 +803,18 @@ export function FrontdeskBoard() {
                       sesion={sesiones.get(f.id)}
                       colsRender={colsRender}
                       flujoCols={flujoCols}
-                      flujo={flujo}
-                      transiciones={def?.transiciones ?? []}
+                      flujo={flujo.map((e) => ({ clave: e.slug, labelKey: e.labelKey, color: e.color }))}
+                      transiciones={def?.transitions ?? []}
                       estadoDe={estadoDe}
                       servicio={servicioActivo}
                       tablero={tabEfectivo}
                       fecha={fecha}
                       optionsByCol={optionsByCol}
-                      saldoDosis={saldoByPaciente[String(sesiones.get(f.id)?.pacienteId ?? "")] ?? []}
+                      saldoDosis={saldoByPaciente[String(sesiones.get(f.id)?.patientId ?? "")] ?? []}
                       centro={gate.centro}
                       sinSaldo={sinSaldoIds.has(f.id)}
                       canReparar={can("frontdesk.reparar")}
-                      estados={estados.map((e) => ({ clave: e.clave, label: tRoot(e.labelKey) }))}
+                      estados={estados.map((e) => ({ clave: e.slug, label: tRoot(e.labelKey) }))}
                       onChanged={refetch}
                       onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
                     />
@@ -884,7 +884,7 @@ export function FrontdeskBoard() {
                       type="button"
                       onClick={() => {
                         // Traer la sesión al tablero para repararla: filtra por el paciente del aviso.
-                        if (a.paciente) setQ(a.paciente);
+                        if (a.patient) setQ(a.patient);
                         setAvisosOpen(false);
                       }}
                       className="flex w-full items-start justify-between gap-3 rounded-md bg-card p-3 text-left ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] transition hover:bg-accent/50"
@@ -892,12 +892,12 @@ export function FrontdeskBoard() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="inline-block rounded-full bg-warning px-2 py-0.5 text-[11px] font-semibold text-warning-foreground">
-                            {t.has(`avisos.tipo.${a.tipo}`) ? t(`avisos.tipo.${a.tipo}`) : a.tipo}
+                            {t.has(`avisos.tipo.${a.type}`) ? t(`avisos.tipo.${a.type}`) : a.type}
                           </span>
-                          <span className="truncate font-medium">{a.paciente ?? "—"}</span>
+                          <span className="truncate font-medium">{a.patient ?? "—"}</span>
                         </div>
                         <div className="mt-0.5 truncate text-xs text-muted-foreground">
-                          {a.servicio ?? "—"}
+                          {a.service ?? "—"}
                           {a.actor ? ` · ${t("avisos.por", { actor: a.actor })}` : ""}
                         </div>
                       </div>
@@ -1055,7 +1055,7 @@ function FilaSesion({
   const [notificarCfg, setNotificarCfg] = React.useState<{ panel: string; seccion: string } | null>(null);
   // Reports del servicio (HILT/MLS, o formatos genéricos): se listan PLANOS en el menú de Acciones,
   // cada uno abre su documento imprimible. Handoff HANDOFF-formato-laser-hilt-mls (§3).
-  const reportsAcc = React.useMemo(() => (parseAcciones(servicio?.formAcciones).reports ?? []), [servicio]);
+  const reportsAcc = React.useMemo(() => (parseAcciones(servicio?.formActions).reports ?? []), [servicio]);
   const [formatoReport, setFormatoReport] = React.useState<ReportAccion | null>(null);
   // Reflejo OPTIMISTA local del select (por columna): muestra el valor elegido al instante, sin
   // esperar las 2 idas al servidor (guardar + refetch). Se limpia si la escritura falla.
@@ -1073,7 +1073,7 @@ function FilaSesion({
   } | null>(null);
   // Verdad del flujo: el `estado` top-level que ahora manda el BE en cada fila (PR #195). Antes el FE lo
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
-  const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.estado ?? "");
+  const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.status ?? "");
   const cancelada = estadoActual === "cancelada";
 
   // Devuelve true SOLO si la acción tuvo éxito. Así quien encadena un postAccion (p. ej. abrir "Programar
@@ -1101,7 +1101,7 @@ function FilaSesion({
   // motivo (rojo); onChanged() re-lee la fila, así una escritura fallida revierte sola a la verdad.
   // Handoff HANDOFF-toast-que-certifica-la-persistencia.
   async function guardarCelda(columna: string, valor: unknown, etiqueta?: string) {
-    const { persistencia } = await editarCelda({ tablero, entidadId: fila.id, columna, valor }, centro);
+    const { persistencia } = await editarCelda({ boardSlug: tablero, entityId: fila.id, column: columna, value: valor }, centro);
     notifyPersistencia(persistencia, etiqueta);
     return persistencia;
   }
@@ -1115,7 +1115,7 @@ function FilaSesion({
     // TABLERO (número ya resuelto en la fila; null = celda en blanco, NUNCA "0") y al hacer clic abre el
     // historial completo de compras del paciente. El icono es clicable aunque no haya compras ese día.
     if (rk === "compras") {
-      if (!sesion?.pacienteId) return <span className="text-muted-foreground">—</span>;
+      if (!sesion?.patientId) return <span className="text-muted-foreground">—</span>;
       const n = v == null || v === "" ? null : String(v);
       return (
         <button
@@ -1131,7 +1131,7 @@ function FilaSesion({
       );
     }
     if (rk === "notificar") {
-      if (!sesion?.pacienteId) return <span className="text-muted-foreground">—</span>;
+      if (!sesion?.patientId) return <span className="text-muted-foreground">—</span>;
       const rc = (c.render ?? {}) as { panel?: string; seccion?: string };
       return (
         <button
@@ -1165,7 +1165,7 @@ function FilaSesion({
         <SesionesCell
           display={v == null || v === "" ? "—" : String(v)}
           servicioId={servicio?.id}
-          pacienteId={sesion?.pacienteId}
+          pacienteId={sesion?.patientId}
           centro={centro}
         />
       );
@@ -1192,7 +1192,7 @@ function FilaSesion({
       // un grupo "Otras dosis" sin número. Nunca se esconde ni se bloquea una dosis. Contrato del handoff.
       const esDosis = (c.render as { optionsSource?: string } | null)?.optionsSource === "productos_grupo";
       const saldoMap = new Map<string, PendienteEntrega>();
-      if (esDosis) for (const s of saldoDosis) if (s.productoId) saldoMap.set(String(s.productoId), s);
+      if (esDosis) for (const s of saldoDosis) if (s.productId) saldoMap.set(String(s.productId), s);
       const agotada = (val: string) => {
         const s = saldoMap.get(val);
         return !!s && Number(s.pendiente ?? 0) <= 0;
@@ -1317,7 +1317,7 @@ function FilaSesion({
           onClick={() =>
             // Vía CANÓNICA del builder: POST /tablero/accion (la entidad es implícita en el tablero;
             // acepta claves reusadas de Atención como 'consulta'/'atender').
-            run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: r.transition ?? c.clave }, centro))
+            run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: r.transition ?? c.clave }, centro))
           }
         >
           {tRoot(r.labelKey ?? c.labelKey)}
@@ -1410,28 +1410,28 @@ function FilaSesion({
   const accionesMenu = transiciones
     .filter(
       (tr) =>
-        tr.activo !== false &&
+        tr.active !== false &&
         // Solo transiciones SIN payload extra: el menú plano no recoge formularios. Esto excluye el
         // cancelar/anular dedicado (que exige `motivo` → tiene su propio diálogo) sin hardcodear su nombre,
         // y deja pasar recuperaciones como `reactivar`. `requiere`/`desdeEstados` pueden venir NULL del BE
         // (p. ej. reactivar.requiere=null) → coerción a arreglo antes de leer .length/.includes (sin
         // asumir el shape del BE; evita el crash "Cannot read properties of null (reading 'length')").
-        (tr.requiere?.length ?? 0) === 0 &&
-        !pasoKeys.has(tr.clave) &&
-        ((tr.desdeEstados?.length ?? 0) === 0 || (tr.desdeEstados ?? []).includes(estadoActual)) &&
-        (!tr.permiso || can(tr.permiso)),
+        (tr.formFields?.length ?? 0) === 0 &&
+        !pasoKeys.has(tr.slug) &&
+        ((tr.fromStatuses?.length ?? 0) === 0 || (tr.fromStatuses ?? []).includes(estadoActual)) &&
+        (!tr.permissionSlug || can(tr.permissionSlug)),
     )
     .map((tr) => ({
-      clave: tr.clave,
-      label: tr.labelKey && tRoot.has(tr.labelKey) ? tRoot(tr.labelKey) : (t.has(tr.clave) ? t(tr.clave) : tr.clave),
-      confirmar: tr.confirmar,
+      clave: tr.slug,
+      label: tr.labelKey && tRoot.has(tr.labelKey) ? tRoot(tr.labelKey) : (t.has(tr.slug) ? t(tr.slug) : tr.slug),
+      confirmar: tr.requiresConfirmation,
     }));
 
   // Campos requeridos por servicio (data-driven, servicio.formAcciones). Para un estado destino, los que
   // faltan por llenar en la sesión (sesion.datos[clave]) → bloquean esa transición (p. ej. áreas para asistir).
-  const camposReq = ((servicio as { formAcciones?: { campos?: { clave: string; labelKey?: string; en?: string; requerido?: boolean }[] } } | undefined)?.formAcciones?.campos ?? []);
+  const camposReq = ((servicio as { formActions?: { campos?: { clave: string; labelKey?: string; en?: string; requerido?: boolean }[] } } | undefined)?.formActions?.campos ?? []);
   const faltantesPara = (estado: string): string[] => {
-    const datos = (sesion?.datos as Record<string, unknown> | null | undefined) ?? {};
+    const datos = (sesion?.data as Record<string, unknown> | null | undefined) ?? {};
     // Un campo requerido puede vivir en la MEDICIÓN (sesion.datos[clave], p. ej. aplicadas/cantidad) o
     // en un SELECT sobre la sesión resuelto en la fila (fd_<clave>, p. ej. dosis→fd_dosis,
     // enfermera→fd_enfermera, sesiones→fd_sesiones). Se considera lleno si CUALQUIERA tiene valor.
@@ -1481,18 +1481,18 @@ function FilaSesion({
         const col = paso.color ?? undefined;
         const avanzar = () => {
           if (bloqueadoPorCampos) { toast.warning(t("faltanCampos", { campos: faltan.join(", ") })); return; }
-          run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: paso.key }, centro)).then((ok) => {
+          run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: paso.key }, centro)).then((ok) => {
             // Solo tras un avance EXITOSO se dispara el postAccion (p. ej. abrir "Programar citas"); si
             // falló, ya se mostró el toast de error y NO se simula que la acción ocurrió.
-            if (ok && paso.postAccion === POSTACCION_PROGRAMAR && sesion?.pacienteId) {
-              onProgramar({ pacienteId: sesion.pacienteId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
+            if (ok && paso.postAccion === POSTACCION_PROGRAMAR && sesion?.patientId) {
+              onProgramar({ pacienteId: sesion.patientId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
             }
           });
         };
         const deshacer = () => {
           if (!puedeDeshacer || !reversa) return;
           toast(t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), {
-            action: { label: t("deshacer"), onClick: () => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: reversa }, centro)) },
+            action: { label: t("deshacer"), onClick: () => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: reversa }, centro)) },
           });
         };
         return (
@@ -1548,67 +1548,67 @@ function FilaSesion({
           cancelada={cancelada}
           canReparar={canReparar}
           estados={estados}
-          conHistorial={!!sesion?.pacienteId}
+          conHistorial={!!sesion?.patientId}
           onHistorial={() => setHistorialOpen(true)}
-          reports={sesion?.pacienteId ? reportsAcc.map((r) => ({ id: r.id, label: r.labelKey && tRoot.has(r.labelKey) ? tRoot(r.labelKey) : (r.name ?? r.id) })) : []}
+          reports={sesion?.patientId ? reportsAcc.map((r) => ({ id: r.id, label: r.labelKey && tRoot.has(r.labelKey) ? tRoot(r.labelKey) : (r.name ?? r.id) })) : []}
           onReport={(id) => { const r = reportsAcc.find((x) => x.id === id); if (r) setFormatoReport(r); }}
           accionesMenu={accionesMenu}
-          onAccion={(clave) => run(() => ejecutarAccion({ tablero, entidadId: fila.id, accion: clave }, centro))}
+          onAccion={(clave) => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: clave }, centro))}
           onProgramar={
-            sesion?.pacienteId
-              ? () => onProgramar({ pacienteId: sesion.pacienteId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
+            sesion?.patientId
+              ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
               : undefined
           }
           onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
-        {sesion?.pacienteId && (
+        {sesion?.patientId && (
           <HistorialModal
             open={historialOpen}
             onOpenChange={setHistorialOpen}
-            pacienteId={sesion.pacienteId}
+            pacienteId={sesion.patientId}
             pacienteNombre={String(fila.paciente ?? "")}
             servicioId={servicio?.id}
-            servicioNombre={servicio?.nombre}
+            servicioNombre={servicio?.name}
             centro={centro}
           />
         )}
-        {sesion?.pacienteId && (
+        {sesion?.patientId && (
           <ComprasModal
             open={comprasOpen}
             onOpenChange={setComprasOpen}
-            pacienteId={sesion.pacienteId}
+            pacienteId={sesion.patientId}
             pacienteNombre={String(fila.paciente ?? "")}
             servicioId={servicio?.id}
-            servicioNombre={servicio?.nombre}
+            servicioNombre={servicio?.name}
             fecha={fecha}
             centro={centro}
           />
         )}
-        {sesion?.pacienteId && servicio && (
+        {sesion?.patientId && servicio && (
           <FormatosModal
             open={!!formatoReport}
             onOpenChange={(o) => !o && setFormatoReport(null)}
             initialReport={formatoReport ?? undefined}
-            servicioNombre={servicio.nombre}
-            formAcciones={servicio.formAcciones}
+            servicioNombre={servicio.name}
+            formAcciones={servicio.formActions}
             pacienteNombre={String(fila.paciente ?? "")}
-            sesionDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
-            areasDefault={Number((sesion?.datos as Record<string, unknown> | null)?.aplicadas) || undefined}
+            sesionDefault={Number((sesion?.data as Record<string, unknown> | null)?.aplicadas) || undefined}
+            areasDefault={Number((sesion?.data as Record<string, unknown> | null)?.aplicadas) || undefined}
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
             sesionId={fila.id}
             centro={centro}
             onHistorial={() => setHistorialOpen(true)}
           />
         )}
-        {notificarCfg && sesion?.pacienteId && (
+        {notificarCfg && sesion?.patientId && (
           <PanelNotificarModal
             open={!!notificarCfg}
             onOpenChange={(o) => !o && setNotificarCfg(null)}
             panelClave={notificarCfg.panel}
             seccion={notificarCfg.seccion}
             sesionId={fila.id}
-            servicioNombre={servicio?.nombre ?? ""}
+            servicioNombre={servicio?.name ?? ""}
             pacienteNombre={String(fila.paciente ?? "")}
             enfermeras={optionsByCol["fd_enfermera"] ?? []}
             enfermeraActual={(() => { const raw = fila["fd_enfermera"]; const ops = optionsByCol["fd_enfermera"] ?? []; return ops.find((o) => o.value === raw || o.label === raw)?.value; })()}
@@ -1745,7 +1745,7 @@ function CorregirDisponibilidadDialog({
     if (invalido || !paquete?.id) return;
     setGuardando(true);
     try {
-      await ajustarDisponibilidad(paquete.id, { sesionesTotales: n }, centro);
+      await ajustarDisponibilidad(paquete.id, { totalSessions: n }, centro);
       toast.success(t("corregirOk"));
       onClose();
       onDone();
@@ -1858,11 +1858,11 @@ function TransferirTratamientoDialog({
       await transferirTratamiento(
         paquete.id,
         {
-          clinicDestinoId: destino,
-          ...(sesiones !== "" && nSes < pendientes ? { sesiones: nSes } : {}), // omitido = todas
-          modo,
-          ...(modo === "fisica" ? { almacenOrigenId: almOrigen, almacenDestinoId: almDestino } : {}),
-          ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
+          destinationClinicId: destino,
+          ...(sesiones !== "" && nSes < pendientes ? { sessions: nSes } : {}), // omitido = todas
+          mode: modo,
+          ...(modo === "fisica" ? { sourceWarehouseId: almOrigen, destinationWarehouseId: almDestino } : {}),
+          ...(motivo.trim() ? { reason: motivo.trim() } : {}),
         },
         centro,
       );
@@ -1895,7 +1895,7 @@ function TransferirTratamientoDialog({
               <Select value={destino} onValueChange={setDestino}>
                 <SelectTrigger><SelectValue placeholder={t("transferir.elegirCentro")} /></SelectTrigger>
                 <SelectContent>
-                  {destinos.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                  {destinos.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -1930,14 +1930,14 @@ function TransferirTratamientoDialog({
                   <Label>{t("transferir.almacenOrigen")}</Label>
                   <Select value={almOrigen} onValueChange={setAlmOrigen}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{almacenesOrigen.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}</SelectContent>
+                    <SelectContent>{almacenesOrigen.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
                   <Label>{t("transferir.almacenDestino")}</Label>
                   <Select value={almDestino} onValueChange={setAlmDestino} disabled={!destino}>
                     <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{almacenesDestino.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}</SelectContent>
+                    <SelectContent>{almacenesDestino.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
               </div>
@@ -2010,7 +2010,7 @@ function SesionesCell({
               const { entregadas, totales } = paqueteTotales(p);
               const leyenda = legendMultiplicadores(p.multiplicadores, (k) => (t.has(`mult.${k}`) ? t(`mult.${k}`) : k));
               return (
-                <div key={p.id ?? p.facturaItemId ?? i} className="flex items-start justify-between gap-2 text-sm">
+                <div key={p.id ?? p.invoiceItemId ?? i} className="flex items-start justify-between gap-2 text-sm">
                   <div className="min-w-0">
                     <div className="truncate font-medium">{p.productoNombre ?? p.sku ?? "—"}</div>
                     <div className="text-xs text-muted-foreground">
@@ -2089,7 +2089,7 @@ function MedicionCell({
   const tRoot = useTranslations();
   const r = (col.render ?? {}) as { dato?: string; unidadKey?: string; min?: number; max?: number; paso?: number };
   const dato = r.dato ?? col.clave;
-  const actual = (sesion?.datos as Record<string, unknown> | null | undefined)?.[dato];
+  const actual = (sesion?.data as Record<string, unknown> | null | undefined)?.[dato];
   const [val, setVal] = React.useState(actual != null ? String(actual) : "");
   // SINCRONIZAR con el valor persistido cuando cambia (la sesión llega tarde por el fetch, o el board
   // se refresca tras guardar) — patrón "ajustar estado al cambiar la prop". Antes `val` se fijaba una
@@ -2174,7 +2174,7 @@ function RowMenu({
   onAccion?: (clave: string) => void;
   onProgramar?: () => void; // abrir "Programar citas" desde la fila (agendar la próxima aunque ya esté asistido)
   onCancelar: (motivo: string) => void;
-  onReparar: (payload: { motivo: string; estado?: string }) => void;
+  onReparar: (payload: { reason: string; status?: string }) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tc = useTranslations("common");
@@ -2276,7 +2276,7 @@ function RowMenu({
               disabled={!motivo.trim()}
               onClick={() => {
                 setRepararOpen(false);
-                onReparar({ motivo: motivo.trim(), ...(estadoNuevo ? { estado: estadoNuevo } : {}) });
+                onReparar({ reason: motivo.trim(), ...(estadoNuevo ? { status: estadoNuevo } : {}) });
               }}
             >
               {t("reparar")}
@@ -2323,7 +2323,7 @@ function HistorialModal({
     let cancel = false;
     getHistorialPaciente(pacienteId, servicioId, centro)
       .then((r) => {
-        if (!cancel) setData({ key, rows: r.slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha))) });
+        if (!cancel) setData({ key, rows: r.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))) });
       })
       .catch(() => {
         if (!cancel) setFailKey(key);
@@ -2363,19 +2363,19 @@ function HistorialModal({
               <tbody className="divide-y">
                 {rows.map((r) => (
                   <tr key={r.id} className="hover:bg-muted/30">
-                    <td className="whitespace-nowrap px-5 py-2.5 tabular-nums">{formatFechaSolo(r.fecha) || "—"}</td>
+                    <td className="whitespace-nowrap px-5 py-2.5 tabular-nums">{formatFechaSolo(r.date) || "—"}</td>
                     <td className="px-3 py-2.5">
                       <Badge
                         variant="secondary"
-                        className={r.estado === "asistido" ? "bg-success text-success-foreground" : undefined}
+                        className={r.status === "asistido" ? "bg-success text-success-foreground" : undefined}
                       >
-                        {t.has(`histEstadoVal.${r.estado}`) ? t(`histEstadoVal.${r.estado}`) : (r.estado || "—")}
+                        {t.has(`histEstadoVal.${r.status}`) ? t(`histEstadoVal.${r.status}`) : (r.status || "—")}
                       </Badge>
                     </td>
                     <td className="px-3 py-2.5">
                       <span className="font-medium">{r.servicioNombre ?? "—"}</span>
                       <span className="block text-xs text-muted-foreground">
-                        {t("histSesion")}: {r.sesionNumero != null && r.sesionesTotales != null ? `${r.sesionNumero}/${r.sesionesTotales}` : "—"}
+                        {t("histSesion")}: {r.sesionNumero != null && r.totalSessions != null ? `${r.sesionNumero}/${r.totalSessions}` : "—"}
                         {r.areas != null ? ` · ${t("histAreas")}: ${r.areas}` : ""}
                       </span>
                     </td>
@@ -2442,7 +2442,7 @@ function ComprasModal({
   const fallo = failKey === key && key !== "";
   const items = c?.delDia?.items ?? [];
   const historial = c?.historial ?? [];
-  const tot = c?.totales ?? {};
+  const tot = c?.totals ?? {};
   const num = (x: number | null | undefined) => (x == null ? "—" : String(x));
   const importe = (x: number | null | undefined) => (x == null ? "—" : money.format(x));
 
@@ -2468,7 +2468,7 @@ function ComprasModal({
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <ComprasStat label={t("compras.totCompras")} value={num(tot.compras)} />
                 <ComprasStat label={t("compras.totComprado")} value={num(tot.sesionesCompradas)} />
-                <ComprasStat label={t("compras.totEntregadas")} value={num(tot.sesionesEntregadas)} />
+                <ComprasStat label={t("compras.totEntregadas")} value={num(tot.deliveredSessions)} />
                 <ComprasStat
                   label={t("compras.pendientes")}
                   value={num(tot.sesionesPendientes)}
@@ -2479,7 +2479,7 @@ function ComprasModal({
               {/* Bloque 1: comprado el DÍA DEL TABLERO. */}
               <section>
                 <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {t("compras.delDia")}{c.delDia?.fecha ? ` · ${formatFechaSolo(c.delDia.fecha)}` : ""}
+                  {t("compras.delDia")}{c.delDia?.date ? ` · ${formatFechaSolo(c.delDia.date)}` : ""}
                 </h3>
                 {items.length === 0 ? (
                   <p className="rounded-md border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
@@ -2557,13 +2557,13 @@ function ComprasTabla({
         <tbody className="divide-y">
           {filas.map((f, i) => (
             <tr key={f.id ?? i} className="hover:bg-muted/30">
-              {conFecha && <td className="whitespace-nowrap px-3 py-2 tabular-nums">{formatFechaSolo(f.fecha ?? "") || "—"}</td>}
+              {conFecha && <td className="whitespace-nowrap px-3 py-2 tabular-nums">{formatFechaSolo(f.date ?? "") || "—"}</td>}
               <td className="px-3 py-2">
-                <span className="font-medium">{f.producto ?? f.sku ?? "—"}</span>
-                {f.producto && f.sku && <span className="block text-xs text-muted-foreground">{f.sku}</span>}
+                <span className="font-medium">{f.product ?? f.sku ?? "—"}</span>
+                {f.product && f.sku && <span className="block text-xs text-muted-foreground">{f.sku}</span>}
               </td>
-              <td className="px-3 py-2 tabular-nums text-muted-foreground">{f.facturaNumero ?? "—"}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{num(f.sesiones)}</td>
+              <td className="px-3 py-2 tabular-nums text-muted-foreground">{f.invoiceNumber ?? "—"}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{num(f.sessions)}</td>
               <td className="px-3 py-2 text-right tabular-nums">{num(f.entregadas)}</td>
               <td className="px-3 py-2 text-right tabular-nums">
                 {(f.pendientes ?? 0) > 0 ? (

@@ -89,12 +89,12 @@ type Row = {
 function buildRows(catalog: ColumnaCatalogo[], efectivas: ColumnaEfectiva[]): Row[] {
   const eff = new Map(efectivas.map((e) => [e.clave, e]));
   const rows: (Row & { orden: number })[] = catalog.map((c) => {
-    const e = eff.get(c.clave);
+    const e = eff.get(c.slug);
     return {
       columnaId: c.id,
-      clave: c.clave,
+      clave: c.slug,
       labelKey: c.labelKey,
-      tipo: c.tipo,
+      tipo: c.type,
       visible: !!e,
       fijo: !!e?.fijo,
       // `render` viene tipado como Record opaco → leemos group de forma segura (sin hardcodear claves).
@@ -153,12 +153,12 @@ function Editor({
       if (boardMode) {
         await setComposicionBulk(
           tablero,
-          rows.map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
+          rows.map((r, i) => ({ columnId: r.columnaId, sortOrder: i, visible: r.visible, pinned: r.fijo, active: true })),
         );
       } else {
         await Promise.all(
           rows.map((r, i) =>
-            personalizarColumna({ tablero, columnaId: r.columnaId, visible: r.visible, orden: i, fijo: r.fijo }),
+            personalizarColumna({ boardSlug: tablero, columnId: r.columnaId, visible: r.visible, sortOrder: i, pinned: r.fijo }),
           ),
         );
       }

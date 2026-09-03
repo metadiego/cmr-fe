@@ -74,13 +74,13 @@ const TODOS = "__todos__";
 
 // Campos que se comparan entre centros para marcar "≠ por centro" en modo Todos.
 const CAMPOS_DIFF = [
-  "nombre",
+  "name",
   "color",
-  "orden",
-  "grupoFacturacionId",
-  "productoId",
-  "requiereTecnico",
-  "requiereEnfermera",
+  "sortOrder",
+  "billingGroupId",
+  "productId",
+  "requiresTechnician",
+  "requiresNurse",
   "badge",
 ] as const;
 type CampoDiff = (typeof CAMPOS_DIFF)[number];
@@ -99,7 +99,7 @@ function unir(listas: { centro: Centro; ss: Servicio[] }[]): FilaServicio[] {
   const porClave = new Map<string, { centro: Centro; s: Servicio }[]>();
   for (const { centro, ss } of listas) {
     for (const s of ss) {
-      (porClave.get(s.clave) ?? porClave.set(s.clave, []).get(s.clave)!).push({ centro, s });
+      (porClave.get(s.slug) ?? porClave.set(s.slug, []).get(s.slug)!).push({ centro, s });
     }
   }
   const filas: FilaServicio[] = [];
@@ -111,7 +111,7 @@ function unir(listas: { centro: Centro; ss: Servicio[] }[]): FilaServicio[] {
     }
     filas.push({ clave, rep: entradas[0].s, entradas, diffs, todos: true });
   }
-  return filas.sort((a, b) => (a.rep.orden ?? 0) - (b.rep.orden ?? 0) || a.rep.nombre.localeCompare(b.rep.nombre));
+  return filas.sort((a, b) => (a.rep.sortOrder ?? 0) - (b.rep.sortOrder ?? 0) || a.rep.name.localeCompare(b.rep.name));
 }
 
 // Servicios (config = pestañas de frontdesk). "Todos los centros" (RBAC servicios.multicentro) edita
@@ -151,18 +151,18 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
         );
         // Un centro que no cargó NO desaparece en silencio: se avisa (la unión quedaría incompleta
         // y un guardado bulk igual tocaría ese centro en el BE).
-        const fallidos = resultados.filter((r) => !r.ok).map((r) => r.centro.nombre);
+        const fallidos = resultados.filter((r) => !r.ok).map((r) => r.centro.name);
         if (fallidos.length > 0) {
           toast.warning(t("cargaParcial", { centros: fallidos.join(", ") }));
         }
         return unir(resultados);
       }
       if (!centro) return [];
-      const uno = centros.find((c) => c.id === centro) ?? ({ id: centro, nombre: "" } as Centro);
+      const uno = centros.find((c) => c.id === centro) ?? ({ id: centro, name: "" } as Centro);
       const ss = await getServicios(centro, { includeInactive: true });
       return ss
-        .map<FilaServicio>((s) => ({ clave: s.clave, rep: s, entradas: [{ centro: uno, s }], diffs: new Set(), todos: false }))
-        .sort((a, b) => (a.rep.orden ?? 0) - (b.rep.orden ?? 0) || a.rep.nombre.localeCompare(b.rep.nombre));
+        .map<FilaServicio>((s) => ({ clave: s.slug, rep: s, entradas: [{ centro: uno, s }], diffs: new Set(), todos: false }))
+        .sort((a, b) => (a.rep.sortOrder ?? 0) - (b.rep.sortOrder ?? 0) || a.rep.name.localeCompare(b.rep.name));
     },
     [esTodos, centro, centros],
   );
@@ -172,7 +172,7 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
   const [editing, setEditing] = React.useState<FilaServicio | null>(null);
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  const centroNombre = centros.find((c) => c.id === centro)?.nombre ?? "";
+  const centroNombre = centros.find((c) => c.id === centro)?.name ?? "";
 
   // Orden de los servicios = orden de las PESTAÑAS del Frontdesk (nada rígido, configurable). Arrastrar
   // una fila renumera el `orden` (0..n) y lo persiste al instante: en "Todos" por clave (multicentro),
@@ -187,10 +187,10 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
     try {
       await Promise.all(
         arr.map((f, i) => {
-          if ((f.rep.orden ?? 0) === i) return Promise.resolve();
+          if ((f.rep.sortOrder ?? 0) === i) return Promise.resolve();
           return esTodos
-            ? updateServicioPorClave(f.clave, { orden: i } as UpdateServicioPorClavePayload)
-            : updateServicio(f.rep.id, { orden: i }, centro);
+            ? updateServicioPorClave(f.clave, { sortOrder: i } as UpdateServicioPorClavePayload)
+            : updateServicio(f.rep.id, { sortOrder: i }, centro);
         }),
       );
       reload();
@@ -206,8 +206,8 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
   async function toggleActivo(s: Servicio) {
     setBusyId(s.id);
     try {
-      await updateServicio(s.id, { activo: !s.activo }, centro);
-      toast.success(s.activo ? t("deshabilitadoEn", { centro: centroNombre }) : t("habilitadoEn", { centro: centroNombre }));
+      await updateServicio(s.id, { active: !s.active }, centro);
+      toast.success(s.active ? t("deshabilitadoEn", { centro: centroNombre }) : t("habilitadoEn", { centro: centroNombre }));
       reload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -227,7 +227,7 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
             {/* "Todos los centros" solo para quien puede editar multicentro (RBAC cosmético). */}
             {puedeMulti && <SelectItem value={TODOS}>{t("centro.todos")}</SelectItem>}
             {centros.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -290,20 +290,20 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-2 font-medium">
                     <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: f.rep.color ?? "#94a3b8" }} />
-                    {f.rep.nombre}
-                    {f.diffs.has("nombre") && <DiffChip t={t} entradas={f.entradas} render={(s) => s.nombre} />}
+                    {f.rep.name}
+                    {f.diffs.has("name") && <DiffChip t={t} entradas={f.entradas} render={(s) => s.name} />}
                     {f.diffs.has("color") && <DiffChip t={t} entradas={f.entradas} render={(s) => s.color ?? "—"} />}
                   </div>
                   <span className="font-mono text-[11px] text-muted-foreground">{f.clave}</span>
                 </td>
                 <td className="px-3 py-2">
-                  {f.rep.productoId ? <Badge variant="secondary">{t("tipoInventariable")}</Badge> : <Badge variant="outline">{t("tipoPuro")}</Badge>}
-                  {f.diffs.has("productoId") && <DiffChip t={t} entradas={f.entradas} render={(s) => (s.productoId ? t("tipoInventariable") : t("tipoPuro"))} />}
+                  {f.rep.productId ? <Badge variant="secondary">{t("tipoInventariable")}</Badge> : <Badge variant="outline">{t("tipoPuro")}</Badge>}
+                  {f.diffs.has("productId") && <DiffChip t={t} entradas={f.entradas} render={(s) => (s.productId ? t("tipoInventariable") : t("tipoPuro"))} />}
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">
-                  {[f.rep.requiereTecnico && t("tecnico"), f.rep.requiereEnfermera && t("enfermera")].filter(Boolean).join(" · ") || "—"}
-                  {(f.diffs.has("requiereTecnico") || f.diffs.has("requiereEnfermera")) && (
-                    <DiffChip t={t} entradas={f.entradas} render={(s) => [s.requiereTecnico && t("tecnico"), s.requiereEnfermera && t("enfermera")].filter(Boolean).join(" · ") || "—"} />
+                  {[f.rep.requiresTechnician && t("tecnico"), f.rep.requiresNurse && t("enfermera")].filter(Boolean).join(" · ") || "—"}
+                  {(f.diffs.has("requiresTechnician") || f.diffs.has("requiresNurse")) && (
+                    <DiffChip t={t} entradas={f.entradas} render={(s) => [s.requiresTechnician && t("tecnico"), s.requiresNurse && t("enfermera")].filter(Boolean).join(" · ") || "—"} />
                   )}
                 </td>
                 <td className="px-3 py-2">
@@ -313,13 +313,13 @@ export function ServiciosAdmin({ embedded }: { embedded?: boolean } = {}) {
                   ) : (
                     <label className="inline-flex cursor-pointer items-center gap-2">
                       <Switch
-                        checked={f.rep.activo}
+                        checked={f.rep.active}
                         disabled={busyId === f.rep.id}
                         onCheckedChange={() => toggleActivo(f.rep)}
                         aria-label={t("field.activo")}
                       />
-                      <span className={"text-xs " + (f.rep.activo ? "text-success-foreground" : "text-muted-foreground")}>
-                        {f.rep.activo ? t("active") : t("inactive")}
+                      <span className={"text-xs " + (f.rep.active ? "text-success-foreground" : "text-muted-foreground")}>
+                        {f.rep.active ? t("active") : t("inactive")}
                       </span>
                     </label>
                   )}
@@ -373,7 +373,7 @@ function DiffChip({
         <span className="flex flex-col gap-0.5 text-left">
           {entradas.map((e) => (
             <span key={e.centro.id}>
-              <b>{e.centro.nombre}:</b> {render(e.s)}
+              <b>{e.centro.name}:</b> {render(e.s)}
             </span>
           ))}
         </span>
@@ -448,16 +448,16 @@ function ServicioForm({
     setClaveTouched(!!servicio);
     const inicialForm: FormState = servicio
       ? {
-          clave: servicio.clave,
-          nombre: servicio.nombre,
+          clave: servicio.slug,
+          nombre: servicio.name,
           color: servicio.color ?? "#3b82f6",
-          orden: servicio.orden != null ? String(servicio.orden) : "",
-          grupoFacturacionId: servicio.grupoFacturacionId ?? "",
-          productoId: servicio.productoId ?? "",
-          requiereTecnico: servicio.requiereTecnico,
-          requiereEnfermera: servicio.requiereEnfermera,
+          orden: servicio.sortOrder != null ? String(servicio.sortOrder) : "",
+          grupoFacturacionId: servicio.billingGroupId ?? "",
+          productoId: servicio.productId ?? "",
+          requiereTecnico: servicio.requiresTechnician,
+          requiereEnfermera: servicio.requiresNurse,
           badge: servicio.badge,
-          activo: servicio.activo,
+          activo: servicio.active,
         }
       : EMPTY;
     setForm(inicialForm);
@@ -477,13 +477,13 @@ function ServicioForm({
   // Payload común (sin activo ni clave) para editar la fila (un centro o multicentro).
   function payloadComun() {
     return {
-      nombre: form.nombre.trim(),
+      name: form.nombre.trim(),
       color: form.color,
-      orden: form.orden.trim() ? Number(form.orden) : undefined,
-      grupoFacturacionId: form.grupoFacturacionId || undefined,
-      productoId: form.productoId || undefined,
-      requiereTecnico: form.requiereTecnico,
-      requiereEnfermera: form.requiereEnfermera,
+      sortOrder: form.orden.trim() ? Number(form.orden) : undefined,
+      billingGroupId: form.grupoFacturacionId || undefined,
+      productId: form.productoId || undefined,
+      requiresTechnician: form.requiereTecnico,
+      requiresNurse: form.requiereEnfermera,
       badge: form.badge,
     };
   }
@@ -492,7 +492,7 @@ function ServicioForm({
     if (!servicio) return;
     setSubmitting(true);
     try {
-      await updateServicio(servicio.id, { ...payloadComun(), activo: form.activo }, centro);
+      await updateServicio(servicio.id, { ...payloadComun(), active: form.activo }, centro);
       toast.success(t("updated"));
       onOpenChange(false);
       onSaved();
@@ -506,10 +506,10 @@ function ServicioForm({
   async function guardarAlta() {
     setSubmitting(true);
     try {
-      const payload = { clave: claveEff.trim(), ...payloadComun() } as CreateServicioPayload;
-      const destinos = centros.length ? centros : [{ id: centro, nombre: "" } as Centro];
+      const payload = { slug: claveEff.trim(), ...payloadComun() } as CreateServicioPayload;
+      const destinos = centros.length ? centros : [{ id: centro, name: "" } as Centro];
       const resultados = await Promise.allSettled(destinos.map((c) => createServicio(payload, c.id)));
-      const fallos = resultados.map((r, i) => (r.status === "rejected" ? destinos[i].nombre : null)).filter(Boolean);
+      const fallos = resultados.map((r, i) => (r.status === "rejected" ? destinos[i].name : null)).filter(Boolean);
       if (fallos.length === destinos.length) {
         throw (resultados.find((r) => r.status === "rejected") as PromiseRejectedResult).reason;
       }
@@ -540,7 +540,7 @@ function ServicioForm({
     setSubmitting(true);
     try {
       const res = await updateServicioPorClave(
-        servicio.clave,
+        servicio.slug,
         payload as UpdateServicioPorClavePayload,
         centro || undefined,
       );
@@ -566,7 +566,7 @@ function ServicioForm({
   // El alcance REAL del bulk: los centros donde la clave EXISTE (fila.entradas),
   // no todos mis centros — el BE actualiza solo filas con esa clave.
   const afectados = editandoTodos && fila?.entradas?.length ? fila.entradas.map((e) => e.centro) : centros;
-  const nombresCentros = afectados.map((c) => c.nombre).filter(Boolean).join(", ");
+  const nombresCentros = afectados.map((c) => c.name).filter(Boolean).join(", ");
 
   return (
     <>
@@ -651,7 +651,7 @@ function GrupoSelect({ value, onChange }: { value: string; onChange: (id: string
   const t = useTranslations("servicios");
   const tRoot = useTranslations();
   const { state } = useResource<GrupoFacturacion[]>(() => getGruposFacturacion(), []);
-  const grupos = (state.kind === "ok" ? state.data : []).filter((g) => g.activo !== false);
+  const grupos = (state.kind === "ok" ? state.data : []).filter((g) => g.active !== false);
   const NONE = "__none__";
   return (
     <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>

@@ -22,7 +22,7 @@ export function CentroPicker({ centros, onPick }: { centros: Centro[]; onPick: (
             onClick={() => onPick(c.id)}
             className="flex items-center justify-between rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3 text-left transition-colors hover:ring-primary/50 hover:bg-accent/40"
           >
-            <span className="font-medium">{c.nombre}</span>
+            <span className="font-medium">{c.name}</span>
             <span className="text-xs text-primary">{t("pickCentroGo")} →</span>
           </button>
         ))}

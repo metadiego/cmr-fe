@@ -65,7 +65,7 @@ export function ProfileCentrosDialog({
   )
   const centers = centersState.kind === "ok" ? centersState.data : []
   const nombreCentro = (id: string) =>
-    centers.find((c) => c.id === id)?.nombre ?? id.slice(0, 8)
+    centers.find((c) => c.id === id)?.name ?? id.slice(0, 8)
 
   // Alta
   const [centroId, setCentroId] = React.useState("")
@@ -84,9 +84,9 @@ export function ProfileCentrosDialog({
     setSubmitting(true)
     try {
       await assignCenter(profile.id, {
-        centroId,
-        tipo,
-        vigenteHasta: tipo === "temporal" && hasta ? hasta : undefined,
+        centerId: centroId,
+        type: tipo,
+        validUntil: tipo === "temporal" && hasta ? hasta : undefined,
       })
       toast.success(t("asignado"))
       reset()
@@ -101,7 +101,7 @@ export function ProfileCentrosDialog({
   async function onRevoke(a: Asignacion) {
     if (!profile) return
     if (
-      !window.confirm(t("confirmRevocar", { centro: nombreCentro(a.centroId) }))
+      !window.confirm(t("confirmRevocar", { centro: nombreCentro(a.centerId) }))
     )
       return
     try {
@@ -116,7 +116,7 @@ export function ProfileCentrosDialog({
   async function onReactivate(a: Asignacion) {
     if (!profile) return
     try {
-      await updateAsignacion(profile.id, a.id, { activo: true })
+      await updateAsignacion(profile.id, a.id, { active: true })
       toast.success(t("reactivada"))
       refresh()
     } catch (err) {
@@ -134,7 +134,7 @@ export function ProfileCentrosDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {t("title", { nombre: profile?.nombre ?? "" })}
+            {t("title", { nombre: profile?.name ?? "" })}
           </DialogTitle>
           <DialogDescription>{t("help")}</DialogDescription>
         </DialogHeader>
@@ -162,23 +162,23 @@ export function ProfileCentrosDialog({
               >
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium">
-                    {a.centro?.nombre ?? nombreCentro(a.centroId)}
+                    {a.center?.name ?? nombreCentro(a.centerId)}
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                     <Badge
-                      variant={a.tipo === "temporal" ? "outline" : "secondary"}
+                      variant={a.type === "temporal" ? "outline" : "secondary"}
                     >
-                      {t(`tipo_${a.tipo ?? "base"}`)}
+                      {t(`tipo_${a.type ?? "base"}`)}
                     </Badge>
-                    {a.vigenteHasta && (
-                      <span>{t("hasta", { fecha: a.vigenteHasta })}</span>
+                    {a.validUntil && (
+                      <span>{t("hasta", { fecha: a.validUntil })}</span>
                     )}
-                    {!a.activo && (
+                    {!a.active && (
                       <Badge variant="destructive">{t("inactiva")}</Badge>
                     )}
                   </div>
                 </div>
-                {a.activo ? (
+                {a.active ? (
                   <Button
                     size="sm"
                     variant="outline"
@@ -211,7 +211,7 @@ export function ProfileCentrosDialog({
                 <SelectContent>
                   {centers.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.nombre}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

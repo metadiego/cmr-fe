@@ -79,7 +79,7 @@ export function ProgramarCitasModal({
   // Paciente: preseleccionado (desde el tablero) o buscado (desde Citar).
   const [sel, setSel] = React.useState<PacienteBusqueda | null>(null);
   const pacienteId = pacienteIdProp ?? sel?.id ?? "";
-  const pacienteNombre = pacienteNombreProp ?? (sel ? (sel.nombreMostrar || `${sel.nombres ?? ""} ${sel.apellidos ?? ""}`.trim()) : "");
+  const pacienteNombre = pacienteNombreProp ?? (sel ? (sel.displayName || `${sel.firstName ?? ""} ${sel.lastName ?? ""}`.trim()) : "");
 
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
@@ -99,13 +99,13 @@ export function ProgramarCitasModal({
   const servicios = React.useMemo(
     () =>
       (servRes.state.kind === "ok" ? servRes.state.data : [])
-        .filter((s) => s.activo !== false)
-        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre)),
+        .filter((s) => s.active !== false)
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
   const [servicioId, setServicioId] = React.useState(defaultServicioId ?? "");
   const servicioEff = servicios.some((s) => s.id === servicioId) ? servicioId : (defaultServicioId ?? servicios[0]?.id ?? "");
-  const servicioClave = servicios.find((s) => s.id === servicioEff)?.clave ?? "";
+  const servicioClave = servicios.find((s) => s.id === servicioEff)?.slug ?? "";
 
   // Fechas a agendar (una cita por fecha).
   const [fechas, setFechas] = React.useState<string[]>([]);
@@ -183,8 +183,8 @@ export function ProgramarCitasModal({
       const hora = horaSel || undefined; // opcional; el BE descuenta el cupo de esa franja (no bloquea)
       const { warnings } =
         fechasEff.length > 1
-          ? await agendarMultiple({ pacienteId, servicioId: servicioEff, fechas: fechasEff, hora }, centro)
-          : await crearSesion({ pacienteId, servicioId: servicioEff, fecha: fechasEff[0], hora } as never, centro);
+          ? await agendarMultiple({ patientId: pacienteId, serviceId: servicioEff, fechas: fechasEff, time: hora }, centro)
+          : await crearSesion({ patientId: pacienteId, serviceId: servicioEff, date: fechasEff[0], time: hora }, centro);
       toast.success(t("agendadoOk", { n: fechasEff.length }));
       mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo — no bloquea
       onOpenChange(false);
@@ -220,7 +220,7 @@ export function ProgramarCitasModal({
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{pacienteNombre}</div>
                   <div className="truncate text-xs text-muted-foreground">
-                    {[sel.record && `${t("recordLabel")} ${sel.record}`, sel.telefono ?? sel.whatsapp].filter(Boolean).join(" · ") || sel.docId}
+                    {[sel.medicalRecordNumber && `${t("recordLabel")} ${sel.medicalRecordNumber}`, sel.phone ?? sel.whatsapp].filter(Boolean).join(" · ") || sel.documentId}
                   </div>
                 </div>
                 <button type="button" onClick={() => setSel(null)} className="shrink-0 text-xs font-medium text-primary hover:underline">
@@ -240,8 +240,8 @@ export function ProgramarCitasModal({
                     ) : (
                       resultados.map((p) => (
                         <button key={p.id} type="button" onClick={() => { setSel(p); setQ(""); }} className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50">
-                          <span className="font-medium">{(p.nombreMostrar || `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim()) || "—"}</span>
-                          {(p.record || p.telefono) && <span className="text-[11px] text-muted-foreground">{[p.record && `${t("recordLabel")} ${p.record}`, p.telefono].filter(Boolean).join(" · ")}</span>}
+                          <span className="font-medium">{(p.displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim()) || "—"}</span>
+                          {(p.medicalRecordNumber || p.phone) && <span className="text-[11px] text-muted-foreground">{[p.medicalRecordNumber && `${t("recordLabel")} ${p.medicalRecordNumber}`, p.phone].filter(Boolean).join(" · ")}</span>}
                         </button>
                       ))
                     )}
@@ -261,7 +261,7 @@ export function ProgramarCitasModal({
                   <SelectItem key={s.id} value={s.id}>
                     <span className="inline-flex items-center gap-2">
                       {s.color && <span className="size-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />}
-                      {s.nombre}
+                      {s.name}
                     </span>
                   </SelectItem>
                 ))}
@@ -292,13 +292,13 @@ export function ProgramarCitasModal({
                 <div className="flex flex-wrap gap-1">
                   {horas.map((h) => {
                     const lleno = h.vacios <= 0;
-                    const activa = horaSel === h.hora;
+                    const activa = horaSel === h.time;
                     return (
                       <button
-                        key={h.hora}
+                        key={h.time}
                         type="button"
                         // Clic = elegir/soltar la hora (opcional). Franja llena también es elegible (no bloquea).
-                        onClick={() => setHoraSel((prev) => (prev === h.hora ? "" : h.hora))}
+                        onClick={() => setHoraSel((prev) => (prev === h.time ? "" : h.time))}
                         title={t("cupoTitle", { vacios: h.vacios, cupo: h.cupo })}
                         aria-pressed={activa}
                         className={
@@ -309,7 +309,7 @@ export function ProgramarCitasModal({
                             : "bg-success text-success-foreground")
                         }
                       >
-                        {h.hora}<span className="opacity-70">·{h.vacios}</span>
+                        {h.time}<span className="opacity-70">·{h.vacios}</span>
                       </button>
                     );
                   })}
@@ -350,7 +350,7 @@ export function ProgramarCitasModal({
                     style={a.color ? { backgroundColor: `${a.color}22`, color: a.color } : { backgroundColor: "var(--muted)" }}
                     title={a.servicioNombre ?? ""}
                   >
-                    {formatFechaSolo(a.fecha)}{a.servicioNombre ? ` · ${a.servicioNombre}` : ""}
+                    {formatFechaSolo(a.date)}{a.servicioNombre ? ` · ${a.servicioNombre}` : ""}
                   </span>
                 ))}
               </div>

@@ -5,6 +5,11 @@ import { apiFetch, apiFetchEnvelope } from "./client";
 // (entidad "panel_notificacion", accion "notificada"|"aceptada"). RBAC panel.read/notificar/aceptar/config.
 // El BE nunca manda texto visible: solo `labelKey` (i18n en el FE).
 
+// OJO: PanelSeccion viaja dentro de `secciones` (bolsa OPACA) en /definition → sus claves NO se traducen y
+// quedan en español. Se mantiene en español TODO el tipo (y los payloads de sección) por coherencia con esa
+// bolsa. Sus claves en español pasan íntegras por el middleware de v2 al entrar (ninguna colisiona con un
+// nombre inglés del mapa). NOTA (hueco BE): los endpoints /sections (GET/POST/PUT) devuelven la sección a
+// NIVEL RAÍZ, donde el interceptor SÍ traduce, así que ahí llegan en inglés — inconsistencia del BE. Ver reporte.
 export type PanelSeccion = {
   id: string;
   panelId?: string;
@@ -37,18 +42,20 @@ export type CreatePanelSeccionPayload = {
   origen?: Record<string, unknown> | null;
 };
 export type UpdatePanelSeccionPayload = Partial<CreatePanelSeccionPayload> & { activo?: boolean };
-export type PanelPersonal = { id: string; nombre: string };
+export type PanelPersonal = { id: string; name: string };
 export type PanelEstatus = {
-  personalId: string;
-  statusTipoId?: string | null;
+  staffId: string;
+  statusTypeId?: string | null;
   labelKey?: string | null;
-  label?: string | null;
-  color?: string | null;
+  label?: string | null; // NO en el mapa → queda como está (`label`)
+  color?: string | null; // se dice igual (CAMPOS_IGUALES)
 };
+// `estatus` y `contadores` NO están en el mapa → esas claves del contenedor quedan en español.
+// `config` es bolsa OPACA → su contenido no se traduce (Record).
 export type PanelDefinicion = {
-  panel: { clave: string; labelKey: string; layout: string; config: Record<string, unknown> | null };
-  secciones: PanelSeccion[];
-  personal: PanelPersonal[];
+  panel: { slug: string; labelKey: string; layout: string; config: Record<string, unknown> | null };
+  sections: PanelSeccion[]; // clave `secciones`→`sections`; contenido opaco (PanelSeccion en español)
+  staff: PanelPersonal[]; // clave `personal`→`staff`
   estatus: PanelEstatus[];
   // Contadores del día YA vienen aquí (BE) → no hace falta la llamada aparte a /contadores.
   contadores?: PanelContador[];
@@ -56,31 +63,33 @@ export type PanelDefinicion = {
 
 export type PanelNotificacion = {
   id: string;
-  seccionId?: string | null; // el BE devuelve el id; la sección (clave/color/audio) se resuelve con la definición
-  sesionId?: string | null;
-  pacienteId?: string | null;
-  aceptadaPorId?: string | null;
-  estado?: string;
+  sectionId?: string | null; // el BE devuelve el id; la sección (clave/color/audio) se resuelve con la definición
+  sessionId?: string | null;
+  patientId?: string | null;
+  acceptedById?: string | null;
+  status?: string;
   createdAt?: string;
   // Campos de DISPLAY — el BE debería enriquecerlos (hoy no vienen); ver handoff panel-aviso-enriquecido.
+  // `seccion`, `pacienteNombre` y `servicioNombre` NO están en el mapa → quedan en español.
   seccion?: string | null;
-  color?: string | null;
-  audio?: string | null;
+  color?: string | null; // se dice igual (CAMPOS_IGUALES)
+  audio?: string | null; // se dice igual (CAMPOS_IGUALES)
   pacienteNombre?: string | null;
-  record?: string | null;
+  medicalRecordNumber?: string | null;
   servicioNombre?: string | null;
 };
 
-export type PanelContador = { personalId: string; total: number; porSeccion: Record<string, number> };
+// `porSeccion` NO está en el mapa → queda en español (sus claves internas son claves de sección = datos).
+export type PanelContador = { staffId: string; total: number; porSeccion: Record<string, number> };
 
 // GET /paneles/:clave/definicion — UNA llamada: panel + secciones + personal + estatus vivo.
 export function getPanelDefinicion(clave: string, centroId?: string): Promise<PanelDefinicion> {
-  return apiFetch<PanelDefinicion>(`/paneles/${clave}/definicion`, {}, centroId);
+  return apiFetch<PanelDefinicion>(`/panels/${clave}/definition`, {}, centroId);
 }
 
 // GET /paneles/:clave/notificaciones — avisos pendientes al abrir la pantalla.
 export function getPanelNotificaciones(clave: string, centroId?: string): Promise<PanelNotificacion[]> {
-  return apiFetch<unknown>(`/paneles/${clave}/notificaciones`, {}, centroId).then((r) =>
+  return apiFetch<unknown>(`/panels/${clave}/notifications`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelNotificacion[]) : (((r as { items?: PanelNotificacion[] })?.items) ?? []),
   );
 }
@@ -88,13 +97,14 @@ export function getPanelNotificaciones(clave: string, centroId?: string): Promis
 // POST /paneles/:clave/notificar — lo llama la campana. Idempotente (doble toque no duplica).
 // El aviso puede nacer de una SESIÓN (frontdesk) o de una CITA (Atención). La misma columna sirve en
 // los dos tableros, así que quien llama manda el id que corresponda a su entidad — el BE acepta ambos.
+// `seccion` NO está en el mapa → se envía tal cual (el middleware lo deja pasar al DTO `seccion`).
 export function notificarPanel(
   clave: string,
-  payload: { seccion: string; sesionId?: string; citaId?: string },
+  payload: { seccion: string; sessionId?: string; appointmentId?: string },
   centroId?: string,
 ): Promise<PanelNotificacion> {
   return apiFetch<PanelNotificacion>(
-    `/paneles/${clave}/notificar`,
+    `/panels/${clave}/notify`,
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
@@ -107,9 +117,9 @@ export async function aceptarNotificacion(
   personalId: string,
   centroId?: string,
 ): Promise<PanelNotificacion> {
-  const env = await apiFetchEnvelope<PanelNotificacion>(`/paneles/notificaciones/${id}/aceptar`, {
+  const env = await apiFetchEnvelope<PanelNotificacion>(`/panels/notifications/${id}/accept`, {
     method: "POST",
-    body: JSON.stringify({ personalId }),
+    body: JSON.stringify({ staffId: personalId }),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
   return env.data;
@@ -124,15 +134,15 @@ export function cancelarNotificacion(
   centroId?: string,
 ): Promise<PanelNotificacion> {
   return apiFetch<PanelNotificacion>(
-    `/paneles/notificaciones/${id}/cancelar`,
-    { method: "POST", body: JSON.stringify(motivo ? { motivo } : {}) },
+    `/panels/notifications/${id}/cancel`,
+    { method: "POST", body: JSON.stringify(motivo ? { reason: motivo } : {}) },
     centroId,
   );
 }
 
 // GET /paneles/:clave/contadores?fecha=YYYY-MM-DD — contadores del día por persona (NO se llevan en el FE).
 export function getPanelContadores(clave: string, fecha: string, centroId?: string): Promise<PanelContador[]> {
-  return apiFetch<unknown>(`/paneles/${clave}/contadores?fecha=${fecha}`, {}, centroId).then((r) =>
+  return apiFetch<unknown>(`/panels/${clave}/counters?date=${fecha}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelContador[]) : (((r as { items?: PanelContador[] })?.items) ?? []),
   );
 }
@@ -145,8 +155,8 @@ export function getPanelSecciones(
   opts: { includeInactive?: boolean } = {},
   centroId?: string,
 ): Promise<PanelSeccion[]> {
-  const qs = opts.includeInactive ? "?includeInactive=true" : "";
-  return apiFetch<unknown>(`/paneles/${clave}/secciones${qs}`, {}, centroId).then((r) =>
+  const qs = opts.includeInactive ? "?includeInactive=true" : ""; // `includeInactive` no está en el mapa → igual
+  return apiFetch<unknown>(`/panels/${clave}/sections${qs}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as PanelSeccion[]) : (((r as { items?: PanelSeccion[] })?.items) ?? []),
   );
 }
@@ -156,7 +166,7 @@ export function createPanelSeccion(
   centroId?: string,
 ): Promise<PanelSeccion> {
   return apiFetch<PanelSeccion>(
-    `/paneles/${clave}/secciones`,
+    `/panels/${clave}/sections`,
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
@@ -167,7 +177,7 @@ export function updatePanelSeccion(
   centroId?: string,
 ): Promise<PanelSeccion> {
   return apiFetch<PanelSeccion>(
-    `/paneles/secciones/${id}`,
+    `/panels/sections/${id}`,
     { method: "PUT", body: JSON.stringify(payload) },
     centroId,
   );
@@ -175,17 +185,19 @@ export function updatePanelSeccion(
 // DELETE /paneles/secciones/:id — 409 si tiene histórico (el mensaje trae el conteo): NO es un fallo
 // a ocultar, se muestra y se ofrece desactivar. No arrastra histórico a propósito.
 export function deletePanelSeccion(id: string, centroId?: string): Promise<void> {
-  return apiFetch<void>(`/paneles/secciones/${id}`, { method: "DELETE" }, centroId);
+  return apiFetch<void>(`/panels/sections/${id}`, { method: "DELETE" }, centroId);
 }
 // PUT /paneles/:clave/secciones/orden — reordenar en BLOQUE (atómico): manda la lista entera. Si
 // algún id no es del panel → 400 y no se aplica ninguno.
+// El cuerpo `{ ordenes: [{ id, orden }] }` se queda en español: `ordenes` NO está en el mapa y `orden`
+// no colisiona con ningún nombre inglés → ambos pasan íntegros por el middleware al DTO (dto.ordenes).
 export function reordenarSecciones(
   clave: string,
   ordenes: { id: string; orden: number }[],
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch(
-    `/paneles/${clave}/secciones/orden`,
+    `/panels/${clave}/sections/order`,
     { method: "PUT", body: JSON.stringify({ ordenes }) },
     centroId,
   );

@@ -263,9 +263,9 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         {/* Encabezado: membrete (logo pequeño + centro) + título; a la derecha fecha/sesión/áreas */}
         <div className="flex items-start justify-between border-b pb-3">
           <div className="flex items-center gap-3">
-            <LogoFormato logoUrl={data.membrete?.logoUrl} />
+            <LogoFormato logoUrl={data.letterhead?.logoUrl} />
             <div>
-              {data.membrete?.centro && <div className="text-xs font-semibold uppercase tracking-wide">{data.membrete.centro}</div>}
+              {data.letterhead?.center && <div className="text-xs font-semibold uppercase tracking-wide">{data.letterhead.center}</div>}
               <h2 className="text-lg font-bold uppercase">{t(tipo === "hilt" ? "formatoHiltTitle" : "formatoMlsTitle")}</h2>
               <p className="text-sm">{header.paciente}{header.record ? ` · ${t("recordLabel")} ${header.record}` : ""}</p>
             </div>
@@ -276,8 +276,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
           </div>
         </div>
 
-        {tipo === "hilt" && data.tipo === "hilt" && <HiltTabla secciones={data.secciones} t={t} />}
-        {tipo === "mls" && data.tipo === "mls" && <MlsTabla izquierda={data.izquierda} derecha={data.derecha} t={t} />}
+        {tipo === "hilt" && data.type === "hilt" && <HiltTabla secciones={data.sections} t={t} />}
+        {tipo === "mls" && data.type === "mls" && <MlsTabla izquierda={data.izquierda} derecha={data.derecha} t={t} />}
 
         {/* Footer clínico */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-3 text-xs">
@@ -296,7 +296,7 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         </div>
 
         {/* Pie del legacy (BE PR #201): mismo componente que el genérico. */}
-        <PieFormato pie={data.pie} />
+        <PieFormato pie={data.footer} />
       </div>
     </div>
   );
@@ -307,8 +307,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
 // BE ahora resuelve el nombre real del perfil (antes salía el uuid); `login` (authUserId) es el respaldo.
 function PieFormato({ pie }: { pie?: FormatoPie }) {
   if (!pie) return null;
-  const quien = pie.usuario || pie.login || "";
-  const txt = `${pie.prefijo ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
+  const quien = pie.user || pie.login || "";
+  const txt = `${pie.prefix ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
   if (!txt.trim()) return null;
   return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
 }
@@ -370,7 +370,7 @@ function HiltTabla({ secciones, t }: { secciones: { region: string; filas: Laser
               <tbody>
                 {s.filas.map((f) => (
                   <tr key={f.id} className="border-b border-neutral-200">
-                    <td className="px-2 py-1">{f.patologia}</td>
+                    <td className="px-2 py-1">{f.pathology}</td>
                     <td className="px-2 py-1 text-center tabular-nums">{f.stp1Mjcm ?? "—"}</td>
                     <td className="px-2 py-1 text-center tabular-nums">{f.stp1Hz ?? "—"}</td>
                     <td className="px-2 py-1 text-center tabular-nums">{f.stp2Mjcm ?? "—"}</td>
@@ -405,10 +405,10 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
         <tbody>
           {filas.map((f) => (
             <tr key={f.id} className="border-b border-neutral-200">
-              <td className="px-2 py-1">{f.patologia}</td>
-              <td className="px-2 py-1 tabular-nums">{f.frecuencia ?? "—"}</td>
-              <td className="px-2 py-1 tabular-nums">{f.tiempo ?? "—"}</td>
-              <td className="px-2 py-1 tabular-nums">{f.intensidad ?? "—"}</td>
+              <td className="px-2 py-1">{f.pathology}</td>
+              <td className="px-2 py-1 tabular-nums">{f.frequency ?? "—"}</td>
+              <td className="px-2 py-1 tabular-nums">{f.duration ?? "—"}</td>
+              <td className="px-2 py-1 tabular-nums">{f.intensity ?? "—"}</td>
             </tr>
           ))}
         </tbody>
@@ -433,10 +433,10 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
   const d = res.state.data;
-  const cols = d.columnas ?? [];
-  const filas = d.filas ?? [];
-  const campos = d.campos ?? [];
-  const secciones = d.secciones ?? [];
+  const cols = d.columns ?? [];
+  const filas = d.rows ?? [];
+  const campos = d.fields ?? [];
+  const secciones = d.sections ?? [];
   // ¿Hay un área de OBSERVACIONES (texto_libre) que pueda crecer para llenar la hoja? Si no, se usa un
   // espaciador flexible para que firmas/pie caigan al fondo y el reporte no quede amontonado arriba.
   const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre");
@@ -454,7 +454,7 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
         <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
-        <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.titulo || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
+        <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.title || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
       </div>
       {/* .formato-doc = columna flex que LLENA la hoja (min-height:100vh en impresión): la zona de
           OBSERVACIONES (o un espaciador si no hay) crece y empuja firmas/pie al fondo → nada amontonado
@@ -466,11 +466,11 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
               si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
           <div className="relative text-center">
             <div className="absolute left-0 top-0">
-              <LogoFormato logoUrl={d.membrete?.logoUrl} size={esCampos ? 42 : 32} />
+              <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
             </div>
             <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>
-            {d.membrete?.centro && <div className="text-sm font-semibold uppercase">{d.membrete.centro}</div>}
-            <h2 className="mt-1 text-lg font-bold uppercase">{d.titulo}</h2>
+            {d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
+            <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
           </div>
 
           {esCampos ? (
@@ -489,10 +489,10 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
               {/* Paciente + récord + fecha (solo rejilla; en "campos" ya van dentro de los campos). */}
               <div className="mt-4 flex items-end justify-between border-b pb-2 text-sm">
                 <div>
-                  <span className="text-base font-bold">{d.paciente?.nombre ?? "—"}</span>
-                  {d.paciente?.record && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.paciente.record}</span>}
+                  <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
+                  {d.patient?.medicalRecordNumber && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
                 </div>
-                <div className="tabular-nums">{d.fecha ?? ""}</div>
+                <div className="tabular-nums">{d.date ?? ""}</div>
               </div>
               {/* Rejilla con filas en blanco (aireadas, para llenar a mano). */}
               <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
@@ -543,7 +543,7 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
           })}
 
           {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
-          <PieFormato pie={d.pie} />
+          <PieFormato pie={d.footer} />
         </div>
       </div>
     </div>

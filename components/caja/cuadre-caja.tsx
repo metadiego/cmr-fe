@@ -215,7 +215,7 @@ function Loader(props: LoaderProps) {
     const conteoInicial: Record<string, number> = {};
     for (const d of detalles)
       for (const l of d.conteo)
-        conteoInicial[l.denominacionId] = (conteoInicial[l.denominacionId] ?? 0) + l.cantidad;
+        conteoInicial[l.denominationId] = (conteoInicial[l.denominationId] ?? 0) + l.quantity;
     return { reporte, denoms, cuadre, conteoInicial, cuadres: lista, cajeros, grupos };
   }, []);
 
@@ -275,7 +275,7 @@ function Editor({
 
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
-  const cerrado = cuadreInicial?.estado === "cerrado";
+  const cerrado = cuadreInicial?.status === "cerrado";
   // Contar habilitado: cajero concreto, no cerrado, y (hoy O permiso de retroactivo — RBAC). El
   // consolidado NO se cuenta (es la UNIÓN de todos los cajeros); tampoco fechas pasadas sin permiso.
   const contarHabilitado =
@@ -284,7 +284,7 @@ function Editor({
   // Conteo inicial: en un cajero = su conteo; en consolidado = la UNIÓN (Σ) de todos (solo lectura).
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => ({ ...conteoInicial }));
   const [inicioStr, setInicioStr] = React.useState<string>(
-    String(cuadreInicial?.pettyDeclarado ?? DEFAULT_INICIO),
+    String(cuadreInicial?.declaredPettyCash ?? DEFAULT_INICIO),
   );
   const [aplicarInicio, setAplicarInicio] = React.useState(true);
   const [procesando, setProcesando] = React.useState(false);
@@ -293,7 +293,7 @@ function Editor({
   // Conteo/inicio por cajero (de los cuadres del día) para UNIR en el consolidado.
   const conteoPorCajero = React.useMemo(() => {
     const m: Record<string, number> = {};
-    for (const c of cuadres) if (c.usuarioId) m[c.usuarioId] = c.efectivoContado;
+    for (const c of cuadres) if (c.userId) m[c.userId] = c.countedCash;
     return m;
   }, [cuadres]);
   // Consolidado = UNIÓN de todos los cajeros (Σ de sus cuadres del día): conteo, fondo, a depositar
@@ -304,19 +304,19 @@ function Editor({
     let aDepositar = 0;
     let diferencia = 0;
     for (const c of cuadres) {
-      contado += c.efectivoContado || 0;
-      inicio += c.pettyDeclarado || 0;
-      aDepositar += (c.efectivoContado || 0) - (c.pettyDeclarado || 0);
-      diferencia += c.diferencia || 0;
+      contado += c.countedCash || 0;
+      inicio += c.declaredPettyCash || 0;
+      aDepositar += (c.countedCash || 0) - (c.declaredPettyCash || 0);
+      diferencia += c.difference || 0;
     }
     return { contado, inicio, aDepositar, diferencia };
   }, [cuadres]);
 
   const contadoLocal = React.useMemo(
-    () => totalConteo(denoms.map((d) => ({ valor: d.valor, cantidad: conteo[d.id] ?? 0 }))),
+    () => totalConteo(denoms.map((d) => ({ valor: d.value, cantidad: conteo[d.id] ?? 0 }))),
     [denoms, conteo],
   );
-  const salesCash = reporte.detalle.efectivo.monto;
+  const salesCash = reporte.detalle.efectivo.amount;
   const inicio = esConsolidado
     ? cons.inicio
     : aplicarInicio
@@ -328,7 +328,7 @@ function Editor({
   const diferencia = esConsolidado
     ? cons.diferencia
     : cerrado
-      ? (cuadreInicial?.diferencia ?? 0)
+      ? (cuadreInicial?.difference ?? 0)
       : diferenciaCaja(contado, inicio, salesCash);
   const aDepositar = esConsolidado ? cons.aDepositar : contado - inicio;
   const porCajero = reporte.porCajero ?? [];
@@ -339,23 +339,23 @@ function Editor({
   const subtotalesTarjeta = React.useMemo(() => {
     const parent = grupos.find(
       (g) =>
-        (g.formasPago?.length ?? 0) > 0 &&
-        (reporte.porGrupo[g.clave] ?? null) === reporte.detalle.totalTarjetas,
+        (g.paymentMethods?.length ?? 0) > 0 &&
+        (reporte.porGrupo[g.slug] ?? null) === reporte.detalle.totalTarjetas,
     );
     if (!parent) return [];
-    const parentFormas = new Set(parent.formasPago ?? []);
+    const parentFormas = new Set(parent.paymentMethods ?? []);
     return grupos
       .filter(
         (g) =>
-          g.clave !== parent.clave &&
-          (g.formasPago?.length ?? 0) > 0 &&
-          (g.formasPago ?? []).every((f) => parentFormas.has(f)),
+          g.slug !== parent.slug &&
+          (g.paymentMethods?.length ?? 0) > 0 &&
+          (g.paymentMethods ?? []).every((f) => parentFormas.has(f)),
       )
       .map((g) => ({
-        clave: g.clave,
+        clave: g.slug,
         labelKey: g.labelKey,
-        nombre: g.nombre,
-        monto: reporte.porGrupo[g.clave] ?? 0,
+        nombre: g.name,
+        monto: reporte.porGrupo[g.slug] ?? 0,
       }))
       .filter((s) => s.monto !== 0);
   }, [grupos, reporte]);
@@ -363,14 +363,14 @@ function Editor({
   // Fallback si el roster viene vacío: "yo" + quienes facturaron ese día.
   const opcionesCajero: Array<{ usuarioId: string; nombre: string }> =
     cajeros.length > 0
-      ? cajeros.map((c) => ({ usuarioId: c.usuarioId, nombre: c.nombre }))
+      ? cajeros.map((c) => ({ usuarioId: c.userId, nombre: c.name }))
       : [
           ...(meId ? [{ usuarioId: meId, nombre: t("scope.mine") }] : []),
           ...porCajero
-            .filter((c): c is { usuarioId: string; nombre: string | null; total: number } =>
-              !!c.usuarioId && c.usuarioId !== meId,
+            .filter((c): c is { userId: string; name: string | null; total: number } =>
+              !!c.userId && c.userId !== meId,
             )
-            .map((c) => ({ usuarioId: c.usuarioId, nombre: c.nombre ?? c.usuarioId.slice(0, 8) })),
+            .map((c) => ({ usuarioId: c.userId, nombre: c.name ?? c.userId.slice(0, 8) })),
         ];
 
   async function procesarCierre() {
@@ -378,13 +378,13 @@ function Editor({
     try {
       const abierto = await abrirCuadre({
         division,
-        usuarioId,
-        fecha,
-        pettyDeclarado: inicio,
+        userId: usuarioId,
+        date: fecha,
+        declaredPettyCash: inicio,
       });
       const lineas = Object.entries(conteo)
         .filter(([, c]) => c > 0)
-        .map(([denominacionId, cantidad]) => ({ denominacionId, cantidad }));
+        .map(([denominationId, quantity]) => ({ denominationId, quantity }));
       if (lineas.length) await contarCuadre(abierto.id, lineas);
       await cerrarCuadre(abierto.id);
       toast.success(t("closeConfirmOk"));
@@ -416,20 +416,20 @@ function Editor({
       [],
       [t("payments.cards")],
       [t("payments.type"), t("payments.qty"), t("payments.amount")],
-      ...r.detalle.tarjetas.map((x) => [x.nombre, x.cantidad, x.monto]),
+      ...r.detalle.tarjetas.map((x) => [x.name, x.quantity, x.amount]),
       [t("payments.totalCards"), "", r.detalle.totalTarjetas],
       [],
       [t("payments.otherMethods")],
-      ...r.detalle.otros.map((x) => [x.nombre, x.cantidad, x.monto]),
+      ...r.detalle.otros.map((x) => [x.name, x.quantity, x.amount]),
       [],
       [t("payments.general")],
       [t("payments.opening"), inicio],
-      [t("payments.salesCash"), r.detalle.efectivo.monto],
+      [t("payments.salesCash"), r.detalle.efectivo.amount],
       [t("payments.electronic"), r.detalle.totalElectronicas],
       [t("payments.totalCMA"), r.detalle.total],
-      [t("payments.grossBilling"), r.ventas.bruto],
-      [t("payments.returns"), r.devoluciones.total],
-      [t("payments.netBilling"), r.ventas.neto],
+      [t("payments.grossBilling"), r.sales.bruto],
+      [t("payments.returns"), r.refunds.total],
+      [t("payments.netBilling"), r.sales.neto],
       [t("payments.cashInDrawer"), contado],
       [t("summary.variance"), diferencia],
     ];
@@ -530,15 +530,15 @@ function Editor({
           division={division}
           detalle={reporte.detalle}
           subtotalesTarjeta={subtotalesTarjeta}
-          ventas={reporte.ventas}
-          devoluciones={reporte.devoluciones}
+          ventas={reporte.sales}
+          devoluciones={reporte.refunds}
           inicio={inicio}
           salesCash={salesCash}
           contado={contado}
           aDepositar={aDepositar}
           diferencia={diferencia}
           cerrado={cerrado}
-          cerradoEn={cuadreInicial?.cerradoEn ?? null}
+          cerradoEn={cuadreInicial?.closedAt ?? null}
           canProcesar={contarHabilitado && canCerrar}
           procesando={procesando}
           onProcesar={procesarCierre}
@@ -566,9 +566,9 @@ function Editor({
           electronicas: reporte.detalle.totalElectronicas,
           totalTarjetas: reporte.detalle.totalTarjetas,
           totalDia: reporte.detalle.total,
-          bruto: reporte.ventas.bruto,
-          devuelto: reporte.devoluciones.total,
-          neto: reporte.ventas.neto,
+          bruto: reporte.sales.bruto,
+          devuelto: reporte.refunds.total,
+          neto: reporte.sales.neto,
           contado,
           aDepositar,
           diferencia,

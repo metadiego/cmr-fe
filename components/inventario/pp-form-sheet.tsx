@@ -35,53 +35,53 @@ import {
 const NONE = "__none__";
 
 type FormState = {
-  nombre: string;
-  fabricanteId: string;
-  marcaId: string;
-  concentracion: string;
-  unidadConcentracionId: string;
-  contenidoPorEmpaque: string;
-  unidadContenidoId: string;
-  factorABase: string;
+  name: string;
+  manufacturerId: string;
+  brandId: string;
+  concentration: string;
+  concentrationUnitId: string;
+  contentPerPackage: string;
+  contentUnitId: string;
+  baseConversionFactor: string;
   sku: string;
   barcode: string;
-  vigenciaDesde: string;
-  vigenciaHasta: string;
-  activo: boolean;
+  validFrom: string;
+  validUntil: string;
+  active: boolean;
 };
 
 const EMPTY: FormState = {
-  nombre: "",
-  fabricanteId: "",
-  marcaId: "",
-  concentracion: "",
-  unidadConcentracionId: "",
-  contenidoPorEmpaque: "",
-  unidadContenidoId: "",
-  factorABase: "",
+  name: "",
+  manufacturerId: "",
+  brandId: "",
+  concentration: "",
+  concentrationUnitId: "",
+  contentPerPackage: "",
+  contentUnitId: "",
+  baseConversionFactor: "",
   sku: "",
   barcode: "",
-  vigenciaDesde: "",
-  vigenciaHasta: "",
-  activo: true,
+  validFrom: "",
+  validUntil: "",
+  active: true,
 };
 
 function fromEntity(p: PresentacionProveedor): FormState {
   const s = (v: unknown) => (v == null ? "" : String(v));
   return {
-    nombre: p.nombre ?? "",
-    fabricanteId: p.fabricanteId ?? "",
-    marcaId: p.marcaId ?? "",
-    concentracion: s(p.concentracion),
-    unidadConcentracionId: p.unidadConcentracionId ?? "",
-    contenidoPorEmpaque: s(p.contenidoPorEmpaque),
-    unidadContenidoId: p.unidadContenidoId ?? "",
-    factorABase: s(p.factorABase),
+    name: p.name ?? "",
+    manufacturerId: p.manufacturerId ?? "",
+    brandId: p.brandId ?? "",
+    concentration: s(p.concentration),
+    concentrationUnitId: p.concentrationUnitId ?? "",
+    contentPerPackage: s(p.contentPerPackage),
+    contentUnitId: p.contentUnitId ?? "",
+    baseConversionFactor: s(p.baseConversionFactor),
     sku: p.sku ?? "",
     barcode: p.barcode ?? "",
-    vigenciaDesde: p.vigenciaDesde?.slice(0, 10) ?? "",
-    vigenciaHasta: p.vigenciaHasta?.slice(0, 10) ?? "",
-    activo: p.activo ?? true,
+    validFrom: p.validFrom?.slice(0, 10) ?? "",
+    validUntil: p.validUntil?.slice(0, 10) ?? "",
+    active: p.active ?? true,
   };
 }
 
@@ -128,10 +128,10 @@ export function PPFormSheet({
     setForm((prev) => ({ ...prev, [k]: v }));
   }
 
-  const canSubmit = form.nombre.trim().length > 0 && !submitting;
+  const canSubmit = form.name.trim().length > 0 && !submitting;
 
   async function onSubmit() {
-    if (!form.nombre.trim()) return;
+    if (!form.name.trim()) return;
     setSubmitting(true);
     try {
       const num = (s: string) => {
@@ -141,27 +141,27 @@ export function PPFormSheet({
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const id = (s: string) => (s && s !== NONE ? s : undefined);
       const base = {
-        nombre: form.nombre.trim(),
-        fabricanteId: id(form.fabricanteId),
-        marcaId: id(form.marcaId),
-        concentracion: num(form.concentracion),
-        unidadConcentracionId: id(form.unidadConcentracionId),
-        contenidoPorEmpaque: num(form.contenidoPorEmpaque),
-        unidadContenidoId: id(form.unidadContenidoId),
-        factorABase: num(form.factorABase),
+        name: form.name.trim(),
+        manufacturerId: id(form.manufacturerId),
+        brandId: id(form.brandId),
+        concentration: num(form.concentration),
+        concentrationUnitId: id(form.concentrationUnitId),
+        contentPerPackage: num(form.contentPerPackage),
+        contentUnitId: id(form.contentUnitId),
+        baseConversionFactor: num(form.baseConversionFactor),
         sku: txt(form.sku),
         barcode: txt(form.barcode),
-        vigenciaDesde: txt(form.vigenciaDesde),
-        vigenciaHasta: txt(form.vigenciaHasta),
+        validFrom: txt(form.validFrom),
+        validUntil: txt(form.validUntil),
       };
       if (isEdit && presentacion) {
         await updatePresentacionProveedor(presentacion.id, {
           ...base,
-          activo: form.activo,
+          active: form.active,
         });
       } else {
         await createPresentacionProveedor({
-          productoId,
+          productId: productoId,
           ...base,
         } as CreatePresentacionProveedorPayload);
       }
@@ -185,7 +185,7 @@ export function PPFormSheet({
 
         <div className="grid gap-4 px-4">
           <Field label={t("field.nombre")}>
-            <Input value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
+            <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
           </Field>
 
           {/* factorABase — la pieza clave: se resalta. */}
@@ -193,8 +193,8 @@ export function PPFormSheet({
             <Field label={t("field.factorABase")} hint={t("field.factorABaseHint")}>
               <Input
                 inputMode="decimal"
-                value={form.factorABase}
-                onChange={(e) => set("factorABase", e.target.value)}
+                value={form.baseConversionFactor}
+                onChange={(e) => set("baseConversionFactor", e.target.value)}
                 placeholder="60"
               />
             </Field>
@@ -203,17 +203,17 @@ export function PPFormSheet({
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("field.fabricante")}>
               <CatalogSelect
-                value={form.fabricanteId}
-                onChange={(v) => set("fabricanteId", v)}
-                options={fabricantes.map((c) => ({ id: c.id, nombre: c.nombre }))}
+                value={form.manufacturerId}
+                onChange={(v) => set("manufacturerId", v)}
+                options={fabricantes.map((c) => ({ id: c.id, nombre: c.name }))}
                 placeholder={t("field.none")}
               />
             </Field>
             <Field label={t("field.marca")}>
               <CatalogSelect
-                value={form.marcaId}
-                onChange={(v) => set("marcaId", v)}
-                options={marcas.map((c) => ({ id: c.id, nombre: c.nombre }))}
+                value={form.brandId}
+                onChange={(v) => set("brandId", v)}
+                options={marcas.map((c) => ({ id: c.id, nombre: c.name }))}
                 placeholder={t("field.none")}
               />
             </Field>
@@ -223,15 +223,15 @@ export function PPFormSheet({
             <Field label={t("field.concentracion")}>
               <Input
                 inputMode="decimal"
-                value={form.concentracion}
-                onChange={(e) => set("concentracion", e.target.value)}
+                value={form.concentration}
+                onChange={(e) => set("concentration", e.target.value)}
               />
             </Field>
             <Field label={t("field.unidadConcentracion")}>
               <CatalogSelect
-                value={form.unidadConcentracionId}
-                onChange={(v) => set("unidadConcentracionId", v)}
-                options={unidades.map((u) => ({ id: u.id, nombre: u.nombre }))}
+                value={form.concentrationUnitId}
+                onChange={(v) => set("concentrationUnitId", v)}
+                options={unidades.map((u) => ({ id: u.id, nombre: u.name }))}
                 placeholder={t("field.none")}
               />
             </Field>
@@ -241,15 +241,15 @@ export function PPFormSheet({
             <Field label={t("field.contenido")}>
               <Input
                 inputMode="decimal"
-                value={form.contenidoPorEmpaque}
-                onChange={(e) => set("contenidoPorEmpaque", e.target.value)}
+                value={form.contentPerPackage}
+                onChange={(e) => set("contentPerPackage", e.target.value)}
               />
             </Field>
             <Field label={t("field.unidadContenido")}>
               <CatalogSelect
-                value={form.unidadContenidoId}
-                onChange={(v) => set("unidadContenidoId", v)}
-                options={unidades.map((u) => ({ id: u.id, nombre: u.nombre }))}
+                value={form.contentUnitId}
+                onChange={(v) => set("contentUnitId", v)}
+                options={unidades.map((u) => ({ id: u.id, nombre: u.name }))}
                 placeholder={t("field.none")}
               />
             </Field>
@@ -268,15 +268,15 @@ export function PPFormSheet({
             <Field label={t("field.vigenciaDesde")}>
               <Input
                 type="date"
-                value={form.vigenciaDesde}
-                onChange={(e) => set("vigenciaDesde", e.target.value)}
+                value={form.validFrom}
+                onChange={(e) => set("validFrom", e.target.value)}
               />
             </Field>
             <Field label={t("field.vigenciaHasta")}>
               <Input
                 type="date"
-                value={form.vigenciaHasta}
-                onChange={(e) => set("vigenciaHasta", e.target.value)}
+                value={form.validUntil}
+                onChange={(e) => set("validUntil", e.target.value)}
               />
             </Field>
           </div>
@@ -284,7 +284,7 @@ export function PPFormSheet({
           {isEdit && (
             <div className="flex items-center justify-between rounded-lg border px-3 py-2">
               <span className="text-sm">{t("field.activo")}</span>
-              <Switch checked={form.activo} onCheckedChange={(v) => set("activo", v)} />
+              <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} />
             </div>
           )}
         </div>

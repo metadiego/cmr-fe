@@ -24,60 +24,64 @@ export type Plantilla = components["schemas"]["PlantillaNotificacionEntity"];
 export type EnviarNotificacionPayload = components["schemas"]["EnviarNotificacionDto"];
 export type CreatePlantillaPayload = components["schemas"]["CreatePlantillaDto"];
 
-// GET /alertas responde { data:[...], noLeidas } (doble-anidado; apiFetch quita el
-// envelope externo → aquí llega ya como { data, noLeidas }).
+// GET /alerts responde { data:[...], unread } (doble-anidado; apiFetch quita el
+// envelope externo → aquí llega ya como { data, unread }).
+// OJO (hueco BE): el interceptor de v2 trata `data` como bolsa OPACA → las alertas de DENTRO NO se
+// traducen y llegan con claves en español (más un `miEstado` que no está en el mapa), pese a que el
+// tipo generado `AlertaEntity` está en inglés. Ver reporte (bloqueante para la campana en v2).
 export interface AlertasResponse {
   data: Alerta[];
-  noLeidas: number;
+  unread: number;
 }
 
 export function listAlertas(): Promise<AlertasResponse> {
-  return apiFetch<AlertasResponse>(`/comunicaciones/alertas`);
+  return apiFetch<AlertasResponse>(`/communications/alerts`);
 }
 export function marcarLeida(id: string): Promise<unknown> {
-  return apiFetch(`/comunicaciones/alertas/${id}/leer`, { method: "POST" });
+  return apiFetch(`/communications/alerts/${id}/read`, { method: "POST" });
 }
 export function acusarAlerta(id: string): Promise<unknown> {
-  return apiFetch(`/comunicaciones/alertas/${id}/acusar`, { method: "POST" });
+  return apiFetch(`/communications/alerts/${id}/acknowledge`, { method: "POST" });
 }
 export function resolverAlerta(id: string): Promise<unknown> {
-  return apiFetch(`/comunicaciones/alertas/${id}/resolver`, { method: "POST" });
+  return apiFetch(`/communications/alerts/${id}/resolve`, { method: "POST" });
 }
 export function descartarAlerta(id: string): Promise<unknown> {
-  return apiFetch(`/comunicaciones/alertas/${id}/descartar`, { method: "POST" });
+  return apiFetch(`/communications/alerts/${id}/dismiss`, { method: "POST" });
 }
 export function listTiposAlerta(): Promise<TipoAlerta[]> {
-  return apiFetch<TipoAlerta[]>(`/comunicaciones/tipos-alerta`);
+  return apiFetch<TipoAlerta[]>(`/communications/alert-types`);
 }
 
 // Ruta en la app para una alerta accionable (deep-link por su origen/metadata).
 export function alertaHref(a: Alerta): string | null {
   const tid =
+    // `metadata` es una bolsa OPACA → sus claves NO se traducen: se lee `transferenciaId` en español.
     (a.metadata?.transferenciaId as string | undefined) ??
-    (a.origenEntidad === "transferencia_inventario" ? a.origenId ?? undefined : undefined);
+    (a.sourceEntity === "transferencia_inventario" ? a.sourceId ?? undefined : undefined);
   if (tid) return `/inventario/transferencias/${tid}`;
   return null;
 }
 
 // Notificaciones (canales salientes).
 export function listNotificaciones(citaId?: string): Promise<Notificacion[]> {
-  const qs = citaId ? `?citaId=${encodeURIComponent(citaId)}` : "";
-  return apiFetch<Notificacion[]>(`/comunicaciones/notificaciones${qs}`);
+  const qs = citaId ? `?appointmentId=${encodeURIComponent(citaId)}` : "";
+  return apiFetch<Notificacion[]>(`/communications/notifications${qs}`);
 }
 export function enviarNotificacion(
   payload: EnviarNotificacionPayload,
 ): Promise<Notificacion> {
-  return apiFetch<Notificacion>(`/comunicaciones/notificaciones/enviar`, {
+  return apiFetch<Notificacion>(`/communications/notifications/send`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 export function listPlantillas(): Promise<Plantilla[]> {
-  return apiFetch<Plantilla[]>(`/comunicaciones/notificaciones/plantillas`);
+  return apiFetch<Plantilla[]>(`/communications/notifications/templates`);
 }
 // Alta de plantilla — endpoint del dominio único (RBAC: notificaciones.config; el BE es la autoridad).
 export function crearPlantilla(payload: CreatePlantillaPayload): Promise<Plantilla> {
-  return apiFetch<Plantilla>(`/comunicaciones/notificaciones/plantillas`, {
+  return apiFetch<Plantilla>(`/communications/notifications/templates`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -100,7 +104,9 @@ export async function subscribeAlertas(opts: {
   if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
   if (typeof opts.centroId === "string" && opts.centroId) headers["X-Tenant-ID"] = opts.centroId;
 
-  const res = await fetch(`${env.API_BASE_URL}/api/v1/comunicaciones/alertas/stream`, {
+  // v2 + dominio en inglés. El subpath `alertas/stream` NO tiene alias en inglés en el BE (@Sse Spanish);
+  // el frame SSE viaja dentro de `data` (bolsa opaca) → `entidad` sigue en español y se filtra abajo tal cual.
+  const res = await fetch(`${env.API_BASE_URL}/api/v2/communications/alertas/stream`, {
     headers,
     signal: opts.signal,
   });

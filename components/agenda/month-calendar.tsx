@@ -72,8 +72,8 @@ export function MonthCalendar({
                   {date.getDate()}
                 </span>
                 {fest && (
-                  <span className="truncate text-[10px] text-destructive" title={fest.nombre}>
-                    {fest.nombre}
+                  <span className="truncate text-[10px] text-destructive" title={fest.name}>
+                    {fest.name}
                   </span>
                 )}
               </div>

@@ -75,7 +75,7 @@ export function FestivosConfig({ year }: { year: number }) {
   );
   const festivos = (festivosRes.state.kind === "ok" ? festivosRes.state.data : [])
     .slice()
-    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   // New-holiday form.
   const [fecha, setFecha] = React.useState("");
@@ -89,7 +89,7 @@ export function FestivosConfig({ year }: { year: number }) {
     setBusy(true);
     try {
       await createFestivo(
-        { fecha, nombre: nombre.trim(), recurrenteAnual: recurrente, bloqueaAgenda: bloquea, scope },
+        { date: fecha, name: nombre.trim(), recursAnnually: recurrente, blocksSchedule: bloquea, scope },
         centroId,
       );
       toast.success(t("festivos.added"));
@@ -107,7 +107,7 @@ export function FestivosConfig({ year }: { year: number }) {
 
   async function toggleBloquea(f: Festivo) {
     try {
-      await updateFestivo(f.id, { bloqueaAgenda: !f.bloqueaAgenda, scope }, centroId);
+      await updateFestivo(f.id, { blocksSchedule: !f.blocksSchedule, scope }, centroId);
       festivosRes.reload();
     } catch (err) {
       toastError(err, t);
@@ -131,7 +131,7 @@ export function FestivosConfig({ year }: { year: number }) {
           <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
             {centros.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
             {canGlobal && <SelectItem value={GLOBAL}>{t("cupos.allCenters")}</SelectItem>}
           </SelectContent>
@@ -162,18 +162,18 @@ export function FestivosConfig({ year }: { year: number }) {
             )}
             {festivos.map((f) => (
               <tr key={f.id} className="border-t">
-                <td className="px-3 py-1.5 font-mono">{f.fecha}</td>
+                <td className="px-3 py-1.5 font-mono">{f.date}</td>
                 <td className="px-3 py-1.5">
-                  {f.nombre}
-                  {f.recurrenteAnual && (
+                  {f.name}
+                  {f.recursAnnually && (
                     <Badge variant="secondary" className="ml-2">{t("festivos.recurring")}</Badge>
                   )}
                 </td>
                 <td className="px-3 py-1.5">
                   <label className="inline-flex cursor-pointer items-center gap-2">
-                    <Checkbox checked={f.bloqueaAgenda} onCheckedChange={() => toggleBloquea(f)} />
-                    <span className={f.bloqueaAgenda ? "text-destructive" : "text-muted-foreground"}>
-                      {f.bloqueaAgenda ? t("festivos.closes") : t("festivos.informative")}
+                    <Checkbox checked={f.blocksSchedule} onCheckedChange={() => toggleBloquea(f)} />
+                    <span className={f.blocksSchedule ? "text-destructive" : "text-muted-foreground"}>
+                      {f.blocksSchedule ? t("festivos.closes") : t("festivos.informative")}
                     </span>
                   </label>
                 </td>

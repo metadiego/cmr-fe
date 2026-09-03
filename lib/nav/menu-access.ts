@@ -9,16 +9,16 @@
 
 import type { MenuItem } from "@/lib/api/menu";
 
-type Gateable = Pick<MenuItem, "permisoClave" | "visible">;
+type Gateable = Pick<MenuItem, "permissionSlug" | "visible">;
 
 export function canSeeMenuItem(
   item: Gateable,
   permissions: readonly string[],
 ): boolean {
   if (item.visible === false) return false;
-  if (!item.permisoClave) return true;
+  if (!item.permissionSlug) return true;
   if (permissions.includes("*")) return true;
-  return permissions.includes(item.permisoClave);
+  return permissions.includes(item.permissionSlug);
 }
 
 export function filterMenuByPermissions(

@@ -52,7 +52,7 @@ export default function DisponibilidadLegadoPage() {
     try {
       const d = await diagnosticoDisponibilidadLegado(r, pid, centro);
       setDiag(d);
-      setPacienteId(pid ?? d.paciente?.id ?? d.pacienteId ?? null);
+      setPacienteId(pid ?? d.patient?.id ?? d.patientId ?? null);
       setCandidatos(null);
     } catch (err) {
       if (err instanceof ApiError && err.code === "RECORD_AMBIGUO") {
@@ -139,13 +139,13 @@ export default function DisponibilidadLegadoPage() {
                 >
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium">
-                      {[c.nombres, c.apellidos].filter(Boolean).join(" ") || t("sinNombre")}
+                      {[c.firstName, c.lastName].filter(Boolean).join(" ") || t("sinNombre")}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
                       {/* Desempate: id abreviado + datos que distingan (mismos nombres en 53 casos). */}
-                      #{c.record} · ID {String(c.id).slice(0, 8)}
-                      {c.telefono ? ` · ${c.telefono}` : ""}
-                      {c.fechaNacimiento ? ` · ${String(c.fechaNacimiento).slice(0, 10)}` : ""}
+                      #{c.medicalRecordNumber} · ID {String(c.id).slice(0, 8)}
+                      {c.phone ? ` · ${c.phone}` : ""}
+                      {c.dateOfBirth ? ` · ${String(c.dateOfBirth).slice(0, 10)}` : ""}
                     </span>
                   </span>
                   <span className="shrink-0 text-xs font-medium text-primary">{t("elegir")}</span>
@@ -163,9 +163,9 @@ export default function DisponibilidadLegadoPage() {
             <div>
               <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("cargarPara")}</div>
               <div className="text-lg font-semibold">
-                {[diag.paciente?.nombres, diag.paciente?.apellidos].filter(Boolean).join(" ") || t("sinNombre")}
+                {[diag.patient?.firstName, diag.patient?.lastName].filter(Boolean).join(" ") || t("sinNombre")}
               </div>
-              <div className="text-xs text-muted-foreground">#{diag.record}{pacienteId ? ` · ID ${pacienteId.slice(0, 8)}` : ""}</div>
+              <div className="text-xs text-muted-foreground">#{diag.medicalRecordNumber}{pacienteId ? ` · ID ${pacienteId.slice(0, 8)}` : ""}</div>
             </div>
             <span className="rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
               {t("nItems", { n: items.length })}
@@ -198,8 +198,8 @@ export default function DisponibilidadLegadoPage() {
 function ItemResumen({ it }: { it: unknown }) {
   if (it && typeof it === "object") {
     const o = it as Record<string, unknown>;
-    const nombre = (o.servicio ?? o.nombre ?? o.producto ?? o.terapia) as string | undefined;
-    const cant = (o.sesiones ?? o.cantidad ?? o.disponibles) as number | undefined;
+    const nombre = (o.service ?? o.name ?? o.product ?? o.terapia) as string | undefined;
+    const cant = (o.sessions ?? o.quantity ?? o.disponibles) as number | undefined;
     if (nombre != null || cant != null) {
       return (
         <span className="flex items-center justify-between gap-3">

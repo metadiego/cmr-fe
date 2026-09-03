@@ -72,19 +72,19 @@ export function TransferenciaRecibir({ id }: { id: string }) {
 
   const prodName = React.useMemo(() => {
     const m = new Map<string, string>();
-    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.nombre));
+    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.name));
     return m;
   }, [prodRes.state]);
   const centroNames = React.useMemo(() => {
     const m = new Map<string, string>();
-    if (centrosRes.state.kind === "ok") centrosRes.state.data.forEach((c) => m.set(c.id, c.nombre));
-    if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.nombre));
+    if (centrosRes.state.kind === "ok") centrosRes.state.data.forEach((c) => m.set(c.id, c.name));
+    if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.name));
     return m;
   }, [centrosRes.state, destinosRes.state]);
   const centroName = (cid: string) => centroNames.get(cid) ?? cid;
 
   const detalle = state.kind === "ok" ? state.data : null;
-  const transfer = detalle?.transferencia ?? null;
+  const transfer = detalle?.transfer ?? null;
   const items = detalle?.items ?? [];
 
   // Recibido por línea (default = enviado). Se inicializa cuando llega el detalle.
@@ -96,7 +96,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     setPrevKey(key);
     const init: Record<string, string> = {};
     items.forEach((it) => {
-      init[it.id] = String(num(it.cantidad));
+      init[it.id] = String(num(it.quantity));
     });
     setRecibido(init);
   }
@@ -107,10 +107,10 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   const [motivo, setMotivo] = React.useState("");
 
   const activeCentro = getActiveCentro();
-  const esDestino = !!transfer && activeCentro === transfer.clinicDestinoId;
+  const esDestino = !!transfer && activeCentro === transfer.destinationClinicId;
   const puedeRecibir =
     !!transfer &&
-    transfer.estado === "pendiente" &&
+    transfer.status === "pendiente" &&
     (esDestino || (me.kind === "ok" && isAdmin(me.me)));
 
   // Validación por línea: 0 ≤ recibida ≤ enviada.
@@ -118,7 +118,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     const r = Number(recibido[it.id]);
     if (recibido[it.id] === "" || Number.isNaN(r)) return t("err.required");
     if (r < 0) return t("err.negativo");
-    if (r > num(it.cantidad)) return t("err.excede");
+    if (r > num(it.quantity)) return t("err.excede");
     return null;
   };
   const hayErrores = items.some((it) => lineError(it) !== null);
@@ -128,7 +128,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     setBusy(true);
     try {
       await recibirTransferencia(id, {
-        items: items.map((it) => ({ itemId: it.id, cantidadRecibida: Number(recibido[it.id]) })),
+        items: items.map((it) => ({ itemId: it.id, receivedQuantity: Number(recibido[it.id]) })),
         politicaRemanente: politica,
       });
       toast.success(t("recibidaOk"));
@@ -144,7 +144,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     if (!transfer || !motivo.trim() || busy) return;
     setBusy(true);
     try {
-      await rechazarTransferencia(id, { motivo: motivo.trim() });
+      await rechazarTransferencia(id, { reason: motivo.trim() });
       toast.success(t("rechazadaOk"));
       setRechazando(false);
       router.push("/inventory/transfers");
@@ -175,13 +175,13 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       {/* Cabecera */}
       <div className="mb-6 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <PageHeader
-          title={`${centroName(transfer.clinicOrigenId)} → ${centroName(transfer.clinicDestinoId)}`}
-          description={transfer.motivo}
-          actions={<Badge variant={ESTADO_VARIANT[transfer.estado] ?? "outline"}>{t(`estado.${transfer.estado}`)}</Badge>}
+          title={`${centroName(transfer.sourceClinicId)} → ${centroName(transfer.destinationClinicId)}`}
+          description={transfer.reason}
+          actions={<Badge variant={ESTADO_VARIANT[transfer.status] ?? "outline"}>{t(`estado.${transfer.status}`)}</Badge>}
         />
-        {!esDestino && transfer.estado === "pendiente" && (
+        {!esDestino && transfer.status === "pendiente" && (
           <p className="mt-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
-            {t("soloDestino", { centro: centroName(transfer.clinicDestinoId) })}
+            {t("soloDestino", { centro: centroName(transfer.destinationClinicId) })}
           </p>
         )}
       </div>
@@ -199,13 +199,13 @@ export function TransferenciaRecibir({ id }: { id: string }) {
           </thead>
           <tbody className="divide-y">
             {items.map((it) => {
-              const enviado = num(it.cantidad);
-              const rec = puedeRecibir ? Number(recibido[it.id] || 0) : num(it.cantidadRecibida);
+              const enviado = num(it.quantity);
+              const rec = puedeRecibir ? Number(recibido[it.id] || 0) : num(it.receivedQuantity);
               const remanente = Math.max(0, enviado - (Number.isNaN(rec) ? 0 : rec));
               const err = puedeRecibir ? lineError(it) : null;
               return (
                 <tr key={it.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-medium">{it.productoNombre ?? prodName.get(it.productoId) ?? it.productoId}</td>
+                  <td className="px-3 py-2 font-medium">{it.productoNombre ?? prodName.get(it.productId) ?? it.productId}</td>
                   <td className="px-3 py-2 tabular-nums">{enviado}</td>
                   {puedeRecibir && (
                     <td className="px-3 py-2">
@@ -248,7 +248,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
           </div>
         </div>
       ) : (
-        transfer.estado === "pendiente" && (
+        transfer.status === "pendiente" && (
           <p className="mt-5 text-sm text-muted-foreground">{t("readonlyEnEspera")}</p>
         )
       )}

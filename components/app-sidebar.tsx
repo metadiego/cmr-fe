@@ -102,9 +102,9 @@ export function AppSidebar() {
   // Grupos del catálogo (raíces grupo/contenedor con hijos visibles), ya filtrado por permisos.
   const domainGroups = buildNavGroups(menu, can);
 
-  // Etiqueta visible: labelCustom (nombre libre) pisa la clave i18n; si no, traducir.
-  const labelOf = (n: { labelCustom?: string | null; labelKey: string }): string => {
-    const custom = n.labelCustom?.trim();
+  // Etiqueta visible: customLabel (nombre libre) pisa la clave i18n; si no, traducir.
+  const labelOf = (n: { customLabel?: string | null; labelKey: string }): string => {
+    const custom = n.customLabel?.trim();
     if (custom) return custom;
     return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.labelKey;
   };
@@ -119,14 +119,14 @@ export function AppSidebar() {
   // Un ítem con hijos es plegable (Collapsible); una hoja es un enlace.
   const renderSub = (nodes: NavNode[]): React.ReactNode =>
     nodes.map((n) =>
-      n.tipo === "separador" ? (
-        <SidebarSeparator key={n.clave} />
+      n.type === "separador" ? (
+        <SidebarSeparator key={n.slug} />
       ) : n.children.length > 0 ? (
         <Collapsible
-          key={n.clave}
+          key={n.slug}
           asChild
-          open={effOpen(n.clave)}
-          onOpenChange={(o) => navOpen.setClaveOpen(n.clave, o)}
+          open={effOpen(n.slug)}
+          onOpenChange={(o) => navOpen.setClaveOpen(n.slug, o)}
           className="group/subitem"
         >
           <SidebarMenuSubItem>
@@ -145,12 +145,12 @@ export function AppSidebar() {
           </SidebarMenuSubItem>
         </Collapsible>
       ) : (
-        <SidebarMenuSubItem key={n.clave}>
+        <SidebarMenuSubItem key={n.slug}>
           <SidebarMenuSubButton
             asChild
-            isActive={isActive(pathname, routeForClave(n.clave, n.path))}
+            isActive={isActive(pathname, routeForClave(n.slug, n.path))}
           >
-            <Link href={routeForClave(n.clave, n.path)}>
+            <Link href={routeForClave(n.slug, n.path)}>
               <span>{labelOf(n)}</span>
             </Link>
           </SidebarMenuSubButton>
@@ -162,14 +162,14 @@ export function AppSidebar() {
   // hijos es plegable (segundo nivel); una hoja es un enlace.
   const renderTop = (nodes: NavNode[]): React.ReactNode =>
     nodes.map((n) =>
-      n.tipo === "separador" ? (
-        <SidebarSeparator key={n.clave} />
+      n.type === "separador" ? (
+        <SidebarSeparator key={n.slug} />
       ) : n.children.length > 0 ? (
         <Collapsible
-          key={n.clave}
+          key={n.slug}
           asChild
-          open={effOpen(n.clave)}
-          onOpenChange={(o) => navOpen.setClaveOpen(n.clave, o)}
+          open={effOpen(n.slug)}
+          onOpenChange={(o) => navOpen.setClaveOpen(n.slug, o)}
           className="group/item"
         >
           <SidebarMenuItem>
@@ -188,13 +188,13 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </Collapsible>
       ) : (
-        <SidebarMenuItem key={n.clave}>
+        <SidebarMenuItem key={n.slug}>
           <SidebarMenuButton
             asChild
-            isActive={isActive(pathname, routeForClave(n.clave, n.path))}
+            isActive={isActive(pathname, routeForClave(n.slug, n.path))}
             tooltip={labelOf(n)}
           >
-            <Link href={routeForClave(n.clave, n.path)}>
+            <Link href={routeForClave(n.slug, n.path)}>
               <span>{labelOf(n)}</span>
             </Link>
           </SidebarMenuButton>
@@ -210,9 +210,9 @@ export function AppSidebar() {
     children: React.ReactNode,
   ): React.ReactNode => (
     <Collapsible
-      key={g.clave}
-      open={effOpen(g.clave)}
-      onOpenChange={(o) => navOpen.setClaveOpen(g.clave, o)}
+      key={g.slug}
+      open={effOpen(g.slug)}
+      onOpenChange={(o) => navOpen.setClaveOpen(g.slug, o)}
       className="group/section"
     >
       <SidebarGroup>
@@ -249,7 +249,7 @@ export function AppSidebar() {
   }
 
   const fullName = session
-    ? [session.nombre, session.apellido].filter(Boolean).join(" ").trim()
+    ? [session.name, session.lastName].filter(Boolean).join(" ").trim()
     : "";
   const displayName = session
     ? fullName || (session.email ? session.email.split("@")[0] : "")

@@ -98,14 +98,14 @@ export default function StockPage() {
   const resumenRes = useResource<Paginated<StockResumenFila>>(
     () =>
       vista === "centro" && tenantCentro
-        ? getStockResumen({ q: qApplied, almacenId: almacenValido || undefined, soloNegativos, soloPorVencer, asOf: asOf || undefined, incluirNoInventariables: incluirNI, page, limit: 50 }, tenantCentro)
+        ? getStockResumen({ q: qApplied, warehouseId: almacenValido || undefined, onlyNegative: soloNegativos, onlyExpiring: soloPorVencer, asOf: asOf || undefined, includeNonInventoryItems: incluirNI, page, limit: 50 }, tenantCentro)
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 50 } }),
     [vista, tenantCentro, qApplied, almacenValido, soloNegativos, soloPorVencer, asOf, incluirNI, page],
   );
   const consolRes = useResource<Paginated<StockConsolidadoFila>>(
     () =>
       vista === "consolidado"
-        ? getStockConsolidado({ q: qApplied, soloNegativos, asOf: asOf || undefined, incluirNoInventariables: incluirNI, page, limit: 50 }, centroSel === "" ? null : centroSel)
+        ? getStockConsolidado({ q: qApplied, onlyNegative: soloNegativos, asOf: asOf || undefined, includeNonInventoryItems: incluirNI, page, limit: 50 }, centroSel === "" ? null : centroSel)
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 50 } }),
     [vista, centroSel, qApplied, soloNegativos, asOf, incluirNI, page],
   );
@@ -120,8 +120,8 @@ export default function StockPage() {
   const colCentros = React.useMemo(() => {
     if (vista !== "consolidado" || !consol) return [];
     const keys = new Set<string>();
-    consol.items.forEach((r) => Object.keys(r.porCentro ?? {}).forEach((k) => keys.add(k)));
-    const orden = gate.centros.filter((c) => keys.has(c.id)).map((c) => ({ id: c.id, nombre: c.nombre }));
+    consol.items.forEach((r) => Object.keys(r.byCenter ?? {}).forEach((k) => keys.add(k)));
+    const orden = gate.centros.filter((c) => keys.has(c.id)).map((c) => ({ id: c.id, nombre: c.name }));
     keys.forEach((k) => { if (!orden.some((o) => o.id === k)) orden.push({ id: k, nombre: k.slice(0, 6) }); });
     return orden;
   }, [vista, consol, gate.centros]);
@@ -154,7 +154,7 @@ export default function StockPage() {
                 <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {vista === "consolidado" && <SelectItem value={TODOS}>{t("todosCentros")}</SelectItem>}
-                  {gate.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                  {gate.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             )}
@@ -180,7 +180,7 @@ export default function StockPage() {
             <SelectTrigger className="h-9 w-48"><SelectValue placeholder={t("almacen")} /></SelectTrigger>
             <SelectContent>
               <SelectItem value={TODOS}>{t("almacenTodos")}</SelectItem>
-              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}
+              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
             </SelectContent>
           </Select>
         )}
@@ -234,21 +234,21 @@ export default function StockPage() {
                   </TableHeader>
                   <TableBody>
                     {resumen.items.map((r, i) => (
-                      <TableRow key={`${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                      <TableRow key={`${r.productId}-${r.warehouseId ?? ""}-${r.lotId ?? ""}-${i}`} className="cursor-pointer" onClick={() => setDetalleDe({ productoId: r.productId, nombre: r.name ?? r.sku ?? "—" })}>
                         <TableCell className="whitespace-normal">
                           <span className="flex items-center gap-1.5">
-                            <EstadoDot estado={r.estado} />
-                            <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                            {r.nombreTecnico && <span className="text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                            <EstadoDot estado={r.status} />
+                            <span className="font-medium">{r.name ?? r.sku ?? "—"}</span>
+                            {r.technicalName && <span className="text-xs text-muted-foreground">· {r.technicalName}</span>}
                           </span>
-                          <span className="block text-xs text-muted-foreground">{r.sku}{r.modoDescarga ? ` · ${t(`modo.${r.modoDescarga}` as const)}` : ""}</span>
+                          <span className="block text-xs text-muted-foreground">{r.sku}{r.deductionMode ? ` · ${t(`modo.${r.deductionMode}` as const)}` : ""}</span>
                           <Equivalencias items={r.equivalencias} t={t} />
                         </TableCell>
                         <TableCell className="text-muted-foreground">{r.almacenNombre ?? "—"}</TableCell>
                         <TableCell>
-                          <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
+                          <Lote numero={r.lotNumber} fecha={r.expirationDate} vencido={r.expired} porVencer={r.expiringSoon} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
                         </TableCell>
-                        <TableCell className="text-right"><Cantidad valor={r.cantidad} negativo={r.negativo} unidad={r.unidadClave} /></TableCell>
+                        <TableCell className="text-right"><Cantidad valor={r.quantity} negativo={r.negative} unidad={r.unidadClave} /></TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="outline"
@@ -256,11 +256,11 @@ export default function StockPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setAjusteDe({
-                                productoId: r.productoId,
-                                nombre: r.nombre ?? r.sku ?? "—",
-                                almacenId: r.almacenId ?? null,
+                                productoId: r.productId,
+                                nombre: r.name ?? r.sku ?? "—",
+                                almacenId: r.warehouseId ?? null,
                                 almacenNombre: r.almacenNombre ?? null,
-                                stockActual: Number(r.cantidad) || 0,
+                                stockActual: Number(r.quantity) || 0,
                               });
                             }}
                           >
@@ -274,17 +274,17 @@ export default function StockPage() {
                 {/* Móvil: cada fila es una TARJETA (nombre + cuánto hay grande a la derecha; almacén/lote debajo). */}
                 <div className="space-y-2 md:hidden">
                   {resumen.items.map((r, i) => (
-                    <div key={`m-${r.productoId}-${r.almacenId ?? ""}-${r.loteId ?? ""}-${i}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                    <div key={`m-${r.productId}-${r.warehouseId ?? ""}-${r.lotId ?? ""}-${i}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productId, nombre: r.name ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="flex items-center gap-1.5"><EstadoDot estado={r.estado} /><span className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</span></div>
-                          <div className="truncate text-xs text-muted-foreground">{r.sku}{r.nombreTecnico ? ` · ${r.nombreTecnico}` : ""}</div>
+                          <div className="flex items-center gap-1.5"><EstadoDot estado={r.status} /><span className="truncate font-medium">{r.name ?? r.sku ?? "—"}</span></div>
+                          <div className="truncate text-xs text-muted-foreground">{r.sku}{r.technicalName ? ` · ${r.technicalName}` : ""}</div>
                         </div>
-                        <Cantidad valor={r.cantidad} negativo={r.negativo} unidad={r.unidadClave} />
+                        <Cantidad valor={r.quantity} negativo={r.negative} unidad={r.unidadClave} />
                       </div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{r.almacenNombre ?? "—"}</span>
-                        <Lote numero={r.numeroLote} fecha={r.fechaVencimiento} vencido={r.vencido} porVencer={r.porVencer} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
+                        <Lote numero={r.lotNumber} fecha={r.expirationDate} vencido={r.expired} porVencer={r.expiringSoon} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
                       </div>
                       <Equivalencias items={r.equivalencias} t={t} />
                     </div>
@@ -310,17 +310,17 @@ export default function StockPage() {
                   </TableHeader>
                   <TableBody>
                     {consol.items.map((r) => (
-                      <TableRow key={r.productoId} className="cursor-pointer" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                      <TableRow key={r.productId} className="cursor-pointer" onClick={() => setDetalleDe({ productoId: r.productId, nombre: r.name ?? r.sku ?? "—" })}>
                         <TableCell className="whitespace-normal">
-                          <span className="font-medium">{r.nombre ?? r.sku ?? "—"}</span>
-                          {r.nombreTecnico && <span className="ml-2 text-xs text-muted-foreground">· {r.nombreTecnico}</span>}
+                          <span className="font-medium">{r.name ?? r.sku ?? "—"}</span>
+                          {r.technicalName && <span className="ml-2 text-xs text-muted-foreground">· {r.technicalName}</span>}
                           <span className="block text-xs text-muted-foreground">{r.sku}</span>
                         </TableCell>
                         {colCentros.map((c) => {
-                          const v = r.porCentro?.[c.id] ?? 0;
+                          const v = r.byCenter?.[c.id] ?? 0;
                           return <TableCell key={c.id} className="text-right"><Cantidad valor={v} negativo={v < 0} /></TableCell>;
                         })}
-                        <TableCell className="text-right"><Cantidad valor={r.total} negativo={r.negativo} bold /></TableCell>
+                        <TableCell className="text-right"><Cantidad valor={r.total} negativo={r.negative} bold /></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -328,20 +328,20 @@ export default function StockPage() {
                 {/* Móvil: tarjeta por producto con el Total grande y el desglose por centro debajo. */}
                 <div className="space-y-2 md:hidden">
                   {consol.items.map((r) => (
-                    <div key={`m-${r.productoId}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productoId, nombre: r.nombre ?? r.sku ?? "—" })}>
+                    <div key={`m-${r.productId}`} className="cursor-pointer rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10" onClick={() => setDetalleDe({ productoId: r.productId, nombre: r.name ?? r.sku ?? "—" })}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate font-medium">{r.nombre ?? r.sku ?? "—"}</div>
-                          <div className="truncate text-xs text-muted-foreground">{r.sku}{r.nombreTecnico ? ` · ${r.nombreTecnico}` : ""}</div>
+                          <div className="truncate font-medium">{r.name ?? r.sku ?? "—"}</div>
+                          <div className="truncate text-xs text-muted-foreground">{r.sku}{r.technicalName ? ` · ${r.technicalName}` : ""}</div>
                         </div>
                         <span className="shrink-0 text-right">
                           <span className="block text-[10px] uppercase tracking-wide text-muted-foreground">{t("col.total")}</span>
-                          <Cantidad valor={r.total} negativo={r.negativo} bold />
+                          <Cantidad valor={r.total} negativo={r.negative} bold />
                         </span>
                       </div>
                       <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                         {colCentros.map((c) => {
-                          const v = r.porCentro?.[c.id] ?? 0;
+                          const v = r.byCenter?.[c.id] ?? 0;
                           return (
                             <span key={c.id}>
                               {c.nombre}: <span className={"tabular-nums " + (v < 0 ? "font-semibold text-destructive" : "text-foreground")}>{v}</span>
@@ -423,14 +423,14 @@ function EstadoDot({ estado }: { estado?: string | null }) {
 }
 
 // «Alcanza para N de X»: equivalencias ordenadas de menor a mayor dosis. Vacío = no es insumo (no pintar).
-function Equivalencias({ items, t }: { items?: { nombre?: string | null; dosis?: number | null; rinde?: number | null }[]; t: (k: string) => string }) {
+function Equivalencias({ items, t }: { items?: { name?: string | null; dose?: number | null; rinde?: number | null }[]; t: (k: string) => string }) {
   const eq = (items ?? []).filter((e) => (e.rinde ?? 0) > 0);
   if (eq.length === 0) return null;
   return (
     <p className="text-xs text-muted-foreground">
       <span className="font-medium">{t("col.alcanza")}</span>{" "}
       {eq.map((e, i) => (
-        <span key={i}>{i > 0 ? " · " : ""}<span className="font-semibold text-foreground tabular-nums">{e.rinde}</span> {t("col.de")} {e.nombre ?? (e.dosis != null ? `${e.dosis}` : "?")}</span>
+        <span key={i}>{i > 0 ? " · " : ""}<span className="font-semibold text-foreground tabular-nums">{e.rinde}</span> {t("col.de")} {e.name ?? (e.dose != null ? `${e.dose}` : "?")}</span>
       ))}
     </p>
   );
@@ -482,8 +482,8 @@ function DetalleModal({
   // Columnas de estado: solo las que traiga algún dato (no ensuciar con ceros que no aplican).
   const cols: { key: keyof StockDetalleFila; label: string }[] = (
     [
-      ["fisico", t("detalle.fisico")],
-      ["reservado", t("detalle.reservado")],
+      ["physical", t("detalle.fisico")],
+      ["reserved", t("detalle.reservado")],
       ["comprometido", t("detalle.comprometido")],
       ["dañado", t("detalle.danado")],
       ["disponible", t("detalle.disponible")],
@@ -492,7 +492,7 @@ function DetalleModal({
     .filter(([k]) => (filas ?? []).some((f) => typeof f[k] === "number"))
     .map(([key, label]) => ({ key, label }));
 
-  const total = (filas ?? []).reduce((s, f) => s + (f.cantidad ?? 0), 0);
+  const total = (filas ?? []).reduce((s, f) => s + (f.quantity ?? 0), 0);
 
   return (
     <div
@@ -537,14 +537,14 @@ function DetalleModal({
                 </TableHeader>
                 <TableBody>
                   {filas.map((f, i) => (
-                    <TableRow key={`${f.almacenId ?? ""}-${f.loteId ?? ""}-${i}`}>
+                    <TableRow key={`${f.warehouseId ?? ""}-${f.lotId ?? ""}-${i}`}>
                       <TableCell>{f.almacenNombre ?? "—"}</TableCell>
-                      <TableCell className="tabular-nums">{f.numeroLote ?? "—"}</TableCell>
+                      <TableCell className="tabular-nums">{f.lotNumber ?? "—"}</TableCell>
                       {cols.map((c) => (
                         <TableCell key={String(c.key)} className="text-right tabular-nums">{nf.format(Number(f[c.key] ?? 0))}</TableCell>
                       ))}
                       <TableCell className="text-right">
-                        <Cantidad valor={f.cantidad} negativo={!!f.negativo || f.cantidad < 0} />
+                        <Cantidad valor={f.quantity} negativo={!!f.negative || f.quantity < 0} />
                       </TableCell>
                     </TableRow>
                   ))}

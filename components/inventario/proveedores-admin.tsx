@@ -117,12 +117,12 @@ export function ProveedoresAdmin() {
             )}
             {rows.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
-                <td className="px-3 py-2 font-medium">{p.nombre}</td>
-                <td className="px-3 py-2">{p.telefono ?? "—"}</td>
+                <td className="px-3 py-2 font-medium">{p.name}</td>
+                <td className="px-3 py-2">{p.phone ?? "—"}</td>
                 <td className="px-3 py-2 text-muted-foreground">{p.email ?? "—"}</td>
                 <td className="px-3 py-2">
-                  <Badge variant={p.activo ? "secondary" : "outline"}>
-                    {p.activo ? t("active") : t("inactive")}
+                  <Badge variant={p.active ? "secondary" : "outline"}>
+                    {p.active ? t("active") : t("inactive")}
                   </Badge>
                 </td>
                 <td className="px-3 py-2">
@@ -130,7 +130,7 @@ export function ProveedoresAdmin() {
                     <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
                       {tc("edit")}
                     </Button>
-                    {p.activo && (
+                    {p.active && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -160,7 +160,7 @@ export function ProveedoresAdmin() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("deactivateTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("deactivateBody", { name: deleting?.nombre ?? "" })}
+              {t("deactivateBody", { name: deleting?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -176,18 +176,18 @@ export function ProveedoresAdmin() {
 }
 
 type FormState = {
-  nombre: string;
-  telefono: string;
+  name: string;
+  phone: string;
   email: string;
-  direccion: string;
-  activo: boolean;
+  address: string;
+  active: boolean;
 };
 const EMPTY: FormState = {
-  nombre: "",
-  telefono: "",
+  name: "",
+  phone: "",
   email: "",
-  direccion: "",
-  activo: true,
+  address: "",
+  active: true,
 };
 
 function ProveedorForm({
@@ -215,11 +215,11 @@ function ProveedorForm({
     setForm(
       proveedor
         ? {
-            nombre: proveedor.nombre ?? "",
-            telefono: proveedor.telefono ?? "",
+            name: proveedor.name ?? "",
+            phone: proveedor.phone ?? "",
             email: proveedor.email ?? "",
-            direccion: proveedor.direccion ?? "",
-            activo: proveedor.activo ?? true,
+            address: proveedor.address ?? "",
+            active: proveedor.active ?? true,
           }
         : EMPTY,
     );
@@ -230,18 +230,18 @@ function ProveedorForm({
   }
 
   async function onSubmit() {
-    if (!form.nombre.trim()) return;
+    if (!form.name.trim()) return;
     setSubmitting(true);
     try {
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const base = {
-        nombre: form.nombre.trim(),
-        telefono: txt(form.telefono),
+        name: form.name.trim(),
+        phone: txt(form.phone),
         email: txt(form.email),
-        direccion: txt(form.direccion),
+        address: txt(form.address),
       };
       if (isEdit && proveedor) {
-        await updateProveedor(proveedor.id, { ...base, activo: form.activo });
+        await updateProveedor(proveedor.id, { ...base, active: form.active });
       } else {
         await createProveedor(base);
       }
@@ -265,13 +265,13 @@ function ProveedorForm({
 
         <div className="space-y-3">
           <FormRow label={t("field.nombre")}>
-            <Input value={form.nombre} onChange={(e) => set("nombre", e.target.value)} />
+            <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
           </FormRow>
           <FormRow label={t("field.telefono")}>
             <Input
               type="tel"
-              value={form.telefono}
-              onChange={(e) => set("telefono", e.target.value)}
+              value={form.phone}
+              onChange={(e) => set("phone", e.target.value)}
             />
           </FormRow>
           <FormRow label={t("field.email")}>
@@ -283,14 +283,14 @@ function ProveedorForm({
           </FormRow>
           <FormRow label={t("field.direccion")}>
             <Input
-              value={form.direccion}
-              onChange={(e) => set("direccion", e.target.value)}
+              value={form.address}
+              onChange={(e) => set("address", e.target.value)}
             />
           </FormRow>
           {isEdit && (
             <div className="flex items-center justify-between rounded-lg border px-3 py-2">
               <Label>{t("field.activo")}</Label>
-              <Switch checked={form.activo} onCheckedChange={(v) => set("activo", v)} />
+              <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} />
             </div>
           )}
         </div>
@@ -299,7 +299,7 @@ function ProveedorForm({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {tc("cancel")}
           </Button>
-          <Button onClick={onSubmit} disabled={submitting || !form.nombre.trim()}>
+          <Button onClick={onSubmit} disabled={submitting || !form.name.trim()}>
             {submitting ? tc("saving") : tc("save")}
           </Button>
         </DialogFooter>

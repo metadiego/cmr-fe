@@ -88,12 +88,12 @@ export function ComoSeCobra({
 }) {
   const t = useTranslations("gruposFacturacion");
   const { state, reload } = useResource<ColumnaFacturacion[]>(
-    () => getColumnasDeGrupo(grupo.clave),
-    [grupo.clave],
+    () => getColumnasDeGrupo(grupo.slug),
+    [grupo.slug],
   );
   const columnas = state.kind === "ok" ? state.data : [];
-  const deFabrica = columnas.filter((c) => esFabrica(c.rol) && c.activo);
-  const extra = columnas.filter((c) => !esFabrica(c.rol) && c.activo);
+  const deFabrica = columnas.filter((c) => esFabrica(c.role) && c.active);
+  const extra = columnas.filter((c) => !esFabrica(c.role) && c.active);
 
   const [toDelete, setToDelete] = React.useState<ColumnaFacturacion | null>(null);
   const [creating, setCreating] = React.useState(false);
@@ -103,7 +103,7 @@ export function ComoSeCobra({
   async function toggleMultiplica(col: ColumnaFacturacion, multiplica: boolean) {
     try {
       await actualizarColumnaFacturacion(col.id, {
-        rol: multiplica ? "multiplicador" : "informativo",
+        role: multiplica ? "multiplicador" : "informativo",
       });
       reload();
     } catch (err) {
@@ -128,7 +128,7 @@ export function ComoSeCobra({
     const col = toDelete;
     setToDelete(null);
     try {
-      await actualizarColumnaFacturacion(col.id, { activo: false });
+      await actualizarColumnaFacturacion(col.id, { active: false });
       toast.success(t("fieldRemoved"));
       reload();
     } catch (err) {
@@ -141,11 +141,11 @@ export function ComoSeCobra({
     setCopying(true);
     try {
       const origenColumnas = await getColumnasDeGrupo(copyFrom);
-      const origenExtra = origenColumnas.filter((c) => !esFabrica(c.rol) && c.activo);
-      const clavesActuales = new Set(extra.map((c) => c.clave));
-      const aCrear = origenExtra.filter((c) => !clavesActuales.has(c.clave));
+      const origenExtra = origenColumnas.filter((c) => !esFabrica(c.role) && c.active);
+      const clavesActuales = new Set(extra.map((c) => c.slug));
+      const aCrear = origenExtra.filter((c) => !clavesActuales.has(c.slug));
       const origenLabel = label(
-        grupos.find((g) => g.clave === copyFrom)?.labelKey ?? "",
+        grupos.find((g) => g.slug === copyFrom)?.labelKey ?? "",
         copyFrom,
       );
       if (aCrear.length === 0) {
@@ -156,13 +156,13 @@ export function ComoSeCobra({
       for (const c of aCrear) {
         try {
           await crearColumnaFacturacion({
-            grupoClave: grupo.clave,
-            clave: c.clave,
+            groupKey: grupo.slug,
+            slug: c.slug,
             labelKey: c.labelKey,
-            tipo: c.tipo,
-            rol: c.rol,
-            orden: c.orden,
-            requerido: c.requerido,
+            type: c.type,
+            role: c.role,
+            sortOrder: c.sortOrder,
+            required: c.required,
             visible: c.visible,
           });
           ok++;
@@ -196,10 +196,10 @@ export function ComoSeCobra({
           </SelectTrigger>
           <SelectContent>
             {grupos
-              .filter((g) => g.clave !== grupo.clave)
+              .filter((g) => g.slug !== grupo.slug)
               .map((g) => (
-                <SelectItem key={g.id} value={g.clave}>
-                  {label(g.labelKey, g.clave)}
+                <SelectItem key={g.id} value={g.slug}>
+                  {label(g.labelKey, g.slug)}
                 </SelectItem>
               ))}
           </SelectContent>
@@ -240,7 +240,7 @@ export function ComoSeCobra({
               key={c.id}
               className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"
             >
-              {label(c.labelKey, c.clave)}
+              {label(c.labelKey, c.slug)}
             </span>
           ))}
         </div>
@@ -253,7 +253,7 @@ export function ComoSeCobra({
             <AlertDialogTitle>{t("removeFieldTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
               {t("removeFieldBody", {
-                nombre: toDelete ? label(toDelete.labelKey, toDelete.clave) : "",
+                nombre: toDelete ? label(toDelete.labelKey, toDelete.slug) : "",
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -266,8 +266,8 @@ export function ComoSeCobra({
 
       {creating && (
         <NuevoCampoDialog
-          existentes={new Set(columnas.map((c) => c.clave))}
-          grupoClave={grupo.clave}
+          existentes={new Set(columnas.map((c) => c.slug))}
+          grupoClave={grupo.slug}
           orden={columnas.length}
           onClose={() => setCreating(false)}
           onCreated={() => {
@@ -294,9 +294,9 @@ function CampoExtra({
   onRemove: () => void;
 }) {
   const t = useTranslations("gruposFacturacion");
-  const [nombre, setNombre] = React.useState(label(col.labelKey, col.clave));
+  const [nombre, setNombre] = React.useState(label(col.labelKey, col.slug));
   const [prueba, setPrueba] = React.useState(2);
-  const multiplica = col.rol === "multiplicador";
+  const multiplica = col.role === "multiplicador";
 
   return (
     <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
@@ -366,12 +366,12 @@ function NuevoCampoDialog({
     setSaving(true);
     try {
       await crearColumnaFacturacion({
-        grupoClave,
-        clave: uniqueClave(nombre, existentes),
+        groupKey: grupoClave,
+        slug: uniqueClave(nombre, existentes),
         labelKey: nombre.trim(),
-        tipo,
-        rol: multiplica ? "multiplicador" : "informativo",
-        orden,
+        type: tipo,
+        role: multiplica ? "multiplicador" : "informativo",
+        sortOrder: orden,
       });
       toast.success(t("fieldAdded"));
       onCreated();

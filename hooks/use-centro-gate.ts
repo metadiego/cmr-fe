@@ -42,7 +42,7 @@ export function useCentroGate() {
     (cambiando ? null : (urlCentro && ids.has(urlCentro) ? urlCentro : validActive));
   const necesitaPicker = !cargando && !centro && centros.length > 0;
   const sinCentro = !cargando && centros.length === 0;
-  const centroNombre = centros.find((c) => c.id === centro)?.nombre ?? "";
+  const centroNombre = centros.find((c) => c.id === centro)?.name ?? "";
 
   // Fija X-Tenant-ID (cookie) para toda la sesión cuando hay centro efectivo.
   React.useEffect(() => {

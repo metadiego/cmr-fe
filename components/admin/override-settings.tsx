@@ -60,7 +60,7 @@ export function OverrideSettings() {
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
   const centerName = React.useCallback(
-    (id?: string | null) => centers.find((c) => c.id === id)?.nombre ?? id,
+    (id?: string | null) => centers.find((c) => c.id === id)?.name ?? id,
     [centers],
   );
 
@@ -103,8 +103,8 @@ export function OverrideSettings() {
   }
 
   function vigencia(o: Override): string {
-    if (!o.vigenteDesde && !o.vigenteHasta) return t("permanent");
-    return `${o.vigenteDesde ?? "…"} → ${o.vigenteHasta ?? "…"}`;
+    if (!o.validFrom && !o.validUntil) return t("permanent");
+    return `${o.validFrom ?? "…"} → ${o.validUntil ?? "…"}`;
   }
 
   return (
@@ -144,11 +144,11 @@ export function OverrideSettings() {
               {state.overrides.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-medium">
-                    {o.nombre || "—"}
+                    {o.name || "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {o.centroId ? centerName(o.centroId) : t("global")}
+                      {o.centerId ? centerName(o.centerId) : t("global")}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-mono text-xs">
@@ -216,10 +216,10 @@ function CreateOverrideDialog({
     try {
       await createOverride({
         config,
-        nombre: nombre.trim() || undefined,
-        centroId: scope === GLOBAL ? undefined : scope,
-        vigenteDesde: desde || undefined,
-        vigenteHasta: hasta || undefined,
+        name: nombre.trim() || undefined,
+        centerId: scope === GLOBAL ? undefined : scope,
+        validFrom: desde || undefined,
+        validUntil: hasta || undefined,
       });
       toast.success(t("created"));
       handleOpenChange(false);
@@ -259,7 +259,7 @@ function CreateOverrideDialog({
                 <SelectItem value={GLOBAL}>{t("global")}</SelectItem>
                 {centers.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.nombre} ({c.codigo})
+                    {c.name} ({c.code})
                   </SelectItem>
                 ))}
               </SelectContent>

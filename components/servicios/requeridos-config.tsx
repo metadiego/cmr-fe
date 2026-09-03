@@ -46,7 +46,7 @@ export function RequeridosConfig({ centro }: { centro?: string }) {
 
   const servRes = useResource<Servicio[]>(() => getServicios(centro, { includeInactive: true }), [centro]);
   const servicios = React.useMemo(
-    () => (servRes.state.kind === "ok" ? servRes.state.data : []).slice().sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre)),
+    () => (servRes.state.kind === "ok" ? servRes.state.data : []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
   const fuentesRes = useResource<FuenteRequisito[]>(() => getFuentesRequisito(centro), [centro]);
@@ -62,7 +62,7 @@ export function RequeridosConfig({ centro }: { centro?: string }) {
         <Select value={servicio?.id ?? ""} onValueChange={setServId}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            {servicios.map((s) => <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>)}
+            {servicios.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </label>
@@ -99,8 +99,8 @@ function CamposEditor({
   t: TFn;
   tRoot: TFn;
 }) {
-  const fa = (servicio.formAcciones ?? {}) as ServicioFormAcciones;
-  const [rows, setRows] = React.useState<ServicioCampo[]>(() => (fa.campos ?? []).map((c) => ({ ...c })));
+  const fa = (servicio.formActions ?? {}) as ServicioFormAcciones;
+  const [rows, setRows] = React.useState<ServicioCampo[]>(() => (fa.fields ?? []).map((c) => ({ ...c })));
   const [saving, setSaving] = React.useState(false);
   // Alcance: "centro" (por defecto) o "todos" (solo admin; aplica a todos los centros).
   const me = useMe();
@@ -112,7 +112,7 @@ function CamposEditor({
   const del = (i: number) => setRows((rs) => rs.filter((_, j) => j !== i));
 
   // Agrupa el catálogo de fuentes por grupo (sesión, personal, paquete) para el desplegable.
-  const porGrupo = fuentes.reduce<Record<string, FuenteRequisito[]>>((acc, b) => { (acc[b.grupo] ??= []).push(b); return acc; }, {});
+  const porGrupo = fuentes.reduce<Record<string, FuenteRequisito[]>>((acc, b) => { (acc[b.group] ??= []).push(b); return acc; }, {});
   const grupoLabel = (g: string) => (tRoot.has(`requeridos.grupo.${g}`) ? tRoot(`requeridos.grupo.${g}`) : g);
 
   async function guardar() {
@@ -127,7 +127,7 @@ function CamposEditor({
       // Mandar el formAcciones COMPLETO ({ ...fa, campos }) para no borrar reports[] u otras claves.
       const res = await updateServicioConAlcance(
         servicio.id,
-        { formAcciones: ({ ...fa, campos } as unknown) as Record<string, never> },
+        { formActions: ({ ...fa, fields: campos } as unknown) as Record<string, never> },
         alcance,
         centro,
       );

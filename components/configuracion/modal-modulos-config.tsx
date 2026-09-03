@@ -61,8 +61,8 @@ export function ModalModulosConfig({ tablero, centroId }: { tablero: string; cen
   }, [fetchData]);
 
   // Columna que dispara el modal = la que tiene render.postAccion (merged).
-  const modalCol = def?.columnas.find((c) => (c.render as Record<string, unknown> | null)?.postAccion);
-  const catCol = modalCol ? cat.find((c) => c.clave === modalCol.clave) : undefined;
+  const modalCol = def?.columns.find((c) => (c.render as Record<string, unknown> | null)?.postAccion);
+  const catCol = modalCol ? cat.find((c) => c.slug === modalCol.clave) : undefined;
   const mergedRender = (modalCol?.render as Record<string, unknown> | null) ?? null;
   const catRender = ((catCol?.render as Record<string, unknown> | null) ?? null);
   const postAccion = (mergedRender?.postAccion as string | undefined) ?? "";
@@ -105,20 +105,20 @@ export function ModalModulosConfig({ tablero, centroId }: { tablero: string; cen
     <div className="space-y-3">
       {modulos.length === 0 && <p className="text-sm text-muted-foreground">{t("noModules")}</p>}
       {modulos.map((m) => {
-        const enabled = mergedRender?.[m.clave] !== false;
+        const enabled = mergedRender?.[m.slug] !== false;
         return (
-          <div key={m.clave} className="flex items-center gap-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
+          <div key={m.slug} className="flex items-center gap-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
             <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-lg font-semibold text-primary">
               {tRoot(m.labelKey).charAt(0)}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">{tRoot(m.labelKey)}</p>
-              <p className="text-xs text-muted-foreground">{tRoot(m.descripcionKey)}</p>
+              <p className="text-xs text-muted-foreground">{tRoot(m.descriptionKey)}</p>
             </div>
             <Switch
               checked={enabled}
-              disabled={busy === m.clave}
-              onCheckedChange={(v) => toggle(m.clave, v)}
+              disabled={busy === m.slug}
+              onCheckedChange={(v) => toggle(m.slug, v)}
               aria-label={tRoot(m.labelKey)}
             />
           </div>

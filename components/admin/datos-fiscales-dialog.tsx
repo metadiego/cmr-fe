@@ -27,33 +27,33 @@ import {
 // Los 10 campos editables (mapean 1:1 a UpdateDatosFiscalesDto). La dirección se
 // pre-llena y se envía como `direccionFiscal` (el GET la lee como `direccion`).
 type Form = {
-  nombreLegal: string;
-  nombreComercial: string;
-  registroFiscal: string;
-  registroFiscalLabel: string;
-  telefono: string;
-  direccionFiscal: string;
-  zip: string;
-  web: string;
-  pieFactura: string;
+  legalName: string;
+  tradeName: string;
+  taxRegistration: string;
+  taxRegistrationLabel: string;
+  phone: string;
+  taxAddress: string;
+  zipCode: string;
+  website: string;
+  invoiceFooter: string;
   logoUrl: string;
-  frontdeskAutopresente: boolean;
+  frontdeskAutoPresent: boolean;
 };
 
 function fromCentro(c: Centro): Form {
   return {
-    nombreLegal: c.nombreLegal ?? "",
-    nombreComercial: c.nombreComercial ?? "",
-    registroFiscal: c.registroFiscal ?? "",
-    registroFiscalLabel: c.registroFiscalLabel ?? "",
-    telefono: c.telefono ?? "",
-    direccionFiscal: c.direccionFiscal ?? "",
-    zip: c.zip ?? "",
-    web: c.web ?? "",
-    pieFactura: c.pieFactura ?? "",
+    legalName: c.legalName ?? "",
+    tradeName: c.tradeName ?? "",
+    taxRegistration: c.taxRegistration ?? "",
+    taxRegistrationLabel: c.taxRegistrationLabel ?? "",
+    phone: c.phone ?? "",
+    taxAddress: c.taxAddress ?? "",
+    zipCode: c.zipCode ?? "",
+    website: c.website ?? "",
+    invoiceFooter: c.invoiceFooter ?? "",
     logoUrl: c.logoUrl ?? "",
     // Default true si el BE aún no lo devuelve (comportamiento de fábrica del enganche).
-    frontdeskAutopresente: c.frontdeskAutopresente ?? true,
+    frontdeskAutoPresent: c.frontdeskAutoPresent ?? true,
   };
 }
 
@@ -102,7 +102,7 @@ export function DatosFiscalesDialog({
         if (v) (payload as Record<string, string>)[k] = v;
       });
       // Enganche autopresente (boolean): siempre se envía su estado explícito.
-      (payload as Record<string, unknown>).frontdeskAutopresente = form.frontdeskAutopresente;
+      (payload as Record<string, unknown>).frontdeskAutoPresent = form.frontdeskAutoPresent;
       await updateDatosFiscales(centro.id, payload);
       toast.success(t("saved"));
       onOpenChange(false);
@@ -115,25 +115,25 @@ export function DatosFiscalesDialog({
   }
 
   // Solo campos de texto (el boolean autopresente se pinta aparte con un Switch).
-  type StrKey = Exclude<keyof Form, "frontdeskAutopresente">;
+  type StrKey = Exclude<keyof Form, "frontdeskAutoPresent">;
   const FIELDS: { key: StrKey; area?: boolean }[] = [
-    { key: "nombreLegal" },
-    { key: "nombreComercial" },
-    { key: "registroFiscal" },
-    { key: "registroFiscalLabel" },
-    { key: "telefono" },
-    { key: "direccionFiscal" },
-    { key: "zip" },
-    { key: "web" },
+    { key: "legalName" },
+    { key: "tradeName" },
+    { key: "taxRegistration" },
+    { key: "taxRegistrationLabel" },
+    { key: "phone" },
+    { key: "taxAddress" },
+    { key: "zipCode" },
+    { key: "website" },
     { key: "logoUrl" },
-    { key: "pieFactura", area: true },
+    { key: "invoiceFooter", area: true },
   ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("title", { name: centro?.nombre ?? "" })}</DialogTitle>
+          <DialogTitle>{t("title", { name: centro?.name ?? "" })}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
@@ -167,8 +167,8 @@ export function DatosFiscalesDialog({
           </div>
           <Switch
             id="frontdesk-autopresente"
-            checked={form.frontdeskAutopresente}
-            onCheckedChange={(v) => setForm((prev) => ({ ...prev, frontdeskAutopresente: v }))}
+            checked={form.frontdeskAutoPresent}
+            onCheckedChange={(v) => setForm((prev) => ({ ...prev, frontdeskAutoPresent: v }))}
           />
         </div>
 

@@ -32,7 +32,7 @@ function defaultCentro(centros: Centro[]): string {
 
 // Firma de los cupos en vista → fuerza remonte de la grilla tras guardar (resync sin valores viejos).
 function sig(cupos: Cupo[]): string {
-  return cupos.map((c) => `${c.id}:${c.diaSemana ?? "d"}:${c.hora}:${c.cantidad}`).sort().join(",");
+  return cupos.map((c) => `${c.id}:${c.dayOfWeek ?? "d"}:${c.time}:${c.quantity}`).sort().join(",");
 }
 
 /**
@@ -72,8 +72,8 @@ export function CuposServicioConfig() {
   const servicios = React.useMemo(
     () =>
       (servRes.state.kind === "ok" ? servRes.state.data : [])
-        .filter((s) => s.activo !== false)
-        .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre)),
+        .filter((s) => s.active !== false)
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
   const [servSel, setServSel] = React.useState<string>("");
@@ -86,7 +86,7 @@ export function CuposServicioConfig() {
     [scope, centroId],
   );
   const cupos = cuposRes.state.kind === "ok" ? cuposRes.state.data : [];
-  const cuposServicio = cupos.filter((c) => c.servicioId === servicioId && c.fecha == null);
+  const cuposServicio = cupos.filter((c) => c.serviceId === servicioId && c.date == null);
 
   const loading = centrosRes.state.kind === "loading" || servRes.state.kind === "loading" || cuposRes.state.kind === "loading";
 
@@ -98,7 +98,7 @@ export function CuposServicioConfig() {
         <Select value={scopeSel} onValueChange={pickScope}>
           <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
-            {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+            {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             {canGlobal && <SelectItem value={GLOBAL}>{t("cupos.allCenters")}</SelectItem>}
           </SelectContent>
         </Select>
@@ -119,7 +119,7 @@ export function CuposServicioConfig() {
               }
             >
               {s.color && <span className="size-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />}
-              {s.nombre}
+              {s.name}
             </button>
           );
         })}
@@ -137,7 +137,7 @@ export function CuposServicioConfig() {
             cupos={cuposServicio}
             onSaved={cuposRes.reload}
           />
-          <Preview servicioClave={servicio.clave ?? ""} centroId={centroId} />
+          <Preview servicioClave={servicio.slug ?? ""} centroId={centroId} />
         </div>
       )}
       {!loading && !servicio && <p className="text-sm text-muted-foreground">{t("cupos.noServicios")}</p>}
@@ -157,15 +157,15 @@ type Row = { hora: string; cells: Record<ColKey, Cell>; todos: boolean };
 
 function buildRows(cupos: Cupo[]): Row[] {
   const cols = columnas();
-  const horas = [...new Set(cupos.map((c) => c.hora))].sort();
+  const horas = [...new Set(cupos.map((c) => c.time))].sort();
   const rows = new Map<string, Row>();
   for (const hora of horas) {
     rows.set(hora, { hora, todos: false, cells: Object.fromEntries(cols.map((c) => [c.key, { value: "" } as Cell])) });
   }
   for (const c of cupos) {
-    const colKey = c.diaSemana == null ? DEFAULT_COL : String(c.diaSemana);
-    const cell = rows.get(c.hora)?.cells[colKey];
-    if (cell) { cell.id = c.id; cell.value = String(c.cantidad); }
+    const colKey = c.dayOfWeek == null ? DEFAULT_COL : String(c.dayOfWeek);
+    const cell = rows.get(c.time)?.cells[colKey];
+    if (cell) { cell.id = c.id; cell.value = String(c.quantity); }
   }
   // "Todos" = la hora solo tiene Default y ningún valor por día (aplica a todos por igual).
   for (const r of rows.values()) {
@@ -232,9 +232,9 @@ function SemanaGrid({
       const valid = Number.isFinite(n) && n > 0;
       if (cell.id) {
         if (!valid) ops.push(deleteCupo(cell.id, { scope, centroId }));
-        else ops.push(updateCupo(cell.id, { cantidad: n, scope }, centroId));
+        else ops.push(updateCupo(cell.id, { quantity: n, scope }, centroId));
       } else if (valid) {
-        ops.push(createCupo({ hora: r.hora, servicioId, cantidad: n, scope, ...(col.dia != null ? { diaSemana: col.dia } : {}) }, centroId));
+        ops.push(createCupo({ time: r.hora, serviceId: servicioId, quantity: n, scope, ...(col.dia != null ? { dayOfWeek: col.dia } : {}) }, centroId));
       }
     };
     for (const r of rows) {
@@ -345,8 +345,8 @@ function Preview({ servicioClave, centroId }: { servicioClave: string; centroId?
       {fecha && horas.length > 0 && (
         <div className="mt-3 space-y-1">
           {horas.map((h) => (
-            <div key={h.hora} className="flex items-center justify-between rounded px-2 py-1 text-xs tabular-nums odd:bg-background/60">
-              <span className="font-mono">{h.hora}</span>
+            <div key={h.time} className="flex items-center justify-between rounded px-2 py-1 text-xs tabular-nums odd:bg-background/60">
+              <span className="font-mono">{h.time}</span>
               <span className={h.vacios <= 0 ? "text-destructive" : "text-success-foreground"}>
                 {t("cupos.previewCell", { agendadas: h.agendadas, cupo: h.cupo, vacios: h.vacios })}
               </span>

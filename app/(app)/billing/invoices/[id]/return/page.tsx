@@ -33,27 +33,27 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
-type CompRow = { facturaItemComponenteId?: string | null; nombre?: string; cantidad?: number; precio?: number };
+type CompRow = { invoiceItemComponentId?: string | null; name?: string; quantity?: number; price?: number };
 
 // Helpers PUROS (módulo) para poder pre-llenar en los initializers de useState.
 // a_la_entrega se devuelve por SESIONES no entregadas; el resto por cantidad. Si a_la_entrega no trae
 // sesiones (>0), cae a cantidad para no mostrar la línea "en cero".
-const esEntrega = (it: FacturaItem) => String(it.modoDescarga) === "a_la_entrega" && n(it.sesiones) > 0;
-const dispCant = (it: FacturaItem) => n(it.cantidad) - n((it as { cantidadDevuelta?: number }).cantidadDevuelta);
-const dispSes = (it: FacturaItem) => n(it.sesiones) - n((it as { sesionesDevueltas?: number }).sesionesDevueltas);
+const esEntrega = (it: FacturaItem) => String(it.deductionMode) === "a_la_entrega" && n(it.sessions) > 0;
+const dispCant = (it: FacturaItem) => n(it.quantity) - n((it as { refundedQuantity?: number }).refundedQuantity);
+const dispSes = (it: FacturaItem) => n(it.sessions) - n((it as { refundedSessions?: number }).refundedSessions);
 const dispDe = (it: FacturaItem) => (esEntrega(it) ? dispSes(it) : dispCant(it));
-const billedQty = (it: FacturaItem) => (esEntrega(it) ? n(it.sesiones) : n(it.cantidad)) || 0;
-const lineBilledTotal = (it: FacturaItem) => n(it.total) || n(it.cantidad) * n(it.precioUnitario);
+const billedQty = (it: FacturaItem) => (esEntrega(it) ? n(it.sessions) : n(it.quantity)) || 0;
+const lineBilledTotal = (it: FacturaItem) => n(it.total) || n(it.quantity) * n(it.unitPrice);
 // Reembolso EXACTO facturado por unidad × devuelto (incluye descuento/impuesto tal como se facturó).
 const exactRefund = (it: FacturaItem, q: number) => {
   const bq = billedQty(it);
   return bq > 0 ? (q / bq) * lineBilledTotal(it) : 0;
 };
 const compExactRefund = (c: CompRow, q: number) => {
-  const bq = n(c.cantidad) || 0;
-  return bq > 0 ? (q / bq) * n(c.precio) : 0;
+  const bq = n(c.quantity) || 0;
+  return bq > 0 ? (q / bq) * n(c.price) : 0;
 };
-const compsDe = (it: FacturaItem): CompRow[] => (it as { contenido?: CompRow[] }).contenido ?? [];
+const compsDe = (it: FacturaItem): CompRow[] => (it as { content?: CompRow[] }).content ?? [];
 const ck = (itemId: string, ficId: string) => `${itemId}::${ficId}`;
 
 // Devolución a PANTALLA COMPLETA (tipo factura). La lógica/estado vive en <DevolverForm>, remontado por
@@ -72,11 +72,11 @@ export default function DevolverFacturaPage() {
   const formasRes = useResource<FormaPago[]>(() => getFormasPago(centro), [centro]);
   const factura = facturaState.kind === "ok" ? facturaState.data : null;
   const items = factura?.items ?? [];
-  const formas = (formasRes.state.kind === "ok" ? formasRes.state.data : []).filter((f) => f.activo !== false);
+  const formas = (formasRes.state.kind === "ok" ? formasRes.state.data : []).filter((f) => f.active !== false);
 
   const backHref = `/billing/invoices/${id}${centro ? `?centro=${centro}` : ""}`;
-  const pac = factura?.paciente;
-  const pacNombre = pac ? (pac.nombreMostrar || [pac.nombres, pac.apellidos].filter(Boolean).join(" ")) : "";
+  const pac = factura?.patient;
+  const pacNombre = pac ? (pac.displayName || [pac.firstName, pac.lastName].filter(Boolean).join(" ")) : "";
 
   return (
     <PageContainer>
@@ -90,9 +90,9 @@ export default function DevolverFacturaPage() {
           </>
         }
         count={
-          factura?.numero != null && (
+          factura?.number != null && (
             <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
-              {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
+              {factura.series ? `${factura.series}-` : "F"}{String(factura.number)}
             </span>
           )
         }
@@ -115,7 +115,7 @@ export default function DevolverFacturaPage() {
         </div>
       ) : items.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tf("noItems")}</p>
-      ) : !["emitida", "devuelta_parcial"].includes(String(factura?.estado)) ? (
+      ) : !["emitida", "devuelta_parcial"].includes(String(factura?.status)) ? (
         <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-muted-foreground">{t("returnOnlyIssued")}</p>
           <Button variant="outline" size="sm" asChild><Link href={backHref}>{tf("back")}</Link></Button>
@@ -132,16 +132,16 @@ function ResumenFactura({ factura }: { factura: FacturaConItems }) {
   const tf = useTranslations("facturacion");
   const [verImp, setVerImp] = React.useState(false);
   const f = factura as unknown as {
-    subtotal?: number; descuento?: number; descuentoGlobalTipo?: string; descuentoGlobalValor?: number;
-    impuesto?: number; total?: number; impuestos?: { nombre?: string; tasa?: number; monto?: number }[];
+    subtotal?: number; discount?: number; globalDiscountType?: string; globalDiscountValue?: number;
+    tax?: number; total?: number; taxes?: { name?: string; rate?: number; amount?: number }[];
   };
-  const desc = n(f.descuento);
+  const desc = n(f.discount);
   const descTxt =
-    f.descuentoGlobalTipo === "porcentaje" && n(f.descuentoGlobalValor) > 0
-      ? `${n(f.descuentoGlobalValor)}% · ${money(desc)}`
+    f.globalDiscountType === "porcentaje" && n(f.globalDiscountValue) > 0
+      ? `${n(f.globalDiscountValue)}% · ${money(desc)}`
       : money(desc);
   // Desglose del IVU (Estatal + Municipal) TAL CUAL del BE; sin filtrar por monto>0 (un 0,00 gravado va).
-  const imps = f.impuestos ?? [];
+  const imps = f.taxes ?? [];
 
   return (
     <div className="mt-3 border-t pt-3">
@@ -158,7 +158,7 @@ function ResumenFactura({ factura }: { factura: FacturaConItems }) {
           <button type="button" onClick={() => setVerImp((v) => !v)} className="text-left text-[10px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground">
             {tf("tax")} {imps.length > 0 ? (verImp ? "▾" : "▸") : ""}
           </button>
-          <span className="text-sm font-medium tabular-nums">{money(f.impuesto)}</span>
+          <span className="text-sm font-medium tabular-nums">{money(f.tax)}</span>
         </div>
         <div className="flex flex-col">
           <span className="text-[10px] font-semibold uppercase tracking-wide text-primary/80">{tf("total")}</span>
@@ -169,8 +169,8 @@ function ResumenFactura({ factura }: { factura: FacturaConItems }) {
         <div className="mt-2 space-y-0.5">
           {imps.map((im, i) => (
             <div key={i} className="flex justify-between gap-4 text-xs text-muted-foreground">
-              <span>{(im.nombre || tf("tax")) + (im.tasa != null ? ` (${im.tasa}%)` : "")}</span>
-              <span className="tabular-nums">{money(im.monto)}</span>
+              <span>{(im.name || tf("tax")) + (im.rate != null ? ` (${im.rate}%)` : "")}</span>
+              <span className="tabular-nums">{money(im.amount)}</span>
             </div>
           ))}
         </div>
@@ -240,7 +240,7 @@ function DevolverForm({
     }
   }
   function onCompQtyChange(it: FacturaItem, c: CompRow, val: string) {
-    const key = ck(it.id, String(c.facturaItemComponenteId));
+    const key = ck(it.id, String(c.invoiceItemComponentId));
     setCompCant((m) => ({ ...m, [key]: val }));
     if (politica === "como_facturada") {
       const q = Number(val || 0);
@@ -261,7 +261,7 @@ function DevolverForm({
       setCompPrecio(() => {
         const next: Record<string, string> = {};
         items.forEach((it) => compsDe(it).forEach((c) => {
-          const key = ck(it.id, String(c.facturaItemComponenteId));
+          const key = ck(it.id, String(c.invoiceItemComponentId));
           const q = Number(compCant[key] || 0);
           if (q > 0) next[key] = compExactRefund(c, q).toFixed(2);
         }));
@@ -273,12 +273,12 @@ function DevolverForm({
     }
   }
 
-  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.facturaItemComponenteId && Number(compCant[ck(it.id, String(c.facturaItemComponenteId))] || 0) > 0);
+  const compSelDe = (it: FacturaItem) => compsDe(it).filter((c) => c.invoiceItemComponentId && Number(compCant[ck(it.id, String(c.invoiceItemComponentId))] || 0) > 0);
   const compRefund = (it: FacturaItem, c: CompRow) => {
-    const key = ck(it.id, String(c.facturaItemComponenteId));
+    const key = ck(it.id, String(c.invoiceItemComponentId));
     if (compPrecio[key]?.trim()) return Number(compPrecio[key]);
-    const total = n(c.cantidad) || 1;
-    return total > 0 ? (Number(compCant[key] || 0) / total) * n(c.precio) : 0;
+    const total = n(c.quantity) || 1;
+    return total > 0 ? (Number(compCant[key] || 0) / total) * n(c.price) : 0;
   };
   const lineSel = (it: FacturaItem) => (esEntrega(it) ? Number(ses[it.id] || 0) > 0 : Number(cant[it.id] || 0) > 0);
   const seleccion = items.filter((it) => lineSel(it) || compSelDe(it).length > 0);
@@ -292,9 +292,9 @@ function DevolverForm({
   // precio_base: trae los precios base de referencia de los productos de la factura.
   React.useEffect(() => {
     if (politica !== "precio_base") return;
-    const faltan = Array.from(new Set(items.map((it) => String(it.productoId)))).filter((p) => p && bases[p] == null);
+    const faltan = Array.from(new Set(items.map((it) => String(it.productId)))).filter((p) => p && bases[p] == null);
     if (!faltan.length) return;
-    Promise.all(faltan.map((p) => getPrecioBase(p, centro).then((r) => [p, r.precioBase] as const).catch(() => null)))
+    Promise.all(faltan.map((p) => getPrecioBase(p, centro).then((r) => [p, r.basePrice] as const).catch(() => null)))
       .then((rs) => setBases((m) => ({ ...m, ...Object.fromEntries(rs.filter(Boolean) as [string, number][]) })));
   }, [politica, items, centro, bases]);
 
@@ -303,22 +303,22 @@ function DevolverForm({
     setBusy(true);
     try {
       const payload: DevolverPayload = {
-        motivo: motivo.trim(),
-        politica,
-        ...(formaId ? { formaReembolsoId: formaId } : {}),
+        reason: motivo.trim(),
+        policy: politica,
+        ...(formaId ? { refundMethodId: formaId } : {}),
         items: seleccion.map((it) => {
           const comps = compSelDe(it).map((c) => {
-            const key = ck(it.id, String(c.facturaItemComponenteId));
+            const key = ck(it.id, String(c.invoiceItemComponentId));
             return {
-              facturaItemComponenteId: String(c.facturaItemComponenteId),
-              cantidad: Number(compCant[key]),
-              ...(compPrecio[key]?.trim() ? { precioDevuelto: Number(compPrecio[key]) } : {}),
+              invoiceItemComponentId: String(c.invoiceItemComponentId),
+              quantity: Number(compCant[key]),
+              ...(compPrecio[key]?.trim() ? { refundedPrice: Number(compPrecio[key]) } : {}),
             };
           });
           return {
-            facturaItemId: it.id,
-            ...(lineSel(it) ? (esEntrega(it) ? { sesiones: Number(ses[it.id]) } : { cantidad: Number(cant[it.id]) }) : {}),
-            ...(precio[it.id]?.trim() ? { precioDevuelto: Number(precio[it.id]) } : {}),
+            invoiceItemId: it.id,
+            ...(lineSel(it) ? (esEntrega(it) ? { sessions: Number(ses[it.id]) } : { quantity: Number(cant[it.id]) }) : {}),
+            ...(precio[it.id]?.trim() ? { refundedPrice: Number(precio[it.id]) } : {}),
             ...(comps.length ? { componentes: comps } : {}),
           };
         }),
@@ -350,12 +350,12 @@ function DevolverForm({
               const entrega = esEntrega(it);
               const disp = dispDe(it);
               const comps = compsDe(it);
-              const base = bases[String(it.productoId)];
+              const base = bases[String(it.productId)];
               return (
                 <React.Fragment key={it.id}>
                   <tr className="align-top">
                     <td className="px-3 py-2">
-                      <span className="font-medium">{it.descripcion ?? "—"}</span>
+                      <span className="font-medium">{it.description ?? "—"}</span>
                       {entrega && <span className="ml-2 rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] text-sky-600 dark:text-sky-400">{t("byDelivery")}</span>}
                       {politica === "precio_base" && base != null && (
                         <span className="block text-[11px] text-muted-foreground">{t("basePriceRef", { v: money(base) })}</span>
@@ -367,7 +367,7 @@ function DevolverForm({
                       )}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
-                      {entrega ? n(it.sesiones) : n(it.cantidad)} × {money(it.precioUnitario)}
+                      {entrega ? n(it.sessions) : n(it.quantity)} × {money(it.unitPrice)}
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums">{disp}</td>
                     <td className="px-3 py-2 text-right">
@@ -388,21 +388,21 @@ function DevolverForm({
                     </td>
                   </tr>
                   {expanded[it.id] && comps.map((c, ci) => {
-                    const puede = !!c.facturaItemComponenteId;
-                    const key = ck(it.id, String(c.facturaItemComponenteId));
+                    const puede = !!c.invoiceItemComponentId;
+                    const key = ck(it.id, String(c.invoiceItemComponentId));
                     return (
                       <tr key={puede ? key : `${it.id}::c${ci}`} className="bg-muted/20 text-xs">
                         <td className="px-3 py-1.5 pl-8">
-                          {n(c.cantidad)} · {c.nombre}
+                          {n(c.quantity)} · {c.name}
                           {!puede && <span className="ml-2 text-[10px] text-muted-foreground/70">({t("compNoReturnable")})</span>}
                         </td>
-                        <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.precio)}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">{n(c.cantidad)}</td>
+                        <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{money(c.price)}</td>
+                        <td className="px-3 py-1.5 text-right tabular-nums">{n(c.quantity)}</td>
                         <td className="px-3 py-1.5 text-right">
-                          <Input type="number" min={0} max={n(c.cantidad)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
+                          <Input type="number" min={0} max={n(c.quantity)} disabled={!puede} value={puede ? (compCant[key] ?? "") : ""} onChange={(e) => onCompQtyChange(it, c, e.target.value)} className="h-7 w-16 text-right tabular-nums" placeholder="0" />
                         </td>
                         <td className="px-3 py-1.5 text-right">
-                          <Input type="number" min={0} disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => { const v = e.target.value; setCompPrecio((m) => ({ ...m, [key]: v.trim() !== "" && Number(v) < 0 ? "0" : v })); }} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.precio)} />
+                          <Input type="number" min={0} disabled={!puede} value={puede ? (compPrecio[key] ?? "") : ""} onChange={(e) => { const v = e.target.value; setCompPrecio((m) => ({ ...m, [key]: v.trim() !== "" && Number(v) < 0 ? "0" : v })); }} className="h-7 w-20 text-right tabular-nums" placeholder={money(c.price)} />
                         </td>
                       </tr>
                     );
@@ -434,7 +434,7 @@ function DevolverForm({
             <span className="text-xs font-medium text-muted-foreground">{t("returnRefund")}</span>
             <Select value={formaId} onValueChange={setFormaId}>
               <SelectTrigger><SelectValue placeholder={t("returnRefundNone")} /></SelectTrigger>
-              <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.clave, f.nombre)}</SelectItem>)}</SelectContent>
+              <SelectContent>{formas.map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}</SelectContent>
             </Select>
           </label>
         </div>

@@ -34,7 +34,7 @@ export default function ConfiguracionIndexPage() {
   // Rutas de configuración que el BE le manda a esta persona; el índice se limita a esas.
   // Se comparan RUTAS RESUELTAS (routeForClave) porque el BE sigue mandando paths viejos (/configuracion/*)
   // mientras el FE ya usa /configuration/* — sin resolver, el índice no mostraría nada.
-  const rutasDelMenu = new Set(menu.map((m) => routeForClave(m.clave, m.path)));
+  const rutasDelMenu = new Set(menu.map((m) => routeForClave(m.slug, m.path)));
   const visibles = SECCIONES.filter((s) => rutasDelMenu.has(s.href));
   const ready = menu.length > 0;
 

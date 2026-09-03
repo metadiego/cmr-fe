@@ -90,7 +90,7 @@ function Finder({
     setMedicoOverridePara(sel?.id ?? null);
     setMedicoOverride(null);
   }
-  const medicoId = medicoOverride ?? sel?.medicoId ?? "";
+  const medicoId = medicoOverride ?? sel?.doctorId ?? "";
   const [medioId, setMedioId] = React.useState("");
   // Facturar a un tercero (empresa/otra persona). Vacío = se factura al paciente.
   const [terceroOpen, setTerceroOpen] = React.useState(false);
@@ -99,13 +99,13 @@ function Finder({
   const [terceroTipo, setTerceroTipo] = React.useState<"persona" | "empresa">("empresa");
 
   const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
-  const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.activo !== false);
-  const defaultId = (listas.find((l) => l.esDefault) ?? listas.find((l) => l.clave === "regular"))?.id ?? "";
+  const listas = (listasRes.state.kind === "ok" ? listasRes.state.data : []).filter((l) => l.active !== false);
+  const defaultId = (listas.find((l) => l.isDefault) ?? listas.find((l) => l.slug === "regular"))?.id ?? "";
   const listaSel = tipoPrecioId || defaultId;
   const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
   const mediosRes = useResource<MedioFacturacion[]>(() => listMedios(centro), [centro]);
-  const medios = (mediosRes.state.kind === "ok" ? mediosRes.state.data : []).filter((m) => m.activo !== false);
+  const medios = (mediosRes.state.kind === "ok" ? mediosRes.state.data : []).filter((m) => m.active !== false);
 
   React.useEffect(() => {
     const id = setTimeout(() => setDebounced(q), 300);
@@ -119,7 +119,7 @@ function Finder({
   );
   const shown = term.length >= 2 ? (res.state.kind === "ok" ? res.state.data : []) : [];
   const loading = res.state.kind === "loading" && term.length >= 2;
-  const nombre = (p: PacienteBusqueda) => (p.nombreMostrar || `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim()) || t("sinNombre");
+  const nombre = (p: PacienteBusqueda) => (p.displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim()) || t("sinNombre");
 
   async function iniciar() {
     if (!sel || creating) return;
@@ -127,12 +127,12 @@ function Finder({
     try {
       const f = await crearFactura(
         {
-          pacienteId: sel.id,
-          ...(listaSel ? { tipoPrecioId: listaSel } : {}),
-          ...(medicoId ? { medicoId } : {}),
-          ...(medioId ? { medioId } : {}),
+          patientId: sel.id,
+          ...(listaSel ? { priceTypeId: listaSel } : {}),
+          ...(medicoId ? { doctorId: medicoId } : {}),
+          ...(medioId ? { sourceId: medioId } : {}),
           ...(terceroNombre.trim()
-            ? { facturarANombre: terceroNombre.trim(), facturarADocId: terceroDoc.trim() || undefined, facturarATipo: terceroTipo }
+            ? { billToName: terceroNombre.trim(), billToDocumentId: terceroDoc.trim() || undefined, billToType: terceroTipo }
             : {}),
         },
         centro,
@@ -173,7 +173,7 @@ function Finder({
           <div className="min-w-0 flex-1">
             <div className="truncate font-medium">{nombre(sel)}</div>
             <div className="truncate text-xs text-muted-foreground">
-              {[sel.record && `${t("recordLabel")} ${sel.record}`, sel.telefono ?? sel.whatsapp].filter(Boolean).join(" · ") || sel.docId}
+              {[sel.medicalRecordNumber && `${t("recordLabel")} ${sel.medicalRecordNumber}`, sel.phone ?? sel.whatsapp].filter(Boolean).join(" · ") || sel.documentId}
             </div>
           </div>
           <button type="button" onClick={() => setSel(null)} className="shrink-0 text-xs font-medium text-primary hover:underline">
@@ -194,9 +194,9 @@ function Finder({
             >
               <div className="min-w-0 flex-1">
                 <span className="block font-medium">{nombre(p)}</span>
-                {(p.record || p.telefono || p.whatsapp || p.docId) && (
+                {(p.medicalRecordNumber || p.phone || p.whatsapp || p.documentId) && (
                   <span className="block text-[11px] text-muted-foreground">
-                    {[p.record && `${t("recordLabel")} ${p.record}`, p.telefono ?? p.whatsapp].filter(Boolean).join(" · ") || p.docId}
+                    {[p.medicalRecordNumber && `${t("recordLabel")} ${p.medicalRecordNumber}`, p.phone ?? p.whatsapp].filter(Boolean).join(" · ") || p.documentId}
                   </span>
                 )}
               </div>
@@ -211,7 +211,7 @@ function Finder({
             <span className="text-xs font-medium text-muted-foreground">{t("lista")}</span>
             <Select value={listaSel} onValueChange={setTipoPrecioId}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.nombre ?? l.clave}</SelectItem>)}</SelectContent>
+              <SelectContent>{listas.map((l) => <SelectItem key={l.id} value={l.id}>{l.name ?? l.slug}</SelectItem>)}</SelectContent>
             </Select>
           </label>
         )}
@@ -222,7 +222,7 @@ function Finder({
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">{t("sinMedico")}</SelectItem>
-                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </label>
@@ -234,7 +234,7 @@ function Finder({
               <SelectTrigger className="w-full"><SelectValue placeholder={t("sinReferencia")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">{t("sinReferencia")}</SelectItem>
-                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </label>

@@ -68,7 +68,7 @@ export default function ClientesPage() {
   );
   const centroName = React.useMemo(() => {
     const m = new Map<string, string>();
-    centros.forEach((c) => m.set(c.id, c.nombre));
+    centros.forEach((c) => m.set(c.id, c.name));
     return m;
   }, [centros]);
 
@@ -143,7 +143,7 @@ export default function ClientesPage() {
               )}
               {centros.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.nombre}
+                  {c.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -187,17 +187,17 @@ export default function ClientesPage() {
                 <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
                   {(page - 1) * LIMIT + i + 1}
                 </TableCell>
-                <TableCell className="tabular-nums">{p.record ?? "—"}</TableCell>
+                <TableCell className="tabular-nums">{p.medicalRecordNumber ?? "—"}</TableCell>
                 <TableCell>
                   <span className="font-medium">
-                    {(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}
+                    {(p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" "))}
                   </span>
                 </TableCell>
-                <TableCell>{p.docId ?? "—"}</TableCell>
-                <TableCell>{p.telefono ?? "—"}</TableCell>
+                <TableCell>{p.documentId ?? "—"}</TableCell>
+                <TableCell>{p.phone ?? "—"}</TableCell>
                 <TableCell>{p.email ?? "—"}</TableCell>
                 <TableCell>
-                  {p.activo ? (
+                  {p.active ? (
                     <Badge variant="success">{t("active")}</Badge>
                   ) : (
                     <Badge variant="outline">{t("inactive")}</Badge>

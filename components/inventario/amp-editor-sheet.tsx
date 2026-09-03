@@ -83,22 +83,22 @@ export function AmpEditorSheet({
   const key = open ? (amp?.id ?? `new:${productoId}`) : null;
   if (key !== prevKey) {
     setPrevKey(key);
-    setProveedorId(amp?.proveedorId ?? "");
-    setNombre(amp?.nombre ?? "");
+    setProveedorId(amp?.supplierId ?? "");
+    setNombre(amp?.name ?? "");
     setNombreTouched(!!amp);
-    setContenido(amp?.contenidoPorEmpaque != null ? String(amp.contenidoPorEmpaque) : "");
-    setUnidadContenidoId(amp?.unidadContenidoId ?? "");
-    setConcentracion(amp?.concentracion != null ? String(amp.concentracion) : "");
-    setUnidadConcentracionId(amp?.unidadConcentracionId ?? "");
-    setMarcaId(amp?.marcaId ?? "");
-    setFabricanteId(amp?.fabricanteId ?? "");
+    setContenido(amp?.contentPerPackage != null ? String(amp.contentPerPackage) : "");
+    setUnidadContenidoId(amp?.contentUnitId ?? "");
+    setConcentracion(amp?.concentration != null ? String(amp.concentration) : "");
+    setUnidadConcentracionId(amp?.concentrationUnitId ?? "");
+    setMarcaId(amp?.brandId ?? "");
+    setFabricanteId(amp?.manufacturerId ?? "");
     setSku(amp?.sku ?? "");
     setBarcode(amp?.barcode ?? "");
     setAdvanced(false);
   }
 
-  const activos = proveedores.filter((p) => p.activo);
-  const unidadNombre = (id: string) => unidades.find((u) => u.id === id)?.nombre ?? "";
+  const activos = proveedores.filter((p) => p.active);
+  const unidadNombre = (id: string) => unidades.find((u) => u.id === id)?.name ?? "";
 
   // Autogenera el nombre "{producto} — {cantidad} {unidad}" mientras no se edite a mano.
   const autoNombre =
@@ -117,14 +117,14 @@ export function AmpEditorSheet({
       const id = (s: string) => (s && s !== NONE ? s : undefined);
       const txt = (s: string) => (s.trim() ? s.trim() : undefined);
       const body = {
-        proveedorId,
-        nombre: effectiveNombre.trim(),
-        contenidoPorEmpaque: num(contenido),
-        unidadContenidoId: id(unidadContenidoId),
-        concentracion: num(concentracion),
-        unidadConcentracionId: id(unidadConcentracionId),
-        marcaId: id(marcaId),
-        fabricanteId: id(fabricanteId),
+        supplierId: proveedorId,
+        name: effectiveNombre.trim(),
+        contentPerPackage: num(contenido),
+        contentUnitId: id(unidadContenidoId),
+        concentration: num(concentracion),
+        concentrationUnitId: id(unidadConcentracionId),
+        brandId: id(marcaId),
+        manufacturerId: id(fabricanteId),
         sku: txt(sku),
         barcode: txt(barcode),
       };
@@ -132,7 +132,7 @@ export function AmpEditorSheet({
         await updatePresentacionProveedor(amp.id, body);
       } else {
         await createPresentacionProveedor({
-          productoId,
+          productId: productoId,
           ...body,
         } as CreatePresentacionProveedorPayload);
       }
@@ -163,7 +163,7 @@ export function AmpEditorSheet({
               <SelectContent>
                 {activos.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
-                    {p.nombre}
+                    {p.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -191,7 +191,7 @@ export function AmpEditorSheet({
                   <SelectItem value={NONE}>{t("field.none")}</SelectItem>
                   {unidades.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
-                      {u.nombre}
+                      {u.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -239,7 +239,7 @@ export function AmpEditorSheet({
                       <SelectItem value={NONE}>{t("field.none")}</SelectItem>
                       {unidades.map((u) => (
                         <SelectItem key={u.id} value={u.id}>
-                          {u.nombre}
+                          {u.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -319,7 +319,7 @@ function ClasSelect({
         <SelectItem value={NONE}>{noneLabel}</SelectItem>
         {options.map((o) => (
           <SelectItem key={o.id} value={o.id}>
-            {o.nombre}
+            {o.name}
           </SelectItem>
         ))}
       </SelectContent>

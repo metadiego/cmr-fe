@@ -108,7 +108,7 @@ function PacienteDetail({
   onDeleted: () => void;
 }) {
   const t = useTranslations("patients");
-  const age = ageFrom(p.fechaNacimiento);
+  const age = ageFrom(p.dateOfBirth);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const centroId = p.clinicId ?? undefined;
@@ -130,7 +130,7 @@ function PacienteDetail({
   async function reactivate() {
     setBusy(true);
     try {
-      await updatePaciente(p.id, { activo: true }, centroId);
+      await updatePaciente(p.id, { active: true }, centroId);
       toast.success(t("reactivated"));
       onChanged();
     } catch (err) {
@@ -157,12 +157,12 @@ function PacienteDetail({
             title={fullName(p)}
             description={
               <span className="inline-flex flex-wrap items-center gap-2">
-                {p.docId && (
+                {p.documentId && (
                   <Badge variant="outline" className="font-mono">
-                    ID {p.docId}
+                    ID {p.documentId}
                   </Badge>
                 )}
-                {p.activo ? (
+                {p.active ? (
                   <Badge variant="secondary">{t("active")}</Badge>
                 ) : (
                   <Badge variant="outline">{t("inactive")}</Badge>
@@ -176,7 +176,7 @@ function PacienteDetail({
             }
             actions={
               <>
-                {!p.activo && (
+                {!p.active && (
                   <Can permiso="pacientes.update">
                     <Button
                       variant="outline"
@@ -194,7 +194,7 @@ function PacienteDetail({
                     {t("edit")}
                   </Button>
                 </Can>
-                {p.activo && (
+                {p.active && (
                   <Can permiso="pacientes.delete">
                     <Button
                       variant="outline"
@@ -239,29 +239,29 @@ function PacienteDetail({
       {/* Sections */}
       <div className="grid gap-6 sm:grid-cols-2">
         <Card title={t("form.sectionContact")}>
-          <InfoRow icon={Call02Icon} label={t("columns.phone")} value={p.telefono} />
+          <InfoRow icon={Call02Icon} label={t("columns.phone")} value={p.phone} />
           <InfoRow icon={WhatsappIcon} label={t("form.whatsapp")} value={p.whatsapp} />
           <InfoRow icon={Mail01Icon} label={t("columns.email")} value={p.email} />
           <InfoRow
             icon={Location01Icon}
             label={t("form.direccion")}
-            value={[p.direccion, p.zipcode].filter(Boolean).join(", ") || null}
+            value={[p.address, p.zipCode].filter(Boolean).join(", ") || null}
           />
         </Card>
 
         <Card title={t("form.sectionPersonal")}>
-          <InfoRow icon={UserIcon} label={t("form.sexo")} value={sexoLabel(t, p.sexo)} />
+          <InfoRow icon={UserIcon} label={t("form.sexo")} value={sexoLabel(t, p.sex)} />
           <InfoRow
             icon={Calendar03Icon}
             label={t("form.fechaNacimiento")}
-            value={formatDate(p.fechaNacimiento)}
+            value={formatDate(p.dateOfBirth)}
           />
-          <InfoRow icon={UserIcon} label={t("form.nacionalidad")} value={p.nacionalidad} />
+          <InfoRow icon={UserIcon} label={t("form.nacionalidad")} value={p.nationality} />
         </Card>
 
         <Card title={t("form.sectionClinical")}>
-          <InfoRow label={t("form.record")} value={p.record} />
-          <InfoRow label={t("form.aseguradora")} value={p.aseguradora} />
+          <InfoRow label={t("form.record")} value={p.medicalRecordNumber} />
+          <InfoRow label={t("form.aseguradora")} value={p.insurer} />
         </Card>
       </div>
     </div>
@@ -314,7 +314,7 @@ function InfoRow({
 
 function sexoLabel(
   t: ReturnType<typeof useTranslations>,
-  sexo: Paciente["sexo"],
+  sexo: Paciente["sex"],
 ): string | null {
   if (sexo === "femenino") return t("form.sexoFemenino");
   if (sexo === "masculino") return t("form.sexoMasculino");

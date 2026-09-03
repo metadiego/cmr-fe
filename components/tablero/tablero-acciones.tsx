@@ -66,19 +66,19 @@ export function TableroAcciones({
   const [values, setValues] = React.useState<Record<string, string>>({});
   const [busy, setBusy] = React.useState(false);
 
-  const isTerminal = estados.find((e) => e.clave === estado)?.esTerminal ?? false;
+  const isTerminal = estados.find((e) => e.slug === estado)?.isTerminal ?? false;
   const available = transiciones
-    .filter((tr) => tr.activo !== false)
-    .filter((tr) => !tr.permiso || can(tr.permiso))
-    .filter((tr) => tr.desdeEstados.includes(estado) || (tr.desdeEstados.length === 0 && !isTerminal))
-    .sort((a, b) => a.orden - b.orden);
+    .filter((tr) => tr.active !== false)
+    .filter((tr) => !tr.permissionSlug || can(tr.permissionSlug))
+    .filter((tr) => tr.fromStatuses.includes(estado) || (tr.fromStatuses.length === 0 && !isTerminal))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 
   if (available.length === 0) return null;
 
   async function run(tr: Transicion, payload: Record<string, string>) {
     setBusy(true);
     try {
-      await ejecutarAccion({ tablero, entidadId, accion: tr.clave, payload }, centroId);
+      await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: tr.slug, payload }, centroId);
       toast.success(tc("saved"));
       setPending(null);
       setValues({});
@@ -91,7 +91,7 @@ export function TableroAcciones({
   }
 
   function pick(tr: Transicion) {
-    if (tr.requiere.length === 0 && !tr.confirmar) {
+    if (tr.formFields.length === 0 && !tr.requiresConfirmation) {
       void run(tr, {});
     } else {
       setValues({});
@@ -100,7 +100,7 @@ export function TableroAcciones({
   }
 
   const canSubmit =
-    !!pending && !busy && pending.requiere.every((f) => (values[f] ?? "").trim() !== "");
+    !!pending && !busy && pending.formFields.every((f) => (values[f] ?? "").trim() !== "");
 
   return (
     <>
@@ -112,7 +112,7 @@ export function TableroAcciones({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {available.map((tr) => (
-            <DropdownMenuItem key={tr.clave} onSelect={() => pick(tr)}>
+            <DropdownMenuItem key={tr.slug} onSelect={() => pick(tr)}>
               {tRoot(tr.labelKey)}
             </DropdownMenuItem>
           ))}
@@ -125,7 +125,7 @@ export function TableroAcciones({
             <DialogTitle>{pending ? tRoot(pending.labelKey) : ""}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {pending?.requiere.map((field) => (
+            {pending?.formFields.map((field) => (
               <Field
                 key={field}
                 field={field}
@@ -133,7 +133,7 @@ export function TableroAcciones({
                 onChange={(v) => setValues((s) => ({ ...s, [field]: v }))}
               />
             ))}
-            {pending && pending.requiere.length === 0 && pending.confirmar && (
+            {pending && pending.formFields.length === 0 && pending.requiresConfirmation && (
               <p className="text-sm text-muted-foreground">{t("confirmAction")}</p>
             )}
           </div>
@@ -188,7 +188,7 @@ function Field({
           <SelectContent>
             {enfermeras.map((m) => (
               <SelectItem key={m.id} value={m.id}>
-                {[m.nombre, m.apellido].filter(Boolean).join(" ")}
+                {[m.name, m.lastName].filter(Boolean).join(" ")}
               </SelectItem>
             ))}
           </SelectContent>

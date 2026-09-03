@@ -76,10 +76,10 @@ export function ServicioColumnasEditor() {
     const map = new Map<string, ServicioMulti>();
     for (const { centroId, servicios } of fuentes) {
       for (const s of servicios) {
-        if (s.activo === false) continue;
-        const g = map.get(s.clave) ?? { clave: s.clave, nombre: s.nombre, color: s.color ?? null, filas: [] };
+        if (s.active === false) continue;
+        const g = map.get(s.slug) ?? { clave: s.slug, nombre: s.name, color: s.color ?? null, filas: [] };
         g.filas.push({ centroId, id: s.id });
-        map.set(s.clave, g);
+        map.set(s.slug, g);
       }
     }
     return [...map.values()].sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -100,11 +100,11 @@ export function ServicioColumnasEditor() {
     [primera?.id, primera?.centroId],
   );
   const activas = React.useMemo(
-    () => (colsRes.state.kind === "ok" ? [...colsRes.state.data].sort((a, b) => a.orden - b.orden) : []),
+    () => (colsRes.state.kind === "ok" ? [...colsRes.state.data].sort((a, b) => a.sortOrder - b.sortOrder) : []),
     [colsRes.state],
   );
-  const activaPorClave = React.useMemo(() => new Map(activas.map((c) => [c.clave, c])), [activas]);
-  const idPorClave = React.useMemo(() => new Map(catalogo.map((c) => [c.clave, c.id])), [catalogo]);
+  const activaPorClave = React.useMemo(() => new Map(activas.map((c) => [c.slug, c])), [activas]);
+  const idPorClave = React.useMemo(() => new Map(catalogo.map((c) => [c.slug, c.id])), [catalogo]);
 
   const [busy, setBusy] = React.useState(false);
   // Selección múltiple (2+) para Agrupar / Dejar sueltas (render.group compartido → se mueven juntas).
@@ -139,7 +139,7 @@ export function ServicioColumnasEditor() {
         const columnaId = idPorClave.get(clave);
         if (!columnaId) continue;
         for (const centroId of centrosDestino) {
-          jobs.push(setComposicion({ tablero: sel.clave, columnaId, render: { group: nombre } }, centroId));
+          jobs.push(setComposicion({ boardSlug: sel.clave, columnId: columnaId, render: { group: nombre } }, centroId));
         }
       }
       const resultados = await Promise.allSettled(jobs);
@@ -171,7 +171,7 @@ export function ServicioColumnasEditor() {
     if (!columnaId || !sel) return;
     const actual = activaPorClave.get(clave);
     setBusy(true);
-    componerEnTodos({ columnaId, visible: on, activo: on, orden: actual?.orden ?? activas.length + 1 })
+    componerEnTodos({ columnId: columnaId, visible: on, active: on, sortOrder: actual?.sortOrder ?? activas.length + 1 })
       .then(() => colsRes.reload())
       .catch((err) => toastError(err, tRoot))
       .finally(() => setBusy(false));
@@ -179,18 +179,18 @@ export function ServicioColumnasEditor() {
 
   async function mover(clave: string, dir: -1 | 1) {
     if (!sel) return;
-    const i = activas.findIndex((c) => c.clave === clave);
+    const i = activas.findIndex((c) => c.slug === clave);
     const j = i + dir;
     if (i < 0 || j < 0 || j >= activas.length) return;
     const a = activas[i];
     const b = activas[j];
-    const aId = idPorClave.get(a.clave);
-    const bId = idPorClave.get(b.clave);
+    const aId = idPorClave.get(a.slug);
+    const bId = idPorClave.get(b.slug);
     if (!aId || !bId) return;
     setBusy(true);
     try {
-      await componerEnTodos({ columnaId: aId, orden: b.orden, visible: true, activo: true });
-      await componerEnTodos({ columnaId: bId, orden: a.orden, visible: true, activo: true });
+      await componerEnTodos({ columnId: aId, sortOrder: b.sortOrder, visible: true, active: true });
+      await componerEnTodos({ columnId: bId, sortOrder: a.sortOrder, visible: true, active: true });
       colsRes.reload();
     } catch (err) {
       toastError(err, tRoot);
@@ -204,7 +204,7 @@ export function ServicioColumnasEditor() {
   const [dragClave, setDragClave] = React.useState<string | null>(null);
   async function soltar(fromClave: string, toClave: string) {
     if (!sel || fromClave === toClave) return;
-    const orden = activas.map((c) => c.clave);
+    const orden = activas.map((c) => c.slug);
     const from = orden.indexOf(fromClave);
     const to = orden.indexOf(toClave);
     if (from < 0 || to < 0) return;
@@ -217,7 +217,7 @@ export function ServicioColumnasEditor() {
         arr.map((clave, i) => {
           const columnaId = idPorClave.get(clave);
           return columnaId
-            ? componerEnTodos({ columnaId, orden: i, visible: true, activo: true })
+            ? componerEnTodos({ columnId: columnaId, sortOrder: i, visible: true, active: true })
             : Promise.resolve();
         }),
       );
@@ -237,7 +237,7 @@ export function ServicioColumnasEditor() {
             <SelectTrigger className="h-9 w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value={TODOS}>{t("colTodosCentros")}</SelectItem>
-              {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+              {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
         )}
@@ -279,12 +279,12 @@ export function ServicioColumnasEditor() {
           )}
           <ul className="space-y-1.5">
           {/* Activas primero (en su orden), luego las disponibles apagadas. */}
-          {[...activas.map((c) => c.clave), ...catalogo.map((c) => c.clave).filter((k) => !activaPorClave.has(k))].map((clave) => {
+          {[...activas.map((c) => c.slug), ...catalogo.map((c) => c.slug).filter((k) => !activaPorClave.has(k))].map((clave) => {
             const activa = activaPorClave.get(clave);
-            const cat = catalogo.find((c) => c.clave === clave);
+            const cat = catalogo.find((c) => c.slug === clave);
             const labelKey = activa?.labelKey ?? cat?.labelKey ?? clave;
             const grupo = (activa?.render as { group?: string | null } | null)?.group ?? null;
-            const idx = activas.findIndex((c) => c.clave === clave);
+            const idx = activas.findIndex((c) => c.slug === clave);
             return (
               <li
                 key={clave}

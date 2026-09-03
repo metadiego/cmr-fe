@@ -61,35 +61,35 @@ export function CeldaToggleHora({
   const color = colColor(col);
 
   const transClave = (col.render as Record<string, unknown> | null)?.transition as string | undefined;
-  const forward = transClave ? transiciones.find((t) => t.clave === transClave) : undefined;
+  const forward = transClave ? transiciones.find((t) => t.slug === transClave) : undefined;
   const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
 
   // MARCADO = el paciente ya alcanzó (o pasó) el estado destino de esta acción.
   // (Basado en el estado, no en la hora → desmarcar funciona aunque la hora quede.)
-  const baseChecked = !!forward && ordenOf(estado) >= ordenOf(forward.aEstado);
+  const baseChecked = !!forward && ordenOf(estado) >= ordenOf(forward.toStatus);
   const checked = optimistic ?? baseChecked;
   const hora = checked ? fmtHora(value) : null; // la hora sellada es el BENEFICIO
 
   // La "de vuelta" (quitar): transición desde el estado actual que BAJA de estado.
   const back = transiciones.find(
-    (t) => t.desdeEstados.includes(estado) && t.aEstado != null && ordenOf(t.aEstado) < ordenOf(estado),
+    (t) => t.fromStatuses.includes(estado) && t.toStatus != null && ordenOf(t.toStatus) < ordenOf(estado),
   );
 
-  const canCheck = !checked && !!forward && (forward.desdeEstados.length === 0 || forward.desdeEstados.includes(estado));
+  const canCheck = !checked && !!forward && (forward.fromStatuses.length === 0 || forward.fromStatuses.includes(estado));
   // Reversible EN ORDEN (LIFO): solo se desmarca la ÚLTIMA etapa activa, es decir
   // cuando el estado actual es EXACTAMENTE el destino de esta etapa. Para deshacer
   // una etapa anterior, primero hay que deshacer las posteriores.
-  const isLast = !!forward && estado === forward.aEstado;
+  const isLast = !!forward && estado === forward.toStatus;
   const canUncheck = checked && isLast && !!back;
   const disabled = busy || (!checked && !canCheck) || (checked && !canUncheck);
 
   async function toggle() {
-    const accion = checked ? back?.clave : forward?.clave;
+    const accion = checked ? back?.slug : forward?.slug;
     if (!accion) return;
     setBusy(true);
     setOptimistic(!checked); // PONER / QUITAR al instante
     try {
-      await ejecutarAccion({ tablero, entidadId, accion }, centroId);
+      await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: accion }, centroId);
       onSaved?.();
     } catch (err) {
       setOptimistic(undefined); // revertir

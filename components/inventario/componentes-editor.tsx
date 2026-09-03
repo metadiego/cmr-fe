@@ -52,7 +52,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
   const unidades = unidadRes.state.kind === "ok" ? unidadRes.state.data : [];
   const prodName = React.useMemo(() => {
     const m = new Map<string, string>();
-    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.nombre));
+    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.name));
     return m;
   }, [prodRes.state]);
   // Producto completo del componente (para el contenido del envase → rendimiento por dosis).
@@ -61,7 +61,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
     if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p));
     return m;
   }, [prodRes.state]);
-  const unidadName = (id: string | null) => (id ? (unidades.find((u) => u.id === id)?.nombre ?? "") : "");
+  const unidadName = (id: string | null) => (id ? (unidades.find((u) => u.id === id)?.name ?? "") : "");
   // Un insumo se DOSIFICA cuando su unidad es de masa o volumen (mg, mcg, g, ml): la "cantidad" es en
   // realidad la dosis que se consume cada vez que se aplica. Con unidades de conteo (vial, caja) no.
   const dimensionDe = (unidadId: string | null): string | null =>
@@ -73,13 +73,13 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
 
   // Activas y del modo pedido (DELETE = baja lógica; el BE no filtra ?activo).
   const items = (state.kind === "ok" ? state.data : [])
-    .filter((c) => c.activo !== false)
-    .filter((c) => !!c.estimado === estimado);
+    .filter((c) => c.active !== false)
+    .filter((c) => !!c.estimated === estimado);
   // Encabezado de la columna: "Dosis por aplicación" cuando TODAS las filas se dosifican (el caso de un
   // protocolo de medicación); si hay mezcla o son de conteo, se queda en "Cantidad". La ayuda aparece
   // en cuanto haya al menos una dosificada.
-  const todasDosis = items.length > 0 && items.every((c) => esDosis(c.unidadId));
-  const hayDosis = items.some((c) => esDosis(c.unidadId));
+  const todasDosis = items.length > 0 && items.every((c) => esDosis(c.unitId));
+  const hayDosis = items.some((c) => esDosis(c.unitId));
 
   const [nuevoId, setNuevoId] = React.useState("");
   const [nuevaCant, setNuevaCant] = React.useState("");
@@ -99,15 +99,15 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
     setBusy(true);
     try {
       await createComponente({
-        productoCompuestoId: productoId,
-        componenteId: nuevoId,
-        cantidad: cant,
-        estimado,
-        ...(nuevaUnidad && nuevaUnidad !== NONE ? { unidadId: nuevaUnidad } : {}),
+        compositeProductId: productoId,
+        componentId: nuevoId,
+        quantity: cant,
+        estimated: estimado,
+        ...(nuevaUnidad && nuevaUnidad !== NONE ? { unitId: nuevaUnidad } : {}),
         ...(allowOpcional && nuevoOpcional
-          ? { opcional: true, precioIncremental: Number(nuevoPrecioIncr) || 0, incluidoPorDefecto: nuevoIncluido }
+          ? { optional: true, incrementalPrice: Number(nuevoPrecioIncr) || 0, includedByDefault: nuevoIncluido }
           : {}),
-        ...(allowOpcional && nuevaNota.trim() ? { nota: nuevaNota.trim() } : {}),
+        ...(allowOpcional && nuevaNota.trim() ? { note: nuevaNota.trim() } : {}),
       });
       toast.success(t("added"));
       setNuevoId("");
@@ -163,12 +163,12 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
               <ComponenteRow
                 key={c.id}
                 comp={c}
-                nombre={prodName.get(c.componenteId) ?? c.componenteId}
+                nombre={prodName.get(c.componentId) ?? c.componentId}
                 unidades={unidades}
                 unidadName={unidadName}
-                esDosis={esDosis(c.unidadId)}
-                contenido={prodMap.get(c.componenteId)?.contenido ?? null}
-                contenidoUnidadId={prodMap.get(c.componenteId)?.unidadContenidoId ?? null}
+                esDosis={esDosis(c.unitId)}
+                contenido={prodMap.get(c.componentId)?.content ?? null}
+                contenidoUnidadId={prodMap.get(c.componentId)?.contentUnitId ?? null}
                 onSaved={reload}
                 onRemove={() => quitar(c.id)}
                 disabled={busy}
@@ -202,7 +202,7 @@ export function ComponentesEditor({ productoId, estimado }: { productoId: string
             <SelectContent>
               <SelectItem value={NONE}>{t("unidadDefault")}</SelectItem>
               {unidades.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.nombre}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -270,12 +270,12 @@ function ComponenteRow({
   const t = useTranslations(labelNs);
   const tc = useTranslations("common");
   const [editing, setEditing] = React.useState(false);
-  const [cant, setCant] = React.useState(String(comp.cantidad));
-  const [unidad, setUnidad] = React.useState(comp.unidadId ?? NONE);
-  const [opcional, setOpcional] = React.useState(!!comp.opcional);
-  const [precioIncr, setPrecioIncr] = React.useState(String(comp.precioIncremental ?? ""));
-  const [incluido, setIncluido] = React.useState(!!comp.incluidoPorDefecto);
-  const [nota, setNota] = React.useState((comp as { nota?: string | null }).nota ?? "");
+  const [cant, setCant] = React.useState(String(comp.quantity));
+  const [unidad, setUnidad] = React.useState(comp.unitId ?? NONE);
+  const [opcional, setOpcional] = React.useState(!!comp.optional);
+  const [precioIncr, setPrecioIncr] = React.useState(String(comp.incrementalPrice ?? ""));
+  const [incluido, setIncluido] = React.useState(!!comp.includedByDefault);
+  const [nota, setNota] = React.useState(comp.note ?? "");
   const [saving, setSaving] = React.useState(false);
 
   async function save() {
@@ -287,10 +287,10 @@ function ComponenteRow({
     setSaving(true);
     try {
       await updateComponente(comp.id, {
-        cantidad: v,
-        ...(unidad && unidad !== NONE ? { unidadId: unidad } : {}),
+        quantity: v,
+        ...(unidad && unidad !== NONE ? { unitId: unidad } : {}),
         ...(allowOpcional
-          ? { opcional, precioIncremental: opcional ? Number(precioIncr) || 0 : 0, incluidoPorDefecto: opcional ? incluido : false, nota: nota.trim() }
+          ? { optional: opcional, incrementalPrice: opcional ? Number(precioIncr) || 0 : 0, includedByDefault: opcional ? incluido : false, note: nota.trim() }
           : {}),
       });
       toast.success(t("updated"));
@@ -308,8 +308,8 @@ function ComponenteRow({
   // Rendimiento = contenido del envase ÷ dosis. Solo si se dosifica y la unidad de la dosis coincide con
   // la del contenido (no se convierte mg↔ml en el cliente). Delata el error de tecleo: "≈ 1 aplicación"
   // significa que alguien puso la dosis del vial entero. Se recalcula en vivo al editar.
-  const cantNum = Number(editing ? cant : comp.cantidad);
-  const unidadActual = editing ? unidad : (comp.unidadId ?? NONE);
+  const cantNum = Number(editing ? cant : comp.quantity);
+  const unidadActual = editing ? unidad : (comp.unitId ?? NONE);
   const rendimiento =
     esDosis && contenido != null && contenido > 0 && cantNum > 0 && !!contenidoUnidadId && unidadActual === contenidoUnidadId
       ? Math.floor(contenido / cantNum)
@@ -322,7 +322,7 @@ function ComponenteRow({
         {editing ? (
           <Input inputMode="decimal" value={cant} onChange={(e) => setCant(e.target.value)} className="h-7 w-24" />
         ) : (
-          comp.cantidad
+          comp.quantity
         )}
         {rendimiento != null && (
           <div className="text-[11px] font-normal text-muted-foreground">{t("rendimiento", { n: rendimiento })}</div>
@@ -335,12 +335,12 @@ function ComponenteRow({
             <SelectContent>
               <SelectItem value={NONE}>—</SelectItem>
               {unidades.map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.nombre}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         ) : (
-          unidadName(comp.unidadId) || "—"
+          unidadName(comp.unitId) || "—"
         )}
       </td>
       {allowOpcional && (
@@ -361,9 +361,9 @@ function ComponenteRow({
                 </>
               )}
             </div>
-          ) : comp.opcional ? (
+          ) : comp.optional ? (
             <span className="rounded-full bg-warning px-2 py-0.5 font-medium text-warning-foreground">
-              {t("opcional")} +{money(comp.precioIncremental)}{comp.incluidoPorDefecto ? ` · ${t("porDefecto")}` : ""}
+              {t("opcional")} +{money(comp.incrementalPrice)}{comp.includedByDefault ? ` · ${t("porDefecto")}` : ""}
             </span>
           ) : (
             <span className="text-muted-foreground">—</span>
@@ -374,8 +374,8 @@ function ComponenteRow({
         <td className="px-3 py-2 text-xs">
           {editing ? (
             <Input value={nota} onChange={(e) => setNota(e.target.value)} className="h-7 w-48" placeholder={t("notaPlaceholder")} />
-          ) : comp.nota ? (
-            <span className="text-muted-foreground">{comp.nota}</span>
+          ) : comp.note ? (
+            <span className="text-muted-foreground">{comp.note}</span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}

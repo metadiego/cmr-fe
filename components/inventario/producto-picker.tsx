@@ -85,7 +85,7 @@ export function ProductoPicker({
         className="flex h-9 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 text-left text-sm shadow-xs transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <span className={cn("min-w-0 flex-1 truncate", !shown && "text-muted-foreground")}>
-          {shown ? shown.nombre : (placeholder ?? t("placeholder"))}
+          {shown ? shown.name : (placeholder ?? t("placeholder"))}
         </span>
         {shown ? (
           <span
@@ -137,14 +137,14 @@ export function ProductoPicker({
                   )}
                 >
                   <span className="font-medium">
-                    {p.nombre}
-                    {(p as { nombreTecnico?: string | null }).nombreTecnico && (
-                      <span className="ml-2 text-[11px] font-normal text-muted-foreground">· {(p as { nombreTecnico?: string | null }).nombreTecnico}</span>
+                    {p.name}
+                    {(p as { technicalName?: string | null }).technicalName && (
+                      <span className="ml-2 text-[11px] font-normal text-muted-foreground">· {(p as { technicalName?: string | null }).technicalName}</span>
                     )}
                   </span>
-                  {(p.sku || p.tipo) && (
+                  {(p.sku || p.type) && (
                     <span className="text-[11px] text-muted-foreground">
-                      {[p.sku, p.tipo].filter(Boolean).join(" · ")}
+                      {[p.sku, p.type].filter(Boolean).join(" · ")}
                     </span>
                   )}
                 </button>

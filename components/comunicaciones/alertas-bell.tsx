@@ -58,12 +58,12 @@ export function AlertasBell() {
   const puedeResolver = can("alertas.resolver"); // el BE es la autoridad; esto solo evita el click a error
   const { state, refresh, reload } = useResource<AlertasResponse>(() => listAlertas());
   const alertas = state.kind === "ok" ? state.data.data : [];
-  const noLeidas = state.kind === "ok" ? state.data.noLeidas : 0;
+  const noLeidas = state.kind === "ok" ? state.data.unread : 0;
   // Catálogo de tipos → color/dominio por clave de alerta (la alerta trae `clave`, = la del tipo).
   const tiposRes = useResource<TipoAlerta[]>(() => listTiposAlerta());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
-  const tipoPorClave = new Map(tipos.map((tp) => [tp.clave, tp]));
-  const tipoDe = (a: Alerta) => tipoPorClave.get(a.clave);
+  const tipoPorClave = new Map(tipos.map((tp) => [tp.slug, tp]));
+  const tipoDe = (a: Alerta) => tipoPorClave.get(a.slug);
   const colorDe = (a: Alerta) => {
     const c = tipoDe(a)?.color;
     return c ? COLOR[c] ?? null : null;
@@ -71,7 +71,7 @@ export function AlertasBell() {
   // Agrupar por DOMINIO (el color ya lo insinúa). Sin dominio → "otras", al final. Orden estable.
   const grupos: Array<{ dominio: string; label: string; alertas: Alerta[] }> = [];
   for (const a of alertas) {
-    const dom = tipoDe(a)?.dominio || "otras";
+    const dom = tipoDe(a)?.domain || "otras";
     let g = grupos.find((x) => x.dominio === dom);
     if (!g) { g = { dominio: dom, label: dom, alertas: [] }; grupos.push(g); }
     g.alertas.push(a);
@@ -201,14 +201,14 @@ export function AlertasBell() {
                           key={a.id}
                           className="group flex items-start gap-2 rounded-md bg-card px-2.5 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 transition-colors hover:bg-accent/50"
                         >
-                          <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", c?.dot ?? SEV_DOT[a.severidad] ?? "bg-muted")} />
+                          <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", c?.dot ?? SEV_DOT[a.severity] ?? "bg-muted")} />
                           <button
                             type="button"
                             onClick={() => onOpen(a)}
                             className={cn("min-w-0 flex-1 text-left", clickable && "cursor-pointer")}
                           >
-                            <p className="truncate text-sm font-medium">{a.titulo}</p>
-                            {a.cuerpo && <p className="line-clamp-2 text-xs text-muted-foreground">{a.cuerpo}</p>}
+                            <p className="truncate text-sm font-medium">{a.title}</p>
+                            {a.body && <p className="line-clamp-2 text-xs text-muted-foreground">{a.body}</p>}
                           </button>
                           {puedeResolver && (
                             <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">

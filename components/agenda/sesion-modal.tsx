@@ -77,10 +77,10 @@ export function SesionModal({
     try {
       const { warnings } = await crearSesion(
         {
-          pacienteId: paciente.id,
-          servicioId,
-          fecha,
-          cantidad: cantidad > 0 ? cantidad : 1,
+          patientId: paciente.id,
+          serviceId: servicioId,
+          date: fecha,
+          quantity: cantidad > 0 ? cantidad : 1,
         },
         effectiveCentro || undefined,
       );
@@ -109,7 +109,7 @@ export function SesionModal({
               <Select value={effectiveCentro || undefined} onValueChange={setCentroSel}>
                 <SelectTrigger className="w-full"><SelectValue placeholder={t("centroPlaceholder")} /></SelectTrigger>
                 <SelectContent>
-                  {centros.map((c) => (<SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>))}
+                  {centros.map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </Field>
@@ -131,7 +131,7 @@ export function SesionModal({
                   <SelectItem key={s.id} value={s.id}>
                     <span className="inline-flex items-center gap-2">
                       <span className="size-2.5 rounded-full" style={{ backgroundColor: s.color ?? "#4a90d9" }} />
-                      {s.nombre}
+                      {s.name}
                     </span>
                   </SelectItem>
                 ))}

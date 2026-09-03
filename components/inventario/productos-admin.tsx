@@ -107,7 +107,7 @@ export function ProductosAdmin() {
   const { state, reload } = useResource<Paginated<ProductoConProveedores>>(
     () =>
       listProductosPaged({
-        clase: clase as ClaseProducto,
+        class: clase as ClaseProducto,
         conProveedores: true,
         q: debounced,
         page,
@@ -196,7 +196,7 @@ export function ProductosAdmin() {
           </SelectTrigger>
           <SelectContent>
             {clases.map((c) => (
-              <SelectItem key={c.clase} value={c.clase}>{tRoot(c.labelKey)}</SelectItem>
+              <SelectItem key={c.class} value={c.class}>{tRoot(c.labelKey)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -252,24 +252,24 @@ export function ProductosAdmin() {
                     </button>
                   </TableCell>
                   <TableCell className="font-medium">
-                    {p.nombre}
-                    {p.nombreTecnico && <span className="ml-2 text-xs font-normal text-muted-foreground">· {p.nombreTecnico}</span>}
+                    {p.name}
+                    {p.technicalName && <span className="ml-2 text-xs font-normal text-muted-foreground">· {p.technicalName}</span>}
                   </TableCell>
                   <TableCell className="font-mono text-xs">{p.sku ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{t(`tipo.${p.tipo}`)}</Badge>
+                    <Badge variant="outline">{t(`tipo.${p.type}`)}</Badge>
                   </TableCell>
                   <TableCell>
-                    <ProveedorCell proveedores={p.proveedores} />
+                    <ProveedorCell proveedores={p.suppliers} />
                   </TableCell>
                   <TableCell>
-                    <Badge variant={p.activo ? "success" : "outline"}>
-                      {p.activo ? t("active") : t("inactive")}
+                    <Badge variant={p.active ? "success" : "outline"}>
+                      {p.active ? t("active") : t("inactive")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      {p.tipo === "compuesto" && (
+                      {p.type === "compuesto" && (
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/inventory/recipes?compuestoId=${p.id}`}>
                             {t("editarReceta")}
@@ -279,7 +279,7 @@ export function ProductosAdmin() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setInsumosSheet({ productoId: p.id, productoNombre: p.nombre })}
+                        onClick={() => setInsumosSheet({ productoId: p.id, productoNombre: p.name })}
                       >
                         {t("editarInsumos")}
                       </Button>
@@ -303,10 +303,10 @@ export function ProductosAdmin() {
                         producto={p}
                         reloadToken={ampReloadToken}
                         onNew={() =>
-                          setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp: null })
+                          setAmpSheet({ productoId: p.id, productoNombre: p.name, amp: null })
                         }
                         onEdit={(amp) =>
-                          setAmpSheet({ productoId: p.id, productoNombre: p.nombre, amp })
+                          setAmpSheet({ productoId: p.id, productoNombre: p.name, amp })
                         }
                       />
                     </TableCell>
@@ -385,17 +385,17 @@ export function ProductosAdmin() {
 function ProveedorCell({
   proveedores,
 }: {
-  proveedores?: { id: string; nombre: string }[];
+  proveedores?: { id: string; name: string }[];
 }) {
   const t = useTranslations("inventario.prod");
   const list = proveedores ?? [];
   if (list.length === 0) return <span className="text-muted-foreground">—</span>;
-  if (list.length === 1) return <span className="truncate">{list[0].nombre}</span>;
+  if (list.length === 1) return <span className="truncate">{list[0].name}</span>;
   const extra = list.length - 1;
   return (
-    <Tooltip content={list.map((p) => p.nombre).join(", ")}>
+    <Tooltip content={list.map((p) => p.name).join(", ")}>
       <span className="inline-flex max-w-[16rem] cursor-default items-center gap-1 truncate">
-        <span className="truncate">{list[0].nombre}</span>
+        <span className="truncate">{list[0].name}</span>
         <span className="shrink-0 text-muted-foreground">{t("proveedorMas", { n: extra })}</span>
       </span>
     </Tooltip>
@@ -451,9 +451,9 @@ function ExpandedAmp({
           <TableBody>
             {items.map((a) => (
               <TableRow key={a.id}>
-                <TableCell className="py-1.5">{a.nombre}</TableCell>
+                <TableCell className="py-1.5">{a.name}</TableCell>
                 <TableCell className="py-1.5 tabular-nums text-muted-foreground">
-                  {a.contenidoPorEmpaque ?? "—"}
+                  {a.contentPerPackage ?? "—"}
                 </TableCell>
                 <TableCell className="py-1.5 text-right">
                   <Button variant="ghost" size="sm" onClick={() => onEdit(a)}>
@@ -550,29 +550,29 @@ function ProductoForm({
       producto
         ? {
             sku: producto.sku ?? "",
-            nombre: producto.nombre ?? "",
-            nombreCorto: producto.nombreCorto ?? "",
-            nombreTecnico: producto.nombreTecnico ?? "",
-            descripcion: producto.descripcion ?? "",
-            tipo: (producto.tipo as FormState["tipo"]) ?? "unico",
-            esInventariable: producto.esInventariable ?? false,
+            nombre: producto.name ?? "",
+            nombreCorto: producto.shortName ?? "",
+            nombreTecnico: producto.technicalName ?? "",
+            descripcion: producto.description ?? "",
+            tipo: (producto.type as FormState["tipo"]) ?? "unico",
+            esInventariable: producto.isInventoryItem ?? false,
             modoDescarga:
-              (producto.modoDescarga as FormState["modoDescarga"]) ?? "a_la_venta",
-            categoriaId: producto.categoriaId ?? "",
-            marcaId: producto.marcaId ?? "",
-            fabricanteId: producto.fabricanteId ?? "",
+              (producto.deductionMode as FormState["modoDescarga"]) ?? "a_la_venta",
+            categoriaId: producto.categoryId ?? "",
+            marcaId: producto.brandId ?? "",
+            fabricanteId: producto.manufacturerId ?? "",
             barcode: producto.barcode ?? "",
-            gravado: producto.gravado ?? false,
-            facturableGeneral: (producto as { facturableGeneral?: boolean }).facturableGeneral ?? true,
+            gravado: producto.taxable ?? false,
+            facturableGeneral: (producto as { generallyBillable?: boolean }).generallyBillable ?? true,
             costoReferencia:
-              producto.costoReferencia != null ? String(producto.costoReferencia) : "",
-            contenido: producto.contenido != null ? String(producto.contenido) : "",
-            unidadContenidoId: producto.unidadContenidoId ?? "",
-            unidadesPorEnvase: producto.unidadesPorEnvase != null ? String(producto.unidadesPorEnvase) : "",
-            imprimeComponentes: (producto as { imprimeComponentes?: boolean }).imprimeComponentes ?? true,
-            aplicaPrecioBaseDevolucion: (producto as { aplicaPrecioBaseDevolucion?: boolean }).aplicaPrecioBaseDevolucion ?? false,
-            activo: producto.activo ?? true,
-            grupoFacturacionId: producto.grupoFacturacionId ?? "",
+              producto.referenceCost != null ? String(producto.referenceCost) : "",
+            contenido: producto.content != null ? String(producto.content) : "",
+            unidadContenidoId: producto.contentUnitId ?? "",
+            unidadesPorEnvase: producto.unitsPerContainer != null ? String(producto.unitsPerContainer) : "",
+            imprimeComponentes: (producto as { printComponents?: boolean }).printComponents ?? true,
+            aplicaPrecioBaseDevolucion: (producto as { applyBasePriceOnRefund?: boolean }).applyBasePriceOnRefund ?? false,
+            activo: producto.active ?? true,
+            grupoFacturacionId: producto.billingGroupId ?? "",
           }
         : EMPTY,
     );
@@ -592,7 +592,7 @@ function ProductoForm({
   const unidadesContenido = React.useMemo(() => {
     const all = unidadesRes.state.kind === "ok" ? unidadesRes.state.data : [];
     const rank = (u: Unidad) => (u.dimension === "masa" || u.dimension === "volumen" ? 0 : 1);
-    return [...all].sort((a, b) => rank(a) - rank(b) || a.nombre.localeCompare(b.nombre));
+    return [...all].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
   }, [unidadesRes.state]);
   const grupos = gruposRes.state.kind === "ok" ? gruposRes.state.data : [];
   const divisiones = divisionesRes.state.kind === "ok" ? divisionesRes.state.data : [];
@@ -609,9 +609,9 @@ function ProductoForm({
     setCreandoGrupo(true);
     try {
       const g = await crearGrupoFacturacion({
-        clave: ngClave.trim(),
+        slug: ngClave.trim(),
         labelKey: ngLabel.trim() || `fac.grupo.${ngClave.trim()}`,
-        division: ngDivision || divisiones[0]?.clave || "general",
+        division: ngDivision || divisiones[0]?.slug || "general",
       });
       gruposRes.reload();
       set("grupoFacturacionId", g.id);
@@ -643,37 +643,37 @@ function ProductoForm({
       };
       const costo = form.costoReferencia.trim() === "" ? undefined : Number(form.costoReferencia);
       const common = {
-        nombre: form.nombre.trim(),
-        nombreCorto: txt(form.nombreCorto),
+        name: form.nombre.trim(),
+        shortName: txt(form.nombreCorto),
         // Nombre de almacén/técnico: el MISMO frasco con su nombre interno (evita partir el stock en dos).
-        nombreTecnico: txt(form.nombreTecnico),
-        descripcion: txt(form.descripcion),
-        tipo: form.tipo,
-        esInventariable: form.esInventariable,
-        modoDescarga: form.modoDescarga,
-        categoriaId: id(form.categoriaId),
-        marcaId: id(form.marcaId),
-        fabricanteId: id(form.fabricanteId),
+        technicalName: txt(form.nombreTecnico),
+        description: txt(form.descripcion),
+        type: form.tipo,
+        isInventoryItem: form.esInventariable,
+        deductionMode: form.modoDescarga,
+        categoryId: id(form.categoriaId),
+        brandId: id(form.marcaId),
+        manufacturerId: id(form.fabricanteId),
         barcode: txt(form.barcode),
-        gravado: form.gravado,
+        taxable: form.gravado,
         // Costo estable de la unidad (el costo real de cada compra sigue viniendo del lote).
-        ...(costo != null && Number.isFinite(costo) ? { costoReferencia: costo } : {}),
+        ...(costo != null && Number.isFinite(costo) ? { referenceCost: costo } : {}),
         // Contenido del envase (opcional): cuánto trae el frasco + su unidad + unidades por envase.
-        ...(num(form.contenido) != null ? { contenido: num(form.contenido) } : {}),
-        ...(id(form.unidadContenidoId) ? { unidadContenidoId: id(form.unidadContenidoId) } : {}),
-        ...(num(form.unidadesPorEnvase) != null ? { unidadesPorEnvase: num(form.unidadesPorEnvase) } : {}),
+        ...(num(form.contenido) != null ? { content: num(form.contenido) } : {}),
+        ...(id(form.unidadContenidoId) ? { contentUnitId: id(form.unidadContenidoId) } : {}),
+        ...(num(form.unidadesPorEnvase) != null ? { unitsPerContainer: num(form.unidadesPorEnvase) } : {}),
         // Devolución a precio base (láser/vit C/GLP-1…): la política precio_base solo aplica a los marcados.
-        aplicaPrecioBaseDevolucion: form.aplicaPrecioBaseDevolucion,
+        applyBasePriceOnRefund: form.aplicaPrecioBaseDevolucion,
         // Solo relevante para kits (compuesto): detallado vs compacto en el recibo.
-        ...(form.tipo === "compuesto" ? { imprimeComponentes: form.imprimeComponentes } : {}),
+        ...(form.tipo === "compuesto" ? { printComponents: form.imprimeComponentes } : {}),
         // Grupo de facturación (directo al BE): uuid ancla el producto a su servicio de frontdesk; null =
         // "sin grupo (insumo)" — se consume, no abre columna. Explícito (no "no mandar el campo").
-        grupoFacturacionId: form.grupoFacturacionId ? form.grupoFacturacionId : null,
+        billingGroupId: form.grupoFacturacionId ? form.grupoFacturacionId : null,
       };
       let savedId: string;
       if (isEdit && producto) {
         // facturableGeneral (¿se vende suelto?) solo lo acepta el UPDATE del BE.
-        await updateProducto(producto.id, { ...common, facturableGeneral: form.facturableGeneral, activo: form.activo });
+        await updateProducto(producto.id, { ...common, generallyBillable: form.facturableGeneral, active: form.activo });
         savedId = producto.id;
       } else {
         const creado = await createProducto({
@@ -723,7 +723,7 @@ function ProductoForm({
                   <SelectItem value={NONE}>{t("field.grupoNinguno")}</SelectItem>
                   {grupos.map((g) => (
                     <SelectItem key={g.id} value={g.id}>
-                      {grupoLabel(g.labelKey, g.clave)} ·{" "}
+                      {grupoLabel(g.labelKey, g.slug)} ·{" "}
                       {grupoLabel(`fac.division.${g.division}`, g.division)}
                     </SelectItem>
                   ))}
@@ -755,7 +755,7 @@ function ProductoForm({
                     className="h-8"
                   />
                   <Select
-                    value={ngDivision || divisiones[0]?.clave || "general"}
+                    value={ngDivision || divisiones[0]?.slug || "general"}
                     onValueChange={setNgDivision}
                   >
                     <SelectTrigger className="h-8">
@@ -763,8 +763,8 @@ function ProductoForm({
                     </SelectTrigger>
                     <SelectContent>
                       {divisiones.map((d) => (
-                        <SelectItem key={d.clave} value={d.clave}>
-                          {grupoLabel(d.labelKey, d.clave)}
+                        <SelectItem key={d.slug} value={d.slug}>
+                          {grupoLabel(d.labelKey, d.slug)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -859,7 +859,7 @@ function ProductoForm({
                   <SelectContent>
                     <SelectItem value={NONE}>{t("field.none")}</SelectItem>
                     {unidadesContenido.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.nombre}</SelectItem>
+                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1039,7 +1039,7 @@ function CatalogSelect({
         <SelectItem value={NONE}>{placeholder}</SelectItem>
         {options.map((o) => (
           <SelectItem key={o.id} value={o.id}>
-            {o.nombre}
+            {o.name}
           </SelectItem>
         ))}
       </SelectContent>

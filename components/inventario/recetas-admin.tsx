@@ -62,7 +62,7 @@ export function RecetasAdmin() {
                       selId === p.id && "bg-accent",
                     )}
                   >
-                    <span className="font-medium">{p.nombre}</span>
+                    <span className="font-medium">{p.name}</span>
                     {p.sku && <span className="font-mono text-[11px] text-muted-foreground">{p.sku}</span>}
                   </button>
                 </li>
@@ -91,7 +91,7 @@ function RecetaEditor({ compuesto }: { compuesto: Producto }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold">{compuesto.nombre}</h2>
+        <h2 className="text-lg font-semibold">{compuesto.name}</h2>
         <p className="text-xs text-muted-foreground">{t("recipeOf")}</p>
       </div>
       {/* Receta real (descarga de inventario): componentes con estimado=false. */}

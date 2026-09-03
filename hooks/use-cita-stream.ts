@@ -80,7 +80,7 @@ export function useCitaStream(opts: {
             },
             onEvent: (e) => {
               // Single bus for all verticals → ignore events of other entities.
-              if (cbRef.current.entidad && e.entidad !== cbRef.current.entidad) return;
+              if (cbRef.current.entidad && e.entity !== cbRef.current.entidad) return;
               cbRef.current.onEvent?.(e);
               scheduleInvalidate();
             },

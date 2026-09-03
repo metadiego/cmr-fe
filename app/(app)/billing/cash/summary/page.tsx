@@ -28,9 +28,9 @@ type Desglose = { efectivo: number; tarjetas: Metodo[]; otros: Metodo[]; totalTa
 function desgloseDe(r: ReporteDia | null | undefined): Desglose {
   const det = r?.detalle;
   return {
-    efectivo: Number(det?.efectivo?.monto ?? 0),
-    tarjetas: (det?.tarjetas ?? []).map((t) => ({ key: t.clave, label: t.nombre, monto: Number(t.monto ?? 0) })),
-    otros: (det?.otros ?? []).map((t) => ({ key: t.clave, label: t.nombre, monto: Number(t.monto ?? 0) })),
+    efectivo: Number(det?.efectivo?.amount ?? 0),
+    tarjetas: (det?.tarjetas ?? []).map((t) => ({ key: t.slug, label: t.name, monto: Number(t.amount ?? 0) })),
+    otros: (det?.otros ?? []).map((t) => ({ key: t.slug, label: t.name, monto: Number(t.amount ?? 0) })),
     totalTarjetas: Number(det?.totalTarjetas ?? 0),
     total: Number(det?.total ?? 0),
   };
@@ -88,9 +88,9 @@ export default function CuadreGeneralPage() {
     if (state.kind !== "ok") return [] as Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
     const m = new Map<string, { usuarioId: string | null; nombre: string | null; total: number }>();
     for (const c of [...(state.data.general.porCajero ?? []), ...(state.data.consulta.porCajero ?? [])]) {
-      const k = c.usuarioId ?? "sin";
+      const k = c.userId ?? "sin";
       const prev = m.get(k);
-      m.set(k, { usuarioId: c.usuarioId, nombre: c.nombre ?? prev?.nombre ?? null, total: (prev?.total ?? 0) + Number(c.total ?? 0) });
+      m.set(k, { usuarioId: c.userId, nombre: c.name ?? prev?.nombre ?? null, total: (prev?.total ?? 0) + Number(c.total ?? 0) });
     }
     return [...m.values()].sort((a, b) => b.total - a.total);
   }, [state]);

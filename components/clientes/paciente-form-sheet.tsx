@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/select";
 
 // Derived from the API contract so it never drifts from schema.d.ts.
-type Sexo = NonNullable<Paciente["sexo"]>;
+type Sexo = NonNullable<Paciente["sex"]>;
 // Runtime whitelist of the values the BE accepts on write. Typed as Sexo[] so TS
 // errors if any value drops out of the API enum. Legacy patients still hold codes
 // like "0"/"1" (the BE v2 backfill has NOT run yet); those are coerced to "" on
@@ -99,19 +99,19 @@ const EMPTY: FormState = {
 
 function fromPaciente(p: Paciente): FormState {
   return {
-    nombres: p.nombres ?? "",
-    apellidos: p.apellidos ?? "",
-    docId: p.docId ?? "",
-    sexo: SEXO_VALUES.includes(p.sexo as Sexo) ? (p.sexo as Sexo) : "",
-    fechaNacimiento: p.fechaNacimiento?.slice(0, 10) ?? "",
-    nacionalidad: p.nacionalidad ?? "",
-    telefono: p.telefono ?? "",
+    nombres: p.firstName ?? "",
+    apellidos: p.lastName ?? "",
+    docId: p.documentId ?? "",
+    sexo: SEXO_VALUES.includes(p.sex as Sexo) ? (p.sex as Sexo) : "",
+    fechaNacimiento: p.dateOfBirth?.slice(0, 10) ?? "",
+    nacionalidad: p.nationality ?? "",
+    telefono: p.phone ?? "",
     whatsapp: p.whatsapp ?? "",
     email: p.email ?? "",
-    direccion: p.direccion ?? "",
-    zipcode: p.zipcode ?? "",
-    record: p.record ?? "",
-    aseguradora: p.aseguradora ?? "",
+    direccion: p.address ?? "",
+    zipcode: p.zipCode ?? "",
+    record: p.medicalRecordNumber ?? "",
+    aseguradora: p.insurer ?? "",
   };
 }
 
@@ -119,19 +119,19 @@ function fromPaciente(p: Paciente): FormState {
 function toPayload(f: FormState): CreatePacientePayload {
   const t = (s: string) => (s.trim() ? s.trim() : undefined);
   return {
-    nombres: f.nombres.trim(),
-    apellidos: t(f.apellidos),
-    docId: t(f.docId),
-    sexo: f.sexo || undefined,
-    fechaNacimiento: t(f.fechaNacimiento),
-    nacionalidad: t(f.nacionalidad),
-    telefono: t(f.telefono),
+    firstName: f.nombres.trim(),
+    lastName: t(f.apellidos),
+    documentId: t(f.docId),
+    sex: f.sexo || undefined,
+    dateOfBirth: t(f.fechaNacimiento),
+    nationality: t(f.nacionalidad),
+    phone: t(f.telefono),
     whatsapp: t(f.whatsapp),
     email: t(f.email),
-    direccion: t(f.direccion),
-    zipcode: t(f.zipcode),
-    record: t(f.record),
-    aseguradora: t(f.aseguradora),
+    address: t(f.direccion),
+    zipCode: t(f.zipcode),
+    medicalRecordNumber: t(f.record),
+    insurer: t(f.aseguradora),
   };
 }
 
@@ -188,7 +188,7 @@ export function PacienteFormSheet({
   const requeridos = React.useMemo(
     () =>
       new Set(
-        configState.kind === "ok" ? configState.data.camposObligatorios : [],
+        configState.kind === "ok" ? configState.data.requiredFields : [],
       ),
     [configState],
   );
@@ -215,7 +215,7 @@ export function PacienteFormSheet({
     open &&
     !!recordLimpio &&
     !!tenant &&
-    !(isEdit && recordLimpio === (paciente?.record ?? ""));
+    !(isEdit && recordLimpio === (paciente?.medicalRecordNumber ?? ""));
   // res null = the check failed (silent: the BE re-validates on save with 409).
   const [recordCheck, setRecordCheck] = React.useState<{
     key: string;
@@ -315,7 +315,7 @@ export function PacienteFormSheet({
         err instanceof ApiError && err.code === "PACIENTE_RECORD_DUPLICADO"
           ? (err.data?.dueno as NonNullable<RecordDueno["dueno"]> | undefined)
           : undefined;
-      if (dueno && typeof dueno === "object" && "nombres" in dueno) {
+      if (dueno && typeof dueno === "object" && "firstName" in dueno) {
         // Race fallback: someone took the record between the live check and
         // the save — same big alert, keyed to this tenant+record.
         setDuenoServer({ key: recordKey, dueno });
@@ -367,7 +367,7 @@ export function PacienteFormSheet({
                   <SelectContent>
                     {centros.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.nombre}
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -514,9 +514,9 @@ export function PacienteFormSheet({
                 <AlertTitle>{t("recordDuplicadoTitle")}</AlertTitle>
                 <AlertDescription>
                   {t("recordDuplicadoBody", {
-                    record: dueno.record ?? recordLimpio,
-                    nombre: `${dueno.nombres}${dueno.apellidos ? ` ${dueno.apellidos}` : ""}`,
-                    estado: dueno.activo
+                    record: dueno.medicalRecordNumber ?? recordLimpio,
+                    nombre: `${dueno.firstName}${dueno.lastName ? ` ${dueno.lastName}` : ""}`,
+                    estado: dueno.active
                       ? t("recordDuenoActivo")
                       : t("recordDuenoInactivo"),
                   })}

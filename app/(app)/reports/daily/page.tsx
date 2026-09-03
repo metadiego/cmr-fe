@@ -69,7 +69,7 @@ export default function EstadisticasDiariasPage() {
             centros.map((c) =>
               getEstadisticasDiarias(query.desde, query.hasta || undefined, c.id).then((data) => ({
                 centroId: c.id,
-                centroNombre: c.nombre,
+                centroNombre: c.name,
                 data,
               })),
             ),
@@ -88,16 +88,16 @@ export default function EstadisticasDiariasPage() {
     return cards
       .map((c) => {
         const d = c.data;
-        const vacio = d.atencionMedica.total === 0 && d.servicios.length === 0 && !d.ingresoBruto;
+        const vacio = d.medicalCare.total === 0 && d.services.length === 0 && !d.grossRevenue;
         const lineas = [`C.M.R. — ${c.centroNombre}    ${rangoLabel}`, ""];
         if (vacio) { lineas.push(t("sinActividad")); return lineas.join("\n"); }
-        lineas.push(`${t("atencionMedica")}   N: ${d.atencionMedica.nuevas}   S: ${d.atencionMedica.seguimientos}   ${t("total")} ${d.atencionMedica.total}`, "");
-        if (d.servicios.length) {
+        lineas.push(`${t("atencionMedica")}   N: ${d.medicalCare.newCount}   S: ${d.medicalCare.followUpCount}   ${t("total")} ${d.medicalCare.total}`, "");
+        if (d.services.length) {
           lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
-          d.servicios.forEach((s) => lineas.push(`  ${s.nombre}: ${s.aplicados} / ${s.vendidos}`));
+          d.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
           lineas.push("");
         }
-        lineas.push(`${t("ingresoBruto")}   ${money.format(d.ingresoBruto ?? 0)}`);
+        lineas.push(`${t("ingresoBruto")}   ${money.format(d.grossRevenue ?? 0)}`);
         return lineas.join("\n");
       })
       .join("\n\n————————————\n\n");
@@ -176,7 +176,7 @@ export default function EstadisticasDiariasPage() {
 }
 
 function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string; data: EstadisticasDiarias; t: (k: string) => string }) {
-  const vacio = data.atencionMedica.total === 0 && data.servicios.length === 0 && !data.ingresoBruto;
+  const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue;
   return (
     <div className="card rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       <div className="text-center">
@@ -192,14 +192,14 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
           <div className="blk">
             <h3 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("atencionMedica")}</h3>
             <div className="am flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
-              <span title={t("tip.nuevas")}><span className="font-semibold">N:</span> {nf.format(data.atencionMedica.nuevas)}</span>
-              <span title={t("tip.seguimientos")}><span className="font-semibold">S:</span> {nf.format(data.atencionMedica.seguimientos)}</span>
-              <span className="ml-auto font-semibold">{t("total")} {nf.format(data.atencionMedica.total)}</span>
+              <span title={t("tip.nuevas")}><span className="font-semibold">N:</span> {nf.format(data.medicalCare.newCount)}</span>
+              <span title={t("tip.seguimientos")}><span className="font-semibold">S:</span> {nf.format(data.medicalCare.followUpCount)}</span>
+              <span className="ml-auto font-semibold">{t("total")} {nf.format(data.medicalCare.total)}</span>
             </div>
           </div>
 
           {/* Servicios especializados */}
-          {data.servicios.length > 0 && (
+          {data.services.length > 0 && (
             <div className="blk">
               <h3 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("servicios")}</h3>
               <table className="w-full text-sm">
@@ -211,11 +211,11 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {data.servicios.map((s) => (
-                    <tr key={s.clave}>
-                      <td className="py-1.5 pr-3 font-medium">{s.nombre}</td>
-                      <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.aplicados)}</td>
-                      <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.vendidos)}</td>
+                  {data.services.map((s) => (
+                    <tr key={s.slug}>
+                      <td className="py-1.5 pr-3 font-medium">{s.name}</td>
+                      <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.applied)}</td>
+                      <td className="r px-3 py-1.5 text-right tabular-nums">{nf.format(s.sold)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -226,7 +226,7 @@ function DiariaCard({ centro, fecha, data, t }: { centro: string; fecha: string;
           {/* Ingreso bruto */}
           <div className="ingreso flex items-center justify-between border-t-2 border-foreground pt-3 text-base font-bold">
             <span>{t("ingresoBruto")}</span>
-            <span className="tabular-nums">{money.format(data.ingresoBruto ?? 0)}</span>
+            <span className="tabular-nums">{money.format(data.grossRevenue ?? 0)}</span>
           </div>
         </div>
       )}

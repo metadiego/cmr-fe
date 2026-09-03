@@ -3,16 +3,16 @@ import type { Paciente } from "@/lib/api/pacientes";
 // Nombre para MOSTRAR: SIEMPRE prefiere `nombreMostrar` (lo compone el BE por config del centro —
 // apellido primero por defecto); solo si faltara, compone como respaldo. NO componer el orden aquí.
 // Handoff nombre-del-paciente.
-export function fullName(p: { nombres?: string | null; apellidos?: string | null; nombreMostrar?: string | null }): string {
-  if (p.nombreMostrar && p.nombreMostrar.trim()) return p.nombreMostrar.trim();
-  const name = [p.nombres, p.apellidos].filter(Boolean).join(" ").trim();
+export function fullName(p: { firstName?: string | null; lastName?: string | null; displayName?: string | null }): string {
+  if (p.displayName && p.displayName.trim()) return p.displayName.trim();
+  const name = [p.firstName, p.lastName].filter(Boolean).join(" ").trim();
   return name || "—";
 }
 
 // Up to two uppercase initials for the avatar fallback.
-export function initials(p: Pick<Paciente, "nombres" | "apellidos">): string {
-  const a = p.nombres?.trim()?.[0] ?? "";
-  const b = p.apellidos?.trim()?.[0] ?? "";
+export function initials(p: Pick<Paciente, "firstName" | "lastName">): string {
+  const a = p.firstName?.trim()?.[0] ?? "";
+  const b = p.lastName?.trim()?.[0] ?? "";
   return (a + b).toUpperCase() || "?";
 }
 

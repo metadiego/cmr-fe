@@ -78,10 +78,10 @@ export function ColumnConfigDialog({
     Array.isArray(rEf.productoIds) ? (rEf.productoIds as string[]).map(String) : [],
   );
 
-  const [tipo, setTipo] = React.useState<string>(col.tipo);
+  const [tipo, setTipo] = React.useState<string>(col.type);
   const [binding, setBinding] = React.useState(col.binding ?? "");
   const [editable, setEditable] = React.useState(!!col.editable);
-  const [permiso, setPermiso] = React.useState(col.permiso ?? "");
+  const [permiso, setPermiso] = React.useState(col.permissionSlug ?? "");
   const [optionsSource, setOptionsSource] = React.useState((r.optionsSource as string) ?? "");
   const [writeBinding, setWriteBinding] = React.useState((r.writeBinding as string) ?? "");
   const [transition, setTransition] = React.useState((r.transition as string) ?? "");
@@ -127,10 +127,10 @@ export function ColumnConfigDialog({
     setBusy(true);
     try {
       const payload = {
-        tipo,
+        type: tipo,
         binding: binding.trim(),
         editable,
-        permiso: permiso.trim() || undefined,
+        permissionSlug: permiso.trim() || undefined,
         render: buildRender(),
       } as unknown as UpdateColumnaInput;
       await actualizarColumna(col.id, payload);
@@ -234,7 +234,7 @@ export function ColumnConfigDialog({
             <Select value={transition} onValueChange={setTransition}>
               <SelectTrigger className="w-full"><SelectValue placeholder="—" /></SelectTrigger>
               <SelectContent>
-                {transiciones.map((tr) => <SelectItem key={tr.clave} value={tr.clave}>{tr.clave}</SelectItem>)}
+                {transiciones.map((tr) => <SelectItem key={tr.slug} value={tr.slug}>{tr.slug}</SelectItem>)}
               </SelectContent>
             </Select>
           </Field>
@@ -313,7 +313,7 @@ function ProductosGrupoConfig({
     if (!term) return [];
     return pool
       .filter((p) => !chosen.has(p.id))
-      .filter((p) => `${p.nombre} ${p.sku ?? ""}`.toLowerCase().includes(term))
+      .filter((p) => `${p.name} ${p.sku ?? ""}`.toLowerCase().includes(term))
       .slice(0, 12);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, pool, productoIds]);
@@ -329,7 +329,7 @@ function ProductosGrupoConfig({
   };
   const nombreDe = (id: string) => {
     const p = prodMap.get(id);
-    return p ? { nombre: p.nombre, sku: p.sku } : { nombre: id.slice(0, 8), sku: "" };
+    return p ? { nombre: p.name, sku: p.sku } : { nombre: id.slice(0, 8), sku: "" };
   };
 
   return (
@@ -341,7 +341,7 @@ function ProductosGrupoConfig({
           <SelectContent>
             <SelectItem value={GRUPO_SERVICIO}>{t("cfgGrupoServicio")}</SelectItem>
             {grupos.map((g) => (
-              <SelectItem key={g.id} value={g.id}>{grupoLabel(g.labelKey, g.clave)}</SelectItem>
+              <SelectItem key={g.id} value={g.id}>{grupoLabel(g.labelKey, g.slug)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -357,7 +357,7 @@ function ProductosGrupoConfig({
                 <li key={p.id}>
                   <button type="button" onClick={() => add(p.id)} className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-muted">
                     <span className="font-mono text-xs text-muted-foreground">{p.sku || "—"}</span>
-                    <span className="truncate">{p.nombre}</span>
+                    <span className="truncate">{p.name}</span>
                   </button>
                 </li>
               ))}

@@ -56,7 +56,7 @@ export function ConfigAltaAdmin() {
   // Sembrar la selección desde la config del BE la primera vez que carga. Ajuste de estado EN RENDER
   // (patrón guardado de React), NO setState-en-effect (que el linter prohíbe).
   if (state.kind === "ok" && sel === null) {
-    setSel(new Set(state.data.camposObligatorios));
+    setSel(new Set(state.data.requiredFields));
   }
 
   const requerido = (campo: string) => sel?.has(campo) ?? false;
@@ -74,12 +74,12 @@ export function ConfigAltaAdmin() {
     setSaving(true);
     try {
       const res = await updateConfigAltaPacientes(
-        { camposObligatorios: [...sel], alcance },
+        { requiredFields: [...sel], scope: alcance },
         centro,
       );
       toast.success(
         alcance === "todos"
-          ? t("guardadoTodos", { n: res.centros?.length ?? 0 })
+          ? t("guardadoTodos", { n: res.centers?.length ?? 0 })
           : t("guardado"),
       );
       reload();

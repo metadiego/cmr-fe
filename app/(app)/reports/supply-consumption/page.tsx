@@ -38,15 +38,15 @@ export default function ConsumoInsumosPage() {
   const [hasta, setHasta] = React.useState(isoDay(hoy));
   const [estimado, setEstimado] = React.useState<EstimadoFiltro>("true");
   // La query "aplicada" (se dispara al pulsar Buscar), separada de los inputs.
-  const [query, setQuery] = React.useState({ desde: isoDay(primero), hasta: isoDay(hoy), estimado: "true" as EstimadoFiltro });
+  const [query, setQuery] = React.useState({ from: isoDay(primero), to: isoDay(hoy), estimated: "true" as EstimadoFiltro });
 
   const { state } = useResource<ConsumoInsumo[]>(
     () => getConsumoInsumos(query, centro),
-    [query.desde, query.hasta, query.estimado, centro],
+    [query.from, query.to, query.estimated, centro],
   );
   const rows = state.kind === "ok" ? state.data : [];
-  const totalUnidades = rows.reduce((s, r) => s + (r.cantidad ?? 0), 0);
-  const totalFacturas = rows.reduce((s, r) => s + (r.facturas ?? 0), 0);
+  const totalUnidades = rows.reduce((s, r) => s + (r.quantity ?? 0), 0);
+  const totalFacturas = rows.reduce((s, r) => s + (r.invoices ?? 0), 0);
 
   const [open, setOpen] = React.useState<Set<string>>(new Set());
   function toggle(id: string) {
@@ -58,7 +58,7 @@ export default function ConsumoInsumosPage() {
   }
 
   function buscar() {
-    setQuery({ desde, hasta, estimado });
+    setQuery({ from: desde, to: hasta, estimated: estimado });
   }
 
   function exportarCsv() {
@@ -66,16 +66,16 @@ export default function ConsumoInsumosPage() {
     const lines = [head.join(",")];
     rows.forEach((r) => {
       if (r.porTerapia?.length) {
-        r.porTerapia.forEach((pt) => lines.push([csv(r.insumo), r.cantidad, r.facturas, csv(pt.terapia) + `=${pt.cantidad}`].join(",")));
+        r.porTerapia.forEach((pt) => lines.push([csv(r.insumo), r.quantity, r.invoices, csv(pt.terapia) + `=${pt.quantity}`].join(",")));
       } else {
-        lines.push([csv(r.insumo), r.cantidad, r.facturas, ""].join(","));
+        lines.push([csv(r.insumo), r.quantity, r.invoices, ""].join(","));
       }
     });
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `consumo-insumos_${query.desde}_${query.hasta}.csv`;
+    a.download = `consumo-insumos_${query.from}_${query.to}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -156,8 +156,8 @@ export default function ConsumoInsumosPage() {
                 <React.Fragment key={r.insumoId}>
                   <tr className={cn("hover:bg-muted/30", tieneTerapias && "cursor-pointer")} onClick={() => tieneTerapias && toggle(r.insumoId)}>
                     <td className="px-3 py-2 font-medium">{r.insumo}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{num(r.cantidad)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{num(r.facturas)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{num(r.quantity)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{num(r.invoices)}</td>
                     <td className="px-3 py-2 text-right">
                       {tieneTerapias && (
                         <HugeiconsIcon icon={ArrowRight01Icon} className={cn("size-4 transition-transform", isOpen && "rotate-90")} />
@@ -167,7 +167,7 @@ export default function ConsumoInsumosPage() {
                   {isOpen && r.porTerapia.map((pt) => (
                     <tr key={r.insumoId + pt.terapiaId} className="bg-muted/20 text-xs">
                       <td className="px-3 py-1.5 pl-8 text-muted-foreground">{pt.terapia}</td>
-                      <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{num(pt.cantidad)}</td>
+                      <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">{num(pt.quantity)}</td>
                       <td className="px-3 py-1.5" />
                       <td className="px-3 py-1.5" />
                     </tr>

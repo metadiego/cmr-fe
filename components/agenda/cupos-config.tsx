@@ -52,7 +52,7 @@ function defaultCentro(centros: Centro[]): string {
 // (so it resyncs after a save instead of showing stale typed values).
 function sig(cupos: Cupo[]): string {
   return cupos
-    .map((c) => `${c.id}:${c.cantidad}`)
+    .map((c) => `${c.id}:${c.quantity}`)
     .sort()
     .join(",");
 }
@@ -73,7 +73,7 @@ export function CuposConfig() {
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
   const tipos = (tiposRes.state.kind === "ok" ? tiposRes.state.data : []).filter(
-    (t) => t.activo,
+    (t) => t.active,
   );
 
   // Scope selector (persisted): a center id, or GLOBAL (all centers).
@@ -115,18 +115,18 @@ export function CuposConfig() {
   const globalCupos = globalRes.state.kind === "ok" ? globalRes.state.data : [];
 
   const inView = (c: Cupo) =>
-    c.tipoCitaId != null && // esta grilla es de tipos de cita; los cupos de servicio se gestionan aparte
+    c.appointmentTypeId != null && // esta grilla es de tipos de cita; los cupos de servicio se gestionan aparte
     (mode === "fecha"
-      ? c.fecha === fecha
-      : c.fecha == null &&
-        (daySel === DEFAULT_DAY ? c.diaSemana == null : c.diaSemana === Number(daySel)));
+      ? c.date === fecha
+      : c.date == null &&
+        (daySel === DEFAULT_DAY ? c.dayOfWeek == null : c.dayOfWeek === Number(daySel)));
 
   const viewCupos = allCupos.filter(inView);
   // Inheritance only applies to a center's DEFAULT view (inherits the global default).
   const showsInheritance =
     scope === "centro" && mode === "weekday" && daySel === DEFAULT_DAY;
   const inheritedView = showsInheritance
-    ? globalCupos.filter((c) => c.fecha == null && c.diaSemana == null)
+    ? globalCupos.filter((c) => c.date == null && c.dayOfWeek == null)
     : [];
 
   const loading =
@@ -147,7 +147,7 @@ export function CuposConfig() {
           <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
           <SelectContent>
             {centros.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
             {canGlobal && <SelectItem value={GLOBAL}>{t("cupos.allCenters")}</SelectItem>}
           </SelectContent>
@@ -254,7 +254,7 @@ type Cell = { id?: string; value: string; inherited: number | null };
 type Row = { hora: string; cells: Record<string, Cell> };
 
 function buildRows(cupos: Cupo[], inherited: Cupo[], tipos: TipoCita[]): Row[] {
-  const horas = new Set<string>([...cupos, ...inherited].map((c) => c.hora));
+  const horas = new Set<string>([...cupos, ...inherited].map((c) => c.time));
   const rows = new Map<string, Row>();
   for (const hora of [...horas].sort()) {
     rows.set(hora, {
@@ -265,19 +265,19 @@ function buildRows(cupos: Cupo[], inherited: Cupo[], tipos: TipoCita[]): Row[] {
     });
   }
   for (const c of inherited) {
-    if (!c.tipoCitaId) continue; // esta grilla es de tipos de cita; ignora cupos de servicio
-    const cell = rows.get(c.hora)?.cells[c.tipoCitaId];
+    if (!c.appointmentTypeId) continue; // esta grilla es de tipos de cita; ignora cupos de servicio
+    const cell = rows.get(c.time)?.cells[c.appointmentTypeId];
     if (cell) {
-      cell.inherited = c.cantidad;
-      cell.value = String(c.cantidad);
+      cell.inherited = c.quantity;
+      cell.value = String(c.quantity);
     }
   }
   for (const c of cupos) {
-    if (!c.tipoCitaId) continue;
-    const cell = rows.get(c.hora)?.cells[c.tipoCitaId];
+    if (!c.appointmentTypeId) continue;
+    const cell = rows.get(c.time)?.cells[c.appointmentTypeId];
     if (cell) {
       cell.id = c.id;
-      cell.value = String(c.cantidad);
+      cell.value = String(c.quantity);
     }
   }
   return [...rows.values()];
@@ -353,19 +353,19 @@ function CuposGrid({
             // 0/blank, or reverted to the inherited value → drop the override.
             ops.push(deleteCupo(cell.id, { scope, centroId }));
           } else {
-            ops.push(updateCupo(cell.id, { cantidad: n, scope }, centroId));
+            ops.push(updateCupo(cell.id, { quantity: n, scope }, centroId));
           }
         } else if (valid && n !== cell.inherited) {
           // No own row and value differs from inherited → create an override.
           ops.push(
             createCupo(
               {
-                hora: r.hora,
-                tipoCitaId: tipo.id,
-                cantidad: n,
+                time: r.hora,
+                appointmentTypeId: tipo.id,
+                quantity: n,
                 scope,
-                ...(diaSemana != null ? { diaSemana } : {}),
-                ...(fecha ? { fecha } : {}),
+                ...(diaSemana != null ? { dayOfWeek: diaSemana } : {}),
+                ...(fecha ? { date: fecha } : {}),
               },
               centroId,
             ),
@@ -396,7 +396,7 @@ function CuposGrid({
                 <th key={tipo.id} className="px-3 py-2 text-left font-medium">
                   <span className="inline-flex items-center gap-1.5">
                     <span className="inline-block size-2.5 rounded-full" style={{ backgroundColor: tipo.color }} />
-                    {tipo.nombre}
+                    {tipo.name}
                   </span>
                 </th>
               ))}

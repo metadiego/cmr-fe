@@ -56,7 +56,7 @@ export function CeldaSelect({
     setBusy(true);
     setOptimistic(next); // instant feedback
     try {
-      const { persistencia } = await editarCelda({ tablero, entidadId, columna, valor: next }, centroId);
+      const { persistencia } = await editarCelda({ boardSlug: tablero, entityId: entidadId, column: columna, value: next }, centroId);
       // Certifica con la base. Si ok:false, soltamos el optimista y onSaved() re-lee la verdad.
       const ok = notifyPersistencia(persistencia, etiqueta);
       if (!ok) setOptimistic(null);

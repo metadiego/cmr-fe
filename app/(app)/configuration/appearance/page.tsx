@@ -144,9 +144,9 @@ export default function AparienciaCorporativaPage() {
     setCreando(true);
     try {
       const nuevo = await createOverride({
-        nombre: nombreOverride.trim(),
+        name: nombreOverride.trim(),
         config: mezclarSoloTema(null, sistema.value),
-        ...(hastaOverride ? { vigenteHasta: hastaOverride } : {}),
+        ...(hastaOverride ? { validUntil: hastaOverride } : {}),
       });
       setOverrides((prev) => [nuevo, ...prev]);
       setNombreOverride("");
@@ -162,7 +162,7 @@ export default function AparienciaCorporativaPage() {
   async function quitarOverride(o: Override) {
     // Un DELETE que le cambia la pantalla a todo el mundo al instante y no se puede deshacer: se
     // pregunta, igual que antes de borrar un rol o revocar un centro.
-    if (!window.confirm(t("overrideRemoveConfirm", { nombre: o.nombre || o.id }))) return;
+    if (!window.confirm(t("overrideRemoveConfirm", { nombre: o.name || o.id }))) return;
     const id = o.id;
     try {
       await deleteOverride(id);
@@ -237,7 +237,7 @@ export default function AparienciaCorporativaPage() {
                 <SelectContent>
                   {centros.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.nombre}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -311,10 +311,10 @@ export default function AparienciaCorporativaPage() {
               {overrides.map((o) => (
                 <li key={o.id} className="flex items-center justify-between gap-4 py-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{o.nombre || o.id}</p>
+                    <p className="truncate text-sm font-medium">{o.name || o.id}</p>
                     <p className="text-xs text-muted-foreground">
-                      {o.vigenteHasta
-                        ? t("overrideUntilValue", { fecha: formatFechaSolo(o.vigenteHasta) })
+                      {o.validUntil
+                        ? t("overrideUntilValue", { fecha: formatFechaSolo(o.validUntil) })
                         : t("overrideNoEnd")}
                     </p>
                   </div>

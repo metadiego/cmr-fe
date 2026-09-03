@@ -71,7 +71,7 @@ export function CambiarEmailDialog({
         <DialogHeader>
           <DialogTitle>{t("titulo")}</DialogTitle>
           <DialogDescription>
-            {t("desc", { nombre: perfil ? [perfil.nombre, perfil.apellido].filter(Boolean).join(" ") : "" })}
+            {t("desc", { nombre: perfil ? [perfil.name, perfil.lastName].filter(Boolean).join(" ") : "" })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">

@@ -77,10 +77,10 @@ export function CitaModal({
   const isEdit = !!cita;
 
   const me = useMe();
-  const callcenterId = me.kind === "ok" ? me.me.personalId ?? undefined : undefined;
+  const callcenterId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
   const { map: estadosMap, estados } = useEstados();
   // On create the state is the catalog's initial one; on edit it's the cita's.
-  const estadoClave = cita?.estado ?? estados.find((e) => e.esInicial)?.clave ?? "programada";
+  const estadoClave = cita?.status ?? estados.find((e) => e.isInitial)?.slug ?? "programada";
   const estadoDef = estadosMap.get(estadoClave);
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
@@ -91,33 +91,33 @@ export function CitaModal({
     centroSel || cita?.clinicId || centroId || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
 
   const [paciente, setPaciente] = React.useState<Paciente | null>(pacienteInicial ?? null);
-  const [tipoCitaId, setTipoCitaId] = React.useState(cita?.tipoCitaId ?? tipoCitaIdInicial ?? "");
-  // El médico llega PRESELECCIONADO: el de la cita (edición) o el asignado al paciente (`paciente.medicoId`).
+  const [tipoCitaId, setTipoCitaId] = React.useState(cita?.appointmentTypeId ?? tipoCitaIdInicial ?? "");
+  // El médico llega PRESELECCIONADO: el de la cita (edición) o el asignado al paciente (`paciente.doctorId`).
   // Vacío = "Sin médico" (opción nula, nunca un registro comodín). Handoff agenda-estado-y-el-medico-comodin.
-  const medicoDelPaciente = (p: Paciente | null) => (p as { medicoId?: string | null } | null)?.medicoId ?? "";
-  const [medicoId, setMedicoId] = React.useState(cita?.medicoId ?? medicoDelPaciente(pacienteInicial ?? null));
-  const [hora, setHora] = React.useState(cita?.hora ?? horaInicial ?? "09:00");
+  const medicoDelPaciente = (p: Paciente | null) => (p as { doctorId?: string | null } | null)?.doctorId ?? "";
+  const [medicoId, setMedicoId] = React.useState(cita?.doctorId ?? medicoDelPaciente(pacienteInicial ?? null));
+  const [hora, setHora] = React.useState(cita?.time ?? horaInicial ?? "09:00");
   const [horaFin, setHoraFin] = React.useState(() => {
-    if (cita?.horaFin) return cita.horaFin;
-    const tp = tipos.find((x) => x.id === (cita?.tipoCitaId ?? tipoCitaIdInicial));
-    const start = cita?.hora ?? horaInicial ?? "09:00";
-    return tp ? addMinutes(start, tp.duracionMin) : "09:30";
+    if (cita?.endTime) return cita.endTime;
+    const tp = tipos.find((x) => x.id === (cita?.appointmentTypeId ?? tipoCitaIdInicial));
+    const start = cita?.time ?? horaInicial ?? "09:00";
+    return tp ? addMinutes(start, tp.durationMinutes) : "09:30";
   });
-  const [esPrimeraVez, setEsPrimeraVez] = React.useState(cita?.esPrimeraVez ?? false);
+  const [esPrimeraVez, setEsPrimeraVez] = React.useState(cita?.isFirstVisit ?? false);
   // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Sale del
   // CATÁLOGO (`esInicial`), no de una regla escrita aquí: antes una cita de HOY nacía "confirmada", y
   // confirmada entra DIRECTA al tablero de Atención cuando todavía no se está seguro de que el paciente
   // venga. Confirmar es una decisión del usuario. Cambiarlo mañana es marcar otro estado como inicial en
   // el catálogo del BE, sin tocar este archivo.
-  const claveInicial = (estados.find((e) => e.esInicial)?.clave ?? "programada") as
+  const claveInicial = (estados.find((e) => e.isInitial)?.slug ?? "programada") as
     | "programada"
     | "confirmada";
   // El catálogo llega por red: el estado se DERIVA de su inicial hasta que el usuario elija a mano
   // (sin setState en efecto, que dispara renders en cascada / lo marca el React Compiler).
   const [estadoElegido, setEstadoElegido] = React.useState<"programada" | "confirmada" | null>(null);
   const estadoCrear = estadoElegido ?? claveInicial;
-  const [motivo, setMotivo] = React.useState(cita?.motivo ?? "");
-  const [notas, setNotas] = React.useState(cita?.notas ?? "");
+  const [motivo, setMotivo] = React.useState(cita?.reason ?? "");
+  const [notas, setNotas] = React.useState(cita?.notes ?? "");
   const [submitting, setSubmitting] = React.useState(false);
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
 
@@ -128,18 +128,18 @@ export function CitaModal({
   // rechazar. Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
   const yaSeguimiento = !!(paciente as { atendidoPor?: string | null } | null)?.atendidoPor;
   const esPrimeraVezEff = yaSeguimiento ? false : esPrimeraVez;
-  const medicoRequired = !!tipo?.requiereMedico && !esPrimeraVezEff;
+  const medicoRequired = !!tipo?.requiresDoctor && !esPrimeraVezEff;
 
   // Pick a type → auto-fill end time (start + duración), reset any prior warning.
   function onTipoChange(id: string) {
     setTipoCitaId(id);
     const tp = tipos.find((x) => x.id === id);
-    if (tp) setHoraFin(addMinutes(hora, tp.duracionMin));
+    if (tp) setHoraFin(addMinutes(hora, tp.durationMinutes));
     setWarn(null);
   }
   function onHoraChange(value: string) {
     setHora(value);
-    if (tipo) setHoraFin(addMinutes(value, tipo.duracionMin));
+    if (tipo) setHoraFin(addMinutes(value, tipo.durationMinutes));
     setWarn(null);
   }
 
@@ -161,11 +161,11 @@ export function CitaModal({
       if (warn === null) {
         const res = await validarCita(
           {
-            medicoId: medicoId || undefined,
-            fecha,
-            hora,
-            horaFin,
-            tipoCitaId,
+            doctorId: medicoId || undefined,
+            date: fecha,
+            time: hora,
+            endTime: horaFin,
+            appointmentTypeId: tipoCitaId,
             excluirCitaId: cita?.id,
           },
           effectiveCentro || undefined,
@@ -178,20 +178,20 @@ export function CitaModal({
       }
 
       const payload = {
-        pacienteId: paciente.id,
-        tipoCitaId,
-        medicoId: medicoId || undefined,
-        fecha,
-        hora,
-        horaFin,
-        canal: "callcenter" as const,
-        esPrimeraVez: esPrimeraVezEff,
-        motivo: motivo.trim() || undefined,
-        notas: notas.trim() || undefined,
+        patientId: paciente.id,
+        appointmentTypeId: tipoCitaId,
+        doctorId: medicoId || undefined,
+        date: fecha,
+        time: hora,
+        endTime: horaFin,
+        channel: "callcenter" as const,
+        isFirstVisit: esPrimeraVezEff,
+        reason: motivo.trim() || undefined,
+        notes: notas.trim() || undefined,
       };
       const { advertencias } = isEdit
         ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
-        : await crearCitaAgenda({ ...payload, estado: estadoCrear, callcenterId }, effectiveCentro || undefined);
+        : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
       toast.success(isEdit ? t("updated") : t("created"));
       for (const a of advertencias) {
@@ -222,7 +222,7 @@ export function CitaModal({
                 </SelectTrigger>
                 <SelectContent>
                   {centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -263,7 +263,7 @@ export function CitaModal({
                   <SelectItem value={NONE_MEDICO}>{t("noDoctor")}</SelectItem>
                   {medicos.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
-                      {[m.nombre, m.apellido].filter(Boolean).join(" ")}
+                      {[m.name, m.lastName].filter(Boolean).join(" ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -282,7 +282,7 @@ export function CitaModal({
                     <SelectItem key={x.id} value={x.id}>
                       <span className="inline-flex items-center gap-2">
                         <span className="size-2.5 rounded-full" style={{ backgroundColor: x.color }} />
-                        {x.nombre}
+                        {x.name}
                       </span>
                     </SelectItem>
                   ))}
@@ -348,7 +348,7 @@ export function CitaModal({
               <p className="font-medium text-warning-foreground">{t("overlapWarn")}</p>
               <ul className="mt-1 text-xs text-muted-foreground">
                 {warn.map((c) => (
-                  <li key={c.citaId}>· {c.hora}–{c.horaFin}</li>
+                  <li key={c.appointmentId}>· {c.time}–{c.endTime}</li>
                 ))}
               </ul>
             </div>

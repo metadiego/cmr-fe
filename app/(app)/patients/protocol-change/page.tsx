@@ -60,7 +60,7 @@ export default function CambioProtocoloPage() {
     () => (pacienteId ? getPendientesEntrega(pacienteId, centro) : Promise.resolve([])),
     [pacienteId, centro],
   );
-  const pendientes = (pendRes.state.kind === "ok" ? pendRes.state.data : []).filter((p) => (p.pendiente ?? 0) > 0 || (p.sesionesTotales ?? 0) > 0);
+  const pendientes = (pendRes.state.kind === "ok" ? pendRes.state.data : []).filter((p) => (p.pendiente ?? 0) > 0 || (p.totalSessions ?? 0) > 0);
 
   const catRes = useResource<Producto[]>(() => (centro ? getCatalogoFacturacion(centro) : Promise.resolve([])), [centro]);
   const catalogo = catRes.state.kind === "ok" ? catRes.state.data : [];
@@ -95,11 +95,11 @@ export default function CambioProtocoloPage() {
   const nuevosValidos: CambioProtocaloNuevo[] = lineas
     .filter((l) => l.productoId && Number(l.sesiones) >= 1)
     .map((l) => ({
-      productoId: l.productoId,
-      sesionesTotales: Math.max(1, Math.floor(Number(l.sesiones) || 0)),
-      ...(l.cantidad.trim() ? { cantidad: Number(l.cantidad) } : {}),
+      productId: l.productoId,
+      totalSessions: Math.max(1, Math.floor(Number(l.sesiones) || 0)),
+      ...(l.cantidad.trim() ? { quantity: Number(l.cantidad) } : {}),
       ...(l.areas.trim() ? { areas: Number(l.areas) } : {}),
-      ...(l.dosis.trim() ? { dosis: Number(l.dosis) } : {}),
+      ...(l.dosis.trim() ? { dose: Number(l.dosis) } : {}),
     }));
 
   const puedeAplicar = origenSel.size > 0 && nuevosValidos.length > 0 && motivo.trim().length > 0 && !busy;
@@ -114,16 +114,16 @@ export default function CambioProtocoloPage() {
         // el reintegro es por producto del paquete origen seleccionado
         .map((r) => {
           const p = pendientes.find((x) => x.id === r.paqueteId);
-          return p ? { productoId: p.productoId, unidadesSelladas: r.n } : null;
+          return p ? { productId: p.productId, unidadesSelladas: r.n } : null;
         })
-        .filter(Boolean) as { productoId: string; unidadesSelladas: number }[];
+        .filter(Boolean) as { productId: string; unidadesSelladas: number }[];
       const res = await aplicarCambioProtocolo(
         pacienteId,
         {
           paqueteOrigenIds: [...origenSel],
-          nuevos: nuevosValidos,
-          motivo: motivo.trim(),
-          ...(medicoId ? { medicoId } : {}),
+          newOnes: nuevosValidos,
+          reason: motivo.trim(),
+          ...(medicoId ? { doctorId: medicoId } : {}),
           ...(reint.length ? { reintegros: reint } : {}),
         },
         centro,
@@ -178,7 +178,7 @@ export default function CambioProtocoloPage() {
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium">{p.productoNombre ?? p.sku ?? "—"}</span>
                         <span className="block text-xs text-muted-foreground">
-                          {t("pendientesN", { n: p.pendiente ?? 0, total: p.sesionesTotales ?? 0 })}
+                          {t("pendientesN", { n: p.pendiente ?? 0, total: p.totalSessions ?? 0 })}
                         </span>
                       </span>
                     </label>
@@ -211,7 +211,7 @@ export default function CambioProtocoloPage() {
                     <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
                       <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>
                       <SelectContent>
-                        {catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+                        {catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     {lineas.length > 1 && (
@@ -238,7 +238,7 @@ export default function CambioProtocoloPage() {
               <Select value={medicoId || undefined} onValueChange={setMedicoId}>
                 <SelectTrigger className="h-9"><SelectValue placeholder={t("medicoPlaceholder")} /></SelectTrigger>
                 <SelectContent>
-                  {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+                  {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

@@ -128,7 +128,7 @@ export function AuditoriaLog() {
   const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
   const centroNombre = (id: string | null) =>
-    id ? centros.find((c) => c.id === id)?.nombre ?? id.slice(0, 8) : "—";
+    id ? centros.find((c) => c.id === id)?.name ?? id.slice(0, 8) : "—";
 
   // Resumen (conteos, no filas) para las tarjetas de la cabecera. Recalcula con el rango de fechas.
   const resumenKey = `${desde}|${hasta}`;
@@ -351,7 +351,7 @@ export function AuditoriaLog() {
         {verTodos ? (
           <div className="space-y-1">
             <Label className="text-xs">{t("col.centro")}</Label>
-            {selectAll(clinicId, onFilter(setClinicId), t("todos"), centros.map((c) => ({ value: c.id, label: c.nombre })))}
+            {selectAll(clinicId, onFilter(setClinicId), t("todos"), centros.map((c) => ({ value: c.id, label: c.name })))}
           </div>
         ) : null}
       </div>

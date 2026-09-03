@@ -16,9 +16,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const EMPTY: EstadisticasServicios = {
-  totales: { sesiones: 0, pacientes: 0, participaciones: 0, serviciosActivos: 0 },
+  totals: { sessions: 0, patients: 0, participaciones: 0, serviciosActivos: 0 },
   general: [],
-  servicios: [],
+  services: [],
 };
 
 function isoDay(d: Date) {
@@ -91,22 +91,22 @@ export default function EstadisticasServiciosPage() {
 
   // Servicios con actividad = pestañas (y columnas de la matriz GENERAL).
   const serviciosActivos = React.useMemo(
-    () => (data?.servicios ?? []).filter((s) => (s.sesiones ?? 0) > 0),
+    () => (data?.services ?? []).filter((s) => (s.sessions ?? 0) > 0),
     [data],
   );
   // Pestaña efectiva derivada (sin efecto): si la elegida ya no existe (cambió el rango), cae a GENERAL.
-  const tabEfectivo = tab === "general" || serviciosActivos.some((s) => s.clave === tab) ? tab : "general";
+  const tabEfectivo = tab === "general" || serviciosActivos.some((s) => s.slug === tab) ? tab : "general";
 
-  const centroNombre = gate.centros.find((c) => c.id === gate.centro)?.nombre ?? "";
+  const centroNombre = gate.centros.find((c) => c.id === gate.centro)?.name ?? "";
   const emailImpresor = me.kind === "ok" ? (me.me.email ?? "") : "";
 
   function exportarCsv() {
     if (!data) return;
     const cols = serviciosActivos;
-    const head = [t("colNombre"), ...cols.map((c) => c.nombre), t("colTotal")];
+    const head = [t("colNombre"), ...cols.map((c) => c.name), t("colTotal")];
     const lines = [head.map(csv).join(",")];
     for (const f of data.general) {
-      lines.push([csv(f.nombre), ...cols.map((c) => f.porServicio[c.clave] ?? 0), f.total].join(","));
+      lines.push([csv(f.name), ...cols.map((c) => f.porServicio[c.slug] ?? 0), f.total].join(","));
     }
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -182,17 +182,17 @@ export default function EstadisticasServiciosPage() {
               <>
                 {/* Totales del periodo */}
                 <div className="stats grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <StatCard label={t("totSesiones")} value={nf.format(data.totales.sesiones)} />
-                  <StatCard label={t("totPacientes")} value={nf.format(data.totales.pacientes)} />
-                  <StatCard label={t("totParticipaciones")} value={nf.format(data.totales.participaciones)} />
-                  <StatCard label={t("totServicios")} value={nf.format(data.totales.serviciosActivos)} />
+                  <StatCard label={t("totSesiones")} value={nf.format(data.totals.sessions)} />
+                  <StatCard label={t("totPacientes")} value={nf.format(data.totals.patients)} />
+                  <StatCard label={t("totParticipaciones")} value={nf.format(data.totals.participaciones)} />
+                  <StatCard label={t("totServicios")} value={nf.format(data.totals.serviciosActivos)} />
                 </div>
 
                 <Tabs value={tabEfectivo} onValueChange={setTab} className="mt-6">
                   <TabsList className="no-print max-w-full flex-wrap justify-start overflow-x-auto">
                     <TabsTrigger value="general">{t("general")}</TabsTrigger>
                     {serviciosActivos.map((s) => (
-                      <TabsTrigger key={s.clave} value={s.clave}>{s.nombre}</TabsTrigger>
+                      <TabsTrigger key={s.slug} value={s.slug}>{s.name}</TabsTrigger>
                     ))}
                   </TabsList>
 
@@ -207,20 +207,20 @@ export default function EstadisticasServiciosPage() {
                             <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                               <th className="sticky left-0 z-10 bg-muted/60 px-3 py-2 font-semibold">{t("colNombre")}</th>
                               {serviciosActivos.map((s) => (
-                                <th key={s.clave} className="whitespace-nowrap px-3 py-2 text-right font-semibold" title={s.nombre}>{s.nombre}</th>
+                                <th key={s.slug} className="whitespace-nowrap px-3 py-2 text-right font-semibold" title={s.name}>{s.name}</th>
                               ))}
                               <th className="px-3 py-2 text-right font-semibold">{t("colTotal")}</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y">
                             {data.general.map((f, i) => {
-                              const sinAsignar = f.personalId == null;
+                              const sinAsignar = f.staffId == null;
                               return (
-                                <tr key={f.personalId ?? `s-${i}`} className="hover:bg-muted/30">
-                                  <td className={"sticky left-0 z-10 bg-background px-3 py-2 font-medium " + (sinAsignar ? "italic text-muted-foreground" : "")}>{f.nombre}</td>
+                                <tr key={f.staffId ?? `s-${i}`} className="hover:bg-muted/30">
+                                  <td className={"sticky left-0 z-10 bg-background px-3 py-2 font-medium " + (sinAsignar ? "italic text-muted-foreground" : "")}>{f.name}</td>
                                   {serviciosActivos.map((s) => {
-                                    const v = f.porServicio[s.clave] ?? 0;
-                                    return <td key={s.clave} className={"px-3 py-2 text-right tabular-nums " + (v === 0 ? "text-muted-foreground/40" : "")}>{v}</td>;
+                                    const v = f.porServicio[s.slug] ?? 0;
+                                    return <td key={s.slug} className={"px-3 py-2 text-right tabular-nums " + (v === 0 ? "text-muted-foreground/40" : "")}>{v}</td>;
                                   })}
                                   <td className="px-3 py-2 text-right font-bold tabular-nums">{f.total}</td>
                                 </tr>
@@ -234,7 +234,7 @@ export default function EstadisticasServiciosPage() {
 
                   {/* Una pestaña por servicio */}
                   {serviciosActivos.map((s) => (
-                    <TabsContent key={s.clave} value={s.clave} className="mt-4">
+                    <TabsContent key={s.slug} value={s.slug} className="mt-4">
                       <ServicioPanel servicio={s} />
                     </TabsContent>
                   ))}
@@ -270,9 +270,9 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
   return (
     <div className="space-y-5">
       <div className="rounded-md bg-card px-4 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-        <span className="font-semibold">{servicio.nombre}</span>
+        <span className="font-semibold">{servicio.name}</span>
         <span className="ml-2 text-muted-foreground">
-          {t("resumenServicio", { sesiones: servicio.sesiones, participaciones: servicio.participaciones, pacientes: servicio.pacientes })}
+          {t("resumenServicio", { sesiones: servicio.sessions, participaciones: servicio.participaciones, pacientes: servicio.patients })}
         </span>
       </div>
 
@@ -280,9 +280,9 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
         <p className="text-sm text-muted-foreground">{t("sinRoles")}</p>
       ) : (
         servicio.roles.map((r) => (
-          <section key={r.rol} className="region">
+          <section key={r.role} className="region">
             <h3 className="rol-cab mb-1.5 text-sm font-bold">
-              {t.has(`rol.${r.rol}`) ? t(`rol.${r.rol}`) : capitalizar(r.rol)}
+              {t.has(`rol.${r.role}`) ? t(`rol.${r.role}`) : capitalizar(r.role)}
               <span className="ml-2 font-normal text-muted-foreground">· {t("participacionesDivisor", { n: r.participaciones })}</span>
             </h3>
             <div className="overflow-x-auto rounded-md bg-card shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
@@ -297,10 +297,10 @@ function ServicioPanel({ servicio }: { servicio: EstServicio }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {r.filas.map((f) => {
+                  {r.rows.map((f) => {
                     const sinAsignar = f.personalId == null;
                     return (
-                      <tr key={f.personalId ?? `${r.rol}-${f.posicion}`} className="hover:bg-muted/30">
+                      <tr key={f.personalId ?? `${r.role}-${f.posicion}`} className="hover:bg-muted/30">
                         <td className="px-3 py-2 tabular-nums text-muted-foreground">{f.posicion}</td>
                         <td className={"px-3 py-2 font-medium " + (sinAsignar ? "italic text-muted-foreground" : "")}>{f.nombre}</td>
                         <td className="px-3 py-2 text-right tabular-nums">{f.participaciones}</td>

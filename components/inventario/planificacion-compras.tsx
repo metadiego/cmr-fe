@@ -75,15 +75,15 @@ export function PlanificacionCompras() {
 
   function aplicar() {
     setAplicados({
-      meses: Number(meses) || undefined,
+      months: Number(meses) || undefined,
       criterio1: Number(c1) || undefined,
       criterio2: Number(c2) || undefined,
-      desde: desde || undefined,
+      from: desde || undefined,
     });
   }
 
   const data = res.state.kind === "ok" ? res.state.data : null;
-  const centros = data?.centros ?? [];
+  const centros = data?.centers ?? [];
   const pos = data?.posAbiertas ?? [];
 
   // Editar cantidad de una PO (0 = quitar) → guarda y refresca para recomputar total/meses.
@@ -91,7 +91,7 @@ export function PlanificacionCompras() {
     const cantidad = Number(valor);
     if (!Number.isFinite(cantidad) || cantidad === original) return;
     try {
-      await actualizarItemOrden(poId, { productoId, cantidad });
+      await actualizarItemOrden(poId, { productId: productoId, quantity: cantidad });
       toast.success(t("guardado"));
       res.reload();
     } catch (e) {
@@ -113,22 +113,22 @@ export function PlanificacionCompras() {
   }
 
   // Recomendados = los que hay que pedir (pedir>0). Redondeado = Pedido Red.; manual = Nuevo Pedido (crudo).
-  const recomendados = (data?.productos ?? []).filter((p) => p.pedir > 0);
+  const recomendados = (data?.products ?? []).filter((p) => p.pedir > 0);
   async function crear(modo: "redondeado" | "manual") {
     if (!proveedorId || !almacenId) {
       toast.error(t("faltaProvAlm"));
       return;
     }
     const lineas = recomendados
-      .map((p) => ({ productoId: p.productoId, cantidad: modo === "manual" ? p.nuevoPedido : p.pedidoRedondeado }))
-      .filter((l) => l.cantidad > 0);
+      .map((p) => ({ productId: p.productId, quantity: modo === "manual" ? p.nuevoPedido : p.pedidoRedondeado }))
+      .filter((l) => l.quantity > 0);
     if (lineas.length === 0) {
       toast.warning(t("nadaQuePedir"));
       return;
     }
     setCreando(true);
     try {
-      const orden = await crearOrdenCompra({ proveedorId, almacenId, lineas });
+      const orden = await crearOrdenCompra({ supplierId: proveedorId, warehouseId: almacenId, lines: lineas });
       // El nº ante el proveedor es aparte (PUT numero); si lo escribieron, se fija ahora.
       if (nuevoNumero.trim() && orden?.id) {
         try {
@@ -162,17 +162,17 @@ export function PlanificacionCompras() {
   function filasPlanas(): { headers: string[]; rows: (string | number)[][] } {
     const headers = [
       t("col.producto"),
-      ...centros.map((c) => c.nombre),
+      ...centros.map((c) => c.name),
       t("col.invTotal"),
-      ...pos.map((po) => `PO ${po.numero ?? ""}`.trim()),
+      ...pos.map((po) => `PO ${po.number ?? ""}`.trim()),
       t("col.ventas"), t("col.promedio"), t("col.total"), t("col.meses"), t("col.pedir"), t("col.nuevoPedido"), t("col.pedidoRed"),
     ];
-    const rows = (data?.productos ?? []).map((p) => [
-      p.nombre,
+    const rows = (data?.products ?? []).map((p) => [
+      p.name,
       ...centros.map((c) => p.existencias?.[c.clinicId] ?? 0),
       p.invTotal,
       ...pos.map((po) => p.poCantidades?.[po.id] ?? 0),
-      p.ventasDelPeriodo, p.promedio, p.total, p.meses, p.pedir, p.nuevoPedido, p.pedidoRedondeado,
+      p.ventasDelPeriodo, p.promedio, p.total, p.months, p.pedir, p.nuevoPedido, p.pedidoRedondeado,
     ]);
     return { headers, rows };
   }
@@ -234,7 +234,7 @@ export function PlanificacionCompras() {
           <Select value={proveedorId} onValueChange={setProveedorId}>
             <SelectTrigger className="w-52"><SelectValue placeholder={t("field.selProveedor")} /></SelectTrigger>
             <SelectContent>
-              {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+              {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </Campo>
@@ -242,7 +242,7 @@ export function PlanificacionCompras() {
           <Select value={almacenId} onValueChange={setAlmacenId}>
             <SelectTrigger className="w-52"><SelectValue placeholder={t("field.selAlmacen")} /></SelectTrigger>
             <SelectContent>
-              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}
+              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </Campo>
@@ -279,22 +279,22 @@ export function PlanificacionCompras() {
             <thead className="bg-muted/60 text-[11px] uppercase tracking-wide text-muted-foreground">
               <tr className="border-b text-right">
                 <th className="sticky left-0 z-10 bg-muted/60 px-3 py-2 text-left font-semibold">{t("col.producto")}</th>
-                {centros.map((c) => <th key={c.clinicId} className="px-3 py-2 font-semibold">{c.nombre}</th>)}
+                {centros.map((c) => <th key={c.clinicId} className="px-3 py-2 font-semibold">{c.name}</th>)}
                 <th className="px-3 py-2 font-semibold">{t("col.invTotal")}</th>
                 {/* Columnas de PO: nº editable en el propio encabezado. */}
                 {pos.map((po) => (
                   <th key={po.id} className="px-2 py-1 font-semibold">
                     <div className="flex items-center justify-end gap-1">
                       <Input
-                        key={po.numero ?? po.id}
-                        defaultValue={po.numero ?? ""}
-                        onBlur={(e) => editarNumero(po.id, e.target.value, po.numero ?? "")}
+                        key={po.number ?? po.id}
+                        defaultValue={po.number ?? ""}
+                        onBlur={(e) => editarNumero(po.id, e.target.value, po.number ?? "")}
                         className="h-7 w-20 text-right text-xs"
                         title={t("col.poNumero")}
                       />
                       <button
                         type="button"
-                        onClick={() => cancelar(po.id, po.numero)}
+                        onClick={() => cancelar(po.id, po.number)}
                         className="rounded p-1 text-muted-foreground hover:text-destructive"
                         title={t("cancelarPo")}
                         aria-label={t("cancelarPo")}
@@ -314,12 +314,12 @@ export function PlanificacionCompras() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {data.productos.length === 0 && (
+              {data.products.length === 0 && (
                 <tr><td colSpan={centros.length + pos.length + 8} className="px-3 py-8 text-center text-muted-foreground">{t("vacio")}</td></tr>
               )}
-              {data.productos.map((p) => (
-                <tr key={p.productoId} className="text-right hover:bg-muted/30">
-                  <td className="sticky left-0 z-10 bg-background px-3 py-2 text-left font-medium">{p.nombre}</td>
+              {data.products.map((p) => (
+                <tr key={p.productId} className="text-right hover:bg-muted/30">
+                  <td className="sticky left-0 z-10 bg-background px-3 py-2 text-left font-medium">{p.name}</td>
                   {centros.map((c) => <td key={c.clinicId} className="px-3 py-2 tabular-nums">{n(p.existencias?.[c.clinicId] ?? 0)}</td>)}
                   <td className="px-3 py-2 font-semibold tabular-nums">{n(p.invTotal)}</td>
                   {pos.map((po) => (
@@ -329,7 +329,7 @@ export function PlanificacionCompras() {
                         type="number"
                         min={0}
                         defaultValue={p.poCantidades?.[po.id] ?? 0}
-                        onBlur={(e) => editarCantidad(po.id, p.productoId, String(Math.max(0, Number(e.target.value) || 0)), p.poCantidades?.[po.id] ?? 0)}
+                        onBlur={(e) => editarCantidad(po.id, p.productId, String(Math.max(0, Number(e.target.value) || 0)), p.poCantidades?.[po.id] ?? 0)}
                         className="h-7 w-20 text-right tabular-nums"
                       />
                     </td>
@@ -337,7 +337,7 @@ export function PlanificacionCompras() {
                   <td className="px-3 py-2 tabular-nums text-muted-foreground">{n(p.ventasDelPeriodo)}</td>
                   <td className="px-3 py-2 tabular-nums">{n(p.promedio)}</td>
                   <td className="px-3 py-2 tabular-nums">{n(p.total)}</td>
-                  <td className="px-3 py-2 tabular-nums">{n(p.meses)}</td>
+                  <td className="px-3 py-2 tabular-nums">{n(p.months)}</td>
                   <td className="px-3 py-2">
                     <span className={cn(
                       "inline-block rounded-full px-2 py-0.5 text-xs font-semibold",

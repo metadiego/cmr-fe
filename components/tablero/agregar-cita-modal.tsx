@@ -87,7 +87,7 @@ export function AgregarCitaModal({
   }
 
   const tipo = tipos.find((x) => x.id === tipoId);
-  const medicoRequerido = !!tipo?.requiereMedico && !esPrimeraVez;
+  const medicoRequerido = !!tipo?.requiresDoctor && !esPrimeraVez;
   const canSubmit = !!paciente && !!tipoId && (!medicoRequerido || medicoId !== NO_MEDICO) && !busy;
 
   async function onGuardar() {
@@ -96,14 +96,14 @@ export function AgregarCitaModal({
     try {
       await createCita(
         {
-          pacienteId: paciente.id,
-          tipoCitaId: tipoId,
-          fecha: hoy,
-          estado: "confirmada", // entra al tablero de atención de hoy
-          esPrimeraVez,
-          ...(medicoId !== NO_MEDICO ? { medicoId } : {}),
-          ...(hora ? { hora } : {}),
-          ...(notas.trim() ? { notas: notas.trim() } : {}),
+          patientId: paciente.id,
+          appointmentTypeId: tipoId,
+          date: hoy,
+          status: "confirmada", // entra al tablero de atención de hoy
+          isFirstVisit: esPrimeraVez,
+          ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
+          ...(hora ? { time: hora } : {}),
+          ...(notas.trim() ? { notes: notas.trim() } : {}),
         } as Parameters<typeof createCita>[0],
         centroId,
       );
@@ -152,7 +152,7 @@ export function AgregarCitaModal({
                     }
                     style={active && c ? { borderColor: c, color: c, backgroundColor: `${c}1a` } : undefined}
                   >
-                    {tp.nombre}
+                    {tp.name}
                   </button>
                 );
               })}

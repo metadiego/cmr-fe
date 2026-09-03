@@ -135,7 +135,10 @@ function Contenido({
   onChanged: () => void;
 }) {
   const t = useTranslations("gruposFacturacion");
-  const conteo = React.useMemo(() => contarPorGrupo(productos), [productos]);
+  const conteo = React.useMemo(
+    () => contarPorGrupo(productos.map((p) => ({ id: p.id, grupoFacturacionId: p.billingGroupId }))),
+    [productos],
+  );
   const sel = grupos.find((g) => g.id === selId) ?? null;
 
   return (
@@ -156,12 +159,12 @@ function Contenido({
               className={cn(
                 "grid w-full grid-cols-[1fr_6rem_4rem] items-center gap-x-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-accent/40",
                 g.id === selId && "bg-accent/60",
-                !g.activo && "opacity-60",
+                !g.active && "opacity-60",
               )}
             >
               <span className="font-medium">
-                {label(g.labelKey, g.clave)}
-                <span className="ml-1 text-xs text-muted-foreground">{g.clave}</span>
+                {label(g.labelKey, g.slug)}
+                <span className="ml-1 text-xs text-muted-foreground">{g.slug}</span>
               </span>
               <span>
                 <Badge variant="secondary" className="font-normal">
@@ -215,14 +218,17 @@ function DetalleGrupo({
   const t = useTranslations("gruposFacturacion");
   const [labelKey, setLabelKey] = React.useState(grupo.labelKey);
   const [division, setDivision] = React.useState(grupo.division);
-  const [activo, setActivo] = React.useState(grupo.activo);
+  const [activo, setActivo] = React.useState(grupo.active);
   const [savingGrupo, setSavingGrupo] = React.useState(false);
 
   // Membresía local (ids que quedan en el grupo). Init = miembros actuales.
   const [miembrosIds, setMiembrosIds] = React.useState<Set<string>>(
     () =>
       new Set(
-        particionarMembresia(productos, grupo.id).miembros.map((p) => p.id),
+        particionarMembresia(
+          productos.map((p) => ({ ...p, grupoFacturacionId: p.billingGroupId })),
+          grupo.id,
+        ).miembros.map((p) => p.id),
       ),
   );
   const [q, setQ] = React.useState("");
@@ -231,7 +237,7 @@ function DetalleGrupo({
   const filtro = q.trim().toLowerCase();
   const coincide = (p: Producto) =>
     !filtro ||
-    [p.nombre, p.sku, p.barcode]
+    [p.name, p.sku, p.barcode]
       .filter(Boolean)
       .some((v) => String(v).toLowerCase().includes(filtro));
 
@@ -253,7 +259,7 @@ function DetalleGrupo({
       await actualizarGrupoFacturacion(grupo.id, {
         labelKey: labelKey.trim() || grupo.labelKey,
         division,
-        activo,
+        active: activo,
       });
       toast.success(t("updated"));
       onChanged();
@@ -282,8 +288,8 @@ function DetalleGrupo({
       {/* Datos del grupo */}
       <div className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">{label(grupo.labelKey, grupo.clave)}</h3>
-          <span className="text-xs text-muted-foreground">{grupo.clave}</span>
+          <h3 className="text-sm font-semibold">{label(grupo.labelKey, grupo.slug)}</h3>
+          <span className="text-xs text-muted-foreground">{grupo.slug}</span>
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-1">
@@ -305,8 +311,8 @@ function DetalleGrupo({
               </SelectTrigger>
               <SelectContent>
                 {divisiones.map((d) => (
-                  <SelectItem key={d.clave} value={d.clave}>
-                    {label(d.labelKey, d.clave)}
+                  <SelectItem key={d.slug} value={d.slug}>
+                    {label(d.labelKey, d.slug)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -387,8 +393,8 @@ function TransferColumna({
       <ul className="max-h-80 divide-y overflow-y-auto">
         {productos.map((p) => (
           <li key={p.id} className="flex items-center justify-between gap-2 px-3 py-1.5 text-sm">
-            <span className="truncate" title={`${p.nombre}${p.sku ? ` · ${p.sku}` : ""}`}>
-              {p.nombre}
+            <span className="truncate" title={`${p.name}${p.sku ? ` · ${p.sku}` : ""}`}>
+              {p.name}
               <span className="ml-1 text-xs text-muted-foreground">{p.sku}</span>
             </span>
             <Button
@@ -422,14 +428,14 @@ function NuevoGrupo({
   const [open, setOpen] = React.useState(false);
   const [clave, setClave] = React.useState("");
   const [labelKey, setLabelKey] = React.useState("");
-  const [division, setDivision] = React.useState(divisiones[0]?.clave ?? "general");
+  const [division, setDivision] = React.useState(divisiones[0]?.slug ?? "general");
   const [saving, setSaving] = React.useState(false);
 
   async function crear() {
     setSaving(true);
     try {
       const g = await crearGrupoFacturacion({
-        clave: clave.trim(),
+        slug: clave.trim(),
         labelKey: labelKey.trim() || `fac.grupo.${clave.trim()}`,
         division,
       });
@@ -477,8 +483,8 @@ function NuevoGrupo({
               </SelectTrigger>
               <SelectContent>
                 {divisiones.map((d) => (
-                  <SelectItem key={d.clave} value={d.clave}>
-                    {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.clave}
+                  <SelectItem key={d.slug} value={d.slug}>
+                    {tRoot.has(d.labelKey) ? tRoot(d.labelKey) : d.slug}
                   </SelectItem>
                 ))}
               </SelectContent>

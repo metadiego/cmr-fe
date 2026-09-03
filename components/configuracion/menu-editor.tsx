@@ -48,13 +48,13 @@ type Zone = "before" | "inside" | "after";
 // ---- helpers de árbol (por `parentClave`; el orden lo da `orden`) ---------------------------------
 
 function parentKey(it: MenuItem): string {
-  return it.parentClave ?? ROOT;
+  return it.parentSlug ?? ROOT;
 }
 function childrenOf(items: MenuItem[], parent: string | null): MenuItem[] {
   const k = parent ?? ROOT;
   return items
     .filter((i) => parentKey(i) === k)
-    .sort((a, b) => a.orden - b.orden);
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 // Nivel del nodo (raíz = 1). `null` = raíz → 0 (para un padre inexistente).
 function levelOfClave(items: MenuItem[], clave: string | null): number {
@@ -63,28 +63,28 @@ function levelOfClave(items: MenuItem[], clave: string | null): number {
   const seen = new Set<string>();
   while (cur && !seen.has(cur)) {
     seen.add(cur);
-    const p = items.find((i) => i.clave === cur);
+    const p = items.find((i) => i.slug === cur);
     level += 1;
-    cur = p ? p.parentClave ?? null : null;
+    cur = p ? p.parentSlug ?? null : null;
   }
   return level;
 }
 // Altura del subárbol de `node` (hoja = 1).
 function heightOf(items: MenuItem[], node: MenuItem): number {
-  const kids = childrenOf(items, node.clave);
+  const kids = childrenOf(items, node.slug);
   if (kids.length === 0) return 1;
   return 1 + Math.max(...kids.map((c) => heightOf(items, c)));
 }
 // ¿`target` es el propio `drag` o un descendiente suyo? (no se puede soltar dentro de sí mismo)
 function isSelfOrDescendant(items: MenuItem[], drag: MenuItem, target: MenuItem): boolean {
   if (target.id === drag.id) return true;
-  let cur: string | null = target.parentClave ?? null;
+  let cur: string | null = target.parentSlug ?? null;
   const seen = new Set<string>();
   while (cur && !seen.has(cur)) {
     seen.add(cur);
-    if (cur === drag.clave) return true;
-    const p = items.find((i) => i.clave === cur);
-    cur = p ? p.parentClave ?? null : null;
+    if (cur === drag.slug) return true;
+    const p = items.find((i) => i.slug === cur);
+    cur = p ? p.parentSlug ?? null : null;
   }
   return false;
 }
@@ -111,7 +111,7 @@ function applyMove(
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k)!.push(it);
   }
-  for (const arr of groups.values()) arr.sort((a, b) => a.orden - b.orden);
+  for (const arr of groups.values()) arr.sort((a, b) => a.sortOrder - b.sortOrder);
 
   // Quitar drag de su grupo actual.
   const fromKey = parentKey(drag);
@@ -119,12 +119,12 @@ function applyMove(
 
   let newParentClave: string | null;
   if (zone === "inside") {
-    newParentClave = target.clave;
-    const arr = (groups.get(target.clave) ?? []).slice();
+    newParentClave = target.slug;
+    const arr = (groups.get(target.slug) ?? []).slice();
     arr.push(drag);
-    groups.set(target.clave, arr);
+    groups.set(target.slug, arr);
   } else {
-    newParentClave = target.parentClave ?? null;
+    newParentClave = target.parentSlug ?? null;
     const key = parentKey(target);
     const arr = (groups.get(key) ?? []).slice();
     const idx = arr.findIndex((i) => i.id === targetId);
@@ -145,9 +145,9 @@ function applyMove(
     const newParent = k === ROOT ? null : k;
     arr.forEach((node, orden) => {
       const u = byId.get(node.id)!;
-      if ((u.parentClave ?? null) !== newParent || u.orden !== orden) {
-        u.parentClave = newParent;
-        u.orden = orden;
+      if ((u.parentSlug ?? null) !== newParent || u.sortOrder !== orden) {
+        u.parentSlug = newParent;
+        u.sortOrder = orden;
         changed.push({ id: u.id, parentClave: newParent, orden });
       }
     });
@@ -191,9 +191,9 @@ export function MenuEditor() {
   const label = React.useCallback(
     (it: MenuItem) => {
       // labelCustom (nombre libre) pisa la clave i18n; si no, traducir labelKey (o mostrarla cruda).
-      const custom = it.labelCustom?.trim();
+      const custom = it.customLabel?.trim();
       if (custom) return custom;
-      if (it.tipo === "separador") return tRoot("nav.separador");
+      if (it.type === "separador") return tRoot("nav.separador");
       try {
         return tRoot.has(it.labelKey) ? tRoot(it.labelKey) : it.labelKey;
       } catch {
@@ -212,7 +212,7 @@ export function MenuEditor() {
     setSaving(true);
     try {
       await Promise.all(
-        changed.map((c) => updateMenuItem(c.id, { parentClave: c.parentClave, orden: c.orden })),
+        changed.map((c) => updateMenuItem(c.id, { parentSlug: c.parentClave, sortOrder: c.orden })),
       );
       toast.success(t("saved"));
     } catch (e) {
@@ -254,9 +254,9 @@ export function MenuEditor() {
   // Icono del ítem: guarda el nombre en `icon` y enciende `mostrarIcono`. null = sin icono.
   async function setIcon(it: MenuItem, name: string | null) {
     if (!items) return;
-    setItems(items.map((i) => (i.id === it.id ? { ...i, icon: name, mostrarIcono: !!name } : i)));
+    setItems(items.map((i) => (i.id === it.id ? { ...i, icon: name, showIcon: !!name } : i)));
     try {
-      await updateMenuItem(it.id, { icon: name, mostrarIcono: !!name });
+      await updateMenuItem(it.id, { icon: name, showIcon: !!name });
     } catch (e) {
       toast.error(apiErrorMessage(e));
       load();
@@ -266,9 +266,9 @@ export function MenuEditor() {
   // Permiso requerido para ver el ítem. null = sin permiso (visible para todos).
   async function setPermiso(it: MenuItem, permisoClave: string | null) {
     if (!items) return;
-    setItems(items.map((i) => (i.id === it.id ? { ...i, permisoClave } : i)));
+    setItems(items.map((i) => (i.id === it.id ? { ...i, permissionSlug: permisoClave } : i)));
     try {
-      await updateMenuItem(it.id, { permisoClave });
+      await updateMenuItem(it.id, { permissionSlug: permisoClave });
       toast.success(t("saved"));
     } catch (e) {
       toast.error(apiErrorMessage(e));
@@ -282,11 +282,11 @@ export function MenuEditor() {
     const base = path.replace(/^\//, "").replace(/\//g, "-") || "home";
     let clave = base;
     let n = 2;
-    const claves = new Set(items.map((i) => i.clave));
+    const claves = new Set(items.map((i) => i.slug));
     while (claves.has(clave)) clave = `${base}-${n++}`;
     const orden = childrenOf(items, null).length;
     try {
-      await createMenuItem({ clave, labelKey, path, parentClave: null, orden, visible: true });
+      await createMenuItem({ slug: clave, labelKey, path, parentSlug: null, sortOrder: orden, visible: true });
       toast.success(t("added"));
       load();
     } catch (e) {
@@ -296,7 +296,7 @@ export function MenuEditor() {
 
   // Genera una clave única a partir de una base.
   function uniqueClave(base: string): string {
-    const claves = new Set((items ?? []).map((i) => i.clave));
+    const claves = new Set((items ?? []).map((i) => i.slug));
     let clave = base;
     let n = 2;
     while (claves.has(clave)) clave = `${base}-${n++}`;
@@ -309,11 +309,11 @@ export function MenuEditor() {
     const orden = childrenOf(items, null).length;
     try {
       await createMenuItem({
-        clave: uniqueClave("grupo"),
-        tipo: "grupo",
-        labelCustom: t("newGroupName"),
-        parentClave: null,
-        orden,
+        slug: uniqueClave("grupo"),
+        type: "grupo",
+        customLabel: t("newGroupName"),
+        parentSlug: null,
+        sortOrder: orden,
         visible: true,
       });
       toast.success(t("groupAdded"));
@@ -329,10 +329,10 @@ export function MenuEditor() {
     const orden = childrenOf(items, null).length;
     try {
       await createMenuItem({
-        clave: uniqueClave("sep"),
-        tipo: "separador",
-        parentClave: null,
-        orden,
+        slug: uniqueClave("sep"),
+        type: "separador",
+        parentSlug: null,
+        sortOrder: orden,
         visible: true,
       });
       toast.success(t("separatorAdded"));
@@ -349,10 +349,10 @@ export function MenuEditor() {
     setEditing(null);
     const labelCustom = value.trim() || null;
     const target = items.find((i) => i.id === id);
-    if (target && (target.labelCustom ?? null) === labelCustom) return; // sin cambios
-    setItems(items.map((i) => (i.id === id ? { ...i, labelCustom } : i)));
+    if (target && (target.customLabel ?? null) === labelCustom) return; // sin cambios
+    setItems(items.map((i) => (i.id === id ? { ...i, customLabel: labelCustom } : i)));
     try {
-      await updateMenuItem(id, { labelCustom });
+      await updateMenuItem(id, { customLabel: labelCustom });
       toast.success(t("saved"));
     } catch (e) {
       toast.error(apiErrorMessage(e));
@@ -382,12 +382,12 @@ export function MenuEditor() {
     const cur = new Map(items.map((i) => [i.id, i]));
     const changed = prev.filter((p) => {
       const c = cur.get(p.id);
-      return c && ((c.parentClave ?? null) !== (p.parentClave ?? null) || c.orden !== p.orden || c.visible !== p.visible);
+      return c && ((c.parentSlug ?? null) !== (p.parentSlug ?? null) || c.sortOrder !== p.sortOrder || c.visible !== p.visible);
     });
     setSaving(true);
     try {
       await Promise.all(
-        changed.map((p) => updateMenuItem(p.id, { parentClave: p.parentClave ?? null, orden: p.orden, visible: p.visible })),
+        changed.map((p) => updateMenuItem(p.id, { parentSlug: p.parentSlug ?? null, sortOrder: p.sortOrder, visible: p.visible })),
       );
       toast.success(t("undone"));
     } catch (e) {
@@ -416,16 +416,16 @@ export function MenuEditor() {
   }
 
   function renderNode(it: MenuItem, depth: number): React.ReactNode {
-    const kids = items ? childrenOf(items, it.clave) : [];
+    const kids = items ? childrenOf(items, it.slug) : [];
     const isOver = over?.id === it.id;
-    const esGrupo = it.tipo === "grupo";
-    const esSeparador = it.tipo === "separador";
+    const esGrupo = it.type === "grupo";
+    const esSeparador = it.type === "separador";
     // Ítem gobernado por el manifiesto FE (lib/nav/manifest.ts): su RUTA, GRUPO y
     // ORDEN los decide el código, no el BE. Reordenar/mover aquí no afecta al rail,
     // así que se bloquea el arrastre y la ruta se muestra en solo-lectura. El
     // labelCustom por-centro, la visibilidad, el permiso y el icono SÍ siguen editables.
-    const feKnown = !esGrupo && !esSeparador && !!groupForClave(it.clave);
-    const feRoute = feKnown ? routeForClave(it.clave, it.path) : it.path;
+    const feKnown = !esGrupo && !esSeparador && !!groupForClave(it.slug);
+    const feRoute = feKnown ? routeForClave(it.slug, it.path) : it.path;
     const dragProps = {
       draggable: !feKnown,
       onDragStart: () => setDragId(it.id),
@@ -510,9 +510,9 @@ export function MenuEditor() {
             <span
               className="flex flex-1 cursor-text items-center gap-2 truncate"
               title={t("renameHint")}
-              onDoubleClick={() => setEditing({ id: it.id, value: it.labelCustom ?? "" })}
+              onDoubleClick={() => setEditing({ id: it.id, value: it.customLabel ?? "" })}
             >
-              {it.mostrarIcono && resolveMenuIcon(it.icon) ? (
+              {it.showIcon && resolveMenuIcon(it.icon) ? (
                 <HugeiconsIcon icon={resolveMenuIcon(it.icon)!} className="size-4 text-muted-foreground" />
               ) : null}
               <span className={cn("truncate font-medium", esGrupo && "font-semibold")}>{label(it)}</span>
@@ -572,10 +572,10 @@ export function MenuEditor() {
                 variant="ghost"
                 className={cn(
                   "size-7 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100",
-                  it.permisoClave ? "text-foreground" : "text-muted-foreground",
+                  it.permissionSlug ? "text-foreground" : "text-muted-foreground",
                 )}
                 aria-label={tRoot("admin.menu.permisoClave")}
-                title={it.permisoClave || tRoot("admin.menu.permisoSinPermiso")}
+                title={it.permissionSlug || tRoot("admin.menu.permisoSinPermiso")}
               >
                 <HugeiconsIcon icon={LockedIcon} className="size-3.5" />
               </Button>
@@ -586,8 +586,8 @@ export function MenuEditor() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {permisos.map((p) => (
-                <DropdownMenuItem key={p.clave} onSelect={() => setPermiso(it, p.clave)}>
-                  {p.clave}
+                <DropdownMenuItem key={p.slug} onSelect={() => setPermiso(it, p.slug)}>
+                  {p.slug}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

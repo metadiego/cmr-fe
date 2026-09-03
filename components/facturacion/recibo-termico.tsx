@@ -84,18 +84,18 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           alt=""
           className="mx-auto mb-1 max-h-[18mm] w-auto object-contain"
         />
-        <div className="text-[9.75pt] font-bold uppercase">{emp?.nombreLegal ?? ""}</div>
-        {emp?.nombreComercial && <div>{emp.nombreComercial}</div>}
+        <div className="text-[9.75pt] font-bold uppercase">{emp?.legalName ?? ""}</div>
+        {emp?.tradeName && <div>{emp.tradeName}</div>}
         {emp?.sucursal && <div>{emp.sucursal}</div>}
-        {emp?.direccion && (
-          <div className="whitespace-pre-line">{emp.direccion}</div>
+        {emp?.address && (
+          <div className="whitespace-pre-line">{emp.address}</div>
         )}
-        {emp?.telefono && <div>{emp.telefono}</div>}
+        {emp?.phone && <div>{emp.phone}</div>}
         {emp?.email && <div>{emp.email}</div>}
-        {emp?.registroFiscal && (
+        {emp?.taxRegistration && (
           <div>
-            {emp.registroFiscalLabel ? `${emp.registroFiscalLabel}: ` : ""}
-            {emp.registroFiscal}
+            {emp.taxRegistrationLabel ? `${emp.taxRegistrationLabel}: ` : ""}
+            {emp.taxRegistration}
           </div>
         )}
       </div>
@@ -235,10 +235,10 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       <div className="text-center">
         <div>{t("thanks")}</div>
         {(() => {
-          const pie = recibo.estado === "borrador" ? (emp?.piePresupuesto ?? null) : (emp?.pieFactura ?? null);
+          const pie = recibo.estado === "borrador" ? (emp?.quoteFooter ?? null) : (emp?.invoiceFooter ?? null);
           return pie ? <div className="mt-0.5 whitespace-pre-line">{pie}</div> : null;
         })()}
-        {emp?.web && <div className="mt-0.5">{emp.web}</div>}
+        {emp?.website && <div className="mt-0.5">{emp.website}</div>}
         {hora && (
           <div className="mt-0.5">
             {fecha} {hora}

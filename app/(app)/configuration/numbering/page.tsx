@@ -68,7 +68,7 @@ export default function ConfigNumeracionPage() {
                 <SelectContent>
                   {centros.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.nombre}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -124,7 +124,7 @@ function SeriesEditor({
     <div className="space-y-3">
       {series.map((s) => (
         <SerieRow
-          key={s.id ?? s.serie}
+          key={s.id ?? s.series}
           serie={s}
           centroId={centroId}
           puedeEditar={puedeEditar}
@@ -157,22 +157,22 @@ function SerieRow({
   onSaved: () => void;
 }) {
   const t = useTranslations("numeracion");
-  const [prefijo, setPrefijo] = React.useState(serie.prefijo ?? "");
+  const [prefijo, setPrefijo] = React.useState(serie.prefix ?? "");
   const [padding, setPadding] = React.useState(serie.padding ?? 0);
   const [saving, setSaving] = React.useState(false);
 
-  const proximo = serie.proximo ?? 0;
-  const dirty = (serie.prefijo ?? "") !== prefijo || (serie.padding ?? 0) !== padding;
+  const proximo = serie.nextNumber ?? 0;
+  const dirty = (serie.prefix ?? "") !== prefijo || (serie.padding ?? 0) !== padding;
 
   // Etiqueta legible por serie conocida; si el BE agrega una nueva, cae al nombre crudo (genérico).
   const known = new Set(["default", "presupuesto", "devolucion"]);
-  const label = known.has(serie.serie) ? t(`serie.${serie.serie}`) : serie.serie;
+  const label = known.has(serie.series) ? t(`serie.${serie.series}`) : serie.series;
 
   async function save() {
     if (!dirty || saving) return;
     setSaving(true);
     try {
-      await actualizarSerieNumeracion(serie.serie, { prefijo: prefijo.trim() || null, padding }, centroId);
+      await actualizarSerieNumeracion(serie.series, { prefix: prefijo.trim() || null, padding }, centroId);
       toast.success(t("saved"));
       onSaved();
     } catch (e) {
@@ -187,7 +187,7 @@ function SerieRow({
       <div className="flex items-baseline justify-between gap-3">
         <div>
           <div className="text-sm font-semibold">{label}</div>
-          <code className="text-[11px] text-muted-foreground">{serie.serie}</code>
+          <code className="text-[11px] text-muted-foreground">{serie.series}</code>
         </div>
         <div className="text-right">
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("preview")}</div>
@@ -237,7 +237,7 @@ function SerieRow({
         <ArranqueEditor
           proximo={proximo}
           onSubmit={(arranque, motivo) =>
-            establecerArranqueSerie(serie.serie, { arranque, motivo }, centroId)
+            establecerArranqueSerie(serie.series, { arranque, motivo }, centroId)
           }
           onSaved={onSaved}
         />
@@ -296,18 +296,18 @@ function RecordRow({
   onSaved: () => void;
 }) {
   const t = useTranslations("numeracion");
-  const [prefijo, setPrefijo] = React.useState(record.prefijo ?? "");
+  const [prefijo, setPrefijo] = React.useState(record.prefix ?? "");
   const [padding, setPadding] = React.useState(record.padding ?? 0);
   const [saving, setSaving] = React.useState(false);
 
-  const proximo = record.proximo ?? 0;
-  const dirty = (record.prefijo ?? "") !== prefijo || (record.padding ?? 0) !== padding;
+  const proximo = record.nextNumber ?? 0;
+  const dirty = (record.prefix ?? "") !== prefijo || (record.padding ?? 0) !== padding;
 
   async function save() {
     if (!dirty || saving) return;
     setSaving(true);
     try {
-      await actualizarSerieRecord({ prefijo: prefijo.trim() || null, padding }, centroId);
+      await actualizarSerieRecord({ prefix: prefijo.trim() || null, padding }, centroId);
       toast.success(t("saved"));
       onSaved();
     } catch (e) {
@@ -383,7 +383,7 @@ function RecordRow({
       {puedeArranque && (
         <ArranqueEditor
           proximo={proximo}
-          onSubmit={(arranque, motivo) => actualizarSerieRecord({ arranque, motivo }, centroId)}
+          onSubmit={(arranque, motivo) => actualizarSerieRecord({ arranque, reason: motivo }, centroId)}
           onSaved={onSaved}
         />
       )}

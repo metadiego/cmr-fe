@@ -110,7 +110,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
   const capacidades = React.useMemo(() => {
     const set = new Set<string>();
     if (personalState.kind === "ok") {
-      for (const p of personalState.data) for (const c of p.capacidades ?? []) set.add(c);
+      for (const p of personalState.data) for (const c of p.capabilities ?? []) set.add(c);
     }
     return set.size > 0 ? [...set].sort() : CAPACIDADES_FALLBACK;
   }, [personalState]);

@@ -44,12 +44,12 @@ export function PermisosCatalogo() {
   const filtrados = permisos
     .filter((p) => {
       const n = q.trim().toLowerCase();
-      return !n || p.clave.toLowerCase().includes(n) || (p.descripcion ?? "").toLowerCase().includes(n) || p.modulo.toLowerCase().includes(n);
+      return !n || p.slug.toLowerCase().includes(n) || (p.description ?? "").toLowerCase().includes(n) || p.module.toLowerCase().includes(n);
     })
-    .sort((a, b) => a.clave.localeCompare(b.clave));
+    .sort((a, b) => a.slug.localeCompare(b.slug));
 
   async function borrar(p: Permiso) {
-    if (!window.confirm(t("borrarConfirm", { clave: p.clave }))) return;
+    if (!window.confirm(t("borrarConfirm", { clave: p.slug }))) return;
     setBusyId(p.id);
     try {
       await eliminarPermiso(p.id);
@@ -92,10 +92,10 @@ export function PermisosCatalogo() {
               )}
               {filtrados.map((p) => (
                 <tr key={p.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-mono">{p.clave}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{p.modulo}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{p.accion}</td>
-                  <td className="px-3 py-2">{p.descripcion || "—"}</td>
+                  <td className="px-3 py-2 font-mono">{p.slug}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{p.module}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{p.action}</td>
+                  <td className="px-3 py-2">{p.description || "—"}</td>
                   <td className="px-3 py-2 text-right">
                     <div className="flex justify-end gap-1">
                       {can("rbac.update") && <Button variant="ghost" size="sm" onClick={() => setEditar(p)}>{tc("edit")}</Button>}
@@ -129,7 +129,7 @@ function PermisoNuevoDialog({ onClose, onSaved, tRoot, tc, t }: {
     if (!valido || busy) return;
     setBusy(true);
     try {
-      await crearPermiso({ clave: clave.trim(), ...(descripcion.trim() ? { descripcion: descripcion.trim() } : {}) });
+      await crearPermiso({ slug: clave.trim(), ...(descripcion.trim() ? { description: descripcion.trim() } : {}) });
       toast.success(t("creado"));
       onSaved();
     } catch (e) {
@@ -177,7 +177,7 @@ function PermisoEditarDialog({ permiso, onClose, onSaved, tRoot, tc, t }: {
   permiso: Permiso; onClose: () => void; onSaved: () => void;
   tRoot: ReturnType<typeof useTranslations>; tc: ReturnType<typeof useTranslations>; t: ReturnType<typeof useTranslations>;
 }) {
-  const [descripcion, setDescripcion] = React.useState(permiso.descripcion ?? "");
+  const [descripcion, setDescripcion] = React.useState(permiso.description ?? "");
   const [busy, setBusy] = React.useState(false);
   async function guardar() {
     if (busy) return;
@@ -203,7 +203,7 @@ function PermisoEditarDialog({ permiso, onClose, onSaved, tRoot, tc, t }: {
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("field.clave")}</span>
             {/* La clave es SOLO LECTURA: renombrarla dejaría colgando el código y las concesiones. */}
-            <Input value={permiso.clave} disabled readOnly className="font-mono" />
+            <Input value={permiso.slug} disabled readOnly className="font-mono" />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("field.descripcion")}</span>

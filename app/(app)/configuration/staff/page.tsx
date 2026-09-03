@@ -33,7 +33,7 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 // clics y ver el estado final aquí mismo, no un «guardado» a secas. Handoff ficha-de-personal-todo-en-una-pantalla.
 // NOTA: el bloque «Centros de servicio» queda pendiente hasta que el BE exponga la LECTURA del set (hoy
 // solo hay PUT; sin GET no se pueden precargar los checkboxes sin arriesgar borrar lo que no se ve).
-const nombreDe = (p: Personal) => [p.nombre, p.apellido].filter(Boolean).join(" ").trim() || p.nombre;
+const nombreDe = (p: Personal) => [p.name, p.lastName].filter(Boolean).join(" ").trim() || p.name;
 
 export default function PersonalPage() {
   const t = useTranslations("personalFicha");
@@ -57,14 +57,14 @@ export default function PersonalPage() {
 
   // Capacidades: derivadas de los valores REALES del personal (no hay catálogo aparte en el handoff).
   const capacidadOpciones = React.useMemo(
-    () => [...new Set(personal.flatMap((p) => p.capacidades ?? []))].sort(),
+    () => [...new Set(personal.flatMap((p) => p.capabilities ?? []))].sort(),
     [personal],
   );
 
   const filtrados = personal
     .filter((p) => {
       const n = q.trim().toLowerCase();
-      return !n || nombreDe(p).toLowerCase().includes(n) || (p.cargo ?? "").toLowerCase().includes(n);
+      return !n || nombreDe(p).toLowerCase().includes(n) || (p.jobTitle ?? "").toLowerCase().includes(n);
     })
     .sort((a, b) => nombreDe(a).localeCompare(nombreDe(b)));
   const sel = personal.find((p) => p.id === selId) ?? null;
@@ -95,12 +95,12 @@ export default function PersonalPage() {
                   )}
                 >
                   <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-medium", p.id === selId ? "bg-primary-foreground/20" : "bg-primary/10 text-primary")}>
-                    {(p.nombre?.[0] ?? "") + (p.apellido?.[0] ?? "")}
+                    {(p.name?.[0] ?? "") + (p.lastName?.[0] ?? "")}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{nombreDe(p)}</span>
                     <span className={cn("block truncate text-xs", p.id === selId ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                      {p.cargo || t("sinCargo")}{p.perfilId ? "" : ` · ${t("sinCuenta")}`}
+                      {p.jobTitle || t("sinCargo")}{p.profileId ? "" : ` · ${t("sinCuenta")}`}
                     </span>
                   </span>
                 </button>
@@ -147,21 +147,21 @@ function FichaPersonal({
 }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
-  const [cargo, setCargo] = React.useState(persona.cargo ?? "");
-  const [caps, setCaps] = React.useState<string[]>(persona.capacidades ?? []);
+  const [cargo, setCargo] = React.useState(persona.jobTitle ?? "");
+  const [caps, setCaps] = React.useState<string[]>(persona.capabilities ?? []);
   const [busy, setBusy] = React.useState(false);
   const [darAcceso, setDarAcceso] = React.useState(false);
 
   // Etiqueta del cargo desde el catálogo (labelKey traducible; si no, la clave). Incluye el cargo actual
   // aunque no esté en el catálogo, para no perderlo.
   const cargoLabel = (clave: string) => {
-    const c = cargoCatalogo.find((x) => x.clave === clave);
+    const c = cargoCatalogo.find((x) => x.slug === clave);
     if (c?.labelKey && tRoot.has(c.labelKey)) return tRoot(c.labelKey);
-    return c?.nombre ?? clave;
+    return c?.name ?? clave;
   };
-  const claves = cargoCatalogo.map((c) => c.clave);
+  const claves = cargoCatalogo.map((c) => c.slug);
   const cargos = cargo && !claves.includes(cargo) ? [...claves, cargo] : claves;
-  const sucio = cargo !== (persona.cargo ?? "") || JSON.stringify([...caps].sort()) !== JSON.stringify([...(persona.capacidades ?? [])].sort());
+  const sucio = cargo !== (persona.jobTitle ?? "") || JSON.stringify([...caps].sort()) !== JSON.stringify([...(persona.capabilities ?? [])].sort());
 
   function toggleCap(c: string) {
     setCaps((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -170,7 +170,7 @@ function FichaPersonal({
     if (busy || !sucio) return;
     setBusy(true);
     try {
-      await updatePersonal(persona.id, { cargo: cargo || null, capacidades: caps }, centro);
+      await updatePersonal(persona.id, { jobTitle: cargo || null, capabilities: caps }, centro);
       toast.success(t("guardado"));
       onChanged();
     } catch (e) {
@@ -186,11 +186,11 @@ function FichaPersonal({
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
-            {(persona.nombre?.[0] ?? "") + (persona.apellido?.[0] ?? "")}
+            {(persona.name?.[0] ?? "") + (persona.lastName?.[0] ?? "")}
           </span>
           <div>
             <div className="text-lg font-semibold">{nombreDe(persona)}</div>
-            <div className="text-sm text-muted-foreground">{persona.email || (persona.perfilId ? t("conCuenta") : t("sinCuenta"))}</div>
+            <div className="text-sm text-muted-foreground">{persona.email || (persona.profileId ? t("conCuenta") : t("sinCuenta"))}</div>
           </div>
         </div>
       </div>
@@ -239,10 +239,10 @@ function FichaPersonal({
       {/* Acceso al sistema */}
       <div className="border-t pt-4">
         <Label className="mb-2 block">{t("acceso")}</Label>
-        {persona.perfilId ? (
+        {persona.profileId ? (
           <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
             <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
-            <span>{persona.email || t("conCuenta")}{persona.perfilId ? ` · ${t("aprobado")}` : ""}</span>
+            <span>{persona.email || t("conCuenta")}{persona.profileId ? ` · ${t("aprobado")}` : ""}</span>
             <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
           </div>
         ) : (
@@ -273,9 +273,9 @@ function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: str
   const base = res.state.kind === "ok" ? res.state.data : [];
   // Selección local (activos) sobre lo que trae el BE; guardar manda la lista de encendidos.
   const [activos, setActivos] = React.useState<Set<string> | null>(null);
-  const marcados = activos ?? new Set(base.filter((c) => c.activo).map((c) => c.id));
+  const marcados = activos ?? new Set(base.filter((c) => c.active).map((c) => c.id));
   const [busy, setBusy] = React.useState(false);
-  const original = new Set(base.filter((c) => c.activo).map((c) => c.id));
+  const original = new Set(base.filter((c) => c.active).map((c) => c.id));
   const sucio = base.length > 0 && (marcados.size !== original.size || [...marcados].some((id) => !original.has(id)));
 
   function toggle(id: string) {
@@ -319,7 +319,7 @@ function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: str
                 on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
               )}
             >
-              {on ? "✓ " : ""}{c.nombre}
+              {on ? "✓ " : ""}{c.name}
             </button>
           );
         })}
@@ -355,11 +355,11 @@ function DarAccesoDialog({
       // UNA sola llamada: crea la cuenta, la enlaza a la ficha (personalId), da el rol y asigna el centro.
       await inviteUser({
         email: email.trim(),
-        nombre: persona.nombre,
-        apellido: persona.apellido ?? undefined,
-        personalId: persona.id,
+        name: persona.name,
+        lastName: persona.lastName ?? undefined,
+        staffId: persona.id,
         rolClave,
-        centroId: centro,
+        centerId: centro,
         tipoAsignacion: "base",
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
@@ -390,7 +390,7 @@ function DarAccesoDialog({
             <Select value={rolClave || undefined} onValueChange={setRolClave}>
               <SelectTrigger className="w-full"><SelectValue placeholder={t("rolPlaceholder")} /></SelectTrigger>
               <SelectContent>
-                {roles.map((r) => <SelectItem key={r.id} value={r.clave}>{r.nombre}</SelectItem>)}
+                {roles.map((r) => <SelectItem key={r.id} value={r.slug}>{r.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

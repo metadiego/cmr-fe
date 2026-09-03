@@ -38,8 +38,8 @@ import {
 
 /** Un producto se dosifica en vial cuando tiene contenido por envase y descarga por dosis. */
 function esDeVial(p: Producto): boolean {
-  const contenido = Number(p.contenido ?? 0);
-  return contenido > 0 && p.esInventariable !== false;
+  const contenido = Number(p.content ?? 0);
+  return contenido > 0 && p.isInventoryItem !== false;
 }
 
 export default function VialesPage() {
@@ -77,10 +77,10 @@ export default function VialesPage() {
       productoId
         ? getReporteViales(
             {
-              productoId,
-              ...(almacenId ? { almacenId } : {}),
-              ...(desde ? { desde } : {}),
-              ...(hasta ? { hasta } : {}),
+              productId: productoId,
+              ...(almacenId ? { warehouseId: almacenId } : {}),
+              ...(desde ? { from: desde } : {}),
+              ...(hasta ? { to: hasta } : {}),
             },
             tenant,
           )
@@ -95,7 +95,16 @@ export default function VialesPage() {
     (producto as { unidadContenidoNombre?: string } | undefined)
       ?.unidadContenidoNombre ?? null;
   const dias = React.useMemo(
-    () => agruparPorDia(reporte?.consumos ?? []),
+    // agruparPorDia (helper de presentación en lib/inventario) agrupa por `fecha`/`cantidad`; adaptamos
+    // los consumos del API v2 (`date`/`quantity`) a esa forma sin perder los demás campos en inglés.
+    () =>
+      agruparPorDia(
+        (reporte?.consumos ?? []).map((c) => ({
+          ...c,
+          fecha: c.date,
+          cantidad: c.quantity,
+        })),
+      ),
     [reporte],
   );
 
@@ -114,7 +123,7 @@ export default function VialesPage() {
             <SelectContent>
               {productos.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  {p.nombre}
+                  {p.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -133,7 +142,7 @@ export default function VialesPage() {
               <SelectItem value="__todos">{t("almacenTodos")}</SelectItem>
               {almacenes.map((a) => (
                 <SelectItem key={a.id} value={a.id}>
-                  {a.nombre}
+                  {a.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -196,26 +205,26 @@ export default function VialesPage() {
 
             <section className="rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] md:col-span-2">
               <h2 className="mb-4 text-sm font-medium">{t("vialActivo")}</h2>
-              {reporte.activo ? (
+              {reporte.active ? (
                 <div className="flex items-center gap-6">
                   <Frasco
-                    nivel={nivelDelFrasco(reporte.activo)}
-                    etiqueta={`${Math.round(reporte.activo.porcentaje)}%`}
+                    nivel={nivelDelFrasco(reporte.active)}
+                    etiqueta={`${Math.round(reporte.active.porcentaje)}%`}
                   />
                   <div className="space-y-1">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {t("vialNumero", { n: reporte.activo.numero ?? "—" })}
+                      {t("vialNumero", { n: reporte.active.number ?? "—" })}
                     </p>
                     <p className="font-mono text-2xl font-semibold">
                       {textoDeCapacidad(
                         {
-                          remanente: reporte.activo.remanente,
-                          capacidad: reporte.activo.capacidad,
+                          remanente: reporte.active.remanente,
+                          capacidad: reporte.active.capacity,
                         },
                         unidad,
                       )}
                     </p>
-                    {reporte.activo.remanente < 0 && (
+                    {reporte.active.remanente < 0 && (
                       <p className="rounded-md border border-warning/40 bg-warning px-2 py-1 text-xs text-warning-foreground">
                         {t("remanenteNegativo")}
                       </p>
@@ -265,29 +274,29 @@ export default function VialesPage() {
                       {d.items.map((c, i) => (
                         <tr key={`${c.vialId}-${i}`} className="hover:bg-muted/30">
                           <td className="px-4 py-2 text-muted-foreground">
-                            {new Date(c.fecha).toLocaleTimeString(undefined, {
+                            {new Date(c.date).toLocaleTimeString(undefined, {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </td>
                           <td className="px-4 py-2">
-                            {c.paciente ? (
+                            {c.patient ? (
                               <>
                                 {/* Nada aislado: la dosis enlaza a la FICHA del paciente que la consumió
-                                    (pacienteId ya viene del reporte). Si no hay id, texto plano. */}
-                                {c.pacienteId ? (
+                                    (patientId ya viene del reporte). Si no hay id, texto plano. */}
+                                {c.patientId ? (
                                   <Link
-                                    href={`/patients/${c.pacienteId}`}
+                                    href={`/patients/${c.patientId}`}
                                     className="font-medium text-primary hover:underline"
                                   >
-                                    {c.paciente}
+                                    {c.patient}
                                   </Link>
                                 ) : (
-                                  <span>{c.paciente}</span>
+                                  <span>{c.patient}</span>
                                 )}
-                                {c.record && (
+                                {c.medicalRecordNumber && (
                                   <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                                    {c.record}
+                                    {c.medicalRecordNumber}
                                   </span>
                                 )}
                               </>
@@ -297,16 +306,16 @@ export default function VialesPage() {
                           </td>
                           {/* Nada aislado: la dosis enlaza a su FACTURA. null = carga vieja sin sesión. */}
                           <td className="px-4 py-2">
-                            {c.facturaId ? (
-                              <Link href={`/billing/invoices/${c.facturaId}`} className="font-medium text-primary hover:underline">
-                                {c.facturaNumero ? `#${c.facturaNumero}` : t("verFactura")}
+                            {c.invoiceId ? (
+                              <Link href={`/billing/invoices/${c.invoiceId}`} className="font-medium text-primary hover:underline">
+                                {c.invoiceNumber ? `#${c.invoiceNumber}` : t("verFactura")}
                               </Link>
                             ) : (
                               <span className="text-xs text-muted-foreground">—</span>
                             )}
                           </td>
                           <td className="px-4 py-2 text-right font-mono">
-                            {String(c.cantidad)}
+                            {String(c.quantity)}
                           </td>
                           <td className="px-4 py-2 text-right">
                             {c.vialNumero != null ? (
@@ -340,7 +349,7 @@ export default function VialesPage() {
                     key={h.id}
                     className="rounded-full border px-3 py-1 text-xs text-muted-foreground"
                   >
-                    #{h.numero ?? "—"} · {t(`estado.${h.estado}` as never)}
+                    #{h.number ?? "—"} · {t(`estado.${h.status}` as never)}
                   </li>
                 ))}
               </ul>

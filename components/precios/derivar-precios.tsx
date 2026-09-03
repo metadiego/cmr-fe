@@ -49,7 +49,7 @@ export function DerivarPrecios({
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  const regular = tipos.find((x) => x.clave === "regular");
+  const regular = tipos.find((x) => x.slug === "regular");
 
   const [origenTipoRaw, setOrigenTipo] = React.useState("");
   const [destinoTipo, setDestinoTipo] = React.useState(
@@ -92,25 +92,25 @@ export function DerivarPrecios({
     let destinoTipoId = destinoTipo;
     if (destinoTipo === NEW_LIST) {
       const clave = newListName.trim().toLowerCase().replace(/\s+/g, "_");
-      const created = await createTipoPrecio({ clave, nombre: newListName.trim() });
+      const created = await createTipoPrecio({ slug: clave, name: newListName.trim() });
       destinoTipoId = created.id;
       setDestinoTipo(created.id);
       tiposRes.reload();
     }
     const centroSel = ambito === "centro" ? clinicId : undefined;
     return {
-      origen: { tipoPrecioId: origenTipo, ...(centroSel ? { clinicId: centroSel } : {}) },
-      destino: {
-        tipoPrecioId: destinoTipoId,
-        ambito,
+      source: { priceTypeId: origenTipo, ...(centroSel ? { clinicId: centroSel } : {}) },
+      destination: {
+        priceTypeId: destinoTipoId,
+        scope: ambito,
         ...(centroSel ? { clinicId: centroSel } : {}),
       },
-      ajuste: { modo, valor: valorNum, direccion },
+      ajuste: { mode: modo, value: valorNum, address: direccion },
       ...(redondeo !== "ninguno"
         ? {
             redondeo: {
-              modo: redondeo,
-              ...(redondeoValor.trim() ? { valor: Number(redondeoValor) } : {}),
+              mode: redondeo,
+              ...(redondeoValor.trim() ? { value: Number(redondeoValor) } : {}),
             },
           }
         : {}),
@@ -133,12 +133,12 @@ export function DerivarPrecios({
   }
 
   async function apply() {
-    if (!preview || preview.aplicados === 0) return;
+    if (!preview || preview.applied === 0) return;
     setBusy(true);
     try {
       const payload = await buildPayload(false);
       const res = await derivarPrecios(payload, tenantForScope());
-      toast.success(t("applied", { n: res.aplicados }));
+      toast.success(t("applied", { n: res.applied }));
       setPreview(null);
       onDone?.();
     } catch (err) {
@@ -163,7 +163,7 @@ export function DerivarPrecios({
               <SelectContent>
                 {tipos.map((x) => (
                   <SelectItem key={x.id} value={x.id}>
-                    {x.nombre}
+                    {x.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -182,7 +182,7 @@ export function DerivarPrecios({
               <SelectContent>
                 {tipos.map((x) => (
                   <SelectItem key={x.id} value={x.id}>
-                    {x.nombre}
+                    {x.name}
                   </SelectItem>
                 ))}
                 <SelectItem value={NEW_LIST}>{t("newList")}</SelectItem>
@@ -223,7 +223,7 @@ export function DerivarPrecios({
                 <SelectContent>
                   {centros.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.nombre}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -284,8 +284,8 @@ export function DerivarPrecios({
           {busy ? t("calculating") : t("preview")}
         </Button>
         {preview && (
-          <Button variant="default" onClick={apply} disabled={busy || preview.aplicados === 0}>
-            {t("apply", { n: preview.aplicados })}
+          <Button variant="default" onClick={apply} disabled={busy || preview.applied === 0}>
+            {t("apply", { n: preview.applied })}
           </Button>
         )}
       </div>
@@ -295,10 +295,10 @@ export function DerivarPrecios({
         <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <div className="flex flex-wrap items-center gap-3 border-b px-4 py-3 text-sm">
             <Badge variant="secondary">{t("total", { n: preview.total })}</Badge>
-            <Badge variant={preview.aplicados > 0 ? "default" : "outline"}>
-              {t("aplicables", { n: preview.aplicados })}
+            <Badge variant={preview.applied > 0 ? "default" : "outline"}>
+              {t("aplicables", { n: preview.applied })}
             </Badge>
-            {preview.aplicados === 0 && (
+            {preview.applied === 0 && (
               <span className="text-muted-foreground">{t("nothingToApply")}</span>
             )}
           </div>
@@ -316,14 +316,14 @@ export function DerivarPrecios({
                 {preview.cambios.map((c) => {
                   const changed = c.precioDespues != null && c.precioDespues !== c.precioAntes;
                   return (
-                    <tr key={c.presentacionId} className="hover:bg-muted/30">
+                    <tr key={c.presentationId} className="hover:bg-muted/30">
                       <td className="px-3 py-1.5 font-mono text-xs">{c.sku ?? "—"}</td>
                       <td className="px-3 py-1.5 tabular-nums text-muted-foreground">{money(c.precioAntes)}</td>
                       <td className={"px-3 py-1.5 tabular-nums " + (changed ? "font-medium text-primary" : "")}>
                         {money(c.precioDespues)}
                       </td>
                       <td className="px-3 py-1.5">
-                        <span className="text-xs text-muted-foreground">{c.fuente}</span>
+                        <span className="text-xs text-muted-foreground">{c.source}</span>
                       </td>
                     </tr>
                   );

@@ -60,21 +60,21 @@ export function NurseStatusButton({
     if (!open || !centro) return;
     getNurseStatusTipos(centro).then(setTipos).catch(() => setTipos([]));
     listPersonalPorCapacidad("enfermera", centro)
-      .then((list) => setRoster(list.map((p) => ({ id: p.id, nombre: `${p.nombre} ${p.apellido ?? ""}`.trim() }))))
+      .then((list) => setRoster(list.map((p) => ({ id: p.id, nombre: `${p.name} ${p.lastName ?? ""}`.trim() }))))
       .catch(() => setRoster([]));
   }, [open, centro, gen]);
 
-  const conStatus = actuales.filter((a) => a.statusTipoId);
+  const conStatus = actuales.filter((a) => a.statusTypeId);
   const count = conStatus.length;
   const tipoById = React.useMemo(() => new Map((tipos ?? []).map((x) => [x.id, x])), [tipos]);
-  const tipoLabel = (x: NurseStatusTipo) => (tRoot.has(x.labelKey) ? tRoot(x.labelKey) : x.nombre);
-  const nombreDe = (a: NurseStatusActual) => a.personalNombre ?? roster.find((r) => r.id === a.personalId)?.nombre ?? a.personalId.slice(0, 8);
+  const tipoLabel = (x: NurseStatusTipo) => (tRoot.has(x.labelKey) ? tRoot(x.labelKey) : x.name);
+  const nombreDe = (a: NurseStatusActual) => a.personalNombre ?? roster.find((r) => r.id === a.staffId)?.nombre ?? a.staffId.slice(0, 8);
 
   async function aplicar(personalId: string, statusTipoId: string | null) {
     if (!personalId) return;
     setBusy(true);
     try {
-      await setNurseStatus({ personalId, statusTipoId: statusTipoId ?? undefined } as never, centro);
+      await setNurseStatus({ staffId: personalId, statusTypeId: statusTipoId ?? undefined }, centro);
       setGen((g) => g + 1);
       onChanged?.();
     } catch (err) {
@@ -116,8 +116,8 @@ export function NurseStatusButton({
           </select>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {[...(tipos ?? [])]
-              .filter((x) => x.activo !== false)
-              .sort((a, b) => a.orden - b.orden)
+              .filter((x) => x.active !== false)
+              .sort((a, b) => a.sortOrder - b.sortOrder)
               .map((x) => (
                 <button
                   key={x.id}
@@ -148,17 +148,17 @@ export function NurseStatusButton({
         ) : (
           <ul className="space-y-1">
             {conStatus.map((a) => {
-              const tipo = a.statusTipoId ? tipoById.get(a.statusTipoId) : undefined;
+              const tipo = a.statusTypeId ? tipoById.get(a.statusTypeId) : undefined;
               const color = tipo?.color ?? null;
-              const label = tipo ? tipoLabel(tipo) : a.statusTipoId ?? "";
+              const label = tipo ? tipoLabel(tipo) : a.statusTypeId ?? "";
               return (
-                <li key={a.personalId} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+                <li key={a.staffId} className="flex items-center justify-between gap-2 rounded-md bg-card px-2 py-1.5 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                   <span className="min-w-0 truncate">{nombreDe(a)}</span>
                   <span className="flex shrink-0 items-center gap-2">
                     <span className="rounded-full px-2 py-0.5 text-[11px] font-medium" style={color ? { backgroundColor: `${color}22`, color } : undefined}>
                       {label}
                     </span>
-                    <button type="button" disabled={busy} onClick={() => aplicar(a.personalId, null)} aria-label={tRoot("common.remove")} className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                    <button type="button" disabled={busy} onClick={() => aplicar(a.staffId, null)} aria-label={tRoot("common.remove")} className="rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                       <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
                     </button>
                   </span>

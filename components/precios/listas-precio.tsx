@@ -54,7 +54,7 @@ export function ListasPrecio({
     if (!n || busy) return;
     setBusy(true);
     try {
-      await createTipoPrecio({ clave: slugify(n), nombre: n });
+      await createTipoPrecio({ slug: slugify(n), name: n });
       toast.success(t("created", { nombre: n }));
       setNombre("");
       reload();
@@ -71,7 +71,7 @@ export function ListasPrecio({
     if (!n) return;
     setBusy(true);
     try {
-      await updateTipoPrecio(id, { nombre: n });
+      await updateTipoPrecio(id, { name: n });
       toast.success(t("renamed"));
       setEditId(null);
       reload();
@@ -86,8 +86,8 @@ export function ListasPrecio({
   async function toggleActivo(l: TipoPrecio) {
     setBusy(true);
     try {
-      if (l.activo === false) {
-        await updateTipoPrecio(l.id, { activo: true });
+      if (l.active === false) {
+        await updateTipoPrecio(l.id, { active: true });
       } else {
         await deleteTipoPrecio(l.id); // baja lógica
       }
@@ -163,8 +163,8 @@ export function ListasPrecio({
               </tr>
             )}
             {listas.map((l) => {
-              const esRegular = l.clave === "regular";
-              const activo = l.activo !== false;
+              const esRegular = l.slug === "regular";
+              const activo = l.active !== false;
               return (
                 <tr key={l.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2 font-medium">
@@ -180,10 +180,10 @@ export function ListasPrecio({
                         className="h-7 max-w-xs"
                       />
                     ) : (
-                      (l.nombre ?? l.clave)
+                      (l.name ?? l.slug)
                     )}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{l.clave}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{l.slug}</td>
                   <td className="px-3 py-2">
                     <Badge variant={activo ? "secondary" : "outline"}>
                       {activo ? t("active") : t("inactive")}
@@ -207,7 +207,7 @@ export function ListasPrecio({
                             variant="ghost"
                             onClick={() => {
                               setEditId(l.id);
-                              setEditName(l.nombre ?? "");
+                              setEditName(l.name ?? "");
                             }}
                           >
                             {tc("edit")}

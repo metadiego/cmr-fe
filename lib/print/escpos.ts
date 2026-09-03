@@ -89,13 +89,13 @@ export function reciboToEscPos(r: Recibo, labels: EscPosLabels, cols = 48): Uint
   // Encabezado centrado
   p.align(1);
   if (r.anulada) p.bold(true).ln(labels.anulada).bold(false);
-  if (emp?.nombreLegal) p.bold(true).size(true).ln(emp.nombreLegal).size(false).bold(false);
-  if (emp?.nombreComercial) p.ln(emp.nombreComercial);
+  if (emp?.legalName) p.bold(true).size(true).ln(emp.legalName).size(false).bold(false);
+  if (emp?.tradeName) p.ln(emp.tradeName);
   if (emp?.sucursal) p.ln(emp.sucursal);
-  if (emp?.direccion) emp.direccion.split(/\r?\n/).forEach((li) => p.wrap(li));
-  if (emp?.telefono) p.ln(emp.telefono);
+  if (emp?.address) emp.address.split(/\r?\n/).forEach((li) => p.wrap(li));
+  if (emp?.phone) p.ln(emp.phone);
   if (emp?.email) p.ln(emp.email);
-  if (emp?.registroFiscal) p.ln(`${emp.registroFiscalLabel ? emp.registroFiscalLabel + ": " : ""}${emp.registroFiscal}`);
+  if (emp?.taxRegistration) p.ln(`${emp.taxRegistrationLabel ? emp.taxRegistrationLabel + ": " : ""}${emp.taxRegistration}`);
 
   p.align(0).dashed();
   const tipo =
@@ -138,9 +138,9 @@ export function reciboToEscPos(r: Recibo, labels: EscPosLabels, cols = 48): Uint
   if (r.pagos.length) { p.dashed(); r.pagos.forEach((pg) => p.lr(pg.formaPagoNombre || "-", money(pg.monto))); }
 
   // Pie (pieFactura / piePresupuesto ya viene en empresa; el recibo lo trae en el pie legacy)
-  const pie = r.tipoDocumento === "presupuesto" ? emp?.piePresupuesto : emp?.pieFactura;
+  const pie = r.tipoDocumento === "presupuesto" ? emp?.quoteFooter : emp?.invoiceFooter;
   if (pie) { p.dashed().align(1); pie.split(/\r?\n|\s\|\s/).forEach((li) => p.wrap(li.trim())); p.align(0); }
-  if (emp?.web) p.align(1).ln(emp.web).align(0);
+  if (emp?.website) p.align(1).ln(emp.website).align(0);
 
   return p.feedCut().bytes();
 }

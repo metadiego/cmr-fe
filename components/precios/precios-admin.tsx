@@ -77,7 +77,7 @@ export function PreciosAdmin() {
           q: debounced,
           page,
           limit: PAGE_SIZE,
-          tipoPrecioId: tipoFiltro || undefined,
+          priceTypeId: tipoFiltro || undefined,
           clinicId: scopeClinicId,
         },
         scopeTenant,
@@ -91,7 +91,7 @@ export function PreciosAdmin() {
   // Centros para el selector de scope (admin ve todos).
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  const regularTipoId = tipos.find((x) => x.clave === "regular")?.id ?? null;
+  const regularTipoId = tipos.find((x) => x.slug === "regular")?.id ?? null;
   // Lista destino de una edición: la lista filtrada, o regular por defecto.
   const targetTipoId = tipoFiltro || regularTipoId;
 
@@ -104,8 +104,8 @@ export function PreciosAdmin() {
   const [saving, setSaving] = React.useState(false);
 
   function startEdit(row: PrecioCatalogoRow) {
-    setEditingId(row.presentacionId);
-    setDraft(row.precio != null ? String(row.precio) : "");
+    setEditingId(row.presentationId);
+    setDraft(row.price != null ? String(row.price) : "");
   }
 
   async function save(row: PrecioCatalogoRow) {
@@ -116,26 +116,26 @@ export function PreciosAdmin() {
     }
     setSaving(true);
     try {
-      const listaId = row.tipoPrecioId ?? targetTipoId;
+      const listaId = row.priceTypeId ?? targetTipoId;
       // Escribe en el scope elegido (global o el centro): el BE fija clinicId por X-Tenant-ID.
       // Busca la fila EN ese scope para decidir PUT vs POST (un centro no ve la global como suya).
-      const filas = await listPreciosByPresentacion(row.presentacionId, scopeTenant);
+      const filas = await listPreciosByPresentacion(row.presentationId, scopeTenant);
       const existente = listaId
         ? filas.find(
             (f) =>
-              f.tipoPrecioId === listaId &&
+              f.priceTypeId === listaId &&
               (scope === "global" ? f.clinicId == null : f.clinicId === scope),
           )
         : undefined;
       if (existente) {
-        await updatePrecio(existente.id, { precio: value }, scopeTenant);
+        await updatePrecio(existente.id, { price: value }, scopeTenant);
       } else {
         if (!targetTipoId) throw new Error(t("regularNotFound"));
         await createPrecio(
           {
-            presentacionId: row.presentacionId,
-            tipoPrecioId: targetTipoId,
-            precio: value,
+            presentationId: row.presentationId,
+            priceTypeId: targetTipoId,
+            price: value,
           },
           scopeTenant,
         );
@@ -207,7 +207,7 @@ export function PreciosAdmin() {
             <SelectItem value="global">{t("scopeGlobal")}</SelectItem>
             {centros.map((c) => (
               <SelectItem key={c.id} value={c.id}>
-                {c.nombre}
+                {c.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -220,7 +220,7 @@ export function PreciosAdmin() {
             <SelectItem value="__efectivo__">{t("efectivo")}</SelectItem>
             {tipos.map((x) => (
               <SelectItem key={x.id} value={x.id}>
-                {x.nombre}
+                {x.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -267,13 +267,13 @@ export function PreciosAdmin() {
             )}
             {rows.map((row) => {
               // Filas sin presentación no se pueden precificar (no hay a qué colgar el precio).
-              const editable = !!row.presentacionId;
-              const isEditing = editable && editingId === row.presentacionId;
+              const editable = !!row.presentationId;
+              const isEditing = editable && editingId === row.presentationId;
               return (
-                <tr key={row.presentacionId ?? row.productoId} className="group hover:bg-muted/30">
-                  <td className="px-3 py-2 font-medium">{row.nombre}</td>
+                <tr key={row.presentationId ?? row.productId} className="group hover:bg-muted/30">
+                  <td className="px-3 py-2 font-medium">{row.name}</td>
                   <td className="px-3 py-2 font-mono text-xs">{row.sku ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{row.presentacionNombre}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{row.presentationName}</td>
                   <td className="px-3 py-2 tabular-nums">
                     {isEditing ? (
                       <Input
@@ -287,14 +287,14 @@ export function PreciosAdmin() {
                         }}
                         className="h-7 w-28"
                       />
-                    ) : row.precio != null ? (
-                      money(row.precio)
+                    ) : row.price != null ? (
+                      money(row.price)
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
                   </td>
                   <td className="px-3 py-2">
-                    <Badge variant={FUENTE_VARIANT[row.fuente]}>{t(`fuente.${row.fuente}`)}</Badge>
+                    <Badge variant={FUENTE_VARIANT[row.source]}>{t(`fuente.${row.source}`)}</Badge>
                   </td>
                   <td className="px-3 py-2 text-right">
                     {isEditing ? (

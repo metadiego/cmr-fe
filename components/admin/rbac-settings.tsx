@@ -85,7 +85,7 @@ export function RbacSettings() {
 
   async function onDelete(r: Rol) {
     // Confirmación: borrar un rol arrastra sus asignaciones (FK cascade).
-    if (!window.confirm(t("confirmDelete", { role: r.nombre }))) return
+    if (!window.confirm(t("confirmDelete", { role: r.name }))) return
     setBusyId(r.id)
     try {
       await deleteRole(r.id)
@@ -131,11 +131,11 @@ export function RbacSettings() {
           <TableBody>
             {state.roles.map((r) => (
               <TableRow key={r.id}>
-                <TableCell className="font-mono">{r.clave}</TableCell>
-                <TableCell className="font-medium">{r.nombre}</TableCell>
+                <TableCell className="font-mono">{r.slug}</TableCell>
+                <TableCell className="font-medium">{r.name}</TableCell>
                 <TableCell>
-                  <Badge variant={r.esSistema ? "secondary" : "outline"}>
-                    {r.esSistema ? t("system") : t("custom")}
+                  <Badge variant={r.isSystem ? "secondary" : "outline"}>
+                    {r.isSystem ? t("system") : t("custom")}
                   </Badge>
                 </TableCell>
                 <TableCell className="space-x-2 text-right">
@@ -162,7 +162,7 @@ export function RbacSettings() {
                   >
                     {t("edit")}
                   </Button>
-                  {!r.esSistema && (
+                  {!r.isSystem && (
                     <Button
                       size="sm"
                       variant="outline"
@@ -235,7 +235,7 @@ function RoleMenuDialog({
           new Set(
             list
               .filter((i) => i.allowed && i.requiresPermiso)
-              .map((i) => i.clave)
+              .map((i) => i.slug)
           )
         )
       })
@@ -246,9 +246,9 @@ function RoleMenuDialog({
   }, [role])
 
   function labelDe(i: ProfileMenuItem) {
-    const anyI = i as unknown as { labelCustom?: string | null }
-    if (anyI.labelCustom) return anyI.labelCustom
-    return tRoot.has(i.labelKey) ? tRoot(i.labelKey) : i.clave
+    const anyI = i as unknown as { customLabel?: string | null }
+    if (anyI.customLabel) return anyI.customLabel
+    return tRoot.has(i.labelKey) ? tRoot(i.labelKey) : i.slug
   }
 
   async function onSubmit() {
@@ -270,7 +270,7 @@ function RoleMenuDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {t("menuRolTitle", { role: role?.nombre ?? "" })}
+            {t("menuRolTitle", { role: role?.name ?? "" })}
           </DialogTitle>
           <DialogDescription>{t("menuRolHelp")}</DialogDescription>
         </DialogHeader>
@@ -281,16 +281,16 @@ function RoleMenuDialog({
         <div className="space-y-1">
           {items?.map((i) => {
             const anyI = i as unknown as {
-              tipo?: string
-              parentClave?: string | null
+              type?: string
+              parentSlug?: string | null
             }
-            if (anyI.tipo === "separador") return null
-            const esGrupo = anyI.tipo === "grupo"
-            const indent = anyI.parentClave && !esGrupo ? "pl-6" : ""
+            if (anyI.type === "separador") return null
+            const esGrupo = anyI.type === "grupo"
+            const indent = anyI.parentSlug && !esGrupo ? "pl-6" : ""
             if (esGrupo) {
               return (
                 <p
-                  key={i.clave}
+                  key={i.slug}
                   className="pt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
                 >
                   {labelDe(i)}
@@ -300,17 +300,17 @@ function RoleMenuDialog({
             const participa = !!i.requiresPermiso
             return (
               <label
-                key={i.clave}
+                key={i.slug}
                 className={`flex items-center gap-2 text-sm ${indent}`}
               >
                 <Checkbox
-                  checked={participa ? selected.has(i.clave) : true}
+                  checked={participa ? selected.has(i.slug) : true}
                   disabled={!participa}
                   onCheckedChange={(v) =>
                     setSelected((prev) => {
                       const next = new Set(prev)
-                      if (v === true) next.add(i.clave)
-                      else next.delete(i.clave)
+                      if (v === true) next.add(i.slug)
+                      else next.delete(i.slug)
                       return next
                     })
                   }
@@ -350,9 +350,9 @@ function EditRoleDialog({
 }) {
   const t = useTranslations("admin.rbac")
   const tc = useTranslations("admin")
-  const [nombre, setNombre] = React.useState(role?.nombre ?? "")
-  const [descripcion, setDescripcion] = React.useState(role?.descripcion ?? "")
-  const [todosLosCentros, setTodosLosCentros] = React.useState(!!role?.todosLosCentros)
+  const [nombre, setNombre] = React.useState(role?.name ?? "")
+  const [descripcion, setDescripcion] = React.useState(role?.description ?? "")
+  const [todosLosCentros, setTodosLosCentros] = React.useState(!!role?.allCenters)
   const [submitting, setSubmitting] = React.useState(false)
 
   async function onSubmit() {
@@ -360,9 +360,9 @@ function EditRoleDialog({
     setSubmitting(true)
     try {
       await updateRole(role.id, {
-        nombre: nombre.trim(),
-        descripcion: descripcion.trim() || undefined,
-        todosLosCentros,
+        name: nombre.trim(),
+        description: descripcion.trim() || undefined,
+        allCenters: todosLosCentros,
       })
       toast.success(t("updated"))
       onOpenChange(false)
@@ -379,7 +379,7 @@ function EditRoleDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("editTitle")}</DialogTitle>
-          <DialogDescription>{role?.clave}</DialogDescription>
+          <DialogDescription>{role?.slug}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -445,9 +445,9 @@ function CreateRoleDialog({
     setSubmitting(true)
     try {
       await createRole({
-        clave: clave.trim(),
-        nombre: nombre.trim(),
-        descripcion: descripcion.trim() || undefined,
+        slug: clave.trim(),
+        name: nombre.trim(),
+        description: descripcion.trim() || undefined,
       })
       toast.success(t("created"))
       handleOpenChange(false)
@@ -538,7 +538,7 @@ function PermisosDialog({
 
   const byModulo = React.useMemo(() => {
     const acc: Record<string, Permiso[]> = {}
-    for (const p of permisos) (acc[p.modulo] ??= []).push(p)
+    for (const p of permisos) (acc[p.module] ??= []).push(p)
     return acc
   }, [permisos])
 
@@ -570,7 +570,7 @@ function PermisosDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {t("permisosTitle", { role: role?.nombre ?? "" })}
+            {t("permisosTitle", { role: role?.name ?? "" })}
           </DialogTitle>
           <DialogDescription>{t("permisosHelp")}</DialogDescription>
         </DialogHeader>
@@ -586,14 +586,14 @@ function PermisosDialog({
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {list.map((p) => (
                     <label
-                      key={p.clave}
+                      key={p.slug}
                       className="flex items-center gap-2 text-sm"
                     >
                       <Checkbox
-                        checked={selected.has(p.clave)}
-                        onCheckedChange={(v) => toggle(p.clave, v === true)}
+                        checked={selected.has(p.slug)}
+                        onCheckedChange={(v) => toggle(p.slug, v === true)}
                       />
-                      <span className="font-mono text-xs">{p.accion}</span>
+                      <span className="font-mono text-xs">{p.action}</span>
                     </label>
                   ))}
                 </div>
