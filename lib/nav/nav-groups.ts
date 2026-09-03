@@ -29,10 +29,17 @@ export type NavMenuItem = {
 
 export type NavNode = NavMenuItem & { children: NavNode[] };
 
-// ¿La raíz es un grupo? Igual criterio que site-header.tsx: `tipo === "grupo"`
-// (cmr-be PR #230) con fallback al prefijo `g-` por compatibilidad.
+// ¿La raíz es un grupo (contenedor sin destino propio)? `tipo === "grupo"` (cmr-be PR #230),
+// el prefijo `g-` por compatibilidad, o un contenedor cuyo `path` es "#"/vacío — así los buckets
+// del catálogo (`en-desarrollo`, `por-desarrollar`, path "#") se pintan como sección plegable en
+// vez de como enlace muerto. Una hoja con ruta real (home "/", dashboard "/dashboard") NO es grupo.
 function isGroupRoot(node: NavMenuItem): boolean {
-  return node.tipo === "grupo" || node.clave.startsWith("g-");
+  return (
+    node.tipo === "grupo" ||
+    node.clave.startsWith("g-") ||
+    !node.path ||
+    node.path === "#"
+  );
 }
 
 export function buildNavGroups(

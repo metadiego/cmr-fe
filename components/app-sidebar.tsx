@@ -8,11 +8,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Stethoscope02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { isActive } from "@/lib/nav";
-import { NAV_MANIFEST } from "@/lib/nav-manifest";
 import { resolveMenuIcon } from "@/lib/menu-icons";
 import { buildNavGroups, type NavNode } from "@/lib/nav/nav-groups";
 import { useMenu } from "@/hooks/use-menu";
-import { useMe, isAdmin } from "@/hooks/use-me";
+import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -76,12 +75,13 @@ function useNavOpenState() {
 const COLLAPSE_ANIM =
   "overflow-hidden data-[state=open]:animate-[collapsible-down_180ms_ease-out] data-[state=closed]:animate-[collapsible-up_180ms_ease-out]";
 
-// Rail navy, shell ÚNICO (reemplaza SiteHeader + NavSidebar beta). Mismos datos y
-// filtros que la barra clásica — el menú del BE (`GET /me/menu`, useMenu()) más el
-// "catch-all" del manifiesto para admin — solo re-alojados en el primitivo Sidebar.
-// La agrupación de dominio se extrajo a lib/nav/nav-groups.ts (buildNavGroups) y se
-// testea ahí. Los buckets "En desarrollo / Por desarrollar" (solo admin) se arman
-// aquí igual que en la barra clásica anterior, para no perder ese acceso al migrar.
+// Rail navy, shell ÚNICO. La barra se construye ENTERA desde el catálogo de menú del BE
+// (`GET /menu`, useMenu()) filtrado por permisos en el FE — decisión «los accesos los decide el
+// frontend» (docs/specs/accesos-los-decide-el-frontend.md). Ya NO hay lista de rutas a mano: la
+// agrupación por dominio (raíces g-*/contenedores con hijos, incluido el bucket `en-desarrollo`
+// del catálogo, gateado por el permiso `menu.desarrollo`) vive en lib/nav/nav-groups.ts
+// (buildNavGroups) y se testea ahí. El respaldo del esquema anterior:
+// docs/specs/backups/nav-manifest-y-buckets-respaldo-2026-09-03.md.
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -97,69 +97,9 @@ export function AppSidebar() {
   const effOpen = (clave: string) =>
     sidebarState === "collapsed" ? true : navOpen.isOpen(clave);
   const session = me.kind === "ok" ? me.me : null;
-  const puedeVerCatalogoCompleto = !!session && isAdmin(session);
 
-  // Grupos de dominio del BE (raíces g-* / tipo grupo con hijos visibles).
+  // Grupos del catálogo (raíces grupo/contenedor con hijos visibles), ya filtrado por permisos.
   const domainGroups = buildNavGroups(menu, can);
-
-  // --- Buckets de desarrollo (solo admin) — portado de la barra clásica -------
-  // "En desarrollo" = la ruta tiene página; "Por desarrollar" = el resto.
-  const REAL_ROUTES = [
-    "/dashboard",
-    "/inventario",
-    "/clientes",
-    "/citas",
-    "/facturacion",
-    "/tablero",
-    "/inventario/productos",
-    "/inventario/proveedores",
-    "/inventario/presentaciones-proveedor",
-    "/inventario/recibir-compra",
-    "/inventario/recetas",
-    "/precios",
-    "/servicios",
-    "/comunicaciones",
-    "/admin",
-    "/configuracion/tableros",
-    "/settings",
-  ];
-  const KNOWN_ROUTES = [...REAL_ROUTES, ...NAV_MANIFEST.map((r) => r.path)];
-  const hasPage = (p: string) =>
-    p === "/" ||
-    KNOWN_ROUTES.some((r) => p === r || p.startsWith(r + "/") || p.startsWith(r));
-  const navItems = menu.filter(
-    (m) =>
-      !!m.path &&
-      m.path !== "#" &&
-      m.clave !== "en-desarrollo" &&
-      m.clave !== "por-desarrollar",
-  );
-  const bePaths = new Set(navItems.map((m) => m.path));
-  const manifestItems = puedeVerCatalogoCompleto
-    ? NAV_MANIFEST.filter((r) => !bePaths.has(r.path)).map((r) => ({
-        clave: `manifest:${r.path}`,
-        labelKey: r.labelKey,
-        path: r.path,
-      }))
-    : [];
-  const allItems: { clave: string; labelKey: string; path: string }[] = [
-    ...navItems.map((m) => ({ clave: m.clave, labelKey: m.labelKey, path: m.path })),
-    ...manifestItems,
-  ];
-  const devGroups = puedeVerCatalogoCompleto
-    ? [
-        {
-          clave: "en-desarrollo",
-          labelKey: "nav.en_desarrollo",
-          items: allItems.filter((m) => hasPage(m.path)),
-        },
-        {
-          clave: "por-desarrollar",
-          labelKey: "nav.por_desarrollar",
-          items: allItems.filter((m) => !hasPage(m.path)),
-        },
-      ].filter((g) => g.items.length > 0)
-    : [];
 
   // Etiqueta visible: labelCustom (nombre libre) pisa la clave i18n; si no, traducir.
   const labelOf = (n: { labelCustom?: string | null; labelKey: string }): string => {
@@ -323,28 +263,8 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Guía de desarrollo primero (solo admin), igual que la barra clásica. */}
-        {devGroups.map((g) =>
-          renderSection(
-            g.clave,
-            labelOf(g),
-            g.items.map((c) => (
-              <SidebarMenuItem key={c.clave}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive(pathname, c.path)}
-                  tooltip={labelOf(c)}
-                >
-                  <Link href={c.path}>
-                    <span>{labelOf(c)}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )),
-          ),
-        )}
-
-        {/* Grupos de dominio del BE. */}
+        {/* Todo el menú sale del catálogo (GET /menu) filtrado por permisos. El bucket
+            «En desarrollo» es otra raíz del catálogo (perm menu.desarrollo), no un caso especial. */}
         {domainGroups.map((g) =>
           renderSection(g.clave, labelOf(g), renderTop(g.children)),
         )}

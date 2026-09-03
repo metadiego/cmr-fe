@@ -1,8 +1,11 @@
-// Manifiesto de rutas reales de la app. Durante el desarrollo queremos TODO a mano en el menú
-// sin depender de que cada página esté registrada en el menú del BE (que es RBAC-driven y se
-// organiza después). El header fusiona esto con el menú del BE, deduplicando por `path`; los
-// items del BE mandan (traen su permiso/orden). Estos son el "catch-all" para no perder páginas.
-// Al agregar una página nueva, añade su ruta aquí. `labelKey` = clave i18n completa.
+// Paleta de rutas reales de la app para el EDITOR DE MENÚ (components/configuracion/menu-editor.tsx).
+//
+// OJO: esta lista YA NO arma la barra lateral. Desde la decisión «los accesos los decide el frontend»
+// (docs/specs/accesos-los-decide-el-frontend.md) la barra se construye desde el catálogo del BE
+// (`GET /menu`) filtrado por permisos — ver hooks/use-menu.ts y lib/nav/nav-groups.ts. Aquí solo
+// queda como sugerencias de rutas registrables: el editor ofrece las que aún no están en el catálogo
+// para que un admin las dé de alta como DATO (sin desplegar el frontend). Añadir una página nueva a
+// esta paleta es opcional (comodidad del editor); no hace falta para que el ítem aparezca en la barra.
 export interface NavRoute {
   path: string;
   labelKey: string;
