@@ -122,7 +122,7 @@ export function DiaView({ fecha }: { fecha: string }) {
         actions={
           <>
             <Link
-              href="/citas"
+              href="/scheduling/appointments"
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
@@ -162,7 +162,7 @@ export function DiaView({ fecha }: { fecha: string }) {
             </div>
             <Can permiso="citas.config">
               <Link
-                href="/citas/agenda/cupos"
+                href="/scheduling/slots"
                 className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 <HugeiconsIcon icon={Settings02Icon} className="size-4" />

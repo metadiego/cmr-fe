@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { isActive } from "@/lib/nav";
+import { routeForClave } from "@/lib/nav/manifest";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { MeProvider } from "@/components/me-provider";
@@ -62,9 +63,12 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
     if (custom) return custom;
     return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.labelKey;
   };
+  // Match against the FE-owned resolved route (not the BE path), so the section
+  // title survives route renames (Phase 1+). Most specific (longest) route wins.
   const active = menu
-    .filter((m) => !!m.path && m.path !== "#" && isActive(pathname, m.path))
-    .sort((a, b) => b.path.length - a.path.length)[0];
+    .map((m) => ({ item: m, route: routeForClave(m.clave, m.path) }))
+    .filter(({ route }) => !!route && route !== "#" && isActive(pathname, route))
+    .sort((a, b) => b.route.length - a.route.length)[0]?.item;
   const sectionTitle = active ? labelOf(active) : "";
 
   return (

@@ -90,8 +90,8 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     [q, estado, desde, hasta, gate.centro, contexto],
   );
   const rows = state.kind === "ok" ? state.data.items : [];
-  const facturasHref = esConsulta ? "/consultas" : "/facturacion";
-  const detalleHref = (fid: string) => `/facturacion/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
+  const facturasHref = esConsulta ? "/billing/consultations" : "/billing/invoices";
+  const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
 
   const [anular, setAnular] = React.useState<Devolucion | null>(null);
   const [motivo, setMotivo] = React.useState("");
@@ -185,7 +185,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => router.push(`/facturacion/${d.facturaId}/devoluciones/${d.id}/recibo${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.facturaId}/returns/${d.id}/receipt${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => router.push(detalleHref(d.facturaId))}>{t("verFactura")}</DropdownMenuItem>
                           {d.estado === "activa" && can("factura.devolver") && (
                             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>

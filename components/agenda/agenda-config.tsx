@@ -24,7 +24,7 @@ export function AgendaConfig() {
         actions={
           <>
             <Link
-              href="/citas"
+              href="/scheduling/appointments"
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />

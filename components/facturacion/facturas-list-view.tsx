@@ -149,8 +149,8 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const labelExentas = esConsulta ? t("totales.cortesias") : t("totales.cienDescuento");
   // ¿Página == rango? (sin resumen aún, o mismo conteo) → un solo total.
   const totalUnico = !resumen || paginaCount === resumen.total;
-  const devolucionesHref = esConsulta ? "/consultas/devoluciones" : "/facturacion/devoluciones";
-  const detalleHref = (fid: string) => `/facturacion/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
+  const devolucionesHref = esConsulta ? "/billing/consultations/returns" : "/billing/returns";
+  const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
 
   function cell(clave: string, value: unknown) {
     if (clave === "fac_estado") return <EstadoBadge estado={String(value ?? "")} />;
@@ -173,10 +173,10 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             {!esConsulta && (
               <>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/facturacion/reportes/consumo-insumos">{t("consumoInsumos")}</Link>
+                  <Link href="/reports/supply-consumption">{t("consumoInsumos")}</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href={`/facturacion/general?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
+                  <Link href={`/billing/invoices/new?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
                 </Button>
               </>
             )}

@@ -133,7 +133,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       });
       toast.success(t("recibidaOk"));
       setConfirmAprobar(false);
-      router.push("/inventario/transferencias");
+      router.push("/inventory/transfers");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setBusy(false);
@@ -147,7 +147,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       await rechazarTransferencia(id, { motivo: motivo.trim() });
       toast.success(t("rechazadaOk"));
       setRechazando(false);
-      router.push("/inventario/transferencias");
+      router.push("/inventory/transfers");
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setBusy(false);
@@ -168,7 +168,7 @@ export function TransferenciaRecibir({ id }: { id: string }) {
 
   return (
     <PageContainer>
-      <button type="button" onClick={() => router.push("/inventario/transferencias")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
+      <button type="button" onClick={() => router.push("/inventory/transfers")} className="mb-4 text-sm text-muted-foreground hover:text-foreground">
         ← {t("backToList")}
       </button>
 
