@@ -4,16 +4,18 @@ import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
 
-// Catalog column definition (GET /tablero/columnas). `ambitos` = which boards
+// Catalog column definition (GET /board/columns). `scopes` = which boards
 // it's eligible for. Distinct from ColumnaEfectiva (a placed column).
 export type ColumnaCatalogo = components["schemas"]["ColumnaEntity"];
 
-// Metadata-driven board (GET /citas/tablero). Same dynamic-column engine as the
+// Metadata-driven board (GET /appointments/board). Same dynamic-column engine as the
 // day-view: effective columns + projected flat rows for a day. Not typed in
 // Swagger (streamed projection), so we model the verified contract here.
+// `columnas`→`columns` y `filas`→`rows` son claves OPACAS: la respuesta las renombra
+// pero su CONTENIDO (ColumnaEfectiva/CitaFila) queda en español (motor de tableros).
 export interface Tablero {
-  columnas: ColumnaEfectiva[];
-  filas: CitaFila[];
+  columns: ColumnaEfectiva[];
+  rows: CitaFila[];
 }
 
 // tablero: which board composition ("citas" = Atención al Paciente).
@@ -22,52 +24,55 @@ export function getTablero(
   fecha: string,
   opts: { tablero?: string; centroId?: string; soloAtencion?: boolean } = {},
 ): Promise<Tablero> {
-  const sp = new URLSearchParams({ fecha });
-  if (opts.tablero) sp.set("tablero", opts.tablero);
-  if (opts.soloAtencion) sp.set("soloAtencion", "true");
-  return apiFetch<Tablero>(`/citas/tablero?${sp.toString()}`, {}, opts.centroId);
+  const sp = new URLSearchParams({ date: fecha });
+  if (opts.tablero) sp.set("boardSlug", opts.tablero);
+  if (opts.soloAtencion) sp.set("onlyCare", "true");
+  return apiFetch<Tablero>(`/appointments/board?${sp.toString()}`, {}, opts.centroId);
 }
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────
 
-// GET /tablero/columnas — catalog. With `tablero` → only columns ELIGIBLE for
-// that board (by ambitos); without → the WHOLE catalog (to incorporate/reuse).
+// GET /board/columns — catalog. With `boardSlug` → only columns ELIGIBLE for
+// that board (by scopes); without → the WHOLE catalog (to incorporate/reuse).
 export function getColumnasCatalogo(tablero?: string): Promise<ColumnaCatalogo[]> {
-  const qs = tablero ? `?tablero=${encodeURIComponent(tablero)}` : "";
-  return apiFetch<ColumnaCatalogo[]>(`/tablero/columnas${qs}`);
+  const qs = tablero ? `?boardSlug=${encodeURIComponent(tablero)}` : "";
+  return apiFetch<ColumnaCatalogo[]>(`/board/columns${qs}`);
 }
 
-// GET /tablero/efectivas?tablero= — the columns currently placed (orden/visible/fijo).
+// GET /board/effective?boardSlug= — the columns currently placed (sortOrder/visible/pinned).
+// OJO api-ingles: al ser un ARRAY directo (no dentro de la clave opaca `columnas`), la respuesta
+// SÍ traduce las claves de cada columna al inglés (clave→slug, orden→sortOrder, fijo→pinned…),
+// a diferencia de ColumnaEfectiva dentro de Tablero.columns (que llega en español).
 export function getColumnasEfectivas(tablero: string): Promise<ColumnaEfectiva[]> {
-  return apiFetch<ColumnaEfectiva[]>(`/tablero/efectivas?tablero=${encodeURIComponent(tablero)}`);
+  return apiFetch<ColumnaEfectiva[]>(`/board/effective?boardSlug=${encodeURIComponent(tablero)}`);
 }
 
 export interface ComposicionItem {
-  columnaId: string;
-  orden?: number;
+  columnId: string;
+  sortOrder?: number;
   visible?: boolean;
-  fijo?: boolean;
-  activo?: boolean;
+  pinned?: boolean;
+  active?: boolean;
 }
 
-// POST /tablero/composicion/bulk — board-level composition (needs tablero.config).
+// POST /board/composition/bulk — board-level composition (needs tablero.config).
 export function setComposicionBulk(tablero: string, columnas: ComposicionItem[]): Promise<unknown> {
-  return apiFetch(`/tablero/composicion/bulk`, {
+  return apiFetch(`/board/composition/bulk`, {
     method: "POST",
-    body: JSON.stringify({ tablero, columnas }),
+    body: JSON.stringify({ boardSlug: tablero, columns: columnas }),
   });
 }
 
-// POST /tablero/personalizar — per-user override (any user).
+// POST /board/customize — per-user override (any user).
 export function personalizarColumna(payload: {
-  tablero: string;
-  columnaId: string;
+  boardSlug: string;
+  columnId: string;
   visible?: boolean;
-  orden?: number;
-  fijo?: boolean;
+  sortOrder?: number;
+  pinned?: boolean;
   render?: Record<string, unknown>; // override del usuario, ej. {color, background}
 }): Promise<unknown> {
-  return apiFetch(`/tablero/personalizar`, {
+  return apiFetch(`/board/customize`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -75,11 +80,13 @@ export function personalizarColumna(payload: {
 
 // ── Generic board engine (registry-driven; any vertical) ────────────────────
 
-// A registered vertical (GET /tableros). `entidad` = event entity for SSE
-// filtering; `filtros` = server-side scope (e.g. {soloAtencion:true} for AP).
-// Botón enchufable de la barra del tablero (estilo hooks). Editable por PUT /tableros/:id, sin código:
+// A registered vertical (GET /boards). `entity` = event entity for SSE
+// filtering; `filters` = server-side scope (e.g. {soloAtencion:true} for AP).
+// Botón enchufable de la barra del tablero (estilo hooks). Editable por PUT /boards/:id, sin código:
 // el FE registra HANDLERS por clave y pinta el `slot` por `orden`, gate por `requierePermiso`. Ver
 // docs/specs/be-tablero-acciones-toolbar-hooks-handoff.md.
+// OJO: AccionTablero vive DENTRO de la clave opaca `acciones`/`actions` → sus claves NO se traducen
+// (quedan en español). NO renombrar (motor de tableros).
 export interface AccionTablero {
   clave: string;
   labelKey: string;
@@ -94,57 +101,57 @@ export interface AccionTablero {
 
 export interface TableroRegistro {
   id: string;
-  clave: string;
+  slug: string;
   labelKey: string;
   icon: string | null;
-  orden: number;
-  permiso: string | null;
+  sortOrder: number;
+  permissionSlug: string | null;
   layout: string; // "etapas" | "tabla" | ...
-  ruta: string; // ruta del board del vertical, ej. "/tablero/atencion"
-  entidad: string; // "cita" | "sesion" | ...
-  filtros: Record<string, unknown> | null;
-  acciones?: AccionTablero[] | null; // barra de botones enchufables (BE PR #165/#166)
-  esVertical?: boolean; // true → aparece en /tableros (menú); false → consultable (citas_cc)
-  activo: boolean;
+  path: string; // ruta del board del vertical, ej. "/tablero/atencion"
+  entity: string; // "cita" | "sesion" | ...
+  filters: Record<string, unknown> | null; // clave opaca `filtros`→`filters` (contenido intacto)
+  actions?: AccionTablero[] | null; // clave opaca `acciones`→`actions`; contenido en español
+  isVertical?: boolean; // true → aparece en /boards (menú); false → consultable (citas_cc)
+  active: boolean;
 }
 
-// A declarative transition (definicion.transiciones). `requiere` = payload field
-// claves the FE must collect. `desdeEstados` empty = available from any state.
+// A declarative transition (definicion.transiciones). `formFields` (era `requiere`) = payload field
+// claves the FE must collect. `fromStatuses` empty = available from any state.
 export interface Transicion {
   id: string;
-  clave: string;
+  slug: string;
   labelKey: string;
-  desdeEstados: string[];
-  aEstado: string | null;
-  metodo: string;
+  fromStatuses: string[];
+  toStatus: string | null;
+  method: string;
   path: string | null;
-  accion: string | null;
-  permiso: string | null;
-  requiere: string[];
-  confirmar: boolean;
-  orden: number;
-  activo: boolean;
+  action: string | null;
+  permissionSlug: string | null;
+  formFields: string[];
+  requiresConfirmation: boolean;
+  sortOrder: number;
+  active: boolean;
 }
 
 export interface SubTipo {
   id: string;
-  clave: string;
+  slug: string;
   labelKey: string;
-  orden: number;
-  activo?: boolean;
+  sortOrder: number;
+  active?: boolean;
 }
 
 export interface TableroDefinicion {
-  tablero: string;
-  columnas: ColumnaEfectiva[];
-  estados: EstadoCitaCatalogo[];
-  transiciones: Transicion[];
-  subTipos: SubTipo[];
+  boardSlug: string;
+  columns: ColumnaEfectiva[]; // clave opaca `columnas`→`columns`; contenido en español
+  statuses: EstadoCitaCatalogo[];
+  transitions: Transicion[];
+  subtypes: SubTipo[];
 }
 
-// GET /tableros — the vertical registry.
+// GET /boards — the vertical registry.
 export function getTableros(): Promise<TableroRegistro[]> {
-  return apiFetch<TableroRegistro[]>(`/tableros`);
+  return apiFetch<TableroRegistro[]>(`/boards`);
 }
 
 // GET /tablero/modal/modulos?postAccion= — catálogo GLOBAL de módulos pluggables de

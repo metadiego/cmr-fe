@@ -65,14 +65,14 @@ export function updateSystemPreferences(config: ThemeConfig): Promise<ThemeConfi
 }
 
 export function getCentroPreferences(centroId: string): Promise<ThemeConfig> {
-  return apiFetch<ThemeConfig>(`/preferences/centro/${centroId}`);
+  return apiFetch<ThemeConfig>(`/preferences/center/${centroId}`);
 }
 
 export function updateCentroPreferences(
   centroId: string,
   config: ThemeConfig,
 ): Promise<ThemeConfig> {
-  return apiFetch<ThemeConfig>(`/preferences/centro/${centroId}`, {
+  return apiFetch<ThemeConfig>(`/preferences/center/${centroId}`, {
     method: "PUT",
     body: JSON.stringify({ config }),
   });
@@ -82,19 +82,19 @@ export function updateCentroPreferences(
 
 export interface Override {
   id: string;
-  nombre?: string | null;
-  centroId?: string | null;
-  vigenteDesde?: string | null;
-  vigenteHasta?: string | null;
+  name?: string | null;
+  centerId?: string | null;
+  validFrom?: string | null;
+  validUntil?: string | null;
   config: ThemeConfig;
 }
 
 export interface CreateOverridePayload {
   config: ThemeConfig;
-  centroId?: string;
-  vigenteDesde?: string;
-  vigenteHasta?: string;
-  nombre?: string;
+  centerId?: string;
+  validFrom?: string;
+  validUntil?: string;
+  name?: string;
 }
 
 export function listOverrides(): Promise<Override[]> {

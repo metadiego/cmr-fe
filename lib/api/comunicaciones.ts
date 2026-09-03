@@ -16,8 +16,8 @@ export type Alerta = Omit<components["schemas"]["AlertaEntity"], "metadata"> & {
 // aún no los refleja (drift pendiente de gen:api). Ambos null = caer al color por severidad.
 // Handoff alertas-color-campanita.
 export type TipoAlerta = components["schemas"]["TipoAlertaEntity"] & {
-  dominio?: string | null;
-  color?: string | null;
+  domain?: string | null;
+  color?: string | null; // se dice igual (CAMPOS_IGUALES)
 };
 export type Notificacion = components["schemas"]["NotificacionEntity"];
 export type Plantilla = components["schemas"]["PlantillaNotificacionEntity"];

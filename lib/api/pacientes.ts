@@ -3,7 +3,7 @@ import { apiFetch, apiFetchPaged } from "./client";
 import type { Paginated } from "./types";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
-export type Paciente = components["schemas"]["PacienteEntity"] & { nombreMostrar?: string | null };
+export type Paciente = components["schemas"]["PacienteEntity"] & { displayName?: string | null };
 export type CreatePacientePayload = components["schemas"]["CreatePacienteDto"];
 export type UpdatePacientePayload = components["schemas"]["UpdatePacienteDto"];
 
@@ -24,11 +24,11 @@ export function listPacientes(
   const { page = 1, limit = 20, q } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
-  return apiFetchPaged<Paciente>(`/pacientes?${sp.toString()}`, {}, tenant);
+  return apiFetchPaged<Paciente>(`/patients?${sp.toString()}`, {}, tenant);
 }
 
 export function getPaciente(id: string, centroId?: string): Promise<Paciente> {
-  return apiFetch<Paciente>(`/pacientes/${id}`, {}, centroId);
+  return apiFetch<Paciente>(`/patients/${id}`, {}, centroId);
 }
 
 // Writes are tenant-scoped: the BE needs the target center. Pass `centroId` to
@@ -38,7 +38,7 @@ export function createPaciente(
   payload: CreatePacientePayload,
   centroId?: string,
 ): Promise<Paciente> {
-  return apiFetch<Paciente>(`/pacientes`, {
+  return apiFetch<Paciente>(`/patients`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
@@ -50,7 +50,7 @@ export function updatePaciente(
   payload: UpdatePacientePayload,
   centroId?: string,
 ): Promise<Paciente> {
-  return apiFetch<Paciente>(`/pacientes/${id}`, {
+  return apiFetch<Paciente>(`/patients/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
@@ -61,7 +61,7 @@ export function updatePaciente(
 // center (POST /pacientes/:id/asignar-record). Used when a patient has no record
 // yet. Tenant-scoped: pass centroId so the BE picks the right center's sequence.
 export function asignarRecord(id: string, centroId?: string): Promise<Paciente> {
-  return apiFetch<Paciente>(`/pacientes/${id}/asignar-record`, {
+  return apiFetch<Paciente>(`/patients/${id}/assign-record`, {
     method: "POST",
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
@@ -70,7 +70,7 @@ export function asignarRecord(id: string, centroId?: string): Promise<Paciente> 
 // Soft-delete: the BE sets activo=false (clinical history is kept) and the
 // patient drops out of the list. Reactivate with updatePaciente(id,{activo:true}).
 export function deletePaciente(id: string, centroId?: string): Promise<void> {
-  return apiFetch<void>(`/pacientes/${id}`, {
+  return apiFetch<void>(`/patients/${id}`, {
     method: "DELETE",
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
@@ -82,14 +82,15 @@ export function deletePaciente(id: string, centroId?: string): Promise<void> {
 
 // Quién posee un número de récord en el centro. `dueno` null = disponible.
 export interface RecordDueno {
-  record: string;
-  disponible: boolean;
+  medicalRecordNumber: string;
+  disponible: boolean; // NO en el mapa de campos → el BE lo devuelve en español
   dueno: {
+    // `dueno` NO está en el mapa → la clave del contenedor queda en español
     id: string;
-    nombres: string;
-    apellidos: string | null;
-    record: string | null;
-    activo: boolean;
+    firstName: string;
+    lastName: string | null;
+    medicalRecordNumber: string | null;
+    active: boolean;
   } | null;
 }
 
@@ -100,7 +101,7 @@ export function getRecordDueno(
   centroId?: string,
 ): Promise<RecordDueno> {
   return apiFetch<RecordDueno>(
-    `/pacientes/record/${encodeURIComponent(record)}`,
+    `/patients/record/${encodeURIComponent(record)}`,
     {},
     centroId,
   );
@@ -110,9 +111,9 @@ export function getRecordDueno(
 // nombres (default del BE: telefono, zipcode, sexo; cada centro puede sobreescribir).
 export function getConfigAltaPacientes(
   centroId?: string,
-): Promise<{ camposObligatorios: string[] }> {
-  return apiFetch<{ camposObligatorios: string[] }>(
-    `/pacientes/config-alta`,
+): Promise<{ requiredFields: string[] }> {
+  return apiFetch<{ requiredFields: string[] }>(
+    `/patients/discharge-config`,
     {},
     centroId,
   );
@@ -122,16 +123,16 @@ export function getConfigAltaPacientes(
 // centro activo) o "todos" (exige admin; aplica a todos los centros). Devuelve a qué centros aplicó.
 // RBAC pacientes.config. "Datos obligatorios del paciente" ≠ "campos requeridos por servicio".
 export type AltaConfigResult = {
-  camposObligatorios: string[];
-  alcance: "centro" | "todos";
-  centros: string[];
+  requiredFields: string[];
+  scope: "centro" | "todos"; // valores de dato, no claves → se quedan igual
+  centers: string[];
 };
 export function updateConfigAltaPacientes(
-  payload: { camposObligatorios: string[]; alcance?: "centro" | "todos" },
+  payload: { requiredFields: string[]; scope?: "centro" | "todos" },
   centroId?: string,
 ): Promise<AltaConfigResult> {
   return apiFetch<AltaConfigResult>(
-    `/pacientes/config-alta`,
+    `/patients/discharge-config`,
     { method: "PUT", body: JSON.stringify(payload) },
     centroId,
   );
@@ -144,19 +145,19 @@ export function updateConfigAltaPacientes(
 // El endpoint NO está aún en el schema generado (gen:api pendiente) → se tipa aquí.
 export interface CandidatoRecord {
   id: string;
-  record: string;
-  nombres?: string | null;
-  apellidos?: string | null;
-  telefono?: string | null;
-  fechaNacimiento?: string | null;
+  medicalRecordNumber: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+  dateOfBirth?: string | null;
   createdAt?: string | null;
 }
 // La forma del diagnóstico "feliz" la sirve el BE al leer el legado; se tipa laxa (hoy la nube
 // devuelve 500 porque el contenedor no trae sqlcmd — solo el camino del 409 es probable en prod).
 export interface DiagnosticoLegado {
-  record: string;
-  pacienteId?: string | null;
-  paciente?: { id?: string; nombres?: string | null; apellidos?: string | null } | null;
+  medicalRecordNumber: string;
+  patientId?: string | null;
+  patient?: { id?: string; firstName?: string | null; lastName?: string | null } | null;
   items?: unknown[];
   [k: string]: unknown;
 }
@@ -165,9 +166,9 @@ export function diagnosticoDisponibilidadLegado(
   pacienteId?: string,
   centroId?: string,
 ): Promise<DiagnosticoLegado> {
-  const qs = pacienteId ? `?pacienteId=${encodeURIComponent(pacienteId)}` : "";
+  const qs = pacienteId ? `?patientId=${encodeURIComponent(pacienteId)}` : "";
   return apiFetch<DiagnosticoLegado>(
-    `/pacientes/disponibilidad-legado/${encodeURIComponent(record)}/diagnostico${qs}`,
+    `/patients/legacy-availability/${encodeURIComponent(record)}/diagnosis${qs}`,
     {},
     centroId,
   );
@@ -178,7 +179,7 @@ export function aplicarDisponibilidadLegado(
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch<unknown>(
-    `/pacientes/disponibilidad-legado/${encodeURIComponent(record)}/aplicar`,
+    `/patients/legacy-availability/${encodeURIComponent(record)}/apply`,
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
@@ -197,21 +198,25 @@ export interface PreparacionFila {
   candidatos?: CandidatoRecord[];
   motivo?: string | null;
 }
+// OJO: `filas` es una bolsa OPACA (el interceptor traduce la clave del contenedor a `rows` pero NO
+// recorre su contenido) → las filas (PreparacionFila) conservan sus claves en español.
 export interface PreparacionLegado {
-  desde: string;
-  hasta: string;
+  from: string;
+  to: string;
   total: number;
-  omitidos: number;
-  filas: PreparacionFila[];
+  skipped: number;
+  rows: PreparacionFila[];
 }
 export function getPreparacionLegado(
   params: { dias?: number; limite?: number } = {},
   centroId?: string,
 ): Promise<PreparacionLegado> {
   const sp = new URLSearchParams();
-  if (params.dias) sp.set("dias", String(params.dias));
+  if (params.dias) sp.set("days", String(params.dias));
+  // `limite` se queda en español: el BE lee @Query('limite') y el middleware NO traduce `limit`→`limite`
+  // (`limit` está en NUNCA_SE_TRADUCEN), así que mandar `limit` dejaría el tope en el default sin avisar.
   if (params.limite) sp.set("limite", String(params.limite));
-  return apiFetch<PreparacionLegado>(`/pacientes/disponibilidad-legado/preparacion?${sp.toString()}`, {}, centroId);
+  return apiFetch<PreparacionLegado>(`/patients/legacy-availability/preparation?${sp.toString()}`, {}, centroId);
 }
 
 // Serie del récord del paciente (número de expediente al abrir un folder nuevo). El BE resuelve
@@ -219,20 +224,21 @@ export function getPreparacionLegado(
 // «hoy entregaría el N», no como valor guardado). Cambiar el arranque exige `motivo` y solo avanza.
 // Handoff qa-2026-09-03-lo-que-cambia-para-el-fe (§5). Permiso: numeracion.arranque.
 export interface SerieRecord {
-  configurada: boolean;
-  serie: string;
-  prefijo: string | null;
-  padding: number;
-  proximo: number;
+  configurada: boolean; // NO en el mapa → el BE lo devuelve en español
+  series: string;
+  prefix: string | null;
+  padding: number; // se dice igual (CAMPOS_IGUALES)
+  nextNumber: number;
 }
 export function getSerieRecord(centroId?: string): Promise<SerieRecord> {
-  return apiFetch<SerieRecord>(`/pacientes/serie-record`, {}, centroId);
+  return apiFetch<SerieRecord>(`/patients/record-series`, {}, centroId);
 }
 export function actualizarSerieRecord(
-  payload: { prefijo?: string | null; padding?: number; arranque?: number; motivo?: string },
+  // `arranque` NO está en el mapa → se envía tal cual (el middleware lo deja pasar hasta el DTO).
+  payload: { prefix?: string | null; padding?: number; arranque?: number; reason?: string },
   centroId?: string,
 ): Promise<SerieRecord> {
-  return apiFetch<SerieRecord>(`/pacientes/serie-record`, {
+  return apiFetch<SerieRecord>(`/patients/record-series`, {
     method: "PUT",
     body: JSON.stringify(payload),
   }, centroId);

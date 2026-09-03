@@ -6,17 +6,17 @@ import type { Paginated } from "./types";
 export type Cita = components["schemas"]["CitaEntity"];
 export type CreateCitaPayload = components["schemas"]["CreateCitaDto"];
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
-export type EstadoCita = Cita["estado"];
-export type CanalCita = Cita["canal"];
+export type EstadoCita = Cita["status"];
+export type CanalCita = Cita["channel"];
 
-// State catalog (GET /citas/estados): labelKey/color/orden/flags. Drive UI from
-// this instead of hardcoding the state list. Fetched once (memoized promise).
+// State catalog (GET /appointments/statuses): labelKey/color/sortOrder/flags. Drive UI
+// from this instead of hardcoding the state list. Fetched once (memoized promise).
 export type EstadoCitaCatalogo = components["schemas"]["EstadoCitaEntity"];
 
 let estadosPromise: Promise<EstadoCitaCatalogo[]> | null = null;
 export function getEstados(): Promise<EstadoCitaCatalogo[]> {
   if (!estadosPromise) {
-    estadosPromise = apiFetch<EstadoCitaCatalogo[]>(`/citas/estados`).catch((err) => {
+    estadosPromise = apiFetch<EstadoCitaCatalogo[]>(`/appointments/statuses`).catch((err) => {
       estadosPromise = null; // let it retry after a failure
       throw err;
     });
@@ -24,12 +24,13 @@ export function getEstados(): Promise<EstadoCitaCatalogo[]> {
   return estadosPromise;
 }
 
-// Overlap conflict + warning shapes (POST /citas/validar and meta.advertencias).
+// Overlap conflict + warning shapes (POST /appointments/validate and meta.advertencias).
+// `advertencias`/`conflictos`/`ok` NO están en el mapa api-ingles → el BE los sirve tal cual (español).
 export interface CitaConflicto {
-  citaId: string;
-  pacienteId: string;
-  hora: string;
-  horaFin: string;
+  appointmentId: string;
+  patientId: string;
+  time: string;
+  endTime: string;
 }
 export interface ValidarCitaResult {
   ok: boolean;
@@ -52,14 +53,14 @@ export const ESTADOS: EstadoCita[] = [
 export interface ListCitasParams {
   page?: number;
   limit?: number;
-  fecha?: string; // YYYY-MM-DD (single day)
-  desde?: string;
-  hasta?: string;
-  medicoId?: string;
-  pacienteId?: string;
-  estado?: EstadoCita;
-  canal?: CanalCita;
-  soloAtencion?: boolean; // only states visible to the Atención board
+  date?: string; // YYYY-MM-DD (single day)
+  from?: string;
+  to?: string;
+  doctorId?: string;
+  patientId?: string;
+  status?: EstadoCita;
+  channel?: CanalCita;
+  onlyCare?: boolean; // only states visible to the Atención board
 }
 
 // `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, sin tocar el centro de la
@@ -73,16 +74,16 @@ export function listCitas(
   for (const [k, v] of Object.entries(filters)) {
     if (v) sp.set(k, String(v));
   }
-  return apiFetchPaged<Cita>(`/citas?${sp.toString()}`, {}, centroId);
+  return apiFetchPaged<Cita>(`/appointments?${sp.toString()}`, {}, centroId);
 }
 
 // Fetch ALL citas for a range across pages (BE caps limit at 100). Used by the
 // month calendar, where a busy month can exceed one page.
 export async function listCitasRango(params: {
-  desde: string;
-  hasta: string;
-  medicoId?: string;
-  estado?: EstadoCita;
+  from: string;
+  to: string;
+  doctorId?: string;
+  status?: EstadoCita;
   centroId?: string; // fuerza el centro de la lectura (selector de centro EN la pantalla)
 }): Promise<Cita[]> {
   const { centroId, ...filters } = params;
@@ -99,20 +100,20 @@ export async function listCitasRango(params: {
 }
 
 export function getCita(id: string): Promise<Cita> {
-  return apiFetch<Cita>(`/citas/${id}`);
+  return apiFetch<Cita>(`/appointments/${id}`);
 }
 
 // Asignar la enfermera de VITALES de una cita (es el writeBinding `cita.enfermeraId` del modal de
-// Notificar en Atención → campo real `enfermeraVitalesId`). `null` la limpia. PUT /citas/:id.
+// Notificar en Atención → campo real `vitalsNurseId`). `null` la limpia. PUT /appointments/:id.
 // Verificado en prod: la fila del tablero refleja el nombre en `fd_enfermera` tras guardar.
 export function asignarEnfermeraVitales(
   citaId: string,
-  enfermeraVitalesId: string | null,
+  vitalsNurseId: string | null,
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch(
-    `/citas/${citaId}`,
-    { method: "PUT", body: JSON.stringify({ enfermeraVitalesId }) },
+    `/appointments/${citaId}`,
+    { method: "PUT", body: JSON.stringify({ vitalsNurseId }) },
     centroId,
   );
 }
@@ -122,26 +123,26 @@ export function createCita(
   payload: CreateCitaPayload,
   centroId?: string,
 ): Promise<Cita> {
-  return apiFetch<Cita>(`/citas`, {
+  return apiFetch<Cita>(`/appointments`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
 }
 
-// Dry-run overlap check before saving (POST /citas/validar). Does NOT create.
+// Dry-run overlap check before saving (POST /appointments/validate). Does NOT create.
 export function validarCita(
   payload: {
-    medicoId?: string;
-    fecha: string;
-    hora: string;
-    horaFin: string;
-    tipoCitaId?: string;
-    excluirCitaId?: string;
+    doctorId?: string;
+    date: string;
+    time: string;
+    endTime: string;
+    appointmentTypeId?: string;
+    excluirCitaId?: string; // NO está en el mapa api-ingles: se manda tal cual
   },
   centroId?: string,
 ): Promise<ValidarCitaResult> {
-  return apiFetch<ValidarCitaResult>(`/citas/validar`, {
+  return apiFetch<ValidarCitaResult>(`/appointments/validate`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
@@ -154,7 +155,7 @@ export async function crearCitaAgenda(
   payload: CreateCitaPayload,
   centroId?: string,
 ): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
-  const env = await apiFetchEnvelope<Cita>(`/citas`, {
+  const env = await apiFetchEnvelope<Cita>(`/appointments`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
@@ -168,7 +169,7 @@ export async function actualizarCitaAgenda(
   payload: Partial<CreateCitaPayload>,
   centroId?: string,
 ): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
-  const env = await apiFetchEnvelope<Cita>(`/citas/${id}`, {
+  const env = await apiFetchEnvelope<Cita>(`/appointments/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
@@ -177,9 +178,9 @@ export async function actualizarCitaAgenda(
 }
 
 // ---- Lifecycle transitions (slice 2: scheduling flow) ----------------------
-// State machine (verified): programada →confirmar→ confirmada →presente→ presente
-// →consulta→ en_consulta. triage/atender need vitals (slice 3). no-show/cancelar/
-// reagendar available from the open states. All are tenant-scoped writes.
+// State machine (verified): programada →confirm→ confirmada →present→ presente
+// →consultation→ en_consulta. triage/attend need vitals (slice 3). no-show/cancel/
+// reschedule available from the open states. All are tenant-scoped writes.
 
 function transition<T = Cita>(
   id: string,
@@ -187,7 +188,7 @@ function transition<T = Cita>(
   body: Record<string, unknown> | undefined,
   centroId?: string,
 ): Promise<T> {
-  return apiFetch<T>(`/citas/${id}/${action}`, {
+  return apiFetch<T>(`/appointments/${id}/${action}`, {
     method: "POST",
     body: body ? JSON.stringify(body) : undefined,
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
@@ -195,56 +196,58 @@ function transition<T = Cita>(
 }
 
 export const confirmarCita = (id: string, centroId?: string) =>
-  transition(id, "confirmar", undefined, centroId);
+  transition(id, "confirm", undefined, centroId);
 export const presenteCita = (id: string, centroId?: string) =>
-  transition(id, "presente", undefined, centroId);
+  transition(id, "present", undefined, centroId);
 export const noShowCita = (id: string, centroId?: string) =>
   transition(id, "no-show", undefined, centroId);
 export const cancelarCita = (id: string, motivo: string, centroId?: string) =>
-  transition(id, "cancelar", { motivo }, centroId);
-// Reschedule / move. `centroId` in the BODY = destination center (omit = keep).
-// Cross-center MEDICA SEGUIMIENTO: send the destination `medicoId`. `actorId` =
+  transition(id, "cancel", { reason: motivo }, centroId);
+// Reschedule / move. `centerId` in the BODY = destination center (omit = keep).
+// Cross-center MEDICA SEGUIMIENTO: send the destination `doctorId`. `actorId` =
 // the operator's personal.id (audit trail). `tenant` scopes the request (source
 // center). The BE records a `reprogramada` event with antes/después.
 export function reagendarCita(
   id: string,
   payload: {
-    fecha: string;
-    hora?: string;
-    motivo: string;
-    centroId?: string; // destination center (omit → keep current)
-    medicoId?: string;
+    date: string;
+    time?: string;
+    reason: string;
+    centerId?: string; // destination center (omit → keep current)
+    doctorId?: string;
     actorId?: string;
   },
   tenant?: string,
 ): Promise<Cita> {
   return apiFetch<Cita>(
-    `/citas/${id}/reagendar`,
+    `/appointments/${id}/reschedule`,
     { method: "POST", body: JSON.stringify(payload) },
     tenant,
   );
 }
 
-// Appointment audit trail (GET /citas/:id/historial). The reschedule event
+// Appointment audit trail (GET /appointments/:id/history). The reschedule event
 // carries payload.antes / payload.despues (fecha, hora, centroId, medicoId).
+// `actorNombre` NO está en el mapa api-ingles → el BE lo sirve tal cual (español).
+// `payload` es una bolsa OPACA: sus claves internas NO se traducen.
 export interface CitaEvento {
   id: string;
-  citaId: string;
-  tipo: string; // "reprogramada" | "campo_editado" | "creada" | ...
+  appointmentId: string;
+  type: string; // "reprogramada" | "campo_editado" | "creada" | ...
   actorId: string | null;
-  actorNombre?: string | null; // resolved by BE (actorId → personal)
-  motivo: string | null;
+  actorNombre?: string | null; // resolved by BE (actorId → personal); no está en el mapa
+  reason: string | null;
   payload: {
     antes?: Record<string, unknown>;
     despues?: Record<string, unknown>;
     columna?: string; // campo_editado (antes/despues son valores simples)
   } | null;
-  esRetroactivo: boolean;
+  isRetroactive: boolean;
   createdAt: string;
 }
 
 export function getHistorial(id: string, centroId?: string): Promise<CitaEvento[]> {
-  return apiFetch<CitaEvento[]>(`/citas/${id}/historial`, {}, centroId);
+  return apiFetch<CitaEvento[]>(`/appointments/${id}/history`, {}, centroId);
 }
 
 // Recent visits for a patient (most recent first), tenant-scoped. Used by the
@@ -253,12 +256,12 @@ export function getVisitasRecientes(
   pacienteId: string,
   centroId?: string,
 ): Promise<Cita[]> {
-  return apiFetch<Cita[]>(`/citas?pacienteId=${pacienteId}&limit=6`, {}, centroId);
+  return apiFetch<Cita[]>(`/appointments?patientId=${pacienteId}&limit=6`, {}, centroId);
 }
 
-// Appointment type catalog (medica / seguimiento / control, each requiereMedico).
+// Appointment type catalog (medica / seguimiento / control, each requiresDoctor).
 export async function getTiposCita(): Promise<TipoCita[]> {
-  const res = (await apiFetch(`/citas/tipos`)) as unknown;
+  const res = (await apiFetch(`/appointments/types`)) as unknown;
   if (Array.isArray(res)) return res as TipoCita[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as TipoCita[]) : [];

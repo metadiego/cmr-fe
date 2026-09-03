@@ -8,14 +8,14 @@ import type { FormatoPie } from "./formatos";
 
 export type LaserTipo = "hilt" | "mls";
 
-// Una fila del catálogo. HILT usa stp*/energy; MLS usa frecuencia/tiempo/intensidad.
+// Una fila del catálogo. HILT usa stp*/energy; MLS usa frequency/duration/intensity.
 export interface LaserParametro {
   id: string;
-  patologia: string;
-  tipo: LaserTipo;
+  pathology: string;
+  type: LaserTipo;
   area: string;
-  orden: number;
-  orden2: number;
+  sortOrder: number;
+  itemOrder: number;
   // HILT
   stp1Mjcm: number | null;
   stp1Hz: number | null;
@@ -25,42 +25,48 @@ export interface LaserParametro {
   stp3Hz: number | null;
   energy: number | null;
   // MLS
-  frecuencia: string | null;
-  tiempo: string | null;
-  intensidad: string | null;
-  activo: boolean;
+  frequency: string | null;
+  duration: string | null;
+  intensity: string | null;
+  active: boolean;
 }
 
 // Membrete del formato (BE PR #207): centro + logo del centro (null → asset por defecto en el FE).
 export interface FormatoMembrete {
-  centro?: string | null;
+  center?: string | null;
   logoUrl?: string | null;
 }
 // HILT: secciones por región, en orden (10 regiones).
+// OJO (inconsistencia BE bajo v2): la CLAVE `secciones` se traduce a `sections`, pero `secciones`
+// y `filas` son bolsas OPACAS en el traductor del BE, así que su CONTENIDO llega EN ESPAÑOL:
+// `region`, `orden` y las filas (`LaserParametro` con campos españoles: patologia/frecuencia/…).
+// El tipo declara `LaserParametro` (inglés) por reuso; para HILT/getFormato el runtime NO coincide.
+// Arreglo del BE: sacar `secciones`/`filas` de CAMPOS_OPACOS para láser o añadir region al mapa.
 export interface FormatoHilt {
-  tipo: "hilt";
-  secciones: { region: string; orden: number; filas: LaserParametro[] }[];
-  pie?: FormatoPie; // pie del legacy (BE PR #201) — mismo shape que el genérico
-  membrete?: FormatoMembrete;
+  type: "hilt";
+  sections: { region: string; orden: number; filas: LaserParametro[] }[];
+  footer?: FormatoPie; // pie del legacy (BE PR #201) — mismo shape que el genérico
+  letterhead?: FormatoMembrete;
 }
-// MLS: dos columnas (izquierda/derecha).
+// MLS: dos columnas (izquierda/derecha). `izquierda`/`derecha` NO están en el mapa CAMPOS_EN_INGLES,
+// así que la CLAVE llega en español bajo v2; su CONTENIDO sí se traduce (LaserParametro inglés).
 export interface FormatoMls {
-  tipo: "mls";
+  type: "mls";
   izquierda: LaserParametro[];
   derecha: LaserParametro[];
-  pie?: FormatoPie;
-  membrete?: FormatoMembrete;
+  footer?: FormatoPie;
+  letterhead?: FormatoMembrete;
 }
 export type Formato = FormatoHilt | FormatoMls;
 
-// GET /laser/formato/{tipo} — formato armado (print-ready).
+// GET /laser/format/{type} — formato armado (print-ready).
 export function getFormato(tipo: LaserTipo, centroId?: string): Promise<Formato> {
-  return apiFetch<Formato>(`/laser/formato/${tipo}`, {}, centroId);
+  return apiFetch<Formato>(`/laser/format/${tipo}`, {}, centroId);
 }
 
-// GET /laser/parametros?tipo= — catálogo (editor).
+// GET /laser/parameters?type= — catálogo (editor).
 export function getParametros(tipo: LaserTipo, centroId?: string): Promise<LaserParametro[]> {
-  return apiFetch<LaserParametro[]>(`/laser/parametros?tipo=${tipo}`, {}, centroId).then((r) =>
+  return apiFetch<LaserParametro[]>(`/laser/parameters?type=${tipo}`, {}, centroId).then((r) =>
     Array.isArray(r) ? r : ((r as { items?: LaserParametro[] })?.items ?? []),
   );
 }

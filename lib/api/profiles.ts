@@ -13,51 +13,52 @@ function asList<T>(res: unknown): T[] {
 // Domain types mirror cmr-be profiles endpoints. Optional fields are kept loose
 // because the BE may add columns; the panel only relies on what it renders.
 export interface PerfilRolResumen {
-  clave: string;
-  nombre: string;
-  centroId: string | null;
+  slug: string;
+  name: string;
+  centerId: string | null;
 }
 
 export interface PerfilCentroResumen {
+  // `asignacionId` NO está en CAMPOS_EN_INGLES → el BE lo devuelve en español bajo v2 (hueco del mapa).
   asignacionId: string;
-  centroId: string;
-  nombre: string | null;
-  tipo: string;
-  vigenteDesde?: string | null;
-  vigenteHasta?: string | null;
-  activo: boolean;
+  centerId: string;
+  name: string | null;
+  type: string;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  active: boolean;
 }
 
 export interface Perfil {
   id: string;
   email: string;
-  nombre: string;
-  apellido?: string | null;
-  estado: PerfilEstado;
+  name: string;
+  lastName?: string | null;
+  status: PerfilEstado;
   accessMode: AccessMode;
   isMaster?: boolean;
   createdAt?: string;
   // GET /profiles enriquecido (usuarios-roles-accesos): roles y centros del perfil.
   roles?: PerfilRolResumen[];
-  centros?: PerfilCentroResumen[];
+  centers?: PerfilCentroResumen[];
 }
 
 export interface Asignacion {
   id: string;
-  perfilId: string;
-  centroId: string;
-  tipo?: string;
-  vigenteDesde?: string;
-  vigenteHasta?: string | null;
-  forzado?: boolean;
-  activo?: boolean;
-  centro?: { id: string; nombre: string } | null;
+  profileId: string;
+  centerId: string;
+  type?: string;
+  validFrom?: string;
+  validUntil?: string | null;
+  forced?: boolean;
+  active?: boolean;
+  center?: { id: string; name: string } | null;
 }
 
 export interface InvitePayload {
   email: string;
-  nombre: string;
-  apellido?: string;
+  name: string;
+  lastName?: string;
   // BE accepts operativo|gerencial here (admin/master is reserved for the master).
   accessMode?: Extract<AccessMode, "operativo" | "gerencial">;
   password?: string;
@@ -65,14 +66,16 @@ export interface InvitePayload {
   // Sent per-request so it works in any environment (dev :8080 / prod Vercel).
   redirectTo?: string;
   // Invite ampliado: centro + rol en el mismo paso (el invitado no nace sin accesos).
-  centroId?: string;
+  centerId?: string;
+  // `rolClave` y `tipoAsignacion` NO están en CAMPOS_EN_INGLES: el traductor de entrada de v2 los
+  // deja tal cual, y el DTO del BE los espera en español, así que se envían en español a propósito.
   rolClave?: string;
   tipoAsignacion?: "base" | "temporal" | "fijo";
-  vigenteHasta?: string;
+  validUntil?: string;
   // Enlace a una PERSONA ya dada de alta (personal sin cuenta): la invitación engancha la cuenta nueva a
-  // ese personalId y conserva su historial (sellos/participaciones cuelgan de personalId, no del login).
+  // ese staffId y conserva su historial (sellos/participaciones cuelgan de staffId, no del login).
   // Sin este campo, la cuenta nace sin ficha, como antes (BE PR #241). Ver HANDOFF-invitar-vinculando-persona.
-  personalId?: string;
+  staffId?: string;
 }
 
 // Invite without password → the BE sends a Supabase invitation email and
@@ -83,15 +86,16 @@ export interface InviteResponse extends Perfil {
   emailSent?: boolean;
   tempPassword?: string;
   // Avisos no-bloqueantes tras crear la cuenta (centro/rol/enlace de personal que quedó pendiente).
+  // `avisos` NO está en CAMPOS_EN_INGLES → el BE lo devuelve en español bajo v2 (hueco del mapa).
   avisos?: string[];
 }
 
 export interface AssignCenterPayload {
-  centroId: string;
-  tipo?: string;
-  vigenteDesde?: string;
-  vigenteHasta?: string;
-  forzado?: boolean;
+  centerId: string;
+  type?: string;
+  validFrom?: string;
+  validUntil?: string;
+  forced?: boolean;
 }
 
 const qs = (page?: number, limit?: number) => {
@@ -120,10 +124,10 @@ export function approveProfile(id: string): Promise<Perfil> {
   return apiFetch<Perfil>(`/profiles/${id}/approve`, { method: "POST" });
 }
 
-export function rejectProfile(id: string, motivo: string): Promise<Perfil> {
+export function rejectProfile(id: string, reason: string): Promise<Perfil> {
   return apiFetch<Perfil>(`/profiles/${id}/reject`, {
     method: "POST",
-    body: JSON.stringify({ motivo }),
+    body: JSON.stringify({ reason }),
   });
 }
 
@@ -135,12 +139,12 @@ export function inviteUser(payload: InvitePayload): Promise<InviteResponse> {
 }
 
 export interface UpdatePerfilPayload {
-  nombre?: string;
-  apellido?: string | null;
+  name?: string;
+  lastName?: string | null;
   accessMode?: Extract<AccessMode, "operativo" | "gerencial">;
 }
 
-// PUT /profiles/:id — nombre/apellido/accessMode (D5).
+// PUT /profiles/:id — name/lastName/accessMode (D5).
 export function updateProfile(
   id: string,
   payload: UpdatePerfilPayload,
@@ -152,11 +156,11 @@ export function updateProfile(
 }
 
 export function suspenderProfile(id: string): Promise<Perfil> {
-  return apiFetch<Perfil>(`/profiles/${id}/suspender`, { method: "POST" });
+  return apiFetch<Perfil>(`/profiles/${id}/suspend`, { method: "POST" });
 }
 
 export function reactivarProfile(id: string): Promise<Perfil> {
-  return apiFetch<Perfil>(`/profiles/${id}/reactivar`, { method: "POST" });
+  return apiFetch<Perfil>(`/profiles/${id}/reactivate`, { method: "POST" });
 }
 
 // Código de acceso de UN SOLO USO (8 caracteres, caduca en 60 min): el admin lo genera y lo entrega en
@@ -165,11 +169,12 @@ export function reactivarProfile(id: string): Promise<Perfil> {
 // ni enlaces. 409 si el perfil está suspendido/rechazado o sin email. Handoff codigo-de-acceso.
 export interface CodigoAccesoResult {
   email: string;
-  codigo: string;
+  code: string;
+  // `expiraEnMinutos` NO está en CAMPOS_EN_INGLES → el BE lo devuelve en español bajo v2 (hueco del mapa).
   expiraEnMinutos: number;
 }
 export function generarCodigoAcceso(id: string): Promise<CodigoAccesoResult> {
-  return apiFetch<CodigoAccesoResult>(`/profiles/${id}/codigo-acceso`, { method: "POST", body: JSON.stringify({}) });
+  return apiFetch<CodigoAccesoResult>(`/profiles/${id}/access-code`, { method: "POST", body: JSON.stringify({}) });
 }
 
 // Cambia el email de ACCESO de un perfil ya invitado (cmr-be PR #277). Mueve el correo en Supabase Y en
@@ -184,18 +189,18 @@ export function cambiarEmailPerfil(id: string, email: string): Promise<Perfil> {
   });
 }
 
-// GET /profiles/:id/asignaciones — centros del perfil con tipo/vigencia/activo.
+// GET /profiles/:id/assignments — centros del perfil con type/vigencia/active.
 export function getAsignaciones(perfilId: string): Promise<Asignacion[]> {
-  return apiFetch<Asignacion[]>(`/profiles/${perfilId}/asignaciones`).then(
+  return apiFetch<Asignacion[]>(`/profiles/${perfilId}/assignments`).then(
     (r) => asList<Asignacion>(r),
   );
 }
 
 export interface UpdateAsignacionPayload {
-  tipo?: "base" | "temporal" | "fijo";
-  vigenteDesde?: string;
-  vigenteHasta?: string;
-  activo?: boolean;
+  type?: "base" | "temporal" | "fijo";
+  validFrom?: string;
+  validUntil?: string;
+  active?: boolean;
 }
 
 export function updateAsignacion(
@@ -204,18 +209,18 @@ export function updateAsignacion(
   payload: UpdateAsignacionPayload,
 ): Promise<Asignacion> {
   return apiFetch<Asignacion>(
-    `/profiles/${perfilId}/asignaciones/${asignacionId}`,
+    `/profiles/${perfilId}/assignments/${asignacionId}`,
     { method: "PUT", body: JSON.stringify(payload) },
   );
 }
 
-// Revoca (soft: activo=false) — el perfil pierde el centro sin borrar historial.
+// Revoca (soft: active=false) — el perfil pierde el centro sin borrar historial.
 export function revokeAsignacion(
   perfilId: string,
   asignacionId: string,
 ): Promise<Asignacion> {
   return apiFetch<Asignacion>(
-    `/profiles/${perfilId}/asignaciones/${asignacionId}`,
+    `/profiles/${perfilId}/assignments/${asignacionId}`,
     { method: "DELETE" },
   );
 }
@@ -224,7 +229,7 @@ export function assignCenter(
   profileId: string,
   payload: AssignCenterPayload,
 ): Promise<Asignacion> {
-  return apiFetch<Asignacion>(`/profiles/${profileId}/asignaciones`, {
+  return apiFetch<Asignacion>(`/profiles/${profileId}/assignments`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

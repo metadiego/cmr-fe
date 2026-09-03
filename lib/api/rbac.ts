@@ -5,21 +5,21 @@ import { apiFetch } from "./client"
 
 export interface Permiso {
   id: string
-  clave: string // modulo.accion, e.g. "clientes.update"
-  descripcion?: string | null
-  modulo: string
-  accion: string
+  slug: string // module.action, e.g. "clientes.update"
+  description?: string | null
+  module: string
+  action: string
 }
 
 export interface Rol {
   id: string
-  clave: string
-  nombre: string
-  descripcion?: string | null
-  esSistema: boolean
+  slug: string
+  name: string
+  description?: string | null
+  isSystem: boolean
   // El rol opera en TODOS los centros (quien lo recibe lo hereda). Un rol multi-centro se asigna GLOBAL
-  // (sin centroId). Handoff HANDOFF-rol-multicentro-y-preparacion-legado.
-  todosLosCentros?: boolean
+  // (sin centerId). Handoff HANDOFF-rol-multicentro-y-preparacion-legado.
+  allCenters?: boolean
 }
 
 function asArray<T>(res: unknown): T[] {
@@ -29,7 +29,7 @@ function asArray<T>(res: unknown): T[] {
 }
 
 export async function getPermisos(): Promise<Permiso[]> {
-  return asArray<Permiso>(await apiFetch(`/permisos`))
+  return asArray<Permiso>(await apiFetch(`/permissions`))
 }
 
 // Catálogo de permisos (rbac.create/update/delete). La CLAVE va `modulo.accion` (la acción puede llevar
@@ -37,20 +37,23 @@ export async function getPermisos(): Promise<Permiso[]> {
 // espacios) — NO mandar modulo/accion por separado. La clave NO se edita (está en el código y en cada
 // concesión). Al borrar, el BE responde 400 con un mensaje que dice a cuántos afecta → mostrarlo tal cual.
 // Handoff permisos-y-roles-pantalla.
-export function crearPermiso(payload: { clave: string; descripcion?: string }): Promise<Permiso> {
-  return apiFetch<Permiso>(`/permisos`, { method: "POST", body: JSON.stringify(payload) })
+export function crearPermiso(payload: { slug: string; description?: string }): Promise<Permiso> {
+  return apiFetch<Permiso>(`/permissions`, { method: "POST", body: JSON.stringify(payload) })
 }
-export function actualizarPermiso(id: string, descripcion: string): Promise<Permiso> {
-  return apiFetch<Permiso>(`/permisos/${id}`, { method: "PUT", body: JSON.stringify({ descripcion }) })
+export function actualizarPermiso(id: string, description: string): Promise<Permiso> {
+  return apiFetch<Permiso>(`/permissions/${id}`, { method: "PUT", body: JSON.stringify({ description }) })
 }
 export function eliminarPermiso(id: string): Promise<void> {
-  return apiFetch<void>(`/permisos/${id}`, { method: "DELETE" })
+  return apiFetch<void>(`/permissions/${id}`, { method: "DELETE" })
 }
 
 // «Clonar de»: copia a un perfil el ACCESO de otro (roles + excepciones de permiso + centros de trabajo
 // + modo de acceso). SUMA, no reemplaza (clonar dos veces no duplica). NO copia identidad (nombre/email/
 // avatar/contraseña/ficha/estado/master) ni la apariencia. Permiso `rbac.create`. El perfil destino debe
 // existir ya → invitar primero, clonar después. Handoff clonar-acceso-de-usuario.
+// OJO: NINGUNO de estos campos está en CAMPOS_EN_INGLES (origenPerfilId, destinoPerfilId, copiados,
+// yaTenia, antes, ahora, y las colecciones roles/permisos/asignaciones aquí son objetos-contador, no
+// listas de entidades). El BE los devuelve EN ESPAÑOL bajo v2 (huecos del mapa) → se dejan tal cual.
 export interface ClonarAccesoResultado {
   origenPerfilId: string
   destinoPerfilId: string
@@ -60,9 +63,9 @@ export interface ClonarAccesoResultado {
   accessMode: { antes: string; ahora: string }
 }
 export function clonarAccesoDe(destinoPerfilId: string, origenPerfilId: string): Promise<ClonarAccesoResultado> {
-  // Ruta REAL verificada en prod: POST /profiles/:id/clonar-de (NO /rbac/profiles/...; el handoff la
-  // escribió con /rbac y daba 404). Handoff clonar-acceso-de-usuario.
-  return apiFetch<ClonarAccesoResultado>(`/profiles/${destinoPerfilId}/clonar-de`, {
+  // Ruta REAL verificada en prod: POST /profiles/:id/clone-of (v1: /clonar-de). Handoff clonar-acceso-de-usuario.
+  // `origenPerfilId` no está en el mapa → el traductor de entrada lo deja tal cual y el DTO lo espera así.
+  return apiFetch<ClonarAccesoResultado>(`/profiles/${destinoPerfilId}/clone-of`, {
     method: "POST",
     body: JSON.stringify({ origenPerfilId }),
   })
@@ -73,9 +76,9 @@ export async function getRoles(): Promise<Rol[]> {
 }
 
 export function createRole(payload: {
-  clave: string
-  nombre: string
-  descripcion?: string
+  slug: string
+  name: string
+  description?: string
 }): Promise<Rol> {
   return apiFetch<Rol>(`/roles`, {
     method: "POST",
@@ -90,13 +93,14 @@ export function deleteRole(id: string): Promise<void> {
 // Claves ACTUALES del rol — para PRECARGAR el editor antes del PUT (que
 // reemplaza el set completo). Corrige el viejo bug del REPLACE ciego.
 export async function getRolePermisos(id: string): Promise<string[]> {
-  return asArray<string>(await apiFetch(`/roles/${id}/permisos`))
+  return asArray<string>(await apiFetch(`/roles/${id}/permissions`))
 }
 
 // Replaces the role's permisos with EXACTLY these claves. Precarga SIEMPRE con
-// getRolePermisos antes de editar.
+// getRolePermisos antes de editar. `claves` NO está en el mapa (solo `clave`→`slug`): el DTO del BE
+// espera `claves`, así que la clave del cuerpo se queda en español a propósito.
 export function setRolePermisos(id: string, claves: string[]): Promise<Rol> {
-  return apiFetch<Rol>(`/roles/${id}/permisos`, {
+  return apiFetch<Rol>(`/roles/${id}/permissions`, {
     method: "PUT",
     body: JSON.stringify({ claves }),
   })
@@ -109,6 +113,7 @@ export async function getRoleMenu(id: string): Promise<ProfileMenuItem[]> {
 
 // Fija QUÉ ítems de menú ve el rol (claves de menú → permisos; los permisos
 // no ligados a menú del rol no se tocan).
+// `claves` NO está en el mapa (solo `clave`→`slug`): el DTO/respuesta del BE usa `claves`, se deja en español.
 export function setRoleMenu(
   id: string,
   claves: string[]
@@ -123,7 +128,7 @@ export function setRoleMenu(
 // not editable on the BE.
 export function updateRole(
   id: string,
-  payload: { nombre?: string; descripcion?: string; todosLosCentros?: boolean }
+  payload: { name?: string; description?: string; allCenters?: boolean }
 ): Promise<Rol> {
   return apiFetch<Rol>(`/roles/${id}`, {
     method: "PUT",
@@ -138,14 +143,16 @@ export function updateRole(
 // ser Gerente en un centro y Facturación en otro a la vez. SIN centroId el rol es GLOBAL (todos los
 // centros); un rol `todosLosCentros` SOLO se asigna global (el BE rechaza acotarlo). Handoff
 // roles-por-centro-en-la-ui. Verificado en prod (POST 201, aparece en access?centroId=).
+// `rolClave` NO está en el mapa (solo `rol`→`role`, `clave`→`slug`): el DTO del BE espera `rolClave`,
+// se envía en español a propósito. `centerId` sí se traduce en el mapa.
 export function assignRoleToProfile(
   profileId: string,
   rolClave: string,
-  centroId?: string
+  centerId?: string
 ): Promise<unknown> {
   return apiFetch(`/profiles/${profileId}/roles`, {
     method: "POST",
-    body: JSON.stringify(centroId ? { rolClave, centroId } : { rolClave }),
+    body: JSON.stringify(centerId ? { rolClave, centerId } : { rolClave }),
   })
 }
 
@@ -154,36 +161,39 @@ export function assignRoleToProfile(
 // roles, per-permiso overrides, and the resolved permiso list. Swagger types it
 // loosely (Record<string,never>) so we model the contract by hand.
 
-const qCentro = (centroId?: string) =>
-  centroId ? `?centroId=${encodeURIComponent(centroId)}` : ""
+const qCentro = (centerId?: string) =>
+  centerId ? `?centerId=${encodeURIComponent(centerId)}` : ""
 
 export interface AccessRole {
   id: string // assignment id (use to remove)
-  rolId: string
-  clave: string
-  nombre: string
-  centroId?: string | null
+  roleId: string
+  slug: string
+  name: string
+  centerId?: string | null
 }
 
 export interface AccessOverride {
   id: string // override id (use to remove)
-  permisoId: string
-  permisoClave: string
-  efecto: "grant" | "deny"
-  centroId?: string | null
+  permissionId: string
+  permissionSlug: string
+  effect: "grant" | "deny"
+  centerId?: string | null
 }
 
-// Centro (id + nombre) para los selectores de la ficha de accesos. Handoff centros-por-permiso-del-usuario.
+// Centro (id + name) para los selectores de la ficha de accesos. Handoff centros-por-permiso-del-usuario.
 export interface CentroRef {
   id: string
-  nombre: string
+  name: string
 }
 
+// OJO: `centrosConcedidos`, `centrosDisponibles` y `effectivePermissions` NO están en CAMPOS_EN_INGLES
+// → el BE los devuelve tal cual bajo v2. `centrosConcedidos`/`centrosDisponibles` quedan en español
+// (huecos del mapa, añadir al BE); `effectivePermissions`/`viaRole`/`override`/`allowed` ya son inglés.
 export interface AccessPermiso {
-  clave: string
-  modulo: string
-  accion: string
-  descripcion?: string | null
+  slug: string
+  module: string
+  action: string
+  description?: string | null
   viaRole: boolean // granted by an assigned role
   override: "grant" | "deny" | null // per-profile exception
   effective: boolean // resolved result
@@ -196,9 +206,9 @@ export interface AccessPermiso {
 export interface ProfileAccess {
   roles: AccessRole[]
   overrides: AccessOverride[]
-  permisos: AccessPermiso[]
+  permissions: AccessPermiso[]
   effectivePermissions: string[]
-  // Todos los centros de la empresa: fuente del selector de la columna «Centros».
+  // Todos los centros de la empresa: fuente del selector de la columna «Centros». (Clave en español: hueco del mapa.)
   centrosDisponibles: CentroRef[]
 }
 
@@ -213,7 +223,7 @@ export async function getProfileAccess(
     roles: res?.roles ?? [],
     overrides: res?.overrides ?? [],
     // centrosConcedidos SIEMPRE array aunque el BE lo omita en algún borde.
-    permisos: (res?.permisos ?? []).map((p) => ({ ...p, centrosConcedidos: p.centrosConcedidos ?? [] })),
+    permissions: (res?.permissions ?? []).map((p) => ({ ...p, centrosConcedidos: p.centrosConcedidos ?? [] })),
     effectivePermissions: res?.effectivePermissions ?? [],
     centrosDisponibles: res?.centrosDisponibles ?? [],
   }
@@ -222,12 +232,14 @@ export async function getProfileAccess(
 // «Esta persona, ESTE permiso, en ESTOS centros» sin tocar su rol/menú/sesión. Deja los centros de la
 // fila EXACTAMENTE en `centroIds` (crea los que falten, borra los que sobren; [] los quita todos).
 // Idempotente. Devuelve la fila recalculada para repintar solo esa fila. Handoff centros-por-permiso-del-usuario.
+// `centroIds` NO está en el mapa (solo `centroId`→`centerId`): el DTO del BE espera `centroIds`, se envía
+// en español. La respuesta trae `slug` (clave→slug) y `centrosConcedidos` (español, hueco del mapa).
 export async function setPermisoCentros(
   id: string,
   permisoClave: string,
   centroIds: string[]
-): Promise<{ clave: string; centrosConcedidos: CentroRef[] }> {
-  return apiFetch(`/profiles/${id}/permisos/${encodeURIComponent(permisoClave)}/centros`, {
+): Promise<{ slug: string; centrosConcedidos: CentroRef[] }> {
+  return apiFetch(`/profiles/${id}/permissions/${encodeURIComponent(permisoClave)}/centers`, {
     method: "PUT",
     body: JSON.stringify({ centroIds }),
   })
@@ -237,17 +249,18 @@ export async function setPermisoCentros(
 export interface ProfileMenuItem {
   // El BE devuelve la entidad completa anotada (MenuService.annotateForPermissions):
   // estos campos SÍ viajan y se usan para pintar grupos/separadores e iconos.
-  tipo?: "item" | "grupo" | "separador"
-  labelCustom?: string | null
-  mostrarIcono?: boolean
+  // `requiresPermiso` NO está en el mapa → el BE lo devuelve en español bajo v2 (hueco del mapa).
+  type?: "item" | "grupo" | "separador"
+  customLabel?: string | null
+  showIcon?: boolean
   visible?: boolean
-  centroId?: string | null
+  centerId?: string | null
   id: string
-  clave: string
+  slug: string
   labelKey: string
   path: string
-  parentClave?: string | null
-  orden: number
+  parentSlug?: string | null
+  sortOrder: number
   allowed: boolean
   requiresPermiso?: string | null
 }
@@ -274,23 +287,23 @@ export function removeRoleFromProfile(
 // Set a per-profile permission exception (grant or deny).
 export function setProfileOverride(
   id: string,
-  permisoClave: string,
-  efecto: "grant" | "deny",
-  centroId?: string
+  permissionSlug: string,
+  effect: "grant" | "deny",
+  centerId?: string
 ): Promise<unknown> {
-  return apiFetch(`/profiles/${id}/permisos`, {
+  return apiFetch(`/profiles/${id}/permissions`, {
     method: "POST",
-    body: JSON.stringify({ permisoClave, efecto, centroId }),
+    body: JSON.stringify({ permissionSlug, effect, centerId }),
   })
 }
 
 // Remove an exception → the permiso falls back to whatever the role decides.
 export function removeProfileOverride(
   id: string,
-  permisoId: string,
-  centroId?: string
+  permissionId: string,
+  centerId?: string
 ): Promise<unknown> {
-  return apiFetch(`/profiles/${id}/permisos/${permisoId}${qCentro(centroId)}`, {
+  return apiFetch(`/profiles/${id}/permissions/${permissionId}${qCentro(centerId)}`, {
     method: "DELETE",
   })
 }
