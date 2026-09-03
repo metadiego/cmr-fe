@@ -149,10 +149,13 @@ export function buildRecibo(
   };
 }
 
-// Recibo PROPIO de una devolución (BE PR #113), reusando <ReciboTermico>. El encabezado dice
-// "Devolución #D-000001". El BE no manda el nombre del producto en el ítem → lo resolvemos con
-// `nombres` (facturaItemId → descripción) desde la factura de origen. Los `pagos` muestran el REEMBOLSO
-// (forma + monto). Sin abonado/saldo (no aplica a una devolución).
+// Recibo PROPIO de una devolución, reusando <ReciboTermico>. El encabezado dice "Devolución #D-000016".
+//
+// Desde el 3-sep-2026 el BE manda la `descripcion` de cada línea devuelta (la tomó de la línea de la
+// factura de origen, congelada). Antes no la mandaba y aquí se ponía "—", así que el papel decía
+// «1 … 170.46» sin nombrar el producto. El mapa `nombres` se conserva como respaldo para recibos
+// viejos y para quien ya lo pasaba. Los `pagos` muestran el REEMBOLSO (forma + monto). Sin
+// abonado/saldo (no aplica a una devolución).
 export function buildReciboDevolucion(
   d: ReciboDevolucion,
   nombres: Record<string, string> = {},
@@ -164,7 +167,11 @@ export function buildReciboDevolucion(
     const cant = num(it.cantidad) || 1;
     return {
       cantidad: num(it.cantidad),
-      descripcion: nombres[it.facturaItemId] ?? "—",
+      // El BE manda la descripción; el mapa de la factura de origen es el respaldo.
+      descripcion:
+        (it as { descripcion?: string | null }).descripcion?.trim() ||
+        nombres[it.facturaItemId] ||
+        "—",
       precioUnitario: cant ? base / cant : base,
       descuento: 0,
       total: base, // base pre-impuesto por línea; el impuesto va al pie, igual que la factura
