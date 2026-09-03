@@ -38,7 +38,7 @@ export function VentaGeneral() {
 
   return (
     <PageContainer>
-      <Link href="/facturacion" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+      <Link href="/billing/invoices" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
         ← {t("verLista")}
       </Link>
       <PageHeader title={t("title")} description={t("help")} />
@@ -50,7 +50,7 @@ export function VentaGeneral() {
       ) : gate.necesitaPicker ? (
         // Elegir centro → SIEMPRE la lista de ese centro (nunca directo a crear).
         // Crear solo desde la lista con "Nueva venta".
-        <CentroPicker centros={gate.centros} onPick={(id) => router.push(`/facturacion?centro=${id}`)} />
+        <CentroPicker centros={gate.centros} onPick={(id) => router.push(`/billing/invoices?centro=${id}`)} />
       ) : (
         <Finder
           centro={gate.centro}
@@ -138,7 +138,7 @@ function Finder({
         centro,
       );
       // Fija el centro para TODA la sesión del editor (se propaga a catálogo/items/emitir/pagos).
-      router.push(`/facturacion/${f.id}${centro ? `?centro=${centro}` : ""}`);
+      router.push(`/billing/invoices/${f.id}${centro ? `?centro=${centro}` : ""}`);
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setCreating(false);

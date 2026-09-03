@@ -128,7 +128,7 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
           </span>
           <span className="flex shrink-0 items-center gap-3">
             <span className="tabular-nums">{money((f as { total?: number }).total)}</span>
-            <Link href={centro ? `/facturacion/${f.id}?centro=${centro}` : `/facturacion/${f.id}`} className="text-xs font-medium text-primary hover:underline">
+            <Link href={centro ? `/billing/invoices/${f.id}?centro=${centro}` : `/billing/invoices/${f.id}`} className="text-xs font-medium text-primary hover:underline">
               {t("abrir")}
             </Link>
           </span>

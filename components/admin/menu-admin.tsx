@@ -222,7 +222,7 @@ function MenuItemForm({
         <Input
           value={form.path}
           onChange={(e) => set("path", e.target.value)}
-          placeholder="/pacientes"
+          placeholder="/patients"
           className="font-mono"
         />
       </Field>

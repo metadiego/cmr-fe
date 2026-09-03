@@ -10,17 +10,17 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 // existentes (sin rutas paralelas ni duplicados). Solo enlaza rutas REALES.
 const SECTIONS: { key: string; href: string }[] = [
   // Existencias primero: "cuánto hay" es la pregunta más frecuente (stock por centro + consolidado).
-  { key: "existencias", href: "/inventario/existencias" },
-  { key: "viales", href: "/inventario/viales" },
-  { key: "productos", href: "/inventario/productos" },
-  { key: "recepcion", href: "/inventario/recibir-compra" },
-  { key: "planificacion", href: "/inventario/planificacion" },
-  { key: "recepcionFactura", href: "/inventario/recepcion-factura" },
-  { key: "transferencias", href: "/inventario/transferencias" },
-  { key: "recetas", href: "/inventario/recetas" },
-  { key: "proveedores", href: "/inventario/proveedores" },
-  { key: "amp", href: "/inventario/presentaciones-proveedor" },
-  { key: "precios", href: "/precios" },
+  { key: "existencias", href: "/inventory/stock" },
+  { key: "viales", href: "/inventory/vials" },
+  { key: "productos", href: "/inventory/products" },
+  { key: "recepcion", href: "/inventory/receive-purchase" },
+  { key: "planificacion", href: "/inventory/planning" },
+  { key: "recepcionFactura", href: "/inventory/invoice-reception" },
+  { key: "transferencias", href: "/inventory/transfers" },
+  { key: "recetas", href: "/inventory/recipes" },
+  { key: "proveedores", href: "/inventory/suppliers" },
+  { key: "amp", href: "/inventory/supplier-presentations" },
+  { key: "precios", href: "/inventory/prices" },
 ];
 
 export function InventarioIndex() {
