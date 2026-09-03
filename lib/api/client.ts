@@ -186,7 +186,7 @@ export function apiFetchPaged<T>(
 }
 
 // Like apiFetch but returns the FULL envelope ({ data, meta }) so callers can
-// read meta extras (e.g. meta.advertencias on cita create). Prefixes /api/v1.
+// read meta extras (e.g. meta.advertencias on cita create). Prefixes /api/v2.
 export async function apiFetchEnvelope<T>(
   path: string,
   init: RequestInit = {},
@@ -196,4 +196,24 @@ export async function apiFetchEnvelope<T>(
   return (
     envelope ?? { data: undefined as T, meta: { timestamp: "", requestId: "" } }
   );
+}
+
+// CARRIL v1 EXPLÍCITO para el puñado de endpoints que TODAVÍA no tienen versión inglesa
+// en el backend (verificado: `/auditoria/*` y `/me/centros-donde-puedo` dan 404 bajo /api/v2).
+// NO es un parche de traducción: es llamar a la única versión que existe hoy para esos endpoints,
+// que responden con campos en ESPAÑOL. Retirar en cuanto el BE publique su v2 (ver handoff
+// docs/specs/api-v2-huecos-handoff-be.md). El resto de la app usa /api/v2 (inglés).
+export function apiFetchV1<T>(
+  path: string,
+  init: RequestInit = {},
+  tenant?: string | null,
+): Promise<T> {
+  return apiRequest<T>(`/api/v1${path}`, init, tenant);
+}
+export function apiFetchPagedV1<T>(
+  path: string,
+  init: RequestInit = {},
+  tenant?: string | null,
+): Promise<Paginated<T>> {
+  return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
 }

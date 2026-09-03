@@ -1094,16 +1094,16 @@
       "autopresenteLabel": "Auto check-in on payment",
       "autopresenteHelp": "When an invoice is settled the same day, each service line enters the frontdesk marked present.",
       "field": {
-        "nombreLegal": "Legal name",
-        "nombreComercial": "Trade name (DBA)",
-        "registroFiscal": "Fiscal registry (MN/tax id)",
-        "registroFiscalLabel": "Registry label (MN, RIF…)",
-        "telefono": "Phone",
-        "direccionFiscal": "Fiscal address",
-        "zip": "ZIP code",
-        "web": "Website",
+        "legalName": "Legal name",
+        "tradeName": "Trade name (DBA)",
+        "taxRegistration": "Fiscal registry (MN/tax id)",
+        "taxRegistrationLabel": "Registry label (MN, RIF…)",
+        "phone": "Phone",
+        "taxAddress": "Fiscal address",
+        "zipCode": "ZIP code",
+        "website": "Website",
         "logoUrl": "Logo URL",
-        "pieFactura": "Invoice footer"
+        "invoiceFooter": "Invoice footer"
       }
     },
     "centrosPerfil": {

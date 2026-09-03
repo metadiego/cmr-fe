@@ -11,31 +11,31 @@ import { buildRecibo, buildReciboDevolucion } from "./build-recibo.ts";
 const EMPRESA = { nombreLegal: "MEDICINA SISTEMICA LLC", logoUrl: null } as never;
 
 const facturaBase = {
-  estado: "emitida",
-  numeroDisplay: "000325",
+  status: "emitida",
+  displayNumber: "000325",
   emitidaEn: "2026-09-03",
   subtotal: 305.76,
-  descuento: 0,
-  impuesto: 35.16,
+  discount: 0,
+  tax: 35.16,
   total: 340.92,
-  montoAbonado: 340.92,
+  paidAmount: 340.92,
   empresa: EMPRESA,
-  impuestos: [
-    { nombre: "Estatal", tasa: 10.5, monto: 32.1 },
-    { nombre: "Municipal", tasa: 1, monto: 3.06 },
+  taxes: [
+    { name: "Estatal", rate: 10.5, amount: 32.1 },
+    { name: "Municipal", rate: 1, amount: 3.06 },
   ],
-  paciente: {
-    nombres: "ANA AIXA",
-    apellidos: "OTERO ADORNO",
-    nombreMostrar: "OTERO ADORNO, ANA AIXA",
-    record: "102803",
+  patient: {
+    firstName: "ANA AIXA",
+    lastName: "OTERO ADORNO",
+    displayName: "OTERO ADORNO, ANA AIXA",
+    medicalRecordNumber: "102803",
   },
   items: [
     {
-      descripcion: "NEURALGAID 300 CAPSULES",
-      cantidad: 2,
-      precioUnitario: 152.88,
-      descuento: 0,
+      description: "NEURALGAID 300 CAPSULES",
+      quantity: 2,
+      unitPrice: 152.88,
+      discount: 0,
       total: 305.76,
     },
   ],
@@ -48,12 +48,12 @@ test("el nombre del paciente sale COMPUESTO por el backend, no rearmado aquí", 
 });
 
 test("si el backend no compone el nombre, el papel no sale vacío", () => {
-  const f = { ...(facturaBase as object), paciente: { nombres: "ANA AIXA", apellidos: "OTERO ADORNO" } } as never;
+  const f = { ...(facturaBase as object), patient: { firstName: "ANA AIXA", lastName: "OTERO ADORNO" } } as never;
   assert.equal(buildRecibo(f).paciente.nombre, "ANA AIXA OTERO ADORNO");
 });
 
 test("sin paciente no se imprime «null» ni «undefined»", () => {
-  const f = { ...(facturaBase as object), paciente: null } as never;
+  const f = { ...(facturaBase as object), patient: null } as never;
   assert.equal(buildRecibo(f).paciente.nombre, "");
 });
 
@@ -73,26 +73,26 @@ test("el IVU va DESGLOSADO: Estatal + Municipal, y suma el impuesto de la factur
 });
 
 test("un impuesto en 0 SÍ se imprime: su ausencia se leería como error de cálculo", () => {
-  const f = { ...(facturaBase as object), impuestos: [{ nombre: "Municipal", monto: 0 }] } as never;
+  const f = { ...(facturaBase as object), taxes: [{ name: "Municipal", amount: 0 }] } as never;
   assert.equal(buildRecibo(f).impuestos.length, 1);
 });
 
 test("un borrador es un PRESUPUESTO y usa su propio número", () => {
-  const f = { ...(facturaBase as object), estado: "borrador", numeroDisplay: null } as never;
+  const f = { ...(facturaBase as object), status: "borrador", displayNumber: null } as never;
   const r = buildRecibo(f, {}, {}, "P-000007");
   assert.equal(r.tipoDocumento, "presupuesto");
   assert.equal(r.numeroDisplay, "P-000007");
 });
 
 test("sin número no se imprime «null»: se imprime la raya", () => {
-  const f = { ...(facturaBase as object), numeroDisplay: null } as never;
+  const f = { ...(facturaBase as object), displayNumber: null } as never;
   assert.equal(buildRecibo(f).numeroDisplay, "—");
 });
 
 test("la cantidad EFECTIVA del láser multiplica áreas por días", () => {
   const f = {
     ...(facturaBase as object),
-    items: [{ descripcion: "Láser MLS", cantidad: 1, precioUnitario: 100, descuento: 0, total: 2400, meta: { multiplicadores: { dias: 12, areas: 2 } } }],
+    items: [{ description: "Láser MLS", quantity: 1, unitPrice: 100, discount: 0, total: 2400, meta: { multiplicadores: { dias: 12, areas: 2 } } }],
   } as never;
   const [linea] = buildRecibo(f).items;
   assert.equal(linea.cantidad, 24);
@@ -101,15 +101,15 @@ test("la cantidad EFECTIVA del láser multiplica áreas por días", () => {
 
 // ── El recibo de la DEVOLUCIÓN ────────────────────────────────────────────────────────────────
 const devolucionBase = {
-  numeroDisplay: "D-000016",
-  fecha: "2026-09-03",
-  estado: "activa",
-  montoDevuelto: 170.46,
-  impuestoDevuelto: 17.58,
+  displayNumber: "D-000016",
+  date: "2026-09-03",
+  status: "activa",
+  refundedAmount: 170.46,
+  refundedTax: 17.58,
   formaReembolso: "Efectivo",
   empresa: EMPRESA,
-  paciente: { nombres: "ANA AIXA", apellidos: "OTERO ADORNO", nombreMostrar: "OTERO ADORNO, ANA AIXA", record: "102803" },
-  items: [{ facturaItemId: "li-1", cantidad: 1, monto: 170.46, descripcion: "NEURALGAID 300 CAPSULES" }],
+  patient: { firstName: "ANA AIXA", lastName: "OTERO ADORNO", displayName: "OTERO ADORNO, ANA AIXA", medicalRecordNumber: "102803" },
+  items: [{ invoiceItemId: "li-1", quantity: 1, amount: 170.46, description: "NEURALGAID 300 CAPSULES" }],
 } as never;
 
 test("la línea devuelta dice QUÉ se devolvió, con la descripción que manda el backend", () => {
@@ -119,7 +119,7 @@ test("la línea devuelta dice QUÉ se devolvió, con la descripción que manda e
 });
 
 test("si el backend no la trae, se usa el mapa de la factura de origen", () => {
-  const d = { ...(devolucionBase as object), items: [{ facturaItemId: "li-1", cantidad: 1, monto: 170.46 }] } as never;
+  const d = { ...(devolucionBase as object), items: [{ invoiceItemId: "li-1", quantity: 1, amount: 170.46 }] } as never;
   const [linea] = buildReciboDevolucion(d, { "li-1": "NEURALGAID 300 CAPSULES" }).items;
   assert.equal(linea.descripcion, "NEURALGAID 300 CAPSULES");
 });

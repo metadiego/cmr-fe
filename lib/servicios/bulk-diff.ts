@@ -20,14 +20,19 @@ export type BulkFormValues = {
   badge: boolean;
 };
 
+// El PAYLOAD que sale al BE va en INGLÉS (API v2): el estado del formulario
+// (BulkFormValues) es interno del FE y sigue en español, pero aquí se traduce al
+// enviar (name/sortOrder/billingGroupId/productId/requiresTechnician/requiresNurse;
+// color y badge se dicen igual). Antes salía en español bajo un cast y el BE v2 lo
+// ignoraba en silencio. Ver docs/specs/api-v2-en-ingles.md.
 export type BulkDirtyPayload = {
-  nombre?: string;
+  name?: string;
   color?: string;
-  orden?: number;
-  grupoFacturacionId?: string | null;
-  productoId?: string | null;
-  requiereTecnico?: boolean;
-  requiereEnfermera?: boolean;
+  sortOrder?: number;
+  billingGroupId?: string | null;
+  productId?: string | null;
+  requiresTechnician?: boolean;
+  requiresNurse?: boolean;
   badge?: boolean;
 };
 
@@ -37,24 +42,24 @@ export function payloadBulkDirty(
 ): BulkDirtyPayload {
   const out: BulkDirtyPayload = {};
   if (actual.nombre.trim() !== inicial.nombre.trim() && actual.nombre.trim()) {
-    out.nombre = actual.nombre.trim();
+    out.name = actual.nombre.trim();
   }
   if (actual.color !== inicial.color) out.color = actual.color;
   if (actual.orden.trim() !== inicial.orden.trim()) {
     const n = Number(actual.orden);
-    if (actual.orden.trim() && Number.isFinite(n)) out.orden = n;
+    if (actual.orden.trim() && Number.isFinite(n)) out.sortOrder = n;
   }
   if (actual.grupoFacturacionId !== inicial.grupoFacturacionId) {
-    out.grupoFacturacionId = actual.grupoFacturacionId || null;
+    out.billingGroupId = actual.grupoFacturacionId || null;
   }
   if (actual.productoId !== inicial.productoId) {
-    out.productoId = actual.productoId || null;
+    out.productId = actual.productoId || null;
   }
   if (actual.requiereTecnico !== inicial.requiereTecnico) {
-    out.requiereTecnico = actual.requiereTecnico;
+    out.requiresTechnician = actual.requiereTecnico;
   }
   if (actual.requiereEnfermera !== inicial.requiereEnfermera) {
-    out.requiereEnfermera = actual.requiereEnfermera;
+    out.requiresNurse = actual.requiereEnfermera;
   }
   if (actual.badge !== inicial.badge) out.badge = actual.badge;
   return out;

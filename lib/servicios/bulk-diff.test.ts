@@ -27,14 +27,14 @@ test("solo el campo tocado viaja (cambiar color NO arrastra nombre/orden/grupo)"
 
 test("limpiar el grupo envía null explícito (desanclar en el BE)", () => {
   assert.deepEqual(payloadBulkDirty(base, { ...base, grupoFacturacionId: "" }), {
-    grupoFacturacionId: null,
+    billingGroupId: null,
   });
 });
 
 test("orden no numérico u orden vacío se OMITE (NOT NULL en el BE)", () => {
   assert.deepEqual(payloadBulkDirty(base, { ...base, orden: "abc" }), {});
   assert.deepEqual(payloadBulkDirty(base, { ...base, orden: "" }), {});
-  assert.deepEqual(payloadBulkDirty(base, { ...base, orden: "7" }), { orden: 7 });
+  assert.deepEqual(payloadBulkDirty(base, { ...base, orden: "7" }), { sortOrder: 7 });
 });
 
 test("nombre vaciado NO viaja (no se puede borrar el nombre en bloque)", () => {
@@ -43,6 +43,6 @@ test("nombre vaciado NO viaja (no se puede borrar el nombre en bloque)", () => {
 
 test("booleanos solo cuando cambian", () => {
   assert.deepEqual(payloadBulkDirty(base, { ...base, requiereTecnico: true }), {
-    requiereTecnico: true,
+    requiresTechnician: true,
   });
 });

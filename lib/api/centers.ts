@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchV1 } from "./client";
 
 export interface Centro {
   id: string;
@@ -98,7 +98,7 @@ export async function getMyCentrosOperativos(): Promise<Centro[]> {
 // rutas del BE ya prevé el nombre inglés `allowed-centers` y el query `permiso`→`permissionSlug`, pero el
 // controlador aún no declara v2. Se deja la ruta/param en español hasta que el BE añada v2. Ver reporte.
 export async function getCentrosDondePuedo(permiso: string): Promise<Centro[]> {
-  const res: unknown = await apiFetch(`/me/centros-donde-puedo?permiso=${encodeURIComponent(permiso)}`);
+  const res: unknown = await apiFetchV1(`/me/centros-donde-puedo?permiso=${encodeURIComponent(permiso)}`);
   if (Array.isArray(res)) return res as Centro[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];
