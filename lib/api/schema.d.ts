@@ -5629,29 +5629,29 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         CreateCentroDto: {
-            nombre: string;
-            codigo: string;
-            direccion?: string;
-            activo?: boolean;
+            name: string;
+            code: string;
+            address?: string;
+            active?: boolean;
         };
         CentroEntity: {
-            nombre: string;
-            codigo: string;
-            direccion: string | null;
-            activo: boolean;
-            nombreLegal: string | null;
-            nombreComercial: string | null;
-            registroFiscal: string | null;
-            registroFiscalLabel: string | null;
-            telefono: string | null;
-            direccionFiscal: string | null;
-            zip: string | null;
-            web: string | null;
-            pieFactura: string | null;
-            piePresupuesto: string | null;
+            name: string;
+            code: string;
+            address: string | null;
+            active: boolean;
+            legalName: string | null;
+            tradeName: string | null;
+            taxRegistration: string | null;
+            taxRegistrationLabel: string | null;
+            phone: string | null;
+            taxAddress: string | null;
+            zipCode: string | null;
+            website: string | null;
+            invoiceFooter: string | null;
+            quoteFooter: string | null;
             email: string | null;
             logoUrl: string | null;
-            frontdeskAutopresente: boolean;
+            frontdeskAutoPresent: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5660,52 +5660,52 @@ export interface components {
         };
         DatosFiscalesDto: {
             /** @description Razón social / nombre legal. */
-            nombreLegal: string | null;
+            legalName: string | null;
             /** @description Nombre comercial (DBA). */
-            nombreComercial: string | null;
+            tradeName: string | null;
             /** @description Número de registro fiscal (tax id). */
-            registroFiscal: string | null;
+            taxRegistration: string | null;
             /** @description Etiqueta del registro fiscal (p.ej. MN, RIF); default "MN". */
-            registroFiscalLabel: string;
+            taxRegistrationLabel: string;
             /** @description Teléfono del centro. */
-            telefono: string | null;
+            phone: string | null;
             /** @description Dirección fiscal (o la física de fallback). */
-            direccion: string | null;
+            address: string | null;
             /** @description Nombre de la sucursal (= nombre del centro). */
             sucursal: string;
             /** @description Pie de la FACTURA emitida (multilínea, bilingüe EN/ES). */
-            pieFactura: string | null;
+            invoiceFooter: string | null;
             /** @description Pie del PRESUPUESTO/borrador (multilínea, bilingüe EN/ES). El FE usa este mientras el documento NO es factura emitida. */
-            piePresupuesto: string | null;
+            quoteFooter: string | null;
             /** @description Email del centro para la factura. */
             email: string | null;
             /** @description Web del centro. */
-            web: string | null;
+            website: string | null;
             /** @description URL del logo para el encabezado. */
             logoUrl: string | null;
             /** @description Enganche factura→frontdesk: true = al saldar una factura del mismo día, cada línea a_la_entrega entra automáticamente PRESENTE al tablero de su servicio. false = desconectado. Configurable por centro. */
-            frontdeskAutopresente: boolean;
+            frontdeskAutoPresent: boolean;
         };
         UpdateDatosFiscalesDto: {
-            nombreLegal?: string;
-            nombreComercial?: string;
-            registroFiscal?: string;
-            registroFiscalLabel?: string;
-            telefono?: string;
-            direccionFiscal?: string;
-            zip?: string;
-            web?: string;
-            pieFactura?: string;
-            piePresupuesto?: string;
+            legalName?: string;
+            tradeName?: string;
+            taxRegistration?: string;
+            taxRegistrationLabel?: string;
+            phone?: string;
+            taxAddress?: string;
+            zipCode?: string;
+            website?: string;
+            invoiceFooter?: string;
+            quoteFooter?: string;
             email?: string;
             logoUrl?: string;
-            frontdeskAutopresente?: boolean;
+            frontdeskAutoPresent?: boolean;
         };
         PermisoEntity: {
-            clave: string;
-            descripcion: string | null;
-            modulo: string;
-            accion: string;
+            slug: string;
+            description: string | null;
+            module: string;
+            action: string;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5713,10 +5713,10 @@ export interface components {
             updatedAt: string;
         };
         RolEntity: {
-            clave: string;
-            nombre: string;
-            descripcion: string | null;
-            esSistema: boolean;
+            slug: string;
+            name: string;
+            description: string | null;
+            isSystem: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5724,13 +5724,13 @@ export interface components {
             updatedAt: string;
         };
         CreateRolDto: {
-            clave: string;
-            nombre: string;
-            descripcion?: string;
+            slug: string;
+            name: string;
+            description?: string;
         };
         UpdateRolDto: {
-            nombre?: string;
-            descripcion?: string;
+            name?: string;
+            description?: string;
         };
         SetRolPermisosDto: {
             claves: string[];
@@ -5738,23 +5738,23 @@ export interface components {
         AssignRolDto: {
             rolClave: string;
             /** Format: uuid */
-            centroId?: string;
+            centerId?: string;
         };
         PerfilEntity: {
             authUserId: string;
             email: string;
-            nombre: string;
-            apellido: string | null;
+            name: string;
+            lastName: string | null;
             /** @enum {string} */
-            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
-            esMaster: boolean;
+            status: "pendiente" | "aprobado" | "rechazado" | "suspendido";
+            isMaster: boolean;
             mustChangePassword: boolean;
             /** @enum {string} */
             accessMode: "operativo" | "gerencial";
-            aprobadoPor: string | null;
+            approvedBy: string | null;
             /** Format: date-time */
-            aprobadoEn: string | null;
-            rechazadoMotivo: string | null;
+            approvedAt: string | null;
+            rejectionReason: string | null;
             avatarUrl: string | null;
             aprobador?: components["schemas"]["PerfilEntity"];
             id: string;
@@ -5764,12 +5764,12 @@ export interface components {
             updatedAt: string;
         };
         PerfilRolEntity: {
-            perfilId: string;
-            rolId: string;
-            centroId: string | null;
-            perfil?: components["schemas"]["PerfilEntity"];
-            rol?: components["schemas"]["RolEntity"];
-            centro?: components["schemas"]["CentroEntity"];
+            profileId: string;
+            roleId: string;
+            centerId: string | null;
+            profile?: components["schemas"]["PerfilEntity"];
+            role?: components["schemas"]["RolEntity"];
+            center?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5777,21 +5777,21 @@ export interface components {
             updatedAt: string;
         };
         SetOverrideDto: {
-            permisoClave: string;
+            permissionSlug: string;
             /** @enum {string} */
-            efecto: "grant" | "deny";
+            effect: "grant" | "deny";
             /** Format: uuid */
-            centroId?: string;
+            centerId?: string;
         };
         PerfilPermisoEntity: {
-            perfilId: string;
-            permisoId: string;
+            profileId: string;
+            permissionId: string;
             /** @enum {string} */
-            efecto: "grant" | "deny";
-            centroId: string | null;
-            perfil?: components["schemas"]["PerfilEntity"];
-            permiso?: components["schemas"]["PermisoEntity"];
-            centro?: components["schemas"]["CentroEntity"];
+            effect: "grant" | "deny";
+            centerId: string | null;
+            profile?: components["schemas"]["PerfilEntity"];
+            permissionSlug?: components["schemas"]["PermisoEntity"];
+            center?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5799,16 +5799,16 @@ export interface components {
             updatedAt: string;
         };
         MenuItemEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
             path: string;
             icon: string | null;
-            parentClave: string | null;
-            orden: number;
-            permisoClave: string | null;
+            parentSlug: string | null;
+            sortOrder: number;
+            permissionSlug: string | null;
             visible: boolean;
-            centroId: string | null;
-            centro?: components["schemas"]["CentroEntity"];
+            centerId: string | null;
+            center?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5816,27 +5816,27 @@ export interface components {
             updatedAt: string;
         };
         CreateMenuItemDto: {
-            clave: string;
+            slug: string;
             labelKey: string;
             path: string;
             icon?: string;
-            parentClave?: string;
-            orden?: number;
-            permisoClave?: string;
+            parentSlug?: string;
+            sortOrder?: number;
+            permissionSlug?: string;
             visible?: boolean;
             /** Format: uuid */
-            centroId?: string;
+            centerId?: string;
         };
         UpdateMenuItemDto: {
             labelKey?: string;
             path?: string;
             icon?: string | null;
-            parentClave?: string | null;
-            orden?: number;
-            permisoClave?: string | null;
+            parentSlug?: string | null;
+            sortOrder?: number;
+            permissionSlug?: string | null;
             visible?: boolean;
             /** Format: uuid */
-            centroId?: string | null;
+            centerId?: string | null;
         };
         UpsertPreferenceDto: {
             config: Record<string, never>;
@@ -5844,21 +5844,21 @@ export interface components {
         CreateOverrideDto: {
             config: Record<string, never>;
             /** Format: uuid */
-            centroId?: string;
-            vigenteDesde?: string;
-            vigenteHasta?: string;
-            nombre?: string;
+            centerId?: string;
+            validFrom?: string;
+            validUntil?: string;
+            name?: string;
         };
         UnidadEntity: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
             /** @enum {string|null} */
             dimension: "masa" | "volumen" | "actividad" | "conteo" | "longitud" | null;
-            factorACanonica: number;
-            esCanonica: boolean;
+            canonicalConversionFactor: number;
+            isCanonical: boolean;
             /** @deprecated */
-            factorBase: number;
-            activo: boolean;
+            baseFactor: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5866,38 +5866,38 @@ export interface components {
             updatedAt: string;
         };
         CreateUnidadDto: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
             /**
              * @description Dimensión/familia (masa, volumen, actividad, conteo, longitud).
              * @enum {string}
              */
             dimension?: "masa" | "volumen" | "actividad" | "conteo" | "longitud";
             /** @description Factor a la unidad canónica de su dimensión (g→1000, mcg→0.001). */
-            factorACanonica?: number;
+            canonicalConversionFactor?: number;
             /** @description Si es la unidad canónica de su dimensión. */
-            esCanonica?: boolean;
+            isCanonical?: boolean;
             /** @deprecated */
-            factorBase?: number;
+            baseFactor?: number;
         };
         UpdateUnidadDto: {
-            nombre?: string;
+            name?: string;
             /** @enum {string} */
             dimension?: "masa" | "volumen" | "actividad" | "conteo" | "longitud";
-            factorACanonica?: number;
-            esCanonica?: boolean;
+            canonicalConversionFactor?: number;
+            isCanonical?: boolean;
             /** @deprecated */
-            factorBase?: number;
-            activo?: boolean;
+            baseFactor?: number;
+            active?: boolean;
         };
         ClasificacionEntity: {
             /** @enum {string} */
-            tipo: "categoria" | "subcategoria" | "familia" | "marca" | "fabricante" | "linea";
-            nombre: string;
+            type: "categoria" | "subcategoria" | "familia" | "marca" | "fabricante" | "linea";
+            name: string;
             parentId: string | null;
-            gravado: boolean | null;
-            impuestoId: string | null;
-            activo: boolean;
+            taxable: boolean | null;
+            taxId: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5906,58 +5906,58 @@ export interface components {
         };
         CreateClasificacionDto: {
             /** @enum {string} */
-            tipo: "categoria" | "subcategoria" | "familia" | "marca" | "fabricante" | "linea";
-            nombre: string;
+            type: "categoria" | "subcategoria" | "familia" | "marca" | "fabricante" | "linea";
+            name: string;
             /** Format: uuid */
             parentId?: string;
-            gravado?: boolean;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
+            taxId?: string;
         };
         UpdateClasificacionDto: {
-            nombre?: string;
+            name?: string;
             /** Format: uuid */
             parentId?: string | null;
-            gravado?: boolean;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
-            activo?: boolean;
+            taxId?: string;
+            active?: boolean;
         };
         ProductoEntity: {
             sku: string;
-            nombre: string;
-            descripcion: string | null;
-            nombreCorto: string | null;
-            nombreTecnico: string | null;
-            costoReferencia: number | null;
+            name: string;
+            description: string | null;
+            shortName: string | null;
+            technicalName: string | null;
+            referenceCost: number | null;
             /** @enum {string} */
-            tipo: "base" | "unico" | "compuesto" | "servicio";
-            esInventariable: boolean;
+            type: "base" | "unico" | "compuesto" | "servicio";
+            isInventoryItem: boolean;
             /** @enum {string} */
-            modoDescarga: "a_la_venta" | "a_la_entrega" | "no_descarga";
-            reglaDefinida: boolean;
-            unidadInventarioId: string | null;
-            contenido: number | null;
-            unidadesPorEnvase: number | null;
-            diasTratamiento: number | null;
-            areasDefault: number | null;
-            facturableGeneral: boolean;
-            imprimeComponentes: boolean;
-            aplicaPrecioBaseDevolucion: boolean;
-            unidadContenidoId: string | null;
-            tamano: string | null;
-            peso: number | null;
-            pesoUnidadId: string | null;
-            categoriaId: string | null;
-            grupoFacturacionId: string | null;
-            gravado: boolean | null;
-            impuestoId: string | null;
-            marcaId: string | null;
-            fabricanteId: string | null;
-            controlaLote: boolean;
-            controlaVencimiento: boolean;
+            deductionMode: "a_la_venta" | "a_la_entrega" | "no_descarga";
+            hasDefinedRule: boolean;
+            inventoryUnitId: string | null;
+            content: number | null;
+            unitsPerContainer: number | null;
+            treatmentDays: number | null;
+            defaultAreas: number | null;
+            generallyBillable: boolean;
+            printComponents: boolean;
+            applyBasePriceOnRefund: boolean;
+            contentUnitId: string | null;
+            size: string | null;
+            weight: number | null;
+            weightUnitId: string | null;
+            categoryId: string | null;
+            billingGroupId: string | null;
+            taxable: boolean | null;
+            taxId: string | null;
+            brandId: string | null;
+            manufacturerId: string | null;
+            tracksLots: boolean;
+            tracksExpiration: boolean;
             barcode: string | null;
-            activo: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -5966,113 +5966,113 @@ export interface components {
         };
         CreateProductoDto: {
             /** @description Nombre TÉCNICO/de almacén del mismo producto, si difiere del comercial (ej.: NANO DPM para la GELATINA DE WHARTON). Es el MISMO producto y el mismo stock: no se crea otra ficha. El buscador encuentra por los dos nombres. */
-            nombreTecnico?: string;
+            technicalName?: string;
             /**
              * @description Costo unitario de REFERENCIA. El costo real de cada compra vive en el lote; este es el respaldo y sirve para estimar el margen de un kit.
              * @example 155
              */
-            costoReferencia?: number;
+            referenceCost?: number;
             sku: string;
-            nombre: string;
-            descripcion?: string;
-            nombreCorto?: string;
+            name: string;
+            description?: string;
+            shortName?: string;
             /** @enum {string} */
-            tipo: "base" | "unico" | "compuesto" | "servicio";
-            esInventariable?: boolean;
+            type: "base" | "unico" | "compuesto" | "servicio";
+            isInventoryItem?: boolean;
             /** @enum {string} */
-            modoDescarga?: "a_la_venta" | "a_la_entrega" | "no_descarga";
+            deductionMode?: "a_la_venta" | "a_la_entrega" | "no_descarga";
             /** Format: uuid */
-            unidadInventarioId?: string;
-            contenido?: number;
+            inventoryUnitId?: string;
+            content?: number;
             /** Format: uuid */
-            unidadContenidoId?: string;
+            contentUnitId?: string;
             /** @description Unidades (cáps/tabletas/comprimidos) por envase vendible; base para sugerir cantidad desde la dosis. */
-            unidadesPorEnvase?: number;
+            unitsPerContainer?: number;
             /** @description Días de tratamiento por defecto para sugerir la cantidad desde la dosis. */
-            diasTratamiento?: number;
+            treatmentDays?: number;
             /** @description Áreas por defecto por visita (preset de captura al facturar; null = el FE usa 1). */
-            areasDefault?: number;
+            defaultAreas?: number;
             /** @description Si el producto aparece en el catálogo de Facturación General (venta al público). Insumos/servicios internos = false. */
-            facturableGeneral?: boolean;
+            generallyBillable?: boolean;
             /** @description Solo kits: si el recibo imprime el desglose de componentes (true) o solo el kit (false = compacto). */
-            imprimeComponentes?: boolean;
+            printComponents?: boolean;
             /** @description Devolución con política precio_base: valora este producto al precio base (servicios de precio variable). */
-            aplicaPrecioBaseDevolucion?: boolean;
-            tamano?: string;
-            peso?: number;
+            applyBasePriceOnRefund?: boolean;
+            size?: string;
+            weight?: number;
             /** Format: uuid */
-            pesoUnidadId?: string;
+            weightUnitId?: string;
             /** Format: uuid */
-            categoriaId?: string;
+            categoryId?: string;
             /** Format: uuid */
-            marcaId?: string;
+            brandId?: string;
             /** Format: uuid */
-            fabricanteId?: string;
-            gravado?: boolean;
+            manufacturerId?: string;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
-            controlaLote?: boolean;
-            controlaVencimiento?: boolean;
+            taxId?: string;
+            tracksLots?: boolean;
+            tracksExpiration?: boolean;
             barcode?: string;
         };
         UpdateProductoDto: {
             /** @description Nombre TÉCNICO/de almacén del mismo producto. */
-            nombreTecnico?: string;
+            technicalName?: string;
             /**
              * @description Costo unitario de REFERENCIA (el real por compra vive en el lote).
              * @example 155
              */
-            costoReferencia?: number;
-            nombre?: string;
-            descripcion?: string;
-            nombreCorto?: string;
+            referenceCost?: number;
+            name?: string;
+            description?: string;
+            shortName?: string;
             /** @enum {string} */
-            tipo?: "base" | "unico" | "compuesto" | "servicio";
-            esInventariable?: boolean;
+            type?: "base" | "unico" | "compuesto" | "servicio";
+            isInventoryItem?: boolean;
             /** @enum {string} */
-            modoDescarga?: "a_la_venta" | "a_la_entrega" | "no_descarga";
+            deductionMode?: "a_la_venta" | "a_la_entrega" | "no_descarga";
             /** Format: uuid */
-            unidadInventarioId?: string;
-            contenido?: number;
+            inventoryUnitId?: string;
+            content?: number;
             /** Format: uuid */
-            unidadContenidoId?: string;
-            unidadesPorEnvase?: number;
-            diasTratamiento?: number;
-            areasDefault?: number;
-            facturableGeneral?: boolean;
-            imprimeComponentes?: boolean;
+            contentUnitId?: string;
+            unitsPerContainer?: number;
+            treatmentDays?: number;
+            defaultAreas?: number;
+            generallyBillable?: boolean;
+            printComponents?: boolean;
             /** @description Devolución con política precio_base: valora este producto al precio base (servicios de precio variable). */
-            aplicaPrecioBaseDevolucion?: boolean;
-            tamano?: string;
-            peso?: number;
+            applyBasePriceOnRefund?: boolean;
+            size?: string;
+            weight?: number;
             /** Format: uuid */
-            pesoUnidadId?: string;
+            weightUnitId?: string;
             /** Format: uuid */
-            categoriaId?: string;
+            categoryId?: string;
             /** Format: uuid */
-            marcaId?: string;
+            brandId?: string;
             /** Format: uuid */
-            fabricanteId?: string;
-            gravado?: boolean;
+            manufacturerId?: string;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
-            controlaLote?: boolean;
-            controlaVencimiento?: boolean;
+            taxId?: string;
+            tracksLots?: boolean;
+            tracksExpiration?: boolean;
             barcode?: string;
-            activo?: boolean;
+            active?: boolean;
         };
         PresentacionEntity: {
-            productoId: string;
-            nombre: string;
-            unidadVentaId: string | null;
+            productId: string;
+            name: string;
+            salesUnitId: string | null;
             /** @deprecated */
-            factorConversion: number;
-            precioBase: number | null;
-            gravado: boolean | null;
-            impuestoId: string | null;
-            esDefault: boolean;
+            conversionFactor: number;
+            basePrice: number | null;
+            taxable: boolean | null;
+            taxId: string | null;
+            isDefault: boolean;
             barcode: string | null;
-            activo: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6081,47 +6081,47 @@ export interface components {
         };
         CreatePresentacionDto: {
             /** Format: uuid */
-            productoId: string;
-            nombre: string;
+            productId: string;
+            name: string;
             /** Format: uuid */
-            unidadVentaId?: string;
-            factorConversion?: number;
-            precioBase?: number;
-            gravado?: boolean;
+            salesUnitId?: string;
+            conversionFactor?: number;
+            basePrice?: number;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
-            esDefault?: boolean;
+            taxId?: string;
+            isDefault?: boolean;
             barcode?: string;
         };
         UpdatePresentacionDto: {
-            nombre?: string;
+            name?: string;
             /** Format: uuid */
-            unidadVentaId?: string;
-            factorConversion?: number;
-            precioBase?: number;
-            gravado?: boolean;
+            salesUnitId?: string;
+            conversionFactor?: number;
+            basePrice?: number;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
-            esDefault?: boolean;
+            taxId?: string;
+            isDefault?: boolean;
             barcode?: string;
-            activo?: boolean;
+            active?: boolean;
         };
         PresentacionProveedorEntity: {
-            productoId: string;
-            proveedorId: string | null;
-            nombre: string;
-            fabricanteId: string | null;
-            marcaId: string | null;
-            concentracion: number | null;
-            unidadConcentracionId: string | null;
-            contenidoPorEmpaque: number | null;
-            unidadContenidoId: string | null;
-            factorABase: number | null;
+            productId: string;
+            supplierId: string | null;
+            name: string;
+            manufacturerId: string | null;
+            brandId: string | null;
+            concentration: number | null;
+            concentrationUnitId: string | null;
+            contentPerPackage: number | null;
+            contentUnitId: string | null;
+            baseConversionFactor: number | null;
             sku: string | null;
             barcode: string | null;
-            vigenciaDesde: string | null;
-            vigenciaHasta: string | null;
-            activo: boolean;
+            validFrom: string | null;
+            validUntil: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6130,65 +6130,65 @@ export interface components {
         };
         CreatePresentacionProveedorDto: {
             /** Format: uuid */
-            productoId: string;
-            nombre: string;
+            productId: string;
+            name: string;
             /**
              * Format: uuid
              * @description Proveedor de esta presentación (proveedores.id).
              */
-            proveedorId?: string;
+            supplierId?: string;
             /** Format: uuid */
-            fabricanteId?: string;
+            manufacturerId?: string;
             /** Format: uuid */
-            marcaId?: string;
-            concentracion?: number;
+            brandId?: string;
+            concentration?: number;
             /** Format: uuid */
-            unidadConcentracionId?: string;
-            contenidoPorEmpaque?: number;
+            concentrationUnitId?: string;
+            contentPerPackage?: number;
             /** Format: uuid */
-            unidadContenidoId?: string;
-            factorABase?: number;
+            contentUnitId?: string;
+            baseConversionFactor?: number;
             sku?: string;
             barcode?: string;
-            vigenciaDesde?: string;
-            vigenciaHasta?: string;
+            validFrom?: string;
+            validUntil?: string;
         };
         UpdatePresentacionProveedorDto: {
-            nombre?: string;
+            name?: string;
             /**
              * Format: uuid
              * @description Proveedor de esta presentación (proveedores.id).
              */
-            proveedorId?: string;
+            supplierId?: string;
             /** Format: uuid */
-            fabricanteId?: string;
+            manufacturerId?: string;
             /** Format: uuid */
-            marcaId?: string;
-            concentracion?: number;
+            brandId?: string;
+            concentration?: number;
             /** Format: uuid */
-            unidadConcentracionId?: string;
-            contenidoPorEmpaque?: number;
+            concentrationUnitId?: string;
+            contentPerPackage?: number;
             /** Format: uuid */
-            unidadContenidoId?: string;
-            factorABase?: number;
+            contentUnitId?: string;
+            baseConversionFactor?: number;
             sku?: string;
             barcode?: string;
-            vigenciaDesde?: string;
-            vigenciaHasta?: string;
-            activo?: boolean;
+            validFrom?: string;
+            validUntil?: string;
+            active?: boolean;
         };
         ProductoComponenteEntity: {
-            productoCompuestoId: string;
-            componenteId: string;
-            cantidad: number;
-            unidadId: string | null;
-            presentacionId: string | null;
-            activo: boolean;
-            estimado: boolean;
-            opcional: boolean;
-            precioIncremental: number | null;
-            incluidoPorDefecto: boolean;
-            nota: string | null;
+            compositeProductId: string;
+            componentId: string;
+            quantity: number;
+            unitId: string | null;
+            presentationId: string | null;
+            active: boolean;
+            estimated: boolean;
+            optional: boolean;
+            incrementalPrice: number | null;
+            includedByDefault: boolean;
+            note: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6197,44 +6197,44 @@ export interface components {
         };
         CreateProductoComponenteDto: {
             /** Format: uuid */
-            productoCompuestoId: string;
+            compositeProductId: string;
             /** Format: uuid */
-            componenteId: string;
-            cantidad: number;
+            componentId: string;
+            quantity: number;
             /** Format: uuid */
-            unidadId?: string;
+            unitId?: string;
             /** Format: uuid */
-            presentacionId?: string;
+            presentationId?: string;
             /** @description Insumo ESTIMADO de consumo: no descarga inventario ni bloquea la venta; solo se reporta. */
-            estimado?: boolean;
+            estimated?: boolean;
             /** @description Componente OPCIONAL del kit: se incluye/excluye por línea y ajusta el total con precioIncremental. */
-            opcional?: boolean;
+            optional?: boolean;
             /** @description Monto que suma al total del kit cuando este opcional se incluye. */
-            precioIncremental?: number;
+            incrementalPrice?: number;
             /** @description Si el opcional arranca incluido por defecto al agregar el kit. */
-            incluidoPorDefecto?: boolean;
+            includedByDefault?: boolean;
             /** @description Programación/orden del componente en el protocolo (informativo, no afecta precio/descarga). */
-            nota?: string;
+            note?: string;
         };
         UpdateProductoComponenteDto: {
-            cantidad?: number;
+            quantity?: number;
             /** Format: uuid */
-            unidadId?: string;
+            unitId?: string;
             /** Format: uuid */
-            presentacionId?: string;
-            estimado?: boolean;
-            opcional?: boolean;
-            precioIncremental?: number;
-            incluidoPorDefecto?: boolean;
+            presentationId?: string;
+            estimated?: boolean;
+            optional?: boolean;
+            incrementalPrice?: number;
+            includedByDefault?: boolean;
             /** @description Programación/orden del componente en el protocolo (informativo, no afecta precio/descarga). */
-            nota?: string;
-            activo?: boolean;
+            note?: string;
+            active?: boolean;
         };
         ProductoCentroEntity: {
-            productoId: string;
-            activo: boolean;
-            stockMinimo: number | null;
-            stockMaximo: number | null;
+            productId: string;
+            active: boolean;
+            minStock: number | null;
+            maxStock: number | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6244,20 +6244,20 @@ export interface components {
         };
         CreateProductoCentroDto: {
             /** Format: uuid */
-            productoId: string;
-            stockMinimo?: number;
-            stockMaximo?: number;
+            productId: string;
+            minStock?: number;
+            maxStock?: number;
         };
         UpdateProductoCentroDto: {
-            activo?: boolean;
-            stockMinimo?: number;
-            stockMaximo?: number;
+            active?: boolean;
+            minStock?: number;
+            maxStock?: number;
         };
         AlmacenEntity: {
-            nombre: string;
+            name: string;
             /** @enum {string} */
-            tipo: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
-            activo: boolean;
+            type: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6266,21 +6266,21 @@ export interface components {
             updatedAt: string;
         };
         CreateAlmacenDto: {
-            nombre: string;
+            name: string;
             /** @enum {string} */
-            tipo?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
+            type?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
         };
         UpdateAlmacenDto: {
-            nombre?: string;
+            name?: string;
             /** @enum {string} */
-            tipo?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
-            activo?: boolean;
+            type?: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
+            active?: boolean;
         };
         UbicacionEntity: {
-            almacenId: string;
-            nombre: string;
-            tipo: string | null;
-            activo: boolean;
+            warehouseId: string;
+            name: string;
+            type: string | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6290,26 +6290,26 @@ export interface components {
         };
         CreateUbicacionDto: {
             /** Format: uuid */
-            almacenId: string;
-            nombre: string;
-            tipo?: string;
+            warehouseId: string;
+            name: string;
+            type?: string;
         };
         UpdateUbicacionDto: {
-            nombre?: string;
-            tipo?: string;
-            activo?: boolean;
+            name?: string;
+            type?: string;
+            active?: boolean;
         };
         LoteEntity: {
-            productoId: string;
-            almacenId: string;
-            numeroLote: string | null;
-            numeroFacturaCompra: string | null;
-            fechaVencimiento: string | null;
-            costoUnitario: number | null;
-            proveedorId: string | null;
-            presentacionProveedorId: string | null;
+            productId: string;
+            warehouseId: string;
+            lotNumber: string | null;
+            purchaseInvoiceNumber: string | null;
+            expirationDate: string | null;
+            unitCost: number | null;
+            supplierId: string | null;
+            supplierPresentationId: string | null;
             /** @enum {string} */
-            estado: "activo" | "recall" | "bloqueado" | "vencido";
+            status: "activo" | "recall" | "bloqueado" | "vencido";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6319,40 +6319,40 @@ export interface components {
         };
         CreateLoteDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenId: string;
-            numeroLote?: string;
-            numeroFacturaCompra?: string;
-            fechaVencimiento?: string;
-            costoUnitario?: number;
+            warehouseId: string;
+            lotNumber?: string;
+            purchaseInvoiceNumber?: string;
+            expirationDate?: string;
+            unitCost?: number;
             /** Format: uuid */
-            proveedorId?: string;
+            supplierId?: string;
             /** Format: uuid */
-            presentacionProveedorId?: string;
+            supplierPresentationId?: string;
         };
         UpdateLoteDto: {
-            numeroLote?: string;
-            numeroFacturaCompra?: string;
-            fechaVencimiento?: string;
-            costoUnitario?: number;
+            lotNumber?: string;
+            purchaseInvoiceNumber?: string;
+            expirationDate?: string;
+            unitCost?: number;
             /** Format: uuid */
-            proveedorId?: string;
+            supplierId?: string;
             /** @enum {string} */
-            estado?: "activo" | "recall" | "bloqueado" | "vencido";
+            status?: "activo" | "recall" | "bloqueado" | "vencido";
         };
         VialAbiertoEntity: {
-            productoId: string;
-            loteId: string | null;
-            almacenId: string;
-            capacidadTotal: number;
-            unidadId: string | null;
+            productId: string;
+            lotId: string | null;
+            warehouseId: string;
+            totalCapacity: number;
+            unitId: string | null;
             /** Format: date-time */
-            fechaApertura: string | null;
+            openedAt: string | null;
             /** Format: date-time */
-            caducaApertura: string | null;
+            openingExpiresAt: string | null;
             /** @enum {string} */
-            estado: "abierto" | "agotado" | "descartado";
+            status: "abierto" | "agotado" | "descartado";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6362,27 +6362,27 @@ export interface components {
         };
         CreateVialAbiertoDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenId: string;
+            warehouseId: string;
             /** Format: uuid */
-            loteId?: string;
-            capacidadTotal: number;
+            lotId?: string;
+            totalCapacity: number;
             /** Format: uuid */
-            unidadId?: string;
-            fechaApertura?: string;
-            caducaApertura?: string;
+            unitId?: string;
+            openedAt?: string;
+            openingExpiresAt?: string;
         };
         UpdateVialAbiertoDto: {
             /** @enum {string} */
-            estado?: "abierto" | "agotado" | "descartado";
+            status?: "abierto" | "agotado" | "descartado";
         };
         TipoMovimientoEntity: {
-            clave: string;
-            nombre: string;
-            signo: number;
-            mueveStock: boolean;
-            activo: boolean;
+            slug: string;
+            name: string;
+            sign: number;
+            movesStock: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6390,23 +6390,23 @@ export interface components {
             updatedAt: string;
         };
         CreateTipoMovimientoDto: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
             /** @enum {number} */
-            signo?: -1 | 0 | 1;
-            mueveStock?: boolean;
+            sign?: -1 | 0 | 1;
+            movesStock?: boolean;
         };
         UpdateTipoMovimientoDto: {
-            nombre?: string;
+            name?: string;
             /** @enum {number} */
-            signo?: -1 | 0 | 1;
-            mueveStock?: boolean;
-            activo?: boolean;
+            sign?: -1 | 0 | 1;
+            movesStock?: boolean;
+            active?: boolean;
         };
         MotivoMovimientoEntity: {
-            clave: string;
-            nombre: string;
-            activo: boolean;
+            slug: string;
+            name: string;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6414,66 +6414,66 @@ export interface components {
             updatedAt: string;
         };
         CreateMotivoMovimientoDto: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
         };
         UpdateMotivoMovimientoDto: {
-            nombre?: string;
-            activo?: boolean;
+            name?: string;
+            active?: boolean;
         };
         CreateMovimientoInventarioDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            tipoMovimientoId: string;
+            movementTypeId: string;
             /** Format: uuid */
-            motivoId: string;
-            cantidad: number;
-            fechaEfectiva: string;
+            reasonId: string;
+            quantity: number;
+            effectiveDate: string;
             /** Format: uuid */
-            loteId?: string;
+            lotId?: string;
             /** Format: uuid */
-            vialAbiertoId?: string;
+            openVialId?: string;
             /** Format: uuid */
-            almacenOrigenId?: string;
+            sourceWarehouseId?: string;
             /** Format: uuid */
-            almacenDestinoId?: string;
+            destinationWarehouseId?: string;
             /** Format: uuid */
-            ubicacionId?: string;
-            costoUnitario?: number;
-            documentoTipo?: string;
+            locationId?: string;
+            unitCost?: number;
+            documentType?: string;
             /** Format: uuid */
-            documentoId?: string;
+            documentId?: string;
             /** Format: uuid */
-            reglaDescargaId?: string;
-            reglaVersion?: number;
+            deductionRuleId?: string;
+            ruleVersion?: number;
             /** Format: uuid */
-            usuarioId?: string;
-            notas?: string;
-            esRetroactivo?: boolean;
+            userId?: string;
+            notes?: string;
+            isRetroactive?: boolean;
             /** Format: uuid */
             clinicId?: string;
         };
         MovimientoInventarioEntity: {
-            productoId: string;
-            loteId: string | null;
-            vialAbiertoId: string | null;
-            tipoMovimientoId: string;
-            motivoId: string;
-            almacenOrigenId: string | null;
-            almacenDestinoId: string | null;
-            ubicacionId: string | null;
-            cantidad: number;
-            costoUnitario: number | null;
+            productId: string;
+            lotId: string | null;
+            openVialId: string | null;
+            movementTypeId: string;
+            reasonId: string;
+            sourceWarehouseId: string | null;
+            destinationWarehouseId: string | null;
+            locationId: string | null;
+            quantity: number;
+            unitCost: number | null;
             /** Format: date-time */
-            fechaEfectiva: string;
-            esRetroactivo: boolean;
-            documentoTipo: string | null;
-            documentoId: string | null;
-            reglaDescargaId: string | null;
-            reglaVersion: number | null;
-            usuarioId: string | null;
-            notas: string | null;
+            effectiveDate: string;
+            isRetroactive: boolean;
+            documentType: string | null;
+            documentId: string | null;
+            deductionRuleId: string | null;
+            ruleVersion: number | null;
+            userId: string | null;
+            notes: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6483,11 +6483,11 @@ export interface components {
         };
         CierreInventarioEntity: {
             /** Format: date-time */
-            fechaCorte: string;
-            usuarioId: string | null;
-            estado: string;
-            totalCantidad: number | null;
-            notas: string | null;
+            cutoffDate: string;
+            userId: string | null;
+            status: string;
+            totalQuantity: number | null;
+            notes: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6496,17 +6496,17 @@ export interface components {
             updatedAt: string;
         };
         CreateCierreDto: {
-            fechaCorte: string;
+            cutoffDate: string;
             /** Format: uuid */
-            usuarioId?: string;
-            notas?: string;
+            userId?: string;
+            notes?: string;
         };
         CierreInventarioDetalleEntity: {
-            cierreId: string;
-            productoId: string;
-            almacenId: string | null;
-            loteId: string | null;
-            cantidad: number;
+            closingId: string;
+            productId: string;
+            warehouseId: string | null;
+            lotId: string | null;
+            quantity: number;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6516,9 +6516,9 @@ export interface components {
         };
         RecibirCompraDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenId: string;
+            warehouseId: string;
             /**
              * @description Cantidad comprada, en la UNIDAD DE INVENTARIO del producto
              *     (`producto.unidadInventarioId`; la misma en que vive el stock y descuenta la
@@ -6526,82 +6526,82 @@ export interface components {
              *     empaque distinto, el FE hace la conversión de presentación y envía aquí la
              *     cantidad ya en unidad de inventario.
              */
-            cantidad: number;
+            quantity: number;
             /** @description Costo unitario por unidad de inventario (misma unidad que `cantidad`). */
-            costoUnitario?: number;
-            numeroLote?: string;
-            numeroFacturaCompra?: string;
-            fechaVencimiento?: string;
+            unitCost?: number;
+            lotNumber?: string;
+            purchaseInvoiceNumber?: string;
+            expirationDate?: string;
             /** Format: uuid */
-            proveedorId?: string;
+            supplierId?: string;
             /** Format: uuid */
-            presentacionProveedorId?: string;
+            supplierPresentationId?: string;
             /** Format: uuid */
-            ubicacionId?: string;
-            fechaEfectiva?: string;
-            notas?: string;
+            locationId?: string;
+            effectiveDate?: string;
+            notes?: string;
         };
         TransferirDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenOrigenId: string;
+            sourceWarehouseId: string;
             /** Format: uuid */
-            almacenDestinoId: string;
-            cantidad: number;
+            destinationWarehouseId: string;
+            quantity: number;
             /** Format: uuid */
-            loteId?: string;
-            fechaEfectiva?: string;
-            notas?: string;
+            lotId?: string;
+            effectiveDate?: string;
+            notes?: string;
         };
         AjustarDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenId: string;
-            cantidad: number;
+            warehouseId: string;
+            quantity: number;
             /** @enum {string} */
-            signo: "positivo" | "negativo";
+            sign: "positivo" | "negativo";
             /** @enum {string} */
-            motivo?: "correccion" | "conteo_fisico";
+            reason?: "correccion" | "conteo_fisico";
             /** Format: uuid */
-            loteId?: string;
-            fechaEfectiva?: string;
-            notas: string;
+            lotId?: string;
+            effectiveDate?: string;
+            notes: string;
         };
         AplicarDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenId?: string;
-            cantidad: number;
+            warehouseId?: string;
+            quantity: number;
             /** Format: uuid */
-            vialAbiertoId?: string;
+            openVialId?: string;
             /** Format: uuid */
-            loteId?: string;
+            lotId?: string;
             /** Format: uuid */
-            documentoId?: string;
-            fechaEfectiva?: string;
+            documentId?: string;
+            effectiveDate?: string;
             /** Format: uuid */
-            reglaDescargaId?: string;
-            reglaVersion?: number;
-            notas?: string;
+            deductionRuleId?: string;
+            ruleVersion?: number;
+            notes?: string;
         };
         ConteoFisicoDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            almacenId: string;
+            warehouseId: string;
             cantidadContada: number;
-            fechaEfectiva?: string;
+            effectiveDate?: string;
         };
         ProveedorEntity: {
-            nombre: string;
-            rnc: string | null;
-            telefono: string | null;
+            name: string;
+            taxIdNumber: string | null;
+            phone: string | null;
             email: string | null;
-            direccion: string | null;
-            activo: boolean;
+            address: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6609,29 +6609,29 @@ export interface components {
             updatedAt: string;
         };
         CreateProveedorDto: {
-            nombre: string;
-            rnc?: string;
-            telefono?: string;
+            name: string;
+            taxIdNumber?: string;
+            phone?: string;
             /** Format: email */
             email?: string;
-            direccion?: string;
+            address?: string;
         };
         UpdateProveedorDto: {
-            nombre?: string;
-            rnc?: string;
-            telefono?: string;
+            name?: string;
+            taxIdNumber?: string;
+            phone?: string;
             /** Format: email */
             email?: string;
-            direccion?: string;
-            activo?: boolean;
+            address?: string;
+            active?: boolean;
         };
         OrdenCompraEntity: {
-            proveedorId: string;
-            almacenId: string;
+            supplierId: string;
+            warehouseId: string;
             /** @enum {string} */
-            estado: "cancelada" | "borrador" | "enviada" | "recibida";
+            status: "cancelada" | "borrador" | "enviada" | "recibida";
             total: number | null;
-            notas: string | null;
+            notes: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6641,23 +6641,23 @@ export interface components {
         };
         OrdenCompraLineaDto: {
             /** Format: uuid */
-            productoId: string;
-            cantidad: number;
-            costoUnitario?: number;
+            productId: string;
+            quantity: number;
+            unitCost?: number;
         };
         CreateOrdenCompraDto: {
             /** Format: uuid */
-            proveedorId: string;
+            supplierId: string;
             /** Format: uuid */
-            almacenId: string;
-            lineas: components["schemas"]["OrdenCompraLineaDto"][];
-            notas?: string;
+            warehouseId: string;
+            lines: components["schemas"]["OrdenCompraLineaDto"][];
+            notes?: string;
         };
         OrdenCompraDetalleEntity: {
-            ordenCompraId: string;
-            productoId: string;
-            cantidad: number;
-            costoUnitario: number | null;
+            purchaseOrderId: string;
+            productId: string;
+            quantity: number;
+            unitCost: number | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6666,22 +6666,22 @@ export interface components {
             updatedAt: string;
         };
         ReglaDescargaEntity: {
-            productoId: string;
+            productId: string;
             version: number;
             /** @enum {string} */
-            estado: "borrador" | "activa" | "reemplazada";
+            status: "borrador" | "activa" | "reemplazada";
             /** @enum {string} */
-            evento: "a_la_venta" | "a_la_entrega" | "por_sesion";
+            event: "a_la_venta" | "a_la_entrega" | "por_sesion";
             /** @enum {string} */
-            tipo: "directa" | "conversion" | "receta" | "dosis_vial";
-            unidadBaseId: string | null;
-            cantidadPorAplicacion: number | null;
-            factorBase: number | null;
-            vigenciaDesde: string | null;
-            creadoPor: string | null;
-            motivo: string | null;
+            type: "directa" | "conversion" | "receta" | "dosis_vial";
+            baseUnitId: string | null;
+            quantityPerApplication: number | null;
+            baseFactor: number | null;
+            validFrom: string | null;
+            createdBy: string | null;
+            reason: string | null;
             /** Format: date-time */
-            publicadaEn: string | null;
+            publishedAt: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6690,62 +6690,62 @@ export interface components {
         };
         ReglaItemDto: {
             /** Format: uuid */
-            insumoProductoId: string;
-            cantidadBase: number;
+            inputProductId: string;
+            baseQuantity: number;
             /** Format: uuid */
-            unidadId?: string;
+            unitId?: string;
         };
         CrearReglaDto: {
             /** @enum {string} */
-            evento: "a_la_venta" | "a_la_entrega" | "por_sesion";
+            event: "a_la_venta" | "a_la_entrega" | "por_sesion";
             /** @enum {string} */
-            tipo: "directa" | "conversion" | "receta" | "dosis_vial";
+            type: "directa" | "conversion" | "receta" | "dosis_vial";
             /** Format: uuid */
-            unidadBaseId?: string;
-            cantidadPorAplicacion?: number;
-            factorBase?: number;
+            baseUnitId?: string;
+            quantityPerApplication?: number;
+            baseFactor?: number;
             items?: components["schemas"]["ReglaItemDto"][];
-            vigenciaDesde?: string;
-            motivo?: string;
+            validFrom?: string;
+            reason?: string;
         };
         PublicarReglaDto: {
             retroactivo?: boolean;
         };
         TransferenciaInvItemDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            loteId?: string;
-            cantidad: number;
+            lotId?: string;
+            quantity: number;
         };
         CrearTransferenciaInvDto: {
-            clinicOrigenId: string;
-            clinicDestinoId: string;
+            sourceClinicId: string;
+            destinationClinicId: string;
             /** Format: uuid */
-            almacenOrigenId: string;
+            sourceWarehouseId: string;
             /** Format: uuid */
-            almacenDestinoId: string;
+            destinationWarehouseId: string;
             items: components["schemas"]["TransferenciaInvItemDto"][];
-            requiereRecepcion?: boolean;
-            motivo?: string;
+            requiresReceipt?: boolean;
+            reason?: string;
             /** Format: uuid */
-            creadoPor?: string;
-            notas?: string;
+            createdBy?: string;
+            notes?: string;
         };
         TransferenciaInventarioEntity: {
-            clinicOrigenId: string;
-            clinicDestinoId: string;
-            almacenOrigenId: string;
-            almacenDestinoId: string;
+            sourceClinicId: string;
+            destinationClinicId: string;
+            sourceWarehouseId: string;
+            destinationWarehouseId: string;
             /** @enum {string} */
-            estado: "pendiente" | "cancelada" | "recibida" | "recibida_parcial" | "rechazada";
-            requiereRecepcion: boolean;
-            motivo: string | null;
-            creadoPor: string | null;
-            recibidoPor: string | null;
+            status: "pendiente" | "cancelada" | "recibida" | "recibida_parcial" | "rechazada";
+            requiresReceipt: boolean;
+            reason: string | null;
+            createdBy: string | null;
+            receivedBy: string | null;
             /** Format: date-time */
-            recibidaEn: string | null;
-            notas: string | null;
+            receivedAt: string | null;
+            notes: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6755,7 +6755,7 @@ export interface components {
         RecibirItemDto: {
             /** Format: uuid */
             itemId: string;
-            cantidadRecibida: number;
+            receivedQuantity: number;
         };
         RecibirTransferenciaInvDto: {
             /** Format: uuid */
@@ -6769,7 +6769,7 @@ export interface components {
             politicaRemanente?: "merma" | "devolver_origen";
         };
         RechazarTransferenciaInvDto: {
-            motivo: string;
+            reason: string;
             /** Format: uuid */
             actorId?: string;
         };
@@ -6778,47 +6778,47 @@ export interface components {
             rolClaves?: string[];
         };
         CrearAlertaDto: {
-            clave: string;
-            titulo: string;
+            slug: string;
+            title: string;
             clinicId?: string;
-            cuerpo?: string;
+            body?: string;
             /** @enum {string} */
-            severidad?: "info" | "warning" | "critica";
+            severity?: "info" | "warning" | "critica";
             /** @enum {string} */
-            modoAcuse?: "compartido" | "por_usuario";
+            acknowledgementMode?: "compartido" | "por_usuario";
             /** @enum {string} */
-            alcance?: "centro" | "rol" | "usuario";
+            scope?: "centro" | "rol" | "usuario";
             targets?: components["schemas"]["AlertaTargetsDto"];
             metadata?: Record<string, never>;
-            origenEntidad?: string;
+            sourceEntity?: string;
             /** Format: uuid */
-            origenId?: string;
-            vigenciaHasta?: string;
+            sourceId?: string;
+            validUntil?: string;
             /** Format: uuid */
-            creadaPor?: string;
+            createdBy?: string;
         };
         AlertaEntity: {
-            clave: string;
+            slug: string;
             /** @enum {string} */
-            severidad: "info" | "warning" | "critica";
-            titulo: string;
-            cuerpo: string | null;
+            severity: "info" | "warning" | "critica";
+            title: string;
+            body: string | null;
             metadata: Record<string, never> | null;
-            origenEntidad: string | null;
-            origenId: string | null;
+            sourceEntity: string | null;
+            sourceId: string | null;
             /** @enum {string} */
-            modoAcuse: "compartido" | "por_usuario";
+            acknowledgementMode: "compartido" | "por_usuario";
             /** @enum {string} */
-            alcance: "centro" | "rol" | "usuario";
+            scope: "centro" | "rol" | "usuario";
             targets: Record<string, never> | null;
             /** @enum {string} */
-            estado: "activa" | "resuelta" | "descartada";
+            status: "activa" | "resuelta" | "descartada";
             /** Format: date-time */
-            vigenciaHasta: string | null;
-            creadaPor: string | null;
-            resueltaPor: string | null;
+            validUntil: string | null;
+            createdBy: string | null;
+            resolvedBy: string | null;
             /** Format: date-time */
-            resueltaEn: string | null;
+            resolvedAt: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6827,14 +6827,14 @@ export interface components {
             updatedAt: string;
         };
         AlertaDestinatarioEntity: {
-            alertaId: string;
-            usuarioId: string;
+            alertId: string;
+            userId: string;
             /** @enum {string} */
-            estado: "descartada" | "no_leida" | "leida" | "acusada";
+            status: "descartada" | "no_leida" | "leida" | "acusada";
             /** Format: date-time */
-            leidaEn: string | null;
+            readAt: string | null;
             /** Format: date-time */
-            acusadaEn: string | null;
+            acknowledgedAt: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -6847,14 +6847,14 @@ export interface components {
             actorId?: string;
         };
         TipoAlertaEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
             /** @enum {string} */
-            severidadDefault: "info" | "warning" | "critica";
+            defaultSeverity: "info" | "warning" | "critica";
             /** @enum {string} */
-            modoAcuseDefault: "compartido" | "por_usuario";
-            icono: string | null;
-            activo: boolean;
+            defaultAcknowledgementMode: "compartido" | "por_usuario";
+            icon: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6862,43 +6862,43 @@ export interface components {
             updatedAt: string;
         };
         CreateTipoPrecioDto: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
             /** @description Marca esta lista como la POR DEFECTO (desmarca las demás). */
-            esDefault?: boolean;
+            isDefault?: boolean;
         };
         UpdateTipoPrecioDto: {
-            nombre?: string;
-            activo?: boolean;
+            name?: string;
+            active?: boolean;
             /** @description Marca esta lista como la POR DEFECTO (desmarca las demás). */
-            esDefault?: boolean;
+            isDefault?: boolean;
         };
         CreateMonedaDto: {
-            clave: string;
-            nombre: string;
-            simbolo?: string;
+            slug: string;
+            name: string;
+            symbol?: string;
         };
         UpdateMonedaDto: {
-            nombre?: string;
-            simbolo?: string;
-            activo?: boolean;
+            name?: string;
+            symbol?: string;
+            active?: boolean;
         };
         CreateImpuestoDto: {
-            clave: string;
-            nombre: string;
-            tasa: number;
+            slug: string;
+            name: string;
+            rate: number;
             /** @description Impuesto por defecto (se aplica a líneas gravadas sin impuesto específico). Único. */
-            esDefault?: boolean;
+            isDefault?: boolean;
         };
         UpdateImpuestoDto: {
-            nombre?: string;
-            tasa?: number;
-            activo?: boolean;
-            esDefault?: boolean;
+            name?: string;
+            rate?: number;
+            active?: boolean;
+            isDefault?: boolean;
         };
         OrigenDto: {
             /** Format: uuid */
-            tipoPrecioId: string;
+            priceTypeId: string;
             /**
              * Format: uuid
              * @description Centro de origen (null/omitido = global).
@@ -6907,9 +6907,9 @@ export interface components {
         };
         DestinoDto: {
             /** Format: uuid */
-            tipoPrecioId: string;
+            priceTypeId: string;
             /** @enum {string} */
-            ambito: "global" | "centro" | "individual";
+            scope: "global" | "centro" | "individual";
             /**
              * Format: uuid
              * @description Requerido si ambito=centro.
@@ -6920,19 +6920,19 @@ export interface components {
         };
         AjusteDto: {
             /** @enum {string} */
-            modo: "porcentaje" | "monto";
-            valor: number;
+            mode: "porcentaje" | "monto";
+            value: number;
             /** @enum {string} */
-            direccion: "aumentar" | "disminuir";
+            address: "aumentar" | "disminuir";
         };
         RedondeoDto: {
             /** @enum {string} */
-            modo: "ninguno" | "entero" | "multiplo" | "terminacion";
-            valor?: number;
+            mode: "ninguno" | "entero" | "multiplo" | "terminacion";
+            value?: number;
         };
         DerivarPreciosDto: {
-            origen: components["schemas"]["OrigenDto"];
-            destino: components["schemas"]["DestinoDto"];
+            source: components["schemas"]["OrigenDto"];
+            destination: components["schemas"]["DestinoDto"];
             ajuste: components["schemas"]["AjusteDto"];
             redondeo?: components["schemas"]["RedondeoDto"];
             /** @description true = preview (no escribe). */
@@ -6941,16 +6941,16 @@ export interface components {
         PrecioEntity: {
             /** @default null */
             clinicId: string | null;
-            presentacionId: string;
-            tipoPrecioId: string;
-            precio: number;
-            monedaId: string | null;
-            impuestoId: string | null;
+            presentationId: string;
+            priceTypeId: string;
+            price: number;
+            currencyId: string | null;
+            taxId: string | null;
             /** Format: date-time */
-            vigenciaDesde: string | null;
+            validFrom: string | null;
             /** Format: date-time */
-            vigenciaHasta: string | null;
-            activo: boolean;
+            validUntil: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -6959,46 +6959,46 @@ export interface components {
         };
         CreatePrecioDto: {
             /** Format: uuid */
-            presentacionId: string;
+            presentationId: string;
             /** Format: uuid */
-            tipoPrecioId: string;
-            precio: number;
+            priceTypeId: string;
+            price: number;
             /**
              * Format: uuid
              * @description Centro dueño (admin fija el centro). Sin él = scope del header.
              */
             clinicId?: string;
             /** Format: uuid */
-            monedaId?: string;
+            currencyId?: string;
             /** Format: uuid */
-            impuestoId?: string;
-            vigenciaDesde?: string;
-            vigenciaHasta?: string;
+            taxId?: string;
+            validFrom?: string;
+            validUntil?: string;
         };
         UpdatePrecioDto: {
-            precio?: number;
+            price?: number;
             /** Format: uuid */
-            monedaId?: string;
+            currencyId?: string;
             /** Format: uuid */
-            impuestoId?: string;
-            vigenciaDesde?: string;
-            vigenciaHasta?: string;
-            activo?: boolean;
+            taxId?: string;
+            validFrom?: string;
+            validUntil?: string;
+            active?: boolean;
         };
         OfertaEntity: {
-            presentacionId: string;
-            nombre: string;
-            precio: number | null;
-            descuentoPct: number | null;
+            presentationId: string;
+            name: string;
+            price: number | null;
+            discountPct: number | null;
             /** Format: date-time */
-            vigenciaDesde: string | null;
+            validFrom: string | null;
             /** Format: date-time */
-            vigenciaHasta: string | null;
-            horaInicio: string | null;
-            horaFin: string | null;
-            diasSemana: string | null;
-            prioridad: number;
-            activo: boolean;
+            validUntil: string | null;
+            startTime: string | null;
+            endTime: string | null;
+            daysOfWeek: string | null;
+            priority: number;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7007,111 +7007,111 @@ export interface components {
             updatedAt: string;
         };
         CreateOfertaDto: {
-            presentacionId: string;
-            nombre: string;
-            precio?: number;
-            descuentoPct?: number;
-            vigenciaDesde?: string;
-            vigenciaHasta?: string;
-            horaInicio?: string;
-            horaFin?: string;
-            diasSemana?: string;
-            prioridad?: number;
+            presentationId: string;
+            name: string;
+            price?: number;
+            discountPct?: number;
+            validFrom?: string;
+            validUntil?: string;
+            startTime?: string;
+            endTime?: string;
+            daysOfWeek?: string;
+            priority?: number;
         };
         UpdateOfertaDto: {
-            nombre?: string;
-            precio?: number;
-            descuentoPct?: number;
-            vigenciaDesde?: string;
-            vigenciaHasta?: string;
-            horaInicio?: string;
-            horaFin?: string;
-            diasSemana?: string;
-            prioridad?: number;
-            activo?: boolean;
+            name?: string;
+            price?: number;
+            discountPct?: number;
+            validFrom?: string;
+            validUntil?: string;
+            startTime?: string;
+            endTime?: string;
+            daysOfWeek?: string;
+            priority?: number;
+            active?: boolean;
         };
         CreatePacienteDto: {
-            nombres: string;
-            apellidos?: string;
-            docId?: string;
+            firstName: string;
+            lastName?: string;
+            documentId?: string;
             /** @enum {string} */
-            sexo?: "femenino" | "masculino" | "otro" | "desconocido";
-            fechaNacimiento?: string;
-            fallecido?: boolean;
-            telefono?: string;
-            telCasa?: string;
-            telOficina?: string;
+            sex?: "femenino" | "masculino" | "otro" | "desconocido";
+            dateOfBirth?: string;
+            deceased?: boolean;
+            phone?: string;
+            homePhone?: string;
+            officePhone?: string;
             whatsapp?: string;
             /** @enum {string} */
-            telPref?: "principal" | "casa" | "oficina" | "whatsapp";
+            preferredPhone?: "principal" | "casa" | "oficina" | "whatsapp";
             /** Format: email */
             email?: string;
-            direccion?: string;
-            zipcode?: string;
+            address?: string;
+            zipCode?: string;
             /** Format: uuid */
-            ciudadId?: string;
+            cityId?: string;
             /** Format: uuid */
-            estadoId?: string;
+            stateId?: string;
             /** Format: uuid */
-            paisId?: string;
-            envDireccion?: string;
-            envZipcode?: string;
+            countryId?: string;
+            shippingAddress?: string;
+            shippingZipCode?: string;
             /** Format: uuid */
-            envCiudadId?: string;
+            shippingCityId?: string;
             /** Format: uuid */
-            envEstadoId?: string;
+            shippingStateId?: string;
             /** Format: uuid */
-            envPaisId?: string;
-            envioIgual?: boolean;
+            shippingCountryId?: string;
+            sameShippingAddress?: boolean;
             /** Format: uuid */
-            medicoId?: string;
+            doctorId?: string;
             /** Format: uuid */
-            atendidoPor?: string;
-            nacionalidad?: string;
-            record?: string;
-            aseguradora?: string;
-            esTestimonio?: boolean;
-            altaOriginal?: string;
-            creadoPor?: string;
-            codigoLegacy?: string;
+            attendedBy?: string;
+            nationality?: string;
+            medicalRecordNumber?: string;
+            insurer?: string;
+            isTestimonial?: boolean;
+            originalRegistration?: string;
+            createdBy?: string;
+            legacyCode?: string;
         };
         PacienteEntity: {
-            nombres: string;
-            apellidos: string | null;
-            docId: string | null;
+            firstName: string;
+            lastName: string | null;
+            documentId: string | null;
             /** @enum {string|null} */
-            sexo: "desconocido" | "femenino" | "masculino" | "otro" | null;
-            fechaNacimiento: string | null;
-            telefono: string | null;
+            sex: "desconocido" | "femenino" | "masculino" | "otro" | null;
+            dateOfBirth: string | null;
+            phone: string | null;
             whatsapp: string | null;
             email: string | null;
-            direccion: string | null;
-            zipcode: string | null;
-            nacionalidad: string | null;
-            record: string | null;
-            aseguradora: string | null;
-            medicoId: string | null;
-            telCasa: string | null;
-            telOficina: string | null;
+            address: string | null;
+            zipCode: string | null;
+            nationality: string | null;
+            medicalRecordNumber: string | null;
+            insurer: string | null;
+            doctorId: string | null;
+            homePhone: string | null;
+            officePhone: string | null;
             /** @enum {string|null} */
-            telPref: "principal" | "casa" | "oficina" | "whatsapp" | null;
-            ciudadId: string | null;
-            estadoId: string | null;
-            paisId: string | null;
-            envDireccion: string | null;
-            envCiudadId: string | null;
-            envEstadoId: string | null;
-            envPaisId: string | null;
-            envZipcode: string | null;
-            envioIgual: boolean;
-            atendidoPor: string | null;
-            fallecido: boolean;
-            esTestimonio: boolean;
+            preferredPhone: "principal" | "casa" | "oficina" | "whatsapp" | null;
+            cityId: string | null;
+            stateId: string | null;
+            countryId: string | null;
+            shippingAddress: string | null;
+            shippingCityId: string | null;
+            shippingStateId: string | null;
+            shippingCountryId: string | null;
+            shippingZipCode: string | null;
+            sameShippingAddress: boolean;
+            attendedBy: string | null;
+            deceased: boolean;
+            isTestimonial: boolean;
             /** Format: date-time */
-            altaOriginal: string | null;
-            creadoPor: string | null;
-            codigoLegacy: string | null;
-            activo: boolean;
+            originalRegistration: string | null;
+            createdBy: string | null;
+            legacyCode: string | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7120,55 +7120,55 @@ export interface components {
             updatedAt: string;
         };
         UpdatePacienteDto: {
-            nombres?: string;
-            activo?: boolean;
-            apellidos?: string;
-            docId?: string;
+            firstName?: string;
+            active?: boolean;
+            lastName?: string;
+            documentId?: string;
             /** @enum {string} */
-            sexo?: "femenino" | "masculino" | "otro" | "desconocido";
-            fechaNacimiento?: string;
-            fallecido?: boolean;
-            telefono?: string;
-            telCasa?: string;
-            telOficina?: string;
+            sex?: "femenino" | "masculino" | "otro" | "desconocido";
+            dateOfBirth?: string;
+            deceased?: boolean;
+            phone?: string;
+            homePhone?: string;
+            officePhone?: string;
             whatsapp?: string;
             /** @enum {string} */
-            telPref?: "principal" | "casa" | "oficina" | "whatsapp";
+            preferredPhone?: "principal" | "casa" | "oficina" | "whatsapp";
             /** Format: email */
             email?: string;
-            direccion?: string;
-            zipcode?: string;
+            address?: string;
+            zipCode?: string;
             /** Format: uuid */
-            ciudadId?: string;
+            cityId?: string;
             /** Format: uuid */
-            estadoId?: string;
+            stateId?: string;
             /** Format: uuid */
-            paisId?: string;
-            envDireccion?: string;
-            envZipcode?: string;
+            countryId?: string;
+            shippingAddress?: string;
+            shippingZipCode?: string;
             /** Format: uuid */
-            envCiudadId?: string;
+            shippingCityId?: string;
             /** Format: uuid */
-            envEstadoId?: string;
+            shippingStateId?: string;
             /** Format: uuid */
-            envPaisId?: string;
-            envioIgual?: boolean;
+            shippingCountryId?: string;
+            sameShippingAddress?: boolean;
             /** Format: uuid */
-            medicoId?: string;
+            doctorId?: string;
             /** Format: uuid */
-            atendidoPor?: string;
-            nacionalidad?: string;
-            record?: string;
-            aseguradora?: string;
-            esTestimonio?: boolean;
-            altaOriginal?: string;
-            creadoPor?: string;
-            codigoLegacy?: string;
+            attendedBy?: string;
+            nationality?: string;
+            medicalRecordNumber?: string;
+            insurer?: string;
+            isTestimonial?: boolean;
+            originalRegistration?: string;
+            createdBy?: string;
+            legacyCode?: string;
         };
         PaisEntity: {
-            nombre: string;
+            name: string;
             iso2: string | null;
-            codigoLegacy: string | null;
+            legacyCode: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7176,10 +7176,10 @@ export interface components {
             updatedAt: string;
         };
         EstadoEntity: {
-            nombre: string;
-            abreviatura: string | null;
-            paisId: string | null;
-            codigoLegacy: string | null;
+            name: string;
+            abbreviation: string | null;
+            countryId: string | null;
+            legacyCode: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7187,10 +7187,10 @@ export interface components {
             updatedAt: string;
         };
         CiudadEntity: {
-            nombre: string;
-            estadoId: string | null;
-            paisId: string | null;
-            codigoLegacy: string | null;
+            name: string;
+            stateId: string | null;
+            countryId: string | null;
+            legacyCode: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7198,17 +7198,17 @@ export interface components {
             updatedAt: string;
         };
         PersonalEntity: {
-            nombre: string;
-            apellido: string | null;
-            perfilId: string | null;
-            cargo: string | null;
-            capacidades: string[] | null;
-            especialidad: string | null;
-            telefono: string | null;
+            name: string;
+            lastName: string | null;
+            profileId: string | null;
+            jobTitle: string | null;
+            capabilities: string[] | null;
+            specialty: string | null;
+            phone: string | null;
             email: string | null;
             color: string;
-            codigoLegacy: string | null;
-            activo: boolean;
+            legacyCode: string | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7217,47 +7217,47 @@ export interface components {
             updatedAt: string;
         };
         CreatePersonalDto: {
-            nombre: string;
-            apellido?: string;
+            name: string;
+            lastName?: string;
             /** Format: uuid */
-            perfilId?: string;
-            cargo?: string;
-            capacidades?: string[];
-            especialidad?: string;
-            telefono?: string;
+            profileId?: string;
+            jobTitle?: string;
+            capabilities?: string[];
+            specialty?: string;
+            phone?: string;
             /** Format: email */
             email?: string;
-            codigoLegacy?: string;
+            legacyCode?: string;
         };
         UpdatePersonalDto: {
-            nombre?: string;
-            apellido?: string;
+            name?: string;
+            lastName?: string;
             /** Format: uuid */
-            perfilId?: string;
-            cargo?: string;
-            capacidades?: string[];
-            especialidad?: string;
-            telefono?: string;
+            profileId?: string;
+            jobTitle?: string;
+            capabilities?: string[];
+            specialty?: string;
+            phone?: string;
             /** Format: email */
             email?: string;
-            activo?: boolean;
+            active?: boolean;
         };
         CreatePerfilDto: {
             authUserId: string;
             /** Format: email */
             email: string;
-            nombre: string;
-            apellido?: string;
+            name: string;
+            lastName?: string;
             /** @enum {string} */
             accessMode?: "operativo" | "gerencial";
         };
         PerfilResponseDto: {
             id: string;
             email: string;
-            nombre: string;
-            apellido: string | null;
+            name: string;
+            lastName: string | null;
             /** @enum {string} */
-            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
+            status: "pendiente" | "aprobado" | "rechazado" | "suspendido";
             /** @enum {string} */
             accessMode: "operativo" | "gerencial";
             isMaster: boolean;
@@ -7268,8 +7268,8 @@ export interface components {
         InvitePerfilDto: {
             /** Format: email */
             email: string;
-            nombre: string;
-            apellido?: string;
+            name: string;
+            lastName?: string;
             /** @enum {string} */
             accessMode?: "operativo" | "gerencial";
             password?: string;
@@ -7286,10 +7286,10 @@ export interface components {
         InvitePerfilResponseDto: {
             id: string;
             email: string;
-            nombre: string;
-            apellido: string | null;
+            name: string;
+            lastName: string | null;
             /** @enum {string} */
-            estado: "pendiente" | "aprobado" | "rechazado" | "suspendido";
+            status: "pendiente" | "aprobado" | "rechazado" | "suspendido";
             /** @enum {string} */
             accessMode: "operativo" | "gerencial";
             isMaster: boolean;
@@ -7300,28 +7300,28 @@ export interface components {
             emailSent?: boolean;
         };
         RejectPerfilDto: {
-            motivo: string;
+            reason: string;
         };
         CreateAsignacionDto: {
             /** Format: uuid */
-            centroId: string;
+            centerId: string;
             /** @enum {string} */
-            tipo?: "base" | "temporal" | "fijo";
-            vigenteDesde?: string;
-            vigenteHasta?: string;
-            forzado?: boolean;
+            type?: "base" | "temporal" | "fijo";
+            validFrom?: string;
+            validUntil?: string;
+            forced?: boolean;
         };
         AsignacionEntity: {
-            perfilId: string;
-            centroId: string;
+            profileId: string;
+            centerId: string;
             /** @enum {string} */
-            tipo: "base" | "temporal" | "fijo";
-            vigenteDesde: string;
-            vigenteHasta: string | null;
-            forzado: boolean;
-            activo: boolean;
-            perfil?: components["schemas"]["PerfilEntity"];
-            centro?: components["schemas"]["CentroEntity"];
+            type: "base" | "temporal" | "fijo";
+            validFrom: string;
+            validUntil: string | null;
+            forced: boolean;
+            active: boolean;
+            profile?: components["schemas"]["PerfilEntity"];
+            center?: components["schemas"]["CentroEntity"];
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7332,14 +7332,14 @@ export interface components {
             avatarUrl: string;
         };
         TipoCitaEntity: {
-            clave: string;
-            nombre: string;
-            requiereMedico: boolean;
+            slug: string;
+            name: string;
+            requiresDoctor: boolean;
             color: string;
-            duracionMin: number;
-            codigo: string | null;
-            productoId: string | null;
-            activo: boolean;
+            durationMinutes: number;
+            code: string | null;
+            productId: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7349,13 +7349,13 @@ export interface components {
         CupoAgendaEntity: {
             /** @default null */
             clinicId: string | null;
-            fecha: string | null;
-            diaSemana: number | null;
-            hora: string;
-            tipoCitaId: string | null;
-            servicioId: string | null;
-            cantidad: number;
-            activo: boolean;
+            date: string | null;
+            dayOfWeek: number | null;
+            time: string;
+            appointmentTypeId: string | null;
+            serviceId: string | null;
+            quantity: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7363,22 +7363,22 @@ export interface components {
             updatedAt: string;
         };
         CreateCupoDto: {
-            diaSemana?: number;
+            dayOfWeek?: number;
             /** @description Override SOLO para esta fecha ("YYYY-MM-DD"); si se omite aplica por diaSemana/default. */
-            fecha?: string;
-            hora: string;
+            date?: string;
+            time: string;
             /**
              * Format: uuid
              * @description Tipo de cita (citas médicas). Exclusivo con `servicioId`: una fila es de tipo-cita O de servicio.
              */
-            tipoCitaId?: string;
+            appointmentTypeId?: string;
             /**
              * Format: uuid
              * @description Servicio de frontdesk (cupo por hora por terapia). Exclusivo con `tipoCitaId`.
              */
-            servicioId?: string;
-            cantidad: number;
-            activo?: boolean;
+            serviceId?: string;
+            quantity: number;
+            active?: boolean;
             /**
              * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
              * @enum {string}
@@ -7386,15 +7386,15 @@ export interface components {
             scope?: "centro" | "global";
         };
         UpdateCupoDto: {
-            diaSemana?: number;
-            fecha?: string;
-            hora?: string;
+            dayOfWeek?: number;
+            date?: string;
+            time?: string;
             /** Format: uuid */
-            tipoCitaId?: string;
+            appointmentTypeId?: string;
             /** Format: uuid */
-            servicioId?: string;
-            cantidad?: number;
-            activo?: boolean;
+            serviceId?: string;
+            quantity?: number;
+            active?: boolean;
             /**
              * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
              * @enum {string}
@@ -7402,10 +7402,10 @@ export interface components {
             scope?: "centro" | "global";
         };
         NotaDiaEntity: {
-            fecha: string;
-            contenido: string;
-            autorId: string | null;
-            activo: boolean;
+            date: string;
+            content: string;
+            authorId: string | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7414,27 +7414,27 @@ export interface components {
             updatedAt: string;
         };
         CreateNotaDiaDto: {
-            fecha: string;
-            contenido: string;
+            date: string;
+            content: string;
             /** Format: uuid */
-            autorId?: string;
+            authorId?: string;
         };
         UpdateNotaDiaDto: {
-            contenido?: string;
-            activo?: boolean;
+            content?: string;
+            active?: boolean;
         };
         EstadoCitaEntity: {
             /** @default null */
             clinicId: string | null;
-            tablero: string;
-            clave: string;
+            boardSlug: string;
+            slug: string;
             labelKey: string;
-            orden: number;
+            sortOrder: number;
             color: string;
-            esInicial: boolean;
-            esTerminal: boolean;
-            visibleEnAtencion: boolean;
-            activo: boolean;
+            isInitial: boolean;
+            isTerminal: boolean;
+            visibleInCareBoard: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7442,36 +7442,36 @@ export interface components {
             updatedAt: string;
         };
         CitaEntity: {
-            pacienteId: string;
-            tipoCitaId: string;
-            medicoId: string | null;
-            fecha: string;
-            hora: string | null;
-            horaFin: string | null;
+            patientId: string;
+            appointmentTypeId: string;
+            doctorId: string | null;
+            date: string;
+            time: string | null;
+            endTime: string | null;
             /** @enum {string} */
-            estado: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
-            esPrimeraVez: boolean;
+            status: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
+            isFirstVisit: boolean;
             /** @enum {string} */
-            canal: "atencion" | "callcenter" | "webhook" | "ia";
-            motivo: string | null;
-            notas: string | null;
-            reprogramadaDeId: string | null;
-            callcenterId: string | null;
-            atencionId: string | null;
-            enfermeraVitalesId: string | null;
-            vitales: Record<string, never> | null;
+            channel: "atencion" | "callcenter" | "webhook" | "ia";
+            reason: string | null;
+            notes: string | null;
+            rescheduledFromId: string | null;
+            bookedByStaffId: string | null;
+            frontDeskStaffId: string | null;
+            vitalsNurseId: string | null;
+            vitals: Record<string, never> | null;
             /** Format: date-time */
-            confirmadaEn: string | null;
+            confirmedAt: string | null;
             /** Format: date-time */
-            llegadaEn: string | null;
+            arrivedAt: string | null;
             /** Format: date-time */
-            vitalesEn: string | null;
+            vitalsAt: string | null;
             /** Format: date-time */
-            horaInEn: string | null;
+            checkedInAt: string | null;
             /** Format: date-time */
-            horaOutEn: string | null;
+            checkedOutAt: string | null;
             /** Format: date-time */
-            registradaTardeEn: string | null;
+            lateRegisteredAt: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7481,124 +7481,124 @@ export interface components {
         };
         ValidarCitaDto: {
             /** Format: uuid */
-            medicoId: string;
-            fecha: string;
-            hora: string;
-            horaFin: string;
+            doctorId: string;
+            date: string;
+            time: string;
+            endTime: string;
             /** Format: uuid */
-            tipoCitaId?: string;
+            appointmentTypeId?: string;
             /** Format: uuid */
             excluirCitaId?: string;
         };
         CreateCitaDto: {
             /** Format: uuid */
-            pacienteId: string;
+            patientId: string;
             /** Format: uuid */
-            tipoCitaId: string;
+            appointmentTypeId: string;
             /**
              * Format: uuid
              * @description Centro DESTINO (central de citas multi-centro). Si se omite, se usa el centro activo.
              *     Debe pertenecer a los centros permitidos del principal.
              */
-            centroId?: string;
+            centerId?: string;
             /** Format: uuid */
-            medicoId?: string;
-            fecha: string;
-            hora?: string;
-            horaFin?: string;
-            esPrimeraVez?: boolean;
+            doctorId?: string;
+            date: string;
+            time?: string;
+            endTime?: string;
+            isFirstVisit?: boolean;
             /**
              * @description Estado INICIAL de la cita. Default 'programada' (agenda/call-center). Atención puede crear una cita del
              *     día directamente 'confirmada' para que entre al tablero (que filtra visibleEnAtencion). Allowlist BE:
              *     solo programada|confirmada al crear.
              * @enum {string}
              */
-            estado?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+            status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
             /** @enum {string} */
-            canal?: "atencion" | "callcenter" | "webhook" | "ia";
-            motivo?: string;
-            notas?: string;
+            channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            reason?: string;
+            notes?: string;
             /** Format: uuid */
-            callcenterId?: string;
+            bookedByStaffId?: string;
             /** Format: uuid */
-            atencionId?: string;
+            frontDeskStaffId?: string;
         };
         UpdateCitaDto: {
             /** Format: uuid */
-            medicoId?: string;
-            hora?: string;
-            horaFin?: string;
-            motivo?: string;
-            notas?: string;
+            doctorId?: string;
+            time?: string;
+            endTime?: string;
+            reason?: string;
+            notes?: string;
         };
         RegistrarCitaRetroactivaDto: {
             /**
              * @description Día en que el paciente vino de verdad. La cita aparece en el tablero de ESE día.
              * @example 2026-07-28
              */
-            fecha: string;
+            date: string;
             /**
              * @description Número de récord del paciente, tal como lo manejan en el mostrador.
              * @example 5856
              */
-            record: string;
+            medicalRecordNumber: string;
             /**
              * Format: uuid
              * @description Médico que lo atendió. Si no viene: el último que atendió a ese paciente, luego su médico de cabecera, y si tampoco hay, se registra sin médico. NUNCA bloquea.
              */
-            medicoId?: string;
+            doctorId?: string;
             /**
              * Format: uuid
              * @description Personal que agendó la cita (call center).
              */
-            callcenterId?: string;
+            bookedByStaffId?: string;
             /**
              * Format: uuid
              * @description Personal que atendió al paciente en recepción.
              */
-            atencionId?: string;
+            frontDeskStaffId?: string;
             /**
              * Format: uuid
              * @description Enfermera que tomó los signos vitales.
              */
-            enfermeraVitalesId?: string;
+            vitalsNurseId?: string;
             /**
              * Format: uuid
              * @description Centro donde ocurrió la visita. Por defecto el centro activo. OBLIGATORIO para un admin sin centro activo: el mismo récord existe en los dos centros y son personas distintas.
              */
-            centroId?: string;
+            centerId?: string;
             /**
              * Format: uuid
              * @description Tipo de cita, si se sabe.
              */
-            tipoCitaId?: string;
+            appointmentTypeId?: string;
             /**
              * @description Canal por el que llegó; por defecto, atención.
              * @enum {string}
              */
-            canal?: "atencion" | "callcenter" | "webhook" | "ia";
+            channel?: "atencion" | "callcenter" | "webhook" | "ia";
             /**
              * @description Por qué se registra tarde. Queda en los cuatro eventos del historial.
              * @example no se registró el día de la visita; detectado el 31
              */
-            motivo?: string;
+            reason?: string;
         };
         ReagendarCitaDto: {
-            fecha: string;
-            hora?: string;
-            motivo: string;
+            date: string;
+            time?: string;
+            reason: string;
             /**
              * Format: uuid
              * @description Centro DESTINO al reagendar: permite MOVER la cita a otro centro (central de citas).
              *     Si se omite, mantiene el centro de la cita original.
              */
-            centroId?: string;
+            centerId?: string;
             /**
              * Format: uuid
              * @description Médico de la cita NUEVA. Si viene, se asigna (p. ej. médico del centro destino al mover);
              *     si se omite y NO se mueve de centro, hereda el de la original; si se mueve, queda null.
              */
-            medicoId?: string;
+            doctorId?: string;
             /**
              * Format: uuid
              * @description Personal que reagenda (queda en el evento reprogramada + como citadoPor de la nueva).
@@ -7608,58 +7608,58 @@ export interface components {
         TransicionCitaDto: {
             /** Format: uuid */
             actorId?: string;
-            motivo?: string;
+            reason?: string;
         };
         TriageDto: {
             /** Format: uuid */
-            enfermeraId: string;
-            vitales?: Record<string, never>;
+            nurseId: string;
+            vitals?: Record<string, never>;
         };
         AsignarMedicoDto: {
             /** Format: uuid */
-            medicoId: string;
+            doctorId: string;
             /** @enum {string} */
-            alcance?: "temporal" | "total";
+            scope?: "temporal" | "total";
             /** Format: uuid */
             actorId?: string;
         };
         CancelarCitaDto: {
-            motivo: string;
+            reason: string;
             /** Format: uuid */
             actorId?: string;
         };
         RepararCitaDto: {
-            motivo: string;
+            reason: string;
             /** Format: uuid */
             actorId?: string;
             /** @enum {string} */
-            estado?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+            status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
             /** Format: uuid */
-            medicoId?: string;
+            doctorId?: string;
             /** Format: uuid */
-            enfermeraVitalesId?: string;
+            vitalsNurseId?: string;
             /** Format: uuid */
-            atencionId?: string;
+            frontDeskStaffId?: string;
             /** Format: uuid */
-            callcenterId?: string;
-            fecha?: string;
-            hora?: string;
-            llegadaEn?: string;
-            vitalesEn?: string;
-            horaInEn?: string;
-            horaOutEn?: string;
+            bookedByStaffId?: string;
+            date?: string;
+            time?: string;
+            arrivedAt?: string;
+            vitalsAt?: string;
+            checkedInAt?: string;
+            checkedOutAt?: string;
         };
         ColumnaEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
             /** @enum {string} */
-            tipo: "accion" | "fecha" | "hora" | "badge" | "texto" | "select" | "toggle" | "derivado" | "medicion";
+            type: "accion" | "fecha" | "hora" | "badge" | "texto" | "select" | "toggle" | "derivado" | "medicion";
             binding: string;
             editable: boolean;
-            permiso: string | null;
+            permissionSlug: string | null;
             render: Record<string, never> | null;
-            ambitos: string[] | null;
-            activo: boolean;
+            scopes: string[] | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7676,9 +7676,9 @@ export interface components {
             /** @description Transición que dispara un toggle (clave en tablero_transiciones, p. ej. "presente"). */
             transition?: string;
             /** @description Campo de hora que el toggle muestra/sella (p. ej. llegadaEn). */
-            estampa?: string;
+            stampsField?: string;
             /** @description Modal/acción que el FE dispara tras ejecutar la acción de la columna (enruta por valor; p. ej. "nueva_cita_prescripcion" abre el modal de próxima cita). Data-driven y por-tablero (override de composición). Plug-and-play. */
-            postAccion?: string;
+            postAction?: string;
             /** @description Si el módulo de prescripción está CONECTADO (plugged) en el modal de este tablero. Override por composición; false = sin grilla. Plug-and-play. */
             prescripcion?: boolean;
             /** @description Si la prescripción es OBLIGATORIA para cerrar la atención en este tablero (regla de negocio configurable, no hardcode del FE). El servidor es la autoridad: ver GET /prescripcion/cita/:id.resuelto. */
@@ -7693,39 +7693,39 @@ export interface components {
         CreateColumnaDto: {
             /** @description Pistas de render declarativas; claves de primera clase documentadas en ColumnaRenderDto (group, optionsSource, writeBinding, transition, estampa, color, background, ancho). Acepta claves extra. */
             render?: components["schemas"]["ColumnaRenderDto"];
-            clave: string;
+            slug: string;
             labelKey: string;
             /** @enum {string} */
-            tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado" | "medicion";
+            type?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado" | "medicion";
             binding: string;
             editable?: boolean;
-            permiso?: string;
+            permissionSlug?: string;
             /** @description Tableros donde la columna es elegible (p. ej. ['citas','operaciones']); vacío/null = universal. */
-            ambitos?: string[];
+            scopes?: string[];
         };
         UpdateColumnaDto: {
             /** @description Pistas de render declarativas; claves de primera clase documentadas en ColumnaRenderDto (group, optionsSource, writeBinding, transition, estampa, color, background, ancho). Acepta claves extra. */
             render?: components["schemas"]["ColumnaRenderDto"];
             labelKey?: string;
             /** @enum {string} */
-            tipo?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado" | "medicion";
+            type?: "texto" | "select" | "toggle" | "hora" | "fecha" | "badge" | "accion" | "derivado" | "medicion";
             binding?: string;
             editable?: boolean;
-            permiso?: string;
-            activo?: boolean;
+            permissionSlug?: string;
+            active?: boolean;
             /** @description Tableros donde la columna es elegible; vacío/null = universal. */
-            ambitos?: string[];
+            scopes?: string[];
         };
         SetComposicionDto: {
             /** @description Override de render para la columna en este tablero (se fusiona sobre columnas.render). Ej. postAccion. Acepta claves extra. */
             render?: components["schemas"]["ColumnaRenderDto"];
-            tablero: string;
+            boardSlug: string;
             /** Format: uuid */
-            columnaId: string;
-            orden?: number;
+            columnId: string;
+            sortOrder?: number;
             visible?: boolean;
-            fijo?: boolean;
-            activo?: boolean;
+            pinned?: boolean;
+            active?: boolean;
             /** @description Override de editabilidad de la columna en este tablero (null = hereda del catálogo). */
             editable?: boolean;
             /** @description Color (#hex) de pre-personalización del admin para la columna en este tablero. */
@@ -7734,15 +7734,15 @@ export interface components {
         TableroColumnaEntity: {
             /** @default null */
             clinicId: string | null;
-            tablero: string;
-            columnaId: string;
-            orden: number;
+            boardSlug: string;
+            columnId: string;
+            sortOrder: number;
             visible: boolean;
-            fijo: boolean;
+            pinned: boolean;
             editable: boolean | null;
             color: string | null;
             render: Record<string, never> | null;
-            activo: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7753,37 +7753,37 @@ export interface components {
             /** @description Override de render para la columna en este tablero (se fusiona sobre columnas.render). Ej. postAccion (modal post-acción por-tablero). Acepta claves extra. */
             render?: components["schemas"]["ColumnaRenderDto"];
             /** Format: uuid */
-            columnaId: string;
-            orden?: number;
+            columnId: string;
+            sortOrder?: number;
             visible?: boolean;
-            fijo?: boolean;
-            activo?: boolean;
+            pinned?: boolean;
+            active?: boolean;
             /** @description Override de editabilidad de la columna en este tablero (null = hereda del catálogo). */
             editable?: boolean;
             /** @description Color (#hex) de pre-personalización del admin para la columna en este tablero. */
             color?: string;
         };
         SetComposicionBulkDto: {
-            tablero: string;
-            columnas: components["schemas"]["SetComposicionItemDto"][];
+            boardSlug: string;
+            columns: components["schemas"]["SetComposicionItemDto"][];
         };
         PersonalizarColumnaDto: {
             /** @description Pistas de render declarativas; claves de primera clase documentadas en ColumnaRenderDto (group, optionsSource, writeBinding, transition, estampa, color, background, ancho). Acepta claves extra. */
             render?: components["schemas"]["ColumnaRenderDto"];
-            tablero: string;
+            boardSlug: string;
             /** Format: uuid */
-            columnaId: string;
+            columnId: string;
             visible?: boolean;
-            orden?: number;
-            fijo?: boolean;
+            sortOrder?: number;
+            pinned?: boolean;
         };
         UsuarioColumnaEntity: {
-            usuarioId: string;
-            tablero: string;
-            columnaId: string;
+            userId: string;
+            boardSlug: string;
+            columnId: string;
             visible: boolean | null;
-            orden: number | null;
-            fijo: boolean | null;
+            sortOrder: number | null;
+            pinned: boolean | null;
             render: Record<string, never> | null;
             id: string;
             clinicId: string | null;
@@ -7793,11 +7793,11 @@ export interface components {
             updatedAt: string;
         };
         HorarioMedicoEntity: {
-            medicoId: string | null;
-            diaSemana: number;
-            horaInicio: string;
-            horaFin: string;
-            activo: boolean;
+            doctorId: string | null;
+            dayOfWeek: number;
+            startTime: string;
+            endTime: string;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7807,28 +7807,28 @@ export interface components {
         };
         CreateHorarioMedicoDto: {
             /** Format: uuid */
-            medicoId?: string;
-            diaSemana: number;
-            horaInicio: string;
-            horaFin: string;
-            activo?: boolean;
+            doctorId?: string;
+            dayOfWeek: number;
+            startTime: string;
+            endTime: string;
+            active?: boolean;
         };
         UpdateHorarioMedicoDto: {
             /** Format: uuid */
-            medicoId?: string;
-            diaSemana?: number;
-            horaInicio?: string;
-            horaFin?: string;
-            activo?: boolean;
+            doctorId?: string;
+            dayOfWeek?: number;
+            startTime?: string;
+            endTime?: string;
+            active?: boolean;
         };
         FestivoEntity: {
             /** @default null */
             clinicId: string | null;
-            fecha: string;
-            nombre: string;
-            recurrenteAnual: boolean;
-            bloqueaAgenda: boolean;
-            activo: boolean;
+            date: string;
+            name: string;
+            recursAnnually: boolean;
+            blocksSchedule: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7836,12 +7836,12 @@ export interface components {
             updatedAt: string;
         };
         CreateFestivoDto: {
-            fecha: string;
-            nombre: string;
-            recurrenteAnual?: boolean;
+            date: string;
+            name: string;
+            recursAnnually?: boolean;
             /** @description True (default) = cierra la agenda ese día; false = informativo. */
-            bloqueaAgenda?: boolean;
-            activo?: boolean;
+            blocksSchedule?: boolean;
+            active?: boolean;
             /**
              * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
              * @enum {string}
@@ -7849,11 +7849,11 @@ export interface components {
             scope?: "centro" | "global";
         };
         UpdateFestivoDto: {
-            fecha?: string;
-            nombre?: string;
-            recurrenteAnual?: boolean;
-            bloqueaAgenda?: boolean;
-            activo?: boolean;
+            date?: string;
+            name?: string;
+            recursAnnually?: boolean;
+            blocksSchedule?: boolean;
+            active?: boolean;
             /**
              * @description `global` guarda clinicId=null (requiere permiso citas.config.global); default `centro`.
              * @enum {string}
@@ -7862,11 +7862,11 @@ export interface components {
         };
         EnviarNotificacionDto: {
             /** Format: uuid */
-            citaId: string;
+            appointmentId: string;
             /** @enum {string} */
-            canal: "whatsapp" | "sms" | "impresa" | "email";
-            plantillaClave?: string;
-            idioma?: string;
+            channel: "whatsapp" | "sms" | "impresa" | "email";
+            templateSlug?: string;
+            language?: string;
             /**
              * @description A quién va: 'paciente' (default) o 'medico' (el médico de la cita).
              * @enum {string}
@@ -7874,19 +7874,19 @@ export interface components {
             destinatario?: "paciente" | "medico";
         };
         NotificacionEntity: {
-            citaId: string | null;
+            appointmentId: string | null;
             /** @enum {string} */
-            canal: "email" | "whatsapp" | "sms" | "impresa";
-            destino: string | null;
-            plantillaClave: string | null;
-            asunto: string | null;
-            cuerpo: string;
+            channel: "email" | "whatsapp" | "sms" | "impresa";
+            destination: string | null;
+            templateSlug: string | null;
+            subject: string | null;
+            body: string;
             /** @enum {string} */
-            estado: "pendiente" | "enviada" | "fallida" | "lista";
-            proveedorRef: string | null;
+            status: "pendiente" | "enviada" | "fallida" | "lista";
+            providerReference: string | null;
             error: string | null;
             /** Format: date-time */
-            enviadaEn: string | null;
+            sentAt: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7895,13 +7895,13 @@ export interface components {
             updatedAt: string;
         };
         PlantillaNotificacionEntity: {
-            clave: string;
+            slug: string;
             /** @enum {string} */
-            canal: "email" | "whatsapp" | "sms" | "impresa";
-            idioma: string;
-            asunto: string | null;
-            cuerpo: string;
-            activo: boolean;
+            channel: "email" | "whatsapp" | "sms" | "impresa";
+            language: string;
+            subject: string | null;
+            body: string;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -7910,29 +7910,29 @@ export interface components {
             updatedAt: string;
         };
         CreatePlantillaDto: {
-            clave: string;
+            slug: string;
             /** @enum {string} */
-            canal: "whatsapp" | "sms" | "impresa" | "email";
-            idioma?: string;
-            asunto?: string;
-            cuerpo: string;
+            channel: "whatsapp" | "sms" | "impresa" | "email";
+            language?: string;
+            subject?: string;
+            body: string;
         };
         TransferenciaTratamientoEntity: {
-            paqueteOrigenId: string;
-            paqueteDestinoId: string;
-            clinicOrigenId: string;
-            clinicDestinoId: string;
-            pacienteId: string;
-            productoId: string;
-            sesiones: number;
+            sourcePackageId: string;
+            destinationPackageId: string;
+            sourceClinicId: string;
+            destinationClinicId: string;
+            patientId: string;
+            productId: string;
+            sessions: number;
             /** @enum {string} */
-            modo: "virtual" | "fisica";
-            almacenOrigenId: string | null;
-            almacenDestinoId: string | null;
-            motivo: string | null;
+            mode: "virtual" | "fisica";
+            sourceWarehouseId: string | null;
+            destinationWarehouseId: string | null;
+            reason: string | null;
             actorId: string | null;
             /** @enum {string} */
-            estado: "anulada" | "aplicada";
+            status: "anulada" | "aplicada";
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -7941,21 +7941,21 @@ export interface components {
         };
         TransferirTratamientoDto: {
             /** Format: uuid */
-            clinicDestinoId: string;
-            sesiones?: number;
+            destinationClinicId: string;
+            sessions?: number;
             /** @enum {string} */
-            modo?: "virtual" | "fisica";
+            mode?: "virtual" | "fisica";
             /** Format: uuid */
-            almacenOrigenId?: string;
+            sourceWarehouseId?: string;
             /** Format: uuid */
-            almacenDestinoId?: string;
-            motivo?: string;
+            destinationWarehouseId?: string;
+            reason?: string;
             /** Format: uuid */
             actorId?: string;
         };
         AjusteDisponibilidadDto: {
             /** @description Nuevo total de sesiones del paquete (p.ej. corregir 12→10 días). Debe ser ≥ lo ya consumido. */
-            sesionesTotales?: number;
+            totalSessions?: number;
             /** @description Nuevos multiplicadores a congelar (p.ej. { "dias": 10, "areas": 2 }). Si se envían, el total se recalcula (cantidad × Π multiplicadores) salvo que `sesionesTotales` lo fije explícito. */
             multiplicadores?: {
                 [key: string]: number;
@@ -7968,69 +7968,69 @@ export interface components {
         };
         CreateFacturaDto: {
             /** Format: uuid */
-            pacienteId: string;
+            patientId: string;
             /** Format: uuid */
-            medicoId?: string;
+            doctorId?: string;
             /**
              * Format: uuid
              * @description Cita/consulta que origina la factura (puente cita↔factura). Opcional.
              */
-            citaId?: string;
+            appointmentId?: string;
             /** Format: uuid */
-            medioId?: string;
+            sourceId?: string;
             /**
              * Format: uuid
              * @description Lista de precios con la que se factura (tipos_precio.id). Omitido = lista por defecto (esDefault).
              */
-            tipoPrecioId?: string;
-            serie?: string;
-            notas?: string;
+            priceTypeId?: string;
+            series?: string;
+            notes?: string;
             /** @description Nombre del receptor si NO es el paciente (empresa u otra persona). Omitido = se factura al paciente. */
-            facturarANombre?: string;
+            billToName?: string;
             /** @description Identificación del receptor tercero (label "ID"; registro fiscal si es empresa). */
-            facturarADocId?: string;
+            billToDocumentId?: string;
             /**
              * @description Tipo de receptor tercero: persona | empresa.
              * @enum {string}
              */
-            facturarATipo?: "persona" | "empresa";
+            billToType?: "persona" | "empresa";
         };
         FacturaEntity: {
-            numero: string | null;
-            serie: string | null;
-            numeroLegacy: string | null;
-            origenLegacy: string | null;
-            pacienteId: string;
-            facturarANombre: string | null;
-            facturarADocId: string | null;
-            facturarATipo: string | null;
-            medicoId: string | null;
-            emisorId: string | null;
-            creadoPor: string | null;
-            emitidoPor: string | null;
-            citaId: string | null;
-            tipoPrecioId: string | null;
-            medioId: string | null;
+            number: string | null;
+            series: string | null;
+            legacyNumber: string | null;
+            legacyOrigin: string | null;
+            patientId: string;
+            billToName: string | null;
+            billToDocumentId: string | null;
+            billToType: string | null;
+            doctorId: string | null;
+            issuerId: string | null;
+            createdBy: string | null;
+            issuedBy: string | null;
+            appointmentId: string | null;
+            priceTypeId: string | null;
+            sourceId: string | null;
             /** @enum {string} */
-            estado: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
+            status: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
             subtotal: number;
-            descuentoGlobalTipo: string;
-            descuentoGlobalValor: number;
-            descuento: number;
-            exento: boolean;
-            motivoExencion: string | null;
-            impuesto: number;
+            globalDiscountType: string;
+            globalDiscountValue: number;
+            discount: number;
+            exempt: boolean;
+            exemptionReason: string | null;
+            tax: number;
             total: number;
-            envio: number;
-            almacenId: string | null;
-            montoAbonado: number;
-            cancelado: boolean;
-            fecha: string | null;
-            notas: string | null;
+            shipping: number;
+            warehouseId: string | null;
+            paidAmount: number;
+            cancelled: boolean;
+            date: string | null;
+            notes: string | null;
             /** Format: date-time */
-            anuladaEn: string | null;
-            anuladaPor: string | null;
-            motivoAnulacion: string | null;
+            cancelledAt: string | null;
+            cancelledBy: string | null;
+            cancellationReason: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8040,62 +8040,62 @@ export interface components {
         };
         CambiarPacienteDto: {
             /** Format: uuid */
-            pacienteId: string;
+            patientId: string;
         };
         EditarCabeceraDto: {
             /** Format: uuid */
-            pacienteId?: string;
+            patientId?: string;
             /** Format: uuid */
-            medicoId?: string | null;
+            doctorId?: string | null;
             /** Format: uuid */
-            medioId?: string | null;
-            facturarANombre?: string | null;
-            facturarADocId?: string | null;
+            sourceId?: string | null;
+            billToName?: string | null;
+            billToDocumentId?: string | null;
             /** @enum {string|null} */
-            facturarATipo?: "persona" | "empresa" | null;
+            billToType?: "persona" | "empresa" | null;
         };
         AgregarItemDto: {
             /** Format: uuid */
-            productoId: string;
+            productId: string;
             /** Format: uuid */
-            presentacionId?: string;
-            descripcion?: string;
-            cantidad?: number;
-            sesiones?: number;
-            precioUnitario?: number;
+            presentationId?: string;
+            description?: string;
+            quantity?: number;
+            sessions?: number;
+            unitPrice?: number;
             /** @enum {string} */
-            descuentoTipo?: "monto" | "porcentaje";
-            descuentoValor?: number;
-            descuento?: number;
-            gravado?: boolean;
+            discountType?: "monto" | "porcentaje";
+            discountValue?: number;
+            discount?: number;
+            taxable?: boolean;
             /** Format: uuid */
-            impuestoId?: string;
-            personalizacion?: Record<string, never>;
+            taxId?: string;
+            customization?: Record<string, never>;
             meta?: Record<string, never>;
         };
         FacturaItemEntity: {
-            facturaId: string;
-            productoId: string;
-            presentacionId: string | null;
-            descripcion: string;
-            cantidad: number;
-            sesiones: number;
-            precioUnitario: number;
-            descuentoTipo: string;
-            descuentoValor: number;
-            descuento: number;
-            gravado: boolean;
-            impuestoId: string | null;
-            montoImpuesto: number;
+            invoiceId: string;
+            productId: string;
+            presentationId: string | null;
+            description: string;
+            quantity: number;
+            sessions: number;
+            unitPrice: number;
+            discountType: string;
+            discountValue: number;
+            discount: number;
+            taxable: boolean;
+            taxId: string | null;
+            taxAmount: number;
             total: number;
-            modoDescarga: string;
-            personalizacion: Record<string, never> | null;
+            deductionMode: string;
+            customization: Record<string, never> | null;
             meta: Record<string, never> | null;
-            opcionalesIncluidos: string[] | null;
-            grupoFacturacionId: string | null;
-            categoriaId: string | null;
-            cantidadDevuelta: number;
-            sesionesDevueltas: number;
+            optionalItemsIncluded: string[] | null;
+            billingGroupId: string | null;
+            categoryId: string | null;
+            refundedQuantity: number;
+            refundedSessions: number;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8104,16 +8104,16 @@ export interface components {
             updatedAt: string;
         };
         UpdateItemDto: {
-            descripcion?: string;
-            cantidad?: number;
-            sesiones?: number;
-            precioUnitario?: number;
+            description?: string;
+            quantity?: number;
+            sessions?: number;
+            unitPrice?: number;
             /** @enum {string} */
-            descuentoTipo?: "monto" | "porcentaje";
-            descuentoValor?: number;
-            descuento?: number;
+            discountType?: "monto" | "porcentaje";
+            discountValue?: number;
+            discount?: number;
             /** @description Toggle IVU/exento por línea (override del gravado heredado). El impuesto se recalcula. */
-            gravado?: boolean;
+            taxable?: boolean;
         };
         RepararDescargaDto: {
             /**
@@ -8126,20 +8126,20 @@ export interface components {
             /** @description Fuerza la reparación aunque la línea tenga entregas/devoluciones (requiere admin). */
             force?: boolean;
             /** @description Motivo/nota de la reparación. */
-            motivo?: string;
+            reason?: string;
         };
         ReparacionEntity: {
-            facturaId: string;
-            facturaItemId: string;
-            campo: string;
-            valorAntes: string | null;
-            valorDespues: string | null;
-            movimientosIds: string[] | null;
-            paqueteId: string | null;
-            accionPaquete: string | null;
-            usuarioId: string | null;
-            motivo: string | null;
-            revertidoDeId: string | null;
+            invoiceId: string;
+            invoiceItemId: string;
+            field: string;
+            valueBefore: string | null;
+            valueAfter: string | null;
+            movementIds: string[] | null;
+            packageId: string | null;
+            packageAction: string | null;
+            userId: string | null;
+            reason: string | null;
+            revertedFromId: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8152,89 +8152,89 @@ export interface components {
         };
         KitComponenteDto: {
             /** Format: uuid */
-            productoId: string;
-            cantidad: number;
+            productId: string;
+            quantity: number;
         };
         PersonalizarKitDto: {
             componentes: components["schemas"]["KitComponenteDto"][];
         };
         DescuentoGlobalDto: {
             /** @enum {string} */
-            tipo: "monto" | "porcentaje";
-            valor: number;
+            type: "monto" | "porcentaje";
+            value: number;
         };
         DescuentoGrupoItemDto: {
             /** @enum {string} */
-            ambito: "grupo" | "categoria";
+            scope: "grupo" | "categoria";
             /** Format: uuid */
-            objetivoId: string;
+            targetId: string;
             /** @enum {string} */
-            tipo: "monto" | "porcentaje";
-            valor: number;
+            type: "monto" | "porcentaje";
+            value: number;
         };
         DescuentosGrupoDto: {
             descuentos: components["schemas"]["DescuentoGrupoItemDto"][];
         };
         SetExentoDto: {
-            exento: boolean;
-            motivo?: string;
+            exempt: boolean;
+            reason?: string;
         };
         SetEnvioDto: {
             /**
              * @description Monto de envío/flete (delivery) a sumar al total DESPUÉS del impuesto. 0 = sin envío. No se graba por defecto (configurable por centro).
              * @example 12
              */
-            monto: number;
+            amount: number;
         };
         AnularFacturaDto: {
-            motivo: string;
+            reason: string;
             /** Format: uuid */
             actorId?: string;
         };
         DevolverComponenteDto: {
             /** Format: uuid */
-            facturaItemComponenteId: string;
-            cantidad?: number;
-            precioDevuelto?: number;
+            invoiceItemComponentId: string;
+            quantity?: number;
+            refundedPrice?: number;
         };
         DevolverItemDto: {
             /** Format: uuid */
-            facturaItemId: string;
-            cantidad?: number;
-            sesiones?: number;
-            precioDevuelto?: number;
+            invoiceItemId: string;
+            quantity?: number;
+            sessions?: number;
+            refundedPrice?: number;
             componentes?: components["schemas"]["DevolverComponenteDto"][];
         };
         DevolverDto: {
             items: components["schemas"]["DevolverItemDto"][];
-            motivo: string;
+            reason: string;
             /** @enum {string} */
-            politica?: "como_facturada" | "precio_base";
+            policy?: "como_facturada" | "precio_base";
             /** Format: uuid */
-            formaReembolsoId?: string;
+            refundMethodId?: string;
             /** Format: uuid */
             actorId?: string;
         };
         DevolucionEntity: {
-            facturaId: string;
-            facturaNumero: string | null;
-            numero: number | null;
-            serie: string | null;
+            invoiceId: string;
+            invoiceNumber: string | null;
+            number: number | null;
+            series: string | null;
             /** @enum {string} */
-            tipo: "total" | "parcial";
-            politica: string;
-            motivo: string | null;
-            montoDevuelto: number;
-            impuestoDevuelto: number;
-            formaReembolsoId: string | null;
-            usuarioId: string | null;
-            fecha: string | null;
-            notas: string | null;
-            estado: string;
+            type: "total" | "parcial";
+            policy: string;
+            reason: string | null;
+            refundedAmount: number;
+            refundedTax: number;
+            refundMethodId: string | null;
+            userId: string | null;
+            date: string | null;
+            notes: string | null;
+            status: string;
             /** Format: date-time */
-            anuladaEn: string | null;
-            anuladaPor: string | null;
-            motivoAnulacion: string | null;
+            cancelledAt: string | null;
+            cancelledBy: string | null;
+            cancellationReason: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8244,39 +8244,39 @@ export interface components {
         };
         EmailFacturaDto: Record<string, never>;
         AnularDevolucionDto: {
-            motivo: string;
+            reason: string;
             /** Format: uuid */
             actorId?: string;
         };
         RegistrarPagoDto: {
             /** Format: uuid */
-            formaPagoId?: string;
-            monto: number;
-            notas?: string;
+            paymentMethodId?: string;
+            amount: number;
+            notes?: string;
             /** @description Referencia estructurada (p. ej. últimos 4 de tarjeta / nº de aprobación) para conciliación por tarjeta. */
-            referencia?: string;
+            reference?: string;
         };
         PagosMultipleDto: {
-            pagos: components["schemas"]["RegistrarPagoDto"][];
+            payments: components["schemas"]["RegistrarPagoDto"][];
         };
         PagoEntity: {
-            facturaId: string;
-            formaPagoId: string | null;
-            monto: number;
+            invoiceId: string;
+            paymentMethodId: string | null;
+            amount: number;
             /** @enum {string} */
-            tipo: "pago" | "reembolso";
+            type: "pago" | "reembolso";
             /** @enum {string} */
-            estado: "activo" | "anulado";
-            fecha: string | null;
-            usuarioId: string | null;
-            notas: string | null;
-            referencia: string | null;
+            status: "activo" | "anulado";
+            date: string | null;
+            userId: string | null;
+            notes: string | null;
+            reference: string | null;
             /** Format: date-time */
             anuladoEn: string | null;
             anuladoPor: string | null;
-            motivoAnulacion: string | null;
-            reemplazaA: string | null;
-            devolucionId: string | null;
+            cancellationReason: string | null;
+            replacesId: string | null;
+            refundId: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8285,19 +8285,19 @@ export interface components {
             updatedAt: string;
         };
         AnularPagoDto: {
-            motivo?: string;
+            reason?: string;
         };
         RepararPagoDto: {
             /** Format: uuid */
-            formaPagoId?: string;
-            monto?: number;
-            motivo?: string;
+            paymentMethodId?: string;
+            amount?: number;
+            reason?: string;
         };
         MedioEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
-            nombre: string;
-            activo: boolean;
+            name: string;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8305,11 +8305,11 @@ export interface components {
             updatedAt: string;
         };
         FormaPagoEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
-            nombre: string;
-            esEfectivo: boolean;
-            activo: boolean;
+            name: string;
+            isCash: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8322,13 +8322,13 @@ export interface components {
             /** @description División: consulta | general. */
             division?: string;
             /** @description Activo (false = deshabilitado, soft). */
-            activo?: boolean;
+            active?: boolean;
         };
         GrupoFacturacionEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
             division: string;
-            activo: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8345,18 +8345,18 @@ export interface components {
             mover: boolean;
         };
         ColumnaFacturacionEntity: {
-            grupoClave: string;
-            clave: string;
+            groupKey: string;
+            slug: string;
             labelKey: string;
             /** @enum {string} */
-            tipo: "readonly" | "numero" | "texto" | "select" | "calculado";
+            type: "readonly" | "numero" | "texto" | "select" | "calculado";
             /** @enum {string} */
-            rol: "accion" | "cantidad" | "producto" | "precio" | "subtotal" | "descuento" | "impuesto" | "tarifa" | "multiplicador" | "informativo";
-            orden: number;
-            requerido: boolean;
+            role: "accion" | "cantidad" | "producto" | "precio" | "subtotal" | "descuento" | "impuesto" | "tarifa" | "multiplicador" | "informativo";
+            sortOrder: number;
+            required: boolean;
             visible: boolean;
             render: Record<string, never> | null;
-            activo: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8365,55 +8365,55 @@ export interface components {
         };
         CrearGrupoFacturacionDto: {
             /** @description Clave única del grupo (suero, laser, …). */
-            clave: string;
+            slug: string;
             /** @description Clave i18n de la etiqueta (el FE la traduce). */
             labelKey: string;
             /** @description División de facturación del grupo: consulta | general. Omitida = general (default de la entidad). */
             division?: string;
         };
         CrearColumnaFacturacionDto: {
-            grupoClave: string;
-            clave: string;
+            groupKey: string;
+            slug: string;
             labelKey: string;
             /** @enum {string} */
-            tipo?: "select" | "numero" | "texto" | "readonly" | "calculado";
+            type?: "select" | "numero" | "texto" | "readonly" | "calculado";
             /** @enum {string} */
-            rol: "producto" | "tarifa" | "cantidad" | "multiplicador" | "informativo" | "precio" | "descuento" | "impuesto" | "subtotal" | "accion";
-            orden?: number;
-            requerido?: boolean;
+            role: "producto" | "tarifa" | "cantidad" | "multiplicador" | "informativo" | "precio" | "descuento" | "impuesto" | "subtotal" | "accion";
+            sortOrder?: number;
+            required?: boolean;
             visible?: boolean;
             render?: Record<string, never>;
         };
         UpdateColumnaFacturacionDto: {
             labelKey?: string;
             /** @enum {string} */
-            tipo?: "select" | "numero" | "texto" | "readonly" | "calculado";
+            type?: "select" | "numero" | "texto" | "readonly" | "calculado";
             /** @enum {string} */
-            rol?: "producto" | "tarifa" | "cantidad" | "multiplicador" | "informativo" | "precio" | "descuento" | "impuesto" | "subtotal" | "accion";
-            orden?: number;
-            requerido?: boolean;
+            role?: "producto" | "tarifa" | "cantidad" | "multiplicador" | "informativo" | "precio" | "descuento" | "impuesto" | "subtotal" | "accion";
+            sortOrder?: number;
+            required?: boolean;
             visible?: boolean;
             render?: Record<string, never>;
-            activo?: boolean;
+            active?: boolean;
         };
         ExportarDto: {
-            recurso: string;
+            resource: string;
             /** @enum {string} */
-            formato: "csv" | "json" | "pdf";
+            format: "csv" | "json" | "pdf";
             /** @enum {string} */
-            canal?: "download" | "email" | "sms";
-            filtros?: Record<string, never>;
-            configClave?: string;
-            destino?: string;
+            channel?: "download" | "email" | "sms";
+            filters?: Record<string, never>;
+            configSlug?: string;
+            destination?: string;
         };
         ExportConfigEntity: {
-            clave: string;
-            incluirIdentidad: boolean;
-            incluirLogo: boolean;
+            slug: string;
+            includeIdentity: boolean;
+            includeLogo: boolean;
             logoUrl: string | null;
-            encabezado: Record<string, never> | null;
-            pie: string | null;
-            activo: boolean;
+            header: Record<string, never> | null;
+            footer: string | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8422,23 +8422,23 @@ export interface components {
             updatedAt: string;
         };
         UpsertExportConfigDto: {
-            clave: string;
-            incluirIdentidad?: boolean;
-            incluirLogo?: boolean;
+            slug: string;
+            includeIdentity?: boolean;
+            includeLogo?: boolean;
             logoUrl?: string;
-            encabezado?: Record<string, never>;
-            pie?: string;
+            header?: Record<string, never>;
+            footer?: string;
         };
         ExportJobEntity: {
-            recurso: string;
-            formato: string;
-            canal: string;
-            destino: string | null;
-            configClave: string | null;
-            filas: number;
+            resource: string;
+            format: string;
+            channel: string;
+            destination: string | null;
+            configSlug: string | null;
+            rows: number;
             /** @enum {string} */
-            estado: "generado" | "enviado" | "fallido";
-            usuarioId: string | null;
+            status: "generado" | "enviado" | "fallido";
+            userId: string | null;
             error: string | null;
             id: string;
             clinicId: string | null;
@@ -8448,20 +8448,20 @@ export interface components {
             updatedAt: string;
         };
         ServicioEntity: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
             color: string | null;
             icon: string | null;
-            orden: number;
-            grupoFacturacionId: string | null;
-            productoId: string | null;
-            codigo: string | null;
-            requiereTecnico: boolean;
-            requiereEnfermera: boolean;
-            consumoPaquetes: string;
+            sortOrder: number;
+            billingGroupId: string | null;
+            productId: string | null;
+            code: string | null;
+            requiresTechnician: boolean;
+            requiresNurse: boolean;
+            packageConsumption: string;
             badge: boolean;
-            formAcciones: Record<string, never> | null;
-            activo: boolean;
+            formActions: Record<string, never> | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8470,91 +8470,91 @@ export interface components {
             updatedAt: string;
         };
         CreateServicioDto: {
-            clave: string;
-            nombre: string;
+            slug: string;
+            name: string;
             color?: string;
             icon?: string;
-            orden?: number;
+            sortOrder?: number;
             /** Format: uuid */
-            grupoFacturacionId?: string;
+            billingGroupId?: string;
             /** Format: uuid */
-            productoId?: string;
-            codigo?: string;
-            requiereTecnico?: boolean;
-            requiereEnfermera?: boolean;
+            productId?: string;
+            code?: string;
+            requiresTechnician?: boolean;
+            requiresNurse?: boolean;
             badge?: boolean;
-            formAcciones?: Record<string, never>;
+            formActions?: Record<string, never>;
             /**
              * @description Cómo consume el asistido (dato, no código): ver docs/specs/consumo-paquetes-simultaneo.md.
              * @enum {string}
              */
-            consumoPaquetes?: "fila" | "simultaneo";
+            packageConsumption?: "fila" | "simultaneo";
         };
         UpdateServicioPorClaveDto: {
-            nombre?: string;
+            name?: string;
             color?: string | null;
             icon?: string | null;
-            orden?: number;
+            sortOrder?: number;
             /** Format: uuid */
-            grupoFacturacionId?: string | null;
+            billingGroupId?: string | null;
             /** Format: uuid */
-            productoId?: string | null;
-            codigo?: string | null;
-            requiereTecnico?: boolean;
-            requiereEnfermera?: boolean;
+            productId?: string | null;
+            code?: string | null;
+            requiresTechnician?: boolean;
+            requiresNurse?: boolean;
             badge?: boolean;
-            formAcciones?: Record<string, never> | null;
+            formActions?: Record<string, never> | null;
             /**
              * @description Cómo consume el asistido (dato, no código): ver docs/specs/consumo-paquetes-simultaneo.md.
              * @enum {string}
              */
-            consumoPaquetes?: "fila" | "simultaneo";
+            packageConsumption?: "fila" | "simultaneo";
         };
         UpdateServicioDto: {
-            nombre?: string;
+            name?: string;
             color?: string;
             icon?: string;
-            orden?: number;
+            sortOrder?: number;
             /** Format: uuid */
-            grupoFacturacionId?: string;
+            billingGroupId?: string;
             /** Format: uuid */
-            productoId?: string;
-            codigo?: string;
-            requiereTecnico?: boolean;
-            requiereEnfermera?: boolean;
+            productId?: string;
+            code?: string;
+            requiresTechnician?: boolean;
+            requiresNurse?: boolean;
             badge?: boolean;
-            formAcciones?: Record<string, never>;
+            formActions?: Record<string, never>;
             /**
              * @description Cómo consume el asistido (dato, no código): ver docs/specs/consumo-paquetes-simultaneo.md.
              * @enum {string}
              */
-            consumoPaquetes?: "fila" | "simultaneo";
-            activo?: boolean;
+            packageConsumption?: "fila" | "simultaneo";
+            active?: boolean;
         };
         ComponerColumnaDto: {
             /** Format: uuid */
-            columnaId: string;
-            orden?: number;
+            columnId: string;
+            sortOrder?: number;
             visible?: boolean;
-            fijo?: boolean;
-            activo?: boolean;
+            pinned?: boolean;
+            active?: boolean;
         };
         SetNurseStatusDto: {
             /**
              * Format: uuid
              * @description Personal (enfermera) al que se le fija el estatus.
              */
-            personalId: string;
+            staffId: string;
             /**
              * Format: uuid
              * @description Tipo de estatus (nurse_status_tipos.id); null/omitido = reset (disponible).
              */
-            statusTipoId?: string | null;
+            statusTypeId?: string | null;
         };
         NurseStatusLogEntity: {
-            personalId: string;
-            fecha: string;
-            statusTipoId: string | null;
+            staffId: string;
+            date: string;
+            statusTypeId: string | null;
             actorId: string | null;
             id: string;
             clinicId: string | null;
@@ -8564,13 +8564,13 @@ export interface components {
             updatedAt: string;
         };
         NurseStatusTipoEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
-            nombre: string;
+            name: string;
             color: string | null;
-            icono: string | null;
-            orden: number;
-            activo: boolean;
+            icon: string | null;
+            sortOrder: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8578,29 +8578,29 @@ export interface components {
             updatedAt: string;
         };
         FrontdeskSesionEntity: {
-            pacienteId: string;
-            servicioId: string;
-            paquetesConsumidos: string[] | null;
-            paqueteId: string | null;
-            tecnicoId: string | null;
-            enfermeraId: string | null;
-            medicoId: string | null;
-            fecha: string;
-            hora: string | null;
+            patientId: string;
+            serviceId: string;
+            consumedPackages: string[] | null;
+            packageId: string | null;
+            technicianId: string | null;
+            nurseId: string | null;
+            doctorId: string | null;
+            date: string;
+            time: string | null;
             /** @enum {string} */
-            estado: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
-            cantidad: number;
+            status: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
+            quantity: number;
             /** Format: date-time */
-            presenteEn: string | null;
+            presentAt: string | null;
             /** Format: date-time */
-            terapiaInEn: string | null;
+            therapyStartedAt: string | null;
             /** Format: date-time */
-            asistidoEn: string | null;
-            datos: Record<string, never> | null;
+            attendedAt: string | null;
+            data: Record<string, never> | null;
             /** @enum {string} */
-            origen: "manual" | "autopresente" | "agendada";
-            productoAplicadoId: string | null;
-            vialAbiertoId: string | null;
+            source: "manual" | "autopresente" | "agendada";
+            appliedProductId: string | null;
+            openVialId: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8610,19 +8610,19 @@ export interface components {
         };
         CreateSesionDto: {
             /** @description Franja horaria "HH:mm" (p. ej. "08:00") elegida por el usuario; descuenta el cupo de esa hora (NO bloqueante). Omitir/null = agenda por día, sin tocar cupos por hora. */
-            hora?: string;
+            time?: string;
             /** Format: uuid */
-            pacienteId: string;
+            patientId: string;
             /** Format: uuid */
-            servicioId: string;
-            fecha: string;
+            serviceId: string;
+            date: string;
             /** Format: uuid */
-            paqueteId?: string;
+            packageId?: string;
             /** Format: uuid */
-            tecnicoId?: string;
+            technicianId?: string;
             /** Format: uuid */
-            enfermeraId?: string;
-            cantidad?: number;
+            nurseId?: string;
+            quantity?: number;
             /** Format: uuid */
             actorId?: string;
         };
@@ -8630,27 +8630,27 @@ export interface components {
             /** @description Fechas (YYYY-MM-DD) a agendar; una cita por fecha. */
             fechas: string[];
             /** @description Franja horaria "HH:mm" aplicada a TODAS las fechas agendadas; descuenta cupo por hora (NO bloqueante). Omitir = por día. */
-            hora?: string;
+            time?: string;
             /** Format: uuid */
-            pacienteId: string;
+            patientId: string;
             /** Format: uuid */
-            servicioId: string;
+            serviceId: string;
             /** Format: uuid */
             actorId?: string;
         };
         ReagendarSesionDto: {
-            fecha: string;
+            date: string;
             /** Format: uuid */
             actorId?: string;
         };
         FrontdeskEventoEntity: {
-            sesionId: string;
+            sessionId: string;
             /** @enum {string} */
-            tipo: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo";
+            type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo";
             actorId: string | null;
-            motivo: string | null;
+            reason: string | null;
             payload: Record<string, never> | null;
-            esRetroactivo: boolean;
+            isRetroactive: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8662,42 +8662,42 @@ export interface components {
             /** Format: uuid */
             actorId?: string;
             /** Format: uuid */
-            tecnicoId?: string;
+            technicianId?: string;
             /** Format: uuid */
-            almacenId?: string;
+            warehouseId?: string;
             /** Format: uuid */
-            vialAbiertoId?: string;
+            openVialId?: string;
         };
         RepararSesionDto: {
-            motivo: string;
-            cantidad?: number;
+            reason: string;
+            quantity?: number;
             /** Format: uuid */
-            productoId?: string;
+            productId?: string;
             /** Format: uuid */
-            vialAbiertoId?: string;
-            estado?: string;
-            fechaEfectiva?: string;
+            openVialId?: string;
+            status?: string;
+            effectiveDate?: string;
             /** Format: uuid */
-            almacenId?: string;
+            warehouseId?: string;
             /** Format: uuid */
             actorId?: string;
         };
         GuardarDatosDto: {
-            datos: Record<string, never>;
+            data: Record<string, never>;
             /** Format: uuid */
             actorId?: string;
         };
         CancelarSesionDto: {
-            motivo: string;
+            reason: string;
             /** Format: uuid */
             actorId?: string;
         };
         PanelEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
             layout: string;
             config: Record<string, never> | null;
-            activo: boolean;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8710,7 +8710,7 @@ export interface components {
             layout?: string;
             /** @description Opciones declarativas del panel (audio por defecto, tema, refresco). */
             config?: Record<string, never>;
-            clave: string;
+            slug: string;
             /** @description i18n: el FE traduce; nunca se guarda el texto visible. */
             labelKey: string;
         };
@@ -8718,42 +8718,42 @@ export interface components {
             labelKey?: string;
             layout?: string;
             config?: Record<string, never>;
-            activo?: boolean;
+            active?: boolean;
         };
         CreatePanelSeccionDto: {
             /** @description False = no se pinta pero SIGUE contando (franja de color, paridad legacy). */
             visible?: boolean;
             /** @description Origen de los avisos: { tipo: 'servicio', servicioId } o { tipo: 'cita' }. */
-            origen?: Record<string, never>;
+            source?: Record<string, never>;
             /**
              * @description Campo que se escribe al aceptar el aviso. Permitidos: sesion.enfermeraId, sesion.tecnicoId, sesion.medicoId.
              * @enum {string}
              */
-            asignaA?: "sesion.enfermeraId" | "sesion.tecnicoId" | "sesion.medicoId";
+            assignsTo?: "sesion.enfermeraId" | "sesion.tecnicoId" | "sesion.medicoId";
             /**
              * @description Capacidad del personal que puede tomar la sección: enfermera, tecnico, medico.
              * @enum {string}
              */
-            capacidad?: "enfermera" | "tecnico" | "medico";
+            capacity?: "enfermera" | "tecnico" | "medico";
             /** @description Nombre lógico del sonido de alarma (el FE resuelve el archivo). */
             audio?: string;
-            clave: string;
+            slug: string;
             labelKey: string;
-            orden?: number;
+            sortOrder?: number;
             color?: string;
         };
         PanelSeccionEntity: {
             panelId: string;
-            clave: string;
+            slug: string;
             labelKey: string;
-            orden: number;
+            sortOrder: number;
             color: string | null;
             visible: boolean;
-            origen: Record<string, never> | null;
-            asignaA: string;
-            capacidad: string;
+            source: Record<string, never> | null;
+            assignsTo: string;
+            capacity: string;
             audio: string | null;
-            activo: boolean;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8763,16 +8763,16 @@ export interface components {
         };
         UpdatePanelSeccionDto: {
             labelKey?: string;
-            orden?: number;
+            sortOrder?: number;
             color?: string;
             visible?: boolean;
-            origen?: Record<string, never>;
+            source?: Record<string, never>;
             /** @enum {string} */
-            asignaA?: "sesion.enfermeraId" | "sesion.tecnicoId" | "sesion.medicoId";
+            assignsTo?: "sesion.enfermeraId" | "sesion.tecnicoId" | "sesion.medicoId";
             /** @enum {string} */
-            capacidad?: "enfermera" | "tecnico" | "medico";
+            capacity?: "enfermera" | "tecnico" | "medico";
             audio?: string;
-            activo?: boolean;
+            active?: boolean;
         };
         NotificarPanelDto: {
             /** @description Clave de la sección del panel (p. ej. vitales). */
@@ -8781,30 +8781,30 @@ export interface components {
              * Format: uuid
              * @description Sesión del frontdesk que origina el aviso.
              */
-            sesionId?: string;
+            sessionId?: string;
             /**
              * Format: uuid
              * @description Cita que origina el aviso (alternativa a sesionId).
              */
-            citaId?: string;
+            appointmentId?: string;
         };
         AceptarPanelDto: {
             /** Format: uuid */
-            personalId: string;
+            staffId: string;
         };
         FormatoTerapiaEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
-            titulo: string;
-            servicioClave: string;
+            title: string;
+            serviceSlug: string;
             layout: string;
-            columnas: Record<string, never>[] | null;
-            filas: number;
-            campos: Record<string, never>[] | null;
-            secciones: Record<string, never>[] | null;
-            membrete: boolean;
-            orden: number;
-            activo: boolean;
+            columns: Record<string, never>[] | null;
+            rows: number;
+            fields: Record<string, never>[] | null;
+            sections: Record<string, never>[] | null;
+            letterhead: boolean;
+            sortOrder: number;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8815,7 +8815,7 @@ export interface components {
         ColumnaFormatoDto: {
             /** @description Ancho sugerido de la columna al imprimir. */
             ancho?: number;
-            clave: string;
+            slug: string;
             /** @description i18n: el FE traduce el encabezado impreso. */
             labelKey: string;
         };
@@ -8824,8 +8824,8 @@ export interface components {
              * @description Origen del valor: paciente.nombre | paciente.record | sesion.fecha | sesion.sesiones (X/Y) | sesion.dosis (producto aplicado).
              * @enum {string}
              */
-            origen?: "paciente.nombre" | "paciente.record" | "sesion.fecha" | "sesion.sesiones" | "sesion.dosis";
-            clave: string;
+            source?: "paciente.nombre" | "paciente.record" | "sesion.fecha" | "sesion.sesiones" | "sesion.dosis";
+            slug: string;
             labelKey: string;
         };
         SeccionFormatoDto: {
@@ -8833,59 +8833,59 @@ export interface components {
              * @description 'texto_libre' = área en blanco para escribir (OBSERVACIONES); 'firmas' = líneas de firma.
              * @enum {string}
              */
-            tipo?: "texto_libre" | "firmas";
+            type?: "texto_libre" | "firmas";
             /** @description Alto del área en líneas (solo texto_libre). */
             alto?: number;
             /** @description Claves i18n de cada línea de firma (solo tipo firmas). */
-            lineas?: string[];
-            clave: string;
+            lines?: string[];
+            slug: string;
             labelKey: string;
         };
         CreateFormatoDto: {
             /** @description Rejilla; null/omitido en un formato de solo campos. */
-            columnas?: components["schemas"]["ColumnaFormatoDto"][] | null;
+            columns?: components["schemas"]["ColumnaFormatoDto"][] | null;
             /** @description Filas en blanco a imprimir bajo el encabezado. */
-            filas?: number;
+            rows?: number;
             /** @description Campos del encabezado del documento. */
-            campos?: components["schemas"]["CampoFormatoDto"][];
-            clave: string;
+            fields?: components["schemas"]["CampoFormatoDto"][];
+            slug: string;
             labelKey: string;
             /** @description Texto IMPRESO en el documento (no es de la UI). */
-            titulo: string;
-            servicioClave: string;
+            title: string;
+            serviceSlug: string;
             /** @enum {string} */
             layout?: "tabla" | "campos";
-            secciones?: components["schemas"]["SeccionFormatoDto"][];
-            membrete?: boolean;
-            orden?: number;
+            sections?: components["schemas"]["SeccionFormatoDto"][];
+            letterhead?: boolean;
+            sortOrder?: number;
         };
         UpdateFormatoDto: {
             /** @description Rejilla; null/omitido en un formato de solo campos. */
-            columnas?: components["schemas"]["ColumnaFormatoDto"][] | null;
+            columns?: components["schemas"]["ColumnaFormatoDto"][] | null;
             /** @description Campos del encabezado del documento. */
-            campos?: components["schemas"]["CampoFormatoDto"][];
+            fields?: components["schemas"]["CampoFormatoDto"][];
             labelKey?: string;
-            titulo?: string;
-            servicioClave?: string;
+            title?: string;
+            serviceSlug?: string;
             /** @enum {string} */
             layout?: "tabla" | "campos";
-            filas?: number;
-            secciones?: components["schemas"]["SeccionFormatoDto"][];
-            membrete?: boolean;
-            orden?: number;
-            activo?: boolean;
+            rows?: number;
+            sections?: components["schemas"]["SeccionFormatoDto"][];
+            letterhead?: boolean;
+            sortOrder?: number;
+            active?: boolean;
         };
         ConsultaEntity: {
-            citaId: string;
-            pacienteId: string;
-            medicoId: string | null;
-            fecha: string;
-            motivo: string | null;
-            hallazgos: string | null;
-            diagnostico: string | null;
-            notas: string | null;
-            vitales: Record<string, never> | null;
-            activo: boolean;
+            appointmentId: string;
+            patientId: string;
+            doctorId: string | null;
+            date: string;
+            reason: string | null;
+            findings: string | null;
+            diagnosis: string | null;
+            notes: string | null;
+            vitals: Record<string, never> | null;
+            active: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8895,45 +8895,45 @@ export interface components {
         };
         CrearConsultaDto: {
             /** Format: uuid */
-            citaId: string;
+            appointmentId: string;
             /** Format: uuid */
-            medicoId?: string;
-            motivo?: string;
-            hallazgos?: string;
-            diagnostico?: string;
-            notas?: string;
-            vitales?: Record<string, never>;
+            doctorId?: string;
+            reason?: string;
+            findings?: string;
+            diagnosis?: string;
+            notes?: string;
+            vitals?: Record<string, never>;
         };
         UpdateConsultaDto: {
-            motivo?: string;
-            hallazgos?: string;
-            diagnostico?: string;
-            notas?: string;
-            vitales?: Record<string, never>;
+            reason?: string;
+            findings?: string;
+            diagnosis?: string;
+            notes?: string;
+            vitals?: Record<string, never>;
         };
         PrescripcionItemDto: {
             /** Format: uuid */
-            productoId?: string;
-            servicioClave?: string;
-            descripcion: string;
-            dosis?: string;
-            sesiones?: number;
-            cantidad?: number;
-            indicaciones?: string;
+            productId?: string;
+            serviceSlug?: string;
+            description: string;
+            dose?: string;
+            sessions?: number;
+            quantity?: number;
+            instructions?: string;
         };
         CrearPrescripcionDto: {
             items: components["schemas"]["PrescripcionItemDto"][];
-            notas?: string;
+            notes?: string;
         };
         PrescripcionEntity: {
             consultaId: string;
-            pacienteId: string;
-            medicoId: string | null;
+            patientId: string;
+            doctorId: string | null;
             /** @enum {string} */
-            estado: "activa" | "anulada";
-            fecha: string;
-            notas: string | null;
-            motivoAnulacion: string | null;
+            status: "activa" | "anulada";
+            date: string;
+            notes: string | null;
+            cancellationReason: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -8942,25 +8942,25 @@ export interface components {
             updatedAt: string;
         };
         AnularPrescripcionDto: {
-            motivo?: string;
+            reason?: string;
         };
         DetalleTarjetaDto: {
             /** @description Clave de la forma de pago (ath, visa, master, care_credit, amex...). */
-            clave: string;
+            slug: string;
             /** @description Nombre legible de la forma de pago. */
-            nombre: string;
+            name: string;
             /** @description Cantidad de pagos de esa forma en el día/división. */
-            cantidad: number;
+            quantity: number;
             /** @description Monto NETO (pagos − reembolsos); puede ser negativo por devoluciones. */
-            monto: number;
+            amount: number;
         };
         DenominacionEntity: {
-            monedaId: string;
-            valor: number;
+            currencyId: string;
+            value: number;
             /** @enum {string} */
-            tipo: "moneda" | "billete";
-            orden: number;
-            activo: boolean;
+            type: "moneda" | "billete";
+            sortOrder: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8968,12 +8968,12 @@ export interface components {
             updatedAt: string;
         };
         GrupoMetodoPagoEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
-            nombre: string;
-            formasPago: string[] | null;
-            orden: number;
-            activo: boolean;
+            name: string;
+            paymentMethods: string[] | null;
+            sortOrder: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -8981,21 +8981,21 @@ export interface components {
             updatedAt: string;
         };
         CuadreCajaEntity: {
-            usuarioId: string | null;
+            userId: string | null;
             /** @enum {string|null} */
             division: "consulta" | "general" | null;
-            fecha: string;
-            monedaId: string | null;
+            date: string;
+            currencyId: string | null;
             /** @enum {string} */
-            estado: "abierto" | "cerrado";
-            pettyDeclarado: number;
-            efectivoContado: number;
-            efectivoEsperado: number;
-            diferencia: number;
-            totalesPorMetodo: Record<string, never> | null;
-            notas: string | null;
+            status: "abierto" | "cerrado";
+            declaredPettyCash: number;
+            countedCash: number;
+            expectedCash: number;
+            difference: number;
+            totalsByMethod: Record<string, never> | null;
+            notes: string | null;
             /** Format: date-time */
-            cerradoEn: string | null;
+            closedAt: string | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -9005,11 +9005,11 @@ export interface components {
         };
         CajeroDto: {
             /** @description Auth user id del cajero (= perfiles.authUserId, el que usa el cuadre). */
-            usuarioId: string;
+            userId: string;
             /** @description Nombre completo del cajero (fallback: email). */
-            nombre: string;
+            name: string;
             /** @description True si el perfil está activo/aprobado. */
-            activo: boolean;
+            active: boolean;
         };
         EmailCuadreDto: {
             /**
@@ -9018,7 +9018,7 @@ export interface components {
              */
             email?: string;
             /** @description Cuerpo del correo (opcional; por defecto un resumen del cuadre). */
-            cuerpo?: string;
+            body?: string;
         };
         AbrirCuadreDto: {
             /**
@@ -9030,59 +9030,59 @@ export interface components {
              * Format: uuid
              * @description Cajero del cuadre. Omitido = el propio usuario; null = consolidado de gerencia (todos los cajeros). Ver/abrir otro o el consolidado requiere gerencia.
              */
-            usuarioId?: string | null;
+            userId?: string | null;
             /** @description Fecha del cuadre (YYYY-MM-DD). Omitido = hoy. */
-            fecha?: string;
+            date?: string;
             /** Format: uuid */
-            monedaId?: string;
+            currencyId?: string;
             /** @description Caja chica (petty) declarada. */
-            pettyDeclarado?: number;
+            declaredPettyCash?: number;
         };
         ConteoLineaDto: {
             /** Format: uuid */
-            denominacionId: string;
-            cantidad: number;
+            denominationId: string;
+            quantity: number;
         };
         ContarCuadreDto: {
             conteos: components["schemas"]["ConteoLineaDto"][];
         };
         CrearMedicionCorporalDto: {
             /** Format: uuid */
-            pacienteId: string;
-            fecha?: string;
-            fuente?: string;
-            pesoKg?: number;
-            grasaPct?: number;
-            imc?: number;
-            musculoEsqueleticoPct?: number;
-            masaMuscularKg?: number;
-            proteinaPct?: number;
+            patientId: string;
+            date?: string;
+            source?: string;
+            weightKg?: number;
+            bodyFatPct?: number;
+            bmi?: number;
+            skeletalMusclePct?: number;
+            muscleMassKg?: number;
+            proteinPct?: number;
             bmrKcal?: number;
-            grasaVisceral?: number;
-            hidratacionPct?: number;
-            masaOseaKg?: number;
-            edadMetabolica?: number;
+            visceralFat?: number;
+            hydrationPct?: number;
+            boneMassKg?: number;
+            metabolicAge?: number;
             /** Format: uuid */
-            citaId?: string;
-            raw?: Record<string, never>;
+            appointmentId?: string;
+            rawData?: Record<string, never>;
         };
         MedicionCorporalEntity: {
-            pacienteId: string;
-            fecha: string;
-            fuente: string | null;
-            pesoKg: number | null;
-            grasaPct: number | null;
-            imc: number | null;
-            musculoEsqueleticoPct: number | null;
-            masaMuscularKg: number | null;
-            proteinaPct: number | null;
+            patientId: string;
+            date: string;
+            source: string | null;
+            weightKg: number | null;
+            bodyFatPct: number | null;
+            bmi: number | null;
+            skeletalMusclePct: number | null;
+            muscleMassKg: number | null;
+            proteinPct: number | null;
             bmrKcal: number | null;
-            grasaVisceral: number | null;
-            hidratacionPct: number | null;
-            masaOseaKg: number | null;
-            edadMetabolica: number | null;
-            citaId: string | null;
-            raw: Record<string, never> | null;
+            visceralFat: number | null;
+            hydrationPct: number | null;
+            boneMassKg: number | null;
+            metabolicAge: number | null;
+            appointmentId: string | null;
+            rawData: Record<string, never> | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -9092,43 +9092,43 @@ export interface components {
         };
         CrearMedicionAntropometricaDto: {
             /** Format: uuid */
-            pacienteId: string;
-            fecha?: string;
-            cuello?: number;
-            hombro?: number;
-            bicepsIzq?: number;
-            bicepsDer?: number;
-            pecho?: number;
-            cintura?: number;
+            patientId: string;
+            date?: string;
+            neck?: number;
+            shoulder?: number;
+            leftBiceps?: number;
+            rightBiceps?: number;
+            chest?: number;
+            waist?: number;
             abdomen?: number;
-            cadera?: number;
-            musloIzq?: number;
-            musloDer?: number;
-            pantorrillaIzq?: number;
-            pantorrillaDer?: number;
-            ratioCinturaCadera?: number;
+            hips?: number;
+            leftThigh?: number;
+            rightThigh?: number;
+            leftCalf?: number;
+            rightCalf?: number;
+            waistToHipRatio?: number;
             /** Format: uuid */
-            citaId?: string;
-            raw?: Record<string, never>;
+            appointmentId?: string;
+            rawData?: Record<string, never>;
         };
         MedicionAntropometricaEntity: {
-            pacienteId: string;
-            fecha: string;
-            cuello: number | null;
-            hombro: number | null;
-            bicepsIzq: number | null;
-            bicepsDer: number | null;
-            pecho: number | null;
-            cintura: number | null;
+            patientId: string;
+            date: string;
+            neck: number | null;
+            shoulder: number | null;
+            leftBiceps: number | null;
+            rightBiceps: number | null;
+            chest: number | null;
+            waist: number | null;
             abdomen: number | null;
-            cadera: number | null;
-            musloIzq: number | null;
-            musloDer: number | null;
-            pantorrillaIzq: number | null;
-            pantorrillaDer: number | null;
-            ratioCinturaCadera: number | null;
-            citaId: string | null;
-            raw: Record<string, never> | null;
+            hips: number | null;
+            leftThigh: number | null;
+            rightThigh: number | null;
+            leftCalf: number | null;
+            rightCalf: number | null;
+            waistToHipRatio: number | null;
+            appointmentId: string | null;
+            rawData: Record<string, never> | null;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -9138,15 +9138,15 @@ export interface components {
         };
         VincularMedicionDto: {
             /** Format: uuid */
-            citaId: string;
+            appointmentId: string;
         };
         LaserParametroEntity: {
-            patologia: string;
+            pathology: string;
             /** @enum {string} */
-            tipo: "hilt" | "mls";
+            type: "hilt" | "mls";
             area: string;
-            orden: number;
-            orden2: number;
+            sortOrder: number;
+            itemOrder: number;
             stp1Mjcm: number | null;
             stp1Hz: number | null;
             stp2Mjcm: number | null;
@@ -9154,10 +9154,10 @@ export interface components {
             stp3Mjcm: number | null;
             stp3Hz: number | null;
             energy: number | null;
-            frecuencia: string | null;
-            tiempo: string | null;
-            intensidad: string | null;
-            activo: boolean;
+            frequency: string | null;
+            duration: string | null;
+            intensity: string | null;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -9166,16 +9166,16 @@ export interface components {
         };
         CreateLaserParametroDto: {
             /** @description Nombre de la patología. */
-            patologia: string;
+            pathology: string;
             /**
              * @description hilt | mls.
              * @enum {string}
              */
-            tipo: "hilt" | "mls";
+            type: "hilt" | "mls";
             /** @description HILT: región corporal; MLS: lado l | r. */
             area: string;
-            orden?: number;
-            orden2?: number;
+            sortOrder?: number;
+            itemOrder?: number;
             /** @description HILT paso 1 mJ/cm². */
             stp1Mjcm?: number;
             /** @description HILT paso 1 Hz. */
@@ -9187,18 +9187,18 @@ export interface components {
             /** @description HILT energía total (J). */
             energy?: number;
             /** @description MLS frecuencia (texto). */
-            frecuencia?: string;
+            frequency?: string;
             /** @description MLS tiempo (texto). */
-            tiempo?: string;
+            duration?: string;
             /** @description MLS intensidad (texto). */
-            intensidad?: string;
-            activo?: boolean;
+            intensity?: string;
+            active?: boolean;
         };
         UpdateLaserParametroDto: {
-            patologia?: string;
+            pathology?: string;
             area?: string;
-            orden?: number;
-            orden2?: number;
+            sortOrder?: number;
+            itemOrder?: number;
             stp1Mjcm?: number;
             stp1Hz?: number;
             stp2Mjcm?: number;
@@ -9206,68 +9206,68 @@ export interface components {
             stp3Mjcm?: number;
             stp3Hz?: number;
             energy?: number;
-            frecuencia?: string;
-            tiempo?: string;
-            intensidad?: string;
-            activo?: boolean;
+            frequency?: string;
+            duration?: string;
+            intensity?: string;
+            active?: boolean;
         };
         TableroAccionDto: {
-            tablero: string;
-            entidadId: string;
-            accion: string;
+            boardSlug: string;
+            entityId: string;
+            action: string;
             /** @description Campos que exige la transición (p. ej. vitales, motivo, enfermeraId, actorId). */
             payload?: Record<string, never>;
         };
         TableroCeldaDto: {
-            tablero: string;
-            entidadId: string;
-            columna: string;
+            boardSlug: string;
+            entityId: string;
+            column: string;
             /**
              * @description Nuevo valor de la celda (tipo LIBRE según la columna: texto/número/fecha/…). `@Allow()` lo deja
              *     pasar el ValidationPipe (whitelist + forbidNonWhitelisted) sin restringir el tipo.
              */
-            valor: Record<string, never>;
+            value: Record<string, never>;
         };
         AccionTableroDto: {
-            clave: string;
+            slug: string;
             labelKey?: string;
             icon?: string;
             slot?: string;
-            orden?: number;
+            sortOrder?: number;
             handler: string;
             requierePermiso?: string;
             visible?: boolean;
             params?: Record<string, never>;
         };
         CreateTableroDto: {
-            clave: string;
+            slug: string;
             labelKey: string;
             icon?: string;
-            orden?: number;
-            permiso?: string;
+            sortOrder?: number;
+            permissionSlug?: string;
             layout: string;
-            entidad: string;
+            entity: string;
             /** @description Ruta del FE (null = convención /tablero/<clave>). */
-            ruta?: string;
-            filtros?: Record<string, never>;
+            path?: string;
+            filters?: Record<string, never>;
             /** @description Barra de acciones (toolbar) data-driven; cada item {clave,labelKey,icon,slot,orden,handler,...}. */
-            acciones?: components["schemas"]["AccionTableroDto"][];
-            esVertical?: boolean;
-            activo?: boolean;
+            actions?: components["schemas"]["AccionTableroDto"][];
+            isVertical?: boolean;
+            active?: boolean;
         };
         TableroEntity: {
-            clave: string;
+            slug: string;
             labelKey: string;
             icon: string | null;
-            orden: number;
-            permiso: string | null;
+            sortOrder: number;
+            permissionSlug: string | null;
             layout: string;
-            ruta: string | null;
-            entidad: string;
-            filtros: Record<string, never> | null;
-            acciones: Record<string, never>[] | null;
-            esVertical: boolean;
-            activo: boolean;
+            path: string | null;
+            entity: string;
+            filters: Record<string, never> | null;
+            actions: Record<string, never>[] | null;
+            isVertical: boolean;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -9277,53 +9277,53 @@ export interface components {
         UpdateTableroDto: {
             labelKey?: string;
             icon?: string;
-            orden?: number;
-            permiso?: string;
+            sortOrder?: number;
+            permissionSlug?: string;
             layout?: string;
-            entidad?: string;
-            ruta?: string;
-            filtros?: Record<string, never>;
-            acciones?: components["schemas"]["AccionTableroDto"][];
-            esVertical?: boolean;
-            activo?: boolean;
+            entity?: string;
+            path?: string;
+            filters?: Record<string, never>;
+            actions?: components["schemas"]["AccionTableroDto"][];
+            isVertical?: boolean;
+            active?: boolean;
         };
         CreateEstadoDto: {
-            tablero: string;
-            clave: string;
+            boardSlug: string;
+            slug: string;
             labelKey: string;
-            orden?: number;
+            sortOrder?: number;
             color?: string;
-            esInicial?: boolean;
-            esTerminal?: boolean;
-            visibleEnAtencion?: boolean;
-            activo?: boolean;
+            isInitial?: boolean;
+            isTerminal?: boolean;
+            visibleInCareBoard?: boolean;
+            active?: boolean;
         };
         UpdateEstadoDto: {
             labelKey?: string;
-            orden?: number;
+            sortOrder?: number;
             color?: string;
-            esInicial?: boolean;
-            esTerminal?: boolean;
-            visibleEnAtencion?: boolean;
-            activo?: boolean;
+            isInitial?: boolean;
+            isTerminal?: boolean;
+            visibleInCareBoard?: boolean;
+            active?: boolean;
         };
         TableroTransicionEntity: {
-            tablero: string;
-            clave: string;
+            boardSlug: string;
+            slug: string;
             labelKey: string;
-            desdeEstados: string[] | null;
-            aEstado: string | null;
-            metodo: string;
+            fromStatuses: string[] | null;
+            toStatus: string | null;
+            method: string;
             path: string | null;
-            accion: string | null;
-            permiso: string | null;
-            requiere: string[] | null;
-            estampa: string | null;
-            requierePrevios: string[] | null;
-            limpia: string[] | null;
-            confirmar: boolean;
-            orden: number;
-            activo: boolean;
+            action: string | null;
+            permissionSlug: string | null;
+            formFields: string[] | null;
+            stampsField: string | null;
+            requiredPreviousFields: string[] | null;
+            clearsFields: string[] | null;
+            requiresConfirmation: boolean;
+            sortOrder: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -9331,45 +9331,45 @@ export interface components {
             updatedAt: string;
         };
         CreateTransicionDto: {
-            tablero: string;
-            clave: string;
+            boardSlug: string;
+            slug: string;
             labelKey: string;
-            desdeEstados?: string[];
-            aEstado?: string;
-            metodo?: string;
+            fromStatuses?: string[];
+            toStatus?: string;
+            method?: string;
             path?: string;
-            accion?: string;
-            permiso?: string;
-            requiere?: string[];
-            estampa?: string;
-            requierePrevios?: string[];
-            limpia?: string[];
-            confirmar?: boolean;
-            orden?: number;
-            activo?: boolean;
+            action?: string;
+            permissionSlug?: string;
+            formFields?: string[];
+            stampsField?: string;
+            requiredPreviousFields?: string[];
+            clearsFields?: string[];
+            requiresConfirmation?: boolean;
+            sortOrder?: number;
+            active?: boolean;
         };
         UpdateTransicionDto: {
             labelKey?: string;
-            desdeEstados?: string[];
-            aEstado?: string;
-            metodo?: string;
+            fromStatuses?: string[];
+            toStatus?: string;
+            method?: string;
             path?: string;
-            accion?: string;
-            permiso?: string;
-            requiere?: string[];
-            estampa?: string;
-            requierePrevios?: string[];
-            limpia?: string[];
-            confirmar?: boolean;
-            orden?: number;
-            activo?: boolean;
+            action?: string;
+            permissionSlug?: string;
+            formFields?: string[];
+            stampsField?: string;
+            requiredPreviousFields?: string[];
+            clearsFields?: string[];
+            requiresConfirmation?: boolean;
+            sortOrder?: number;
+            active?: boolean;
         };
         TableroSubtipoEntity: {
-            tablero: string;
-            clave: string;
+            boardSlug: string;
+            slug: string;
             labelKey: string;
-            orden: number;
-            activo: boolean;
+            sortOrder: number;
+            active: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -9377,33 +9377,33 @@ export interface components {
             updatedAt: string;
         };
         CreateSubtipoDto: {
-            tablero: string;
-            clave: string;
+            boardSlug: string;
+            slug: string;
             labelKey: string;
-            orden?: number;
-            activo?: boolean;
+            sortOrder?: number;
+            active?: boolean;
         };
         UpdateSubtipoDto: {
             labelKey?: string;
-            orden?: number;
-            activo?: boolean;
+            sortOrder?: number;
+            active?: boolean;
         };
         UpsertPrescripcionDto: {
             /** @description Clave del grupo (grupos_prescripcion.clave). */
-            grupoClave: string;
+            groupKey: string;
             /** @description Cantidad prescrita (>=0; 0 = quitar/soft-delete). checked se deriva de cantidad>0. */
-            cantidad: number;
+            quantity: number;
         };
         PrescripcionRegistroEntity: {
-            citaId: string;
-            grupoClave: string;
-            cantidad: number;
+            appointmentId: string;
+            groupKey: string;
+            quantity: number;
             checked: boolean;
-            pacienteId: string | null;
-            medicoId: string | null;
-            usuarioId: string | null;
+            patientId: string | null;
+            doctorId: string | null;
+            userId: string | null;
             /** Format: date-time */
-            fecha: string;
+            date: string;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -9753,9 +9753,9 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Inicio del periodo (YYYY-MM-DD), inclusive. */
-                desde: string;
+                from: string;
                 /** @description Fin del periodo (YYYY-MM-DD), inclusive. */
-                hasta: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -9931,12 +9931,12 @@ export interface operations {
     RbacController_removeRole_v1: {
         parameters: {
             query?: {
-                centroId?: string;
+                centerId?: string;
             };
             header?: never;
             path: {
                 id: string;
-                rolId: string;
+                roleId: string;
             };
             cookie?: never;
         };
@@ -9978,12 +9978,12 @@ export interface operations {
     RbacController_removeOverride_v1: {
         parameters: {
             query?: {
-                centroId?: string;
+                centerId?: string;
             };
             header?: never;
             path: {
                 id: string;
-                permisoId: string;
+                permissionId: string;
             };
             cookie?: never;
         };
@@ -10000,7 +10000,7 @@ export interface operations {
     ProfileAccessController_access_v1: {
         parameters: {
             query?: {
-                centroId?: string;
+                centerId?: string;
             };
             header?: never;
             path: {
@@ -10023,7 +10023,7 @@ export interface operations {
     ProfileAccessController_profileMenu_v1: {
         parameters: {
             query?: {
-                centroId?: string;
+                centerId?: string;
             };
             header?: never;
             path: {
@@ -10454,15 +10454,15 @@ export interface operations {
     UnidadesController_convertir_v1: {
         parameters: {
             query: {
-                cantidad: number;
+                quantity: number;
                 /** @description Unidad de origen (unidades.id). */
-                desde: string;
+                from: string;
                 /** @description Unidad de destino (unidades.id). */
-                hasta: string;
+                to: string;
                 /** @description Contexto para puentes cross-dimensión (envase↔medida). */
-                productoId?: string;
+                productId?: string;
                 /** @description Contexto para puentes del proveedor (contenido/concentración). */
-                presentacionProveedorId?: string;
+                supplierPresentationId?: string;
             };
             header?: never;
             path?: never;
@@ -10619,7 +10619,7 @@ export interface operations {
                  *     (kits/derivados, se forman de físicos+servicios+insumos) | `servicio` (no inventariable: láser/suero/
                  *     consulta). Omitido = todos.
                  */
-                clase?: "fisico" | "insumo" | "compuesto" | "servicio";
+                class?: "fisico" | "insumo" | "compuesto" | "servicio";
                 /** @description Búsqueda por nombre o sku (ILIKE). */
                 q?: string;
                 /** @description 'true' para incluir inactivos (gestión); por defecto solo activos. */
@@ -10687,9 +10687,9 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Unidades del producto; por defecto 1. */
-                cantidad?: string;
+                quantity?: string;
                 /** @description Ids de componentes OPCIONALES incluidos, separados por coma (ej.: el INFILTRA01 que convierte el Protocolo Rodilla en "full"). */
-                incluirOpcionales?: string;
+                includeOptionalItems?: string;
             };
             header?: never;
             path: {
@@ -10775,7 +10775,7 @@ export interface operations {
     PresentacionesController_list_v1: {
         parameters: {
             query: {
-                productoId: string;
+                productId: string;
             };
             header?: never;
             path?: never;
@@ -10863,8 +10863,8 @@ export interface operations {
     PresentacionesProveedorController_list_v1: {
         parameters: {
             query: {
-                productoId: string;
-                activo?: string;
+                productId: string;
+                active?: string;
             };
             header?: never;
             path?: never;
@@ -10973,7 +10973,7 @@ export interface operations {
     ProductoComponentesController_list_v1: {
         parameters: {
             query: {
-                productoCompuestoId: string;
+                compositeProductId: string;
             };
             header?: never;
             path?: never;
@@ -11233,7 +11233,7 @@ export interface operations {
     UbicacionesController_list_v1: {
         parameters: {
             query: {
-                almacenId: string;
+                warehouseId: string;
             };
             header?: never;
             path?: never;
@@ -11364,7 +11364,7 @@ export interface operations {
     LotesController_porVencer_v1: {
         parameters: {
             query?: {
-                dias?: string;
+                days?: string;
             };
             header?: never;
             path?: never;
@@ -11450,7 +11450,7 @@ export interface operations {
     VialesAbiertosController_list_v1: {
         parameters: {
             query?: {
-                productoId?: string;
+                productId?: string;
             };
             header?: never;
             path?: never;
@@ -11753,8 +11753,8 @@ export interface operations {
     StockController_existencias_v1: {
         parameters: {
             query?: {
-                productoId?: string;
-                almacenId?: string;
+                productId?: string;
+                warehouseId?: string;
                 asOf?: string;
             };
             header?: never;
@@ -11776,8 +11776,8 @@ export interface operations {
     StockController_existenciasDetalladas_v1: {
         parameters: {
             query?: {
-                productoId?: string;
-                almacenId?: string;
+                productId?: string;
+                warehouseId?: string;
                 asOf?: string;
             };
             header?: never;
@@ -11841,8 +11841,8 @@ export interface operations {
     StockController_valorizacion_v1: {
         parameters: {
             query?: {
-                productoId?: string;
-                almacenId?: string;
+                productId?: string;
+                warehouseId?: string;
                 asOf?: string;
             };
             header?: never;
@@ -11864,7 +11864,7 @@ export interface operations {
     StockController_historialCostos_v1: {
         parameters: {
             query: {
-                productoId: string;
+                productId: string;
             };
             header?: never;
             path?: never;
@@ -11885,9 +11885,9 @@ export interface operations {
     StockController_fefo_v1: {
         parameters: {
             query: {
-                productoId: string;
-                almacenId: string;
-                cantidad: string;
+                productId: string;
+                warehouseId: string;
+                quantity: string;
                 asOf?: string;
             };
             header?: never;
@@ -11909,10 +11909,10 @@ export interface operations {
     KardexController_kardex_v1: {
         parameters: {
             query: {
-                productoId: string;
-                loteId?: string;
-                desde?: string;
-                hasta?: string;
+                productId: string;
+                lotId?: string;
+                from?: string;
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -12126,8 +12126,8 @@ export interface operations {
     ReportesController_rotacion_v1: {
         parameters: {
             query?: {
-                desde?: string;
-                hasta?: string;
+                from?: string;
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -12148,8 +12148,8 @@ export interface operations {
     ReportesController_mermas_v1: {
         parameters: {
             query?: {
-                desde?: string;
-                hasta?: string;
+                from?: string;
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -12170,8 +12170,8 @@ export interface operations {
     ReportesController_consumo_v1: {
         parameters: {
             query?: {
-                desde?: string;
-                hasta?: string;
+                from?: string;
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -12459,7 +12459,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                productoId: string;
+                productId: string;
             };
             cookie?: never;
         };
@@ -12480,7 +12480,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                productoId: string;
+                productId: string;
             };
             cookie?: never;
         };
@@ -12505,7 +12505,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                productoId: string;
+                productId: string;
             };
             cookie?: never;
         };
@@ -12526,7 +12526,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                productoId: string;
+                productId: string;
             };
             cookie?: never;
         };
@@ -12547,8 +12547,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                productoId: string;
-                reglaId: string;
+                productId: string;
+                ruleId: string;
             };
             cookie?: never;
         };
@@ -13137,7 +13137,7 @@ export interface operations {
                 /** @description Momento para resolver el precio efectivo (default ahora). */
                 asOf?: string;
                 /** @description Lista de un TIPO concreto (regular/mayorista/…); sin él = precio efectivo. */
-                tipoPrecioId?: string;
+                priceTypeId?: string;
                 /** @description Centro para el que resolver (admin); sin él = scope del header. */
                 clinicId?: string;
                 page: number;
@@ -13181,7 +13181,7 @@ export interface operations {
     PreciosController_efectivo_v1: {
         parameters: {
             query: {
-                presentacionId: string;
+                presentationId: string;
                 asOf?: string;
             };
             header?: never;
@@ -13203,7 +13203,7 @@ export interface operations {
     PreciosController_list_v1: {
         parameters: {
             query: {
-                presentacionId: string;
+                presentationId: string;
             };
             header?: never;
             path?: never;
@@ -13291,7 +13291,7 @@ export interface operations {
     OfertasController_list_v1: {
         parameters: {
             query: {
-                presentacionId: string;
+                presentationId: string;
             };
             header?: never;
             path?: never;
@@ -13530,7 +13530,7 @@ export interface operations {
     GeoController_estados_v1: {
         parameters: {
             query: {
-                paisId: string;
+                countryId: string;
             };
             header?: never;
             path?: never;
@@ -13551,7 +13551,7 @@ export interface operations {
     GeoController_ciudades_v1: {
         parameters: {
             query: {
-                estadoId: string;
+                stateId: string;
                 q?: string;
             };
             header?: never;
@@ -13618,7 +13618,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                capacidad: string;
+                capacity: string;
             };
             cookie?: never;
         };
@@ -14016,8 +14016,8 @@ export interface operations {
     CitasReportesController_resumen_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -14036,8 +14036,8 @@ export interface operations {
     CitasReportesController_porMedico_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -14056,8 +14056,8 @@ export interface operations {
     CitasReportesController_tiempos_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -14076,8 +14076,8 @@ export interface operations {
     CitasReportesController_vitalesPorEnfermera_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -14097,9 +14097,9 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filtra por día de la semana (0=domingo … 6=sábado) */
-                diaSemana?: number;
+                dayOfWeek?: number;
                 /** @description Filtra los overrides de una fecha ("YYYY-MM-DD") */
-                fecha?: string;
+                date?: string;
                 /** @description scope=global lista los cupos de todos los centros (clinicId=null) */
                 scope?: "centro" | "global";
             };
@@ -14190,7 +14190,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filtra por fecha (YYYY-MM-DD) */
-                fecha?: string;
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -14298,24 +14298,24 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Rango: fecha inicio (YYYY-MM-DD, inclusivo) */
-                desde?: string;
+                from?: string;
                 /** @description Rango: fecha fin (YYYY-MM-DD, inclusivo) */
-                hasta?: string;
+                to?: string;
                 /** @description Día único (compat); ignorado si hay rango */
-                fecha?: string;
+                date?: string;
                 /** @description Filtra por médico asignado */
-                medicoId?: string;
+                doctorId?: string;
                 /** @description Filtra por paciente */
-                pacienteId?: string;
+                patientId?: string;
                 /** @description Filtra por estado (programada, confirmada, …) */
-                estado?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
                 /** @description Filtra por canal (callcenter, atencion, …) */
-                canal?: "atencion" | "callcenter" | "webhook" | "ia";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
                 /**
                  * @description true = tablero de Atención al Paciente: solo citas cuyo estado tiene `visibleEnAtencion=true`
                  *     (confirmada→presente→triage→en_consulta→atendida). Las `programada` (Agendada) no las ve Atención.
                  */
-                soloAtencion?: boolean;
+                onlyCare?: boolean;
                 page: number;
                 limit: number;
             };
@@ -14360,11 +14360,11 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Día (YYYY-MM-DD) */
-                fecha: string;
+                date: string;
                 /** @description Clave del tablero (default citas) */
-                tablero?: string;
+                boardSlug?: string;
                 /** @description true = tablero de Atención al Paciente: solo estados visibleEnAtencion (confirmada→atendida) */
-                soloAtencion?: string;
+                onlyCare?: string;
             };
             header?: never;
             path?: never;
@@ -14384,9 +14384,9 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Día (YYYY-MM-DD) */
-                fecha: string;
+                date: string;
                 /** @description Centro objetivo; si se omite, el activo o los permitidos (combinado) */
-                centroId?: string;
+                centerId?: string;
             };
             header?: never;
             path?: never;
@@ -14786,7 +14786,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filtra el catálogo a las columnas ELEGIBLES de ese tablero (por `ambitos`); sin él, todo el catálogo. */
-                tablero?: string;
+                boardSlug?: string;
             };
             header?: never;
             path?: never;
@@ -14855,7 +14855,7 @@ export interface operations {
     TableroController_efectivas_v1: {
         parameters: {
             query: {
-                tablero: string;
+                boardSlug: string;
             };
             header?: never;
             path?: never;
@@ -14945,7 +14945,7 @@ export interface operations {
     HorariosController_list_v1: {
         parameters: {
             query?: {
-                medicoId?: string;
+                doctorId?: string;
             };
             header?: never;
             path?: never;
@@ -15147,7 +15147,7 @@ export interface operations {
     NotificacionesController_listar_v1: {
         parameters: {
             query?: {
-                citaId?: string;
+                appointmentId?: string;
             };
             header?: never;
             path?: never;
@@ -15210,7 +15210,7 @@ export interface operations {
     FacturacionController_listarTransferencias_v1: {
         parameters: {
             query?: {
-                pacienteId?: string;
+                patientId?: string;
             };
             header?: never;
             path?: never;
@@ -15365,7 +15365,7 @@ export interface operations {
     FacturacionController_pendientesEntrega_v1: {
         parameters: {
             query: {
-                pacienteId: string;
+                patientId: string;
             };
             header?: never;
             path?: never;
@@ -15386,12 +15386,12 @@ export interface operations {
     FacturacionController_tablero_v1: {
         parameters: {
             query?: {
-                estado?: string;
-                pacienteId?: string;
-                contexto?: string;
-                desde?: string;
-                hasta?: string;
-                fecha?: string;
+                status?: string;
+                patientId?: string;
+                context?: string;
+                from?: string;
+                to?: string;
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -15410,10 +15410,10 @@ export interface operations {
     FacturacionController_catalogo_v1: {
         parameters: {
             query?: {
-                tipo?: string;
+                type?: string;
                 q?: string;
-                contexto?: string;
-                tipoPrecioId?: string;
+                context?: string;
+                priceTypeId?: string;
             };
             header?: never;
             path?: never;
@@ -15434,7 +15434,7 @@ export interface operations {
     FacturacionController_precioBase_v1: {
         parameters: {
             query: {
-                productoId: string;
+                productId: string;
             };
             header?: never;
             path?: never;
@@ -15545,7 +15545,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                citaId: string;
+                appointmentId: string;
             };
             cookie?: never;
         };
@@ -15949,7 +15949,7 @@ export interface operations {
             header?: never;
             path: {
                 id: string;
-                devolucionId: string;
+                refundId: string;
             };
             cookie?: never;
         };
@@ -16015,7 +16015,7 @@ export interface operations {
             header?: never;
             path: {
                 id: string;
-                devolucionId: string;
+                refundId: string;
             };
             cookie?: never;
         };
@@ -16197,8 +16197,8 @@ export interface operations {
     FacturasReportesController_resumen_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16217,8 +16217,8 @@ export interface operations {
     FacturasReportesController_porMedico_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16237,8 +16237,8 @@ export interface operations {
     FacturasReportesController_porProducto_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16257,8 +16257,8 @@ export interface operations {
     FacturasReportesController_impuestos_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16277,9 +16277,9 @@ export interface operations {
     FacturasReportesController_consumoInsumos_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
-                estimado?: string;
+                from: string;
+                to: string;
+                estimated?: string;
             };
             header?: never;
             path?: never;
@@ -16523,8 +16523,8 @@ export interface operations {
     ColumnasFacturacionController_esquema_v1: {
         parameters: {
             query?: {
-                grupo?: string;
-                productoId?: string;
+                group?: string;
+                productId?: string;
             };
             header?: never;
             path?: never;
@@ -16678,7 +16678,7 @@ export interface operations {
     ExportController_listJobs_v1: {
         parameters: {
             query?: {
-                recurso?: string;
+                resource?: string;
             };
             header?: never;
             path?: never;
@@ -16873,7 +16873,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -16894,8 +16894,8 @@ export interface operations {
     FrontdeskController_repResumen_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16914,8 +16914,8 @@ export interface operations {
     FrontdeskController_repPorServicio_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16934,8 +16934,8 @@ export interface operations {
     FrontdeskController_repPorTecnico_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16954,8 +16954,8 @@ export interface operations {
     FrontdeskController_repTiempos_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -16974,7 +16974,7 @@ export interface operations {
     FrontdeskController_nurseStatusActuales_v1: {
         parameters: {
             query?: {
-                fecha?: string;
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -17056,8 +17056,8 @@ export interface operations {
     FrontdeskController_agendaDia_v1: {
         parameters: {
             query: {
-                servicio: string;
-                fecha: string;
+                service: string;
+                date: string;
             };
             header?: never;
             path?: never;
@@ -17076,10 +17076,10 @@ export interface operations {
     FrontdeskController_tablero_v1: {
         parameters: {
             query: {
-                servicio: string;
-                fecha: string;
-                desde?: string;
-                hasta?: string;
+                service: string;
+                date: string;
+                from?: string;
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -17098,11 +17098,11 @@ export interface operations {
     FrontdeskController_disponibilidadServicio_v1: {
         parameters: {
             query: {
-                pacienteId: string;
+                patientId: string;
             };
             header?: never;
             path: {
-                servicioId: string;
+                serviceId: string;
             };
             cookie?: never;
         };
@@ -17139,11 +17139,11 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Filtra las sesiones de un paciente (historial). */
-                pacienteId?: string;
-                desde: string;
-                hasta: string;
-                servicioId?: string;
-                tecnicoId?: string;
+                patientId?: string;
+                from: string;
+                to: string;
+                serviceId?: string;
+                technicianId?: string;
             };
             header?: never;
             path?: never;
@@ -17270,13 +17270,13 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Rango desde (YYYY-MM-DD); si falta, sin límite inferior. */
-                desde?: string;
+                from?: string;
                 /** @description Rango hasta (YYYY-MM-DD); requiere `desde` para acotar. */
-                hasta?: string;
+                to?: string;
             };
             header?: never;
             path: {
-                pacienteId: string;
+                patientId: string;
             };
             cookie?: never;
         };
@@ -17294,11 +17294,11 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Acota el historial a un servicio (recomendado para el modal). */
-                servicioId?: string;
+                serviceId?: string;
             };
             header?: never;
             path: {
-                pacienteId: string;
+                patientId: string;
             };
             cookie?: never;
         };
@@ -17316,13 +17316,13 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Acota al grupo de facturación de este servicio (el carrito de láser no muestra sueroterapia). */
-                servicioId?: string;
+                serviceId?: string;
                 /** @description Día del TABLERO (YYYY-MM-DD), no "hoy": define lo comprado ESE día. Sin él solo viene el historial. */
-                fecha?: string;
+                date?: string;
             };
             header?: never;
             path: {
-                pacienteId: string;
+                patientId: string;
             };
             cookie?: never;
         };
@@ -17583,7 +17583,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -17604,7 +17604,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -17654,7 +17654,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -17677,11 +17677,11 @@ export interface operations {
     PanelesController_notificaciones_v1: {
         parameters: {
             query?: {
-                estado?: string;
+                status?: string;
             };
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -17725,11 +17725,11 @@ export interface operations {
     PanelesController_contadores_v1: {
         parameters: {
             query?: {
-                fecha?: string;
+                date?: string;
             };
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -17749,7 +17749,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Clave del servicio (p. ej. amnisome). Sin él, todos los del centro. */
-                servicio?: string;
+                service?: string;
             };
             header?: never;
             path?: never;
@@ -17794,11 +17794,11 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Sesión del frontdesk: rellena paciente, récord y fecha. Sin ella sale en blanco. */
-                sesionId?: string;
+                sessionId?: string;
             };
             header?: never;
             path: {
-                clave: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -17842,8 +17842,8 @@ export interface operations {
     ConsultasController_productividad_v1: {
         parameters: {
             query: {
-                desde: string;
-                hasta: string;
+                from: string;
+                to: string;
             };
             header?: never;
             path?: never;
@@ -17907,7 +17907,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                citaId: string;
+                appointmentId: string;
             };
             cookie?: never;
         };
@@ -18018,7 +18018,7 @@ export interface operations {
     PrescripcionesController_porPaciente_v1: {
         parameters: {
             query: {
-                pacienteId: string;
+                patientId: string;
             };
             header?: never;
             path?: never;
@@ -18085,9 +18085,9 @@ export interface operations {
     CajaController_reporteDia_v1: {
         parameters: {
             query: {
-                fecha: string;
+                date: string;
                 division?: string;
-                usuarioId?: string;
+                userId?: string;
             };
             header?: never;
             path?: never;
@@ -18106,7 +18106,7 @@ export interface operations {
     CajaController_listDenominaciones_v1: {
         parameters: {
             query?: {
-                monedaId?: string;
+                currencyId?: string;
             };
             header?: never;
             path?: never;
@@ -18226,10 +18226,10 @@ export interface operations {
     CajaController_listarCuadres_v1: {
         parameters: {
             query?: {
-                fecha?: string;
+                date?: string;
                 division?: string;
-                usuarioId?: string;
-                estado?: string;
+                userId?: string;
+                status?: string;
             };
             header?: never;
             path?: never;
@@ -18274,7 +18274,7 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string;
-                activo?: string;
+                active?: string;
             };
             header?: never;
             path?: never;
@@ -18496,7 +18496,7 @@ export interface operations {
     AhoraMismoController_delDia_v1: {
         parameters: {
             query?: {
-                fecha?: string;
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -18517,7 +18517,7 @@ export interface operations {
     AhoraMismoController_delDiaCentros_v1: {
         parameters: {
             query?: {
-                fecha?: string;
+                date?: string;
             };
             header?: never;
             path?: never;
@@ -18537,7 +18537,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Formato: hilt | mls. */
-                tipo?: "hilt" | "mls";
+                type?: "hilt" | "mls";
             };
             header?: never;
             path?: never;
@@ -18583,7 +18583,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                tipo: string;
+                type: string;
             };
             cookie?: never;
         };
@@ -18706,7 +18706,7 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Clave del tablero */
-                tablero: string;
+                boardSlug: string;
             };
             header?: never;
             path?: never;
@@ -18727,9 +18727,9 @@ export interface operations {
     TablerosController_opciones_v1: {
         parameters: {
             query: {
-                tablero: string;
+                boardSlug: string;
                 /** @description Clave de la columna select */
-                columna: string;
+                column: string;
             };
             header?: never;
             path?: never;
@@ -18768,7 +18768,7 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Entidad del tablero (cita/sesion/factura) */
-                entidad: string;
+                entity: string;
             };
             header?: never;
             path?: never;
@@ -18805,7 +18805,7 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Filtra por modal (postAccion) */
-                postAccion?: string;
+                postAction?: string;
             };
             header?: never;
             path?: never;
@@ -18825,13 +18825,13 @@ export interface operations {
         parameters: {
             query: {
                 /** @description Clave del tablero */
-                tablero: string;
+                boardSlug: string;
                 /** @description Día (YYYY-MM-DD) */
-                fecha: string;
+                date: string;
                 /** @description Subtipo (p. ej. servicio) para filtrar */
-                subTipo?: string;
+                subtype?: string;
                 /** @description true = solo estados visibleEnAtencion */
-                soloAtencion?: string;
+                onlyCare?: string;
             };
             header?: never;
             path?: never;
@@ -18944,7 +18944,7 @@ export interface operations {
     TablerosController_listEstados_v1: {
         parameters: {
             query?: {
-                tablero?: string;
+                boardSlug?: string;
                 /** @description true incluye inactivos */
                 all?: string;
             };
@@ -19036,7 +19036,7 @@ export interface operations {
     TablerosController_listTransiciones_v1: {
         parameters: {
             query?: {
-                tablero?: string;
+                boardSlug?: string;
                 all?: string;
             };
             header?: never;
@@ -19127,7 +19127,7 @@ export interface operations {
     TablerosController_listSubtipos_v1: {
         parameters: {
             query?: {
-                tablero?: string;
+                boardSlug?: string;
                 all?: string;
             };
             header?: never;
@@ -19239,7 +19239,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                citaId: string;
+                appointmentId: string;
             };
             cookie?: never;
         };
@@ -19258,7 +19258,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                citaId: string;
+                appointmentId: string;
             };
             cookie?: never;
         };
@@ -19283,7 +19283,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                citaId: string;
+                appointmentId: string;
             };
             cookie?: never;
         };
@@ -19621,7 +19621,7 @@ export interface operations {
     ComunicacionesController_listarNotificaciones_v1: {
         parameters: {
             query?: {
-                citaId?: string;
+                appointmentId?: string;
             };
             header?: never;
             path?: never;

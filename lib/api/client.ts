@@ -171,7 +171,7 @@ export function apiFetch<T>(
   init: RequestInit = {},
   tenant?: string | null,
 ): Promise<T> {
-  return apiRequest<T>(`/api/v1${path}`, init, tenant);
+  return apiRequest<T>(`/api/v2${path}`, init, tenant);
 }
 
 // Paginated variant of apiFetch (prefixes /api/v1).
@@ -182,7 +182,7 @@ export function apiFetchPaged<T>(
   init: RequestInit = {},
   tenant?: string | null,
 ): Promise<Paginated<T>> {
-  return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
+  return apiRequestPaged<T>(`/api/v2${path}`, init, tenant);
 }
 
 // Like apiFetch but returns the FULL envelope ({ data, meta }) so callers can
@@ -192,7 +192,7 @@ export async function apiFetchEnvelope<T>(
   init: RequestInit = {},
   tenant?: string | null,
 ): Promise<ApiEnvelope<T>> {
-  const envelope = await rawRequest<T>(`/api/v1${path}`, init, tenant);
+  const envelope = await rawRequest<T>(`/api/v2${path}`, init, tenant);
   return (
     envelope ?? { data: undefined as T, meta: { timestamp: "", requestId: "" } }
   );
