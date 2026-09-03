@@ -108,9 +108,11 @@ export function AppSidebar() {
     if (custom) return custom;
     return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.labelKey;
   };
-  const nodeIcon = (n: NavNode) => {
-    const ic = n.mostrarIcono ? resolveMenuIcon(n.icon) : null;
-    return ic ? <HugeiconsIcon icon={ic} /> : null;
+  // Icono de SECCIÓN (categoría de primer nivel). Homogéneo: solo las secciones llevan icono;
+  // los enlaces a cada pantalla NO. Resuelto del nombre curado del grupo (lib/menu-icons.ts).
+  const sectionIcon = (n: NavNode) => {
+    const ic = resolveMenuIcon(n.icon);
+    return ic ? <HugeiconsIcon icon={ic} className="size-4 shrink-0 opacity-90" /> : null;
   };
 
   // Hijos de un grupo, recursivo dentro de SidebarMenuSub (soporta N niveles).
@@ -130,7 +132,6 @@ export function AppSidebar() {
           <SidebarMenuSubItem>
             <CollapsibleTrigger asChild>
               <SidebarMenuSubButton className="cursor-pointer font-medium">
-                {nodeIcon(n)}
                 <span>{labelOf(n)}</span>
                 <HugeiconsIcon
                   icon={ArrowRight01Icon}
@@ -150,7 +151,6 @@ export function AppSidebar() {
             isActive={isActive(pathname, routeForClave(n.clave, n.path))}
           >
             <Link href={routeForClave(n.clave, n.path)}>
-              {nodeIcon(n)}
               <span>{labelOf(n)}</span>
             </Link>
           </SidebarMenuSubButton>
@@ -175,7 +175,6 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <CollapsibleTrigger asChild>
               <SidebarMenuButton tooltip={labelOf(n)} className="cursor-pointer">
-                {nodeIcon(n)}
                 <span>{labelOf(n)}</span>
                 <HugeiconsIcon
                   icon={ArrowRight01Icon}
@@ -196,7 +195,6 @@ export function AppSidebar() {
             tooltip={labelOf(n)}
           >
             <Link href={routeForClave(n.clave, n.path)}>
-              {nodeIcon(n)}
               <span>{labelOf(n)}</span>
             </Link>
           </SidebarMenuButton>
@@ -208,20 +206,25 @@ export function AppSidebar() {
   // contenido (los ítems) se expande/colapsa. Reutilizada por grupos de dominio y
   // por los buckets de desarrollo.
   const renderSection = (
-    clave: string,
-    label: string,
+    g: NavNode,
     children: React.ReactNode,
   ): React.ReactNode => (
     <Collapsible
-      key={clave}
-      open={effOpen(clave)}
-      onOpenChange={(o) => navOpen.setClaveOpen(clave, o)}
+      key={g.clave}
+      open={effOpen(g.clave)}
+      onOpenChange={(o) => navOpen.setClaveOpen(g.clave, o)}
       className="group/section"
     >
       <SidebarGroup>
-        <SidebarGroupLabel asChild>
-          <CollapsibleTrigger className="flex w-full cursor-pointer items-center gap-1 hover:text-sidebar-foreground">
-            <span className="flex-1 truncate text-left">{label}</span>
+        {/* Cabecera de categoría: icono + etiqueta destacada (mayúsculas/semibold/alto contraste)
+            para separarla con claridad de los enlaces de cada pantalla. */}
+        <SidebarGroupLabel
+          asChild
+          className="text-xs font-semibold uppercase tracking-wide text-sidebar-foreground"
+        >
+          <CollapsibleTrigger className="flex w-full cursor-pointer items-center gap-2 hover:text-sidebar-foreground">
+            {sectionIcon(g)}
+            <span className="flex-1 truncate text-left">{labelOf(g)}</span>
             <HugeiconsIcon
               icon={ArrowRight01Icon}
               className="size-3.5 shrink-0 opacity-60 transition-transform duration-200 group-data-[state=open]/section:rotate-90"
@@ -269,9 +272,7 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Todo el menú sale del catálogo (GET /menu) filtrado por permisos. El bucket
             «En desarrollo» es otra raíz del catálogo (perm menu.desarrollo), no un caso especial. */}
-        {domainGroups.map((g) =>
-          renderSection(g.clave, labelOf(g), renderTop(g.children)),
-        )}
+        {domainGroups.map((g) => renderSection(g, renderTop(g.children)))}
       </SidebarContent>
 
       <SidebarFooter>

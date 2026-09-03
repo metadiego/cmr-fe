@@ -21,20 +21,21 @@ export type NavGroupKey =
 export interface NavGroupDef {
   key: NavGroupKey;
   labelKey: string; // i18n key (messages/*.json)
+  icon: string;     // curated icon name (lib/menu-icons.ts) — every top-level group shows one
   order: number;    // top-level display order in the rail
 }
 
 // The 9-group taxonomy (route prefix = menu group). Order = top-to-bottom.
 export const NAV_GROUPS: NavGroupDef[] = [
-  { key: "scheduling", labelKey: "nav.grupo.scheduling", order: 1 },
-  { key: "patients", labelKey: "nav.grupo.patients", order: 2 },
-  { key: "services", labelKey: "nav.grupo.services", order: 3 },
-  { key: "billing", labelKey: "nav.grupo.billing", order: 4 },
-  { key: "reports", labelKey: "nav.grupo.reports", order: 5 },
-  { key: "inventory", labelKey: "nav.grupo.inventory", order: 6 },
-  { key: "communications", labelKey: "nav.grupo.communications", order: 7 },
-  { key: "admin", labelKey: "nav.grupo.admin", order: 8 },
-  { key: "configuration", labelKey: "nav.grupo.configuration", order: 9 },
+  { key: "scheduling", labelKey: "nav.grupo.scheduling", icon: "calendar", order: 1 },
+  { key: "patients", labelKey: "nav.grupo.patients", icon: "patients", order: 2 },
+  { key: "services", labelKey: "nav.grupo.services", icon: "stethoscope", order: 3 },
+  { key: "billing", labelKey: "nav.grupo.billing", icon: "invoice", order: 4 },
+  { key: "reports", labelKey: "nav.grupo.reports", icon: "chart", order: 5 },
+  { key: "inventory", labelKey: "nav.grupo.inventory", icon: "package", order: 6 },
+  { key: "communications", labelKey: "nav.grupo.communications", icon: "bell", order: 7 },
+  { key: "admin", labelKey: "nav.grupo.admin", icon: "users", order: 8 },
+  { key: "configuration", labelKey: "nav.grupo.configuration", icon: "settings", order: 9 },
 ];
 
 export type NavEntry = {
