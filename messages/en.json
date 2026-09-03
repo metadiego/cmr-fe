@@ -3449,6 +3449,25 @@
       "default": "Invoices",
       "presupuesto": "Quotes",
       "devolucion": "Returns"
+    },
+    "arranque": "Starting number",
+    "arranqueHelp": "You can only move it FORWARD; going back would repeat an already-printed correlative.",
+    "arranqueChange": "Change start",
+    "arranqueSet": "Set start",
+    "cancel": "Cancel",
+    "motivo": "Reason for the change",
+    "motivoPlaceholder": "e.g. continue the legacy numbering",
+    "arranqueSaved": "Starting number updated",
+    "recordTitle": "Patient record",
+    "recordHelp": "Where the record number starts when opening a new folder.",
+    "recordConfigured": "Configured",
+    "recordNotConfigured": "Not configured",
+    "recordProximoAuto": "Today it would issue {n}",
+    "error": {
+      "motivo_requerido": "Enter the reason for the change before setting the start.",
+      "centro_requerido": "Pick a center before changing numbering.",
+      "arranque_invalido": "The starting number is invalid (must be a positive integer).",
+      "padding_invalido": "Zero-padding must be between 0 and 12."
     }
   },
   "inventarioAjuste": {

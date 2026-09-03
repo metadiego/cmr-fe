@@ -568,3 +568,16 @@ export function actualizarSerieNumeracion(
     body: JSON.stringify(payload),
   }, centroId);
 }
+// Fijar el SIGUIENTE número de una serie (arranque). Solo avanzar: el BE rechaza retroceder
+// (labelKey numeracion.error.arranque_retrocede). `motivo` es OBLIGATORIO (queda en el rastro).
+// Permiso propio: numeracion.arranque. Handoff qa-2026-09-03-lo-que-cambia-para-el-fe (§5).
+export function establecerArranqueSerie(
+  serie: string,
+  payload: { arranque: number; motivo: string },
+  centroId?: string,
+): Promise<SerieNumeracion> {
+  return apiFetch<SerieNumeracion>(`/facturas/series/${encodeURIComponent(serie)}/arranque`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }, centroId);
+}

@@ -3449,6 +3449,25 @@
       "default": "Facturas",
       "presupuesto": "Presupuestos",
       "devolucion": "Devoluciones"
+    },
+    "arranque": "Número de arranque",
+    "arranqueHelp": "Solo se puede AVANZAR; retroceder repetiría un correlativo ya impreso.",
+    "arranqueChange": "Cambiar arranque",
+    "arranqueSet": "Fijar arranque",
+    "cancel": "Cancelar",
+    "motivo": "Motivo del cambio",
+    "motivoPlaceholder": "Ej. continuar la numeración del legado",
+    "arranqueSaved": "Arranque actualizado",
+    "recordTitle": "Récord del paciente",
+    "recordHelp": "Por dónde arranca el número de expediente al abrir un folder nuevo.",
+    "recordConfigured": "Configurada",
+    "recordNotConfigured": "Sin configurar",
+    "recordProximoAuto": "Hoy entregaría el {n}",
+    "error": {
+      "motivo_requerido": "Escribe el motivo del cambio antes de fijar el arranque.",
+      "centro_requerido": "Elige un centro antes de cambiar la numeración.",
+      "arranque_invalido": "El número de arranque no es válido (debe ser un entero positivo).",
+      "padding_invalido": "El relleno debe estar entre 0 y 12."
     }
   },
   "inventarioAjuste": {

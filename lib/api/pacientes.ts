@@ -213,3 +213,27 @@ export function getPreparacionLegado(
   if (params.limite) sp.set("limite", String(params.limite));
   return apiFetch<PreparacionLegado>(`/pacientes/disponibilidad-legado/preparacion?${sp.toString()}`, {}, centroId);
 }
+
+// Serie del récord del paciente (número de expediente al abrir un folder nuevo). El BE resuelve
+// `proximo` por cálculo automático si el centro no la ha fijado (`configurada:false` → mostrar como
+// «hoy entregaría el N», no como valor guardado). Cambiar el arranque exige `motivo` y solo avanza.
+// Handoff qa-2026-09-03-lo-que-cambia-para-el-fe (§5). Permiso: numeracion.arranque.
+export interface SerieRecord {
+  configurada: boolean;
+  serie: string;
+  prefijo: string | null;
+  padding: number;
+  proximo: number;
+}
+export function getSerieRecord(centroId?: string): Promise<SerieRecord> {
+  return apiFetch<SerieRecord>(`/pacientes/serie-record`, {}, centroId);
+}
+export function actualizarSerieRecord(
+  payload: { prefijo?: string | null; padding?: number; arranque?: number; motivo?: string },
+  centroId?: string,
+): Promise<SerieRecord> {
+  return apiFetch<SerieRecord>(`/pacientes/serie-record`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }, centroId);
+}
