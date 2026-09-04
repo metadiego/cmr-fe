@@ -73,14 +73,32 @@ in good faith by copying the file next door. Here it is.
 props, i18n keys, component names — and equally **comments, console messages, CI step names and
 commit messages**.
 
-**Two things, and only two, may be written in Spanish:**
+**Three things may be written in Spanish:**
 
 1. **The documents under `docs/`** — specs, plans and handoffs. That is where the reasoning lives,
    and it is written in the language this product is thought in.
 2. **Pull request descriptions.**
+3. **Translated UI copy** — the *values* in `messages/es.json`. The app is deliberately bilingual
+   (`next-intl`, Spanish and English catalogues side by side), and Spanish user-facing text is the
+   product working as intended, not debt. See the paragraph below for where that stops.
 
 Everything else in the repository is English, comments and console messages included. A long
 explanatory comment is not a "document": it is code, and it goes in English.
+
+#### Where the UI exception stops
+
+The exception covers the **translated string**, not the code around it. Concretely:
+
+- **A Spanish string hardcoded into a component is NOT covered.** User-facing copy goes through
+  `useTranslations`/`getTranslations` and lands in **both** `messages/es.json` and
+  `messages/en.json`. A literal in JSX is invisible to the English catalogue and silently makes the
+  app monolingual again. 165 of the 234 files under `app/` and `components/` already do this
+  properly, so it is the norm here, not an aspiration.
+- **Message keys and namespaces are English.** The catalogue is mid-migration — `appointments`,
+  `patients`, `common` sit next to `citas`, `tablero`, `configuracion` — and new keys go in English.
+  The Spanish key next door is history, not licence.
+- **Adding a key to `es.json` without its twin in `en.json`** leaves a hole that only shows up for
+  an English-speaking user. Both catalogues move together, in the same commit.
 
 The remaining exception is a name that belongs to an external or legacy system, which keeps its
 original spelling because there the name is a fact, not a choice.
