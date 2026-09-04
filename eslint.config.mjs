@@ -9,15 +9,15 @@ import nextTs from "eslint-config-next/typescript";
  * por escrito en el assessment y han seguido creciendo en cada informe. Un fichero de dos mil
  * líneas no se revisa: se hojea. Y son justo los dos sitios por donde pasa el dinero.
  *
- * `TECHO` es para lo que nace hoy. `DEUDA` son los que ya eran grandes, con su tamaño actual como
+ * `CEILING` es para lo que nace hoy. `DEBT` son los que ya eran grandes, con su tamaño actual como
  * máximo: esa lista **solo puede menguar**. Al partir un componente se baja su número o se borra la
  * línea. Añadir una entrada nueva es admitir deuda y va hablado, no colado en un commit de paso.
  *
  * El lint BLOQUEA en CI (`.github/workflows/ci.yml`), así que esto no es un consejo.
  */
-const TECHO = 600;
+const CEILING = 600;
 
-const DEUDA = {
+const DEBT = {
   "components/frontdesk/frontdesk-board.tsx": 2582,
   "app/(app)/billing/invoices/[id]/page.tsx": 2274,
   "components/inventario/productos-admin.tsx": 1048,
@@ -40,7 +40,7 @@ const maxLines = (max) => ({
  * medía contra el máximo general — un techo que existe pero no se aplica es el peor de los dos
  * mundos, porque parece que está puesto.
  */
-const comoGlob = (ruta) => ruta.replace(/[()[\]]/g, (c) => `\\${c}`);
+const asGlob = (route) => route.replace(/[()[\]]/g, (c) => `\\${c}`);
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -60,7 +60,7 @@ const eslintConfig = defineConfig([
   // luego las exenciones y por último la deuda con su techo propio.
   {
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "hooks/**/*.{ts,tsx}"],
-    rules: maxLines(TECHO),
+    rules: maxLines(CEILING),
   },
   {
     // Primitivas de shadcn copiadas al repo y regeneradas por su CLI: su tamaño no lo decidimos
@@ -68,8 +68,8 @@ const eslintConfig = defineConfig([
     files: ["components/ui/**"],
     rules: { "max-lines": "off" },
   },
-  ...Object.entries(DEUDA).map(([file, max]) => ({
-    files: [comoGlob(file)],
+  ...Object.entries(DEBT).map(([file, max]) => ({
+    files: [asGlob(file)],
     rules: maxLines(max),
   })),
 ]);

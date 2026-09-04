@@ -56,35 +56,48 @@ señaladas por escrito y han seguido creciendo en cada informe. Son justo los do
 donde pasa el dinero, y un fichero de dos mil líneas no se revisa: se hojea.
 
 - **Un fichero nuevo nace por debajo de 600 líneas.** Sin excepciones.
-- Los que ya eran grandes llevan su tamaño de hoy como techo en `DEUDA` (`eslint.config.mjs`).
+- Los que ya eran grandes llevan su tamaño de hoy como techo en `DEBT` (`eslint.config.mjs`).
   Esa lista **solo puede menguar**: al partir un componente, se baja el número o se borra la
   línea.
-- **Añadir una entrada a `DEUDA`, o subir un techo, no es una decisión de paso**: es admitir
+- **Añadir una entrada a `DEBT`, o subir un techo, no es una decisión de paso**: es admitir
   deuda y va hablada con el dueño y explicada en el commit. Ante la duda, se parte el componente.
 - Exentos a propósito: `components/ui/**` (primitivas de shadcn, las regenera su CLI) y
   `lib/api/schema.d.ts` (generado desde el OpenAPI del BE).
 
-### 3. Una prueba no se borra en silencio
+### 3. El código nuevo se escribe en INGLÉS
+Se pidió como refactor **5d** hace meses y **nunca llegó a escribirse en ningún CLAUDE.md**, así
+que se incumplía de buena fe copiando el fichero de al lado. Aquí queda.
+
+**En inglés, sin excepción, todo lo que sea código:** nombres de fichero y de script npm,
+identificadores, rutas, props, claves de i18n y nombres de componente.
+
+**En español se queda la PROSA:** comentarios, mensajes de commit y los documentos de `docs/`.
+
+**Ojo con lo que llega del API:** las respuestas de `/api/v1` traen claves en español
+(`nombre`, `cantidad`). Eso es un hecho del contrato, no una elección de este repo — no se
+renombra al vuelo (ver la regla 6).
+
+### 4. Una prueba no se borra en silencio
 Al mover, renombrar o partir código, **el número de pruebas no baja**. Si una prueba sobra, se
 dice en el commit y se explica por qué. La CI ve pruebas que fallan, no pruebas que desaparecen
 — y con el glob limitado a `lib/`, una prueba que se mueve fuera de `lib/` desaparece sin
 romper nada.
 
-### 4. El dinero se prueba, aunque cueste
+### 5. El dinero se prueba, aunque cueste
 La cobertura de hoy son **109 pruebas sobre helpers puros de `lib/`** y **cero pruebas de
 componente o de página**, sobre 66 páginas y 165 componentes. Es la I-11 del assessment y sigue
 abierta. Lo que toque facturación, caja o frontdesk **lleva su prueba en `lib/`**: si el cálculo
 no se puede probar sin montar un componente, es que la lógica está en el sitio equivocado —
 sácala a `lib/` y pruébala ahí. Orden sugerido en `docs/specs/tests-por-donde-empezar.md`.
 
-### 5. Las claves del API vienen en español; no las "arregles" a mano
+### 6. Las claves del API vienen en español; no las "arregles" a mano
 El backend ya sirve **`/api/v2` en inglés**, pero este cliente consume **`/api/v1`** en
 `lib/api/client.ts` y las respuestas llegan con claves españolas (`nombre`, `cantidad`,
 `fechaNacimiento`). **No se renombra un campo suelto al vuelo**: la migración a v2 es un trabajo
 propio, pantalla a pantalla, con su handoff en `docs/specs/api-v2-en-ingles.md`. Un rename
 parcial deja la pantalla mitad en un idioma y mitad en otro, que es peor que no empezar.
 
-### 6. Este fichero y el repo no pueden divergir
+### 7. Este fichero y el repo no pueden divergir
 Si cambias un script, la CI, el runner de pruebas o un techo, **actualiza este fichero en el
 mismo commit**. En el backend, `CLAUDE.md` llegó a prohibir un comando que ya era seguro y a
 describir una CI que no existía: una instrucción obsoleta es peor que ninguna, porque se obedece
