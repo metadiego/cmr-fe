@@ -30,7 +30,7 @@ export function SessionGate({ children }: { children: React.ReactNode }) {
     }
     if (
       !me.mustChangePassword &&
-      me.estado !== "aprobado" &&
+      me.status !== "aprobado" &&
       !isAdmin(me) &&
       pathname !== PENDING_PATH
     ) {

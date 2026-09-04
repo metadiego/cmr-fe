@@ -74,7 +74,7 @@ export function AjusteModal({
     listMotivosMovimiento(centro)
       .then((ms) => {
         if (!vivo) return;
-        const activos = ms.filter((m) => m.activo !== false);
+        const activos = ms.filter((m) => m.active !== false);
         setMotivos(activos);
       })
       .catch(() => setMotivos([]));
@@ -85,7 +85,7 @@ export function AjusteModal({
 
   // El conteo físico tiene su propio motivo en el catálogo: no se elige a mano.
   const motivosVisibles = React.useMemo(
-    () => motivos.filter((m) => m.clave !== "conteo_fisico"),
+    () => motivos.filter((m) => m.slug !== "conteo_fisico"),
     [motivos],
   );
 
@@ -118,23 +118,44 @@ export function AjusteModal({
     if (!objetivo.almacenId) return;
     setGuardando(true);
     try {
-      const payload =
-        modo === "conteo"
-          ? ajusteDesdeConteo({
-              productoId: objetivo.productoId,
-              almacenId: objetivo.almacenId,
-              stockActual: objetivo.stockActual,
-              contado: nContado,
-              notas: notas.trim(),
-            })
-          : {
-              productoId: objetivo.productoId,
-              almacenId: objetivo.almacenId,
-              cantidad: nCantidad,
-              signo,
-              motivo,
-              notas: notas.trim(),
-            };
+      let payload:
+        | {
+            productId: string;
+            warehouseId: string;
+            quantity: number;
+            sign: "positivo" | "negativo";
+            reason: string;
+            notes: string;
+          }
+        | null;
+      if (modo === "conteo") {
+        const c = ajusteDesdeConteo({
+          productoId: objetivo.productoId,
+          almacenId: objetivo.almacenId,
+          stockActual: objetivo.stockActual,
+          contado: nContado,
+          notas: notas.trim(),
+        });
+        payload = c
+          ? {
+              productId: c.productoId,
+              warehouseId: c.almacenId,
+              quantity: c.cantidad,
+              sign: c.signo,
+              reason: c.motivo,
+              notes: c.notas,
+            }
+          : null;
+      } else {
+        payload = {
+          productId: objetivo.productoId,
+          warehouseId: objetivo.almacenId,
+          quantity: nCantidad,
+          sign: signo,
+          reason: motivo,
+          notes: notas.trim(),
+        };
+      }
       if (!payload) {
         // Contó lo mismo que dice el sistema: no hay nada que ajustar y no se manda un cero.
         toast.info(t("sinDiferencia"));
@@ -263,8 +284,8 @@ export function AjusteModal({
                     </SelectTrigger>
                     <SelectContent>
                       {motivosVisibles.map((m) => (
-                        <SelectItem key={m.clave} value={m.clave}>
-                          {m.nombre}
+                        <SelectItem key={m.slug} value={m.slug}>
+                          {m.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

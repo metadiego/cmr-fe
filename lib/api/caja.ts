@@ -1,7 +1,7 @@
 import type { components } from "./schema";
 import { apiFetch } from "./client";
 
-// Caja / Cuadre (BE módulo `caja`). Tenant-scoped: el X-Tenant-ID lo adjunta client.ts desde el
+// Caja / Cuadre (BE módulo `caja`, v2 `cash`). Tenant-scoped: el X-Tenant-ID lo adjunta client.ts desde el
 // centro activo. TODO el I/O de caja pasa por aquí (API-First). Los tipos de catálogo/DTO salen del
 // schema OpenAPI; las respuestas que el BE deja sin tipar en Swagger (Record<string,never>) se tipan
 // a mano AQUÍ, calcadas del código real del BE (caja.service.ts / caja-reportes.service.ts /
@@ -17,56 +17,61 @@ export type CajaDivision = "consulta" | "general";
 export type Cajero = components["schemas"]["CajeroDto"];
 
 // Línea de conteo persistida (getById devuelve CuadreCajaEntity + conteo[]). El BE no la tipa en
-// Swagger; se refleja la entidad `cuadre_conteo`.
+// Swagger; se refleja la entidad `cuadre_conteo`. La clave `conteo` (contenedor) NO está en el mapa
+// api-ingles → el BE la deja en español (el CONTENIDO de cada línea sí se traduce).
 export interface CuadreConteo {
   id: string;
-  cuadreId: string;
-  denominacionId: string;
-  cantidad: number;
+  reconciliationId: string;
+  denominationId: string;
+  quantity: number;
 }
 
-// Cuadre con su conteo (respuesta de getById/contar/cerrar). `totalesPorMetodo` es el snapshot
-// (clave de forma de pago → monto neto) que el BE sella al cerrar.
-export type CuadreConItems = Omit<CuadreCaja, "totalesPorMetodo"> & {
-  totalesPorMetodo: Record<string, number> | null;
+// Cuadre con su conteo (respuesta de getById/contar/cerrar). `totalsByMethod` es el snapshot
+// (clave de forma de pago → monto neto) que el BE sella al cerrar (bolsa OPACA: sus claves son datos).
+export type CuadreConItems = Omit<CuadreCaja, "totalsByMethod"> & {
+  totalsByMethod: Record<string, number> | null;
   conteo: CuadreConteo[];
 };
 
-// Fila de método de pago (tarjetas / otros) del detalle. clave estable + nombre del catálogo.
+// Fila de método de pago (tarjetas / otros) del detalle. slug estable + nombre del catálogo.
 export interface DetalleMetodoRow {
-  clave: string;
-  nombre: string;
-  cantidad: number;
-  monto: number;
+  slug: string;
+  name: string;
+  quantity: number;
+  amount: number;
 }
 
 // Reporte del día (caja-reportes.service.ts → reporteDia). Fuente principal de la pantalla.
+// Muchas claves de este árbol NO están en el mapa api-ingles → el BE las deja en español (contenido
+// traducido por recursión): anulaciones, porMetodo, porGrupo, porCajero, detalle, pendientes, documentos,
+// devolucionesDetalle, conteoEfectivo, tributario, bruto, devuelto, neto, porEstado, porMedio, tarjetas,
+// otros, total*, fondoInicial, cajeros, exonerado, facturasExoneradas, base, formaPago, pendiente.
 export interface ReporteDia {
-  fecha: string;
+  date: string;
   division: CajaDivision | null;
-  usuarioId: string | null;
-  ventas: {
-    desde: string;
-    hasta: string;
-    facturas: number;
+  userId: string | null;
+  sales: {
+    from: string;
+    to: string;
+    invoices: number;
     bruto: number;
     devuelto: number;
     neto: number;
     porEstado: Record<string, number>;
     porMedio: Record<string, number>;
   };
-  devoluciones: { cantidad: number; total: number };
-  anulaciones: { cantidad: number; total: number };
+  refunds: { quantity: number; total: number };
+  anulaciones: { quantity: number; total: number };
   porMetodo: Record<string, number>;
   porGrupo: Record<string, number>;
   // QUIÉN facturó (BE 2026-08-20): SIEMPRE presente (antes solo con `division`). Sin división = todos
-  // los facturadores de las dos divisiones; con división = los de esa; con usuarioId = solo ese. Un
+  // los facturadores de las dos divisiones; con división = los de esa; con userId = solo ese. Un
   // cajero que no es gerencia recibe una sola fila (la suya), lo fija el BE. La Σ de `porCajero` debe
   // dar `detalle.total` (hay prueba del BE); si en pantalla no cuadra, es defecto, no se maquilla.
   // Handoff cuadre-quien-facturo-por-cajero. Nombre resuelto por el BE.
-  porCajero?: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
+  porCajero?: Array<{ userId: string | null; name: string | null; total: number }>;
   detalle: {
-    efectivo: { cantidad: number; monto: number };
+    efectivo: { quantity: number; amount: number };
     tarjetas: DetalleMetodoRow[];
     otros: DetalleMetodoRow[];
     totalTarjetas: number;
@@ -76,99 +81,99 @@ export interface ReporteDia {
   };
   pendientes: Array<{
     id: string;
-    numero: string | null;
-    fecha: string | null;
-    pacienteId: string;
+    number: string | null;
+    date: string | null;
+    patientId: string;
     total: number;
-    montoAbonado: number;
+    paidAmount: number;
     pendiente: number;
   }>;
   // ---- Pie del cuadre (BE 2026-08-06): lo que se entrega a contabilidad. ----
   // Documentos del día: una línea por factura. `formaPago` viene YA resuelta en siglas (p.ej. "EF+VISA")
-  // — pintar tal cual, no calcular. `record` puede venir null (paciente sin número → celda vacía).
+  // — pintar tal cual, no calcular. `medicalRecordNumber` puede venir null (paciente sin número → celda vacía).
   documentos?: Array<{
     id: string;
-    numero: string | null;
-    pacienteId?: string | null;
-    paciente: string | null;
-    record: string | null;
+    number: string | null;
+    patientId?: string | null;
+    patient: string | null;
+    medicalRecordNumber: string | null;
     formaPago: string | null;
     total: number;
-    estado: string;
+    status: string;
     // Quién facturó ese documento (cmr-be PR #275): sale del cajero de los pagos del día (misma fuente
-    // que `porCajero`, cuadra la suma). `usuario:null` = sin a quién atribuir; `nombre:null` = sello de
+    // que `porCajero`, cuadra la suma). `user:null` = sin a quién atribuir; `name:null` = sello de
     // integración (llave). En ambos casos se pinta "—", NUNCA el id. Handoff documentos-del-dia-quien-facturo.
-    usuario?: { id: string; nombre: string | null } | null;
+    user?: { id: string; name: string | null } | null;
   }>;
-  // Devoluciones del día con su detalle (bloque aparte, en rojo). `numero` = nº de nota de crédito.
+  // Devoluciones del día con su detalle (bloque aparte, en rojo). `number` = nº de nota de crédito.
   devolucionesDetalle?: Array<{
     id: string;
-    numero: number | string | null;
-    facturaId: string | null;
-    montoDevuelto: number;
-    motivo: string | null;
+    number: number | string | null;
+    invoiceId: string | null;
+    refundedAmount: number;
+    reason: string | null;
   }>;
   // Conteo de efectivo SELLADO del día (hoja del legado): denominaciones de mayor a menor + total.
-  // `cuadreId`/`usuarioId` null = SUMA de las cajas del día (consolidado). `null` = aún sin contar (o
+  // `reconciliationId`/`userId` null = SUMA de las cajas del día (consolidado). `null` = aún sin contar (o
   // el admin ve varios centros a la vez, donde sumar cajas no significa nada) → "sin conteo todavía".
   conteoEfectivo?: {
-    cuadreId: string | null;
-    usuarioId: string | null;
-    estado?: string;
+    reconciliationId: string | null;
+    userId: string | null;
+    status?: string;
     fondoInicial: number;
     total: number;
     cajeros: number;
-    lineas: Array<{ denominacionId?: string; valor: number; cantidad: number; monto: number }>;
+    lines: Array<{ denominationId?: string; value: number; quantity: number; amount: number }>;
   } | null;
   // Bloque tributario (lo mira contabilidad). Tres partidas con las mismas columnas + las facturas
   // EXONERADAS (producto gravable al que se le quitó el IVU — decisión que hay que ver). NO recalcular
   // en el cliente: los números salen calzados del BE. Handoff HANDOFF-pie-del-cuadre.
   tributario?: {
-    gravado: TributarioPartida;
-    exento: TributarioPartida;
+    taxable: TributarioPartida;
+    exempt: TributarioPartida;
     exonerado: TributarioPartida;
     facturasExoneradas: string[]; // ids de factura → se cruzan con `documentos` para el nº
   };
 }
 // Una partida tributaria: monto facturado, descuento, base imponible, impuesto y nº de líneas.
 export interface TributarioPartida {
-  monto: number;
-  descuento: number;
+  amount: number;
+  discount: number;
   base: number;
-  impuesto: number;
-  lineas: number;
+  tax: number;
+  lines: number;
 }
 
 // ---- catálogos (CC1) ------------------------------------------------
 export function getDenominaciones(monedaId?: string): Promise<Denominacion[]> {
-  const q = monedaId ? `?monedaId=${encodeURIComponent(monedaId)}` : "";
-  return apiFetch<Denominacion[]>(`/caja/denominaciones${q}`);
+  const q = monedaId ? `?currencyId=${encodeURIComponent(monedaId)}` : "";
+  return apiFetch<Denominacion[]>(`/cash/denominations${q}`);
 }
 
 export function getGruposMetodoPago(): Promise<GrupoMetodoPago[]> {
-  return apiFetch<GrupoMetodoPago[]>(`/caja/grupos`);
+  return apiFetch<GrupoMetodoPago[]>(`/cash/groups`);
 }
 
 // Roster de cajeros del centro (auth user id + nombre). El BE aplica el alcance por rol: gerencia
 // ve todos; un cajero solo a sí mismo. Puebla el selector con nombres reales (no UUID).
 export function getCajeros(q?: string): Promise<Cajero[]> {
   const qs = q ? `?q=${encodeURIComponent(q)}` : "";
-  return apiFetch<Cajero[]>(`/caja/cajeros${qs}`);
+  return apiFetch<Cajero[]>(`/cash/cashiers${qs}`);
 }
 
 // ---- reporte del día (CC3) ------------------------------------------
 // `division` separa consulta/general; OMITIRLA = totalizado de las DOS divisiones (la vista del
-// gerente). `usuarioId` acota a un cajero (undefined = alcance por rol que resuelve el BE). Un cajero
+// gerente). `userId` acota a un cajero (undefined = alcance por rol que resuelve el BE). Un cajero
 // solo verá el suyo; gerencia puede pasar otro id o null (consolidado).
 export function getReporteDia(
   fecha: string,
   division?: CajaDivision | null,
   usuarioId?: string | null,
 ): Promise<ReporteDia> {
-  const sp = new URLSearchParams({ fecha });
+  const sp = new URLSearchParams({ date: fecha });
   if (division) sp.set("division", division);
-  if (usuarioId != null) sp.set("usuarioId", usuarioId);
-  return apiFetch<ReporteDia>(`/caja/reportes/dia?${sp.toString()}`);
+  if (usuarioId != null) sp.set("userId", usuarioId);
+  return apiFetch<ReporteDia>(`/cash/reports/day?${sp.toString()}`);
 }
 
 // ---- cuadre (CC2) ---------------------------------------------------
@@ -180,39 +185,40 @@ export function listarCuadres(filtros: {
   estado?: "abierto" | "cerrado";
 }): Promise<CuadreCaja[]> {
   const sp = new URLSearchParams();
-  if (filtros.fecha) sp.set("fecha", filtros.fecha);
+  if (filtros.fecha) sp.set("date", filtros.fecha);
   if (filtros.division) sp.set("division", filtros.division);
-  if (filtros.usuarioId) sp.set("usuarioId", filtros.usuarioId);
-  if (filtros.estado) sp.set("estado", filtros.estado);
+  if (filtros.usuarioId) sp.set("userId", filtros.usuarioId);
+  if (filtros.estado) sp.set("status", filtros.estado);
   const qs = sp.toString();
-  return apiFetch<CuadreCaja[]>(`/caja/cuadres${qs ? `?${qs}` : ""}`);
+  return apiFetch<CuadreCaja[]>(`/cash/reconciliations${qs ? `?${qs}` : ""}`);
 }
 
 // Abre o RETOMA (idempotente en el BE) el cuadre de esa (división × cajero)/día. `division`
-// obligatoria. `usuarioId`: omitido = propio cajero; null = consolidado (gerencia).
+// obligatoria. `userId`: omitido = propio cajero; null = consolidado (gerencia).
 export function abrirCuadre(payload: AbrirCuadrePayload): Promise<CuadreCaja> {
-  return apiFetch<CuadreCaja>(`/caja/cuadres`, {
+  return apiFetch<CuadreCaja>(`/cash/reconciliations`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
 export function getCuadre(id: string): Promise<CuadreConItems> {
-  return apiFetch<CuadreConItems>(`/caja/cuadres/${id}`);
+  return apiFetch<CuadreConItems>(`/cash/reconciliations/${id}`);
 }
 
 export function contarCuadre(
   id: string,
   conteos: ConteoLinea[],
 ): Promise<CuadreConItems> {
-  return apiFetch<CuadreConItems>(`/caja/cuadres/${id}/conteo`, {
+  // La clave `conteos` NO está en el mapa api-ingles → se envía tal cual (el DTO la espera en español).
+  return apiFetch<CuadreConItems>(`/cash/reconciliations/${id}/count`, {
     method: "POST",
     body: JSON.stringify({ conteos }),
   });
 }
 
 export function cerrarCuadre(id: string): Promise<CuadreConItems> {
-  return apiFetch<CuadreConItems>(`/caja/cuadres/${id}/cerrar`, {
+  return apiFetch<CuadreConItems>(`/cash/reconciliations/${id}/close`, {
     method: "POST",
   });
 }
@@ -222,7 +228,7 @@ export function enviarCuadreEmail(
   id: string,
   payload: EmailCuadrePayload,
 ): Promise<unknown> {
-  return apiFetch<unknown>(`/caja/cuadres/${id}/email`, {
+  return apiFetch<unknown>(`/cash/reconciliations/${id}/email`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

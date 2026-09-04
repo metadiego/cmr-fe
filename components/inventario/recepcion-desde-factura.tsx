@@ -78,15 +78,15 @@ export function RecepcionDesdeFactura() {
     const top = l.sugerencias?.[0];
     return {
       texto: l.texto,
-      productoId: l.productoId ?? "",
-      productoNombre: l.confirmado && top ? top.nombre : "",
+      productoId: l.productId ?? "",
+      productoNombre: l.confirmado && top ? top.name : "",
       confirmado: l.confirmado,
-      origen: l.origen,
+      origen: l.source,
       sugerencias: l.sugerencias ?? [],
-      cantidad: l.cantidad != null ? String(l.cantidad) : "",
-      costo: l.costoUnitario != null ? String(l.costoUnitario) : "",
-      lote: l.numeroLote ?? "",
-      venc: l.fechaVencimiento ?? "",
+      cantidad: l.quantity != null ? String(l.quantity) : "",
+      costo: l.unitCost != null ? String(l.unitCost) : "",
+      lote: l.lotNumber ?? "",
+      venc: l.expirationDate ?? "",
     };
   }
 
@@ -100,7 +100,7 @@ export function RecepcionDesdeFactura() {
     try {
       const r = await emparejarRecepcion(lineas, proveedorId || undefined);
       // Por-revisar primero (que no haya que buscarlas).
-      const ord = [...r.lineas].sort((a, b) => Number(a.confirmado) - Number(b.confirmado));
+      const ord = [...r.lines].sort((a, b) => Number(a.confirmado) - Number(b.confirmado));
       setFilas(ord.map(aFila));
       setConteo({ listas: r.listas, porRevisar: r.porRevisar });
       setPaso("revisar");
@@ -130,18 +130,18 @@ export function RecepcionDesdeFactura() {
     setBusy(true);
     try {
       const r = await confirmarRecepcion({
-        almacenId,
-        ...(proveedorId ? { proveedorId } : {}),
-        ...(numeroFactura.trim() ? { numeroFacturaCompra: numeroFactura.trim() } : {}),
-        ...(fecha ? { fechaEfectiva: fecha } : {}),
-        ...(notas.trim() ? { notas: notas.trim() } : {}),
-        lineas: filas.map((f) => ({
-          productoId: f.productoId,
+        warehouseId: almacenId,
+        ...(proveedorId ? { supplierId: proveedorId } : {}),
+        ...(numeroFactura.trim() ? { purchaseInvoiceNumber: numeroFactura.trim() } : {}),
+        ...(fecha ? { effectiveDate: fecha } : {}),
+        ...(notas.trim() ? { notes: notas.trim() } : {}),
+        lines: filas.map((f) => ({
+          productId: f.productoId,
           texto: f.texto, // ORIGINAL → se aprende como alias
-          cantidad: Number(f.cantidad) || 0,
-          ...(Number(f.costo) > 0 ? { costoUnitario: Number(f.costo) } : {}),
-          ...(f.lote.trim() ? { numeroLote: f.lote.trim() } : {}),
-          ...(f.venc ? { fechaVencimiento: f.venc } : {}),
+          quantity: Number(f.cantidad) || 0,
+          ...(Number(f.costo) > 0 ? { unitCost: Number(f.costo) } : {}),
+          ...(f.lote.trim() ? { lotNumber: f.lote.trim() } : {}),
+          ...(f.venc ? { expirationDate: f.venc } : {}),
         })),
       });
       setAprendidos(r.aliasAprendidos ?? 0);
@@ -177,7 +177,7 @@ export function RecepcionDesdeFactura() {
               <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selProveedor")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>{t("field.sinProveedor")}</SelectItem>
-                {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+                {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
             <span className="text-[11px] text-muted-foreground">{t("proveedorHint")}</span>
@@ -217,17 +217,17 @@ export function RecepcionDesdeFactura() {
                     <div className="mb-1 text-[11px] uppercase tracking-wide text-muted-foreground">{t("col.producto")}</div>
                     <div className="mb-1.5 flex flex-wrap gap-1">
                       {f.sugerencias.slice(0, 3).map((s) => (
-                        <button key={s.productoId} type="button"
-                          onClick={() => setFila(i, { productoId: s.productoId, productoNombre: s.nombre })}
-                          className={cn("rounded-full border px-2 py-0.5 text-xs", f.productoId === s.productoId ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent/50")}>
-                          {s.nombre} · {Math.round(s.confianza * 100)}%
+                        <button key={s.productId} type="button"
+                          onClick={() => setFila(i, { productoId: s.productId, productoNombre: s.name })}
+                          className={cn("rounded-full border px-2 py-0.5 text-xs", f.productoId === s.productId ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent/50")}>
+                          {s.name} · {Math.round(s.confianza * 100)}%
                         </button>
                       ))}
                       {f.sugerencias.length === 0 && !f.productoId && <span className="text-xs text-muted-foreground">{t("sinSugerencias")}</span>}
                     </div>
                     <ProductoPicker
                       value={f.productoId}
-                      onChange={(id, prod) => setFila(i, { productoId: id, productoNombre: prod?.nombre ?? "" })}
+                      onChange={(id, prod) => setFila(i, { productoId: id, productoNombre: prod?.name ?? "" })}
                       placeholder={t("buscarProducto")}
                     />
                     {f.productoNombre && <div className="mt-1 text-xs text-success-foreground">✓ {f.productoNombre}</div>}
@@ -253,11 +253,11 @@ export function RecepcionDesdeFactura() {
             <Campo label={t("field.almacen")}>
               <Select value={almacenId} onValueChange={setAlmacenId}>
                 <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selAlmacen")} /></SelectTrigger>
-                <SelectContent>{almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}</SelectContent>
+                <SelectContent>{almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
               </Select>
             </Campo>
             <Campo label={t("field.proveedor")}>
-              <Input value={proveedores.find((p) => p.id === proveedorId)?.nombre ?? t("field.sinProveedor")} disabled />
+              <Input value={proveedores.find((p) => p.id === proveedorId)?.name ?? t("field.sinProveedor")} disabled />
             </Campo>
             <Campo label={t("field.factura")}><Input value={numeroFactura} onChange={(e) => setNumeroFactura(e.target.value)} placeholder="F-000" /></Campo>
             <Campo label={t("field.fecha")}><Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} /></Campo>

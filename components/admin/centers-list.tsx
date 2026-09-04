@@ -98,12 +98,12 @@ export function CentersList() {
             <TableBody>
               {state.centers.map((c) => (
                 <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.nombre}</TableCell>
-                  <TableCell className="font-mono">{c.codigo}</TableCell>
-                  <TableCell>{c.direccion ?? "—"}</TableCell>
+                  <TableCell className="font-medium">{c.name}</TableCell>
+                  <TableCell className="font-mono">{c.code}</TableCell>
+                  <TableCell>{c.address ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={c.activo === false ? "outline" : "secondary"}>
-                      {String(c.activo ?? true)}
+                    <Badge variant={c.active === false ? "outline" : "secondary"}>
+                      {String(c.active ?? true)}
                     </Badge>
                   </TableCell>
                   {canFiscal && (
@@ -165,11 +165,11 @@ function CreateCenterDialog({
     setSubmitting(true);
     try {
       const c = await createCenter({
-        nombre: nombre.trim(),
-        codigo: codigo.trim(),
-        direccion: direccion.trim() || undefined,
+        name: nombre.trim(),
+        code: codigo.trim(),
+        address: direccion.trim() || undefined,
       });
-      toast.success(t("centers.success", { name: c.nombre }));
+      toast.success(t("centers.success", { name: c.name }));
       onOpenChange(false);
       onCreated?.();
     } catch (err) {

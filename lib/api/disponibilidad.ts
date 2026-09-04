@@ -12,16 +12,17 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-// GET /medicos/horarios?medicoId= — the doctor's hours, or the center's global
-// hours (medicoId null) when the doctor has none. Empty = no hours configured.
+// GET /doctors/schedules?doctorId= — the doctor's hours, or the center's global
+// hours (doctorId null) when the doctor has none. Empty = no hours configured.
 export async function getHorariosMedico(
   medicoId?: string,
 ): Promise<HorarioMedico[]> {
-  const q = medicoId ? `?medicoId=${encodeURIComponent(medicoId)}` : "";
-  return asArray<HorarioMedico>(await apiFetch(`/medicos/horarios${q}`));
+  const q = medicoId ? `?doctorId=${encodeURIComponent(medicoId)}` : "";
+  return asArray<HorarioMedico>(await apiFetch(`/doctors/schedules${q}`));
 }
 
-// GET /festivos?anio= — holidays for the year (recurring ones resolved to it).
+// GET /holidays?anio= — holidays for the year (recurring ones resolved to it).
+// `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera `anio`: se manda tal cual.
 export async function getFestivos(anio: number): Promise<Festivo[]> {
-  return asArray<Festivo>(await apiFetch(`/festivos?anio=${anio}`));
+  return asArray<Festivo>(await apiFetch(`/holidays?anio=${anio}`));
 }

@@ -17,26 +17,27 @@ export type UpdateServicioPorClavePayload = components["schemas"]["UpdateServici
 
 // Diff por centro que devuelve la edición "Todos los centros" (BE 2026-07-30). El BE aplica los
 // cambios a la fila del servicio de CADA centro (misma clave) y devuelve, por centro, qué cambió.
+// NOTA: `cambios` (y sus `antes`/`despues`), y `actualizados`, NO están en el mapa BE → llegan en español.
 export interface ServicioActualizadoPorCentro {
   id: string;
   clinicId: string | null;
   cambios: Record<string, { antes: unknown; despues: unknown }>;
 }
 export interface UpdateServicioPorClaveResult {
-  clave: string;
+  slug: string;
   actualizados: ServicioActualizadoPorCentro[];
 }
 
 // Edición MULTICENTRO por clave — endpoint CORRECTO para "Todos los centros" (NO iterar updateServicio
-// por centro). `activo` NO va aquí (encender/apagar es por centro). RBAC: admin / servicios.multicentro
-// (el BE es la autoridad). PUT /api/v1/servicios/por-clave/:clave.
+// por centro). `active` NO va aquí (encender/apagar es por centro). RBAC: admin / servicios.multicentro
+// (el BE es la autoridad). PUT /api/v2/services/slug-by/:slug.
 export function updateServicioPorClave(
   clave: string,
   payload: UpdateServicioPorClavePayload,
   centroId?: string,
 ): Promise<UpdateServicioPorClaveResult> {
   return apiFetch<UpdateServicioPorClaveResult>(
-    `/servicios/por-clave/${encodeURIComponent(clave)}`,
+    `/services/slug-by/${encodeURIComponent(clave)}`,
     { method: "PUT", body: JSON.stringify(payload) },
     centroId,
   );
@@ -44,22 +45,22 @@ export function updateServicioPorClave(
 
 // Columnas POR SERVICIO (cada pestaña del Frontdesk tiene las suyas — no se aplican a todos):
 // GET = columnas efectivas del servicio (resueltas); POST = componer una columna del catálogo en ESTE
-// servicio ({columnaId, orden, visible, fijo, activo}).
+// servicio ({columnId, sortOrder, visible, pinned, active}).
 export type ServicioColumna = {
-  clave: string;
+  slug: string;
   labelKey: string;
-  tipo: string;
+  type: string;
   binding: string;
   editable: boolean;
-  permiso: string | null;
+  permissionSlug: string | null;
   render: Record<string, unknown> | null;
-  orden: number;
-  fijo: boolean;
+  sortOrder: number;
+  pinned: boolean;
   color: string | null;
 };
 export type ComponerColumnaPayload = components["schemas"]["ComponerColumnaDto"];
 export async function getServicioColumnas(servicioId: string, centroId?: string): Promise<ServicioColumna[]> {
-  return asArray<ServicioColumna>(await apiFetch(`/servicios/${servicioId}/columnas`, {}, centroId));
+  return asArray<ServicioColumna>(await apiFetch(`/services/${servicioId}/columns`, {}, centroId));
 }
 export function componerServicioColumna(
   servicioId: string,
@@ -67,7 +68,7 @@ export function componerServicioColumna(
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch(
-    `/servicios/${servicioId}/columnas`,
+    `/services/${servicioId}/columns`,
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
@@ -77,7 +78,7 @@ export function componerServicioColumna(
 // cuenta para paquetes/disponibilidad y la DOSIS sale de los productos del grupo (no un producto fijo).
 export type GrupoFacturacion = components["schemas"]["GrupoFacturacionEntity"];
 export async function getGruposFacturacion(centroId?: string): Promise<GrupoFacturacion[]> {
-  return asArray<GrupoFacturacion>(await apiFetch(`/facturacion/columnas/grupos`, {}, centroId));
+  return asArray<GrupoFacturacion>(await apiFetch(`/billing/columns/groups`, {}, centroId));
 }
 
 // Los servicios son POR CENTRO (fila propia por clínica). centroId opcional = X-Tenant-ID explícito;
@@ -88,15 +89,15 @@ export async function getServicios(
   opts: { includeInactive?: boolean } = {},
 ): Promise<Servicio[]> {
   const qs = opts.includeInactive ? `?includeInactive=true` : "";
-  return asArray<Servicio>(await apiFetch(`/servicios${qs}`, {}, centroId));
+  return asArray<Servicio>(await apiFetch(`/services${qs}`, {}, centroId));
 }
 
 // Crear un servicio = crear una PESTAÑA. El BE le pone las columnas por defecto → nace
-// usable. El FE NO compone columnas tras crear (solo POST /servicios/:id/columnas si el
+// usable. El FE NO compone columnas tras crear (solo POST /services/:id/columns si el
 // negocio quiere ajustarlas más tarde — fuera de este flujo).
 export function createServicio(payload: CreateServicioPayload, centroId?: string): Promise<Servicio> {
   return apiFetch<Servicio>(
-    `/servicios`,
+    `/services`,
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
@@ -107,17 +108,19 @@ export function updateServicio(
   centroId?: string,
 ): Promise<Servicio> {
   return apiFetch<Servicio>(
-    `/servicios/${id}`,
+    `/services/${id}`,
     { method: "PUT", body: JSON.stringify(payload) },
     centroId,
   );
 }
 export function deleteServicio(id: string, centroId?: string): Promise<void> {
-  return apiFetch<void>(`/servicios/${id}`, { method: "DELETE" }, centroId);
+  return apiFetch<void>(`/services/${id}`, { method: "DELETE" }, centroId);
 }
 
-// Un campo de `formAcciones.campos`: qué se exige y DÓNDE vive su valor.
+// Un campo de `formActions.fields`: qué se exige y DÓNDE vive su valor.
 // `binding` presente → el valor vive en la entidad/paquete (no en el form); ausente → se captura en el form.
+// NOTA: `fields` (antes `campos`) es una BOLSA OPACA del motor de forms → sus claves internas NO se
+// traducen (llegan en español: clave/tipo/requerido/en/opciones).
 export type ServicioCampo = {
   clave: string;
   labelKey?: string;
@@ -130,7 +133,7 @@ export type ServicioCampo = {
 export type ServicioFormAcciones = {
   title?: string;
   titleKey?: string;
-  campos?: ServicioCampo[];
+  fields?: ServicioCampo[];
   reports?: unknown[];
   additional_actions?: unknown[];
   [k: string]: unknown;
@@ -138,14 +141,15 @@ export type ServicioFormAcciones = {
 
 // FUENTE DEL REQUISITO — dónde vive el valor que SATISFACE un requisito (sesión/personal/paquete).
 // Distinto del "origen de lectura" (columnas del tablero) y del "destino de escritura"
-// (celdas editables). GET /servicios/catalogos/fuentes-requisito.
-export type FuenteRequisito = { binding: string; labelKey: string; grupo: string };
+// (celdas editables). GET /services/catalogs/requirement-sources.
+export type FuenteRequisito = { binding: string; labelKey: string; group: string };
 export async function getFuentesRequisito(centroId?: string): Promise<FuenteRequisito[]> {
-  return asArray<FuenteRequisito>(await apiFetch(`/servicios/catalogos/fuentes-requisito`, {}, centroId));
+  return asArray<FuenteRequisito>(await apiFetch(`/services/catalogs/requirement-sources`, {}, centroId));
 }
 
 // Alcance de una config: "centro" (por defecto, solo el centro activo) o "todos" (exige admin;
-// aplica a TODOS los centros y devuelve qué cambió y dónde). Se manda en el cuerpo del PUT.
+// aplica a TODOS los centros y devuelve qué cambió y dónde). Se manda en el cuerpo del PUT como `scope`
+// (mapa BE: alcance → scope).
 export type Alcance = "centro" | "todos";
 export function updateServicioConAlcance(
   id: string,
@@ -154,8 +158,8 @@ export function updateServicioConAlcance(
   centroId?: string,
 ): Promise<Servicio | UpdateServicioPorClaveResult> {
   return apiFetch<Servicio | UpdateServicioPorClaveResult>(
-    `/servicios/${id}`,
-    { method: "PUT", body: JSON.stringify({ ...payload, alcance }) },
+    `/services/${id}`,
+    { method: "PUT", body: JSON.stringify({ ...payload, scope: alcance }) },
     centroId,
   );
 }

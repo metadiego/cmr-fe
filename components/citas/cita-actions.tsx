@@ -97,7 +97,7 @@ export function CitaActions({
   const [histOpen, setHistOpen] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
 
-  const actions = ACTIONS[cita.estado] ?? [];
+  const actions = ACTIONS[cita.status] ?? [];
   // Show the menu whenever the user can act OR at least view history.
   if (!can("citas.update") && !can("citas.read")) return null;
 
@@ -249,7 +249,7 @@ function RescheduleDialog({
   const tRoot = useTranslations();
   const { can } = useCan();
   const me = useMe();
-  const actorId = me.kind === "ok" ? me.me.personalId ?? undefined : undefined;
+  const actorId = me.kind === "ok" ? me.me.staffId ?? undefined : undefined;
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -259,15 +259,15 @@ function RescheduleDialog({
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
 
   const [centro, setCentro] = React.useState(cita.clinicId ?? "");
-  const [fecha, setFecha] = React.useState(cita.fecha);
-  const [hora, setHora] = React.useState(cita.hora ?? "");
-  const [medico, setMedico] = React.useState(cita.medicoId ?? "");
+  const [fecha, setFecha] = React.useState(cita.date);
+  const [hora, setHora] = React.useState(cita.time ?? "");
+  const [medico, setMedico] = React.useState(cita.doctorId ?? "");
   const [motivo, setMotivo] = React.useState("");
   const [busy, setBusy] = React.useState(false);
 
   const canMulti = can("citas.multicentro");
   const crossCentro = !!centro && centro !== cita.clinicId;
-  const esSeguimiento = tipos.find((x) => x.id === cita.tipoCitaId)?.clave === "seguimiento";
+  const esSeguimiento = tipos.find((x) => x.id === cita.appointmentTypeId)?.slug === "seguimiento";
   const medicoRequired = crossCentro && esSeguimiento;
 
   function pickCentro(v: string) {
@@ -284,23 +284,23 @@ function RescheduleDialog({
   );
   const availability = React.useMemo(() => {
     const data = agendaRes.state.kind === "ok" ? agendaRes.state.data : null;
-    const c = data?.centros?.[0];
+    const c = data?.centers?.[0];
     if (!c) return null;
-    const vaciosOf = (fr: { tipos: { tipoCitaId: string; vacios: number }[] }) =>
-      fr.tipos.find((tp) => tp.tipoCitaId === cita.tipoCitaId)?.vacios ?? 0;
-    const here = c.franjas.find((fr) => fr.hora === hora);
+    const vaciosOf = (fr: { tipos: { appointmentTypeId: string; vacios: number }[] }) =>
+      fr.tipos.find((tp) => tp.appointmentTypeId === cita.appointmentTypeId)?.vacios ?? 0;
+    const here = c.franjas.find((fr) => fr.time === hora);
     const vacios = here ? vaciosOf(here) : 0;
     const next =
       c.franjas
-        .filter((fr) => fr.hora && vaciosOf(fr) > 0)
-        .map((fr) => fr.hora as string)
+        .filter((fr) => fr.time && vaciosOf(fr) > 0)
+        .map((fr) => fr.time as string)
         .sort()
         .find((h) => h >= hora) ?? null;
     return { vacios, next };
-  }, [agendaRes.state, hora, cita.tipoCitaId]);
+  }, [agendaRes.state, hora, cita.appointmentTypeId]);
 
-  const origen = centros.find((c) => c.id === cita.clinicId)?.nombre ?? cita.clinicId ?? "";
-  const destino = centros.find((c) => c.id === centro)?.nombre ?? centro;
+  const origen = centros.find((c) => c.id === cita.clinicId)?.name ?? cita.clinicId ?? "";
+  const destino = centros.find((c) => c.id === centro)?.name ?? centro;
 
   const canSubmit =
     !!fecha &&
@@ -315,11 +315,11 @@ function RescheduleDialog({
       await reagendarCita(
         cita.id,
         {
-          fecha,
-          hora: hora || undefined,
-          motivo: motivo.trim(),
-          centroId: crossCentro ? centro : undefined,
-          medicoId: crossCentro && medico ? medico : undefined,
+          date: fecha,
+          time: hora || undefined,
+          reason: motivo.trim(),
+          centerId: crossCentro ? centro : undefined,
+          doctorId: crossCentro && medico ? medico : undefined,
           actorId,
         },
         cita.clinicId ?? undefined,
@@ -347,7 +347,7 @@ function RescheduleDialog({
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -383,7 +383,7 @@ function RescheduleDialog({
                 <SelectContent>
                   {medicos.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
-                      {[m.nombre, m.apellido].filter(Boolean).join(" ")}
+                      {[m.name, m.lastName].filter(Boolean).join(" ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -448,10 +448,10 @@ function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void })
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
 
   const centroName = (id: unknown) =>
-    centros.find((c) => c.id === id)?.nombre ?? (id ? String(id) : "—");
+    centros.find((c) => c.id === id)?.name ?? (id ? String(id) : "—");
   const medicoName = (id: unknown) => {
     const m = medicos.find((x) => x.id === id);
-    return m ? [m.nombre, m.apellido].filter(Boolean).join(" ") : id ? String(id) : "—";
+    return m ? [m.name, m.lastName].filter(Boolean).join(" ") : id ? String(id) : "—";
   };
   const fmt = (iso: string) => {
     const d = new Date(iso);
@@ -504,10 +504,10 @@ function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void })
             return (
               <li key={ev.id} className="rounded-md bg-card p-3 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{t(`event.${ev.tipo}`)}</span>
+                  <span className="font-medium">{t(`event.${ev.type}`)}</span>
                   <span className="text-xs text-muted-foreground">{fmt(ev.createdAt)}</span>
                 </div>
-                {ev.motivo && <p className="mt-1 text-xs text-muted-foreground">{ev.motivo}</p>}
+                {ev.reason && <p className="mt-1 text-xs text-muted-foreground">{ev.reason}</p>}
                 {rows.length > 0 && (
                   <ul className="mt-2 space-y-0.5 text-xs">
                     {rows.map((r) => (

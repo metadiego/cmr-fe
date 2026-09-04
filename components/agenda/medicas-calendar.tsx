@@ -77,9 +77,9 @@ export function MedicasCalendar() {
   const { state, reload } = useResource<Cita[]>(
     () =>
       listCitasRango({
-        desde,
-        hasta,
-        medicoId: medicoEfectivo === ALL ? undefined : medicoEfectivo,
+        from: desde,
+        to: hasta,
+        doctorId: medicoEfectivo === ALL ? undefined : medicoEfectivo,
         centroId: centro.fetchCentroId,
       }),
     [desde, hasta, medicoEfectivo, centro.fetchCentroId],
@@ -91,7 +91,7 @@ export function MedicasCalendar() {
     return () => clearInterval(id);
   }, [reload]);
 
-  const pacientes = usePacienteMap(citas.map((c) => c.pacienteId));
+  const pacientes = usePacienteMap(citas.map((c) => c.patientId));
   const tipoById = React.useMemo(() => new Map(tipos.map((x) => [x.id, x])), [tipos]);
   const medById = React.useMemo(() => new Map(medicos.map((m) => [m.id, m])), [medicos]);
   const citaById = React.useMemo(() => new Map(citas.map((c) => [c.id, c])), [citas]);
@@ -99,16 +99,16 @@ export function MedicasCalendar() {
   const eventsByDate = React.useMemo(() => {
     const map = new Map<string, AgendaEvent[]>();
     for (const c of citas) {
-      const p = pacientes[c.pacienteId];
-      const label = p ? (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")) : "…";
+      const p = pacientes[c.patientId];
+      const label = p ? (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")) : "…";
       const color = colorDeEvento(
         null,
-        tipoById.get(c.tipoCitaId)?.color,
-        c.medicoId ? medById.get(c.medicoId)?.color : null,
+        tipoById.get(c.appointmentTypeId)?.color,
+        c.doctorId ? medById.get(c.doctorId)?.color : null,
       );
-      const arr = map.get(c.fecha) ?? [];
-      arr.push({ id: c.id, hora: c.hora, label, color });
-      map.set(c.fecha, arr);
+      const arr = map.get(c.date) ?? [];
+      arr.push({ id: c.id, hora: c.time, label, color });
+      map.set(c.date, arr);
     }
     return map;
   }, [citas, pacientes, tipoById, medById]);
@@ -155,7 +155,7 @@ export function MedicasCalendar() {
                 <SelectItem value={ALL}>{t("allDoctors")}</SelectItem>
                 {medicos.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
-                    {[m.nombre, m.apellido].filter(Boolean).join(" ")}
+                    {[m.name, m.lastName].filter(Boolean).join(" ")}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -184,7 +184,7 @@ export function MedicasCalendar() {
             onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}`)}
             onEventClick={(id) => {
               const c = citaById.get(id);
-              router.push(`/scheduling/appointments/${c ? c.fecha : ""}`);
+              router.push(`/scheduling/appointments/${c ? c.date : ""}`);
             }}
           />
         )}
@@ -211,11 +211,11 @@ export function MedicasCalendar() {
                     className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
                   >
                     <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
-                      {(p.nombres?.[0] ?? "") + (p.apellidos?.[0] ?? "")}
+                      {(p.firstName?.[0] ?? "") + (p.lastName?.[0] ?? "")}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate">{(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}</span>
-                      {p.telefono && <span className="block truncate text-xs text-muted-foreground">{p.telefono}</span>}
+                      <span className="block truncate">{(p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" "))}</span>
+                      {p.phone && <span className="block truncate text-xs text-muted-foreground">{p.phone}</span>}
                     </span>
                   </button>
                 </li>
@@ -229,7 +229,7 @@ export function MedicasCalendar() {
             {tipos.map((x) => (
               <li key={x.id} className="flex items-center gap-2 text-sm">
                 <span className="size-3 rounded-sm" style={{ backgroundColor: x.color }} />
-                {x.nombre}
+                {x.name}
               </li>
             ))}
           </ul>

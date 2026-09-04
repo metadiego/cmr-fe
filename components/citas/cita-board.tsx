@@ -29,16 +29,16 @@ export function CitaBoard({
   // (no_show/cancelada/reprogramada/atendida) fall into a trailing "closed"
   // column so nothing is silently dropped. Colors/labels are catalog-driven.
   const flow = estados
-    .filter((e) => !e.esTerminal)
-    .sort((a, b) => a.orden - b.orden);
-  const flowClaves = new Set(flow.map((e) => e.clave));
-  const closed = citas.filter((c) => !flowClaves.has(c.estado));
+    .filter((e) => !e.isTerminal)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const flowClaves = new Set(flow.map((e) => e.slug));
+  const closed = citas.filter((c) => !flowClaves.has(c.status));
   const columns: { key: string; label: string; color?: string; items: Cita[] }[] =
     flow.map((e) => ({
-      key: e.clave,
+      key: e.slug,
       label: tRoot(e.labelKey),
       color: e.color,
-      items: citas.filter((c) => c.estado === e.clave),
+      items: citas.filter((c) => c.status === e.slug),
     }));
   if (closed.length > 0) {
     columns.push({ key: "closed", label: t("boardClosed"), items: closed });
@@ -69,7 +69,7 @@ export function CitaBoard({
             )}
             {col.items
               .slice()
-              .sort((a, b) => (a.hora ?? "99").localeCompare(b.hora ?? "99"))
+              .sort((a, b) => (a.time ?? "99").localeCompare(b.time ?? "99"))
               .map((c) => (
                 <div
                   key={c.id}
@@ -77,16 +77,16 @@ export function CitaBoard({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-mono text-xs text-muted-foreground">
-                      {c.hora ?? "—"}
+                      {c.time ?? "—"}
                     </span>
                     <CitaActions cita={c} onChanged={onChanged} />
                   </div>
                   <p className="mt-1 truncate text-sm font-medium">
-                    {pacienteName(c.pacienteId)}
+                    {pacienteName(c.patientId)}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {tipoName(c.tipoCitaId)}
-                    {c.medicoId ? ` · ${medicoName(c.medicoId)}` : ""}
+                    {tipoName(c.appointmentTypeId)}
+                    {c.doctorId ? ` · ${medicoName(c.doctorId)}` : ""}
                   </p>
                 </div>
               ))}

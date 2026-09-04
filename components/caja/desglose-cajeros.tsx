@@ -15,7 +15,7 @@ export function DesgloseCajeros({
   activeUsuarioId,
   onPick,
 }: {
-  cajeros: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
+  cajeros: Array<{ userId: string | null; name: string | null; total: number }>;
   conteoPorCajero: Record<string, number>;
   meId: string | null;
   activeUsuarioId: string | null;
@@ -34,7 +34,7 @@ export function DesgloseCajeros({
 
   const totalVentas = cajeros.reduce((s, c) => s + c.total, 0);
   const totalConteo = cajeros.reduce(
-    (s, c) => s + (c.usuarioId ? (conteoPorCajero[c.usuarioId] ?? 0) : 0),
+    (s, c) => s + (c.userId ? (conteoPorCajero[c.userId] ?? 0) : 0),
     0,
   );
 
@@ -47,16 +47,16 @@ export function DesgloseCajeros({
       </div>
       <div className="divide-y">
         {cajeros.map((c) => {
-          const activo = c.usuarioId === activeUsuarioId;
+          const activo = c.userId === activeUsuarioId;
           const label =
-            c.nombre ??
-            (c.usuarioId === meId ? t("cashier") : (c.usuarioId ?? "—").slice(0, 8));
-          const conteo = c.usuarioId ? (conteoPorCajero[c.usuarioId] ?? 0) : 0;
+            c.name ??
+            (c.userId === meId ? t("cashier") : (c.userId ?? "—").slice(0, 8));
+          const conteo = c.userId ? (conteoPorCajero[c.userId] ?? 0) : 0;
           return (
             <button
-              key={c.usuarioId ?? "sin"}
+              key={c.userId ?? "sin"}
               type="button"
-              onClick={() => onPick(c.usuarioId)}
+              onClick={() => onPick(c.userId)}
               className={cn(
                 "grid w-full grid-cols-[1fr_7rem_7rem] gap-x-3 px-4 py-2 text-left text-sm transition-colors hover:bg-accent/40",
                 activo && "bg-accent/60",

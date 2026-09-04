@@ -31,11 +31,11 @@ type MenuNode = ProfileMenuItem & { children: MenuNode[] }
 
 function buildTree(items: ProfileMenuItem[]): MenuNode[] {
   const byClave = new Map<string, MenuNode>()
-  for (const i of items) byClave.set(i.clave, { ...i, children: [] })
+  for (const i of items) byClave.set(i.slug, { ...i, children: [] })
   const roots: MenuNode[] = []
   for (const i of items) {
-    const node = byClave.get(i.clave)!
-    const parent = i.parentClave ? byClave.get(i.parentClave) : undefined
+    const node = byClave.get(i.slug)!
+    const parent = i.parentSlug ? byClave.get(i.parentSlug) : undefined
     if (parent) parent.children.push(node)
     else roots.push(node)
   }
@@ -89,8 +89,8 @@ export function EditorRolUnificado() {
         setVisibles(
           new Set(
             menu
-              .filter((i) => i.tipo !== "grupo" && i.tipo !== "separador" && i.allowed)
-              .map((i) => i.clave)
+              .filter((i) => i.type !== "grupo" && i.type !== "separador" && i.allowed)
+              .map((i) => i.slug)
           )
         )
         setPermisosRol(new Set(permisosDelRol))
@@ -111,8 +111,8 @@ export function EditorRolUnificado() {
   }, [roleId, loadRole])
 
   function labelDe(n: ProfileMenuItem): string {
-    if (n.labelCustom) return n.labelCustom
-    return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.clave
+    if (n.customLabel) return n.customLabel
+    return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.slug
   }
 
   function toggleVisible(clave: string, on: boolean) {
@@ -158,10 +158,10 @@ export function EditorRolUnificado() {
   }
 
   function renderNode(n: MenuNode, depth: number): React.ReactNode {
-    if (n.tipo === "separador") return null
-    if (n.tipo === "grupo") {
+    if (n.type === "separador") return null
+    if (n.type === "grupo") {
       return (
-        <div key={n.clave} className="space-y-1">
+        <div key={n.slug} className="space-y-1">
           <p className="pt-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             {labelDe(n)}
           </p>
@@ -170,31 +170,31 @@ export function EditorRolUnificado() {
       )
     }
     const modulo = n.requiresPermiso?.split(".")[0]
-    const verbos = modulo ? permisos.filter((p) => p.modulo === modulo) : []
+    const verbos = modulo ? permisos.filter((p) => p.module === modulo) : []
     // parentClave es texto libre (menu-admin.tsx): un ítem real puede terminar anidado bajo OTRO
     // ítem, no solo bajo un grupo. Si no se recorren sus children acá, quedan invisibles y sin
     // forma de editarlos en esta pantalla.
     return (
-      <div key={n.clave}>
+      <div key={n.slug}>
         <div
           className="flex flex-wrap items-center gap-3 border-b py-2"
           style={{ marginLeft: (depth - 1) * 16 }}
         >
           <Switch
-            checked={visibles.has(n.clave)}
-            onCheckedChange={(v) => toggleVisible(n.clave, v)}
+            checked={visibles.has(n.slug)}
+            onCheckedChange={(v) => toggleVisible(n.slug, v)}
             aria-label={labelDe(n)}
           />
           <span className="min-w-40 text-sm">{labelDe(n)}</span>
           {verbos.length > 0 && (
             <div className="flex flex-wrap gap-3">
               {verbos.map((p) => (
-                <label key={p.clave} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <label key={p.slug} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Checkbox
-                    checked={permisosRol.has(p.clave)}
-                    onCheckedChange={(v) => toggleVerbo(p.clave, v === true)}
+                    checked={permisosRol.has(p.slug)}
+                    onCheckedChange={(v) => toggleVerbo(p.slug, v === true)}
                   />
-                  <span className="font-mono">{p.accion}</span>
+                  <span className="font-mono">{p.action}</span>
                 </label>
               ))}
             </div>
@@ -219,7 +219,7 @@ export function EditorRolUnificado() {
         <SelectContent>
           {roles?.map((r) => (
             <SelectItem key={r.id} value={r.id}>
-              {r.nombre}
+              {r.name}
             </SelectItem>
           ))}
         </SelectContent>

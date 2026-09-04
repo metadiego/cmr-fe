@@ -38,7 +38,7 @@ export default function PreparacionLegadoPage() {
     [query.dias, query.limite, centro],
   );
   const data = state.kind === "ok" ? state.data : null;
-  const filas = data?.filas ?? [];
+  const filas = data?.rows ?? [];
 
   function buscar() {
     const d = Math.max(1, Math.floor(Number(dias) || 7));
@@ -64,7 +64,7 @@ export default function PreparacionLegadoPage() {
 
       {data && (
         <>
-          {data.omitidos > 0 && (
+          {data.skipped > 0 && (
             <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
               {t("omitidos", { mostrados: filas.length, total: data.total })}
             </div>

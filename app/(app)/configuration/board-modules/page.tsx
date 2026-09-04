@@ -27,9 +27,9 @@ export default function SettingsModalModulosPage() {
   const { can, ready } = useCan();
 
   const { state } = useResource<TableroRegistro[]>(() => getTableros());
-  const boards = (state.kind === "ok" ? state.data : []).filter((b) => b.esVertical !== false && b.activo);
+  const boards = (state.kind === "ok" ? state.data : []).filter((b) => b.isVertical !== false && b.active);
   const [picked, setPicked] = React.useState<string>("");
-  const tablero = picked || boards[0]?.clave || "";
+  const tablero = picked || boards[0]?.slug || "";
 
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
@@ -61,7 +61,7 @@ export default function SettingsModalModulosPage() {
               </SelectTrigger>
               <SelectContent>
                 {boards.map((b) => (
-                  <SelectItem key={b.clave} value={b.clave}>
+                  <SelectItem key={b.slug} value={b.slug}>
                     {tRoot(b.labelKey)}
                   </SelectItem>
                 ))}
@@ -79,7 +79,7 @@ export default function SettingsModalModulosPage() {
               <SelectContent>
                 {centros.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.nombre}
+                    {c.name}
                   </SelectItem>
                 ))}
               </SelectContent>

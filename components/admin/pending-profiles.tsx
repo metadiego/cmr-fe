@@ -137,10 +137,10 @@ export function PendingProfiles() {
           {state.profiles.map((p) => (
             <TableRow key={p.id}>
               <TableCell className="font-medium">{p.email}</TableCell>
-              <TableCell>{[p.nombre, p.apellido].filter(Boolean).join(" ")}</TableCell>
+              <TableCell>{[p.name, p.lastName].filter(Boolean).join(" ")}</TableCell>
               <TableCell>{p.accessMode}</TableCell>
               <TableCell>
-                <Badge variant="secondary">{p.estado}</Badge>
+                <Badge variant="secondary">{p.status}</Badge>
               </TableCell>
               <TableCell className="space-x-2 text-right">
                 <Button

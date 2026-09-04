@@ -50,7 +50,7 @@ export function CuadreDetalle({
   const conteo = reporte.conteoEfectivo ?? null;
   // Denominaciones de MAYOR a menor (hoja del legado).
   const conteoLineas = React.useMemo(
-    () => [...(conteo?.lineas ?? [])].sort((a, b) => b.valor - a.valor),
+    () => [...(conteo?.lines ?? [])].sort((a, b) => b.value - a.value),
     [conteo],
   );
 
@@ -62,9 +62,9 @@ export function CuadreDetalle({
   }, [documentos]);
   const exoneradas = (trib?.facturasExoneradas ?? []).map((id) => {
     const d = docPorId.get(id);
-    return { id, numero: d?.numero ?? null, paciente: d?.paciente ?? null };
+    return { id, numero: d?.number ?? null, paciente: d?.patient ?? null };
   });
-  const hayExonerado = !!trib && trib.exonerado.monto > 0;
+  const hayExonerado = !!trib && trib.exonerado.amount > 0;
 
   function imprimir() {
     if (typeof window === "undefined") return;
@@ -165,10 +165,10 @@ export function CuadreDetalle({
                   <tr><td colSpan={3} className="px-4 py-3 text-center text-muted-foreground">{td("sinConteo")}</td></tr>
                 )}
                 {conteoLineas.map((l, i) => (
-                  <tr key={l.denominacionId ?? `${l.valor}-${i}`}>
-                    <td className="px-4 py-2 text-right tabular-nums">{l.cantidad}</td>
-                    <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{money(l.valor)}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{money(l.monto)}</td>
+                  <tr key={l.denominationId ?? `${l.value}-${i}`}>
+                    <td className="px-4 py-2 text-right tabular-nums">{l.quantity}</td>
+                    <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{money(l.value)}</td>
+                    <td className="px-4 py-2 text-right tabular-nums">{money(l.amount)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -200,8 +200,8 @@ export function CuadreDetalle({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                <TribRow label={td("gravado")} p={trib.gravado} />
-                <TribRow label={td("exento")} p={trib.exento} />
+                <TribRow label={td("gravado")} p={trib.taxable} />
+                <TribRow label={td("exento")} p={trib.exempt} />
                 <TribRow label={td("exonerado")} p={trib.exonerado} dim={!hayExonerado} />
               </tbody>
             </table>
@@ -250,12 +250,12 @@ export function CuadreDetalle({
               <tbody className="divide-y">
                 {documentos.map((d) => (
                   <tr key={d.id}>
-                    <td className="px-4 py-2 font-mono tabular-nums">{d.numero || "—"}</td>
+                    <td className="px-4 py-2 font-mono tabular-nums">{d.number || "—"}</td>
                     {/* Sin récord = celda vacía (no "null" ni guion raro). */}
-                    <td className="px-4 py-2 tabular-nums text-muted-foreground">{d.record || ""}</td>
-                    <td className="px-4 py-2">{d.paciente || "—"}</td>
+                    <td className="px-4 py-2 tabular-nums text-muted-foreground">{d.medicalRecordNumber || ""}</td>
+                    <td className="px-4 py-2">{d.patient || "—"}</td>
                     {/* Quién facturó: usuario.nombre; null (o nombre null = llave) → "—", nunca el id. */}
-                    <td className="px-4 py-2">{d.usuario?.nombre || "—"}</td>
+                    <td className="px-4 py-2">{d.user?.name || "—"}</td>
                     {/* Forma de pago YA resuelta en siglas: pintar tal cual. */}
                     <td className="px-4 py-2 font-mono text-xs">{d.formaPago || "—"}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{money(d.total)}</td>
@@ -285,11 +285,11 @@ export function CuadreDetalle({
               <tbody className="divide-y">
                 {devoluciones.map((dev) => (
                   <tr key={dev.id}>
-                    <td className="px-4 py-2 font-mono tabular-nums">{dev.numero != null ? String(dev.numero) : "—"}</td>
+                    <td className="px-4 py-2 font-mono tabular-nums">{dev.number != null ? String(dev.number) : "—"}</td>
                     <td className="px-4 py-2 text-right font-medium tabular-nums text-destructive">
-                      −{money(dev.montoDevuelto)}
+                      −{money(dev.refundedAmount)}
                     </td>
-                    <td className="px-4 py-2 text-muted-foreground">{dev.motivo || "—"}</td>
+                    <td className="px-4 py-2 text-muted-foreground">{dev.reason || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -305,11 +305,11 @@ function TribRow({ label, p, dim }: { label: string; p: TributarioPartida; dim?:
   return (
     <tr className={dim ? "text-muted-foreground" : undefined}>
       <td className="px-4 py-2 font-medium">{label}</td>
-      <td className="px-4 py-2 text-right tabular-nums">{money(p.monto)}</td>
-      <td className="px-4 py-2 text-right tabular-nums">{money(p.descuento)}</td>
+      <td className="px-4 py-2 text-right tabular-nums">{money(p.amount)}</td>
+      <td className="px-4 py-2 text-right tabular-nums">{money(p.discount)}</td>
       <td className="px-4 py-2 text-right tabular-nums">{money(p.base)}</td>
-      <td className="px-4 py-2 text-right tabular-nums">{money(p.impuesto)}</td>
-      <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{p.lineas}</td>
+      <td className="px-4 py-2 text-right tabular-nums">{money(p.tax)}</td>
+      <td className="px-4 py-2 text-right tabular-nums text-muted-foreground">{p.lines}</td>
     </tr>
   );
 }
@@ -368,8 +368,8 @@ function buildPrintHtml(args: {
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
   const conteo = reporte.conteoEfectivo ?? null;
-  const conteoLineas = [...(conteo?.lineas ?? [])].sort((a, b) => b.valor - a.valor);
-  const hayExonerado = !!trib && trib.exonerado.monto > 0;
+  const conteoLineas = [...(conteo?.lines ?? [])].sort((a, b) => b.value - a.value);
+  const hayExonerado = !!trib && trib.exonerado.amount > 0;
 
   const conteoBlock = `<h2>${esc(L.conteoEfectivo)}</h2>${
     !conteo
@@ -378,7 +378,7 @@ function buildPrintHtml(args: {
          <tbody>${
            conteoLineas.length
              ? conteoLineas
-                 .map((l) => `<tr><td class="r mono">${esc(l.cantidad)}</td><td class="r mono dim">${esc(money(l.valor))}</td><td class="r mono">${esc(money(l.monto))}</td></tr>`)
+                 .map((l) => `<tr><td class="r mono">${esc(l.quantity)}</td><td class="r mono dim">${esc(money(l.value))}</td><td class="r mono">${esc(money(l.amount))}</td></tr>`)
                  .join("")
              : `<tr><td colspan="3" class="dim">${esc(L.sinConteo)}</td></tr>`
          }</tbody>
@@ -402,15 +402,15 @@ function buildPrintHtml(args: {
     .join("");
 
   const tribRow = (label: string, p: TributarioPartida, dim = false) =>
-    `<tr class="${dim ? "dim" : ""}"><td>${esc(label)}</td><td class="r mono">${esc(money(p.monto))}</td><td class="r mono">${esc(money(p.descuento))}</td><td class="r mono">${esc(money(p.base))}</td><td class="r mono">${esc(money(p.impuesto))}</td><td class="r mono">${esc(p.lineas)}</td></tr>`;
+    `<tr class="${dim ? "dim" : ""}"><td>${esc(label)}</td><td class="r mono">${esc(money(p.amount))}</td><td class="r mono">${esc(money(p.discount))}</td><td class="r mono">${esc(money(p.base))}</td><td class="r mono">${esc(money(p.tax))}</td><td class="r mono">${esc(p.lines)}</td></tr>`;
 
   const tribBlock = trib
     ? `<h2>${esc(L.tributario)}</h2>
        <table>
          <thead><tr><th></th><th class="r">${esc(L.colMonto)}</th><th class="r">${esc(L.colDescuento)}</th><th class="r">${esc(L.colBase)}</th><th class="r">${esc(L.colImpuesto)}</th><th class="r">${esc(L.colLineas)}</th></tr></thead>
          <tbody>
-           ${tribRow(L.gravado, trib.gravado)}
-           ${tribRow(L.exento, trib.exento)}
+           ${tribRow(L.gravado, trib.taxable)}
+           ${tribRow(L.exento, trib.exempt)}
            ${tribRow(L.exonerado, trib.exonerado, !hayExonerado)}
          </tbody>
        </table>
@@ -433,7 +433,7 @@ function buildPrintHtml(args: {
          <thead><tr><th>${esc(L.colCajero)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
          <tbody>${[...porCajero]
            .sort((a, b) => b.total - a.total)
-           .map((c) => `<tr><td>${esc(c.nombre || "—")}</td><td class="r mono">${esc(money(c.total))}</td></tr>`)
+           .map((c) => `<tr><td>${esc(c.name || "—")}</td><td class="r mono">${esc(money(c.total))}</td></tr>`)
            .join("")}</tbody>
          <tfoot><tr class="tot"><td class="r dim">${esc(L.whoTotal)}</td><td class="r mono">${esc(money(porCajero.reduce((sum, c) => sum + Number(c.total ?? 0), 0)))}</td></tr></tfoot>
        </table>`
@@ -442,7 +442,7 @@ function buildPrintHtml(args: {
   const docRows = documentos
     .map(
       (d) =>
-        `<tr><td class="mono">${esc(d.numero || "—")}</td><td class="mono dim">${esc(d.record || "")}</td><td>${esc(d.paciente || "—")}</td><td>${esc(d.usuario?.nombre || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
+        `<tr><td class="mono">${esc(d.number || "—")}</td><td class="mono dim">${esc(d.medicalRecordNumber || "")}</td><td>${esc(d.patient || "—")}</td><td>${esc(d.user?.name || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
     )
     .join("");
   const docBlock = `<h2>${esc(L.documentos)} (${documentos.length})</h2>
@@ -458,7 +458,7 @@ function buildPrintHtml(args: {
          <tbody>${devoluciones
            .map(
              (d) =>
-               `<tr><td class="mono">${esc(d.numero != null ? d.numero : "—")}</td><td class="r mono rojo">−${esc(money(d.montoDevuelto))}</td><td class="dim">${esc(d.motivo || "—")}</td></tr>`,
+               `<tr><td class="mono">${esc(d.number != null ? d.number : "—")}</td><td class="r mono rojo">−${esc(money(d.refundedAmount))}</td><td class="dim">${esc(d.reason || "—")}</td></tr>`,
            )
            .join("")}</tbody>
        </table>`

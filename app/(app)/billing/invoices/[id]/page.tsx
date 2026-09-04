@@ -150,7 +150,7 @@ export default function FacturacionPage() {
       .then((f) =>
         Promise.all([
           Promise.resolve(f),
-          getCatalogoFacturacion(centro, f.citaId ? "consulta" : undefined),
+          getCatalogoFacturacion(centro, f.appointmentId ? "consulta" : undefined),
           getFormasPago(centro),
         ]),
       )
@@ -159,8 +159,8 @@ export default function FacturacionPage() {
         setFactura(f);
         setCatalogo(c);
         setFormas(fp);
-        if (f.pacienteId) {
-          getPaciente(String(f.pacienteId), centro).then((p) => active && setPaciente(p)).catch(() => {});
+        if (f.patientId) {
+          getPaciente(String(f.patientId), centro).then((p) => active && setPaciente(p)).catch(() => {});
         }
       })
       .catch((err) => toastError(err, tRoot))
@@ -227,19 +227,19 @@ export default function FacturacionPage() {
     let numPres = presupuestoNum;
     try {
       const r = await imprimirFactura(id, centro);
-      setFactura(r.factura);
-      facturaFinal = r.factura;
+      setFactura(r.invoice);
+      facturaFinal = r.invoice;
       // Presupuesto: guardar el nº que asigna el BE (se reusa al reimprimir) para pintarlo en el recibo y
       // en la ficha. Handoff imprimir-presupuesto-cuando-no-esta-cobrada.
-      if (r.documento === "presupuesto" && r.numeroPresupuesto) {
-        setPresupuestoNum(r.numeroPresupuesto);
-        numPres = r.numeroPresupuesto;
+      if (r.documento === "presupuesto" && r.quoteNumber) {
+        setPresupuestoNum(r.quoteNumber);
+        numPres = r.quoteNumber;
       }
-      if (!r.emitida && r.motivo) {
+      if (!r.emitida && r.reason) {
         // El motivo viene como labelKey del BE (factura.no_emitida_pendiente_pago, factura.ya_emitida…).
         // Ámbar solo cuando falta cobrar (hay `pendiente`); neutral para reimpresiones normales (ya
         // emitida/anulada/devuelta). Nunca como error: imprimir es válido igual.
-        const msg = tRoot.has(r.motivo) ? tRoot(r.motivo) : t("imprimirNoEmitida");
+        const msg = tRoot.has(r.reason) ? tRoot(r.reason) : t("imprimirNoEmitida");
         if (r.pendiente) toast.warning(msg);
         else toast.info(msg);
       }
@@ -397,28 +397,28 @@ export default function FacturacionPage() {
   if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
   if (!factura) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p></PageContainer>;
 
-  const estado = String(factura.estado ?? "");
+  const estado = String(factura.status ?? "");
   // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
   // El encabezado y el "Volver" deben reflejarlo (no mezclar: una venta general NO dice "Facturar consulta").
-  const esGeneral = !factura.citaId;
+  const esGeneral = !factura.appointmentId;
   const backHref = esGeneral ? "/billing/invoices" : "/boards/atencion";
-  const nombre = paciente ? (paciente.nombreMostrar || [paciente.nombres, paciente.apellidos].filter(Boolean).join(" ")) : "";
-  const record = paciente?.record ?? "";
+  const nombre = paciente ? (paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ")) : "";
+  const record = paciente?.medicalRecordNumber ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
   // emisor/medico/numeroDisplay/paciente) — sin fallbacks del FE.
   // El precio de cada componente del "Incluye:" viene resuelto en contenido[].precio (BE).
   // Solo mapeamos diasTratamiento del catálogo (kit → "Protocolo de N visitas").
   const diasCatalogo: Record<string, number> = {};
   catalogo.forEach((p) => {
-    const dt = (p as { diasTratamiento?: number | null }).diasTratamiento;
+    const dt = (p as { treatmentDays?: number | null }).treatmentDays;
     if (dt != null) diasCatalogo[p.id] = dt;
   });
   // Mapa formaPagoId → clave (del catálogo) para traducir las formas de pago en el recibo.
   const clavePorFormaId: Record<string, string> = {};
-  formas.forEach((f) => { if (f.clave) clavePorFormaId[f.id] = f.clave; });
+  formas.forEach((f) => { if (f.slug) clavePorFormaId[f.id] = f.slug; });
   const recibo = buildRecibo(factura, diasCatalogo, clavePorFormaId, presupuestoNum);
   // Un borrador con saldo pendiente es un PRESUPUESTO (no se emite al imprimir). Rige el rótulo del botón.
-  const esPresupuesto = estado === "borrador" && n(factura.total) - n(factura.montoAbonado) > 0.005;
+  const esPresupuesto = estado === "borrador" && n(factura.total) - n(factura.paidAmount) > 0.005;
 
   return (
     <PageContainer>
@@ -434,7 +434,7 @@ export default function FacturacionPage() {
         }
         description={
           <>
-            {paciente?.docId && <p className="text-xs text-muted-foreground">ID {paciente.docId}</p>}
+            {paciente?.documentId && <p className="text-xs text-muted-foreground">ID {paciente.documentId}</p>}
             {/* Usuario responsable (de él salen las estadísticas de quién vende). Corregible con permiso;
                 el BE decide si escribe en creadoPor (borrador) o quién cobró (emitida). Handoff usuario-de-la-factura. */}
             <UsuarioResponsable
@@ -463,9 +463,9 @@ export default function FacturacionPage() {
             {record && (
               <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
             )}
-            {factura.numero != null && (
+            {factura.number != null && (
               <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
-                {factura.serie ? `${factura.serie}-` : "F"}{String(factura.numero)}
+                {factura.series ? `${factura.series}-` : "F"}{String(factura.number)}
               </span>
             )}
             <EstadoBadge estado={estado} />
@@ -645,12 +645,12 @@ export default function FacturacionPage() {
           DESACTIVADO: el endpoint GET /facturas/resumen-paciente está roto en prod (valida contradictorio:
           exige pacienteId como UUID y a la vez lo rechaza como propiedad → 400 con cualquier llamada). Ver
           docs/specs/resumen-paciente-endpoint-roto-handoff-be.md. Poner en true cuando el BE lo acepte. */}
-      {RESUMEN_PACIENTE_ENABLED && factura.pacienteId && (
+      {RESUMEN_PACIENTE_ENABLED && factura.patientId && (
         <div className="mb-4 no-print">
           {/* El resumen exige centro (admin/master sin centro → 400). Usar el de la URL o, si falta, el de
               la propia factura (clinicId) → nunca 400 por centro al abrir el panel. */}
           <ResumenPacientePanel
-            pacienteId={String(factura.pacienteId)}
+            pacienteId={String(factura.patientId)}
             facturaActualId={id}
             centro={centro ?? (factura as { clinicId?: string }).clinicId ?? undefined}
           />
@@ -711,19 +711,19 @@ function Editor({
   const { can } = useCan();
   const puedeUpdate = can("factura.update");
   const serverItems = React.useMemo(() => factura.items ?? [], [factura.items]);
-  const estado = String(factura.estado ?? "");
+  const estado = String(factura.status ?? "");
   const esBorrador = estado === "borrador";
   // General = sin cita (productos/servicios). Consulta = con cita (ya funciona perfecto → no se
   // toca). Las features del POS general (IVU por ítem, exento, hook de sesiones) SOLO aplican a
   // general; el editor de consulta queda idéntico a antes. Comparten motor, separadas al facturar.
-  const esGeneral = !factura.citaId;
+  const esGeneral = !factura.appointmentId;
 
   // Lista de precios de la factura (se fija al crear). El server resuelve cada precio por esta
   // lista (fallback a efectivo). Solo la mostramos; no la recalculamos en el cliente.
   const listasRes = useResource<TipoPrecio[]>(() => listTiposPrecio(), []);
   const listaNombre =
     listasRes.state.kind === "ok"
-      ? (listasRes.state.data.find((l) => l.id === (factura as { tipoPrecioId?: string }).tipoPrecioId)?.nombre ?? null)
+      ? (listasRes.state.data.find((l) => l.id === (factura as { priceTypeId?: string }).priceTypeId)?.name ?? null)
       : null;
   // Impuestos APLICABLES: solo los que NO son componentes de desglose (parentId null) y están activos.
   // NO hay "impuesto por defecto" (regla del dueño): el FE NO autoselecciona ni manda impuestoId al crear
@@ -732,15 +732,15 @@ function Editor({
   // Handoff HANDOFF-ivu-compuesto-y-corregir-impuesto-de-linea.
   const impuestosRes = useResource<Impuesto[]>(() => listImpuestos(), []);
   const impuestosAplicables = React.useMemo(
-    () => (impuestosRes.state.kind === "ok" ? impuestosRes.state.data.filter((i) => !i.parentId && i.activo) : []),
+    () => (impuestosRes.state.kind === "ok" ? impuestosRes.state.data.filter((i) => !i.parentId && i.active) : []),
     [impuestosRes.state],
   );
 
   // Ediciones locales (cantidad/precio) por item → cálculo INSTANTÁNEO al teclear;
   // se persiste al salir del campo. Sembrado del servidor (el padre remonta al guardar).
-  type Edit = { cantidad: number; precioUnitario: number };
+  type Edit = { quantity: number; unitPrice: number };
   const [edits, setEdits] = React.useState<Record<string, Edit>>(() =>
-    Object.fromEntries(serverItems.map((it) => [it.id, { cantidad: n(it.cantidad) || 1, precioUnitario: n(it.precioUnitario) }])),
+    Object.fromEntries(serverItems.map((it) => [it.id, { quantity: n(it.quantity) || 1, unitPrice: n(it.unitPrice) }])),
   );
 
   // Importe de LÍNEA = el del BE (`item.total`, ya incluye la cantidad EFECTIVA × precio con sus
@@ -749,33 +749,33 @@ function Editor({
   // (efectiva/base) para que "24 × 70" lea coherente; al salir del campo el BE recomputa el total real.
   const lineTotal = (it: FacturaItem) => {
     const e = edits[it.id];
-    const editing = e && (e.cantidad !== n(it.cantidad) || e.precioUnitario !== n(it.precioUnitario));
+    const editing = e && (e.quantity !== n(it.quantity) || e.unitPrice !== n(it.unitPrice));
     if (!editing) return n(it.total);
-    const base = n(it.cantidad) || 1;
+    const base = n(it.quantity) || 1;
     const mult = base ? cantEfectiva(it) / base : 1;
-    return e.cantidad * mult * e.precioUnitario;
+    return e.quantity * mult * e.unitPrice;
   };
   // Totales de CABECERA = los del BE (subtotal/descuento/impuesto/total). No se recalculan en el cliente.
   const subtotal = n(factura.subtotal) || serverItems.reduce((s, it) => s + n(it.total), 0);
-  const descuento = n(factura.descuento);
-  const impuesto = n(factura.impuesto);
+  const descuento = n(factura.discount);
+  const impuesto = n(factura.tax);
   // Desglose de impuestos del BE (impuestos[] con nombre/tasa/monto). Data-driven: N renglones,
   // sin hardcodear "11.5%". El total NO se recomputa aquí. Vacío → una sola línea (o exento).
   // IVU en dos renglones (Estatal 10.5% + Municipal 1%) tal cual los proyecta el BE. NO se filtra por
   // monto>0: un municipal en 0,00 de una línea gravada debe verse (su ausencia se lee como error).
   // Exento → lista vacía (no ceros). Handoff HANDOFF-ivu-estatal-y-municipal.
-  const impuestosDesglose = (factura as { impuestos?: { nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [];
+  const impuestosDesglose = (factura as { taxes?: { name?: string; rate?: number; amount?: number }[] }).taxes ?? [];
   const total = n(factura.total) || Math.max(0, subtotal - descuento + impuesto);
-  const saldo = total - n(factura.montoAbonado);
+  const saldo = total - n(factura.paidAmount);
 
   function setEdit(itemId: string, p: Partial<Edit>) {
-    setEdits((m) => ({ ...m, [itemId]: { ...(m[itemId] ?? { cantidad: 1, precioUnitario: 0 }), ...p } }));
+    setEdits((m) => ({ ...m, [itemId]: { ...(m[itemId] ?? { quantity: 1, unitPrice: 0 }), ...p } }));
   }
   function persist(it: FacturaItem) {
     const e = edits[it.id];
     if (!e) return;
-    if (e.cantidad !== n(it.cantidad) || e.precioUnitario !== n(it.precioUnitario)) {
-      run(() => actualizarItem(id, it.id, { cantidad: e.cantidad, precioUnitario: e.precioUnitario }, centro));
+    if (e.quantity !== n(it.quantity) || e.unitPrice !== n(it.unitPrice)) {
+      run(() => actualizarItem(id, it.id, { quantity: e.quantity, unitPrice: e.unitPrice }, centro));
     }
   }
   // Toggle IVU por línea. WORKAROUND: PUT items no acepta `gravado` (UpdateItemDto no lo
@@ -784,17 +784,17 @@ function Editor({
   // NO se manda impuestoId: al quedar gravada, el servidor resuelve el impuesto correcto por la cascada
   // del precio (así no se pierde el Municipal). Handoff HANDOFF-ivu-compuesto-y-corregir-impuesto-de-linea.
   function toggleGravado(it: FacturaItem) {
-    const nuevoGravado = !it.gravado;
+    const nuevoGravado = !it.taxable;
     run(async () => {
       await eliminarItem(id, it.id, centro);
       await agregarItem(
         id,
         {
-          productoId: it.productoId,
-          descripcion: it.descripcion,
-          cantidad: n(it.cantidad),
-          precioUnitario: n(it.precioUnitario),
-          gravado: nuevoGravado,
+          productId: it.productId,
+          description: it.description,
+          quantity: n(it.quantity),
+          unitPrice: n(it.unitPrice),
+          taxable: nuevoGravado,
         },
         centro,
       );
@@ -805,8 +805,8 @@ function Editor({
   // el POS avisa "N sesiones por entregar" (hoy null hasta cargar láser/suero; sin enlace
   // porque el tablero de frontdesk aún no existe en el FE).
   const sesionesPorEntregar = serverItems
-    .filter((it) => String(it.modoDescarga) === "a_la_entrega")
-    .reduce((s, it) => s + (n(it.sesiones) || 0), 0);
+    .filter((it) => String(it.deductionMode) === "a_la_entrega")
+    .reduce((s, it) => s + (n(it.sessions) || 0), 0);
 
   // Kits con opcionales: la línea de un producto compuesto ofrece incluir/excluir componentes.
   const prodById = React.useMemo(() => {
@@ -814,7 +814,7 @@ function Editor({
     catalogo.forEach((p) => m.set(p.id, p));
     return m;
   }, [catalogo]);
-  const esKit = (it: FacturaItem) => prodById.get(String(it.productoId))?.tipo === "compuesto";
+  const esKit = (it: FacturaItem) => prodById.get(String(it.productId))?.type === "compuesto";
   const [opcItemId, setOpcItemId] = React.useState<string | null>(null);
   // Personalizar el kit de una línea (quitar/cambiar cantidad/agregar componentes) → lo que entra a frontdesk.
   const [kitItem, setKitItem] = React.useState<FacturaItem | null>(null);
@@ -822,7 +822,7 @@ function Editor({
   const [impuestoItem, setImpuestoItem] = React.useState<FacturaItem | null>(null);
   // Impuestos de UNA línea, discriminados (Estatal/Municipal…), tal cual los proyecta el BE.
   const impuestosDeLinea = (it: FacturaItem) =>
-    (it as { impuestos?: { clave?: string; nombre?: string; tasa?: number; monto?: number }[] }).impuestos ?? [];
+    (it as { taxes?: { slug?: string; name?: string; rate?: number; amount?: number }[] }).taxes ?? [];
 
   // Multiplicadores (láser: áreas×días). Data-driven desde meta.multiplicadores; sin asumir cuáles ni cuántos.
   // Cantidad EFECTIVA = base × Π(multiplicadores). El label de cada clave sale de fac.col.<clave> (i18n).
@@ -833,7 +833,7 @@ function Editor({
   };
   const cantEfectiva = (it: FacturaItem): number => {
     const m = multsDe(it);
-    const base = n(it.cantidad) || 1;
+    const base = n(it.quantity) || 1;
     return m ? Object.values(m).reduce((p, v) => p * (Number(v) || 1), base) : base;
   };
   const multTexto = (m: Record<string, number>): string =>
@@ -873,11 +873,11 @@ function Editor({
                   <TableEmpty colSpan={4 + (esGeneral ? 1 : 0) + (esBorrador ? 1 : 0)}>{t("noItems")}</TableEmpty>
                 )}
                 {serverItems.map((it) => {
-                  const e = edits[it.id] ?? { cantidad: n(it.cantidad), precioUnitario: n(it.precioUnitario) };
+                  const e = edits[it.id] ?? { quantity: n(it.quantity), unitPrice: n(it.unitPrice) };
                   return (
                     <TableRow key={it.id}>
                       <TableCell>
-                        <span>{it.descripcion ?? "—"}</span>
+                        <span>{it.description ?? "—"}</span>
                         {esBorrador && esKit(it) && (
                           <button
                             type="button"
@@ -907,7 +907,7 @@ function Editor({
                             {impuestosDeLinea(it).map((im, i) => (
                               <span key={i}>
                                 {i > 0 ? " · " : ""}
-                                {(im.nombre || "") + (im.tasa != null ? ` ${im.tasa}%` : "")}: {money(im.monto)}
+                                {(im.name || "") + (im.rate != null ? ` ${im.rate}%` : "")}: {money(im.amount)}
                               </span>
                             ))}
                           </span>
@@ -930,22 +930,22 @@ function Editor({
                           <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
                         ) : esBorrador ? (
                           <Input
-                            value={String(e.cantidad)}
-                            onChange={(ev) => setEdit(it.id, { cantidad: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
+                            value={String(e.quantity)}
+                            onChange={(ev) => setEdit(it.id, { quantity: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
                             onBlur={() => persist(it)}
                             className="h-7 w-16 text-right tabular-nums" inputMode="numeric" disabled={busy}
                           />
-                        ) : <span className="tabular-nums">{n(it.cantidad)}</span>}
+                        ) : <span className="tabular-nums">{n(it.quantity)}</span>}
                       </TableCell>
                       <TableCell className="text-right">
                         {esBorrador ? (
                           <Input
-                            value={String(e.precioUnitario)}
-                            onChange={(ev) => setEdit(it.id, { precioUnitario: Math.max(0, Number(ev.target.value) || 0) })}
+                            value={String(e.unitPrice)}
+                            onChange={(ev) => setEdit(it.id, { unitPrice: Math.max(0, Number(ev.target.value) || 0) })}
                             onBlur={() => persist(it)}
                             className="h-7 w-24 text-right tabular-nums" inputMode="decimal" disabled={busy}
                           />
-                        ) : <span className="tabular-nums">{money(it.precioUnitario)}</span>}
+                        ) : <span className="tabular-nums">{money(it.unitPrice)}</span>}
                       </TableCell>
                       {esGeneral && (
                         <TableCell className="text-center">
@@ -956,17 +956,17 @@ function Editor({
                               disabled={busy}
                               className={
                                 "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
-                                (it.gravado
+                                (it.taxable
                                   ? "bg-info/15 text-info-foreground"
                                   : "bg-muted text-muted-foreground")
                               }
                               title={t("ivuToggleHint")}
                             >
-                              {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                              {it.taxable ? t("ivuGravado") : t("ivuExento")}
                             </button>
                           ) : (
                             <span className="text-[11px] text-muted-foreground">
-                              {it.gravado ? t("ivuGravado") : t("ivuExento")}
+                              {it.taxable ? t("ivuGravado") : t("ivuExento")}
                             </span>
                           )}
                         </TableCell>
@@ -989,7 +989,7 @@ function Editor({
           <AddItem
             catalogo={catalogo}
             showIvu={esGeneral}
-            tipoPrecioId={(factura as { tipoPrecioId?: string }).tipoPrecioId ?? null}
+            tipoPrecioId={(factura as { priceTypeId?: string }).priceTypeId ?? null}
             tenant={(factura as { clinicId?: string }).clinicId ?? centro ?? null}
             disabled={busy}
             onAdd={(p) => run(() => agregarItem(id, p, centro))}
@@ -1005,12 +1005,12 @@ function Editor({
           <Row label={t("discount")} value={`- ${money(descuento)}`} />
           {impuestosDesglose.length > 0
             ? impuestosDesglose.map((im, i) => (
-                <Row key={i} label={(im.nombre || t("tax")) + (im.tasa != null ? ` (${im.tasa}%)` : "")} value={money(im.monto)} />
+                <Row key={i} label={(im.name || t("tax")) + (im.rate != null ? ` (${im.rate}%)` : "")} value={money(im.amount)} />
               ))
             : <Row label={t("tax")} value={money(impuesto)} />}
           <EnvioRow
-            key={`envio-${n((factura as { envio?: number }).envio)}`}
-            envio={n((factura as { envio?: number }).envio)}
+            key={`envio-${n((factura as { shipping?: number }).shipping)}`}
+            envio={n((factura as { shipping?: number }).shipping)}
             editable={esBorrador && puedeUpdate}
             showWhenZero={esBorrador && puedeUpdate}
             disabled={busy}
@@ -1022,7 +1022,7 @@ function Editor({
         </Card>
 
         {esBorrador && (
-          <DescuentoGlobal disabled={busy} subtotal={subtotal} descuentoActual={descuento} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { tipo, valor } as never, centro))} applyLabel={t("applyDiscount")} />
+          <DescuentoGlobal disabled={busy} subtotal={subtotal} descuentoActual={descuento} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { type: tipo, value: valor } as never, centro))} applyLabel={t("applyDiscount")} />
         )}
 
         {esBorrador && esGeneral && (
@@ -1031,9 +1031,9 @@ function Editor({
             <input
               type="checkbox"
               className="size-4"
-              checked={!!(factura as { exento?: boolean }).exento}
+              checked={!!(factura as { exempt?: boolean }).exempt}
               disabled={busy}
-              onChange={(e) => run(() => setExento(id, { exento: e.target.checked }, centro))}
+              onChange={(e) => run(() => setExento(id, { exempt: e.target.checked }, centro))}
             />
           </label>
         )}
@@ -1048,7 +1048,7 @@ function Editor({
           <div className="space-y-4">
             {/* Primero se cobra, después se emite: el cobro es el paso PREVIO a emitir (regla
                 cobrar-antes-de-emitir). El BE ya acepta pagos en borrador. */}
-            <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.montoAbonado)} />
+            <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} />
             {/* Emitir solo cuando está SALDADA (nada por cobrar). Cortesía / 100% de descuento = total 0
                 → saldo 0 → habilitado de un clic. Con saldo pendiente, deshabilitado y con el importe que
                 falta a la vista (no hay que pulsarlo para enterarse). El BE es la autoridad: si igual llega
@@ -1062,7 +1062,7 @@ function Editor({
             </Button>
           </div>
         ) : (
-          <PagosFactura pagos={factura.pagos ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.montoAbonado)} />
+          <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} />
         )}
       </aside>
 
@@ -1165,7 +1165,7 @@ function RegenerarDisponibilidadDialog({
                 <AlertDescription>
                   <ul className="list-disc pl-5">
                     {res.detalle.map((d, i) => (
-                      <li key={i}>{t("regen.linea", { sesiones: d.sesiones ?? 0, sku: d.sku ?? "—" })}</li>
+                      <li key={i}>{t("regen.linea", { sesiones: d.sessions ?? 0, sku: d.sku ?? "—" })}</li>
                     ))}
                   </ul>
                 </AlertDescription>
@@ -1295,13 +1295,13 @@ function OpcionalesDialog({
   const opcionales = res.state.kind === "ok" ? res.state.data : [];
   const [ov, setOv] = React.useState<Record<string, boolean>>({});
   const [saving, setSaving] = React.useState(false);
-  const eff = (o: ItemOpcional) => ov[o.componenteId] ?? o.incluido;
-  const extra = opcionales.filter(eff).reduce((s, o) => s + (o.precioIncremental ?? 0), 0);
+  const eff = (o: ItemOpcional) => ov[o.componentId] ?? o.incluido;
+  const extra = opcionales.filter(eff).reduce((s, o) => s + (o.incrementalPrice ?? 0), 0);
 
   async function guardar() {
     setSaving(true);
     try {
-      const incluidos = opcionales.filter(eff).map((o) => o.componenteId);
+      const incluidos = opcionales.filter(eff).map((o) => o.componentId);
       await setItemOpcionales(facturaId, itemId, incluidos, centro);
       onSaved();
     } catch (err) {
@@ -1322,13 +1322,13 @@ function OpcionalesDialog({
             <p className="py-6 text-center text-sm text-muted-foreground">{t("opcionalesEmpty")}</p>
           )}
           {opcionales.map((o) => (
-            <label key={o.componenteId} className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm">
+            <label key={o.componentId} className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm">
               <span className="flex items-center gap-2">
-                <input type="checkbox" checked={eff(o)} onChange={() => setOv((m) => ({ ...m, [o.componenteId]: !eff(o) }))} />
-                <span className="font-medium">{o.nombre}</span>
-                {o.cantidad > 1 && <span className="text-xs text-muted-foreground">×{o.cantidad}</span>}
+                <input type="checkbox" checked={eff(o)} onChange={() => setOv((m) => ({ ...m, [o.componentId]: !eff(o) }))} />
+                <span className="font-medium">{o.name}</span>
+                {o.quantity > 1 && <span className="text-xs text-muted-foreground">×{o.quantity}</span>}
               </span>
-              <span className="tabular-nums text-muted-foreground">+{money(o.precioIncremental)}</span>
+              <span className="tabular-nums text-muted-foreground">+{money(o.incrementalPrice)}</span>
             </label>
           ))}
         </div>
@@ -1374,25 +1374,25 @@ function PersonalizarKitDialog({
   const puedeAgregar = can("factura.kit_agregar");
 
   // Receta base del compuesto (BOM) + nombres de producto. Autocontenido, como ComponentesEditor.
-  const recetaRes = useResource<ProductoComponente[]>(() => listComponentes(String(item.productoId)), [item.productoId]);
+  const recetaRes = useResource<ProductoComponente[]>(() => listComponentes(String(item.productId)), [item.productId]);
   const prodRes = useResource<ProductoInv[]>(() => listProductos({}), []);
   const prodName = React.useMemo(() => {
     const m = new Map<string, string>();
-    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.nombre));
+    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.name));
     return m;
   }, [prodRes.state]);
 
   // Base = personalización ya guardada (si la hay) o la receta real (activa, no estimada). Los insumos
   // ESTIMADOS no se descargan ni entran a frontdesk → fuera de aquí.
-  const perso = (item.personalizacion as { componentes?: { productoId: string; cantidad: number }[] } | null)?.componentes;
+  const perso = (item.customization as { componentes?: { productId: string; quantity: number }[] } | null)?.componentes;
   const base: KitRow[] = React.useMemo(() => {
     if (Array.isArray(perso)) {
-      return perso.map((c) => ({ productoId: c.productoId, cantidad: Number(c.cantidad) || 0, nombre: prodName.get(c.productoId) ?? c.productoId }));
+      return perso.map((c) => ({ productoId: c.productId, cantidad: Number(c.quantity) || 0, nombre: prodName.get(c.productId) ?? c.productId }));
     }
     const receta = recetaRes.state.kind === "ok" ? recetaRes.state.data : [];
     return receta
-      .filter((c) => c.activo !== false && !c.estimado)
-      .map((c) => ({ productoId: c.componenteId, cantidad: Number(c.cantidad) || 0, nombre: prodName.get(c.componenteId) ?? c.componenteId }));
+      .filter((c) => c.active !== false && !c.estimated)
+      .map((c) => ({ productoId: c.componentId, cantidad: Number(c.quantity) || 0, nombre: prodName.get(c.componentId) ?? c.componentId }));
   }, [perso, recetaRes.state, prodName]);
 
   const [removed, setRemoved] = React.useState<Record<string, boolean>>({});
@@ -1429,7 +1429,7 @@ function PersonalizarKitDialog({
   async function guardar() {
     setSaving(true);
     try {
-      await personalizarKit(facturaId, item.id, finalRows.map((r) => ({ productoId: r.productoId, cantidad: r.cantidad })), centro);
+      await personalizarKit(facturaId, item.id, finalRows.map((r) => ({ productId: r.productoId, quantity: r.cantidad })), centro);
       onSaved();
     } catch (err) {
       toastError(err, tRoot);
@@ -1441,7 +1441,7 @@ function PersonalizarKitDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("kit.titulo", { nombre: item.descripcion ?? "" })}</DialogTitle>
+          <DialogTitle>{t("kit.titulo", { nombre: item.description ?? "" })}</DialogTitle>
         </DialogHeader>
 
         {cargando ? (
@@ -1492,7 +1492,7 @@ function PersonalizarKitDialog({
                   <ProductoPicker
                     value={nuevoId}
                     soloFisicos={false}
-                    onChange={(id, p) => { setNuevoId(id); setNuevoNombre(p?.nombre ?? ""); }}
+                    onChange={(id, p) => { setNuevoId(id); setNuevoNombre(p?.name ?? ""); }}
                     placeholder={t("kit.buscarProducto")}
                   />
                 </div>
@@ -1541,13 +1541,13 @@ function CorregirImpuestoDialog({
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const SIN = "__sin_impuesto__";
-  const [sel, setSel] = React.useState<string>(item.impuestoId ? String(item.impuestoId) : SIN);
+  const [sel, setSel] = React.useState<string>(item.taxId ? String(item.taxId) : SIN);
   const [saving, setSaving] = React.useState(false);
 
   async function guardar() {
     setSaving(true);
     try {
-      await actualizarItem(facturaId, item.id, { impuestoId: sel === SIN ? null : sel } as never, centro);
+      await actualizarItem(facturaId, item.id, { taxId: sel === SIN ? null : sel } as never, centro);
       onSaved();
     } catch (err) {
       toastError(err, tRoot);
@@ -1559,7 +1559,7 @@ function CorregirImpuestoDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("corregirImpuesto.titulo", { nombre: item.descripcion ?? "" })}</DialogTitle>
+          <DialogTitle>{t("corregirImpuesto.titulo", { nombre: item.description ?? "" })}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <label className="flex flex-col gap-1.5">
@@ -1571,8 +1571,8 @@ function CorregirImpuestoDialog({
                 <SelectItem value={SIN}>{t("corregirImpuesto.sinImpuesto")}</SelectItem>
                 {impuestos.map((im) => {
                   // El nombre del catálogo a veces YA trae la tasa ("IVU PR (11.5%)"): no duplicarla.
-                  const base = im.nombre || im.clave;
-                  const label = im.tasa != null && !/%/.test(base) ? `${base} (${im.tasa}%)` : base;
+                  const base = im.name || im.slug;
+                  const label = im.rate != null && !/%/.test(base) ? `${base} (${im.rate}%)` : base;
                   return <SelectItem key={im.id} value={im.id}>{label}</SelectItem>;
                 })}
               </SelectContent>
@@ -1621,7 +1621,7 @@ function CambiarPacienteDialog({
   );
   const shown = term.length >= 2 && res.state.kind === "ok" ? res.state.data : [];
   const loading = res.state.kind === "loading" && term.length >= 2;
-  const nombre = (p: PacienteBusqueda) => (p.nombreMostrar || `${p.nombres ?? ""} ${p.apellidos ?? ""}`.trim()) || t("patient");
+  const nombre = (p: PacienteBusqueda) => (p.displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim()) || t("patient");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1649,7 +1649,7 @@ function CambiarPacienteDialog({
                 <span className="min-w-0">
                   <span className="block truncate font-medium">{nombre(p)}</span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {p.record ? `#${p.record}` : ""} {p.docId ? `· ID ${p.docId}` : ""}
+                    {p.medicalRecordNumber ? `#${p.medicalRecordNumber}` : ""} {p.documentId ? `· ID ${p.documentId}` : ""}
                   </span>
                 </span>
                 {esActual && <span className="shrink-0 text-xs text-muted-foreground">{t("pacienteActual")}</span>}
@@ -1681,8 +1681,8 @@ function CabeceraDialog({
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const f = factura as unknown as {
-    medicoId?: string | null; medioId?: string | null;
-    facturarANombre?: string | null; facturarADocId?: string | null; facturarATipo?: string | null;
+    doctorId?: string | null; sourceId?: string | null;
+    billToName?: string | null; billToDocumentId?: string | null; billToType?: string | null;
   };
   const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
   const mediosRes = useResource<MedioFacturacion[]>(() => listMedios(centro), [centro]);
@@ -1690,11 +1690,11 @@ function CabeceraDialog({
   const medios = mediosRes.state.kind === "ok" ? mediosRes.state.data : [];
 
   // Sembrado con los valores actuales de la factura (el padre remonta por `key` al abrir → initializer fresco).
-  const [medicoId, setMedicoId] = React.useState<string>(f.medicoId ?? NONE);
-  const [medioId, setMedioId] = React.useState<string>(f.medioId ?? NONE);
-  const [terceroNombre, setTerceroNombre] = React.useState(f.facturarANombre ?? "");
-  const [terceroDoc, setTerceroDoc] = React.useState(f.facturarADocId ?? "");
-  const [terceroTipo, setTerceroTipo] = React.useState<"persona" | "empresa">(f.facturarATipo === "empresa" ? "empresa" : "persona");
+  const [medicoId, setMedicoId] = React.useState<string>(f.doctorId ?? NONE);
+  const [medioId, setMedioId] = React.useState<string>(f.sourceId ?? NONE);
+  const [terceroNombre, setTerceroNombre] = React.useState(f.billToName ?? "");
+  const [terceroDoc, setTerceroDoc] = React.useState(f.billToDocumentId ?? "");
+  const [terceroTipo, setTerceroTipo] = React.useState<"persona" | "empresa">(f.billToType === "empresa" ? "empresa" : "persona");
   const [saving, setSaving] = React.useState(false);
 
   async function guardar() {
@@ -1702,11 +1702,11 @@ function CabeceraDialog({
     const nombre = terceroNombre.trim();
     // ausente = no aplica; aquí somos autoritativos: null = limpiar cuando el campo va vacío.
     const payload: EditarCabeceraPayload = {
-      medicoId: medicoId === NONE ? null : medicoId,
-      medioId: medioId === NONE ? null : medioId,
-      facturarANombre: nombre || null,
-      facturarADocId: nombre ? (terceroDoc.trim() || null) : null,
-      facturarATipo: nombre ? terceroTipo : null,
+      doctorId: medicoId === NONE ? null : medicoId,
+      sourceId: medioId === NONE ? null : medioId,
+      billToName: nombre || null,
+      billToDocumentId: nombre ? (terceroDoc.trim() || null) : null,
+      billToType: nombre ? terceroTipo : null,
     };
     try {
       await editarCabeceraFactura(String(factura.id), payload, centro);
@@ -1731,7 +1731,7 @@ function CabeceraDialog({
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>{t("sinMedico")}</SelectItem>
-                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </label>
@@ -1741,7 +1741,7 @@ function CabeceraDialog({
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>{t("sinReferido")}</SelectItem>
-                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.nombre}</SelectItem>)}
+                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </label>
@@ -1791,15 +1791,15 @@ function UsuarioResponsable({
   sinUsuarioLabel: string;
   corregirLabel: string;
 }) {
-  const est = String(factura.estado ?? "");
+  const est = String(factura.status ?? "");
   const u = est === "borrador"
-    ? (factura.creadoPor ?? factura.emisor)
-    : (factura.emitidoPor ?? factura.emisor ?? factura.creadoPor);
+    ? (factura.createdBy ?? factura.emisor)
+    : (factura.issuedBy ?? factura.emisor ?? factura.createdBy);
   const esLlave = !!u?.esLlave;
   return (
     <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <span>
-        {label}: <span className="font-medium text-foreground">{esLlave ? integracionLabel : (u?.nombre || sinUsuarioLabel)}</span>
+        {label}: <span className="font-medium text-foreground">{esLlave ? integracionLabel : (u?.name || sinUsuarioLabel)}</span>
       </span>
       {puedeEditar && (
         <button type="button" onClick={onCorregir} className="no-print rounded-md border px-1.5 py-0.5 font-medium text-primary hover:bg-primary/10">
@@ -1831,8 +1831,8 @@ function UsuarioDialog({
   // admin «corregir usuario»), no al montar la pantalla de caja. Handoff selector-de-linea-sin-buscador.
   const perfilesRes = useResource<Perfil[]>(() => (open ? getProfiles() : Promise.resolve([])), [open]);
   const perfiles = perfilesRes.state.kind === "ok" ? perfilesRes.state.data : [];
-  const est = String(factura.estado ?? "");
-  const actual = ((est === "borrador" ? factura.creadoPor?.perfilId : factura.emitidoPor?.perfilId) ?? factura.emisor?.perfilId ?? "") as string;
+  const est = String(factura.status ?? "");
+  const actual = ((est === "borrador" ? factura.createdBy?.profileId : factura.issuedBy?.profileId) ?? factura.emisor?.profileId ?? "") as string;
   const [sel, setSel] = React.useState<string>(actual);
   const [saving, setSaving] = React.useState(false);
 
@@ -1840,7 +1840,7 @@ function UsuarioDialog({
     if (!sel) return;
     setSaving(true);
     try {
-      await editarCabeceraFactura(String(factura.id), { usuarioId: sel } as EditarCabeceraPayload, centro);
+      await editarCabeceraFactura(String(factura.id), { userId: sel } as EditarCabeceraPayload, centro);
       onSaved();
     } catch (err) {
       toastError(err, tRoot);
@@ -1858,7 +1858,7 @@ function UsuarioDialog({
             <Select value={sel} onValueChange={setSel}>
               <SelectTrigger><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
               <SelectContent>
-                {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+                {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </label>
@@ -1912,15 +1912,15 @@ function CatalogoCombobox({
   const searchRes = useResource<Producto[]>(
     () =>
       q.length >= 1
-        ? listCatalogoPrecios(tipoPrecioId ? { q, tipoPrecioId, limit: 50 } : { q, limit: 50 }, tenant ?? undefined)
-            .then((r) => r.items.map((row) => ({ id: row.productoId, nombre: row.nombre, sku: row.sku } as unknown as Producto)))
+        ? listCatalogoPrecios(tipoPrecioId ? { q, priceTypeId: tipoPrecioId, limit: 50 } : { q, limit: 50 }, tenant ?? undefined)
+            .then((r) => r.items.map((row) => ({ id: row.productId, name: row.name, sku: row.sku } as unknown as Producto)))
         : Promise.resolve([]),
     [q, tipoPrecioId, tenant],
   );
   const buscando = q.length >= 1 && searchRes.state.kind === "loading";
   const resultados = q.length >= 1 ? (searchRes.state.kind === "ok" ? searchRes.state.data : []) : catalogoInicial;
 
-  const etiqueta = selected ? (selected.sku ? `${selected.sku} — ${selected.nombre}` : selected.nombre) : "";
+  const etiqueta = selected ? (selected.sku ? `${selected.sku} — ${selected.name}` : selected.name) : "";
 
   return (
     <div ref={rootRef} className="relative">
@@ -1946,7 +1946,7 @@ function CatalogoCombobox({
               className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
             >
               {p.sku && <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.sku}</span>}
-              <span className="min-w-0">{p.nombre}</span>
+              <span className="min-w-0">{p.name}</span>
             </button>
           ))}
         </div>
@@ -1955,7 +1955,7 @@ function CatalogoCombobox({
   );
 }
 
-function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productoId: string; descripcion: string; cantidad: number; precioUnitario?: number; gravado?: boolean; meta?: Record<string, number | string> }) => void }) {
+function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => void }) {
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
   const [prodId, setProdId] = React.useState("");
@@ -1970,7 +1970,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
   const prod = resolve(prodId);
 
   // IVU (§2): el default nace del producto (gravado), NO fijo en ON. El cajero puede sobreescribir.
-  const gravadoEff = gravadoOverride ?? !!(prod as { gravado?: boolean } | undefined)?.gravado;
+  const gravadoEff = gravadoOverride ?? !!(prod as { taxable?: boolean } | undefined)?.taxable;
 
   // Columnas dinámicas por producto: días/áreas/sesiones/dosis. multiplicador→total, informativo→muestra.
   const colsRes = useResource<ColumnaFacturacion[]>(
@@ -1978,7 +1978,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
     [prodId, tenant],
   );
   const capturables = (colsRes.state.kind === "ok" ? colsRes.state.data : []).filter(
-    (c) => c.rol === "multiplicador" || c.rol === "informativo",
+    (c) => c.role === "multiplicador" || c.role === "informativo",
   );
   // Opciones INLINE de un select de captura (nuevo: `render.opciones` en la propia columna; antes los
   // select sacaban sus opciones de un catálogo). Sirve para cualquier select así declarado (p. ej. la ZONA
@@ -1987,22 +1987,22 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
     const r = c.render as { opciones?: { value: string; labelKey?: string }[] } | null;
     return Array.isArray(r?.opciones) ? r!.opciones : [];
   };
-  const esSelectCaptura = (c: ColumnaFacturacion) => c.tipo === "select" && opcionesDe(c).length > 0;
+  const esSelectCaptura = (c: ColumnaFacturacion) => c.type === "select" && opcionesDe(c).length > 0;
 
   // Autocálculo Dosis→Cantidad (potes/frascos): al cambiar la Dosis, Cantidad = ceil(dosis×días/unidadesPorEnvase).
   // unidadesPorEnvase (de NTPRODUCTOS.CapsulasXUni) y diasTratamiento vienen del catálogo (BE, en prod);
   // si faltan → cantidad manual, sin autocálculo.
-  const capsUnit = prod?.unidadesPorEnvase ?? null;
-  const diasTrat = prod?.diasTratamiento ?? 30; // fallback si el producto no tiene el dato
-  const dosisClave = capturables.find((c) => /dosis/i.test(c.clave))?.clave ?? null;
-  const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.clave))?.clave ?? null;
+  const capsUnit = prod?.unitsPerContainer ?? null;
+  const diasTrat = prod?.treatmentDays ?? 30; // fallback si el producto no tiene el dato
+  const dosisClave = capturables.find((c) => /dosis/i.test(c.slug))?.slug ?? null;
+  const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.slug))?.slug ?? null;
 
   // Defaults por columna (modelo del dueño): áreas = 1; días = cantidad (mismas visitas); resto vacío.
   // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
   const isArea = (c: string) => /[aá]rea/i.test(c);
   const isDias = (c: string) => /d[ií]a/i.test(c) && !/dosis/i.test(c);
   // áreas = preset del producto (areasDefault ?? 1); días = cantidad (mismas visitas). Data-driven (PR #158).
-  const areasDefault = (prod as { areasDefault?: number | null } | undefined)?.areasDefault ?? 1;
+  const areasDefault = (prod as { defaultAreas?: number | null } | undefined)?.defaultAreas ?? 1;
   const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? cant : "");
   const metaShown = (c: string) => metaVals[c] ?? defMeta(c);
 
@@ -2042,15 +2042,15 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
     () => {
       const p = resolve(prodId);
       if (!p) return Promise.resolve(null);
-      const q = p.sku ?? p.nombre;
-      const opts = tipoPrecioId ? { tipoPrecioId, q, limit: 50 } : { q, limit: 50 };
+      const q = p.sku ?? p.name;
+      const opts = tipoPrecioId ? { priceTypeId: tipoPrecioId, q, limit: 50 } : { q, limit: 50 };
       return listCatalogoPrecios(opts, tenant ?? undefined).then(async (res) => {
-        let row = res.items.find((r) => r.productoId === p.id) ?? null;
-        if (!row || row.precio == null) {
+        let row = res.items.find((r) => r.productId === p.id) ?? null;
+        if (!row || row.price == null) {
           const eff = await listCatalogoPrecios({ q, limit: 50 }, tenant ?? undefined);
-          row = eff.items.find((r) => r.productoId === p.id) ?? row;
+          row = eff.items.find((r) => r.productId === p.id) ?? row;
         }
-        return row?.precio ?? null;
+        return row?.price ?? null;
       });
     },
     [prodId, tipoPrecioId, tenant],
@@ -2059,7 +2059,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
   const precioLista = precioRes.state.kind === "ok" ? precioRes.state.data : null;
   const precioMostrado = precio !== "" ? precio : precioLista != null ? String(precioLista) : "";
   // Requeridos SIN llenar (p. ej. zona): bloquean agregar la línea → el aviso se ve ANTES de guardar.
-  const faltanRequeridos = capturables.filter((c) => c.requerido && String(metaShown(c.clave)).trim() === "");
+  const faltanRequeridos = capturables.filter((c) => c.required && String(metaShown(c.slug)).trim() === "");
   const canAdd = !!prodId && !disabled && !buscando && faltanRequeridos.length === 0;
 
   function pick(p: Producto) {
@@ -2072,7 +2072,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
     setMetaVals({});
     setPrecio("");
     // Cantidad = diasTratamiento del pack (TD12→12…). Si el producto no lo trae → campo VACÍO (no 1).
-    const dt = (p as { diasTratamiento?: number | null }).diasTratamiento;
+    const dt = (p as { treatmentDays?: number | null }).treatmentDays;
     setCant(dt != null ? String(dt) : "");
   }
 
@@ -2080,7 +2080,7 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
     if (!prod) return;
     // Solo mandamos `gravado` cuando lo SABEMOS (el producto lo trae) o el cajero lo tocó; si un producto
     // de búsqueda no trae el dato, se OMITE y el BE aplica el default del producto (no forzar «exento»).
-    const prodGravado = (prod as { gravado?: boolean | null }).gravado;
+    const prodGravado = (prod as { taxable?: boolean | null }).taxable;
     const gravadoKnown = prodGravado != null || gravadoOverride != null;
     const g = gravadoOverride ?? !!prodGravado;
     // Enviar SIEMPRE el precioUnitario resuelto (override del cajero ?? precio del catálogo por-sesión).
@@ -2091,19 +2091,19 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
     // (áreas, días…, el server calcula el total) y STRING para los select (p. ej. zona=rodilla).
     const meta: Record<string, number | string> = {};
     capturables.forEach((c) => {
-      const raw = metaShown(c.clave); // override del usuario o el default (áreas=1, días=cantidad)
+      const raw = metaShown(c.slug); // override del usuario o el default (áreas=1, días=cantidad)
       if (raw == null || raw.trim() === "") return;
-      if (esSelectCaptura(c)) { meta[c.clave] = raw; return; } // valor de opción (string)
-      if (!Number.isNaN(Number(raw))) meta[c.clave] = Number(raw);
+      if (esSelectCaptura(c)) { meta[c.slug] = raw; return; } // valor de opción (string)
+      if (!Number.isNaN(Number(raw))) meta[c.slug] = Number(raw);
     });
     onAdd({
-      productoId: prod.id,
-      descripcion: prod.nombre,
-      cantidad: Math.max(1, Math.floor(Number(cant) || 1)),
-      ...(precioUnitarioEff !== undefined ? { precioUnitario: precioUnitarioEff } : {}),
+      productId: prod.id,
+      description: prod.name,
+      quantity: Math.max(1, Math.floor(Number(cant) || 1)),
+      ...(precioUnitarioEff !== undefined ? { unitPrice: precioUnitarioEff } : {}),
       // Solo el flag gravado (cuando se conoce): NO se manda impuestoId — el servidor resuelve el impuesto
       // por la cascada del precio (desglose Estatal+Municipal completo). Handoff IVU compuesto.
-      ...(gravadoKnown ? { gravado: g } : {}),
+      ...(gravadoKnown ? { taxable: g } : {}),
       ...(Object.keys(meta).length ? { meta } : {}),
     });
     setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({});
@@ -2126,12 +2126,12 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
           Van ANTES de Cantidad: primero áreas y días (así se lee «áreas × días»), Cantidad después. El
           Enter fluye producto → áreas → días → Cantidad → Agregar. Handoff descuento-… (posición). */}
       {capturables.map((c) => {
-        const requeridoVacio = c.requerido && String(metaShown(c.clave)).trim() === "";
+        const requeridoVacio = c.required && String(metaShown(c.slug)).trim() === "";
         if (esSelectCaptura(c)) {
           return (
-            <label key={c.clave} className="flex w-32 flex-col gap-1">
-              <Lbl>{tRoot(c.labelKey)}{c.requerido && <span className="text-destructive"> *</span>}</Lbl>
-              <Select value={metaShown(c.clave) || undefined} onValueChange={(v) => setMetaVals((m) => ({ ...m, [c.clave]: v }))}>
+            <label key={c.slug} className="flex w-32 flex-col gap-1">
+              <Lbl>{tRoot(c.labelKey)}{c.required && <span className="text-destructive"> *</span>}</Lbl>
+              <Select value={metaShown(c.slug) || undefined} onValueChange={(v) => setMetaVals((m) => ({ ...m, [c.slug]: v }))}>
                 <SelectTrigger className={"h-9 w-full " + (requeridoVacio ? "border-destructive" : "")}>
                   <SelectValue placeholder={t("selectPlaceholder")} />
                 </SelectTrigger>
@@ -2145,18 +2145,18 @@ function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: {
           );
         }
         return (
-          <label key={c.clave} className="flex w-24 flex-col gap-1">
+          <label key={c.slug} className="flex w-24 flex-col gap-1">
             <Lbl>{tRoot(c.labelKey)}</Lbl>
             <Input
-              data-flow={c.clave === sugeridoClave ? undefined : true}
-              value={metaShown(c.clave)}
-              onChange={(e) => onMetaChange(c.clave, e.target.value)}
+              data-flow={c.slug === sugeridoClave ? undefined : true}
+              value={metaShown(c.slug)}
+              onChange={(e) => onMetaChange(c.slug, e.target.value)}
               onFocus={selectOnFocus}
               onKeyDown={onFlowKey}
-              readOnly={c.clave === sugeridoClave}
-              className={"h-9 text-right tabular-nums " + (c.rol === "informativo" ? "opacity-80 " : "") + (c.clave === sugeridoClave ? "bg-muted" : "")}
+              readOnly={c.slug === sugeridoClave}
+              className={"h-9 text-right tabular-nums " + (c.role === "informativo" ? "opacity-80 " : "") + (c.slug === sugeridoClave ? "bg-muted" : "")}
               inputMode="decimal"
-              placeholder={c.rol === "multiplicador" ? "×" : ""}
+              placeholder={c.role === "multiplicador" ? "×" : ""}
             />
           </label>
         );

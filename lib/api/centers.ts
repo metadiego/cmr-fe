@@ -1,32 +1,32 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, apiFetchV1 } from "./client";
 
 export interface Centro {
   id: string;
-  nombre: string;
-  codigo: string;
-  direccion?: string | null;
-  activo?: boolean;
+  name: string;
+  code: string;
+  address?: string | null;
+  active?: boolean;
   // Datos fiscales por centro (CentroEntity) — para el editor de empresa.
-  // El GET /datos-fiscales expone `direccion` (combinada) pero para editar se usan
-  // los campos crudos del centro: direccionFiscal + zip (asimetría del contrato BE).
-  nombreLegal?: string | null;
-  nombreComercial?: string | null;
-  registroFiscal?: string | null;
-  registroFiscalLabel?: string | null;
-  telefono?: string | null;
-  direccionFiscal?: string | null;
-  zip?: string | null;
-  web?: string | null;
-  pieFactura?: string | null;
-  logoUrl?: string | null;
+  // El GET /tax-details expone `address` (combinada) pero para editar se usan
+  // los campos crudos del centro: taxAddress + zipCode (asimetría del contrato BE).
+  legalName?: string | null;
+  tradeName?: string | null;
+  taxRegistration?: string | null;
+  taxRegistrationLabel?: string | null;
+  phone?: string | null;
+  taxAddress?: string | null;
+  zipCode?: string | null;
+  website?: string | null;
+  invoiceFooter?: string | null;
+  logoUrl?: string | null; // se dice igual (CAMPOS_IGUALES)
   // Enganche facturación↔frontdesk: al saldar una factura del día, cada línea a_la_entrega
   // entra sola al frontdesk marcada "presente". Default true; se apaga por centro (PR #172).
-  frontdeskAutopresente?: boolean | null;
+  frontdeskAutoPresent?: boolean | null;
 }
 
-// PUT /centros/:id/datos-fiscales — patch parcial (todos opcionales). La dirección
-// se ENVÍA como `direccionFiscal` (el GET la lee como `direccion`). RBAC centro.fiscal.write.
+// PUT /centers/:id/tax-details — patch parcial (todos opcionales). La dirección
+// se ENVÍA como `taxAddress` (el GET la lee como `address`). RBAC centro.fiscal.write.
 export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"];
 
 export function updateDatosFiscales(
@@ -34,17 +34,17 @@ export function updateDatosFiscales(
   payload: DatosFiscalesPayload,
 ): Promise<unknown> {
   return apiFetch(
-    `/centros/${centroId}/datos-fiscales`,
+    `/centers/${centroId}/tax-details`,
     { method: "PUT", body: JSON.stringify(payload) },
     centroId,
   );
 }
 
 export interface CreateCenterPayload {
-  nombre: string;
-  codigo: string;
-  direccion?: string;
-  activo?: boolean;
+  name: string;
+  code: string;
+  address?: string;
+  active?: boolean;
 }
 
 export async function getCenters(
@@ -55,14 +55,14 @@ export async function getCenters(
   if (page) p.set("page", String(page));
   if (limit) p.set("limit", String(limit));
   const s = p.toString();
-  const res: unknown = await apiFetch(`/centros${s ? `?${s}` : ""}`);
+  const res: unknown = await apiFetch(`/centers${s ? `?${s}` : ""}`);
   if (Array.isArray(res)) return res as Centro[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];
 }
 
 export function createCenter(payload: CreateCenterPayload): Promise<Centro> {
-  return apiFetch<Centro>(`/centros`, {
+  return apiFetch<Centro>(`/centers`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -71,7 +71,7 @@ export function createCenter(payload: CreateCenterPayload): Promise<Centro> {
 // The principal's own centers WITH name (master → all). Use this for the center
 // selector instead of cross-referencing allowedClinicIds against getCenters().
 export async function getMyCentros(): Promise<Centro[]> {
-  const res: unknown = await apiFetch(`/auth/me/centros`);
+  const res: unknown = await apiFetch(`/auth/me/centers`);
   if (Array.isArray(res)) return res as Centro[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];
@@ -82,7 +82,7 @@ export async function getMyCentros(): Promise<Centro[]> {
 // incluidos accesos puntuales (p.ej. mirar el calendario ajeno) → mudarse allí no deja hacer nada. Uno
 // solo → no enseñar el selector del nav. Handoff selector-de-centro-en-la-pantalla §«El selector del NAV».
 export async function getMyCentrosOperativos(): Promise<Centro[]> {
-  const res: unknown = await apiFetch(`/auth/me/centros/operativos`);
+  const res: unknown = await apiFetch(`/auth/me/centers/operational`);
   if (Array.isArray(res)) return res as Centro[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];
@@ -93,8 +93,12 @@ export async function getMyCentrosOperativos(): Promise<Centro[]> {
 // y otra con el de ESCRITURA (decidir si ofrecer las acciones). NO hay endpoint por dominio. Un permiso
 // inexistente responde 400 (no lista vacía) → un error de escritura no se confunde con «no puedes en
 // ningún sitio». Handoff selector-de-centro-en-la-pantalla. Ver [[useCentroPantalla]].
+// HUECO BE (bloqueante en v2): el controlador `mis-centros` sirve `/me/centros-donde-puedo` SOLO en v1
+// (version:'1', sin alias en inglés). Bajo el prefijo /api/v2 de apiFetch esto responde 404. La tabla de
+// rutas del BE ya prevé el nombre inglés `allowed-centers` y el query `permiso`→`permissionSlug`, pero el
+// controlador aún no declara v2. Se deja la ruta/param en español hasta que el BE añada v2. Ver reporte.
 export async function getCentrosDondePuedo(permiso: string): Promise<Centro[]> {
-  const res: unknown = await apiFetch(`/me/centros-donde-puedo?permiso=${encodeURIComponent(permiso)}`);
+  const res: unknown = await apiFetchV1(`/me/centros-donde-puedo?permiso=${encodeURIComponent(permiso)}`);
   if (Array.isArray(res)) return res as Centro[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as Centro[]) : [];

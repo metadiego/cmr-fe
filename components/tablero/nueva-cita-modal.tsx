@@ -109,7 +109,7 @@ export function NuevaCitaModal({
       .then((ts) => {
         if (!active) return;
         setTipos(ts);
-        const seg = ts.find((x) => x.clave === "seguimiento") ?? ts[0];
+        const seg = ts.find((x) => x.slug === "seguimiento") ?? ts[0];
         if (seg) setTipoId(seg.id);
       })
       .catch(() => {});
@@ -134,7 +134,7 @@ export function NuevaCitaModal({
   const canWrite = can("citas.create");
 
   const nombreTipo = React.useCallback(
-    (id: string) => tipos.find((x) => x.id === id)?.nombre ?? "",
+    (id: string) => tipos.find((x) => x.id === id)?.name ?? "",
     [tipos],
   );
   const colorTipo = React.useCallback(
@@ -146,8 +146,8 @@ export function NuevaCitaModal({
   const historial = React.useMemo(() => {
     const hoy = todayISO();
     return [...recientes]
-      .filter((c) => String(c.fecha) < hoy)
-      .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)))
+      .filter((c) => String(c.date) < hoy)
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)))
       .slice(0, 4);
   }, [recientes]);
 
@@ -169,14 +169,14 @@ export function NuevaCitaModal({
     if (!pacienteId || !tId || !f) return;
     await createCita(
       {
-        pacienteId,
-        tipoCitaId: tId,
-        fecha: f,
-        ...(medicoId !== NO_MEDICO ? { medicoId } : {}),
-        ...(notas.trim() ? { notas: notas.trim() } : {}),
+        patientId: pacienteId,
+        appointmentTypeId: tId,
+        date: f,
+        ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
+        ...(notas.trim() ? { notes: notas.trim() } : {}),
         // Desde atención, una cita PARA HOY entra al tablero como confirmada
         // (BE: default programada). Futuras → omitir (programada). Ver POST /citas.
-        ...(f === todayISO() ? { estado: "confirmada" } : {}),
+        ...(f === todayISO() ? { status: "confirmada" } : {}),
       } as Parameters<typeof createCita>[0],
       centroId,
     );
@@ -197,7 +197,7 @@ export function NuevaCitaModal({
 
   // "Abierto" (seguimiento): próxima a +30 días, sin exigir fecha manual.
   async function onAbierto() {
-    const seg = tipos.find((x) => x.clave === "seguimiento") ?? tipos.find((x) => x.id === tipoId);
+    const seg = tipos.find((x) => x.slug === "seguimiento") ?? tipos.find((x) => x.id === tipoId);
     if (!seg) return;
     setBusy("open");
     try {
@@ -219,7 +219,7 @@ export function NuevaCitaModal({
   async function onSalir() {
     setBusy("exit");
     try {
-      await ejecutarAccion({ tablero, entidadId: fila.id, accion: "volver_en_consulta" }, centroId);
+      await ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: "volver_en_consulta" }, centroId);
       onSaved?.();
     } catch (err) {
       toastError(err, tRoot);
@@ -234,7 +234,7 @@ export function NuevaCitaModal({
     setBusy("record");
     try {
       const p = await asignarRecord(pacienteId, centroId);
-      setRecord(p.record ?? "");
+      setRecord(p.medicalRecordNumber ?? "");
     } catch (err) {
       toastError(err, tRoot);
     } finally {
@@ -313,9 +313,9 @@ export function NuevaCitaModal({
               <div className="flex flex-wrap gap-1.5">
                 {historial.map((c) => (
                   <span key={c.id} className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-xs">
-                    <span className="size-2 rounded-full" style={{ backgroundColor: colorTipo(String(c.tipoCitaId)) ?? "var(--muted-foreground)" }} />
-                    <span className="font-medium tabular-nums">{fmtFechaCorta(String(c.fecha), locale)}</span>
-                    <span className="text-muted-foreground">{nombreTipo(String(c.tipoCitaId))}</span>
+                    <span className="size-2 rounded-full" style={{ backgroundColor: colorTipo(String(c.appointmentTypeId)) ?? "var(--muted-foreground)" }} />
+                    <span className="font-medium tabular-nums">{fmtFechaCorta(String(c.date), locale)}</span>
+                    <span className="text-muted-foreground">{nombreTipo(String(c.appointmentTypeId))}</span>
                   </span>
                 ))}
               </div>
@@ -390,7 +390,7 @@ export function NuevaCitaModal({
                       }
                       style={active && c ? { borderColor: c, color: c, backgroundColor: `${c}1a` } : undefined}
                     >
-                      {tp.nombre}
+                      {tp.name}
                     </button>
                   );
                 })}

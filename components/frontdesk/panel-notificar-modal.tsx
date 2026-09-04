@@ -48,7 +48,7 @@ export function PanelNotificarModal({
     try {
       await notificarPanel(
         panelClave,
-        citaId ? { seccion, citaId } : { seccion, sesionId },
+        citaId ? { seccion, appointmentId: citaId } : { seccion, sessionId: sesionId },
         centro,
       );
       toast.success(t("notificado"));

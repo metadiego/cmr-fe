@@ -43,9 +43,9 @@ export function monthMatrix(year: number, month0: number): Date[][] {
 export function isFestivo(festivos: Festivo[], iso: string): Festivo | null {
   const md = iso.slice(5); // MM-DD
   for (const f of festivos) {
-    if (!f.activo) continue;
-    if (f.fecha === iso) return f;
-    if (f.recurrenteAnual && f.fecha.slice(5) === md) return f;
+    if (!f.active) continue;
+    if (f.date === iso) return f;
+    if (f.recursAnnually && f.date.slice(5) === md) return f;
   }
   return null;
 }
@@ -79,22 +79,22 @@ export function generarSlots(opts: {
   fecha: string; // ISO
   slotDuration: number; // minutes (step)
   duracion: number; // minutes the new cita lasts
-  ocupados: Array<{ hora: string; horaFin: string }>;
+  ocupados: Array<{ time: string; endTime: string }>;
 }): string[] {
   const dow = dayOfWeek(opts.fecha);
-  const dayHours = opts.horarios.filter((h) => h.activo && h.diaSemana === dow);
+  const dayHours = opts.horarios.filter((h) => h.active && h.dayOfWeek === dow);
   if (dayHours.length === 0) return [];
   const slots: string[] = [];
   for (const h of dayHours) {
     for (
-      let t = timeToMin(h.horaInicio);
-      t + opts.duracion <= timeToMin(h.horaFin);
+      let t = timeToMin(h.startTime);
+      t + opts.duracion <= timeToMin(h.endTime);
       t += opts.slotDuration
     ) {
       const start = minToTime(t);
       const end = minToTime(t + opts.duracion);
       const busy = opts.ocupados.some((o) =>
-        overlaps(start, end, o.hora, o.horaFin),
+        overlaps(start, end, o.time, o.endTime),
       );
       if (!busy) slots.push(start);
     }

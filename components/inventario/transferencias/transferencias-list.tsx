@@ -53,8 +53,8 @@ export function TransferenciasList() {
   const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia());
   const centroNames = React.useMemo(() => {
     const m = new Map<string, string>();
-    if (centrosRes.state.kind === "ok") centrosRes.state.data.forEach((c) => m.set(c.id, c.nombre));
-    if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.nombre));
+    if (centrosRes.state.kind === "ok") centrosRes.state.data.forEach((c) => m.set(c.id, c.name));
+    if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.name));
     return m;
   }, [centrosRes.state, destinosRes.state]);
   const centroName = (cid: string) => centroNames.get(cid) ?? cid;
@@ -65,8 +65,8 @@ export function TransferenciasList() {
   const histRes = useResource<TransferenciaHistorial[]>(
     () =>
       listTransferencias({
-        estado: estado === TODOS ? undefined : estado,
-        direccion: direccion === "todas" ? undefined : direccion,
+        status: estado === TODOS ? undefined : estado,
+        address: direccion === "todas" ? undefined : direccion,
       }),
     [estado, direccion],
   );
@@ -113,17 +113,17 @@ export function TransferenciasList() {
               <tr><td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>
             )}
             {pendientes.map((tr) => {
-              const porRecibir = tr.estado === "pendiente" && activeCentro === tr.clinicDestinoId;
+              const porRecibir = tr.status === "pendiente" && activeCentro === tr.destinationClinicId;
               return (
                 <tr key={tr.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-medium">{centroName(tr.clinicOrigenId)} → {centroName(tr.clinicDestinoId)}</td>
+                  <td className="px-3 py-2 font-medium">{centroName(tr.sourceClinicId)} → {centroName(tr.destinationClinicId)}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant={ESTADO_VARIANT[tr.estado] ?? "outline"}>{t(`estado.${tr.estado}`)}</Badge>
+                      <Badge variant={ESTADO_VARIANT[tr.status] ?? "outline"}>{t(`estado.${tr.status}`)}</Badge>
                       {porRecibir && <Badge variant="destructive">{t("porRecibir")}</Badge>}
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground">{tr.motivo ?? "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{tr.reason ?? "—"}</td>
                   <td className="px-3 py-2 text-right">
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/inventory/transfers/${tr.id}`}>{porRecibir ? t("recibirAprobar") : tc("view")}</Link>
@@ -193,10 +193,10 @@ export function TransferenciasList() {
               <tr key={tr.id} className="hover:bg-muted/30">
                 <td className="px-3 py-2 tabular-nums text-muted-foreground">{tr.createdAt ? formatFechaSolo(tr.createdAt.slice(0, 10)) : "—"}</td>
                 <td className="px-3 py-2 font-medium">
-                  {(tr.origenNombre ?? centroName(tr.clinicOrigenId))} → {(tr.destinoNombre ?? centroName(tr.clinicDestinoId))}
+                  {(tr.originName ?? centroName(tr.sourceClinicId))} → {(tr.destinationName ?? centroName(tr.destinationClinicId))}
                 </td>
-                <td className="px-3 py-2"><Badge variant={ESTADO_VARIANT[tr.estado] ?? "outline"}>{t(`estado.${tr.estado}`)}</Badge></td>
-                <td className="px-3 py-2 text-muted-foreground">{tr.motivo ?? "—"}</td>
+                <td className="px-3 py-2"><Badge variant={ESTADO_VARIANT[tr.status] ?? "outline"}>{t(`estado.${tr.status}`)}</Badge></td>
+                <td className="px-3 py-2 text-muted-foreground">{tr.reason ?? "—"}</td>
                 <td className="px-3 py-2 text-right">
                   <Button variant="ghost" size="sm" asChild>
                     <Link href={`/inventory/transfers/${tr.id}`}>{tc("view")}</Link>

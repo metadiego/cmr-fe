@@ -1,7 +1,14 @@
 import { apiFetch } from "./client";
 
-// Day-view of medical appointments (call-center). Endpoint: GET /citas/agenda-dia.
+// Day-view of medical appointments (call-center). Endpoint: GET /appointments/day-agenda.
 // The response is not typed in Swagger, so we model the verified contract here.
+// NOTA api-ingles: varios campos de esta respuesta NO están en el mapa (campos.ts) y el BE
+// los sirve TAL CUAL en español: `notasDia`, `bloqueado`, `franjas`, `resumen`, `tipoClave`,
+// `tipoNombre`, `cupo`, `vacios`, `totalCitas`, `porTipo`, `cupoTotal`, `atendidas`, `noShow`.
+// Sus CONTENEDORES no-opacos (franjas/resumen) sí recursan → las claves internas que SÍ están
+// en el mapa (hora→time, tipos→types, tipoCitaId→appointmentTypeId, citas→appointments,
+// fecha→date, nombre→name) llegan en inglés. `columnas`→`columns` es OPACO: su contenido
+// (ColumnaEfectiva) queda en español (motor de tableros).
 
 // A dynamic column definition (drives the day-sheet table headers/cells).
 export interface ColumnaEfectiva {
@@ -25,29 +32,31 @@ export interface ColumnaEfectiva {
 // A projected appointment row: values keyed by column clave (+ id/estado).
 export type CitaFila = { id: string; estado?: string } & Record<string, unknown>;
 
+// Una nota del día (dentro del contenedor español `notasDia`; el contenido SÍ se traduce).
 export interface NotaDia {
   id: string;
-  fecha: string;
-  contenido: string;
-  autorId?: string | null;
-  activo: boolean;
+  date: string;
+  content: string;
+  authorId?: string | null;
+  active: boolean;
   createdAt?: string;
 }
 
 export interface TipoFranja {
-  tipoCitaId: string;
-  tipoClave: string;
-  tipoNombre: string;
-  cupo: number;
-  vacios: number; // empty slots to render as "Agendar" buttons
-  citas: CitaFila[];
+  appointmentTypeId: string;
+  tipoClave: string; // NO está en el mapa → español
+  tipoNombre: string; // NO está en el mapa → español
+  cupo: number; // NO está en el mapa → español
+  vacios: number; // NO está en el mapa → español (empty slots → "Agendar" buttons)
+  citas: CitaFila[]; // clave `citas`→`appointments` en la respuesta
 }
 
 export interface Franja {
-  hora: string | null; // null = appointments with no time (legacy)
-  tipos: TipoFranja[];
+  time: string | null; // null = appointments with no time (legacy)
+  tipos: TipoFranja[]; // clave `tipos`→`types` en la respuesta
 }
 
+// `resumen` y todos sus campos NO están en el mapa → llegan en español.
 export interface ResumenDia {
   totalCitas: number;
   porTipo: Record<string, number>;
@@ -57,28 +66,28 @@ export interface ResumenDia {
 }
 
 export interface FestivoDia {
-  fecha: string;
-  nombre: string;
-  bloqueaAgenda: boolean;
+  date: string;
+  name: string;
+  blocksSchedule: boolean;
 }
 
 export interface CentroDia {
   clinicId: string;
-  nombre: string;
-  notasDia: NotaDia[];
-  festivos: FestivoDia[];
-  bloqueado: boolean; // holiday with bloqueaAgenda → day closed (cupo/vacios all 0)
-  franjas: Franja[];
-  resumen: ResumenDia;
+  name: string;
+  notasDia: NotaDia[]; // contenedor `notasDia` NO está en el mapa → clave en español
+  festivos: FestivoDia[]; // clave `festivos`→`holidays` en la respuesta
+  bloqueado: boolean; // NO está en el mapa → español (holiday closes the day)
+  franjas: Franja[]; // contenedor `franjas` NO está en el mapa → clave en español
+  resumen: ResumenDia; // contenedor `resumen` NO está en el mapa → clave en español
 }
 
 export interface AgendaDia {
-  fecha: string;
-  columnas: ColumnaEfectiva[];
-  centros: CentroDia[];
+  date: string;
+  columns: ColumnaEfectiva[]; // `columnas`→`columns` (OPACO: contenido en español)
+  centers: CentroDia[]; // `centros`→`centers`
 }
 
-// GET /citas/agenda-dia?fecha&centroId?
+// GET /appointments/day-agenda?date&centerId?
 // - centroId set → that center (tenant forced to it).
 // - combinado=true → omit X-Tenant-ID → BE returns ALL permitted centers.
 // - neither → the active center (cookie/clinic).
@@ -86,8 +95,8 @@ export function getAgendaDia(
   fecha: string,
   opts: { centroId?: string; combinado?: boolean } = {},
 ): Promise<AgendaDia> {
-  const sp = new URLSearchParams({ fecha });
-  if (opts.centroId) sp.set("centroId", opts.centroId);
+  const sp = new URLSearchParams({ date: fecha });
+  if (opts.centroId) sp.set("centerId", opts.centroId);
   const tenant = opts.combinado ? null : (opts.centroId ?? undefined);
-  return apiFetch<AgendaDia>(`/citas/agenda-dia?${sp.toString()}`, {}, tenant);
+  return apiFetch<AgendaDia>(`/appointments/day-agenda?${sp.toString()}`, {}, tenant);
 }

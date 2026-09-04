@@ -48,7 +48,7 @@ export function CeldaEditable({
     }
     setBusy(true);
     try {
-      const { persistencia } = await editarCelda({ tablero, entidadId, columna, valor: val }, centroId);
+      const { persistencia } = await editarCelda({ boardSlug: tablero, entityId: entidadId, column: columna, value: val }, centroId);
       // El toast CERTIFICA con lo que quedó en la base. Si ok:false, onChanged() re-lee la fila y la celda
       // vuelve sola a la verdad (no dejamos en pantalla un número que no se guardó).
       notifyPersistencia(persistencia, etiqueta);

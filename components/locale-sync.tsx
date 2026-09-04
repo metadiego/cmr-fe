@@ -20,7 +20,7 @@ export function LocaleSync() {
   const router = useRouter();
   // Evita re-disparar mientras el refresh está en vuelo (la cookie aún no cambió).
   const synced = React.useRef<string | null>(null);
-  const idioma = me.kind === "ok" ? me.me.idioma : undefined;
+  const idioma = me.kind === "ok" ? me.me.language : undefined;
 
   React.useEffect(() => {
     if (!idioma || !isLocale(idioma)) return;

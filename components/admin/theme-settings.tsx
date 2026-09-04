@@ -74,7 +74,7 @@ export function ThemeSettings() {
             <SelectContent>
               {centers.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.nombre} ({c.codigo})
+                  {c.name} ({c.code})
                 </SelectItem>
               ))}
             </SelectContent>

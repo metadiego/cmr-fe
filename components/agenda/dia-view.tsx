@@ -86,7 +86,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   // Editable columns come from the tablero definition (data-driven), not code.
   // The estado column is handled by its own selector, so exclude it here.
   const editableClaves = new Set(
-    (def?.columnas ?? [])
+    (def?.columns ?? [])
       .filter((c) => c.editable && c.clave !== "estado_selector")
       .map((c) => c.clave),
   );
@@ -113,7 +113,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   });
 
   const data = state.kind === "ok" ? state.data : null;
-  const centrosData = data?.centros ?? [];
+  const centrosData = data?.centers ?? [];
 
   return (
     <PageContainer>
@@ -176,7 +176,7 @@ export function DiaView({ fecha }: { fecha: string }) {
                   <SelectItem value={ALL}>{t("dia.allCenters")}</SelectItem>
                 )}
                 {centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -195,20 +195,20 @@ export function DiaView({ fecha }: { fecha: string }) {
         <Tabs defaultValue={centrosData[0]?.clinicId}>
           <TabsList className="mb-3">
             {centrosData.map((c) => (
-              <TabsTrigger key={c.clinicId} value={c.clinicId}>{c.nombre}</TabsTrigger>
+              <TabsTrigger key={c.clinicId} value={c.clinicId}>{c.name}</TabsTrigger>
             ))}
           </TabsList>
           {centrosData.map((c) => (
             <TabsContent key={c.clinicId} value={c.clinicId}>
               <SheetView
                 centro={c}
-                columnas={data.columnas}
-                estados={def?.estados ?? []}
-                transiciones={def?.transiciones ?? []}
+                columnas={data.columns}
+                estados={def?.statuses ?? []}
+                transiciones={def?.transitions ?? []}
                 editableClaves={editableClaves}
                 onChanged={refresh}
                 onAgendar={(hora, tipo) =>
-                  setModal({ fecha, centroId: c.clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
+                  setModal({ fecha, centroId: c.clinicId, hora: hora ?? undefined, tipoCitaId: tipo.appointmentTypeId })
                 }
               />
             </TabsContent>
@@ -217,13 +217,13 @@ export function DiaView({ fecha }: { fecha: string }) {
       ) : data && centrosData.length === 1 ? (
         <SheetView
           centro={centrosData[0]}
-          columnas={data.columnas}
-          estados={def?.estados ?? []}
-          transiciones={def?.transiciones ?? []}
+          columnas={data.columns}
+          estados={def?.statuses ?? []}
+          transiciones={def?.transitions ?? []}
           editableClaves={editableClaves}
           onChanged={refresh}
           onAgendar={(hora, tipo) =>
-            setModal({ fecha, centroId: centrosData[0].clinicId, hora: hora ?? undefined, tipoCitaId: tipo.tipoCitaId })
+            setModal({ fecha, centroId: centrosData[0].clinicId, hora: hora ?? undefined, tipoCitaId: tipo.appointmentTypeId })
           }
         />
       ) : null}
@@ -277,7 +277,7 @@ function CentroSheet({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3 text-sm">
-        <span className="font-semibold">{centro.nombre}</span>
+        <span className="font-semibold">{centro.name}</span>
         <span className="text-muted-foreground">
           {t("dia.summary", {
             total: r?.totalCitas ?? 0,
@@ -287,20 +287,20 @@ function CentroSheet({
         </span>
         {festivos.map((f) => (
           <span
-            key={f.fecha + f.nombre}
+            key={f.date + f.name}
             className={
-              f.bloqueaAgenda
+              f.blocksSchedule
                 ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
                 : "rounded bg-info px-2 py-0.5 text-xs text-info-foreground"
             }
           >
-            {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}
-            {f.bloqueaAgenda ? ` — ${t("dia.closed")}` : ""}
+            {f.blocksSchedule ? "🚫" : "🎉"} {f.name}
+            {f.blocksSchedule ? ` — ${t("dia.closed")}` : ""}
           </span>
         ))}
-        {centro.notasDia.filter((n) => n.activo).map((n) => (
+        {centro.notasDia.filter((n) => n.active).map((n) => (
           <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">
-            📌 {n.contenido}
+            📌 {n.content}
           </span>
         ))}
       </div>
@@ -314,11 +314,11 @@ function CentroSheet({
       {centro.franjas.map((franja) =>
         franja.tipos.map((tipo) => {
           if (tipo.citas.length === 0 && tipo.vacios === 0) return null;
-          const key = `${franja.hora ?? "sin"}-${tipo.tipoCitaId}`;
+          const key = `${franja.time ?? "sin"}-${tipo.appointmentTypeId}`;
           return (
             <section key={key} className="space-y-1">
               <h3 className="flex items-center gap-2 text-sm font-medium">
-                <span className="font-mono">{franja.hora ?? t("dia.noTime")}</span>
+                <span className="font-mono">{franja.time ?? t("dia.noTime")}</span>
                 <span>{tipo.tipoNombre}</span>
                 <span className="text-xs text-muted-foreground">
                   {tipo.citas.length}/{tipo.cupo}
@@ -362,11 +362,11 @@ function CentroSheet({
                             <Can permiso="citas.create">
                               <button
                                 type="button"
-                                onClick={() => onAgendar(franja.hora, tipo)}
+                                onClick={() => onAgendar(franja.time, tipo)}
                                 className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                               >
                                 <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
-                                {t("dia.book", { tipo: tipo.tipoNombre, hora: franja.hora ?? "" })}
+                                {t("dia.book", { tipo: tipo.tipoNombre, hora: franja.time ?? "" })}
                               </button>
                             </Can>
                           </div>
@@ -500,18 +500,18 @@ function CentroSheetV2({
   // Tipos únicos (para los chips) + cupos libres del día.
   const tiposMap = new Map<string, string>();
   let libres = 0;
-  franjas.forEach((f) => f.tipos.forEach((tp) => { tiposMap.set(tp.tipoCitaId, tp.tipoNombre); libres += tp.vacios; }));
+  franjas.forEach((f) => f.tipos.forEach((tp) => { tiposMap.set(tp.appointmentTypeId, tp.tipoNombre); libres += tp.vacios; }));
   const tiposChips = [...tiposMap.entries()];
 
   // Aplanar TODAS las citas (con o sin hora) a una sola lista.
   const items = franjas.flatMap((f) =>
-    f.tipos.flatMap((tp) => tp.citas.map((fila) => ({ fila, hora: f.hora, tipoCitaId: tp.tipoCitaId }))),
+    f.tipos.flatMap((tp) => tp.citas.map((fila) => ({ fila, hora: f.time, tipoCitaId: tp.appointmentTypeId }))),
   );
   const hayNoHora = items.some((i) => i.hora === null);
   const filtered = items.filter((i) =>
     !filtro ? true : filtro === "__sinhora__" ? i.hora === null : i.tipoCitaId === filtro,
   );
-  const franjasHora = franjas.filter((f) => f.hora !== null);
+  const franjasHora = franjas.filter((f) => f.time !== null);
 
   return (
     <div className="space-y-4">
@@ -523,22 +523,22 @@ function CentroSheetV2({
         <Kpi label={t("dia.kpiLibres")} value={libres} tono="muted" />
       </div>
 
-      {(festivos.length > 0 || centro.notasDia.some((n) => n.activo)) && (
+      {(festivos.length > 0 || centro.notasDia.some((n) => n.active)) && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {festivos.map((f) => (
             <span
-              key={f.fecha + f.nombre}
+              key={f.date + f.name}
               className={
-                f.bloqueaAgenda
+                f.blocksSchedule
                   ? "rounded bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive"
                   : "rounded bg-info px-2 py-0.5 text-xs text-info-foreground"
               }
             >
-              {f.bloqueaAgenda ? "🚫" : "🎉"} {f.nombre}{f.bloqueaAgenda ? ` — ${t("dia.closed")}` : ""}
+              {f.blocksSchedule ? "🚫" : "🎉"} {f.name}{f.blocksSchedule ? ` — ${t("dia.closed")}` : ""}
             </span>
           ))}
-          {centro.notasDia.filter((n) => n.activo).map((n) => (
-            <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">📌 {n.contenido}</span>
+          {centro.notasDia.filter((n) => n.active).map((n) => (
+            <span key={n.id} className="rounded bg-warning px-2 py-0.5 text-xs text-warning-foreground">📌 {n.content}</span>
           ))}
         </div>
       )}
@@ -556,22 +556,22 @@ function CentroSheetV2({
             const conCitas = f.tipos.some((tp) => tp.citas.length > 0);
             return (
               <div
-                key={f.hora}
+                key={f.time}
                 className={"min-w-[9.5rem] shrink-0 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2 " + (conCitas ? "ring-primary/40 bg-primary/5" : "ring-foreground/10 bg-card")}
               >
-                <div className="mb-1 font-mono text-xs font-semibold">{f.hora}</div>
+                <div className="mb-1 font-mono text-xs font-semibold">{f.time}</div>
                 <div className="space-y-0.5">
                   {f.tipos.filter((tp) => tp.cupo > 0).map((tp) => (
-                    <div key={tp.tipoCitaId} className="flex items-center justify-between gap-1.5 text-xs">
+                    <div key={tp.appointmentTypeId} className="flex items-center justify-between gap-1.5 text-xs">
                       <span className="min-w-0 flex-1 truncate text-muted-foreground">{tp.tipoNombre}</span>
                       <span className="tabular-nums">{tp.vacios}/{tp.cupo}</span>
                       <Can permiso="citas.create">
                         <button
                           type="button"
-                          onClick={() => onAgendar(f.hora, tp)}
+                          onClick={() => onAgendar(f.time, tp)}
                           disabled={tp.vacios <= 0}
                           className="text-primary hover:underline disabled:opacity-30"
-                          aria-label={t("dia.book", { tipo: tp.tipoNombre, hora: f.hora ?? "" })}
+                          aria-label={t("dia.book", { tipo: tp.tipoNombre, hora: f.time ?? "" })}
                         >
                           <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
                         </button>

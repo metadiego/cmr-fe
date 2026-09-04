@@ -41,8 +41,8 @@ export function ProfileEditDialog({
 }) {
   const t = useTranslations("admin.editarPerfil");
   const tRoot = useTranslations();
-  const [nombre, setNombre] = React.useState(profile?.nombre ?? "");
-  const [apellido, setApellido] = React.useState(profile?.apellido ?? "");
+  const [nombre, setNombre] = React.useState(profile?.name ?? "");
+  const [apellido, setApellido] = React.useState(profile?.lastName ?? "");
   const [accessMode, setAccessMode] = React.useState<"operativo" | "gerencial">(
     profile?.accessMode === "gerencial" ? "gerencial" : "operativo",
   );
@@ -53,8 +53,8 @@ export function ProfileEditDialog({
     setSubmitting(true);
     try {
       await updateProfile(profile.id, {
-        nombre: nombre.trim(),
-        apellido: apellido.trim() || null,
+        name: nombre.trim(),
+        lastName: apellido.trim() || null,
         accessMode,
       });
       toast.success(t("guardado"));

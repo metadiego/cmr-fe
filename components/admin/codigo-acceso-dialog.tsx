@@ -32,7 +32,7 @@ export function CodigoAccesoDialog({
   async function copiar() {
     if (!codigo) return;
     try {
-      await navigator.clipboard.writeText(codigo.codigo);
+      await navigator.clipboard.writeText(codigo.code);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 1500);
     } catch {
@@ -50,7 +50,7 @@ export function CodigoAccesoDialog({
         {codigo && (
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 rounded-md bg-card px-4 py-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
-              <span className="select-all font-mono text-2xl font-bold tracking-[0.2em]">{codigo.codigo}</span>
+              <span className="select-all font-mono text-2xl font-bold tracking-[0.2em]">{codigo.code}</span>
               <Button variant="outline" size="sm" onClick={copiar}>
                 <HugeiconsIcon icon={copiado ? CheckmarkCircle02Icon : Copy01Icon} className="size-4" />
                 {copiado ? t("copiado") : t("copiar")}

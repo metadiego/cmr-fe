@@ -40,10 +40,10 @@ export function PacienteSelect({
     return (
       <div className="flex items-center justify-between gap-2 rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <span className="truncate text-sm font-medium">
-          {(value.nombreMostrar || [value.nombres, value.apellidos].filter(Boolean).join(" "))}
-          {value.docId && (
+          {(value.displayName || [value.firstName, value.lastName].filter(Boolean).join(" "))}
+          {value.documentId && (
             <span className="ml-2 font-mono text-xs text-muted-foreground">
-              ID {value.docId}
+              ID {value.documentId}
             </span>
           )}
         </span>
@@ -95,11 +95,11 @@ export function PacienteSelect({
                 className="flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent"
               >
                 <span className="truncate">
-                  {(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}
+                  {(p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" "))}
                 </span>
-                {p.docId && (
+                {p.documentId && (
                   <span className="font-mono text-xs text-muted-foreground">
-                    {p.docId}
+                    {p.documentId}
                   </span>
                 )}
               </button>

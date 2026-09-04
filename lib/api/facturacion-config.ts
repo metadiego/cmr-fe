@@ -12,7 +12,7 @@ export function listColumnasFacturacion(
   centro?: string,
 ): Promise<ColumnaFacturacion[]> {
   return apiFetch<ColumnaFacturacion[]>(
-    `/facturacion/columnas?productoId=${encodeURIComponent(productoId)}`,
+    `/billing/columns?productId=${encodeURIComponent(productoId)}`,
     {},
     centro,
   );
@@ -21,18 +21,18 @@ export function listColumnasFacturacion(
 // Medios / referencia (mide publicidad). Respuesta no tipada como entidad → shape mínima.
 export interface MedioFacturacion {
   id: string;
-  nombre: string;
-  activo?: boolean;
+  name: string;
+  active?: boolean;
 }
 export function listMedios(centro?: string): Promise<MedioFacturacion[]> {
-  return apiFetch<MedioFacturacion[]>(`/facturacion/medios`, {}, centro);
+  return apiFetch<MedioFacturacion[]>(`/billing/sources`, {}, centro);
 }
 
 // Médicos (personal con capacidad médico) para el "Médico tratante".
 export interface MedicoOpcion {
   id: string;
-  nombre: string;
+  name: string;
 }
 export function listMedicos(centro?: string): Promise<MedicoOpcion[]> {
-  return apiFetch<MedicoOpcion[]>(`/personal/por-capacidad/medico`, {}, centro);
+  return apiFetch<MedicoOpcion[]>(`/staff/capacity-by/medico`, {}, centro);
 }

@@ -96,20 +96,20 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   const actual = pendientes[0] ?? null;
 
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
-  const secciones = (def?.secciones ?? []).slice().sort((a, b) => a.orden - b.orden);
+  const secciones = (def?.sections ?? []).slice().sort((a, b) => a.orden - b.orden);
   // El sonido depende de la SECCIÓN del aviso actual: su `audio` (lo enriquece el BE en la notificación;
   // respaldo a la sección por id/clave). Un audio desconocido cae al tono por defecto (nunca mudo).
   const audioActual =
     actual?.audio ??
-    (secciones.find((s) => s.id === actual?.seccionId) ?? secciones.find((s) => s.clave === actual?.seccion))?.audio ??
+    (secciones.find((s) => s.id === actual?.sectionId) ?? secciones.find((s) => s.clave === actual?.seccion))?.audio ??
     null;
   React.useEffect(() => {
     if (actual && alarma.armado.current) alarma.start(tonoDe(audioActual)); else alarma.stop();
   }, [actual, audioActual, alarma]);
 
-  const personal = def?.personal ?? [];
-  const estatusById = new Map((def?.estatus ?? []).map((e) => [e.personalId, e]));
-  const contByPersona = new Map((def?.contadores ?? []).map((c) => [c.personalId, c]));
+  const personal = def?.staff ?? [];
+  const estatusById = new Map((def?.estatus ?? []).map((e) => [e.staffId, e]));
+  const contByPersona = new Map((def?.contadores ?? []).map((c) => [c.staffId, c]));
 
   async function aceptar(notifId: string, personalId: string) {
     try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
@@ -153,7 +153,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                   const cont = contByPersona.get(p.id);
                   const nSec = cont?.porSeccion?.[s.clave] ?? 0;
                   const est = estatusById.get(p.id);
-                  const pc = colorForName(p.nombre);
+                  const pc = colorForName(p.name);
                   const activo = nSec > 0;
                   const tint = tinteHex(s.color);
                   return (
@@ -165,7 +165,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                         <div className="flex min-w-0 items-center gap-2.5">
                           {/* Punto de color por enfermera: identidad estable, discreta. */}
                           <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: pc }} aria-hidden />
-                          <span className="truncate text-[15px] font-semibold text-foreground">{p.nombre}</span>
+                          <span className="truncate text-[15px] font-semibold text-foreground">{p.name}</span>
                         </div>
                         <span
                           className={
@@ -213,14 +213,14 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
       {/* Aviso entrante a pantalla completa. La sección (color/nombre) se resuelve de la definición
           por seccionId; el nombre/récord del paciente y el servicio los enriquece el BE en el payload. */}
       {actual && (() => {
-        const sec = secciones.find((s) => s.id === actual.seccionId) ?? secciones.find((s) => s.clave === actual.seccion);
+        const sec = secciones.find((s) => s.id === actual.sectionId) ?? secciones.find((s) => s.clave === actual.seccion);
         const color = actual.color ?? sec?.color ?? "#111827";
         const secLabel = sec ? tRoot(sec.labelKey) : (actual.seccion ?? "");
         return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6" style={{ backgroundColor: color + "F2" }}>
           <p className="text-2xl font-semibold uppercase tracking-wide text-white/90">{secLabel}</p>
           <h2 className="mt-2 text-center text-5xl font-black text-white md:text-6xl">{actual.pacienteNombre ?? "—"}</h2>
-          {actual.record && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.record}</p>}
+          {actual.medicalRecordNumber && <p className="mt-1 text-2xl font-bold text-white/90">{t("record")} {actual.medicalRecordNumber}</p>}
           {actual.servicioNombre && <p className="text-lg text-white/80">{actual.servicioNombre}</p>}
           <div className="mt-8 grid w-full max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
             {personal.map((p) => (
@@ -231,7 +231,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                 onClick={() => aceptar(actual.id, p.id)}
                 className="min-h-[88px] rounded-2xl bg-white/95 p-4 text-xl font-bold text-neutral-900 shadow-lg transition-transform active:scale-95 disabled:opacity-60"
               >
-                {p.nombre}
+                {p.name}
               </button>
             ))}
           </div>

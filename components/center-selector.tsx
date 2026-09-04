@@ -79,7 +79,7 @@ export function CenterSelector() {
           <SelectItem key={c.id} value={c.id}>
             <span className="flex items-center gap-2">
               {dot(c.id)}
-              {c.nombre}
+              {c.name}
             </span>
           </SelectItem>
         ))}

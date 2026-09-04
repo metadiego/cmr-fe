@@ -48,13 +48,13 @@ export default function VentasPorGrupoPage() {
   const [hasta, setHasta] = React.useState(isoDay(hoy));
   const [division, setDivision] = React.useState<string>(TODAS);
   // Query aplicada (se dispara al pulsar Buscar / atajo), separada de los inputs.
-  const [query, setQuery] = React.useState<{ desde: string; hasta: string; contexto?: DivisionReporte }>(
-    { desde: isoDay(primero), hasta: isoDay(hoy) },
+  const [query, setQuery] = React.useState<{ from: string; to: string; context?: DivisionReporte }>(
+    { from: isoDay(primero), to: isoDay(hoy) },
   );
 
   const { state } = useResource<ReportePorGrupo>(
     () => getReportePorGrupo(query, centro),
-    [query.desde, query.hasta, query.contexto, centro],
+    [query.from, query.to, query.context, centro],
   );
   const data = state.kind === "ok" ? state.data : null;
   const grupos = data?.grupos ?? [];
@@ -69,13 +69,13 @@ export default function VentasPorGrupoPage() {
     (data?.grupos ?? []).forEach((g) => { if (g.megagrupoClave) m.set(g.megagrupoClave, (m.get(g.megagrupoClave) ?? 0) + 1); });
     return m;
   }, [data]);
-  const megasUtiles = (data?.megagrupos ?? []).filter((m) => (gruposPorMega.get(m.clave) ?? 0) > 1);
+  const megasUtiles = (data?.megagrupos ?? []).filter((m) => (gruposPorMega.get(m.slug) ?? 0) > 1);
 
   function aplicar(d: string, h: string, div: string) {
     setDesde(d);
     setHasta(h);
     setDivision(div);
-    setQuery({ desde: d, hasta: h, contexto: div === TODAS ? undefined : (div as DivisionReporte) });
+    setQuery({ from: d, to: h, context: div === TODAS ? undefined : (div as DivisionReporte) });
   }
   function buscar() {
     aplicar(desde, hasta, division);
@@ -89,20 +89,20 @@ export default function VentasPorGrupoPage() {
     return aplicar(isoDay(new Date(h.getFullYear(), h.getMonth(), 1)), isoDay(h), division);
   }
 
-  const rotulo = (g: { labelKey: string; clave: string }) => (tRoot.has(g.labelKey) ? tRoot(g.labelKey) : titleCase(g.clave));
+  const rotulo = (g: { labelKey: string; slug: string }) => (tRoot.has(g.labelKey) ? tRoot(g.labelKey) : titleCase(g.slug));
 
   function exportarCsv() {
     if (!data) return;
     const head = [t("col.grupo"), t("col.facturado"), t("col.descuento"), t("col.devoluciones"), t("col.impuesto"), t("col.envio"), t("col.neto"), t("col.facturas")];
     const lines = [head.join(",")];
-    grupos.forEach((g) => lines.push([csv(rotulo(g)), g.facturado, g.descuento, g.devoluciones, g.impuesto, g.envio, g.neto, g.facturas].join(",")));
-    const to = data.totales;
-    lines.push([csv(t("totales")), to.facturado, to.descuento, to.devoluciones, to.impuesto, to.envio, to.neto, ""].join(","));
+    grupos.forEach((g) => lines.push([csv(rotulo(g)), g.facturado, g.discount, g.refunds, g.tax, g.shipping, g.neto, g.invoices].join(",")));
+    const to = data.totals;
+    lines.push([csv(t("totales")), to.facturado, to.discount, to.refunds, to.tax, to.shipping, to.neto, ""].join(","));
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ventas-por-grupo_${query.desde}_${query.hasta}.csv`;
+    a.download = `ventas-por-grupo_${query.from}_${query.to}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -163,15 +163,15 @@ export default function VentasPorGrupoPage() {
         <>
           {/* CUADRE: la garantía de que el reporte se puede creer. */}
           <div>
-            {data.cuadre.cuadra ? (
+            {data.reconciliation.cuadra ? (
               <div className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-sm font-medium text-success">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />
-                {t("cuadra", { total: money(data.cuadre.totalFacturas) })}
+                {t("cuadra", { total: money(data.reconciliation.totalFacturas) })}
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
                 <HugeiconsIcon icon={Alert02Icon} className="size-4" />
-                {t("noCuadra", { diferencia: money(data.cuadre.diferencia) })}
+                {t("noCuadra", { diferencia: money(data.reconciliation.difference) })}
               </div>
             )}
           </div>
@@ -180,12 +180,12 @@ export default function VentasPorGrupoPage() {
           {megasUtiles.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {megasUtiles.map((m) => (
-                <div key={m.clave} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
+                <div key={m.slug} className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
                   <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    {tRoot.has(`fac.megagrupo.${m.clave}`) ? tRoot(`fac.megagrupo.${m.clave}`) : titleCase(m.clave)}
+                    {tRoot.has(`fac.megagrupo.${m.slug}`) ? tRoot(`fac.megagrupo.${m.slug}`) : titleCase(m.slug)}
                   </div>
                   <div className="text-lg font-bold tabular-nums">{money(m.neto)}</div>
-                  <div className="text-[11px] text-muted-foreground">{t("nFacturas", { n: nint(m.facturas) })}</div>
+                  <div className="text-[11px] text-muted-foreground">{t("nFacturas", { n: nint(m.invoices) })}</div>
                 </div>
               ))}
             </div>
@@ -212,21 +212,21 @@ export default function VentasPorGrupoPage() {
                 )}
                 {grupos.map((g) => {
                   // Etiqueta de megagrupo por fila solo cuando agrupa 2+ (si es 1:1 con su clave, es ruido).
-                  const megaUtil = !!g.megagrupoClave && g.megagrupoClave !== g.clave && (gruposPorMega.get(g.megagrupoClave) ?? 0) > 1;
+                  const megaUtil = !!g.megagrupoClave && g.megagrupoClave !== g.slug && (gruposPorMega.get(g.megagrupoClave) ?? 0) > 1;
                   const mega = megaUtil ? (tRoot.has(`fac.megagrupo.${g.megagrupoClave}`) ? tRoot(`fac.megagrupo.${g.megagrupoClave}`) : titleCase(g.megagrupoClave!)) : null;
-                  return <GrupoRow key={g.clave} g={g} rotulo={rotulo(g)} maxNeto={maxNeto} sinClasLabel={t("sinClasificarTip")} mega={mega} />;
+                  return <GrupoRow key={g.slug} g={g} rotulo={rotulo(g)} maxNeto={maxNeto} sinClasLabel={t("sinClasificarTip")} mega={mega} />;
                 })}
               </tbody>
               {grupos.length > 0 && (
                 <tfoot>
                   <tr className="border-t-2 bg-muted/40 font-semibold">
                     <td className="px-3 py-2">{t("totales")}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totales.facturado)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totales.descuento)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totales.devoluciones)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totales.impuesto)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totales.envio)}</td>
-                    <td className="px-3 py-2 text-right text-base tabular-nums">{money(data.totales.neto)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.facturado)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.discount)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.refunds)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.tax)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.shipping)}</td>
+                    <td className="px-3 py-2 text-right text-base tabular-nums">{money(data.totals.neto)}</td>
                     <td className="px-3 py-2" />
                   </tr>
                 </tfoot>
@@ -240,7 +240,7 @@ export default function VentasPorGrupoPage() {
 }
 
 function GrupoRow({ g, rotulo, maxNeto, sinClasLabel, mega }: { g: ReporteGrupoFila; rotulo: string; maxNeto: number; sinClasLabel: string; mega: string | null }) {
-  const esSinClas = g.clave === "sin_clasificar";
+  const esSinClas = g.slug === "sin_clasificar";
   const pct = maxNeto > 0 ? Math.max(2, Math.round((Math.abs(g.neto) / maxNeto) * 100)) : 0;
   return (
     <tr className={"hover:bg-muted/30 " + (esSinClas ? "bg-warning" : "")}>
@@ -260,12 +260,12 @@ function GrupoRow({ g, rotulo, maxNeto, sinClasLabel, mega }: { g: ReporteGrupoF
         </div>
       </td>
       <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.facturado)}</td>
-      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.descuento)}</td>
-      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.devoluciones)}</td>
-      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.impuesto)}</td>
-      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.envio)}</td>
+      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.discount)}</td>
+      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.refunds)}</td>
+      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.tax)}</td>
+      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{money(g.shipping)}</td>
       <td className="px-3 py-2 text-right text-base font-bold tabular-nums">{money(g.neto)}</td>
-      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{nint(g.facturas)}</td>
+      <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{nint(g.invoices)}</td>
     </tr>
   );
 }

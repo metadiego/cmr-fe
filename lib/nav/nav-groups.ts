@@ -23,15 +23,15 @@ export type NavMenuTipo = "item" | "grupo" | "separador";
 
 // Subconjunto de lib/api/menu.ts `MenuItem` que necesita la construcción del árbol.
 export type NavMenuItem = {
-  clave: string;
+  slug: string;
   labelKey: string;
-  labelCustom?: string | null;
-  tipo?: NavMenuTipo;
+  customLabel?: string | null;
+  type?: NavMenuTipo;
   icon?: string | null;
-  mostrarIcono?: boolean;
+  showIcon?: boolean;
   path: string;
-  parentClave?: string | null;
-  permisoClave?: string | null;
+  parentSlug?: string | null;
+  permissionSlug?: string | null;
 };
 
 export type NavNode = NavMenuItem & { children: NavNode[] };
@@ -45,16 +45,16 @@ export function buildNavGroups(
   can: (permiso: string) => boolean,
 ): NavNode[] {
   // 1. Filtro de permiso (cosmético): sin permisoClave => siempre visible.
-  const visible = items.filter((i) => !i.permisoClave || can(i.permisoClave));
+  const visible = items.filter((i) => !i.permissionSlug || can(i.permissionSlug));
 
   // 2. Solo destinos reales (se descartan cabeceras de grupo, separadores y raíces sueltas).
   const destinations = visible.filter(
     (i) =>
-      i.tipo !== "grupo" &&
-      i.tipo !== "separador" &&
+      i.type !== "grupo" &&
+      i.type !== "separador" &&
       !!i.path &&
       i.path !== "#" &&
-      !NOT_SURFACED.has(i.clave),
+      !NOT_SURFACED.has(i.slug),
   );
 
   // Filas contenedoras del catálogo del BE (para etiquetar los buckets de fallback):
@@ -62,8 +62,8 @@ export function buildNavGroups(
   // `en-desarrollo`/`por-desarrollar` del catálogo — decisión «accesos los decide el frontend»).
   const beParents = new Map<string, NavMenuItem>();
   for (const i of visible) {
-    if (i.tipo === "grupo" || i.clave.startsWith("g-") || !i.path || i.path === "#") {
-      beParents.set(i.clave, i);
+    if (i.type === "grupo" || i.slug.startsWith("g-") || !i.path || i.path === "#") {
+      beParents.set(i.slug, i);
     }
   }
 
@@ -75,8 +75,8 @@ export function buildNavGroups(
     else buckets.set(key, [node]);
   };
   for (const i of destinations) {
-    const feGroup = groupForClave(i.clave);
-    const key = feGroup ?? (i.parentClave ? `be:${i.parentClave}` : "be:_orphan");
+    const feGroup = groupForClave(i.slug);
+    const key = feGroup ?? (i.parentSlug ? `be:${i.parentSlug}` : "be:_orphan");
     push(key, { ...i, children: [] });
   }
 
@@ -84,23 +84,23 @@ export function buildNavGroups(
   // de fallback conservan el orden de llegada del BE).
   for (const [key, arr] of buckets) {
     if (!key.startsWith("be:")) {
-      arr.sort((a, b) => orderForClave(a.clave) - orderForClave(b.clave));
+      arr.sort((a, b) => orderForClave(a.slug) - orderForClave(b.slug));
     }
   }
 
   // Cada raíz de sección lleva un icono (todas las categorías de primer nivel lo muestran):
   // el del grupo FE, o —para buckets de fallback— el del contenedor del BE, o "folder" por defecto.
   const groupRoot = (
-    clave: string,
+    slug: string,
     labelKey: string,
     icon: string,
     children: NavNode[],
   ): NavNode => ({
-    clave,
+    slug,
     labelKey,
     icon,
-    mostrarIcono: true,
-    tipo: "grupo",
+    showIcon: true,
+    type: "grupo",
     path: "#",
     children,
   });

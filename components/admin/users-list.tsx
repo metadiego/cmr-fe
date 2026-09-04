@@ -82,10 +82,10 @@ export function UsersList() {
       data: state.data.filter((p) =>
         [
           p.email,
-          p.nombre,
-          p.apellido ?? "",
-          ...(p.roles?.map((r) => r.nombre) ?? []),
-          ...(p.centros?.map((c) => c.nombre ?? "") ?? []),
+          p.name,
+          p.lastName ?? "",
+          ...(p.roles?.map((r) => r.name) ?? []),
+          ...(p.centers?.map((c) => c.name ?? "") ?? []),
         ]
           .join(" ")
           .toLowerCase()
@@ -98,10 +98,10 @@ export function UsersList() {
     if (busyId) return // evita el doble POST (el 2º daría 409)
     setBusyId(p.id)
     try {
-      if (p.estado === "aprobado") {
+      if (p.status === "aprobado") {
         await suspenderProfile(p.id)
         toast.success(t("users.suspendido"))
-      } else if (p.estado === "suspendido") {
+      } else if (p.status === "suspendido") {
         await reactivarProfile(p.id)
         toast.success(t("users.reactivado"))
       }
@@ -121,7 +121,7 @@ export function UsersList() {
         <div className="min-w-0">
           <div className="truncate font-medium">{p.email}</div>
           <div className="truncate text-xs text-muted-foreground">
-            {[p.nombre, p.apellido].filter(Boolean).join(" ")}
+            {[p.name, p.lastName].filter(Boolean).join(" ")}
           </div>
         </div>
       ),
@@ -135,8 +135,8 @@ export function UsersList() {
         ) : p.roles?.length ? (
           <div className="flex flex-wrap gap-1">
             {p.roles.map((r) => (
-              <Badge key={`${r.clave}|${r.centroId ?? ""}`} variant="secondary">
-                {r.nombre}
+              <Badge key={`${r.slug}|${r.centerId ?? ""}`} variant="secondary">
+                {r.name}
               </Badge>
             ))}
           </div>
@@ -150,7 +150,7 @@ export function UsersList() {
       key: "centros",
       header: t("columns.centros"),
       cell: (p) => {
-        const activos = (p.centros ?? []).filter((c) => c.activo)
+        const activos = (p.centers ?? []).filter((c) => c.active)
         if (!activos.length)
           return (
             <span className="text-xs text-muted-foreground">
@@ -162,11 +162,11 @@ export function UsersList() {
             {activos.map((c) => (
               <Badge
                 key={c.asignacionId}
-                variant={c.tipo === "temporal" ? "outline" : "secondary"}
+                variant={c.type === "temporal" ? "outline" : "secondary"}
               >
-                {c.nombre ?? c.centroId.slice(0, 8)}
-                {c.tipo === "temporal" && c.vigenteHasta
-                  ? ` · ${t("users.hasta", { fecha: c.vigenteHasta })}`
+                {c.name ?? c.centerId.slice(0, 8)}
+                {c.type === "temporal" && c.validUntil
+                  ? ` · ${t("users.hasta", { fecha: c.validUntil })}`
                   : ""}
               </Badge>
             ))}
@@ -182,7 +182,7 @@ export function UsersList() {
     {
       key: "status",
       header: t("columns.status"),
-      cell: (p) => <EstadoBadge estado={p.estado} />,
+      cell: (p) => <EstadoBadge estado={p.status} />,
     },
     {
       key: "actions",
@@ -210,7 +210,7 @@ export function UsersList() {
               <DropdownMenuItem onClick={() => setEditFor(p)}>
                 {t("users.editar")}
               </DropdownMenuItem>
-              {p.estado === "aprobado" && !p.isMaster && (
+              {p.status === "aprobado" && !p.isMaster && (
                 <DropdownMenuItem
                   variant="destructive"
                   disabled={busyId === p.id}
@@ -219,14 +219,14 @@ export function UsersList() {
                   {t("users.suspender")}
                 </DropdownMenuItem>
               )}
-              {p.estado === "suspendido" && (
+              {p.status === "suspendido" && (
                 <DropdownMenuItem onClick={() => toggleSuspension(p)}>
                   {t("users.reactivar")}
                 </DropdownMenuItem>
               )}
               {/* Código de acceso: el usuario pone su propia clave. Solo con permiso y perfil aprobado
                   (el BE responde 409 si está suspendido/rechazado). Handoff codigo-de-acceso. */}
-              {puedeCodigo && p.estado === "aprobado" && (
+              {puedeCodigo && p.status === "aprobado" && (
                 <DropdownMenuItem disabled={busyId === p.id} onClick={() => generarCodigo(p)}>
                   {t("users.generarCodigo")}
                 </DropdownMenuItem>

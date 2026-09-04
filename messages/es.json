@@ -1094,16 +1094,16 @@
       "autopresenteLabel": "Auto-presente al pagar",
       "autopresenteHelp": "Cuando una factura queda saldada el mismo día, cada línea de servicio entra al frontdesk marcada presente.",
       "field": {
-        "nombreLegal": "Nombre legal (razón social)",
-        "nombreComercial": "Nombre comercial (DBA)",
-        "registroFiscal": "Registro fiscal (MN/tax id)",
-        "registroFiscalLabel": "Etiqueta del registro (MN, RIF…)",
-        "telefono": "Teléfono",
-        "direccionFiscal": "Dirección fiscal",
-        "zip": "Código postal",
-        "web": "Sitio web",
+        "legalName": "Nombre legal (razón social)",
+        "tradeName": "Nombre comercial (DBA)",
+        "taxRegistration": "Registro fiscal (MN/tax id)",
+        "taxRegistrationLabel": "Etiqueta del registro (MN, RIF…)",
+        "phone": "Teléfono",
+        "taxAddress": "Dirección fiscal",
+        "zipCode": "Código postal",
+        "website": "Sitio web",
         "logoUrl": "URL del logo",
-        "pieFactura": "Pie de factura"
+        "invoiceFooter": "Pie de factura"
       }
     },
     "centrosPerfil": {

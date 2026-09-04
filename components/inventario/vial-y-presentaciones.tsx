@@ -38,7 +38,7 @@ export function VialYPresentaciones({ productoId }: { productoId: string }) {
   const unidadesRes = useResource<Unidad[]>(() => listUnidades(), []);
   const unidadNombre = React.useMemo(() => {
     const m = new Map<string, string>();
-    if (unidadesRes.state.kind === "ok") unidadesRes.state.data.forEach((u) => m.set(u.id, u.nombre));
+    if (unidadesRes.state.kind === "ok") unidadesRes.state.data.forEach((u) => m.set(u.id, u.name));
     return m;
   }, [unidadesRes.state]);
   const un = (id?: string | null) => (id ? unidadNombre.get(id) ?? "" : "");
@@ -59,7 +59,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
   const viales = React.useMemo(() => {
     const list = state.kind === "ok" ? state.data : [];
     // Más viejo primero: es el orden en que el sistema los consume.
-    return [...list].sort((a, b) => String(a.fechaApertura ?? a.createdAt ?? "").localeCompare(String(b.fechaApertura ?? b.createdAt ?? "")));
+    return [...list].sort((a, b) => String(a.openedAt ?? a.createdAt ?? "").localeCompare(String(b.openedAt ?? b.createdAt ?? "")));
   }, [state]);
 
   return (
@@ -71,7 +71,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
       )}
       <ul className="space-y-2">
         {viales.map((v) => {
-          const unidad = un(v.unidadId);
+          const unidad = un(v.unitId);
           const pct = Math.max(0, Math.min(100, Number(v.porcentajeUsado ?? 0)));
           const remanente = Number(v.remanente ?? 0);
           const excedido = Number(v.excedido ?? 0);
@@ -79,7 +79,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
             <li key={v.id} className="rounded-md bg-card p-3 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-sm font-medium">
-                  {t("vialDe", { capacidad: nf.format(Number(v.capacidadTotal ?? 0)), unidad })}
+                  {t("vialDe", { capacidad: nf.format(Number(v.totalCapacity ?? 0)), unidad })}
                 </span>
                 {excedido > 0 ? (
                   <span className="rounded-md bg-warning px-2 py-0.5 text-xs font-semibold text-warning-foreground">
@@ -100,7 +100,7 @@ function VialesAbiertos({ productoId, un, t }: { productoId: string; un: (id?: s
                 />
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {t("consumidoDe", { consumido: nf.format(Number(v.consumido ?? 0)), total: nf.format(Number(v.capacidadTotal ?? 0)), unidad })}
+                {t("consumidoDe", { consumido: nf.format(Number(v.consumido ?? 0)), total: nf.format(Number(v.totalCapacity ?? 0)), unidad })}
               </p>
             </li>
           );
@@ -137,11 +137,11 @@ function Presentaciones({
   );
 
   async function activar(p: Presentacion) {
-    if (p.esDefault || busy) return;
+    if (p.isDefault || busy) return;
     setBusy(true);
     try {
-      await updatePresentacion(p.id, { esDefault: true });
-      toast.success(t("activada", { nombre: p.nombre }));
+      await updatePresentacion(p.id, { isDefault: true });
+      toast.success(t("activada", { nombre: p.name }));
       reload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -153,7 +153,7 @@ function Presentaciones({
   async function toggleActivo(p: Presentacion) {
     setBusy(true);
     try {
-      await updatePresentacion(p.id, { activo: !p.activo });
+      await updatePresentacion(p.id, { active: !p.active });
       reload();
     } catch (err) {
       toast.error(apiErrorMessage(err));
@@ -170,7 +170,7 @@ function Presentaciones({
     }
     setBusy(true);
     try {
-      await createPresentacion({ productoId, nombre: nombre.trim(), contenido: c, unidadContenidoId: unidadId });
+      await createPresentacion({ productId: productoId, name: nombre.trim(), content: c, contentUnitId: unidadId });
       toast.success(t("creada"));
       setNombre("");
       setContenido("");
@@ -190,41 +190,41 @@ function Presentaciones({
       {state.kind === "loading" && <p className="text-xs text-muted-foreground">{t("cargando")}</p>}
       <ul className="space-y-1.5">
         {presentaciones.map((p) => {
-          const tieneVial = p.contenido != null;
+          const tieneVial = p.content != null;
           return (
             <li
               key={p.id}
               className={
                 "flex items-center gap-3 rounded-md border px-3 py-2 " +
-                (p.esDefault ? "border-primary bg-primary/10 text-primary " : "") +
-                (p.activo === false ? "opacity-50" : "")
+                (p.isDefault ? "border-primary bg-primary/10 text-primary " : "") +
+                (p.active === false ? "opacity-50" : "")
               }
             >
               {/* Radio de "activa" (esDefault): cambiar de vial = un clic. */}
               <button
                 type="button"
                 onClick={() => activar(p)}
-                disabled={busy || p.activo === false}
+                disabled={busy || p.active === false}
                 aria-label={t("marcarActiva")}
                 className="shrink-0 text-primary disabled:opacity-40"
               >
-                {p.esDefault ? (
+                {p.isDefault ? (
                   <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5" />
                 ) : (
                   <span className="inline-block size-4 rounded-full border-2 border-muted-foreground/40" />
                 )}
               </button>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium">{p.nombre}</div>
+                <div className="truncate text-sm font-medium">{p.name}</div>
                 <div className="text-[11px] text-muted-foreground">
                   {tieneVial
-                    ? t("contenidoVial", { contenido: nf.format(Number(p.contenido)), unidad: un(p.unidadContenidoId) })
+                    ? t("contenidoVial", { contenido: nf.format(Number(p.content)), unidad: un(p.contentUnitId) })
                     : t("sinVial")}
-                  {p.esDefault ? ` · ${t("activa")}` : ""}
+                  {p.isDefault ? ` · ${t("activa")}` : ""}
                 </div>
               </div>
               <Button variant="ghost" size="sm" disabled={busy} onClick={() => toggleActivo(p)}>
-                {p.activo === false ? t("reactivar") : t("dejarDeComprar")}
+                {p.active === false ? t("reactivar") : t("dejarDeComprar")}
               </Button>
             </li>
           );
@@ -240,7 +240,7 @@ function Presentaciones({
               <SelectTrigger className="h-8 flex-1"><SelectValue placeholder={t("unidadPlaceholder")} /></SelectTrigger>
               <SelectContent>
                 {unidadesContenido.map((u) => (
-                  <SelectItem key={u.id} value={u.id}>{u.nombre}</SelectItem>
+                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

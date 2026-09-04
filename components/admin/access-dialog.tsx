@@ -78,9 +78,9 @@ export function AccessDialog({
 // cambiar el selector a mano (FE-HANDOFF-AMBITO-DEFAULT-ACCESOS).
 function defaultCentroDe(profile: Perfil): string {
   const roles = profile.roles ?? []
-  const tieneRolGlobal = roles.some((r) => r.centroId === null)
+  const tieneRolGlobal = roles.some((r) => r.centerId === null)
   const centrosDeRoles = new Set(
-    roles.map((r) => r.centroId).filter((c): c is string => c !== null)
+    roles.map((r) => r.centerId).filter((c): c is string => c !== null)
   )
   return !tieneRolGlobal && centrosDeRoles.size === 1 ? [...centrosDeRoles][0] : GLOBAL
 }
@@ -110,7 +110,7 @@ function AccessPanel({ profile }: { profile: Perfil }) {
             {centers.state.kind === "ok" &&
               centers.state.data.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.nombre}
+                  {c.name}
                 </SelectItem>
               ))}
           </SelectContent>
@@ -182,18 +182,18 @@ function RolesTab({
   if (roles.kind === "fail") return <Fail message={roles.message} />
   if (access.kind === "fail") return <Fail message={access.message} />
 
-  const assigned = new Map(access.data.roles.map((r) => [r.clave, r]))
+  const assigned = new Map(access.data.roles.map((r) => [r.slug, r]))
 
   async function toggle(role: Rol, on: boolean) {
-    setBusy(role.clave)
+    setBusy(role.slug)
     try {
       if (on) {
         // El rol se asigna GLOBAL (sin centroId): el centro vive en las asignaciones de centro del perfil,
         // y un rol multi-centro rechaza centroId. Handoff rol-multicentro-y-preparacion-legado.
-        await assignRoleToProfile(profile.id, role.clave)
+        await assignRoleToProfile(profile.id, role.slug)
       } else {
-        const a = assigned.get(role.clave)
-        if (a) await removeRoleFromProfile(profile.id, a.rolId, centroId)
+        const a = assigned.get(role.slug)
+        if (a) await removeRoleFromProfile(profile.id, a.roleId, centroId)
       }
       toast.success(t("saved"))
       onChanged()
@@ -212,13 +212,13 @@ function RolesTab({
           className="flex items-center gap-3 rounded-md bg-card px-3 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
         >
           <Checkbox
-            checked={assigned.has(role.clave)}
-            disabled={busy === role.clave}
+            checked={assigned.has(role.slug)}
+            disabled={busy === role.slug}
             onCheckedChange={(v) => toggle(role, v === true)}
           />
-          <span className="font-medium">{role.nombre}</span>
+          <span className="font-medium">{role.name}</span>
           <span className="font-mono text-xs text-muted-foreground">
-            {role.clave}
+            {role.slug}
           </span>
         </label>
       ))}
@@ -250,20 +250,20 @@ function ExceptionsTab({
   if (access.kind === "fail") return <Fail message={access.message} />
 
   const byModulo: Record<string, AccessPermiso[]> = {}
-  for (const p of access.data.permisos) (byModulo[p.modulo] ??= []).push(p)
+  for (const p of access.data.permissions) (byModulo[p.module] ??= []).push(p)
   const overrideByClave = new Map(
-    access.data.overrides.map((o) => [o.permisoClave, o])
+    access.data.overrides.map((o) => [o.permissionSlug, o])
   )
   const disponibles = access.data.centrosDisponibles
 
   async function change(p: AccessPermiso, next: TriState) {
-    setBusy(p.clave)
+    setBusy(p.slug)
     try {
       if (next === "inherit") {
-        const o = overrideByClave.get(p.clave)
-        if (o) await removeProfileOverride(profile.id, o.permisoId, centroId)
+        const o = overrideByClave.get(p.slug)
+        if (o) await removeProfileOverride(profile.id, o.permissionId, centroId)
       } else {
-        await setProfileOverride(profile.id, p.clave, next, centroId)
+        await setProfileOverride(profile.id, p.slug, next, centroId)
       }
       toast.success(t("saved"))
       onChanged()
@@ -275,16 +275,16 @@ function ExceptionsTab({
   }
 
   // Centros concedidos vigentes de la fila (el repintado local pisa lo que trajo el fetch).
-  const centrosDe = (p: AccessPermiso): CentroRef[] => centrosPorClave[p.clave] ?? p.centrosConcedidos
+  const centrosDe = (p: AccessPermiso): CentroRef[] => centrosPorClave[p.slug] ?? p.centrosConcedidos
 
   async function toggleCentro(p: AccessPermiso, cid: string) {
     const actuales = centrosDe(p).map((c) => c.id)
     const next = actuales.includes(cid) ? actuales.filter((x) => x !== cid) : [...actuales, cid]
-    setBusyCentros(p.clave)
+    setBusyCentros(p.slug)
     try {
-      const fila = await setPermisoCentros(profile.id, p.clave, next)
+      const fila = await setPermisoCentros(profile.id, p.slug, next)
       // Deja la fila EXACTAMENTE en la lista devuelta; repinta solo esta fila.
-      setCentrosPorClave((m) => ({ ...m, [p.clave]: fila.centrosConcedidos }))
+      setCentrosPorClave((m) => ({ ...m, [p.slug]: fila.centrosConcedidos }))
       toast.success(t("saved"))
     } catch (err) {
       toastError(err)
@@ -304,11 +304,11 @@ function ExceptionsTab({
             const value: TriState = p.override ?? "inherit"
             const concedidos = new Set(centrosDe(p).map((c) => c.id))
             return (
-              <div key={p.clave} className="space-y-2 rounded-md bg-card px-3 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+              <div key={p.slug} className="space-y-2 rounded-md bg-card px-3 py-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs">{p.accion}</span>
+                      <span className="font-mono text-xs">{p.action}</span>
                       {p.override && (
                         <Badge variant="outline">{t("exception")}</Badge>
                       )}
@@ -316,15 +316,15 @@ function ExceptionsTab({
                         <Badge variant="secondary">{t("effective")}</Badge>
                       )}
                     </div>
-                    {p.descripcion && (
+                    {p.description && (
                       <p className="truncate text-xs text-muted-foreground">
-                        {p.descripcion}
+                        {p.description}
                       </p>
                     )}
                   </div>
                   <Select
                     value={value}
-                    disabled={busy === p.clave}
+                    disabled={busy === p.slug}
                     onValueChange={(v) => change(p, v as TriState)}
                   >
                     <SelectTrigger className="w-36 shrink-0">
@@ -352,7 +352,7 @@ function ExceptionsTab({
                         <button
                           key={c.id}
                           type="button"
-                          disabled={busyCentros === p.clave}
+                          disabled={busyCentros === p.slug}
                           onClick={() => toggleCentro(p, c.id)}
                           className={cn(
                             "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-50",
@@ -361,7 +361,7 @@ function ExceptionsTab({
                               : "border-border text-muted-foreground hover:bg-accent"
                           )}
                         >
-                          {c.nombre}
+                          {c.name}
                         </button>
                       )
                     })}
@@ -407,7 +407,7 @@ function MenuPreviewTab({
     const map = new Map<string, { permisoId: string; efecto: string }>()
     if (accessState.kind === "ok") {
       for (const o of accessState.data.overrides) {
-        map.set(o.permisoClave, { permisoId: o.permisoId, efecto: o.efecto })
+        map.set(o.permissionSlug, { permisoId: o.permissionId, efecto: o.effect })
       }
     }
     return map
@@ -418,7 +418,7 @@ function MenuPreviewTab({
   const viaRolePorClave = React.useMemo(() => {
     const map = new Map<string, boolean>()
     if (accessState.kind === "ok") {
-      for (const p of accessState.data.permisos) map.set(p.clave, p.viaRole)
+      for (const p of accessState.data.permissions) map.set(p.slug, p.viaRole)
     }
     return map
   }, [accessState])
@@ -467,7 +467,7 @@ function MenuPreviewTab({
             <li
               key={item.id}
               className="flex items-center justify-between gap-3 rounded-md bg-card px-3 py-2 text-sm shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
-              style={{ marginLeft: item.parentClave ? 16 : 0 }}
+              style={{ marginLeft: item.parentSlug ? 16 : 0 }}
             >
               <span
                 className={

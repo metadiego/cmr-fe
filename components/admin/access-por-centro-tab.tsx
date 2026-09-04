@@ -37,7 +37,7 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
       const asigs = await getAsignaciones(profile.id);
       const global = await getProfileAccess(profile.id);
       const entradas = await Promise.all(
-        asigs.map((a) => getProfileAccess(profile.id, a.centroId).then((acc) => [a.centroId, acc] as const)),
+        asigs.map((a) => getProfileAccess(profile.id, a.centerId).then((acc) => [a.centerId, acc] as const)),
       );
       return { global, porCentro: Object.fromEntries(entradas) };
     },
@@ -47,9 +47,9 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const roles = rolesRes.state.kind === "ok" ? rolesRes.state.data : [];
   const asigs = asigRes.state.kind === "ok" ? asigRes.state.data : [];
-  const nombreCentro = (id: string) => centros.find((c) => c.id === id)?.nombre ?? id;
-  const rolesAcotables = roles.filter((r) => !r.todosLosCentros);
-  const rolesGlobales = roles.filter((r) => r.todosLosCentros);
+  const nombreCentro = (id: string) => centros.find((c) => c.id === id)?.name ?? id;
+  const rolesAcotables = roles.filter((r) => !r.allCenters);
+  const rolesGlobales = roles.filter((r) => r.allCenters);
 
   const cargando = asigRes.state.kind === "loading" || accesosRes.state.kind === "loading";
   const acc = accesosRes.state.kind === "ok" ? accesosRes.state.data : null;
@@ -64,11 +64,11 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
 
   // Roles ACOTADOS a un centro = los del access de ese centro con centroId === ese centro.
   const rolesDeCentro = (centroId: string): AccessRole[] =>
-    (acc?.porCentro[centroId]?.roles ?? []).filter((r) => r.centroId === centroId);
+    (acc?.porCentro[centroId]?.roles ?? []).filter((r) => r.centerId === centroId);
   // Roles GLOBALES del perfil = access global con centroId null.
-  const rolesGlobalesPerfil: AccessRole[] = (acc?.global.roles ?? []).filter((r) => !r.centroId);
+  const rolesGlobalesPerfil: AccessRole[] = (acc?.global.roles ?? []).filter((r) => !r.centerId);
 
-  const centrosSinAsignar = centros.filter((c) => !asigs.some((a) => a.centroId === c.id));
+  const centrosSinAsignar = centros.filter((c) => !asigs.some((a) => a.centerId === c.id));
 
   if (cargando) return <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
   if (asigRes.state.kind === "fail") return <p className="text-sm text-destructive">{asigRes.state.message}</p>;
@@ -88,37 +88,37 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
           </thead>
           <tbody className="divide-y">
             {asigs.map((a) => {
-              const rolesAqui = rolesDeCentro(a.centroId);
-              const disponibles = rolesAcotables.filter((r) => !rolesAqui.some((x) => x.clave === r.clave));
+              const rolesAqui = rolesDeCentro(a.centerId);
+              const disponibles = rolesAcotables.filter((r) => !rolesAqui.some((x) => x.slug === r.slug));
               return (
                 <tr key={a.id}>
-                  <td className="px-3 py-2 font-medium">{nombreCentro(a.centroId)}</td>
+                  <td className="px-3 py-2 font-medium">{nombreCentro(a.centerId)}</td>
                   <td className="px-3 py-2">
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => run(() => updateAsignacion(profile.id, a.id, { activo: !(a.activo ?? true) }))}
-                      className={"inline-flex h-6 w-11 items-center rounded-full px-0.5 transition-colors " + ((a.activo ?? true) ? "bg-primary" : "bg-muted-foreground/30")}
-                      aria-pressed={a.activo ?? true}
+                      onClick={() => run(() => updateAsignacion(profile.id, a.id, { active: !(a.active ?? true) }))}
+                      className={"inline-flex h-6 w-11 items-center rounded-full px-0.5 transition-colors " + ((a.active ?? true) ? "bg-primary" : "bg-muted-foreground/30")}
+                      aria-pressed={a.active ?? true}
                       aria-label={t("colActivo")}
                     >
-                      <span className={"size-5 rounded-full bg-white transition-transform " + ((a.activo ?? true) ? "translate-x-5" : "")} />
+                      <span className={"size-5 rounded-full bg-white transition-transform " + ((a.active ?? true) ? "translate-x-5" : "")} />
                     </button>
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-1.5">
                       {rolesAqui.map((r) => (
-                        <span key={r.rolId} className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
-                          {r.nombre || r.clave}
-                          <button type="button" disabled={busy} onClick={() => run(() => removeRoleFromProfile(profile.id, r.rolId, a.centroId))} className="text-primary/70 hover:text-primary" aria-label={tRoot("common.delete")}>✕</button>
+                        <span key={r.roleId} className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
+                          {r.name || r.slug}
+                          <button type="button" disabled={busy} onClick={() => run(() => removeRoleFromProfile(profile.id, r.roleId, a.centerId))} className="text-primary/70 hover:text-primary" aria-label={tRoot("common.delete")}>✕</button>
                         </span>
                       ))}
                       {rolesAqui.length === 0 && <span className="text-xs italic text-muted-foreground">{t("sinRolCentro")}</span>}
                       {disponibles.length > 0 && (
-                        <Select value="" onValueChange={(clave) => run(() => assignRoleToProfile(profile.id, clave, a.centroId))}>
+                        <Select value="" onValueChange={(clave) => run(() => assignRoleToProfile(profile.id, clave, a.centerId))}>
                           <SelectTrigger className="h-7 w-40 text-xs"><SelectValue placeholder={t("anadirRol")} /></SelectTrigger>
                           <SelectContent>
-                            {disponibles.map((r) => <SelectItem key={r.id} value={r.clave}>{r.nombre}</SelectItem>)}
+                            {disponibles.map((r) => <SelectItem key={r.id} value={r.slug}>{r.name}</SelectItem>)}
                           </SelectContent>
                         </Select>
                       )}
@@ -138,10 +138,10 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
       {centrosSinAsignar.length > 0 && (
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{t("anadirCentro")}</span>
-          <Select value="" onValueChange={(centroId) => run(() => assignCenter(profile.id, { centroId, tipo: "base" }))}>
+          <Select value="" onValueChange={(centroId) => run(() => assignCenter(profile.id, { centerId: centroId, type: "base" }))}>
             <SelectTrigger className="h-8 w-52 text-sm"><SelectValue placeholder={t("elegirCentro")} /></SelectTrigger>
             <SelectContent>
-              {centrosSinAsignar.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+              {centrosSinAsignar.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -152,18 +152,18 @@ export function AccessPorCentroTab({ profile }: { profile: Perfil }) {
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("rolesGlobales")}</p>
         <div className="flex flex-wrap items-center gap-1.5">
           {rolesGlobalesPerfil.map((r) => (
-            <span key={r.rolId} className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium">
-              {r.nombre || r.clave}
-              <button type="button" disabled={busy} onClick={() => run(() => removeRoleFromProfile(profile.id, r.rolId))} className="text-muted-foreground hover:text-foreground" aria-label={tRoot("common.delete")}>✕</button>
+            <span key={r.roleId} className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium">
+              {r.name || r.slug}
+              <button type="button" disabled={busy} onClick={() => run(() => removeRoleFromProfile(profile.id, r.roleId))} className="text-muted-foreground hover:text-foreground" aria-label={tRoot("common.delete")}>✕</button>
             </span>
           ))}
           {rolesGlobalesPerfil.length === 0 && <span className="text-xs italic text-muted-foreground">{t("sinRolesGlobales")}</span>}
           {(() => {
-            const disp = rolesGlobales.filter((r) => !rolesGlobalesPerfil.some((x) => x.clave === r.clave));
+            const disp = rolesGlobales.filter((r) => !rolesGlobalesPerfil.some((x) => x.slug === r.slug));
             return disp.length > 0 ? (
               <Select value="" onValueChange={(clave) => run(() => assignRoleToProfile(profile.id, clave))}>
                 <SelectTrigger className="h-7 w-40 text-xs"><SelectValue placeholder={t("anadir")} /></SelectTrigger>
-                <SelectContent>{disp.map((r) => <SelectItem key={r.id} value={r.clave}>{r.nombre}</SelectItem>)}</SelectContent>
+                <SelectContent>{disp.map((r) => <SelectItem key={r.id} value={r.slug}>{r.name}</SelectItem>)}</SelectContent>
               </Select>
             ) : null;
           })()}

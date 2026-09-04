@@ -40,9 +40,9 @@ export function ColumnasTab({ clave }: { clave: string }) {
 
   const loading =
     catRes.state.kind === "loading" || effRes.state.kind === "loading" || defRes.state.kind === "loading";
-  const catalog = (catRes.state.kind === "ok" ? catRes.state.data : []).filter((c) => c.activo);
+  const catalog = (catRes.state.kind === "ok" ? catRes.state.data : []).filter((c) => c.active);
   const efectivas = effRes.state.kind === "ok" ? effRes.state.data : [];
-  const transiciones = defRes.state.kind === "ok" ? defRes.state.data.transiciones : [];
+  const transiciones = defRes.state.kind === "ok" ? defRes.state.data.transitions : [];
 
   function reloadAll() {
     catRes.reload();
@@ -52,7 +52,7 @@ export function ColumnasTab({ clave }: { clave: string }) {
 
   // Firma para remontar el editor cuando cambia la membresía/orden del servidor.
   const sig =
-    catalog.filter((c) => (c.ambitos ?? []).includes(clave)).map((c) => c.id).join(",") +
+    catalog.filter((c) => (c.scopes ?? []).includes(clave)).map((c) => c.id).join(",") +
     "|" +
     efectivas.map((e) => `${e.clave}:${e.orden}`).join(",");
 
@@ -79,14 +79,14 @@ function buildRows(members: ColumnaCatalogo[], efectivas: ColumnaEfectiva[]): Ro
   const eff = new Map(efectivas.map((e) => [e.clave, e]));
   return members
     .map((c) => {
-      const e = eff.get(c.clave);
+      const e = eff.get(c.slug);
       // group = override por-tablero (composición) o el del catálogo. Encadena.
       const group = renderGroup(e?.render) ?? renderGroup(c.render as Record<string, unknown> | null);
       return {
         columnaId: c.id,
-        clave: c.clave,
+        clave: c.slug,
         labelKey: c.labelKey,
-        tipo: c.tipo,
+        tipo: c.type,
         visible: !!e,
         fijo: !!e?.fijo,
         orden: e?.orden ?? 9999,
@@ -131,8 +131,8 @@ function ColumnasEditor({
   const { can } = useCan();
   const boardMode = can("tablero.config");
 
-  const members = catalog.filter((c) => (c.ambitos ?? []).includes(clave));
-  const nonMembers = catalog.filter((c) => !(c.ambitos ?? []).includes(clave));
+  const members = catalog.filter((c) => (c.scopes ?? []).includes(clave));
+  const nonMembers = catalog.filter((c) => !(c.scopes ?? []).includes(clave));
   const catById = React.useMemo(() => new Map(catalog.map((c) => [c.id, c] as const)), [catalog]);
 
   const [rows, setRows] = React.useState<Row[]>(() => buildRows(members, efectivas));
@@ -181,11 +181,11 @@ function ColumnasEditor({
       if (boardMode) {
         await setComposicionBulk(
           clave,
-          rows.map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
+          rows.map((r, i) => ({ columnId: r.columnaId, sortOrder: i, visible: r.visible, pinned: r.fijo, active: true })),
         );
       } else {
         await Promise.all(
-          rows.map((r, i) => personalizarColumna({ tablero: clave, columnaId: r.columnaId, visible: r.visible, orden: i, fijo: r.fijo })),
+          rows.map((r, i) => personalizarColumna({ boardSlug: clave, columnId: r.columnaId, visible: r.visible, sortOrder: i, pinned: r.fijo })),
         );
       }
       toast.success(te("saved"));
@@ -214,10 +214,10 @@ function ColumnasEditor({
   async function agregar(cat: ColumnaCatalogo) {
     setBusyId(cat.id);
     try {
-      await actualizarColumna(cat.id, { ambitos: [...(cat.ambitos ?? []), clave] });
+      await actualizarColumna(cat.id, { scopes: [...(cat.scopes ?? []), clave] });
       await setComposicionBulk(clave, [
-        ...rows.map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
-        { columnaId: cat.id, orden: rows.length, visible: true, fijo: false, activo: true },
+        ...rows.map((r, i) => ({ columnId: r.columnaId, sortOrder: i, visible: r.visible, pinned: r.fijo, active: true })),
+        { columnId: cat.id, sortOrder: rows.length, visible: true, pinned: false, active: true },
       ]);
       onChanged();
     } catch (err) {
@@ -241,9 +241,9 @@ function ColumnasEditor({
         clave,
         rows
           .filter((r) => r.columnaId !== row.columnaId)
-          .map((r, i) => ({ columnaId: r.columnaId, orden: i, visible: r.visible, fijo: r.fijo, activo: true })),
+          .map((r, i) => ({ columnId: r.columnaId, sortOrder: i, visible: r.visible, pinned: r.fijo, active: true })),
       );
-      await actualizarColumna(cat.id, { ambitos: (cat.ambitos ?? []).filter((a) => a !== clave) });
+      await actualizarColumna(cat.id, { scopes: (cat.scopes ?? []).filter((a) => a !== clave) });
       onChanged();
     } catch (err) {
       toastError(err, tRoot);
@@ -356,7 +356,7 @@ function ColumnasEditor({
             {nonMembers.map((c) => (
               <li key={c.id} className="flex items-center gap-3 px-3 py-2 opacity-80">
                 <span className="text-sm font-medium">{tRoot(c.labelKey)}</span>
-                <span className="text-xs text-muted-foreground">· {c.clave} · {c.tipo}</span>
+                <span className="text-xs text-muted-foreground">· {c.slug} · {c.type}</span>
                 <Button className="ml-auto" size="sm" variant="ghost" disabled={busyId === c.id} onClick={() => agregar(c)}>
                   {t("colAdd")}
                 </Button>
@@ -370,7 +370,7 @@ function ColumnasEditor({
       {configCol && (() => {
         // La efectiva de esta columna EN ESTE tablero: su render (catálogo + override) y su nombre
         // propio actual (label), para el campo "Nombre en este servicio".
-        const ef = efectivas.find((e) => e.clave === configCol.clave);
+        const ef = efectivas.find((e) => e.clave === configCol.slug);
         return (
           <ColumnConfigDialog
             col={configCol}
@@ -398,12 +398,12 @@ function NuevaColumnaDialog({ clave, onClose, onSaved }: { clave: string; onClos
     setBusy(true);
     try {
       await crearColumna({
-        clave: v.clave.trim(),
+        slug: v.clave.trim(),
         labelKey: v.labelKey.trim(),
-        tipo: (v.tipo || "texto") as never,
+        type: (v.tipo || "texto") as never,
         binding: v.binding.trim(),
         editable: v.editable,
-        ambitos: [clave],
+        scopes: [clave],
       });
       toast.success(t("created"));
       onSaved();

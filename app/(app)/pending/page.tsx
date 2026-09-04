@@ -14,7 +14,7 @@ export default function PendingPage() {
   const router = useRouter();
   const state = useMe();
 
-  const estado = state.kind === "ok" ? state.me.estado : null;
+  const estado = state.kind === "ok" ? state.me.status : null;
   const message =
     estado === "rechazado"
       ? t("rejected")

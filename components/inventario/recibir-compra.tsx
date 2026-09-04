@@ -106,21 +106,21 @@ export function RecibirCompra() {
     setSubmitting(true);
     try {
       const items: RecibirCompraLoteItem[] = lineas.map((l) => ({
-        productoId: l.productoId,
-        cantidad: Number(l.cantidad) || 0,
-        ...(Number(l.costo) > 0 ? { costoUnitario: Number(l.costo) } : {}),
-        ...(l.numeroLote.trim() ? { numeroLote: l.numeroLote.trim() } : {}),
-        ...(l.fechaVencimiento ? { fechaVencimiento: l.fechaVencimiento } : {}),
+        productId: l.productoId,
+        quantity: Number(l.cantidad) || 0,
+        ...(Number(l.costo) > 0 ? { unitCost: Number(l.costo) } : {}),
+        ...(l.numeroLote.trim() ? { lotNumber: l.numeroLote.trim() } : {}),
+        ...(l.fechaVencimiento ? { expirationDate: l.fechaVencimiento } : {}),
       }));
       const r = await recibirCompraLote({
-        ...(almacenId ? { almacenId } : {}),
-        ...(proveedorId && proveedorId !== NONE ? { proveedorId } : {}),
-        ...(numeroFactura.trim() ? { numeroFacturaCompra: numeroFactura.trim() } : {}),
-        ...(fecha ? { fechaEfectiva: fecha } : {}),
-        ...(notas.trim() ? { notas: notas.trim() } : {}),
+        ...(almacenId ? { warehouseId: almacenId } : {}),
+        ...(proveedorId && proveedorId !== NONE ? { supplierId: proveedorId } : {}),
+        ...(numeroFactura.trim() ? { purchaseInvoiceNumber: numeroFactura.trim() } : {}),
+        ...(fecha ? { effectiveDate: fecha } : {}),
+        ...(notas.trim() ? { notes: notas.trim() } : {}),
         items,
       });
-      setReciboId(r.documentoId ?? null);
+      setReciboId(r.documentId ?? null);
       toast.success(t("received"));
       // Limpia el carrito; conserva la cabecera por si siguen cargando del mismo proveedor.
       setLineas([]);
@@ -153,7 +153,7 @@ export function RecibirCompra() {
             <Select value={almacenId} onValueChange={setAlmacenId}>
               <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectAlmacen")} /></SelectTrigger>
               <SelectContent>
-                {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>)}
+                {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </Row>
@@ -162,7 +162,7 @@ export function RecibirCompra() {
               <SelectTrigger className="w-full"><SelectValue placeholder={t("field.none")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE}>{t("field.none")}</SelectItem>
-                {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>)}
+                {proveedores.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </Row>
@@ -188,7 +188,7 @@ export function RecibirCompra() {
             <div className="sm:col-span-5">
               <ProductoPicker
                 value={pId}
-                onChange={(id, prod) => { setPId(id); setPNombre(prod?.nombre ?? ""); }}
+                onChange={(id, prod) => { setPId(id); setPNombre(prod?.name ?? ""); }}
                 placeholder={t("field.selectProducto")}
               />
             </div>

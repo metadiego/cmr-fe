@@ -94,8 +94,8 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const { state, reload } = useResource<FacturaTablero>(
     () =>
       gate.centro
-        ? getFacturasTablero({ q, estado, desde, hasta, contexto }, gate.centro)
-        : Promise.resolve({ columnas: [], filas: [] }),
+        ? getFacturasTablero({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
+        : Promise.resolve({ columns: [], rows: [] }),
     [q, estado, desde, hasta, gate.centro, contexto],
   );
 
@@ -104,15 +104,15 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const resumenRes = useResource<FacturasResumen>(
     () =>
       gate.centro
-        ? getFacturasResumen({ q, estado, desde, hasta, contexto }, gate.centro)
+        ? getFacturasResumen({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
         : Promise.resolve({ importe: 0, exentas: 0, cobradas: 0, total: 0 }),
     [q, estado, desde, hasta, gate.centro, contexto],
   );
   const resumen = resumenRes.state.kind === "ok" ? resumenRes.state.data : null;
 
   const tablero = state.kind === "ok" ? state.data : null;
-  const columnas = (tablero?.columnas ?? []).filter((c) => c.clave !== "fac_acciones");
-  const filas = tablero?.filas ?? [];
+  const columnas = (tablero?.columns ?? []).filter((c) => c.clave !== "fac_acciones");
+  const filas = tablero?.rows ?? [];
 
   // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select+editable con writeBinding.
   // Las opciones salen del motor de tableros (GET /tablero/opciones), cargadas UNA vez por columna.

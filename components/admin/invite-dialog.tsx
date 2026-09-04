@@ -81,7 +81,7 @@ export function InviteDialog({
     [open, puedeClonar],
   );
   const perfiles = perfilesState.kind === "ok" ? perfilesState.data : [];
-  const nombreDe = (p: Perfil) => [p.nombre, p.apellido].filter(Boolean).join(" ").trim() || p.email || p.id;
+  const nombreDe = (p: Perfil) => [p.name, p.lastName].filter(Boolean).join(" ").trim() || p.email || p.id;
   const origenSel = perfiles.find((p) => p.id === origenPerfilId) ?? null;
   const origenMatches = origenQuery.trim()
     ? perfiles.filter((p) => `${nombreDe(p)} ${p.email ?? ""}`.toLowerCase().includes(origenQuery.trim().toLowerCase())).slice(0, 8)
@@ -104,8 +104,8 @@ export function InviteDialog({
     [open],
   );
   const sinCuenta = (personalState.kind === "ok" ? personalState.data : [])
-    .filter((p) => p.perfilId == null && p.activo !== false)
-    .sort((a, b) => `${a.nombre} ${a.apellido ?? ""}`.localeCompare(`${b.nombre} ${b.apellido ?? ""}`));
+    .filter((p) => p.profileId == null && p.active !== false)
+    .sort((a, b) => `${a.name} ${a.lastName ?? ""}`.localeCompare(`${b.name} ${b.lastName ?? ""}`));
 
   // Al elegir una persona: prellenar nombre/apellido (mismos datos, no re-teclear) y fijar su centro
   // (evita el error "es de otro centro"). Todo queda editable.
@@ -113,8 +113,8 @@ export function InviteDialog({
     setPersonalId(id);
     const p = sinCuenta.find((x) => x.id === id);
     if (p) {
-      setNombre(p.nombre ?? "");
-      setApellido(p.apellido ?? "");
+      setNombre(p.name ?? "");
+      setApellido(p.lastName ?? "");
       if (p.clinicId) setCentroId(p.clinicId);
     }
   }
@@ -148,15 +148,15 @@ export function InviteDialog({
     try {
       const res = await inviteUser({
         email: email.trim(),
-        nombre: nombre.trim(),
-        apellido: apellido.trim() || undefined,
+        name: nombre.trim(),
+        lastName: apellido.trim() || undefined,
         accessMode,
-        centroId: centroId || undefined,
+        centerId: centroId || undefined,
         rolClave: rolClave || undefined,
         // Enganchar a la persona ya dada de alta (conserva su historial). Sin esto, cuenta sin ficha.
-        personalId: personalId || undefined,
+        staffId: personalId || undefined,
         tipoAsignacion: centroId && temporal ? "temporal" : undefined,
-        vigenteHasta: centroId && temporal ? vigenteHasta || undefined : undefined,
+        validUntil: centroId && temporal ? vigenteHasta || undefined : undefined,
         redirectTo: `${window.location.origin}/auth/set-password`,
       });
       toast.success(t("success", { email: res.email }));
@@ -225,7 +225,7 @@ export function InviteDialog({
                     <SelectItem value="__none__">{t("personaNadie")}</SelectItem>
                     {sinCuenta.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.nombre} {p.apellido ?? ""}{p.cargo ? ` · ${p.cargo}` : ""}
+                        {p.name} {p.lastName ?? ""}{p.jobTitle ? ` · ${p.jobTitle}` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -233,7 +233,7 @@ export function InviteDialog({
                 {personalId && (
                   <p className="text-xs text-success-foreground">
                     {t("personaEnlazando", {
-                      nombre: (() => { const p = sinCuenta.find((x) => x.id === personalId); return p ? `${p.nombre} ${p.apellido ?? ""}`.trim() : ""; })(),
+                      nombre: (() => { const p = sinCuenta.find((x) => x.id === personalId); return p ? `${p.name} ${p.lastName ?? ""}`.trim() : ""; })(),
                     })}
                   </p>
                 )}
@@ -281,7 +281,7 @@ export function InviteDialog({
                   <SelectContent>
                     {centros.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.nombre}
+                        {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -317,8 +317,8 @@ export function InviteDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {roles.map((r) => (
-                      <SelectItem key={r.id} value={r.clave}>
-                        {r.nombre}
+                      <SelectItem key={r.id} value={r.slug}>
+                        {r.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

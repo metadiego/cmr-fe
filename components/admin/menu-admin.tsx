@@ -33,12 +33,12 @@ import {
 const SIN_PERMISO = "__sin_permiso__";
 
 const EMPTY: MenuItemPayload = {
-  clave: "",
+  slug: "",
   labelKey: "",
   path: "",
-  parentClave: "",
-  orden: 0,
-  permisoClave: "",
+  parentSlug: "",
+  sortOrder: 0,
+  permissionSlug: "",
   visible: true,
 };
 
@@ -64,14 +64,14 @@ export function MenuAdmin() {
   }
 
   const columns: Column<MenuItem>[] = [
-    { key: "orden", header: t("orden"), cell: (m) => m.orden },
+    { key: "orden", header: t("orden"), cell: (m) => m.sortOrder },
     {
       key: "clave",
       header: t("clave"),
       cell: (m) => (
         <span className="font-mono text-xs">
-          {m.parentClave ? `${m.parentClave} › ` : ""}
-          {m.clave}
+          {m.parentSlug ? `${m.parentSlug} › ` : ""}
+          {m.slug}
         </span>
       ),
     },
@@ -169,14 +169,14 @@ function MenuItemForm({
   }
 
   async function onSubmit() {
-    if (!form.clave.trim() || !form.labelKey?.trim() || !form.path?.trim()) return;
+    if (!form.slug.trim() || !form.labelKey?.trim() || !form.path?.trim()) return;
     setSubmitting(true);
     try {
       const payload: MenuItemPayload = {
         ...form,
-        parentClave: form.parentClave?.trim() || null,
-        permisoClave: form.permisoClave?.trim() || null,
-        orden: Number(form.orden) || 0,
+        parentSlug: form.parentSlug?.trim() || null,
+        permissionSlug: form.permissionSlug?.trim() || null,
+        sortOrder: Number(form.sortOrder) || 0,
       };
       if (item) await updateMenuItem(item.id, payload);
       else await createMenuItem(payload);
@@ -198,14 +198,14 @@ function MenuItemForm({
       description={t("formHelp")}
       submitting={submitting}
       canSubmit={
-        !!form.clave.trim() && !!form.labelKey?.trim() && !!form.path?.trim()
+        !!form.slug.trim() && !!form.labelKey?.trim() && !!form.path?.trim()
       }
       onSubmit={onSubmit}
     >
       <Field label={t("clave")}>
         <Input
-          value={form.clave}
-          onChange={(e) => set("clave", e.target.value)}
+          value={form.slug}
+          onChange={(e) => set("slug", e.target.value)}
           placeholder="pacientes"
           className="font-mono"
         />
@@ -228,8 +228,8 @@ function MenuItemForm({
       </Field>
       <Field label={t("parentClave")} hint={t("parentClaveHint")}>
         <Input
-          value={form.parentClave ?? ""}
-          onChange={(e) => set("parentClave", e.target.value)}
+          value={form.parentSlug ?? ""}
+          onChange={(e) => set("parentSlug", e.target.value)}
           className="font-mono"
         />
       </Field>
@@ -237,9 +237,9 @@ function MenuItemForm({
           permisos inexistentes (invisibles para todos). */}
       <Field label={t("permisoClave")} hint={t("permisoClaveHint")}>
         <Select
-          value={form.permisoClave || SIN_PERMISO}
+          value={form.permissionSlug || SIN_PERMISO}
           onValueChange={(v) =>
-            set("permisoClave", v === SIN_PERMISO ? "" : v)
+            set("permissionSlug", v === SIN_PERMISO ? "" : v)
           }
         >
           <SelectTrigger className="w-full">
@@ -248,8 +248,8 @@ function MenuItemForm({
           <SelectContent>
             <SelectItem value={SIN_PERMISO}>{t("permisoSinPermiso")}</SelectItem>
             {permisos.map((p) => (
-              <SelectItem key={p.clave} value={p.clave}>
-                {p.clave}
+              <SelectItem key={p.slug} value={p.slug}>
+                {p.slug}
               </SelectItem>
             ))}
           </SelectContent>
@@ -258,8 +258,8 @@ function MenuItemForm({
       <Field label={t("orden")}>
         <Input
           type="number"
-          value={String(form.orden ?? 0)}
-          onChange={(e) => set("orden", Number(e.target.value))}
+          value={String(form.sortOrder ?? 0)}
+          onChange={(e) => set("sortOrder", Number(e.target.value))}
         />
       </Field>
       <label className="flex items-center gap-2 text-sm">
@@ -275,13 +275,13 @@ function MenuItemForm({
 
 function toPayload(m: MenuItem): MenuItemPayload {
   return {
-    clave: m.clave,
+    slug: m.slug,
     labelKey: m.labelKey,
     path: m.path,
     icon: m.icon ?? null,
-    parentClave: m.parentClave ?? "",
-    orden: m.orden,
-    permisoClave: m.permisoClave ?? "",
+    parentSlug: m.parentSlug ?? "",
+    sortOrder: m.sortOrder,
+    permissionSlug: m.permissionSlug ?? "",
     visible: m.visible,
   };
 }

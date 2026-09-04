@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetchV1, apiFetchPagedV1 } from "./client";
 import type { Paginated } from "./types";
 
 // Bitácora de auditoría (BE: AuditLogController, spec docs/specs/auditoria.md — ya en prod).
@@ -64,7 +64,7 @@ export function getAuditoriaFacetas(
   if (window.desde) sp.set("desde", window.desde);
   if (window.hasta) sp.set("hasta", window.hasta);
   const qs = sp.toString();
-  return apiFetch<AuditFacetas>(`/auditoria/facetas${qs ? `?${qs}` : ""}`, {}, tenant);
+  return apiFetchV1<AuditFacetas>(`/auditoria/facetas${qs ? `?${qs}` : ""}`, {}, tenant);
 }
 
 // Resumen para las tarjetas/gráfico de la cabecera (conteos, NO filas). GET /auditoria/resumen.
@@ -86,7 +86,7 @@ export function getAuditoriaResumen(
   if (window.desde) sp.set("desde", window.desde);
   if (window.hasta) sp.set("hasta", window.hasta);
   const qs = sp.toString();
-  return apiFetch<AuditResumen>(`/auditoria/resumen${qs ? `?${qs}` : ""}`, {}, tenant);
+  return apiFetchV1<AuditResumen>(`/auditoria/resumen${qs ? `?${qs}` : ""}`, {}, tenant);
 }
 
 // Purga de la bitácora. Permiso propio auditoria.purgar + rol admin, y EXIGE admin SIN X-Tenant-ID
@@ -99,7 +99,7 @@ export interface AuditPurgaResult {
   yaEnCurso?: boolean;
 }
 export function purgarAuditoria(): Promise<AuditPurgaResult> {
-  return apiFetch<AuditPurgaResult>(`/auditoria/purgar`, { method: "POST" }, null);
+  return apiFetchV1<AuditPurgaResult>(`/auditoria/purgar`, { method: "POST" }, null);
 }
 
 // GET /auditoria — endpoint CORRECTO (el atajo /auditoria/errores devuelve el 98% de las filas por
@@ -116,5 +116,5 @@ export function listAuditoria(
     if (v !== undefined && v !== null && `${v}` !== "") sp.set(k, String(v));
   }
   const qs = sp.toString();
-  return apiFetchPaged<AuditRow>(`/auditoria${qs ? `?${qs}` : ""}`, {}, tenant);
+  return apiFetchPagedV1<AuditRow>(`/auditoria${qs ? `?${qs}` : ""}`, {}, tenant);
 }

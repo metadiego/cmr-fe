@@ -170,7 +170,7 @@ function NotificarCell({
     let active = true;
     listPersonalPorCapacidad(capacidad, centroId)
       .then((list) => {
-        if (active) setRoster(list.map((p) => ({ value: p.id, label: `${p.nombre} ${p.apellido ?? ""}`.trim() })));
+        if (active) setRoster(list.map((p) => ({ value: p.id, label: `${p.name} ${p.lastName ?? ""}`.trim() })));
       })
       .catch(() => {});
     return () => { active = false; };
@@ -190,7 +190,7 @@ function NotificarCell({
       } else {
         // Servicio: la columna de enfermera está colocada; se escribe por celda (resuelve sesion.enfermeraId).
         // Certifica con lo que quedó en la base.
-        const { persistencia } = await editarCelda({ tablero, entidadId: fila.id, columna: asignadoDe, valor: pid }, centroId);
+        const { persistencia } = await editarCelda({ boardSlug: tablero, entityId: fila.id, column: asignadoDe, value: pid }, centroId);
         notifyPersistencia(persistencia, tRoot.has("frontdesk.enfermera") ? tRoot("frontdesk.enfermera") : undefined);
       }
       onRefresh?.();

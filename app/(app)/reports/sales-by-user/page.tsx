@@ -36,11 +36,11 @@ export default function VentasPorUsuarioPage() {
   const [desde, setDesde] = React.useState(isoDay(primero));
   const [hasta, setHasta] = React.useState(isoDay(hoy));
   const [division, setDivision] = React.useState<string>(TODAS);
-  const [query, setQuery] = React.useState<{ desde: string; hasta: string; contexto?: DivisionReporte }>({ desde: isoDay(primero), hasta: isoDay(hoy) });
+  const [query, setQuery] = React.useState<{ from: string; to: string; context?: DivisionReporte }>({ from: isoDay(primero), to: isoDay(hoy) });
 
   const { state } = useResource<ReporteUsuarioFila[]>(
     () => getReportePorUsuario(query, centro),
-    [query.desde, query.hasta, query.contexto, centro],
+    [query.from, query.to, query.context, centro],
   );
   const rows = state.kind === "ok" ? state.data : [];
   // El BE ya ordena; el total del período se suma solo para la barra proporcional y el pie.
@@ -49,7 +49,7 @@ export default function VentasPorUsuarioPage() {
 
   function aplicar(d: string, h: string, div: string) {
     setDesde(d); setHasta(h); setDivision(div);
-    setQuery({ desde: d, hasta: h, contexto: div === TODAS ? undefined : (div as DivisionReporte) });
+    setQuery({ from: d, to: h, context: div === TODAS ? undefined : (div as DivisionReporte) });
   }
   function atajo(tipo: "hoy" | "ayer" | "semana" | "mes") {
     const h = new Date();
@@ -59,7 +59,7 @@ export default function VentasPorUsuarioPage() {
     return aplicar(isoDay(new Date(h.getFullYear(), h.getMonth(), 1)), isoDay(h), division);
   }
 
-  const nombreDe = (r: ReporteUsuarioFila) => r.nombre ?? t("sinUsuario");
+  const nombreDe = (r: ReporteUsuarioFila) => r.name ?? t("sinUsuario");
 
   function exportarCsv() {
     const lines = [[t("col.usuario"), t("col.total")].join(",")];
@@ -68,7 +68,7 @@ export default function VentasPorUsuarioPage() {
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `ventas-por-usuario_${query.desde}_${query.hasta}.csv`; a.click();
+    a.href = url; a.download = `ventas-por-usuario_${query.from}_${query.to}.csv`; a.click();
     URL.revokeObjectURL(url);
   }
 
@@ -136,10 +136,10 @@ export default function VentasPorUsuarioPage() {
                 <tr><td colSpan={2} className="px-3 py-10 text-center text-muted-foreground">{t("empty")}</td></tr>
               )}
               {rows.map((r, i) => {
-                const sinUsuario = r.usuarioId == null;
+                const sinUsuario = r.userId == null;
                 const pct = maxTotal > 0 ? Math.max(2, Math.round((Math.abs(r.total) / maxTotal) * 100)) : 0;
                 return (
-                  <tr key={r.usuarioId ?? `__sin__${i}`} className={"hover:bg-muted/30 " + (sinUsuario ? "bg-warning" : "")}>
+                  <tr key={r.userId ?? `__sin__${i}`} className={"hover:bg-muted/30 " + (sinUsuario ? "bg-warning" : "")}>
                     <td className="px-3 py-2">
                       <span className={"font-medium " + (sinUsuario ? "text-warning-foreground" : "")}>{nombreDe(r)}</span>
                       <div className="mt-1 h-1.5 w-full max-w-[280px] overflow-hidden rounded-full bg-muted">

@@ -30,11 +30,11 @@ export function FormatosAdmin({ centro }: { centro?: string }) {
 
   const servRes = useResource<Servicio[]>(() => getServicios(centro, { includeInactive: true }), [centro]);
   const servicios = React.useMemo(
-    () => (servRes.state.kind === "ok" ? servRes.state.data : []).slice().sort((a, b) => a.nombre.localeCompare(b.nombre)),
+    () => (servRes.state.kind === "ok" ? servRes.state.data : []).slice().sort((a, b) => a.name.localeCompare(b.name)),
     [servRes.state],
   );
   const [servClave, setServClave] = React.useState("");
-  const servicioClave = servicios.some((s) => s.clave === servClave) ? servClave : servicios[0]?.clave ?? "";
+  const servicioClave = servicios.some((s) => s.slug === servClave) ? servClave : servicios[0]?.slug ?? "";
 
   const fmtRes = useResource<Formato[]>(
     () => (servicioClave ? getFormatos(servicioClave, centro) : Promise.resolve([])),
@@ -50,7 +50,7 @@ export function FormatosAdmin({ centro }: { centro?: string }) {
         <Select value={servicioClave} onValueChange={(v) => { setServClave(v); setEditing(null); }}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            {servicios.map((s) => <SelectItem key={s.id} value={s.clave ?? s.id}>{s.nombre}</SelectItem>)}
+            {servicios.map((s) => <SelectItem key={s.id} value={s.slug ?? s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </label>
@@ -76,10 +76,10 @@ export function FormatosAdmin({ centro }: { centro?: string }) {
                 )}
                 {formatos.map((f) => (
                   <tr key={f.id} className="cursor-pointer border-t hover:bg-muted/30" onClick={() => setEditing(f)}>
-                    <td className="px-3 py-1.5 font-medium">{f.titulo}</td>
-                    <td className="px-3 py-1.5 font-mono text-xs">{f.clave}</td>
-                    <td className="px-3 py-1.5 tabular-nums">{f.columnas?.length ?? 0}</td>
-                    <td className="px-3 py-1.5">{f.activo === false ? t("no") : t("si")}</td>
+                    <td className="px-3 py-1.5 font-medium">{f.title}</td>
+                    <td className="px-3 py-1.5 font-mono text-xs">{f.slug}</td>
+                    <td className="px-3 py-1.5 tabular-nums">{f.columns?.length ?? 0}</td>
+                    <td className="px-3 py-1.5">{f.active === false ? t("no") : t("si")}</td>
                     <td className="px-3 py-1.5 text-right text-muted-foreground">›</td>
                   </tr>
                 ))}
@@ -127,14 +127,14 @@ function FormatoEditor({
   t: TFn;
   tRoot: TFn;
 }) {
-  const [clave, setClave] = React.useState(formato?.clave ?? "");
+  const [clave, setClave] = React.useState(formato?.slug ?? "");
   const [labelKey, setLabelKey] = React.useState(formato?.labelKey ?? "");
-  const [titulo, setTitulo] = React.useState(formato?.titulo ?? "");
-  const [cols, setCols] = React.useState<FormatoColumna[]>(() => (formato?.columnas ?? []).map((c) => ({ ...c })));
-  const [filas, setFilas] = React.useState<string>(String(typeof formato?.filas === "number" ? formato.filas : (formato?.filas?.length ?? 6)));
-  const [membrete, setMembrete] = React.useState<boolean>(formato?.membrete !== false && formato?.membrete != null ? true : formato == null);
-  const [orden, setOrden] = React.useState<string>(String(formato?.orden ?? 0));
-  const [activo, setActivo] = React.useState<boolean>(formato?.activo !== false);
+  const [titulo, setTitulo] = React.useState(formato?.title ?? "");
+  const [cols, setCols] = React.useState<FormatoColumna[]>(() => (formato?.columns ?? []).map((c) => ({ ...c })));
+  const [filas, setFilas] = React.useState<string>(String(typeof formato?.rows === "number" ? formato.rows : (formato?.rows?.length ?? 6)));
+  const [membrete, setMembrete] = React.useState<boolean>(formato?.letterhead !== false && formato?.letterhead != null ? true : formato == null);
+  const [orden, setOrden] = React.useState<string>(String(formato?.sortOrder ?? 0));
+  const [activo, setActivo] = React.useState<boolean>(formato?.active !== false);
   const [saving, setSaving] = React.useState(false);
 
   const setCol = (i: number, patch: Partial<FormatoColumna>) => setCols((cs) => cs.map((c, j) => (j === i ? { ...c, ...patch } : c)));
@@ -151,15 +151,15 @@ function FormatoEditor({
     if (!valido) return;
     setSaving(true);
     const payload = {
-      clave: clave.trim(),
+      slug: clave.trim(),
       labelKey: labelKey.trim() || undefined,
-      titulo: titulo.trim(),
-      servicioClave,
-      columnas: cols.filter((c) => c.clave.trim()).map((c) => ({ clave: c.clave.trim(), labelKey: (c.labelKey ?? "").trim() || undefined })),
-      filas: Number(filas) || 0,
-      membrete,
-      orden: Number(orden) || 0,
-      activo,
+      title: titulo.trim(),
+      serviceSlug: servicioClave,
+      columns: cols.filter((c) => c.clave.trim()).map((c) => ({ clave: c.clave.trim(), labelKey: (c.labelKey ?? "").trim() || undefined })),
+      rows: Number(filas) || 0,
+      letterhead: membrete,
+      sortOrder: Number(orden) || 0,
+      active: activo,
     };
     try {
       if (formato) await updateFormato(formato.id, payload, centro);

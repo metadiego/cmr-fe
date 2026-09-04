@@ -75,18 +75,18 @@ export function ServiciosCalendar() {
     return () => clearInterval(id);
   }, [reload]);
 
-  const pacientes = usePacienteMap(sesiones.map((s) => s.pacienteId));
+  const pacientes = usePacienteMap(sesiones.map((s) => s.patientId));
   const servById = React.useMemo(() => new Map(servicios.map((s) => [s.id, s])), [servicios]);
 
   const eventsByDate = React.useMemo(() => {
     const map = new Map<string, AgendaEvent[]>();
     for (const s of sesiones) {
-      const p = pacientes[s.pacienteId];
-      const label = p ? (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")) : "…";
-      const color = servById.get(s.servicioId)?.color ?? "#4a90d9";
-      const arr = map.get(s.fecha) ?? [];
+      const p = pacientes[s.patientId];
+      const label = p ? (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")) : "…";
+      const color = servById.get(s.serviceId)?.color ?? "#4a90d9";
+      const arr = map.get(s.date) ?? [];
       arr.push({ id: s.id, hora: null, label, color });
-      map.set(s.fecha, arr);
+      map.set(s.date, arr);
     }
     return map;
   }, [sesiones, pacientes, servById]);
@@ -134,7 +134,7 @@ export function ServiciosCalendar() {
               <SelectContent>
                 <SelectItem value={ALL}>{t("allServices")}</SelectItem>
                 {servicios.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>{s.nombre}</SelectItem>
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -186,11 +186,11 @@ export function ServiciosCalendar() {
                     className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
                   >
                     <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
-                      {(p.nombres?.[0] ?? "") + (p.apellidos?.[0] ?? "")}
+                      {(p.firstName?.[0] ?? "") + (p.lastName?.[0] ?? "")}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate">{(p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" "))}</span>
-                      {p.telefono && <span className="block truncate text-xs text-muted-foreground">{p.telefono}</span>}
+                      <span className="block truncate">{(p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" "))}</span>
+                      {p.phone && <span className="block truncate text-xs text-muted-foreground">{p.phone}</span>}
                     </span>
                   </button>
                 </li>
@@ -204,7 +204,7 @@ export function ServiciosCalendar() {
             {servicios.map((s) => (
               <li key={s.id} className="flex items-center gap-2 text-sm">
                 <span className="size-3 rounded-sm" style={{ backgroundColor: s.color ?? "#4a90d9" }} />
-                {s.nombre}
+                {s.name}
               </li>
             ))}
           </ul>

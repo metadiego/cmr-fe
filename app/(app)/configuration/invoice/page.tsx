@@ -47,7 +47,7 @@ export default function ConfigFacturaPage() {
             <Select value={selected?.id ?? ""} onValueChange={setCentroId}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </label>
@@ -78,17 +78,17 @@ type FormState = {
 function seed(c: Centro): FormState {
   return {
     logoUrl: c.logoUrl ?? "",
-    nombreLegal: c.nombreLegal ?? "",
-    nombreComercial: c.nombreComercial ?? "",
-    registroFiscal: c.registroFiscal ?? "",
-    registroFiscalLabel: c.registroFiscalLabel ?? "",
-    telefono: c.telefono ?? "",
-    direccionFiscal: c.direccionFiscal ?? "",
-    zip: c.zip ?? "",
-    web: c.web ?? "",
-    pieFactura: c.pieFactura ?? "",
+    nombreLegal: c.legalName ?? "",
+    nombreComercial: c.tradeName ?? "",
+    registroFiscal: c.taxRegistration ?? "",
+    registroFiscalLabel: c.taxRegistrationLabel ?? "",
+    telefono: c.phone ?? "",
+    direccionFiscal: c.taxAddress ?? "",
+    zip: c.zipCode ?? "",
+    web: c.website ?? "",
+    pieFactura: c.invoiceFooter ?? "",
     // Enganche facturación↔frontdesk (auto-presente al saldar). Default true si el BE aún no lo trae.
-    frontdeskAutopresente: c.frontdeskAutopresente ?? true,
+    frontdeskAutopresente: c.frontdeskAutoPresent ?? true,
   };
 }
 
@@ -107,16 +107,16 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
     // Patch parcial: todos los campos que gestiona el form (string vacío = limpiar).
     const payload: DatosFiscalesPayload = {
       logoUrl: form.logoUrl.trim(),
-      nombreLegal: form.nombreLegal.trim(),
-      nombreComercial: form.nombreComercial.trim(),
-      registroFiscal: form.registroFiscal.trim(),
-      registroFiscalLabel: form.registroFiscalLabel.trim(),
-      telefono: form.telefono.trim(),
-      direccionFiscal: form.direccionFiscal.trim(),
-      zip: form.zip.trim(),
-      web: form.web.trim(),
-      pieFactura: form.pieFactura,
-      frontdeskAutopresente: form.frontdeskAutopresente,
+      legalName: form.nombreLegal.trim(),
+      tradeName: form.nombreComercial.trim(),
+      taxRegistration: form.registroFiscal.trim(),
+      taxRegistrationLabel: form.registroFiscalLabel.trim(),
+      phone: form.telefono.trim(),
+      taxAddress: form.direccionFiscal.trim(),
+      zipCode: form.zip.trim(),
+      website: form.web.trim(),
+      invoiceFooter: form.pieFactura,
+      frontdeskAutoPresent: form.frontdeskAutopresente,
     };
     try {
       await updateDatosFiscales(centro.id, payload);
@@ -196,7 +196,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
           ) : null}
           {form.nombreLegal && <div className="text-sm font-bold uppercase">{form.nombreLegal}</div>}
           {form.nombreComercial && <div className="font-medium">{form.nombreComercial}</div>}
-          <div className="font-medium">{centro.nombre}</div>
+          <div className="font-medium">{centro.name}</div>
           {form.registroFiscal && <div>{(form.registroFiscalLabel || "MN")}: {form.registroFiscal}</div>}
           {(form.direccionFiscal || form.zip) && <div>{[form.direccionFiscal, form.zip].filter(Boolean).join(", ")}</div>}
           {form.telefono && <div>{form.telefono}</div>}

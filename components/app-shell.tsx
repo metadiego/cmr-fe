@@ -58,15 +58,15 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
 
   // Título de sección: el ítem de menú activo más específico (path más largo que
   // matchea la ruta). Deriva del mismo menú del BE; sin match, se omite.
-  const labelOf = (n: { labelCustom?: string | null; labelKey: string }): string => {
-    const custom = n.labelCustom?.trim();
+  const labelOf = (n: { customLabel?: string | null; labelKey: string }): string => {
+    const custom = n.customLabel?.trim();
     if (custom) return custom;
     return tRoot.has(n.labelKey) ? tRoot(n.labelKey) : n.labelKey;
   };
   // Match against the FE-owned resolved route (not the BE path), so the section
   // title survives route renames (Phase 1+). Most specific (longest) route wins.
   const active = menu
-    .map((m) => ({ item: m, route: routeForClave(m.clave, m.path) }))
+    .map((m) => ({ item: m, route: routeForClave(m.slug, m.path) }))
     .filter(({ route }) => !!route && route !== "#" && isActive(pathname, route))
     .sort((a, b) => b.route.length - a.route.length)[0]?.item;
   const sectionTitle = active ? labelOf(active) : "";

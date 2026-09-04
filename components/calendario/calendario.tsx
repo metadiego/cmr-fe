@@ -74,9 +74,9 @@ export function Calendario() {
   // autor (creadoPor null, legacyId) → solo admin. El BE re-comprueba (403 con motivo), así que esto solo
   // evita ofrecer un botón que va a fallar. Handoff calendario-selector-de-centro §«Cada uno toca lo suyo».
   const esAdmin = me.kind === "ok" && (me.me.isMaster || me.me.accessMode === "admin" || me.me.roles.some((r) => r === "admin" || r === "super_admin"));
-  const miId = me.kind === "ok" ? me.me.perfilId : null;
+  const miId = me.kind === "ok" ? me.me.profileId : null;
   const miUserId = me.kind === "ok" ? me.me.id : null;
-  const esMio = (ev?: CalendarioEvento) => !!ev?.creadoPor && (ev.creadoPor === miId || ev.creadoPor === miUserId);
+  const esMio = (ev?: CalendarioEvento) => !!ev?.createdBy && (ev.createdBy === miId || ev.createdBy === miUserId);
   const puedeTocar = (ev?: CalendarioEvento) => puedeEscribir && (esAdmin || esMio(ev));
 
   const [vista, setVista] = React.useState<Vista>("mes");
@@ -109,12 +109,12 @@ export function Calendario() {
   const cats = catsRes.state.kind === "ok" ? catsRes.state.data : [];
   const catPorId = new Map(cats.map((c) => [c.id, c]));
   const catLabel = (c?: CalendarioCategoria) =>
-    c ? (c.nombre ?? (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave ?? "")) : "";
+    c ? (c.name ?? (c.labelKey && tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.slug ?? "")) : "";
   const colorDe = (ev: CalendarioEvento) => {
-    const c = ev.categoriaId ? catPorId.get(ev.categoriaId) : undefined;
+    const c = ev.categoryId ? catPorId.get(ev.categoryId) : undefined;
     return (c && COLOR[c.color]) || COLOR.gris;
   };
-  const eventosDe = (d: string) => eventos.filter((e) => e.dia <= d && d <= (e.diaFin || e.dia));
+  const eventosDe = (d: string) => eventos.filter((e) => e.day <= d && d <= (e.endDay || e.day));
 
   const [modal, setModal] = React.useState<{ evento?: CalendarioEvento; dia: string } | null>(null);
 
@@ -196,7 +196,7 @@ export function Calendario() {
                 className={cn("min-h-[104px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", !delMes && "bg-muted/20 text-muted-foreground")}>
                 <div className={cn("mb-1 inline-flex size-6 items-center justify-center rounded-full text-xs font-medium", ds === hoyStr() && "bg-primary text-primary-foreground")}>{cel.getDate()}</div>
                 <div className="space-y-0.5">
-                  {evs.slice(0, 4).map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.dia })} />)}
+                  {evs.slice(0, 4).map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
                   {evs.length > 4 && <div className="px-1 text-[10px] text-muted-foreground">+{evs.length - 4}</div>}
                 </div>
               </button>
@@ -220,7 +220,7 @@ export function Calendario() {
               <button key={ds} type="button" onClick={() => puedeCrear && setModal({ dia: ds })}
                 className={cn("min-h-[420px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", ds === hoyStr() && "ring-1 ring-inset ring-primary/40")}>
                 <div className="space-y-1">
-                  {evs.map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.dia })} />)}
+                  {evs.map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
                   {evs.length === 0 && <span className="text-[10px] text-muted-foreground">—</span>}
                 </div>
               </button>
@@ -236,7 +236,7 @@ export function Calendario() {
             {eventosDe(ymd(cursor)).length === 0 ? (
               <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t("sinEventos")}</p>
             ) : (
-              eventosDe(ymd(cursor)).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoriaId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.dia })} t={t} />)
+              eventosDe(ymd(cursor)).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)
             )}
           </div>
         </div>
@@ -246,13 +246,13 @@ export function Calendario() {
       {vista === "agenda" && (
         <div className="space-y-4">
           {(() => {
-            const dias = [...new Set(eventos.map((e) => e.dia))].sort();
+            const dias = [...new Set(eventos.map((e) => e.day))].sort();
             if (dias.length === 0) return <p className="rounded-md bg-card px-4 py-10 text-center text-sm text-muted-foreground ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">{t("sinProximos")}</p>;
             return dias.map((d) => (
               <div key={d}>
                 <div className="mb-1 text-sm font-semibold capitalize">{fmt(new Date(d + "T12:00:00"), { weekday: "long", day: "numeric", month: "long" })}</div>
                 <div className="divide-y overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-                  {eventos.filter((e) => e.dia === d).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoriaId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.dia })} t={t} />)}
+                  {eventos.filter((e) => e.day === d).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)}
                 </div>
               </div>
             ));
@@ -289,10 +289,10 @@ export function Calendario() {
 function Pill({ ev, col, onClick }: { ev: CalendarioEvento; col: { chip: string }; onClick: () => void }) {
   return (
     <div role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className={cn("flex items-center gap-1 truncate rounded border px-1.5 py-0.5 text-[11px] font-medium", col.chip)} title={ev.titulo}>
-      {ev.esGlobal && <HugeiconsIcon icon={Globe02Icon} className="size-3 shrink-0" />}
-      {ev.hora && <span className="shrink-0 tabular-nums opacity-80">{ev.hora}</span>}
-      <span className="truncate">{ev.titulo}</span>
+      className={cn("flex items-center gap-1 truncate rounded border px-1.5 py-0.5 text-[11px] font-medium", col.chip)} title={ev.title}>
+      {ev.isGlobal && <HugeiconsIcon icon={Globe02Icon} className="size-3 shrink-0" />}
+      {ev.time && <span className="shrink-0 tabular-nums opacity-80">{ev.time}</span>}
+      <span className="truncate">{ev.title}</span>
     </div>
   );
 }
@@ -301,12 +301,12 @@ function Fila({ ev, col, cat, onClick, t }: { ev: CalendarioEvento; col: { dot: 
   return (
     <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-accent/40">
       <span className={cn("size-2.5 shrink-0 rounded-full", col.dot)} />
-      <span className="w-24 shrink-0 text-sm tabular-nums text-muted-foreground">{ev.hora ? (ev.horaFin ? `${ev.hora}–${ev.horaFin}` : ev.hora) : t("todoDia")}</span>
+      <span className="w-24 shrink-0 text-sm tabular-nums text-muted-foreground">{ev.time ? (ev.endTime ? `${ev.time}–${ev.endTime}` : ev.time) : t("todoDia")}</span>
       <span className="min-w-0 flex-1">
-        <span className="truncate font-medium">{ev.titulo}</span>
+        <span className="truncate font-medium">{ev.title}</span>
         {cat && <span className="ml-2 text-xs text-muted-foreground">{cat}</span>}
       </span>
-      {ev.esGlobal && <HugeiconsIcon icon={Globe02Icon} className="size-3.5 shrink-0 text-muted-foreground" />}
+      {ev.isGlobal && <HugeiconsIcon icon={Globe02Icon} className="size-3.5 shrink-0 text-muted-foreground" />}
     </button>
   );
 }
@@ -327,15 +327,15 @@ function EventoModal({
   t: ReturnType<typeof useTranslations>;
 }) {
   const ev = inicial.evento;
-  const [titulo, setTitulo] = React.useState(ev?.titulo ?? "");
-  const [dia, setDia] = React.useState(ev?.dia ?? inicial.dia);
-  const [diaFin, setDiaFin] = React.useState(ev?.diaFin ?? "");
-  const [todoDia, setTodoDia] = React.useState(ev ? !ev.hora : true);
-  const [hora, setHora] = React.useState(ev?.hora ?? "");
-  const [horaFin, setHoraFin] = React.useState(ev?.horaFin ?? "");
-  const [categoriaId, setCategoriaId] = React.useState(ev?.categoriaId ?? "");
-  const [descripcion, setDescripcion] = React.useState(ev?.descripcion ?? "");
-  const [esGlobal, setEsGlobal] = React.useState(!!ev?.esGlobal);
+  const [titulo, setTitulo] = React.useState(ev?.title ?? "");
+  const [dia, setDia] = React.useState(ev?.day ?? inicial.dia);
+  const [diaFin, setDiaFin] = React.useState(ev?.endDay ?? "");
+  const [todoDia, setTodoDia] = React.useState(ev ? !ev.time : true);
+  const [hora, setHora] = React.useState(ev?.time ?? "");
+  const [horaFin, setHoraFin] = React.useState(ev?.endTime ?? "");
+  const [categoriaId, setCategoriaId] = React.useState(ev?.categoryId ?? "");
+  const [descripcion, setDescripcion] = React.useState(ev?.description ?? "");
+  const [esGlobal, setEsGlobal] = React.useState(!!ev?.isGlobal);
   const [busy, setBusy] = React.useState(false);
   const soloLectura = !puedeEditar;
 
@@ -343,15 +343,15 @@ function EventoModal({
     if (soloLectura || !titulo.trim() || busy) return;
     setBusy(true);
     const payload: CrearEventoPayload = {
-      dia, diaFin: diaFin || null,
-      hora: todoDia ? null : (hora || null), horaFin: todoDia ? null : (horaFin || null),
-      titulo: titulo.trim(), descripcion: descripcion.trim() || null,
-      categoriaId: categoriaId || null, esGlobal,
+      day: dia, endDay: diaFin || null,
+      time: todoDia ? null : (hora || null), endTime: todoDia ? null : (horaFin || null),
+      title: titulo.trim(), description: descripcion.trim() || null,
+      categoryId: categoriaId || null, isGlobal: esGlobal,
     };
     try {
       // El centroId solo viaja al CREAR en otro centro; editar no cambia el centro del evento.
       if (ev) await actualizarEvento(ev.id, payload);
-      else await crearEvento(centroIdCrear ? { ...payload, centroId: centroIdCrear } : payload);
+      else await crearEvento(centroIdCrear ? { ...payload, centerId: centroIdCrear } : payload);
       toast.success(t("guardado"));
       onSaved();
     } catch (e) {

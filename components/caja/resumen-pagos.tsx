@@ -48,8 +48,8 @@ export function ResumenPagos({
   division: CajaDivision;
   detalle: ReporteDia["detalle"];
   subtotalesTarjeta: Array<{ clave: string; labelKey: string; nombre: string; monto: number }>;
-  ventas: ReporteDia["ventas"];
-  devoluciones: ReporteDia["devoluciones"];
+  ventas: ReporteDia["sales"];
+  devoluciones: ReporteDia["refunds"];
   inicio: number;
   salesCash: number;
   contado: number;
@@ -85,12 +85,12 @@ export function ResumenPagos({
         ) : (
           <ul className="divide-y">
             {detalle.tarjetas.map((row) => (
-              <li key={row.clave} className="flex items-center justify-between px-4 py-2 text-sm">
+              <li key={row.slug} className="flex items-center justify-between px-4 py-2 text-sm">
                 <span>
-                  {row.nombre}
-                  <span className="ml-1 text-xs text-muted-foreground">×{row.cantidad}</span>
+                  {row.name}
+                  <span className="ml-1 text-xs text-muted-foreground">×{row.quantity}</span>
                 </span>
-                <span className="tabular-nums">{money(row.monto)}</span>
+                <span className="tabular-nums">{money(row.amount)}</span>
               </li>
             ))}
           </ul>
@@ -119,12 +119,12 @@ export function ResumenPagos({
         ) : (
           <ul className="divide-y">
             {detalle.otros.map((row) => (
-              <li key={row.clave} className="flex items-center justify-between px-4 py-2 text-sm">
+              <li key={row.slug} className="flex items-center justify-between px-4 py-2 text-sm">
                 <span>
-                  {row.nombre}
-                  <span className="ml-1 text-xs text-muted-foreground">×{row.cantidad}</span>
+                  {row.name}
+                  <span className="ml-1 text-xs text-muted-foreground">×{row.quantity}</span>
                 </span>
-                <span className="tabular-nums">{money(row.monto)}</span>
+                <span className="tabular-nums">{money(row.amount)}</span>
               </li>
             ))}
           </ul>

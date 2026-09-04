@@ -85,7 +85,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
   const { state, reload } = useResource<Paginated<Devolucion>>(
     () =>
       gate.centro
-        ? listDevoluciones({ q, estado, desde, hasta, contexto }, gate.centro)
+        ? listDevoluciones({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 20 } }),
     [q, estado, desde, hasta, gate.centro, contexto],
   );
@@ -101,7 +101,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     if (!anular || !motivo.trim() || busy) return;
     setBusy(true);
     try {
-      await anularDevolucion(anular.facturaId, anular.id, motivo.trim(), gate.centro);
+      await anularDevolucion(anular.invoiceId, anular.id, motivo.trim(), gate.centro);
       toast.success(t("anuladaOk"));
       setAnular(null);
       setMotivo("");
@@ -166,16 +166,16 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
               {rows.map((d) => (
                 <TableRow key={d.id}>
                   <TableCell>
-                    <span className="block font-mono font-medium tabular-nums">{d.numeroDisplay ?? "—"}</span>
-                    {d.facturaNumero && (
-                      <span className="block text-xs text-muted-foreground">{t("fromInvoice", { n: d.facturaNumero })}</span>
+                    <span className="block font-mono font-medium tabular-nums">{d.displayNumber ?? "—"}</span>
+                    {d.invoiceNumber && (
+                      <span className="block text-xs text-muted-foreground">{t("fromInvoice", { n: d.invoiceNumber })}</span>
                     )}
                   </TableCell>
-                  <TableCell className="tabular-nums">{formatFechaSolo(d.fecha ?? d.createdAt) || "—"}</TableCell>
-                  <TableCell>{t.has(`tipo.${d.tipo}`) ? t(`tipo.${d.tipo}`) : d.tipo}</TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">{money(d.montoDevuelto)}</TableCell>
-                  <TableCell><EstadoBadge estado={String(d.estado ?? "")} /></TableCell>
-                  <TableCell className="max-w-[16rem] truncate text-muted-foreground" title={d.motivo ?? ""}>{d.motivo ?? "—"}</TableCell>
+                  <TableCell className="tabular-nums">{formatFechaSolo(d.date ?? d.createdAt) || "—"}</TableCell>
+                  <TableCell>{t.has(`tipo.${d.type}`) ? t(`tipo.${d.type}`) : d.type}</TableCell>
+                  <TableCell className="text-right font-medium tabular-nums">{money(d.refundedAmount)}</TableCell>
+                  <TableCell><EstadoBadge estado={String(d.status ?? "")} /></TableCell>
+                  <TableCell className="max-w-[16rem] truncate text-muted-foreground" title={d.reason ?? ""}>{d.reason ?? "—"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
@@ -185,9 +185,9 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.facturaId}/returns/${d.id}/receipt${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => router.push(detalleHref(d.facturaId))}>{t("verFactura")}</DropdownMenuItem>
-                          {d.estado === "activa" && can("factura.devolver") && (
+                          <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.invoiceId}/returns/${d.id}/receipt${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => router.push(detalleHref(d.invoiceId))}>{t("verFactura")}</DropdownMenuItem>
+                          {d.status === "activa" && can("factura.devolver") && (
                             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>
                           )}
                         </DropdownMenuContent>

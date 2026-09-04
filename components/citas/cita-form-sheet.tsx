@@ -74,7 +74,7 @@ export function CitaFormSheet({
   const tipo = tipoList.find((x) => x.id === tipoCitaId);
   // Doctor is shown when the type uses one, but only REQUIRED when it's not a
   // first visit — first visits are scheduled before the doctor is assigned.
-  const showMedico = !!tipo?.requiereMedico;
+  const showMedico = !!tipo?.requiresDoctor;
   const medicoRequired = showMedico && !esPrimeraVez;
   const needsCentro = centros.length > 1;
   const effectiveCentro =
@@ -113,15 +113,15 @@ export function CitaFormSheet({
     try {
       const saved = await createCita(
         {
-          pacienteId: paciente.id,
-          tipoCitaId,
-          medicoId: medicoId || undefined,
-          fecha,
-          hora: hora || undefined,
-          canal,
-          esPrimeraVez,
-          motivo: motivo.trim() || undefined,
-          notas: notas.trim() || undefined,
+          patientId: paciente.id,
+          appointmentTypeId: tipoCitaId,
+          doctorId: medicoId || undefined,
+          date: fecha,
+          time: hora || undefined,
+          channel: canal,
+          isFirstVisit: esPrimeraVez,
+          reason: motivo.trim() || undefined,
+          notes: notas.trim() || undefined,
         },
         effectiveCentro || undefined,
       );
@@ -154,7 +154,7 @@ export function CitaFormSheet({
                 <SelectContent>
                   {centros.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.nombre}
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -174,7 +174,7 @@ export function CitaFormSheet({
               <SelectContent>
                 {tipoList.map((x) => (
                   <SelectItem key={x.id} value={x.id}>
-                    {x.nombre}
+                    {x.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -202,7 +202,7 @@ export function CitaFormSheet({
                 <SelectContent>
                   {(medicos.state.kind === "ok" ? medicos.state.data : []).map((m) => (
                     <SelectItem key={m.id} value={m.id}>
-                      {[m.nombre, m.apellido].filter(Boolean).join(" ")}
+                      {[m.name, m.lastName].filter(Boolean).join(" ")}
                     </SelectItem>
                   ))}
                 </SelectContent>

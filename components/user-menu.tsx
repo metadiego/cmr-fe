@@ -49,7 +49,7 @@ export function UserMenu() {
   // «Configuración de la app» se deriva del MENÚ (no de un permiso fijo): visible solo si al usuario le
   // llega alguna sección de configuración (/configuracion/*) en /me/menu.
   const menu = useMenu();
-  const puedeConfigurar = menu.some((m) => routeForClave(m.clave, m.path).startsWith("/configuration/"));
+  const puedeConfigurar = menu.some((m) => routeForClave(m.slug, m.path).startsWith("/configuration/"));
   const locale = useLocale() as Locale;
 
   const [signingOut, setSigningOut] = React.useState(false);
@@ -75,11 +75,11 @@ export function UserMenu() {
   const email = session.email ?? "";
   // Nombre visible: nombre/apellido del perfil (cmr-be PR #221); si el login no tiene perfil
   // (nombre null, p. ej. cuentas master), cae a la parte antes de @ del email.
-  const fullName = [session.nombre, session.apellido].filter(Boolean).join(" ").trim();
+  const fullName = [session.name, session.lastName].filter(Boolean).join(" ").trim();
   const displayName = fullName || (email ? email.split("@")[0] : t("account"));
   const initials = (
     fullName
-      ? `${session.nombre?.[0] ?? ""}${session.apellido?.[0] ?? ""}`
+      ? `${session.name?.[0] ?? ""}${session.lastName?.[0] ?? ""}`
       : email || "?"
   )
     .slice(0, 2)

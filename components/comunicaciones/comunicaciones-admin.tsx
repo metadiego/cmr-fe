@@ -137,10 +137,10 @@ function AlertasPanel() {
         const clickable = !!alertaHref(a);
         return (
           <div key={a.id} className="flex items-start gap-3 px-4 py-3 hover:bg-muted/30">
-            <span className={cn("mt-1.5 size-2.5 shrink-0 rounded-full", SEV_DOT[a.severidad] ?? "bg-muted")} />
+            <span className={cn("mt-1.5 size-2.5 shrink-0 rounded-full", SEV_DOT[a.severity] ?? "bg-muted")} />
             <button type="button" onClick={() => open(a)} className={cn("min-w-0 flex-1 text-left", clickable && "cursor-pointer")}>
-              <p className="font-medium">{a.titulo}</p>
-              {a.cuerpo && <p className="text-sm text-muted-foreground">{a.cuerpo}</p>}
+              <p className="font-medium">{a.title}</p>
+              {a.body && <p className="text-sm text-muted-foreground">{a.body}</p>}
             </button>
             {puedeResolver && (
               <div className="flex shrink-0 gap-1">
@@ -163,7 +163,7 @@ function NotificacionesPanel() {
   const { state, reload } = useResource<Notificacion[]>(() => listNotificaciones());
   const rows = state.kind === "ok" ? state.data : [];
   const fecha = (n: Notificacion) => {
-    const iso = n.enviadaEn ?? n.createdAt;
+    const iso = n.sentAt ?? n.createdAt;
     return iso ? new Date(iso).toLocaleString() : "—";
   };
 
@@ -194,12 +194,12 @@ function NotificacionesPanel() {
           )}
           {rows.map((n) => (
             <tr key={n.id} className="hover:bg-muted/30">
-              <td className="px-3 py-2"><Badge variant="outline">{n.canal}</Badge></td>
-              <td className="px-3 py-2 text-muted-foreground">{n.destino ?? "—"}</td>
-              <td className="px-3 py-2 text-muted-foreground">{n.asunto ?? "—"}</td>
+              <td className="px-3 py-2"><Badge variant="outline">{n.channel}</Badge></td>
+              <td className="px-3 py-2 text-muted-foreground">{n.destination ?? "—"}</td>
+              <td className="px-3 py-2 text-muted-foreground">{n.subject ?? "—"}</td>
               <td className="px-3 py-2">
-                <Badge variant={ESTADO_BADGE[n.estado] ?? "outline"}>
-                  {t.has(`estadoNotif.${n.estado}`) ? t(`estadoNotif.${n.estado}`) : n.estado}
+                <Badge variant={ESTADO_BADGE[n.status] ?? "outline"}>
+                  {t.has(`estadoNotif.${n.status}`) ? t(`estadoNotif.${n.status}`) : n.status}
                 </Badge>
               </td>
               <td className="px-3 py-2 text-muted-foreground">{fecha(n)}</td>
@@ -253,11 +253,11 @@ function PlantillasPanel() {
             )}
             {rows.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
-                <td className="px-3 py-2 font-mono text-xs">{p.clave}</td>
-                <td className="px-3 py-2"><Badge variant="outline">{p.canal}</Badge></td>
-                <td className="px-3 py-2 uppercase text-muted-foreground">{p.idioma}</td>
-                <td className="px-3 py-2 text-muted-foreground">{p.asunto ?? "—"}</td>
-                <td className="px-3 py-2"><Badge variant={p.activo ? "secondary" : "outline"}>{p.activo ? tc("active") : tc("inactive")}</Badge></td>
+                <td className="px-3 py-2 font-mono text-xs">{p.slug}</td>
+                <td className="px-3 py-2"><Badge variant="outline">{p.channel}</Badge></td>
+                <td className="px-3 py-2 uppercase text-muted-foreground">{p.language}</td>
+                <td className="px-3 py-2 text-muted-foreground">{p.subject ?? "—"}</td>
+                <td className="px-3 py-2"><Badge variant={p.active ? "secondary" : "outline"}>{p.active ? tc("active") : tc("inactive")}</Badge></td>
               </tr>
             ))}
           </tbody>
@@ -298,11 +298,11 @@ function PlantillaForm({
     setSubmitting(true);
     try {
       const payload: CreatePlantillaPayload = {
-        clave: form.clave.trim(),
-        canal: form.canal as CreatePlantillaPayload["canal"],
-        idioma: form.idioma.trim() || undefined,
-        asunto: form.asunto.trim() || undefined,
-        cuerpo: form.cuerpo.trim(),
+        slug: form.clave.trim(),
+        channel: form.canal as CreatePlantillaPayload["channel"],
+        language: form.idioma.trim() || undefined,
+        subject: form.asunto.trim() || undefined,
+        body: form.cuerpo.trim(),
       };
       await crearPlantilla(payload);
       toast.success(t("plantillaCreada"));

@@ -4,16 +4,18 @@ import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
 
-// Catalog column definition (GET /tablero/columnas). `ambitos` = which boards
+// Catalog column definition (GET /board/columns). `scopes` = which boards
 // it's eligible for. Distinct from ColumnaEfectiva (a placed column).
 export type ColumnaCatalogo = components["schemas"]["ColumnaEntity"];
 
-// Metadata-driven board (GET /citas/tablero). Same dynamic-column engine as the
+// Metadata-driven board (GET /appointments/board). Same dynamic-column engine as the
 // day-view: effective columns + projected flat rows for a day. Not typed in
 // Swagger (streamed projection), so we model the verified contract here.
+// `columnas`→`columns` y `filas`→`rows` son claves OPACAS: la respuesta las renombra
+// pero su CONTENIDO (ColumnaEfectiva/CitaFila) queda en español (motor de tableros).
 export interface Tablero {
-  columnas: ColumnaEfectiva[];
-  filas: CitaFila[];
+  columns: ColumnaEfectiva[];
+  rows: CitaFila[];
 }
 
 // tablero: which board composition ("citas" = Atención al Paciente).
@@ -22,52 +24,55 @@ export function getTablero(
   fecha: string,
   opts: { tablero?: string; centroId?: string; soloAtencion?: boolean } = {},
 ): Promise<Tablero> {
-  const sp = new URLSearchParams({ fecha });
-  if (opts.tablero) sp.set("tablero", opts.tablero);
-  if (opts.soloAtencion) sp.set("soloAtencion", "true");
-  return apiFetch<Tablero>(`/citas/tablero?${sp.toString()}`, {}, opts.centroId);
+  const sp = new URLSearchParams({ date: fecha });
+  if (opts.tablero) sp.set("boardSlug", opts.tablero);
+  if (opts.soloAtencion) sp.set("onlyCare", "true");
+  return apiFetch<Tablero>(`/appointments/board?${sp.toString()}`, {}, opts.centroId);
 }
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────
 
-// GET /tablero/columnas — catalog. With `tablero` → only columns ELIGIBLE for
-// that board (by ambitos); without → the WHOLE catalog (to incorporate/reuse).
+// GET /board/columns — catalog. With `boardSlug` → only columns ELIGIBLE for
+// that board (by scopes); without → the WHOLE catalog (to incorporate/reuse).
 export function getColumnasCatalogo(tablero?: string): Promise<ColumnaCatalogo[]> {
-  const qs = tablero ? `?tablero=${encodeURIComponent(tablero)}` : "";
-  return apiFetch<ColumnaCatalogo[]>(`/tablero/columnas${qs}`);
+  const qs = tablero ? `?boardSlug=${encodeURIComponent(tablero)}` : "";
+  return apiFetch<ColumnaCatalogo[]>(`/board/columns${qs}`);
 }
 
-// GET /tablero/efectivas?tablero= — the columns currently placed (orden/visible/fijo).
+// GET /board/effective?boardSlug= — the columns currently placed (sortOrder/visible/pinned).
+// OJO api-ingles: al ser un ARRAY directo (no dentro de la clave opaca `columnas`), la respuesta
+// SÍ traduce las claves de cada columna al inglés (clave→slug, orden→sortOrder, fijo→pinned…),
+// a diferencia de ColumnaEfectiva dentro de Tablero.columns (que llega en español).
 export function getColumnasEfectivas(tablero: string): Promise<ColumnaEfectiva[]> {
-  return apiFetch<ColumnaEfectiva[]>(`/tablero/efectivas?tablero=${encodeURIComponent(tablero)}`);
+  return apiFetch<ColumnaEfectiva[]>(`/board/effective?boardSlug=${encodeURIComponent(tablero)}`);
 }
 
 export interface ComposicionItem {
-  columnaId: string;
-  orden?: number;
+  columnId: string;
+  sortOrder?: number;
   visible?: boolean;
-  fijo?: boolean;
-  activo?: boolean;
+  pinned?: boolean;
+  active?: boolean;
 }
 
-// POST /tablero/composicion/bulk — board-level composition (needs tablero.config).
+// POST /board/composition/bulk — board-level composition (needs tablero.config).
 export function setComposicionBulk(tablero: string, columnas: ComposicionItem[]): Promise<unknown> {
-  return apiFetch(`/tablero/composicion/bulk`, {
+  return apiFetch(`/board/composition/bulk`, {
     method: "POST",
-    body: JSON.stringify({ tablero, columnas }),
+    body: JSON.stringify({ boardSlug: tablero, columns: columnas }),
   });
 }
 
-// POST /tablero/personalizar — per-user override (any user).
+// POST /board/customize — per-user override (any user).
 export function personalizarColumna(payload: {
-  tablero: string;
-  columnaId: string;
+  boardSlug: string;
+  columnId: string;
   visible?: boolean;
-  orden?: number;
-  fijo?: boolean;
+  sortOrder?: number;
+  pinned?: boolean;
   render?: Record<string, unknown>; // override del usuario, ej. {color, background}
 }): Promise<unknown> {
-  return apiFetch(`/tablero/personalizar`, {
+  return apiFetch(`/board/customize`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -75,11 +80,13 @@ export function personalizarColumna(payload: {
 
 // ── Generic board engine (registry-driven; any vertical) ────────────────────
 
-// A registered vertical (GET /tableros). `entidad` = event entity for SSE
-// filtering; `filtros` = server-side scope (e.g. {soloAtencion:true} for AP).
-// Botón enchufable de la barra del tablero (estilo hooks). Editable por PUT /tableros/:id, sin código:
+// A registered vertical (GET /boards). `entity` = event entity for SSE
+// filtering; `filters` = server-side scope (e.g. {soloAtencion:true} for AP).
+// Botón enchufable de la barra del tablero (estilo hooks). Editable por PUT /boards/:id, sin código:
 // el FE registra HANDLERS por clave y pinta el `slot` por `orden`, gate por `requierePermiso`. Ver
 // docs/specs/be-tablero-acciones-toolbar-hooks-handoff.md.
+// OJO: AccionTablero vive DENTRO de la clave opaca `acciones`/`actions` → sus claves NO se traducen
+// (quedan en español). NO renombrar (motor de tableros).
 export interface AccionTablero {
   clave: string;
   labelKey: string;
@@ -94,91 +101,91 @@ export interface AccionTablero {
 
 export interface TableroRegistro {
   id: string;
-  clave: string;
+  slug: string;
   labelKey: string;
   icon: string | null;
-  orden: number;
-  permiso: string | null;
+  sortOrder: number;
+  permissionSlug: string | null;
   layout: string; // "etapas" | "tabla" | ...
-  ruta: string; // ruta del board del vertical, ej. "/tablero/atencion"
-  entidad: string; // "cita" | "sesion" | ...
-  filtros: Record<string, unknown> | null;
-  acciones?: AccionTablero[] | null; // barra de botones enchufables (BE PR #165/#166)
-  esVertical?: boolean; // true → aparece en /tableros (menú); false → consultable (citas_cc)
-  activo: boolean;
+  path: string; // ruta del board del vertical, ej. "/tablero/atencion"
+  entity: string; // "cita" | "sesion" | ...
+  filters: Record<string, unknown> | null; // clave opaca `filtros`→`filters` (contenido intacto)
+  actions?: AccionTablero[] | null; // clave opaca `acciones`→`actions`; contenido en español
+  isVertical?: boolean; // true → aparece en /boards (menú); false → consultable (citas_cc)
+  active: boolean;
 }
 
-// A declarative transition (definicion.transiciones). `requiere` = payload field
-// claves the FE must collect. `desdeEstados` empty = available from any state.
+// A declarative transition (definicion.transiciones). `formFields` (era `requiere`) = payload field
+// claves the FE must collect. `fromStatuses` empty = available from any state.
 export interface Transicion {
   id: string;
-  clave: string;
+  slug: string;
   labelKey: string;
-  desdeEstados: string[];
-  aEstado: string | null;
-  metodo: string;
+  fromStatuses: string[];
+  toStatus: string | null;
+  method: string;
   path: string | null;
-  accion: string | null;
-  permiso: string | null;
-  requiere: string[];
-  confirmar: boolean;
-  orden: number;
-  activo: boolean;
+  action: string | null;
+  permissionSlug: string | null;
+  formFields: string[];
+  requiresConfirmation: boolean;
+  sortOrder: number;
+  active: boolean;
 }
 
 export interface SubTipo {
   id: string;
-  clave: string;
+  slug: string;
   labelKey: string;
-  orden: number;
-  activo?: boolean;
+  sortOrder: number;
+  active?: boolean;
 }
 
 export interface TableroDefinicion {
-  tablero: string;
-  columnas: ColumnaEfectiva[];
-  estados: EstadoCitaCatalogo[];
-  transiciones: Transicion[];
-  subTipos: SubTipo[];
+  boardSlug: string;
+  columns: ColumnaEfectiva[]; // clave opaca `columnas`→`columns`; contenido en español
+  statuses: EstadoCitaCatalogo[];
+  transitions: Transicion[];
+  subtypes: SubTipo[];
 }
 
-// GET /tableros — the vertical registry.
+// GET /boards — the vertical registry.
 export function getTableros(): Promise<TableroRegistro[]> {
-  return apiFetch<TableroRegistro[]>(`/tableros`);
+  return apiFetch<TableroRegistro[]>(`/boards`);
 }
 
-// GET /tablero/modal/modulos?postAccion= — catálogo GLOBAL de módulos pluggables de
+// GET /board/modal/modules?postAction= — catálogo GLOBAL de módulos pluggables de
 // un modal de post-acción (BE-3). El estado plugged/unplugged por-tablero sigue en
 // composicion.render (render.<clave>=false = desconectado).
 export interface ModalModulo {
-  clave: string;
+  slug: string;
   labelKey: string;
-  descripcionKey: string;
-  postAccion: string;
-  requiereCatalogo: boolean;
+  descriptionKey: string;
+  postAction: string;
+  requiresCatalog: boolean;
 }
 export function getModalModulos(postAccion: string): Promise<ModalModulo[]> {
-  return apiFetch<ModalModulo[]>(`/tablero/modal/modulos?postAccion=${encodeURIComponent(postAccion)}`);
+  return apiFetch<ModalModulo[]>(`/board/modal/modules?postAction=${encodeURIComponent(postAccion)}`);
 }
 
-// GET /tablero/definicion?tablero= — columns + states + transitions + subtypes.
+// GET /board/definition?boardSlug= — columns + states + transitions + subtypes.
 // Tenant-scoped: la composición (incl. render override por-tablero) es POR CENTRO,
 // así que pasar centroId para leer la definición efectiva de ese centro.
 export function getDefinicion(tablero: string, centroId?: string): Promise<TableroDefinicion> {
-  return apiFetch<TableroDefinicion>(`/tablero/definicion?tablero=${encodeURIComponent(tablero)}`, {}, centroId);
+  return apiFetch<TableroDefinicion>(`/board/definition?boardSlug=${encodeURIComponent(tablero)}`, {}, centroId);
 }
 
-// GET /tablero/filas?tablero=&fecha=(&subTipo=) — projected rows for a day.
+// GET /board/rows?boardSlug=&date=(&subtype=) — projected rows for a day.
 // For "servicios" the columns come from THIS response (per-service), so always
-// render with the columnas returned here.
+// render with the columns returned here.
 export function getFilas(
   tablero: string,
   fecha: string,
   opts: { centroId?: string; subTipo?: string } = {},
 ): Promise<Tablero> {
-  const sp = new URLSearchParams({ tablero, fecha });
-  if (opts.subTipo) sp.set("subTipo", opts.subTipo);
-  return apiFetch<Tablero>(`/tablero/filas?${sp.toString()}`, {}, opts.centroId);
+  const sp = new URLSearchParams({ boardSlug: tablero, date: fecha });
+  if (opts.subTipo) sp.set("subtype", opts.subTipo);
+  return apiFetch<Tablero>(`/board/rows?${sp.toString()}`, {}, opts.centroId);
 }
 
 // POST /tablero/celda — edit an editable cell. BE validates the column is
@@ -188,11 +195,11 @@ export function getFilas(
 // releyendo la base. El FE lo usa para el toast que certifica y, si ok:false, revertir la celda.
 // Handoff HANDOFF-toast-que-certifica-la-persistencia.
 export async function editarCelda(
-  body: { tablero: string; entidadId: string; columna: string; valor: unknown },
+  body: { boardSlug: string; entityId: string; column: string; value: unknown },
   centroId?: string,
 ): Promise<{ data: unknown; persistencia?: Persistencia }> {
   const env = await apiFetchEnvelope<unknown>(
-    `/tablero/celda`,
+    `/board/cell`,
     { method: "POST", body: JSON.stringify(body) },
     centroId,
   );
@@ -209,29 +216,29 @@ export interface Opcion {
 
 export function getOpciones(tablero: string, columna: string, centroId?: string): Promise<Opcion[]> {
   return apiFetch<Opcion[]>(
-    `/tablero/opciones?tablero=${encodeURIComponent(tablero)}&columna=${encodeURIComponent(columna)}`,
+    `/board/options?boardSlug=${encodeURIComponent(tablero)}&column=${encodeURIComponent(columna)}`,
     undefined,
     centroId,
   );
 }
 
-// POST /tablero/composicion — upsert de UNA columna en un tablero; `render` SE FUSIONA sobre
+// POST /board/composition — upsert de UNA columna en un tablero; `render` SE FUSIONA sobre
 // columnas.render (p. ej. {group} para agrupar/desagrupar toggles sin tocar transition/estampa).
 export function setComposicion(
   payload: {
-    tablero: string;
-    columnaId: string;
-    orden?: number;
+    boardSlug: string;
+    columnId: string;
+    sortOrder?: number;
     visible?: boolean;
-    activo?: boolean;
+    active?: boolean;
     render?: Record<string, unknown>;
   },
   centroId?: string,
 ): Promise<unknown> {
-  return apiFetch(`/tablero/composicion`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+  return apiFetch(`/board/composition`, { method: "POST", body: JSON.stringify(payload) }, centroId);
 }
 
-// POST /tablero/composicion — set one column's placement/color in a board (admin
+// POST /board/composition — set one column's placement/color in a board (admin
 // pre-personalization). `color` (null clears). Single-column upsert; does NOT
 // touch the rest of the composition.
 export function colorColumna(
@@ -239,9 +246,9 @@ export function colorColumna(
   columnaId: string,
   color: string | null,
 ): Promise<unknown> {
-  return apiFetch(`/tablero/composicion`, {
+  return apiFetch(`/board/composition`, {
     method: "POST",
-    body: JSON.stringify({ tablero, columnaId, color }),
+    body: JSON.stringify({ boardSlug: tablero, columnId: columnaId, color }),
   });
 }
 
@@ -256,19 +263,19 @@ export function setComposicionRender(
   centroId?: string,
 ): Promise<unknown> {
   return apiFetch(
-    `/tablero/composicion`,
-    { method: "POST", body: JSON.stringify({ tablero, columnaId, render }) },
+    `/board/composition`,
+    { method: "POST", body: JSON.stringify({ boardSlug: tablero, columnId: columnaId, render }) },
     centroId,
   );
 }
 
-// POST /tablero/accion — execute a declarative transition. Fields go in payload
-// (definicion.transiciones[].requiere says which). tenant scopes the request.
+// POST /board/action — execute a declarative transition. Fields go in payload
+// (definicion.transiciones[].formFields says which). tenant scopes the request.
 export function ejecutarAccion(
-  body: { tablero: string; entidadId: string; accion: string; payload?: Record<string, unknown> },
+  body: { boardSlug: string; entityId: string; action: string; payload?: Record<string, unknown> },
   centroId?: string,
 ): Promise<unknown> {
-  return apiFetch(`/tablero/accion`, { method: "POST", body: JSON.stringify(body) }, centroId);
+  return apiFetch(`/board/action`, { method: "POST", body: JSON.stringify(body) }, centroId);
 }
 
 // ── Admin CRUD (Constructor de Tableros; gate `tablero.admin`) ───────────────
@@ -287,65 +294,65 @@ export type CreateSubTipoInput = components["schemas"]["CreateSubtipoDto"];
 export type UpdateSubTipoInput = components["schemas"]["UpdateSubtipoDto"];
 
 const q = (tablero: string, all: boolean) =>
-  `?tablero=${encodeURIComponent(tablero)}${all ? "&all=true" : ""}`;
+  `?boardSlug=${encodeURIComponent(tablero)}${all ? "&all=true" : ""}`;
 
 // Tableros registry
 export function crearTablero(body: CreateTableroInput): Promise<TableroRegistro> {
-  return apiFetch(`/tableros`, { method: "POST", body: JSON.stringify(body) });
+  return apiFetch(`/boards`, { method: "POST", body: JSON.stringify(body) });
 }
 export function actualizarTablero(id: string, body: UpdateTableroInput): Promise<TableroRegistro> {
-  return apiFetch(`/tableros/${id}`, { method: "PUT", body: JSON.stringify(body) });
+  return apiFetch(`/boards/${id}`, { method: "PUT", body: JSON.stringify(body) });
 }
 export function borrarTablero(id: string): Promise<void> {
-  return apiFetch(`/tableros/${id}`, { method: "DELETE" });
+  return apiFetch(`/boards/${id}`, { method: "DELETE" });
 }
 
 // Columnas de catálogo (GET catálogo: getColumnasCatalogo)
 export function crearColumna(body: CreateColumnaInput): Promise<ColumnaCatalogo> {
-  return apiFetch(`/tablero/columnas`, { method: "POST", body: JSON.stringify(body) });
+  return apiFetch(`/board/columns`, { method: "POST", body: JSON.stringify(body) });
 }
 export function actualizarColumna(id: string, body: UpdateColumnaInput): Promise<ColumnaCatalogo> {
-  return apiFetch(`/tablero/columnas/${id}`, { method: "PUT", body: JSON.stringify(body) });
+  return apiFetch(`/board/columns/${id}`, { method: "PUT", body: JSON.stringify(body) });
 }
 
 // Estados
 export function getEstadosAdmin(tablero: string, all = true): Promise<EstadoCitaCatalogo[]> {
-  return apiFetch(`/tablero/estados${q(tablero, all)}`);
+  return apiFetch(`/board/statuses${q(tablero, all)}`);
 }
 export function crearEstado(body: CreateEstadoInput): Promise<EstadoCitaCatalogo> {
-  return apiFetch(`/tablero/estados`, { method: "POST", body: JSON.stringify(body) });
+  return apiFetch(`/board/statuses`, { method: "POST", body: JSON.stringify(body) });
 }
 export function actualizarEstado(id: string, body: UpdateEstadoInput): Promise<EstadoCitaCatalogo> {
-  return apiFetch(`/tablero/estados/${id}`, { method: "PUT", body: JSON.stringify(body) });
+  return apiFetch(`/board/statuses/${id}`, { method: "PUT", body: JSON.stringify(body) });
 }
 export function borrarEstado(id: string): Promise<void> {
-  return apiFetch(`/tablero/estados/${id}`, { method: "DELETE" });
+  return apiFetch(`/board/statuses/${id}`, { method: "DELETE" });
 }
 
 // Transiciones
 export function getTransicionesAdmin(tablero: string, all = true): Promise<Transicion[]> {
-  return apiFetch(`/tablero/transiciones${q(tablero, all)}`);
+  return apiFetch(`/board/transitions${q(tablero, all)}`);
 }
 export function crearTransicion(body: CreateTransicionInput): Promise<Transicion> {
-  return apiFetch(`/tablero/transiciones`, { method: "POST", body: JSON.stringify(body) });
+  return apiFetch(`/board/transitions`, { method: "POST", body: JSON.stringify(body) });
 }
 export function actualizarTransicion(id: string, body: UpdateTransicionInput): Promise<Transicion> {
-  return apiFetch(`/tablero/transiciones/${id}`, { method: "PUT", body: JSON.stringify(body) });
+  return apiFetch(`/board/transitions/${id}`, { method: "PUT", body: JSON.stringify(body) });
 }
 export function borrarTransicion(id: string): Promise<void> {
-  return apiFetch(`/tablero/transiciones/${id}`, { method: "DELETE" });
+  return apiFetch(`/board/transitions/${id}`, { method: "DELETE" });
 }
 
 // SubTipos
 export function getSubTiposAdmin(tablero: string, all = true): Promise<SubTipo[]> {
-  return apiFetch(`/tablero/subtipos${q(tablero, all)}`);
+  return apiFetch(`/board/subtypes${q(tablero, all)}`);
 }
 export function crearSubTipo(body: CreateSubTipoInput): Promise<SubTipo> {
-  return apiFetch(`/tablero/subtipos`, { method: "POST", body: JSON.stringify(body) });
+  return apiFetch(`/board/subtypes`, { method: "POST", body: JSON.stringify(body) });
 }
 export function actualizarSubTipo(id: string, body: UpdateSubTipoInput): Promise<SubTipo> {
-  return apiFetch(`/tablero/subtipos/${id}`, { method: "PUT", body: JSON.stringify(body) });
+  return apiFetch(`/board/subtypes/${id}`, { method: "PUT", body: JSON.stringify(body) });
 }
 export function borrarSubTipo(id: string): Promise<void> {
-  return apiFetch(`/tablero/subtipos/${id}`, { method: "DELETE" });
+  return apiFetch(`/board/subtypes/${id}`, { method: "DELETE" });
 }

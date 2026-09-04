@@ -30,7 +30,7 @@ export function FacturasPendientes({
   const [nombres, setNombres] = React.useState<Record<string, string>>({});
 
   const ids = React.useMemo(
-    () => Array.from(new Set(pendientes.map((p) => p.pacienteId).filter(Boolean))),
+    () => Array.from(new Set(pendientes.map((p) => p.patientId).filter(Boolean))),
     [pendientes],
   );
 
@@ -40,7 +40,7 @@ export function FacturasPendientes({
     Promise.all(
       ids.map((id) =>
         getPaciente(id, centroId)
-          .then((p) => [id, (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")).trim()] as const)
+          .then((p) => [id, (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")).trim()] as const)
           .catch(() => [id, ""] as const),
       ),
     ).then((pares) => {
@@ -77,13 +77,13 @@ export function FacturasPendientes({
             <TableBody>
               {pendientes.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.numero ?? "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{p.fecha ?? "—"}</TableCell>
+                  <TableCell className="font-medium">{p.number ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{p.date ?? "—"}</TableCell>
                   <TableCell>
-                    {nombres[p.pacienteId] ?? p.pacienteId.slice(0, 8)}
+                    {nombres[p.patientId] ?? p.patientId.slice(0, 8)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{money(p.total)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{money(p.montoAbonado)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{money(p.paidAmount)}</TableCell>
                   <TableCell className="text-right font-medium tabular-nums text-destructive">
                     {money(p.pendiente)}
                   </TableCell>

@@ -18,7 +18,7 @@ export function CentroPantallaSelector({ estado }: { estado: CentroPantalla }) {
       <Select value={estado.centroActivo} onValueChange={estado.setCentro}>
         <SelectTrigger className="w-48" aria-label={t("label")}><SelectValue /></SelectTrigger>
         <SelectContent>
-          {estado.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+          {estado.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
         </SelectContent>
       </Select>
       {!estado.puedeEscribir && (

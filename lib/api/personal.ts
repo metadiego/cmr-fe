@@ -23,29 +23,29 @@ export function listPersonal(
   const { page = 1, limit = 50, q, capacidad } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
-  if (capacidad) sp.set("capacidad", capacidad);
-  return apiFetchPaged<Personal>(`/personal?${sp.toString()}`, {}, centroId);
+  if (capacidad) sp.set("capacity", capacidad);
+  return apiFetchPaged<Personal>(`/staff?${sp.toString()}`, {}, centroId);
 }
 
 // Editar la ficha: cargo + capacidades (PUT /personal/:id). Verificado en prod. Handoff
 // ficha-de-personal-todo-en-una-pantalla.
 export function updatePersonal(
   id: string,
-  payload: { cargo?: string | null; capacidades?: string[] },
+  payload: { jobTitle?: string | null; capabilities?: string[] },
   centroId?: string,
 ): Promise<Personal> {
-  return apiFetch<Personal>(`/personal/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+  return apiFetch<Personal>(`/staff/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
 }
 
 // Catálogo de cargos (GET /personal/cargos) → [{ clave, labelKey }]. Ruta arreglada por el BE (antes
 // colisionaba con /personal/:id). Handoff huecos-lectura-personal.
 export interface CargoCatalogo {
-  clave: string;
-  labelKey?: string | null;
-  nombre?: string | null;
+  slug: string;
+  labelKey?: string | null; // se dice igual (CAMPOS_IGUALES)
+  name?: string | null;
 }
 export function getCargos(centroId?: string): Promise<CargoCatalogo[]> {
-  return apiFetch<CargoCatalogo[]>(`/personal/cargos`, {}, centroId);
+  return apiFetch<CargoCatalogo[]>(`/staff/job-titles`, {}, centroId);
 }
 
 // Centros de SERVICIO de una persona (LECTURA, GET /personal/:id/centros): devuelve TODOS los centros del
@@ -54,17 +54,18 @@ export function getCargos(centroId?: string): Promise<CargoCatalogo[]> {
 // huecos-lectura-personal.
 export interface CentroDePersonal {
   id: string;
-  nombre: string;
-  activo: boolean;
+  name: string;
+  active: boolean;
 }
 export function getPersonalCentros(id: string, centroId?: string): Promise<CentroDePersonal[]> {
-  return apiFetch<CentroDePersonal[]>(`/personal/${id}/centros`, {}, centroId);
+  return apiFetch<CentroDePersonal[]>(`/staff/${id}/centers`, {}, centroId);
 }
 
 // Guardar los centros ACTIVOS de la persona (PUT /personal/:id/centros { centroIds }). Se manda la lista
 // de los que quedan ENCENDIDOS; el BE deja el set exactamente así.
+// `centroIds` NO está en el mapa de campos → el body va tal cual (el middleware lo deja pasar al DTO).
 export function updatePersonalCentros(id: string, centroIds: string[], centroId?: string): Promise<Personal> {
-  return apiFetch<Personal>(`/personal/${id}/centros`, { method: "PUT", body: JSON.stringify({ centroIds }) }, centroId);
+  return apiFetch<Personal>(`/staff/${id}/centers`, { method: "PUT", body: JSON.stringify({ centroIds }) }, centroId);
 }
 
 // Roster por CAPACIDAD (enfermera/tecnico/medico…), agnóstico al tablero: GET /personal/por-capacidad/:cap.
@@ -72,11 +73,11 @@ export function updatePersonalCentros(id: string, centroIds: string[], centroId?
 // colocada en ese tablero (p. ej. Atención). Devuelve {id, nombre, apellido}. Verificado en prod.
 export interface PersonalPorCapacidad {
   id: string;
-  nombre: string;
-  apellido?: string | null;
+  name: string;
+  lastName?: string | null;
 }
 export function listPersonalPorCapacidad(capacidad: string, centro?: string): Promise<PersonalPorCapacidad[]> {
-  return apiFetch<PersonalPorCapacidad[]>(`/personal/por-capacidad/${encodeURIComponent(capacidad)}`, {}, centro);
+  return apiFetch<PersonalPorCapacidad[]>(`/staff/capacity-by/${encodeURIComponent(capacidad)}`, {}, centro);
 }
 
 // Doctors available to be assigned to appointments (capacidad = "medico"). `centroId` recarga la lista

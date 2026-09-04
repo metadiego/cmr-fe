@@ -68,7 +68,7 @@ export function AssignCenterDialog({
     if (!profile || !centroId) return;
     setSubmitting(true);
     try {
-      await assignCenter(profile.id, { centroId });
+      await assignCenter(profile.id, { centerId: centroId });
       toast.success(t("success", { email: profile.email }));
       handleOpenChange(false);
       onAssigned?.();
@@ -101,7 +101,7 @@ export function AssignCenterDialog({
               <SelectContent>
                 {(centers ?? []).map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.nombre} ({c.codigo})
+                    {c.name} ({c.code})
                   </SelectItem>
                 ))}
               </SelectContent>

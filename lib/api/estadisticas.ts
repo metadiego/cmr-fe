@@ -6,13 +6,15 @@ import { apiFetch } from "./client";
 
 // Fila de la matriz GENERAL: un miembro del personal y sus participaciones por servicio (solo las claves
 // con valor; las ausentes son 0). `personalId: null` + nombre "Sin asignar" = visita sin esa persona.
+// `porServicio` y `participaciones` NO están en el mapa → el BE los devuelve en español.
 export type EstGeneralFila = {
-  personalId: string | null;
-  nombre: string;
+  staffId: string | null;
+  name: string;
   porServicio: Record<string, number>;
   total: number;
 };
 // Fila dentro de un bloque de rol. `porcentaje` ya viene redondeado a 2 decimales y cada bloque suma 100.
+// OJO: estas filas viajan dentro de `filas` (bolsa OPACA) → sus claves NO se traducen: quedan en español.
 export type EstRolFila = {
   posicion: number;
   personalId: string | null;
@@ -23,22 +25,23 @@ export type EstRolFila = {
 };
 // Un rol dentro de un servicio (enfermera, tecnico…). `participaciones` es el DIVISOR de los porcentajes.
 export type EstRol = {
-  rol: string;
-  participaciones: number;
-  filas: EstRolFila[];
+  role: string;
+  participaciones: number; // NO en el mapa → queda en español
+  rows: EstRolFila[]; // la clave `filas` se traduce a `rows`, pero su CONTENIDO no (bolsa opaca)
 };
 export type EstServicio = {
-  clave: string;
-  nombre: string;
-  sesiones: number;
-  participaciones: number;
-  pacientes: number;
+  slug: string;
+  name: string;
+  sessions: number;
+  participaciones: number; // NO en el mapa → queda en español
+  patients: number;
   roles: EstRol[]; // [] = el servicio no registró rol en el periodo (solo resumen)
 };
 export type EstadisticasServicios = {
-  totales: { sesiones: number; pacientes: number; participaciones: number; serviciosActivos: number };
+  // `general` y `serviciosActivos` NO están en el mapa → quedan en español.
+  totals: { sessions: number; patients: number; participaciones: number; serviciosActivos: number };
   general: EstGeneralFila[]; // ya ordenada por total desc
-  servicios: EstServicio[]; // todos los del catálogo; pintar como pestaña los de sesiones > 0
+  services: EstServicio[]; // todos los del catálogo; pintar como pestaña los de sesiones > 0
 };
 
 // Estadísticas DIARIAS (el cierre del gerente, BE PR #260). Tres bloques + total, por centro de la sesión.
@@ -46,11 +49,11 @@ export type EstadisticasServicios = {
 // `vendidos` = sesiones que prometieron las FACTURAS del día (no coinciden, y está bien). `ingresoBruto`
 // sale del MISMO sitio que el cuadre de caja → NO recalcular sumando la tabla (la tabla cuenta sesiones).
 // Solo vienen servicios con actividad (el BE no manda ceros); orden por nombre → respetar.
-export type EstDiariaServicio = { clave: string; nombre: string; aplicados: number; vendidos: number };
+export type EstDiariaServicio = { slug: string; name: string; applied: number; sold: number };
 export type EstadisticasDiarias = {
-  atencionMedica: { nuevas: number; seguimientos: number; total: number };
-  servicios: EstDiariaServicio[];
-  ingresoBruto: number;
+  medicalCare: { newCount: number; followUpCount: number; total: number };
+  services: EstDiariaServicio[];
+  grossRevenue: number;
 };
 // GET /estadisticas/diarias?desde=YYYY-MM-DD[&hasta] — `hasta` opcional (por defecto = `desde`, un día).
 export function getEstadisticasDiarias(
@@ -58,9 +61,9 @@ export function getEstadisticasDiarias(
   hasta?: string,
   centroId?: string | null,
 ): Promise<EstadisticasDiarias> {
-  const sp = new URLSearchParams({ desde });
-  if (hasta) sp.set("hasta", hasta);
-  return apiFetch<EstadisticasDiarias>(`/estadisticas/diarias?${sp.toString()}`, {}, centroId);
+  const sp = new URLSearchParams({ from: desde });
+  if (hasta) sp.set("to", hasta);
+  return apiFetch<EstadisticasDiarias>(`/statistics/daily?${sp.toString()}`, {}, centroId);
 }
 
 // GET /estadisticas/servicios?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — general + todas las pestañas en una.
@@ -69,6 +72,6 @@ export function getEstadisticasServicios(
   hasta: string,
   centroId?: string,
 ): Promise<EstadisticasServicios> {
-  const sp = new URLSearchParams({ desde, hasta });
-  return apiFetch<EstadisticasServicios>(`/estadisticas/servicios?${sp.toString()}`, {}, centroId);
+  const sp = new URLSearchParams({ from: desde, to: hasta });
+  return apiFetch<EstadisticasServicios>(`/statistics/services?${sp.toString()}`, {}, centroId);
 }

@@ -10,7 +10,7 @@ export type ConWarnings<T> = { data: T; warnings: ApiWarning[] };
 // (no hora/horaFin) — the service calendar schedules by date only.
 export type Sesion = components["schemas"]["FrontdeskSesionEntity"];
 export type CreateSesionPayload = components["schemas"]["CreateSesionDto"];
-export type EstadoSesion = Sesion["estado"];
+export type EstadoSesion = Sesion["status"];
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];
@@ -28,10 +28,10 @@ export async function listSesionesRango(params: {
   pacienteId?: string; // historial de servicios de un paciente (ficha → Acciones)
   centroId?: string; // fuerza el centro de la lectura vía X-Tenant-ID (selector de centro EN la pantalla)
 }): Promise<Sesion[]> {
-  const sp = new URLSearchParams({ desde: params.desde, hasta: params.hasta });
-  if (params.servicioId) sp.set("servicioId", params.servicioId);
-  if (params.tecnicoId) sp.set("tecnicoId", params.tecnicoId);
-  if (params.pacienteId) sp.set("pacienteId", params.pacienteId);
+  const sp = new URLSearchParams({ from: params.desde, to: params.hasta });
+  if (params.servicioId) sp.set("serviceId", params.servicioId);
+  if (params.tecnicoId) sp.set("technicianId", params.tecnicoId);
+  if (params.pacienteId) sp.set("patientId", params.pacienteId);
   return asArray<Sesion>(await apiFetch(`/frontdesk/sesiones?${sp.toString()}`, {}, params.centroId));
 }
 
@@ -44,15 +44,15 @@ export function getSesion(id: string): Promise<Sesion> {
 // centro con presentes:0 incluido (el FE decide esconder vacíos o no). Permiso frontdesk.read. Se refresca
 // por el SSE que la pantalla ya escucha; NO sondear. Handoff presentes-por-servicio.
 export interface PresentePorServicio {
-  servicioId: string;
-  clave: string;
+  serviceId: string;
+  slug: string;
   labelKey: string;
-  presentes: number;
+  present: number;
 }
 export interface PresentesResumen {
-  fecha: string;
-  servicios: PresentePorServicio[];
-  totalPresentes: number;
+  date: string;
+  services: PresentePorServicio[];
+  totalPresent: number;
 }
 export async function getPresentes(centroId?: string): Promise<PresentesResumen | null> {
   // El endpoint aún se está construyendo en el BE: si no existe (404) o falla, la barra simplemente no
@@ -99,17 +99,17 @@ export async function agendarMultiple(
 export function reagendarSesion(sesionId: string, fecha: string, centroId?: string): Promise<Sesion> {
   return apiFetch<Sesion>(
     `/frontdesk/sesiones/${sesionId}/agenda`,
-    { method: "PATCH", body: JSON.stringify({ fecha }) },
+    { method: "PATCH", body: JSON.stringify({ date: fecha }) },
     centroId,
   );
 }
 
 // Calendario del paciente (coloreado por tipo de servicio) para un rango.
 export type AgendaItem = {
-  fecha: string;
-  estado: string;
-  servicioNombre: string | null;
-  servicioClave: string | null;
+  date: string;
+  status: string;
+  servicioNombre: string | null; // NO en el mapa (servicioNombre) — dejado en español
+  serviceSlug: string | null;
   color: string | null;
 };
 export function getAgendaPaciente(
@@ -118,7 +118,7 @@ export function getAgendaPaciente(
   hasta: string,
   centroId?: string,
 ): Promise<AgendaItem[]> {
-  const sp = new URLSearchParams({ desde, hasta });
+  const sp = new URLSearchParams({ from: desde, to: hasta });
   return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as AgendaItem[]) : (((r as { items?: AgendaItem[] })?.items) ?? []),
   );
@@ -126,14 +126,15 @@ export function getAgendaPaciente(
 
 // Vista-día por HORA (cupos) de un servicio: horas con cupo/agendadas/vacíos (BE prod 2026-07-23).
 // Cupos configurables por POST/PUT /citas/cupos (precedencia fecha>diaSemana>default, centro>global).
-export type AgendaHora = { hora: string; cupo: number; agendadas: number; vacios: number };
-export type AgendaDiaHoras = { servicioId?: string; fecha?: string; horas: AgendaHora[] };
+// `cupo`/`agendadas`/`vacios`/`horas` NO están en el mapa — dejados en español.
+export type AgendaHora = { time: string; cupo: number; agendadas: number; vacios: number };
+export type AgendaDiaHoras = { serviceId?: string; date?: string; horas: AgendaHora[] };
 export function getAgendaHoras(
   servicioClave: string,
   fecha: string,
   centroId?: string,
 ): Promise<AgendaDiaHoras> {
-  const sp = new URLSearchParams({ servicio: servicioClave, fecha });
+  const sp = new URLSearchParams({ service: servicioClave, date: fecha });
   return apiFetch<AgendaDiaHoras>(`/frontdesk/agenda?${sp}`, {}, centroId);
 }
 
@@ -174,7 +175,9 @@ export type FrontdeskTotal = {
     capacidad?: number | null;
   } | null;
 };
-export type FrontdeskTablero = { columnas: FrontdeskColumna[]; filas: FrontdeskFila[]; totales?: FrontdeskTotal[] };
+// Claves de bolsa opacas del tablero: se traduce la CLAVE (columnas→columns, filas→rows,
+// totales→totals); el CONTENIDO de cada columna/fila/total NO se toca (board engine).
+export type FrontdeskTablero = { columns: FrontdeskColumna[]; rows: FrontdeskFila[]; totals?: FrontdeskTotal[] };
 
 export function getFrontdeskTablero(
   servicio: string,
@@ -183,10 +186,10 @@ export function getFrontdeskTablero(
   // Rango (2 fechas, solo gerente — PR #141): desde/hasta mandan sobre `fecha`.
   rango?: { desde: string; hasta: string },
 ): Promise<FrontdeskTablero> {
-  const sp = new URLSearchParams({ servicio, fecha });
+  const sp = new URLSearchParams({ service: servicio, date: fecha });
   if (rango) {
-    sp.set("desde", rango.desde);
-    sp.set("hasta", rango.hasta);
+    sp.set("from", rango.desde);
+    sp.set("to", rango.hasta);
   }
   return apiFetch<FrontdeskTablero>(`/frontdesk/tablero?${sp.toString()}`, {}, centroId);
 }
@@ -210,7 +213,7 @@ export function marcarTransicion(
 export function cancelarSesion(sesionId: string, motivo: string, centroId?: string): Promise<Sesion> {
   return apiFetch<Sesion>(
     `/frontdesk/sesiones/${sesionId}/cancelar`,
-    { method: "POST", body: JSON.stringify({ motivo }) },
+    { method: "POST", body: JSON.stringify({ reason: motivo }) },
     centroId,
   );
 }
@@ -237,7 +240,7 @@ export function guardarDatosSesion(
 ): Promise<Sesion> {
   return apiFetch<Sesion>(
     `/frontdesk/sesiones/${sesionId}/acciones`,
-    { method: "POST", body: JSON.stringify({ datos }) },
+    { method: "POST", body: JSON.stringify({ data: datos }) },
     centroId,
   );
 }
@@ -248,23 +251,23 @@ export function guardarDatosSesion(
 // Los campos viejos (total/entregadas/pendientes) se conservan como alias durante la transición.
 export type PaqueteDisponibilidad = {
   id?: string; // id del paquete_sesiones (para PATCH …/paquetes/:id/ajuste)
-  facturaItemId?: string;
+  invoiceItemId?: string;
   sku?: string | null; // código ESTABLE del producto (ubicar/agrupar; no el nombre)
-  productoNombre?: string | null;
-  grupoClave?: string | null;
-  grupoFacturacionId?: string | null;
+  productoNombre?: string | null; // NO en el mapa — dejado en español
+  groupKey?: string | null;
+  billingGroupId?: string | null;
   // Totales fieles (nuevos) + alias viejos.
-  sesionesTotales?: number;
-  sesionesEntregadas?: number;
-  pendiente?: number;
-  total?: number; // alias viejo de sesionesTotales
-  entregadas?: number; // alias viejo de sesionesEntregadas
-  pendientes?: number; // alias viejo de pendiente
+  totalSessions?: number;
+  deliveredSessions?: number;
+  pendiente?: number; // NO en el mapa — dejado en español
+  total?: number; // alias viejo de totalSessions (total es igual)
+  entregadas?: number; // NO en el mapa — dejado en español (alias viejo)
+  pendientes?: number; // NO en el mapa — dejado en español (alias viejo)
   // Desglose multiplicador del grupo, p.ej. { dias: 12, areas: 1 }. Claves dinámicas.
-  multiplicadores?: Record<string, number> | null;
+  multiplicadores?: Record<string, number> | null; // NO en el mapa — dejado en español
 };
 export type DisponibilidadServicio = {
-  paquetes: PaqueteDisponibilidad[];
+  paquetes: PaqueteDisponibilidad[]; // `paquetes`/`pendienteTotal` NO en el mapa — dejados en español
   pendienteTotal: number;
 };
 
@@ -274,8 +277,8 @@ export function paqueteTotales(p: PaqueteDisponibilidad): {
   entregadas: number;
   pendiente: number;
 } {
-  const totales = Number(p.sesionesTotales ?? p.total ?? 0);
-  const entregadas = Number(p.sesionesEntregadas ?? p.entregadas ?? 0);
+  const totales = Number(p.totalSessions ?? p.total ?? 0);
+  const entregadas = Number(p.deliveredSessions ?? p.entregadas ?? 0);
   const pendiente = Number(p.pendiente ?? p.pendientes ?? Math.max(0, totales - entregadas));
   return { totales, entregadas, pendiente };
 }
@@ -284,8 +287,8 @@ export function paqueteTotales(p: PaqueteDisponibilidad): {
 // Manda `sesionesTotales` explícito o `multiplicadores` (el BE recalcula N = cantidad × Π).
 // RBAC: `frontdesk.disponibilidad.editar`. El BE valida no bajar de lo ya consumido (400).
 export type AjustarDisponibilidadPayload = {
-  sesionesTotales?: number;
-  multiplicadores?: Record<string, number>;
+  totalSessions?: number;
+  multiplicadores?: Record<string, number>; // NO en el mapa — dejado en español
   actorId?: string;
 };
 export function ajustarDisponibilidad(
@@ -305,12 +308,12 @@ export function ajustarDisponibilidad(
 // material entre almacenes (viales/insumos). Reversible con /transferencias/:id/anular. El centro ORIGEN
 // es el activo (X-Tenant-ID). Handoff transferir-tratamiento-entre-centros.
 export type TransferirTratamientoPayload = {
-  clinicDestinoId: string;
-  sesiones?: number; // omitido = todas las pendientes
-  modo?: "virtual" | "fisica";
-  almacenOrigenId?: string; // solo modo fisica
-  almacenDestinoId?: string; // solo modo fisica
-  motivo?: string;
+  destinationClinicId: string;
+  sessions?: number; // omitido = todas las pendientes
+  mode?: "virtual" | "fisica";
+  sourceWarehouseId?: string; // solo modo fisica
+  destinationWarehouseId?: string; // solo modo fisica
+  reason?: string;
 };
 export function transferirTratamiento(
   paqueteId: string,
@@ -329,7 +332,7 @@ export function getDisponibilidadServicio(
   centroId?: string,
 ): Promise<DisponibilidadServicio> {
   return apiFetch<DisponibilidadServicio>(
-    `/frontdesk/servicios/${servicioId}/disponibilidad?pacienteId=${encodeURIComponent(pacienteId)}`,
+    `/frontdesk/servicios/${servicioId}/disponibilidad?patientId=${encodeURIComponent(pacienteId)}`,
     {},
     centroId,
   );
@@ -342,18 +345,18 @@ export function getDisponibilidadServicio(
 // cmr-be/docs/specs/frontdesk-consumo-por-dosis.md. NO sumar entre sobres: cada dosis es su propio sobre.
 export type PendienteEntrega = {
   id: string; // id del PAQUETE (paquete_sesiones) → es el `paqueteOrigenIds` del cambio de protocolo
-  productoId: string;
-  productoNombre?: string | null;
+  productId: string;
+  productoNombre?: string | null; // NO en el mapa — dejado en español
   sku?: string | null;
-  pendiente?: number | null; // sesiones que le quedan de esta dosis (puede ser 0 → agotada)
-  sesionesTotales?: number | null;
-  sesionesEntregadas?: number | null;
-  grupoClave?: string | null;
-  multiplicadores?: Record<string, number> | null;
+  pendiente?: number | null; // NO en el mapa — dejado en español (sesiones que le quedan; 0 → agotada)
+  totalSessions?: number | null;
+  deliveredSessions?: number | null;
+  groupKey?: string | null;
+  multiplicadores?: Record<string, number> | null; // NO en el mapa — dejado en español
 };
 export function getPendientesEntrega(pacienteId: string, centroId?: string): Promise<PendienteEntrega[]> {
   return apiFetch<unknown>(
-    `/facturas/pendientes-entrega?pacienteId=${encodeURIComponent(pacienteId)}`,
+    `/facturas/pendientes-entrega?patientId=${encodeURIComponent(pacienteId)}`,
     {},
     centroId,
   ).then((r) =>
@@ -368,24 +371,25 @@ export function getPendientesEntrega(pacienteId: string, centroId?: string): Pro
 // directa). Todo-o-nada; devuelve avisos (diferencia de valor, reintegros ignorados…). Handoff
 // cambio-de-protocolo. Las cantidades nuevas son juicio del médico: el BE AVISA, no bloquea.
 export interface CambioProtocaloNuevo {
-  productoId: string;
-  sesionesTotales: number;
-  cantidad?: number;
-  areas?: number;
-  dosis?: number;
+  productId: string;
+  totalSessions: number;
+  quantity?: number;
+  areas?: number; // NO en el mapa — dejado en español
+  dose?: number;
 }
 export interface CambioProtocoloPayload {
-  paqueteOrigenIds: string[];
-  nuevos: CambioProtocaloNuevo[];
-  motivo: string;
-  medicoId?: string;
-  reintegros?: { productoId: string; unidadesSelladas: number }[];
+  paqueteOrigenIds: string[]; // NO en el mapa (plural) — dejado en español
+  newOnes: CambioProtocaloNuevo[];
+  reason: string;
+  doctorId?: string;
+  // `reintegros` y `unidadesSelladas` NO en el mapa — dejados en español (productoId sí → productId).
+  reintegros?: { productId: string; unidadesSelladas: number }[];
 }
 export interface CambioProtocoloResult {
-  cambioId?: string;
-  creados?: unknown[];
-  cerrados?: unknown[];
-  avisos?: { code?: string; labelKey?: string; message?: string }[];
+  changeId?: string;
+  creados?: unknown[]; // NO en el mapa — dejado en español
+  cerrados?: unknown[]; // NO en el mapa — dejado en español
+  avisos?: { code?: string; labelKey?: string; message?: string }[]; // `avisos` NO en el mapa
 }
 export function aplicarCambioProtocolo(
   pacienteId: string,
@@ -410,29 +414,29 @@ export function aplicarCambioProtocolo(
 export type FrontdeskAvisoTipo = "entrega_sin_paquete" | "dosis_no_comprada" | "entrega_sin_saldo";
 export interface FrontdeskAviso {
   id: string;
-  tipo: string;
-  sesionId?: string | null;
-  fecha?: string | null;
-  paciente?: string | null;
-  servicio?: string | null;
+  type: string;
+  sessionId?: string | null;
+  date?: string | null;
+  patient?: string | null;
+  service?: string | null;
   actorId?: string | null;
-  actor?: string | null;
-  cuando?: string | null;
-  detalle?: Record<string, unknown> | null;
+  actor?: string | null; // NO en el mapa — dejado en español
+  cuando?: string | null; // NO en el mapa — dejado en español
+  detalle?: Record<string, unknown> | null; // NO en el mapa — dejado en español (bolsa opaca)
 }
 export interface FrontdeskAvisosReporte {
-  desde?: string;
-  hasta?: string;
+  from?: string;
+  to?: string;
   total: number;
-  porTipo: Record<string, number>;
-  avisos: FrontdeskAviso[];
+  porTipo: Record<string, number>; // NO en el mapa — dejado en español
+  avisos: FrontdeskAviso[]; // `avisos` NO en el mapa — dejado en español
 }
 export function getAvisosFrontdesk(
   desde: string,
   hasta: string,
   centroId?: string,
 ): Promise<FrontdeskAvisosReporte> {
-  const sp = new URLSearchParams({ desde, hasta });
+  const sp = new URLSearchParams({ from: desde, to: hasta });
   return apiFetch<FrontdeskAvisosReporte>(`/frontdesk/reportes/avisos?${sp.toString()}`, {}, centroId);
 }
 
@@ -441,27 +445,28 @@ export function getAvisosFrontdesk(
 export type NurseStatusTipo = components["schemas"]["NurseStatusTipoEntity"];
 export type SetNurseStatusPayload = components["schemas"]["SetNurseStatusDto"];
 export type NurseStatusActual = {
-  personalId: string;
-  personalNombre?: string | null;
-  statusTipoId: string | null;
-  fecha?: string;
+  staffId: string;
+  personalNombre?: string | null; // NO en el mapa — dejado en español
+  statusTypeId: string | null;
+  date?: string;
 };
 export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[]> {
   return apiFetch<NurseStatusTipo[]>(`/frontdesk/nurse-status/tipos`, {}, centroId);
 }
 export function getNurseStatusActuales(fecha: string, centroId?: string): Promise<NurseStatusActual[]> {
-  return apiFetch<NurseStatusActual[]>(`/frontdesk/nurse-status?fecha=${fecha}`, {}, centroId);
+  return apiFetch<NurseStatusActual[]>(`/frontdesk/nurse-status?date=${fecha}`, {}, centroId);
 }
 // Historial de terapias del paciente por servicio (PR #148) — alimenta el modal "Historial de terapias".
 // Todo proyectado por el BE (X/Y, áreas, staff); el FE solo pinta. Migradas viejas → sesionNumero/staff null.
+// `servicioNombre`/`sesionNumero`/`areas`/`staffNombre` NO en el mapa — dejados en español.
 export type HistorialSesion = {
   id: string;
-  fecha: string;
-  estado: string;
-  servicioId: string;
+  date: string;
+  status: string;
+  serviceId: string;
   servicioNombre: string | null;
   sesionNumero: number | null;
-  sesionesTotales: number | null;
+  totalSessions: number | null;
   areas: number | null;
   staffNombre: string | null;
 };
@@ -470,7 +475,7 @@ export function getHistorialPaciente(
   servicioId?: string,
   centroId?: string,
 ): Promise<HistorialSesion[]> {
-  const qs = servicioId ? `?servicioId=${encodeURIComponent(servicioId)}` : "";
+  const qs = servicioId ? `?serviceId=${encodeURIComponent(servicioId)}` : "";
   return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/historial${qs}`, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as HistorialSesion[]) : (((r as { items?: HistorialSesion[] })?.items) ?? []),
   );
@@ -479,28 +484,31 @@ export function getHistorialPaciente(
 // Carrito de compras de la fila (columna fd_compras). Una línea de compra (paquete de sesiones facturado);
 // `entregadas`/`pendientes` = cuánto le queda al paciente (clave en frontdesk). Contrato:
 // HANDOFF-columna-carrito-compras / cmr-be/docs/specs/frontdesk-columna-compras.md.
+// `entregadas`/`pendientes` NO en el mapa — dejados en español.
 export type CompraLinea = {
   id?: string;
-  fecha?: string | null;
-  facturaId?: string | null;
-  facturaNumero?: string | null;
+  date?: string | null;
+  invoiceId?: string | null;
+  invoiceNumber?: string | null;
   sku?: string | null;
-  producto?: string | null;
-  cantidad?: number | null;
-  sesiones?: number | null;
+  product?: string | null;
+  quantity?: number | null;
+  sessions?: number | null;
   entregadas?: number | null;
   pendientes?: number | null;
   total?: number | null;
 };
 export type ComprasPaciente = {
   // Compras EMITIDAS el día del tablero (no "hoy"): número que muestra la celda + su desglose.
-  delDia?: { fecha?: string | null; sesiones?: number | null; items?: CompraLinea[] } | null;
+  // `delDia` NO en el mapa — clave dejada en español (`items` ya es estándar/inglés).
+  delDia?: { date?: string | null; sessions?: number | null; items?: CompraLinea[] } | null;
   // Historial completo (cualquier fecha), de la más reciente a la más antigua.
-  historial?: CompraLinea[];
-  totales?: {
+  historial?: CompraLinea[]; // `historial` NO en el mapa — dejado en español
+  totals?: {
+    // `compras`/`sesionesCompradas`/`sesionesPendientes` NO en el mapa — dejados en español.
     compras?: number | null;
     sesionesCompradas?: number | null;
-    sesionesEntregadas?: number | null;
+    deliveredSessions?: number | null;
     sesionesPendientes?: number | null;
   } | null;
 };
@@ -513,8 +521,8 @@ export function getComprasPaciente(
   centroId?: string,
 ): Promise<ComprasPaciente> {
   const sp = new URLSearchParams();
-  if (servicioId) sp.set("servicioId", servicioId);
-  if (fecha) sp.set("fecha", fecha);
+  if (servicioId) sp.set("serviceId", servicioId);
+  if (fecha) sp.set("date", fecha);
   const qs = sp.toString() ? `?${sp.toString()}` : "";
   return apiFetch<ComprasPaciente>(`/frontdesk/pacientes/${pacienteId}/compras${qs}`, {}, centroId);
 }

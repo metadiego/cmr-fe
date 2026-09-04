@@ -9,24 +9,24 @@ import assert from "node:assert/strict";
 import { canSeeMenuItem, filterMenuByPermissions } from "./menu-access.ts";
 
 const item = (o: Record<string, unknown> = {}) =>
-  ({ clave: "x", labelKey: "x", ...o }) as never;
+  ({ slug: "x", labelKey: "x", ...o }) as never;
 
 test("un ítem sin permiso declarado lo ve cualquiera que entre", () => {
   assert.equal(canSeeMenuItem(item(), []), true);
 });
 
 test("un ítem con permiso solo lo ve quien lo tiene", () => {
-  assert.equal(canSeeMenuItem(item({ permisoClave: "factura.read" }), ["factura.read"]), true);
-  assert.equal(canSeeMenuItem(item({ permisoClave: "factura.read" }), ["caja.read"]), false);
+  assert.equal(canSeeMenuItem(item({ permissionSlug: "factura.read" }), ["factura.read"]), true);
+  assert.equal(canSeeMenuItem(item({ permissionSlug: "factura.read" }), ["caja.read"]), false);
 });
 
 test("el master (*) lo ve todo, sin enumerar permisos", () => {
-  assert.equal(canSeeMenuItem(item({ permisoClave: "numeracion.arranque" }), ["*"]), true);
+  assert.equal(canSeeMenuItem(item({ permissionSlug: "numeracion.arranque" }), ["*"]), true);
 });
 
 test("oculto es oculto, aunque el permiso lo tenga — y aunque sea master", () => {
   // `visible:false` es la decisión del administrador sobre el catálogo; no la pisa un permiso.
-  assert.equal(canSeeMenuItem(item({ visible: false, permisoClave: "factura.read" }), ["factura.read"]), false);
+  assert.equal(canSeeMenuItem(item({ visible: false, permissionSlug: "factura.read" }), ["factura.read"]), false);
   assert.equal(canSeeMenuItem(item({ visible: false }), ["*"]), false);
 });
 
@@ -35,38 +35,38 @@ test("visible undefined NO significa oculto: solo `false` esconde", () => {
 });
 
 test("un permiso vacío o nulo se trata como «sin permiso declarado»", () => {
-  assert.equal(canSeeMenuItem(item({ permisoClave: "" }), []), true);
-  assert.equal(canSeeMenuItem(item({ permisoClave: null }), []), true);
+  assert.equal(canSeeMenuItem(item({ permissionSlug: "" }), []), true);
+  assert.equal(canSeeMenuItem(item({ permissionSlug: null }), []), true);
 });
 
 test("sin permisos, la barra queda solo con lo abierto — no vacía ni completa", () => {
   const menu = [
-    item({ clave: "inicio" }),
-    item({ clave: "facturacion", permisoClave: "factura.read" }),
-    item({ clave: "numeracion", permisoClave: "numeracion.arranque" }),
-    item({ clave: "interno", visible: false }),
+    item({ slug: "inicio" }),
+    item({ slug: "facturacion", permissionSlug: "factura.read" }),
+    item({ slug: "numeracion", permissionSlug: "numeracion.arranque" }),
+    item({ slug: "interno", visible: false }),
   ];
   assert.deepEqual(
-    filterMenuByPermissions(menu, []).map((i) => (i as { clave: string }).clave),
+    filterMenuByPermissions(menu, []).map((i) => (i as { slug: string }).slug),
     ["inicio"],
   );
 });
 
 test("con el permiso fino, aparece su opción y solo la suya", () => {
   const menu = [
-    item({ clave: "facturacion", permisoClave: "factura.read" }),
-    item({ clave: "numeracion", permisoClave: "numeracion.arranque" }),
+    item({ slug: "facturacion", permissionSlug: "factura.read" }),
+    item({ slug: "numeracion", permissionSlug: "numeracion.arranque" }),
   ];
   assert.deepEqual(
-    filterMenuByPermissions(menu, ["numeracion.arranque"]).map((i) => (i as { clave: string }).clave),
+    filterMenuByPermissions(menu, ["numeracion.arranque"]).map((i) => (i as { slug: string }).slug),
     ["numeracion"],
   );
 });
 
 test("filtrar no muta ni reordena el catálogo que llega del backend", () => {
-  const menu = [item({ clave: "a" }), item({ clave: "b" })];
+  const menu = [item({ slug: "a" }), item({ slug: "b" })];
   const copia = [...menu];
   const out = filterMenuByPermissions(menu, ["*"]);
   assert.deepEqual(menu, copia);
-  assert.deepEqual(out.map((i) => (i as { clave: string }).clave), ["a", "b"]);
+  assert.deepEqual(out.map((i) => (i as { slug: string }).slug), ["a", "b"]);
 });

@@ -48,15 +48,15 @@ export function TablerosList() {
   }
 
   const columns: Column<TableroRegistro>[] = [
-    { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.clave}</span> },
+    { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.slug}</span> },
     { key: "label", header: t("label"), cell: (r) => tRoot(r.labelKey) },
     { key: "layout", header: t("layout"), cell: (r) => r.layout },
-    { key: "entidad", header: t("entidad"), cell: (r) => <span className="font-mono text-xs">{r.entidad}</span> },
+    { key: "entidad", header: t("entidad"), cell: (r) => <span className="font-mono text-xs">{r.entity}</span> },
     {
       key: "activo",
       header: t("active"),
       cell: (r) => (
-        <Badge variant={r.activo ? "secondary" : "outline"}>{r.activo ? tc("yes") : tc("no")}</Badge>
+        <Badge variant={r.active ? "secondary" : "outline"}>{r.active ? tc("yes") : tc("no")}</Badge>
       ),
     },
     {
@@ -65,10 +65,10 @@ export function TablerosList() {
       align: "right",
       cell: (r) => (
         <div className="flex items-center justify-end gap-4">
-          <Link href={r.ruta ?? `/boards/${r.clave}`} className="text-sm text-primary hover:underline">
+          <Link href={r.path ?? `/boards/${r.slug}`} className="text-sm text-primary hover:underline">
             {t("open")}
           </Link>
-          <Link href={`/configuration/boards/${r.clave}`} className="text-sm text-primary hover:underline">
+          <Link href={`/configuration/boards/${r.slug}`} className="text-sm text-primary hover:underline">
             {t("edit")}
           </Link>
         </div>
@@ -114,12 +114,12 @@ function CrearTableroDialog({ onClose, onSaved }: { onClose: () => void; onSaved
     setBusy(true);
     try {
       await crearTablero({
-        clave: clave.trim(),
+        slug: clave.trim(),
         labelKey: labelKey.trim(),
         layout,
-        entidad: entidad.trim(),
+        entity: entidad.trim(),
         icon: icon.trim() || undefined,
-        esVertical,
+        isVertical: esVertical,
       });
       toast.success(t("created"));
       onSaved();

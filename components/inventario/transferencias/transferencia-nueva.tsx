@@ -45,7 +45,7 @@ export function TransferenciaNueva() {
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const origenId = activeCentro ?? "";
-  const centroName = (cid: string) => centros.find((c) => c.id === cid)?.nombre ?? cid;
+  const centroName = (cid: string) => centros.find((c) => c.id === cid)?.name ?? cid;
 
   const [destinoId, setDestinoId] = React.useState("");
   const [almacenOrigenId, setAlmacenOrigenId] = React.useState("");
@@ -63,7 +63,7 @@ export function TransferenciaNueva() {
   const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia(), []);
   const destinos = destinosRes.state.kind === "ok" ? destinosRes.state.data : [];
   const destinoSel = destinos.find((d) => d.clinicId === destinoId) ?? null;
-  const almDestino = destinoSel?.almacenes ?? [];
+  const almDestino = destinoSel?.warehouses ?? [];
   const destinoSinAlmacen = !!destinoSel && almDestino.length === 0;
 
   // Preselección del único almacén (caso común: 1 por centro). Guard con estado (no ref
@@ -93,12 +93,12 @@ export function TransferenciaNueva() {
     setBusy(true);
     try {
       const payload: CrearTransferenciaPayload = {
-        clinicOrigenId: origenId,
-        clinicDestinoId: destinoId,
-        almacenOrigenId,
-        almacenDestinoId,
-        items: lineasValidas.map((l) => ({ productoId: l.productoId, cantidad: Number(l.cantidad) })),
-        ...(motivo.trim() ? { motivo: motivo.trim() } : {}),
+        sourceClinicId: origenId,
+        destinationClinicId: destinoId,
+        sourceWarehouseId: almacenOrigenId,
+        destinationWarehouseId: almacenDestinoId,
+        items: lineasValidas.map((l) => ({ productId: l.productoId, quantity: Number(l.cantidad) })),
+        ...(motivo.trim() ? { reason: motivo.trim() } : {}),
       };
       await crearTransferencia(payload);
       toast.success(t("creadaOk"));
@@ -125,7 +125,7 @@ export function TransferenciaNueva() {
           <Select value={destinoId} onValueChange={(v) => { setDestinoId(v); setAlmacenDestinoId(""); setAutoAlmD(null); }}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectCentro")} /></SelectTrigger>
             <SelectContent>
-              {destinos.map((d) => (<SelectItem key={d.clinicId} value={d.clinicId}>{d.nombre}</SelectItem>))}
+              {destinos.map((d) => (<SelectItem key={d.clinicId} value={d.clinicId}>{d.name}</SelectItem>))}
             </SelectContent>
           </Select>
         </Field>
@@ -133,7 +133,7 @@ export function TransferenciaNueva() {
           <Select value={almacenOrigenId} onValueChange={setAlmacenOrigenId}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectAlmacen")} /></SelectTrigger>
             <SelectContent>
-              {almOrigen.map((a) => (<SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>))}
+              {almOrigen.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
             </SelectContent>
           </Select>
         </Field>
@@ -141,7 +141,7 @@ export function TransferenciaNueva() {
           <Select value={almacenDestinoId} onValueChange={setAlmacenDestinoId} disabled={!destinoId || destinoSinAlmacen}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectAlmacen")} /></SelectTrigger>
             <SelectContent>
-              {almDestino.map((a) => (<SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>))}
+              {almDestino.map((a) => (<SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>))}
             </SelectContent>
           </Select>
           {/* Destino sin almacén: se avisa (no se esconde) para que no busquen el centro en vano. */}

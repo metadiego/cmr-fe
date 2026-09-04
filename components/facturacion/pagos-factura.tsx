@@ -168,25 +168,25 @@ function PagoViewRow({
   const t = useTranslations("pagosFactura");
   const tRoot = useTranslations();
   const [confirmAnular, setConfirmAnular] = React.useState(false);
-  const esReembolso = pago.tipo === "reembolso";
-  const fecha = formatFechaSolo(pago.fecha);
-  // El pago sólo trae `formaPagoNombre` (español); resolvemos la `clave` por `formaPagoId` para traducir.
-  const clave = formas.find((f) => f.id === pago.formaPagoId)?.clave;
+  const esReembolso = pago.type === "reembolso";
+  const fecha = formatFechaSolo(pago.date);
+  // El pago sólo trae `formaPagoNombre` (español); resolvemos la `clave` por `paymentMethodId` para traducir.
+  const clave = formas.find((f) => f.id === pago.paymentMethodId)?.slug;
   const label = formaPagoLabel(tRoot, clave, pago.formaPagoNombre);
 
   return (
     <li className="flex items-center gap-2 rounded-lg bg-muted/30 px-2.5 py-1.5 text-sm">
-      <TipoBadge tipo={pago.tipo} />
+      <TipoBadge tipo={pago.type} />
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium">{label}</span>
-        {(fecha || pago.referencia) && (
+        {(fecha || pago.reference) && (
           <span className="block truncate text-xs text-muted-foreground">
-            {pago.referencia ? `${pago.referencia} · ` : ""}{fecha}
+            {pago.reference ? `${pago.reference} · ` : ""}{fecha}
           </span>
         )}
       </span>
       <span className={"shrink-0 tabular-nums font-medium " + (esReembolso ? "text-destructive" : "")}>
-        {esReembolso ? "−" : ""}{money(pago.monto)}
+        {esReembolso ? "−" : ""}{money(pago.amount)}
       </span>
       {puedeEditar && (
         <span className="flex shrink-0 items-center">
@@ -244,24 +244,24 @@ function PagoEditRow({
 }) {
   const t = useTranslations("pagosFactura");
   const tRoot = useTranslations();
-  const [formaId, setFormaId] = React.useState(pago.formaPagoId ?? "");
-  const [monto, setMonto] = React.useState(String(n(pago.monto).toFixed(2)));
-  const cambio = formaId !== (pago.formaPagoId ?? "") || n(monto) !== n(pago.monto);
+  const [formaId, setFormaId] = React.useState(pago.paymentMethodId ?? "");
+  const [monto, setMonto] = React.useState(String(n(pago.amount).toFixed(2)));
+  const cambio = formaId !== (pago.paymentMethodId ?? "") || n(monto) !== n(pago.amount);
   const valido = !!formaId && n(monto) > 0;
 
   function guardar() {
     if (!pago.id || !cambio || !valido || busy) return;
-    run(() => repararPago(id, pago.id!, { formaPagoId: formaId, monto: n(monto), motivo: t("motivoCorreccion") }, centro)).then(onDone);
+    run(() => repararPago(id, pago.id!, { paymentMethodId: formaId, amount: n(monto), reason: t("motivoCorreccion") }, centro)).then(onDone);
   }
 
   return (
     <li className="space-y-1.5 rounded-lg border px-2.5 py-2">
       <div className="flex items-center gap-1.5">
-        <TipoBadge tipo={pago.tipo} />
+        <TipoBadge tipo={pago.type} />
         <Select value={formaId} onValueChange={setFormaId}>
           <SelectTrigger size="sm" className="h-8 flex-1"><SelectValue placeholder={t("method")} /></SelectTrigger>
           <SelectContent>
-            {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.clave, f.nombre)}</SelectItem>)}
+            {formas.filter((f) => f.active !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -302,13 +302,13 @@ function PagoAddRow({
   const [monto, setMonto] = React.useState(saldoSugerido > 0 ? String(saldoSugerido.toFixed(2)) : "");
   const [last4, setLast4] = React.useState("");
   const forma = formas.find((f) => f.id === formaId);
-  const esTarjeta = !!forma && forma.esEfectivo === false;
+  const esTarjeta = !!forma && forma.isCash === false;
   const valido = !!formaId && n(monto) > 0 && !busy;
 
   function registrar() {
     if (!valido) return;
     const notas = last4.length === 4 ? `•••• ${last4}` : undefined;
-    run(() => registrarPago(id, { formaPagoId: formaId, monto: n(monto), ...(notas ? { notas } : {}) } as never, centro)).then(onDone);
+    run(() => registrarPago(id, { paymentMethodId: formaId, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro)).then(onDone);
   }
 
   return (
@@ -317,7 +317,7 @@ function PagoAddRow({
       <Select value={formaId} onValueChange={setFormaId}>
         <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>
         <SelectContent>
-          {formas.filter((f) => f.activo !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.clave, f.nombre)}</SelectItem>)}
+          {formas.filter((f) => f.active !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
         </SelectContent>
       </Select>
       {esTarjeta && (

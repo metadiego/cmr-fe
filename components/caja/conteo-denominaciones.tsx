@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { Denominacion } from "@/lib/api/caja";
-import { ordenarDenominaciones, totalConteo, money } from "@/lib/caja/totales";
+import { totalConteo, money } from "@/lib/caja/totales";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
@@ -28,13 +28,13 @@ export function ConteoDenominaciones({
   const t = useTranslations("caja.count");
 
   const ordenadas = React.useMemo(
-    () => ordenarDenominaciones(denominaciones),
+    () => [...denominaciones].sort((a, b) => b.value - a.value),
     [denominaciones],
   );
   const total = React.useMemo(
     () =>
       totalConteo(
-        ordenadas.map((d) => ({ valor: d.valor, cantidad: cantidades[d.id] ?? 0 })),
+        ordenadas.map((d) => ({ valor: d.value, cantidad: cantidades[d.id] ?? 0 })),
       ),
     [ordenadas, cantidades],
   );
@@ -64,7 +64,7 @@ export function ConteoDenominaciones({
                   key={d.id}
                   className="grid grid-cols-[1fr_5.5rem_auto] items-center gap-x-3 px-4 py-1.5"
                 >
-                  <span className="text-sm font-medium tabular-nums">{money(d.valor)}</span>
+                  <span className="text-sm font-medium tabular-nums">{money(d.value)}</span>
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -76,10 +76,10 @@ export function ConteoDenominaciones({
                       onChange(d.id, Math.max(0, Math.floor(Number(e.target.value) || 0)))
                     }
                     className="h-8 text-right tabular-nums"
-                    aria-label={money(d.valor)}
+                    aria-label={money(d.value)}
                   />
                   <span className="min-w-20 text-right text-sm tabular-nums text-muted-foreground">
-                    {money(d.valor * c)}
+                    {money(d.value * c)}
                   </span>
                 </div>
               );

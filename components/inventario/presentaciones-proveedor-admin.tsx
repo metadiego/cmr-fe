@@ -49,7 +49,7 @@ export function PresentacionesProveedorAdmin() {
   const marcas = marcasRes.state.kind === "ok" ? marcasRes.state.data : [];
 
   const nameById = new Map<string, string>();
-  [...unidades, ...fabricantes, ...marcas].forEach((x) => nameById.set(x.id, x.nombre));
+  [...unidades, ...fabricantes, ...marcas].forEach((x) => nameById.set(x.id, x.name));
 
   const [productoId, setProductoId] = React.useState("");
 
@@ -149,27 +149,27 @@ export function PresentacionesProveedorAdmin() {
               )}
               {items.map((p) => {
                 const marcaFab = [
-                  p.marcaId ? nameById.get(p.marcaId) : null,
-                  p.fabricanteId ? nameById.get(p.fabricanteId) : null,
+                  p.brandId ? nameById.get(p.brandId) : null,
+                  p.manufacturerId ? nameById.get(p.manufacturerId) : null,
                 ]
                   .filter(Boolean)
                   .join(" · ");
                 const conc =
-                  p.concentracion != null
-                    ? `${p.concentracion} ${p.unidadConcentracionId ? (nameById.get(p.unidadConcentracionId) ?? "") : ""}`.trim()
+                  p.concentration != null
+                    ? `${p.concentration} ${p.concentrationUnitId ? (nameById.get(p.concentrationUnitId) ?? "") : ""}`.trim()
                     : "—";
                 return (
                   <tr key={p.id} className="hover:bg-muted/30">
-                    <td className="px-3 py-2 font-medium">{p.nombre}</td>
+                    <td className="px-3 py-2 font-medium">{p.name}</td>
                     <td className="px-3 py-2 text-muted-foreground">{marcaFab || "—"}</td>
                     <td className="px-3 py-2 tabular-nums">{conc}</td>
                     <td className="px-3 py-2 tabular-nums font-medium">
-                      {p.factorABase ?? "—"}
+                      {p.baseConversionFactor ?? "—"}
                     </td>
                     <td className="px-3 py-2 font-mono text-xs">{p.sku ?? "—"}</td>
                     <td className="px-3 py-2">
-                      <Badge variant={p.activo ? "secondary" : "outline"}>
-                        {p.activo ? t("active") : t("inactive")}
+                      <Badge variant={p.active ? "secondary" : "outline"}>
+                        {p.active ? t("active") : t("inactive")}
                       </Badge>
                     </td>
                     <td className="px-3 py-2">
@@ -177,7 +177,7 @@ export function PresentacionesProveedorAdmin() {
                         <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
                           {tc("edit")}
                         </Button>
-                        {p.activo && (
+                        {p.active && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -215,7 +215,7 @@ export function PresentacionesProveedorAdmin() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t("deactivateTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("deactivateBody", { name: deleting?.nombre ?? "" })}
+              {t("deactivateBody", { name: deleting?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

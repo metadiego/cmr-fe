@@ -59,7 +59,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   const [adding, setAdding] = React.useState(false);
 
   const regRes = useResource<TableroRegistro[]>(() => getTableros());
-  const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === tablero);
+  const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.slug === tablero);
   const defRes = useResource<TableroDefinicion>(() => getDefinicion(tablero), [tablero]);
   const def = defRes.state.kind === "ok" ? defRes.state.data : null;
 
@@ -73,7 +73,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   // Sin esto, el FE mostraba médicos de otros centros → al elegirlos no persistían.
   const [optionsByCol, setOptionsByCol] = React.useState<Record<string, Opcion[]>>({});
   React.useEffect(() => {
-    const selects = (def?.columnas ?? []).filter((c) => c.tipo === "select" && c.editable);
+    const selects = (def?.columns ?? []).filter((c) => c.tipo === "select" && c.editable);
     let active = true;
     Promise.all(
       selects.map((c) =>
@@ -107,19 +107,19 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   // servicio) y ADEMÁS se filtra client-side por `fila.subtipo` (BE PR #125) para los tableros donde el
   // server no lo aplica (atencion: Nueva/Seguimiento). Ambas capas son idempotentes entre sí.
   const filasRes = useResource<Tablero>(
-    () => (centroId ? getFilas(tablero, fecha, { centroId, subTipo: subTipo || undefined }) : Promise.resolve({ columnas: [], filas: [] })),
+    () => (centroId ? getFilas(tablero, fecha, { centroId, subTipo: subTipo || undefined }) : Promise.resolve({ columns: [], rows: [] })),
     [tablero, fecha, centroId, subTipo],
   );
   const data = filasRes.state.kind === "ok" ? filasRes.state.data : null;
 
   const { live } = useCitaStream({
     centroId,
-    entidad: registro?.entidad,
+    entidad: registro?.entity,
     enabled: !!centroId,
     onInvalidate: filasRes.refresh,
   });
 
-  const subTipos = React.useMemo(() => def?.subTipos ?? [], [def]);
+  const subTipos = React.useMemo(() => def?.subtypes ?? [], [def]);
 
   // Self-heal: tableros que EXIGEN subTipo (p. ej. servicios: cada tab es un servicio) responden 400 en
   // "Todos" → auto-selecciona el primer subtipo en vez de dejar el error rojo. Data-driven por el mensaje
@@ -128,7 +128,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
   React.useEffect(() => {
     if (!failMsg || subTipo || subTipos.length === 0) return;
     if (!/subtipo/i.test(failMsg)) return;
-    const h = setTimeout(() => setSubTipo(subTipos[0].clave), 0);
+    const h = setTimeout(() => setSubTipo(subTipos[0].slug), 0);
     return () => clearTimeout(h);
   }, [failMsg, subTipo, subTipos]);
 
@@ -153,12 +153,12 @@ export function GenericBoard({ tablero }: { tablero: string }) {
                 <SelectTrigger className="h-9 w-48"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
-            {registro?.entidad === "cita" && can("citas.create") && centroId && (
+            {registro?.entity === "cita" && can("citas.create") && centroId && (
               <Button size="sm" onClick={() => setAdding(true)}>{t("addCita")}</Button>
             )}
           </>
@@ -171,7 +171,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
             {t("all")}
           </SegmentedButton>
           {subTipos.map((s) => (
-            <SegmentedButton key={s.clave} active={subTipo === s.clave} onClick={() => setSubTipo(s.clave)}>
+            <SegmentedButton key={s.slug} active={subTipo === s.slug} onClick={() => setSubTipo(s.slug)}>
               {tRoot(s.labelKey)}
             </SegmentedButton>
           ))}
@@ -190,14 +190,14 @@ export function GenericBoard({ tablero }: { tablero: string }) {
       {data && def && (() => {
         // 1º el tab de subtipo (Nueva/Seguimiento) acota el set; los KPI de estado se cuentan sobre ese set.
         const base = subTipo
-          ? data.filas.filter((f) => String((f as { subtipo?: unknown }).subtipo ?? "") === subTipo)
-          : data.filas;
+          ? data.rows.filter((f) => String((f as { subtipo?: unknown }).subtipo ?? "") === subTipo)
+          : data.rows;
         const counts = new Map<string, number>();
         for (const f of base) {
           const e = String(f.estado ?? "");
           counts.set(e, (counts.get(e) ?? 0) + 1);
         }
-        const kpiEstados = def.estados.filter((e) => (counts.get(e.clave) ?? 0) > 0);
+        const kpiEstados = def.statuses.filter((e) => (counts.get(e.slug) ?? 0) > 0);
         const filtered = estadoFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
         return (
           <>
@@ -205,24 +205,24 @@ export function GenericBoard({ tablero }: { tablero: string }) {
               <KpiCard label={t("all")} count={base.length} active={estadoFiltro === ""} onClick={() => setEstadoFiltro("")} />
               {kpiEstados.map((e) => (
                 <KpiCard
-                  key={e.clave}
+                  key={e.slug}
                   label={tRoot(e.labelKey)}
-                  count={counts.get(e.clave) ?? 0}
+                  count={counts.get(e.slug) ?? 0}
                   color={e.color}
-                  active={estadoFiltro === e.clave}
-                  onClick={() => setEstadoFiltro(estadoFiltro === e.clave ? "" : e.clave)}
+                  active={estadoFiltro === e.slug}
+                  onClick={() => setEstadoFiltro(estadoFiltro === e.slug ? "" : e.slug)}
                 />
               ))}
             </div>
             <TableroDinamico
-              columnas={data.columnas}
+              columnas={data.columns}
               filas={filtered}
               tablero={tablero}
           centroId={centroId}
           onRefresh={filasRes.refresh}
           optionsByCol={optionsByCol}
-          transiciones={def.transiciones}
-          estados={def.estados}
+          transiciones={def.transitions}
+          estados={def.statuses.map((e) => ({ clave: e.slug, orden: e.sortOrder, color: e.color }))}
           density={density}
           emptyLabel={t("empty")}
           renderAccion={(fila, col) => {
@@ -230,7 +230,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
             // abre el menú declarativo; el resto cae al flujo de transiciones. La de notificar ya se
             // resolvió antes en la celda (render.kind). Handoff HANDOFF-columnas-reusables-binding.
             const actions = (col.render as Record<string, unknown> | null)?.actions as AccionItem[] | undefined;
-            if (registro?.entidad === "cita" || actions) {
+            if (registro?.entity === "cita" || actions) {
               return <AccionesModal actions={actions ?? []} fila={fila} centroId={centroId} />;
             }
             return (
@@ -238,8 +238,8 @@ export function GenericBoard({ tablero }: { tablero: string }) {
                 tablero={tablero}
                 entidadId={fila.id}
                 estado={String(fila.estado ?? fila["estado"] ?? "")}
-                estados={def.estados}
-                transiciones={def.transiciones}
+                estados={def.statuses}
+                transiciones={def.transitions}
                 centroId={centroId}
                 onDone={filasRes.refresh}
               />

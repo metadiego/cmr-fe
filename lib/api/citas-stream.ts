@@ -1,23 +1,24 @@
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 
-// Declarative realtime event from GET /citas/stream (SSE). The FE applies each
-// event silently (never re-emits). `canal` = clinic scope; `accion` = what
-// changed; `estado` = the new snapshot; `actorId` = who did it (anti-loop);
-// `version` = monotonic ordering token.
+// Declarative realtime event from the SSE bus. The FE applies each event
+// silently (never re-emits). `channel` = clinic scope; `action` = what changed;
+// `status` = the new snapshot; `actorId` = who did it (anti-loop); `version` =
+// monotonic ordering token. Las claves llegan en inglés por la capa api-ingles
+// (/api/v2). `ts` NO está en el mapa → el BE lo sirve tal cual.
 export interface CitaStreamEvent {
-  canal: string;
-  entidad: string; // "cita" | "sesion" | ...
-  tablero?: string; // originating board (optional)
+  channel: string;
+  entity: string; // "cita" | "sesion" | ...
+  boardSlug?: string; // originating board (optional)
   id: string;
-  accion: string; // "estado" | "creada" | "reagendada" | ...
-  estado?: {
-    estado: string;
-    fecha: string;
-    hora: string | null;
-    esPrimeraVez: boolean;
-    medicoId: string | null;
-    enfermeraVitalesId: string | null;
+  action: string; // "estado" | "creada" | "reagendada" | ...
+  status?: {
+    status: string;
+    date: string;
+    time: string | null;
+    isFirstVisit: boolean;
+    doctorId: string | null;
+    vitalsNurseId: string | null;
   };
   actorId: string | null;
   version: number;
@@ -46,8 +47,11 @@ export async function subscribeCitas(opts: {
   if (typeof opts.centroId === "string" && opts.centroId) headers["X-Tenant-ID"] = opts.centroId;
   if (opts.lastEventId) headers["Last-Event-ID"] = opts.lastEventId;
 
-  // Canonical single bus for all verticals (filter by entidad on the client).
-  const res = await fetch(`${env.API_BASE_URL}/api/v1/tablero/stream`, {
+  // Canonical single bus for all verticals (filter by entity on the client).
+  // El SSE `tablero/stream` NO tiene alias en inglés en el BE (@Sse('tablero/stream')
+  // sin `board/stream`), así que la ruta se mantiene `tablero/stream`; solo cambia el
+  // prefijo de versión v1→v2 para que la capa api-ingles traduzca las claves del evento.
+  const res = await fetch(`${env.API_BASE_URL}/api/v2/tablero/stream`, {
     headers,
     signal: opts.signal,
   });

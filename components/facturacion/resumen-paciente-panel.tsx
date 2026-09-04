@@ -66,7 +66,7 @@ export function ResumenPacientePanel({
 
           {data && (
             <>
-              {data.facturas.length === 0 ? (
+              {data.invoices.length === 0 ? (
                 <p className="px-2 py-3 text-sm text-muted-foreground">{t("vacio")}</p>
               ) : (
                 <table className="w-full text-sm">
@@ -79,7 +79,7 @@ export function ResumenPacientePanel({
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {data.facturas.map((f) => {
+                    {data.invoices.map((f) => {
                       const actual = f.id === facturaActualId;
                       return (
                         <tr
@@ -92,8 +92,8 @@ export function ResumenPacientePanel({
                           <td className="px-2 py-1.5">
                             <div className="flex items-center gap-2">
                               {actual && <span className="size-1.5 rounded-full bg-primary" aria-label={t("actual")} />}
-                              <span className="font-medium">{f.referencia}</span>
-                              <Badge variant="outline" className="text-[10px]">{f.estado}</Badge>
+                              <span className="font-medium">{f.reference}</span>
+                              <Badge variant="outline" className="text-[10px]">{f.status}</Badge>
                             </div>
                           </td>
                           <td className="px-2 py-1.5 text-muted-foreground">{concepto(f.conceptoLabelKeys)}</td>

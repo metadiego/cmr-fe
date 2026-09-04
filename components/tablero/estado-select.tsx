@@ -45,8 +45,8 @@ export function EstadoSelect({
     if (nuevo === estado || busy) return;
     const tr = transiciones.find(
       (t) =>
-        t.aEstado === nuevo &&
-        (t.desdeEstados.length === 0 || t.desdeEstados.includes(estado)),
+        t.toStatus === nuevo &&
+        (t.fromStatuses.length === 0 || t.fromStatuses.includes(estado)),
     );
     if (!tr) {
       toast.error(tRoot("tableroBoard.transitionNotAllowed"));
@@ -54,7 +54,7 @@ export function EstadoSelect({
     }
     setBusy(true);
     try {
-      await ejecutarAccion({ tablero, entidadId, accion: tr.clave, payload: {} }, centroId);
+      await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: tr.slug, payload: {} }, centroId);
       onDone();
     } catch (err) {
       toastError(err, tRoot);
@@ -63,7 +63,7 @@ export function EstadoSelect({
     }
   }
 
-  const def = estados.find((e) => e.clave === estado);
+  const def = estados.find((e) => e.slug === estado);
 
   // Authority: if the current state isn't in this board's editable set (e.g. the
   // AP board moved it to presente/atendida), CC can't change it → read-only.
@@ -91,7 +91,7 @@ export function EstadoSelect({
       </SelectTrigger>
       <SelectContent>
         {estados.map((e) => (
-          <SelectItem key={e.clave} value={e.clave}>
+          <SelectItem key={e.slug} value={e.slug}>
             <span className="inline-flex items-center gap-2">
               <span className="size-2 rounded-full" style={{ backgroundColor: e.color }} />
               {tRoot(e.labelKey)}

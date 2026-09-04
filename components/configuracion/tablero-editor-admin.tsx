@@ -52,7 +52,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
   const { can, ready } = useCan();
 
   const regRes = useResource<TableroRegistro[]>(() => getTableros());
-  const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.clave === clave);
+  const registro = (regRes.state.kind === "ok" ? regRes.state.data : []).find((r) => r.slug === clave);
   // El vertical de servicios (Frontdesk) gestiona sus PESTAÑAS (servicios) aquí mismo.
   const esServicios = clave === "servicios";
   // Estados list feeds the transitions form (desdeEstados / aEstado options).
@@ -128,16 +128,16 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             deps={[clave]}
             getRowKey={(r) => r.id}
             columns={[
-              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.clave}</span> },
+              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.slug}</span> },
               { key: "label", header: t("label"), cell: (r) => tRoot(r.labelKey) },
               { key: "color", header: t("estColor"), cell: (r) => <span className="inline-flex items-center gap-1.5"><span className="size-3 rounded-full" style={{ backgroundColor: r.color }} />{r.color}</span> },
-              { key: "flags", header: t("estFlags"), cell: (r) => [r.esInicial && "inicial", r.esTerminal && "terminal", r.visibleEnAtencion && "AP"].filter(Boolean).join(", ") },
+              { key: "flags", header: t("estFlags"), cell: (r) => [r.isInitial && "inicial", r.isTerminal && "terminal", r.visibleInCareBoard && "AP"].filter(Boolean).join(", ") },
             ]}
             initialDraft={{ color: "#6b7280", orden: 0, esInicial: false, esTerminal: false, visibleEnAtencion: false }}
-            toDraft={(r) => ({ id: r.id, clave: r.clave, labelKey: r.labelKey, color: r.color, orden: r.orden, esInicial: r.esInicial, esTerminal: r.esTerminal, visibleEnAtencion: r.visibleEnAtencion })}
+            toDraft={(r) => ({ id: r.id, clave: r.slug, labelKey: r.labelKey, color: r.color, orden: r.sortOrder, esInicial: r.isInitial, esTerminal: r.isTerminal, visibleEnAtencion: r.visibleInCareBoard })}
             canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim()}
-            create={(d) => crearEstado({ tablero: clave, clave: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), color: s(d, "color") || undefined, orden: num(d, "orden"), esInicial: !!d.esInicial, esTerminal: !!d.esTerminal, visibleEnAtencion: !!d.visibleEnAtencion })}
-            update={(id, d) => actualizarEstado(id, { labelKey: s(d, "labelKey").trim(), color: s(d, "color") || undefined, orden: num(d, "orden"), esInicial: !!d.esInicial, esTerminal: !!d.esTerminal, visibleEnAtencion: !!d.visibleEnAtencion })}
+            create={(d) => crearEstado({ boardSlug: clave, slug: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), color: s(d, "color") || undefined, sortOrder: num(d, "orden"), isInitial: !!d.esInicial, isTerminal: !!d.esTerminal, visibleInCareBoard: !!d.visibleEnAtencion })}
+            update={(id, d) => actualizarEstado(id, { labelKey: s(d, "labelKey").trim(), color: s(d, "color") || undefined, sortOrder: num(d, "orden"), isInitial: !!d.esInicial, isTerminal: !!d.esTerminal, visibleInCareBoard: !!d.visibleEnAtencion })}
             remove={(id) => borrarEstado(id)}
             fields={(d, patch) => (
               <>
@@ -165,15 +165,15 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             deps={[clave]}
             getRowKey={(r) => (r as unknown as { id: string }).id}
             columns={[
-              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.clave}</span> },
-              { key: "flujo", header: t("trFlujo"), cell: (r) => `${(r.desdeEstados || []).join("/") || "*"} → ${r.aEstado ?? "—"}` },
-              { key: "requiere", header: t("trRequiere"), cell: (r) => (r.requiere || []).join(", ") || "—" },
+              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.slug}</span> },
+              { key: "flujo", header: t("trFlujo"), cell: (r) => `${(r.fromStatuses || []).join("/") || "*"} → ${r.toStatus ?? "—"}` },
+              { key: "requiere", header: t("trRequiere"), cell: (r) => (r.formFields || []).join(", ") || "—" },
             ]}
             initialDraft={{ desdeEstados: [], requiere: "", confirmar: false, orden: 0 }}
-            toDraft={(r) => ({ id: (r as unknown as { id: string }).id, clave: r.clave, labelKey: r.labelKey, desdeEstados: r.desdeEstados || [], aEstado: r.aEstado ?? "", requiere: (r.requiere || []).join(", "), confirmar: r.confirmar, orden: r.orden })}
+            toDraft={(r) => ({ id: (r as unknown as { id: string }).id, clave: r.slug, labelKey: r.labelKey, desdeEstados: r.fromStatuses || [], aEstado: r.toStatus ?? "", requiere: (r.formFields || []).join(", "), confirmar: r.requiresConfirmation, orden: r.sortOrder })}
             canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim() && !!s(d, "aEstado")}
-            create={(d) => crearTransicion({ tablero: clave, clave: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), desdeEstados: (d.desdeEstados as string[]) || [], aEstado: s(d, "aEstado"), requiere: reqArr(d), confirmar: !!d.confirmar, orden: num(d, "orden") })}
-            update={(id, d) => actualizarTransicion(id, { labelKey: s(d, "labelKey").trim(), desdeEstados: (d.desdeEstados as string[]) || [], aEstado: s(d, "aEstado"), requiere: reqArr(d), confirmar: !!d.confirmar, orden: num(d, "orden") })}
+            create={(d) => crearTransicion({ boardSlug: clave, slug: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), fromStatuses: (d.desdeEstados as string[]) || [], toStatus: s(d, "aEstado"), formFields: reqArr(d), requiresConfirmation: !!d.confirmar, sortOrder: num(d, "orden") })}
+            update={(id, d) => actualizarTransicion(id, { labelKey: s(d, "labelKey").trim(), fromStatuses: (d.desdeEstados as string[]) || [], toStatus: s(d, "aEstado"), formFields: reqArr(d), requiresConfirmation: !!d.confirmar, sortOrder: num(d, "orden") })}
             remove={(id) => borrarTransicion(id)}
             fields={(d, patch) => (
               <>
@@ -182,9 +182,9 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                 <Field label={t("trDesde")} hint={t("trDesdeHint")}>
                   <div className="flex flex-wrap gap-2">
                     {estados.map((es) => {
-                      const sel = ((d.desdeEstados as string[]) || []).includes(es.clave);
+                      const sel = ((d.desdeEstados as string[]) || []).includes(es.slug);
                       return (
-                        <button key={es.clave} type="button" onClick={() => patch({ desdeEstados: toggle((d.desdeEstados as string[]) || [], es.clave) })}
+                        <button key={es.slug} type="button" onClick={() => patch({ desdeEstados: toggle((d.desdeEstados as string[]) || [], es.slug) })}
                           className={"rounded-md border px-2 py-0.5 text-xs " + (sel ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground")}>
                           {tRoot(es.labelKey)}
                         </button>
@@ -196,7 +196,7 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
                 <Field label={t("trA")}>
                   <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" value={s(d, "aEstado")} onChange={(e) => patch({ aEstado: e.target.value })}>
                     <option value="">—</option>
-                    {estados.map((es) => <option key={es.clave} value={es.clave}>{tRoot(es.labelKey)}</option>)}
+                    {estados.map((es) => <option key={es.slug} value={es.slug}>{tRoot(es.labelKey)}</option>)}
                   </select>
                 </Field>
                 <Field label={t("trRequiere")} hint={t("trRequiereHint")}><Input value={s(d, "requiere")} onChange={(e) => patch({ requiere: e.target.value })} placeholder="motivo, enfermeraId" /></Field>
@@ -214,15 +214,15 @@ export function TableroEditorAdmin({ clave }: { clave: string }) {
             deps={[clave]}
             getRowKey={(r) => (r as unknown as { id: string }).id}
             columns={[
-              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.clave}</span> },
+              { key: "clave", header: t("clave"), cell: (r) => <span className="font-mono text-xs">{r.slug}</span> },
               { key: "label", header: t("label"), cell: (r) => tRoot(r.labelKey) },
-              { key: "orden", header: "#", cell: (r) => r.orden },
+              { key: "orden", header: "#", cell: (r) => r.sortOrder },
             ]}
             initialDraft={{ orden: 0 }}
-            toDraft={(r) => ({ id: (r as unknown as { id: string }).id, clave: r.clave, labelKey: r.labelKey, orden: r.orden })}
+            toDraft={(r) => ({ id: (r as unknown as { id: string }).id, clave: r.slug, labelKey: r.labelKey, orden: r.sortOrder })}
             canSubmit={(d) => !!s(d, "clave").trim() && !!s(d, "labelKey").trim()}
-            create={(d) => crearSubTipo({ tablero: clave, clave: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), orden: num(d, "orden") })}
-            update={(id, d) => actualizarSubTipo(id, { labelKey: s(d, "labelKey").trim(), orden: num(d, "orden") })}
+            create={(d) => crearSubTipo({ boardSlug: clave, slug: s(d, "clave").trim(), labelKey: s(d, "labelKey").trim(), sortOrder: num(d, "orden") })}
+            update={(id, d) => actualizarSubTipo(id, { labelKey: s(d, "labelKey").trim(), sortOrder: num(d, "orden") })}
             remove={(id) => borrarSubTipo(id)}
             fields={(d, patch) => (
               <>
@@ -283,7 +283,7 @@ function GeneralTab({ registro, onSaved }: { registro?: TableroRegistro; onSaved
   const tRoot = useTranslations();
   const [labelKey, setLabelKey] = React.useState(registro?.labelKey ?? "");
   const [icon, setIcon] = React.useState(registro?.icon ?? "");
-  const [orden, setOrden] = React.useState(String(registro?.orden ?? ""));
+  const [orden, setOrden] = React.useState(String(registro?.sortOrder ?? ""));
   const [busy, setBusy] = React.useState(false);
 
   if (!registro) return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
@@ -292,7 +292,7 @@ function GeneralTab({ registro, onSaved }: { registro?: TableroRegistro; onSaved
     if (!registro) return;
     setBusy(true);
     try {
-      await actualizarTablero(registro.id, { labelKey: labelKey.trim(), icon: icon.trim() || undefined, orden: orden === "" ? undefined : Number(orden) });
+      await actualizarTablero(registro.id, { labelKey: labelKey.trim(), icon: icon.trim() || undefined, sortOrder: orden === "" ? undefined : Number(orden) });
       toast.success(tc("saved"));
       onSaved();
     } catch (err) {
@@ -328,7 +328,7 @@ function PublicarTab({ clave, labelKey, icon }: { clave: string; labelKey: strin
   async function publish() {
     setBusy(true);
     try {
-      await createMenuItem({ clave, labelKey, path, icon: icon || undefined });
+      await createMenuItem({ slug: clave, labelKey, path, icon: icon || undefined });
       toast.success(t("published"));
       reload();
     } catch (err) {

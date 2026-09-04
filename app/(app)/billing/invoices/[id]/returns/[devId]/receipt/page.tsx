@@ -37,11 +37,11 @@ export default function ReciboDevolucionPage() {
         if (!active) return;
         const nombres: Record<string, string> = {};
         (fact?.items ?? []).forEach((it) => {
-          if (it.id) nombres[String(it.id)] = it.descripcion ?? "—";
+          if (it.id) nombres[String(it.id)] = it.description ?? "—";
         });
         // La forma de reembolso llega como nombre → mapa nombre→clave para traducirla en el recibo.
         const clavePorNombre: Record<string, string> = {};
-        formas.forEach((f) => { if (f.nombre && f.clave) clavePorNombre[f.nombre] = f.clave; });
+        formas.forEach((f) => { if (f.name && f.slug) clavePorNombre[f.name] = f.slug; });
         setRecibo(buildReciboDevolucion(rec, nombres, clavePorNombre));
       })
       .catch((err) => toastError(err, tRoot))

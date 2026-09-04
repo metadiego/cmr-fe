@@ -27,7 +27,7 @@ import { CitaModal } from "@/components/agenda/cita-modal";
 // y crear cita médica. Cada sección con su permiso y su estado vacío honesto. Handoff
 // acciones-del-paciente-historiales.
 const money = (v: unknown) => `$${(Number(v) || 0).toFixed(2)}`;
-const nombreDe = (p: Paciente) => (p.nombreMostrar || [p.nombres, p.apellidos].filter(Boolean).join(" ")).trim();
+const nombreDe = (p: Paciente) => (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")).trim();
 // Rango por defecto para servicios (obligan desde/hasta): el año en curso. Fecha fija (no Date.now en SSR).
 const AÑO = "2026";
 
@@ -49,7 +49,7 @@ export function AccionesPacienteSheet({
         <SheetHeader>
           <SheetTitle>{nombreDe(paciente)}</SheetTitle>
           <SheetDescription>
-            {paciente.record ? `#${paciente.record}` : ""} {t("subtitle")}
+            {paciente.medicalRecordNumber ? `#${paciente.medicalRecordNumber}` : ""} {t("subtitle")}
           </SheetDescription>
         </SheetHeader>
 
@@ -110,21 +110,21 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
   const t = useTranslations("acciones");
   // Solo EMITIDAS (decisión del dueño): nada de borradores ni presupuestos.
   const res = useResource<Factura[]>(
-    () => listFacturas({ pacienteId: pid, estado: "emitida", limit: 100 }, centro).then((r) => r.items),
+    () => listFacturas({ patientId: pid, status: "emitida", limit: 100 }, centro).then((r) => r.items),
     [pid, centro],
   );
   if (res.state.kind === "loading") return <Cargando />;
   if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const facturas = res.state.data;
   if (facturas.length === 0) return <Vacio>{t("sinCompras")}</Vacio>;
-  const numDoc = (f: Factura) => (f as { numero?: string }).numero || (f as { numeroPresupuesto?: string }).numeroPresupuesto || (f as { numeroLegacy?: string }).numeroLegacy || "—";
+  const numDoc = (f: Factura) => (f as { number?: string }).number || (f as { quoteNumber?: string }).quoteNumber || (f as { legacyNumber?: string }).legacyNumber || "—";
   return (
     <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {facturas.map((f) => (
         <li key={f.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="min-w-0">
             <span className="font-mono font-medium tabular-nums">{numDoc(f)}</span>
-            <span className="ml-2 text-xs text-muted-foreground">{(f as { fecha?: string }).fecha ?? ""}</span>
+            <span className="ml-2 text-xs text-muted-foreground">{(f as { date?: string }).date ?? ""}</span>
           </span>
           <span className="flex shrink-0 items-center gap-3">
             <span className="tabular-nums">{money((f as { total?: number }).total)}</span>
@@ -146,7 +146,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
     [pid, centro],
   );
   const servRes = useResource<Servicio[]>(() => (centro ? getServicios(centro) : Promise.resolve([])), [centro]);
-  const servName = new Map((servRes.state.kind === "ok" ? servRes.state.data : []).map((s) => [s.id, s.nombre]));
+  const servName = new Map((servRes.state.kind === "ok" ? servRes.state.data : []).map((s) => [s.id, s.name]));
   if (res.state.kind === "loading") return <Cargando />;
   if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const ses = res.state.data;
@@ -155,10 +155,10 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
     <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {ses.map((s) => (
         <li key={s.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-          <span className="min-w-0 truncate">{servName.get(s.servicioId) ?? s.servicioId}</span>
+          <span className="min-w-0 truncate">{servName.get(s.serviceId) ?? s.serviceId}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs">
-            <span className="text-muted-foreground tabular-nums">{s.fecha}</span>
-            <Badge variant="outline">{tRoot.has(`estado.${s.estado}`) ? tRoot(`estado.${s.estado}`) : s.estado}</Badge>
+            <span className="text-muted-foreground tabular-nums">{s.date}</span>
+            <Badge variant="outline">{tRoot.has(`estado.${s.status}`) ? tRoot(`estado.${s.status}`) : s.status}</Badge>
           </span>
         </li>
       ))}
@@ -168,7 +168,7 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
 
 function Citas({ pid, centro }: { pid: string; centro?: string }) {
   const t = useTranslations("acciones");
-  const res = useResource<Cita[]>(() => listCitas({ pacienteId: pid, limit: 100 }, centro).then((r) => r.items), [pid, centro]);
+  const res = useResource<Cita[]>(() => listCitas({ patientId: pid, limit: 100 }, centro).then((r) => r.items), [pid, centro]);
   if (res.state.kind === "loading") return <Cargando />;
   if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const citas = res.state.data;
@@ -177,8 +177,8 @@ function Citas({ pid, centro }: { pid: string; centro?: string }) {
     <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {citas.map((c) => (
         <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-          <span className="tabular-nums">{c.fecha}{c.hora ? ` · ${c.hora}` : ""}</span>
-          <Badge variant="outline">{c.estado}</Badge>
+          <span className="tabular-nums">{c.date}{c.time ? ` · ${c.time}` : ""}</span>
+          <Badge variant="outline">{c.status}</Badge>
         </li>
       ))}
     </ul>
