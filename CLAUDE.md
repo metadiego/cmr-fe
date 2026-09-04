@@ -1,118 +1,125 @@
 # CLAUDE.md
 
-Guía para Claude Code (claude.ai/code) al trabajar en este repositorio.
+Guidance for Claude Code (claude.ai/code) when working in this repository.
 
-Complementa a [`AGENTS.md`](./AGENTS.md) (gstack y QA con navegador real), que sigue vigente.
-Las reglas de Next 16 que abren ese fichero mandan sobre cualquier recuerdo de versiones
-anteriores: **lee `node_modules/next/dist/docs/` antes de escribir código de framework.**
+Complements [`AGENTS.md`](./AGENTS.md) (gstack and browser-based QA), which still applies.
+The Next 16 rules that open that file override any memory of earlier versions: **read
+`node_modules/next/dist/docs/` before writing framework code.**
 
-# CMR FE — cliente web
+# CMR FE — web client
 
-Next.js 16 (App Router) + React 19 + Tailwind v4 + shadcn/ui. Es un **cliente fino sobre
-`cmr-be`**: casi nada de lógica de negocio vive aquí. La autenticación es Supabase y el dato
-sale del API. El contrato entre los dos repos está en `../CLAUDE.md` (raíz del monorepo).
+Next.js 16 (App Router) + React 19 + Tailwind v4 + shadcn/ui. This is a **thin client over
+`cmr-be`**: almost no business logic lives here. Authentication is Supabase and the data comes
+from the API. The contract between the two repos is in `../CLAUDE.md` (monorepo root).
 
-## Comandos
+## Commands
 
 ```bash
-npm run dev          # next dev en el puerto 8080
+npm run dev          # next dev on port 8080
 npm run build        # next build (Turbopack)
-npm run lint         # eslint — BLOQUEA en CI
+npm run lint         # eslint — BLOCKS in CI
 npm run typecheck    # tsc --noEmit
-npm test             # node --test (ver el aviso de abajo)
+npm test             # node --test (see the warning below)
 npm run format       # prettier
-npm run gen:api      # regenera lib/api/schema.d.ts desde el OpenAPI del BE
+npm run gen:api      # regenerates lib/api/schema.d.ts from the backend's OpenAPI
 ```
 
-**El despliegue lo hace Vercel**, no GitHub Actions. `.github/workflows/ci.yml` es solo la
-puerta: typecheck → lint → tests → build, en cada PR y cada push a `main`.
+**Vercel owns deployment**, not GitHub Actions. `.github/workflows/ci.yml` is only the gate:
+typecheck → lint → tests → build, on every PR and every push to `main`.
 
-## Dos trampas del tooling que cuestan una hora si no se saben
+## Two tooling traps that cost an hour if you do not know them
 
-1. **Las pruebas NO son vitest ni jest.** Son `node --test --experimental-strip-types`. Correr
-   `npx vitest run` devuelve «No test suite found in file» en los 15 ficheros y parece que el
-   repo está roto: no lo está, es el runner equivocado. Se corre con `npm test`. Por eso la CI
-   pide **Node 22** — `--experimental-strip-types` no existe antes de 22.6, y con Node 20 las
-   pruebas no fallarían: no llegarían a correr, y el run saldría verde.
-2. **Solo se ejecuta lo que está en `lib/`.** El glob es `"lib/**/*.test.ts"`. Una prueba puesta
-   en `components/` o en `app/` **no la corre nadie** y nadie te avisa. Si algún día hay pruebas
-   de componente, hay que ampliar el glob en el mismo commit que las añade.
+1. **The tests are neither vitest nor jest.** They are `node --test --experimental-strip-types`.
+   Running `npx vitest run` returns "No test suite found in file" for all 15 files and looks like
+   a broken repo: it is not, it is the wrong runner. Use `npm test`. This is also why CI pins
+   **Node 22** — `--experimental-strip-types` does not exist before 22.6, and on Node 20 the tests
+   would not fail: they would never run, and the job would go green.
+2. **Only what lives in `lib/` is executed.** The glob is `"lib/**/*.test.ts"`. A test placed in
+   `components/` or `app/` **is run by nobody** and nothing warns you. If component tests ever
+   arrive, the glob has to be widened in the same commit that adds them.
 
-## Guardarraíles — lo que NO puede volver a pasar
+## Guardrails — what must never happen again
 
-El assessment de agosto (`../cmr-be/docs/plans/assessment-hallazgos-2026-08.md`) dejó dos
-hallazgos que son de este repo, y ninguno se arregló por estar escrito. Ahora hay algo que
-falla detrás de cada uno.
+The August assessment (`../cmr-be/docs/plans/assessment-hallazgos-2026-08.md`) left two findings
+that belong to this repo, and neither was fixed by being written down. Now something fails behind
+each one.
 
-### 1. Nada se apaga para que pase la CI
-Los cuatro pasos (`typecheck`, `lint`, `test`, `build`) bloquean. **Ninguno se comenta, se pone
-en `continue-on-error` ni se salta para sacar un cambio.** Si uno se pone rojo, el rojo es el
-trabajo. Durante meses este repo llegó a producción sin que nada lo mirase, mientras el backend
-tenía puerta desde el 2-sep; esa asimetría es lo que se acaba de cerrar.
+### 1. Nothing gets switched off to make CI pass
+All four steps (`typecheck`, `lint`, `test`, `build`) block. **None of them gets commented out,
+set to `continue-on-error`, or skipped to land a change.** If one goes red, the red is the work.
+For months this repo reached production unwatched while the backend had a gate since 2-Sep; that
+asymmetry is what just closed.
 
-### 2. Los techos de fichero solo bajan (`npm run lint`)
-`frontdesk-board.tsx` (2.582 líneas) y la pantalla de una factura (2.274) llevan meses
-señaladas por escrito y han seguido creciendo en cada informe. Son justo los dos sitios por
-donde pasa el dinero, y un fichero de dos mil líneas no se revisa: se hojea.
+### 2. File ceilings only go down (`npm run lint`)
+`frontdesk-board.tsx` (2,582 lines) and the invoice screen (2,274) have been named in writing for
+months and have kept growing in every report. They are exactly the two places money flows through,
+and a two-thousand-line file does not get reviewed: it gets skimmed.
 
-- **Un fichero nuevo nace por debajo de 600 líneas.** Sin excepciones.
-- Los que ya eran grandes llevan su tamaño de hoy como techo en `DEBT` (`eslint.config.mjs`).
-  Esa lista **solo puede menguar**: al partir un componente, se baja el número o se borra la
-  línea.
-- **Añadir una entrada a `DEBT`, o subir un techo, no es una decisión de paso**: es admitir
-  deuda y va hablada con el dueño y explicada en el commit. Ante la duda, se parte el componente.
-- Exentos a propósito: `components/ui/**` (primitivas de shadcn, las regenera su CLI) y
-  `lib/api/schema.d.ts` (generado desde el OpenAPI del BE).
+- **A new file is born under 600 lines.** No exceptions.
+- The ones that were already big carry their current size as a ceiling in `DEBT`
+  (`eslint.config.mjs`). That list **may only shrink**: when a component is split, lower the number
+  or delete the line.
+- **Adding an entry to `DEBT`, or raising a ceiling, is not a passing decision**: it is admitting
+  debt, and it gets discussed with the owner and explained in the commit. When in doubt, split the
+  component.
+- Deliberately exempt: `components/ui/**` (shadcn primitives, regenerated by its CLI) and
+  `lib/api/schema.d.ts` (generated from the backend's OpenAPI).
 
-### 3. El código nuevo se escribe en INGLÉS
-Se pidió como refactor **5d** hace meses y **nunca llegó a escribirse en ningún CLAUDE.md**, así
-que se incumplía de buena fe copiando el fichero de al lado. Aquí queda.
+### 3. Everything is written in ENGLISH
+Requested as refactor **5d** months ago and **never written into any CLAUDE.md**, so it was broken
+in good faith by copying the file next door. Here it is.
 
-**En inglés, sin excepción, todo lo que sea código:** nombres de fichero y de script npm,
-identificadores, rutas, props, claves de i18n y nombres de componente.
+**English, with no exceptions, for everything that gets committed:** filenames, npm scripts,
+identifiers, routes, props, i18n keys, component names — and equally **comments, console messages,
+CI step names, commit messages, PR descriptions and the documents under `docs/`**. There is no
+"prose stays Spanish" carve-out. If it is in the repository, it is in English.
 
-**En español se queda la PROSA:** comentarios, mensajes de commit y los documentos de `docs/`.
+The only exception is a name that belongs to an external or legacy system, which keeps its original
+spelling because there the name is a fact, not a choice.
 
-**Ojo con lo que llega del API:** las respuestas de `/api/v1` traen claves en español
-(`nombre`, `cantidad`). Eso es un hecho del contrato, no una elección de este repo — no se
-renombra al vuelo (ver la regla 6).
+**A Spanish file does not authorize the next one.** Much of this repo predates the rule and is
+still being translated; that is history, not licence.
 
-### 4. Una prueba no se borra en silencio
-Al mover, renombrar o partir código, **el número de pruebas no baja**. Si una prueba sobra, se
-dice en el commit y se explica por qué. La CI ve pruebas que fallan, no pruebas que desaparecen
-— y con el glob limitado a `lib/`, una prueba que se mueve fuera de `lib/` desaparece sin
-romper nada.
+**Careful with what arrives from the API:** `/api/v1` responses carry Spanish keys (`nombre`,
+`cantidad`). That is a fact of the contract, not a choice made here — do not rename them on the fly
+(see rule 6).
 
-### 5. El dinero se prueba, aunque cueste
-La cobertura de hoy son **109 pruebas sobre helpers puros de `lib/`** y **cero pruebas de
-componente o de página**, sobre 66 páginas y 165 componentes. Es la I-11 del assessment y sigue
-abierta. Lo que toque facturación, caja o frontdesk **lleva su prueba en `lib/`**: si el cálculo
-no se puede probar sin montar un componente, es que la lógica está en el sitio equivocado —
-sácala a `lib/` y pruébala ahí. Orden sugerido en `docs/specs/tests-por-donde-empezar.md`.
+### 4. A test is never deleted in silence
+When moving, renaming or splitting code, **the test count does not go down**. If a test is genuinely
+redundant, say so in the commit and explain why. CI sees tests that fail, not tests that vanish —
+and with the glob limited to `lib/`, a test moved out of `lib/` disappears without breaking
+anything.
 
-### 6. Las claves del API vienen en español; no las "arregles" a mano
-El backend ya sirve **`/api/v2` en inglés**, pero este cliente consume **`/api/v1`** en
-`lib/api/client.ts` y las respuestas llegan con claves españolas (`nombre`, `cantidad`,
-`fechaNacimiento`). **No se renombra un campo suelto al vuelo**: la migración a v2 es un trabajo
-propio, pantalla a pantalla, con su handoff en `docs/specs/api-v2-en-ingles.md`. Un rename
-parcial deja la pantalla mitad en un idioma y mitad en otro, que es peor que no empezar.
+### 5. Money gets tested, however inconvenient
+Today's coverage is **109 tests over pure helpers in `lib/`** and **zero component or page tests**,
+across 66 pages and 165 components. That is I-11 from the assessment and it is still open. Anything
+touching billing, cash or frontdesk **ships with its test in `lib/`**: if the calculation cannot be
+tested without mounting a component, the logic is in the wrong place — move it to `lib/` and test it
+there. Suggested order in `docs/specs/tests-por-donde-empezar.md`.
 
-### 7. Este fichero y el repo no pueden divergir
-Si cambias un script, la CI, el runner de pruebas o un techo, **actualiza este fichero en el
-mismo commit**. En el backend, `CLAUDE.md` llegó a prohibir un comando que ya era seguro y a
-describir una CI que no existía: una instrucción obsoleta es peor que ninguna, porque se obedece
-a ciegas.
+### 6. API keys arrive in Spanish; do not "fix" them by hand
+The backend already serves **`/api/v2` in English**, but this client consumes **`/api/v1`** in
+`lib/api/client.ts` and responses arrive with Spanish keys. **Do not rename a single field on the
+fly**: migrating to v2 is its own piece of work, screen by screen, with its handoff in
+`docs/specs/api-v2-en-ingles.md`. A partial rename leaves a screen half in one language and half in
+the other, which is worse than not starting.
 
-## Cosas que conviene saber del código
+### 7. This file and the repo cannot diverge
+If you change a script, the CI, the test runner or a ceiling, **update this file in the same
+commit**. In the backend, `CLAUDE.md` ended up forbidding a command that was already safe and
+describing a CI that had not existed for months: an obsolete instruction is worse than none, because
+it gets obeyed blindly.
 
-- **`lib/env.ts` revienta al importarse** si falta `NEXT_PUBLIC_SUPABASE_URL` o
-  `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Por eso el build de CI pasa credenciales falsas: compilar no
-  llama ni a Supabase ni al API.
-- **`lib/api/client.ts`** es la única puerta al backend: `apiFetch` antepone `/api/v1`,
-  desenvuelve `.data` del sobre `{ data, meta }` y lanza `ApiError`. Si el BE cambia el sobre,
-  se cambia aquí.
-- **El cliente de Supabase del navegador es un singleton a propósito** (`lib/supabase/client.ts`):
-  recrearlo en cada llamada dejaba sin correr el refresco del token y la sesión moría a los ~15
-  minutos. No lo conviertas en una factory.
-- **Tenancy**: el centro activo va como `X-Tenant-ID`, sacado de
+## Things worth knowing about the code
+
+- **`lib/env.ts` throws on import** if `NEXT_PUBLIC_SUPABASE_URL` or
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` is missing. That is why the CI build passes fake credentials:
+  compiling never calls Supabase or the API.
+- **`lib/api/client.ts`** is the only door to the backend: `apiFetch` prefixes `/api/v1`, unwraps
+  `.data` from the `{ data, meta }` envelope and throws `ApiError`. If the backend changes the
+  envelope, it changes here.
+- **The browser Supabase client is a singleton on purpose** (`lib/supabase/client.ts`): recreating
+  it on every call left `autoRefreshToken` unrun and the session died after ~15 minutes. Do not turn
+  it back into a factory.
+- **Tenancy**: the active center travels as `X-Tenant-ID`, taken from
   `session.user.app_metadata.clinic_id`.
