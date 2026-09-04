@@ -1,0 +1,63 @@
+name: CI
+
+# Vercel owns deployment, not this workflow: nothing is deployed here. This is only the
+# gate — typecheck, lint, tests and build on every PR and every push to main.
+# Until now the FE was the only one of the two repos reaching production unwatched:
+# 66 pages and 165 components with the suite running on one laptop and nowhere else.
+# See cmr-be/.github/workflows/deploy.yml for the backend's equivalent gate.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# A new push on the same branch cancels the previous run: there is no point paying to
+# validate a commit that is already superseded.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Typecheck, Lint, Test, Build
+    runs-on: ubuntu-latest
+
+    env:
+      # FAKE values, on purpose. `lib/env.ts` throws on import when they are missing, so the
+      # build demands them; but the build never calls Supabase or the API, it only compiles.
+      # Nothing here is a secret and none of it reaches production — Vercel supplies the real ones.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-not-a-real-anon-key
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Node 22 is not optional: `npm test` runs with `--experimental-strip-types`, which does
+      # not exist before 22.6. On Node 20 the tests would not fail — they would never run.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Blocking from day one, unlike the backend. There lint was left advisory because of a
+      # backlog of hundreds of files, and it still does not block; here the repo is clean
+      # (0 errors) and the gate goes in while it costs nothing. The 4 current warnings do NOT
+      # fail the run: `eslint` only fails on errors. Once they reach zero, add `--max-warnings 0`.
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
