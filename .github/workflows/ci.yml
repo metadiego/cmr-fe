@@ -1,10 +1,10 @@
 name: CI
 
-# El despliegue lo hace Vercel, no este workflow: aquí NO se despliega nada. Esto es
-# solo la puerta — typecheck, lint, tests y build sobre cada PR y cada push a main.
-# Hasta hoy el FE era el único de los dos repos que llegaba a producción sin que nada
-# lo mirara: 66 páginas y 165 componentes con la suite corriendo solo en un portátil.
-# See cmr-be/.github/workflows/deploy.yml para la puerta equivalente del backend.
+# Vercel owns deployment, not this workflow: nothing is deployed here. This is only the
+# gate — typecheck, lint, tests and build on every PR and every push to main.
+# Until now the FE was the only one of the two repos reaching production unwatched:
+# 66 pages and 165 components with the suite running on one laptop and nowhere else.
+# See cmr-be/.github/workflows/deploy.yml for the backend's equivalent gate.
 
 on:
   push:
@@ -12,8 +12,8 @@ on:
   pull_request:
     branches: [main]
 
-# Un push nuevo sobre la misma rama cancela el run anterior: no tiene sentido pagar
-# por validar un commit que ya quedó atrás.
+# A new push on the same branch cancels the previous run: there is no point paying to
+# validate a commit that is already superseded.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -24,9 +24,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Valores FALSOS, a propósito. `lib/env.ts` revienta al importarse si faltan, así
-      # que el build los exige; pero el build no llama a Supabase ni al API, solo compila.
-      # Nada aquí es un secreto y nada de esto llega a producción — eso lo pone Vercel.
+      # FAKE values, on purpose. `lib/env.ts` throws on import when they are missing, so the
+      # build demands them; but the build never calls Supabase or the API, it only compiles.
+      # Nothing here is a secret and none of it reaches production — Vercel supplies the real ones.
       NEXT_PUBLIC_SUPABASE_URL: https://ci.invalid.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-not-a-real-anon-key
       NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
@@ -35,8 +35,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Node 22 no es opcional: `npm test` corre con `--experimental-strip-types`, que
-      # no existe antes de 22.6. Con Node 20 los tests no fallan — no llegan a correr.
+      # Node 22 is not optional: `npm test` runs with `--experimental-strip-types`, which does
+      # not exist before 22.6. On Node 20 the tests would not fail — they would never run.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,11 +49,10 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      # Bloquea desde el primer día, al contrario que en el backend. Allí el lint quedó
-      # en advisory por una deuda de cientos de ficheros y sigue sin bloquear; aquí el
-      # repo está limpio (0 errores) y la puerta se pone mientras es gratis ponerla.
-      # Los 4 warnings que hay hoy NO tumban el run: `eslint` solo falla con errores.
-      # Cuando lleguen a cero, añadir `--max-warnings 0` al script y ya no vuelven.
+      # Blocking from day one, unlike the backend. There lint was left advisory because of a
+      # backlog of hundreds of files, and it still does not block; here the repo is clean
+      # (0 errors) and the gate goes in while it costs nothing. The 4 current warnings do NOT
+      # fail the run: `eslint` only fails on errors. Once they reach zero, add `--max-warnings 0`.
       - name: Lint
         run: npm run lint
 
