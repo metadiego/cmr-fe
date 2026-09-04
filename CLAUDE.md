@@ -69,13 +69,21 @@ and a two-thousand-line file does not get reviewed: it gets skimmed.
 Requested as refactor **5d** months ago and **never written into any CLAUDE.md**, so it was broken
 in good faith by copying the file next door. Here it is.
 
-**English, with no exceptions, for everything that gets committed:** filenames, npm scripts,
-identifiers, routes, props, i18n keys, component names — and equally **comments, console messages,
-CI step names, commit messages, PR descriptions and the documents under `docs/`**. There is no
-"prose stays Spanish" carve-out. If it is in the repository, it is in English.
+**English, for everything that gets committed:** filenames, npm scripts, identifiers, routes,
+props, i18n keys, component names — and equally **comments, console messages, CI step names and
+commit messages**.
 
-The only exception is a name that belongs to an external or legacy system, which keeps its original
-spelling because there the name is a fact, not a choice.
+**Two things, and only two, may be written in Spanish:**
+
+1. **The documents under `docs/`** — specs, plans and handoffs. That is where the reasoning lives,
+   and it is written in the language this product is thought in.
+2. **Pull request descriptions.**
+
+Everything else in the repository is English, comments and console messages included. A long
+explanatory comment is not a "document": it is code, and it goes in English.
+
+The remaining exception is a name that belongs to an external or legacy system, which keeps its
+original spelling because there the name is a fact, not a choice.
 
 **A Spanish file does not authorize the next one.** Much of this repo predates the rule and is
 still being translated; that is history, not licence.
