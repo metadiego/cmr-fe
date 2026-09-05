@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
@@ -35,6 +35,7 @@ const ALL = "__all__";
 // service. Sessions: GET /frontdesk/sesiones?desde&hasta&servicioId.
 export function ServiciosCalendar() {
   const t = useTranslations("agenda");
+  const format = useFormatter();
   const now = new Date();
   const [year, setYear] = React.useState(now.getFullYear());
   const [month0, setMonth0] = React.useState(now.getMonth());
@@ -102,10 +103,12 @@ export function ServiciosCalendar() {
     setMonth0(d.getMonth());
   }
 
-  const monthLabel = new Date(year, month0, 1).toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
+  // Follows the APP language, not the browser's: `toLocaleDateString(undefined, ...)`
+  // rendered "septiembre 2026" in an English session on a Spanish-configured machine.
+  // Date.UTC plus the `monthYear` format (which pins UTC) keeps the month from sliding:
+  // the previous `new Date(year, month0, 1)` was LOCAL midnight, which on a browser east
+  // of the meridian lands in the PREVIOUS month once rendered in clinic time.
+  const monthLabel = format.dateTime(new Date(Date.UTC(year, month0, 1, 12)), "monthYear");
   const weekdays = [0, 1, 2, 3, 4, 5, 6].map((i) => t(`dow.${i}`));
 
   const patientResults = useResource(

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
@@ -24,6 +24,7 @@ import {
   type Paciente,
 } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -108,6 +109,7 @@ function PacienteDetail({
   onDeleted: () => void;
 }) {
   const t = useTranslations("patients");
+  const format = useFormatter();
   const age = ageFrom(p.dateOfBirth);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -254,7 +256,7 @@ function PacienteDetail({
           <InfoRow
             icon={Calendar03Icon}
             label={t("form.fechaNacimiento")}
-            value={formatDate(p.dateOfBirth)}
+            value={formatDate(format, p.dateOfBirth)}
           />
           <InfoRow icon={UserIcon} label={t("form.nacionalidad")} value={p.nationality} />
         </Card>
@@ -323,15 +325,14 @@ function sexoLabel(
   return null;
 }
 
-function formatDate(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+// Date of birth is a calendar DAY, not an instant: parsed at UTC noon and rendered with
+// the UTC-pinned `dayLong` format so it follows the app language and never slips a day.
+function formatDate(
+  format: ReturnType<typeof useFormatter>,
+  value: string | null | undefined,
+): string | null {
+  const d = parseDayUTC(value);
+  return d ? format.dateTime(d, "dayLong") : null;
 }
 
 function DetailSkeleton() {

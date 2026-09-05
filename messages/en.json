@@ -558,7 +558,7 @@
     "remove": "Remove",
     "close": "Close",
     "add": "Add",
-    "forbidden": "No tienes acceso a esta pantalla."
+    "forbidden": "You do not have access to this screen."
   },
   "pending": {
     "title": "Access pending",
@@ -764,8 +764,8 @@
     "estadisticas_diarias": "Daily statistics",
     "inventario_existencias": "Stock on hand",
     "ventasPorGrupo": "Sales by group",
-    "cuadreGeneral": "Cuadre general",
-    "dispLegado": "Disponibilidad heredada",
+    "cuadreGeneral": "General count",
+    "dispLegado": "Legacy availability",
     "ventasPorUsuario": "Sales by user",
     "preparacionLegado": "Legacy preparation",
     "ventas_por_grupo": "Sales by group",
@@ -2472,6 +2472,7 @@
       "usbTest": "Test direct USB",
       "usbDone": "Sent directly over USB",
       "usbError": "Could not print over USB",
+      "usbNoEndpoint": "No print endpoint (bulk OUT) found on the device.",
       "usbUnsupported": "This browser does not support direct USB printing (use Chrome or Edge)."
     },
     "noMatches": "Nothing matches that text",

@@ -2472,6 +2472,7 @@
       "usbTest": "Probar USB directo",
       "usbDone": "Enviado directo por USB",
       "usbError": "No se pudo imprimir por USB",
+      "usbNoEndpoint": "No se encontró un endpoint de impresión (bulk OUT) en el dispositivo.",
       "usbUnsupported": "Este navegador no soporta impresión USB directa (usa Chrome o Edge)."
     },
     "noMatches": "No hay nada con ese texto",

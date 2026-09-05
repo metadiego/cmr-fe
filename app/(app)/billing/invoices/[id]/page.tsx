@@ -50,7 +50,7 @@ import { buildRecibo } from "@/lib/factura/build-recibo";
 import { reciboToEscPos, type EscPosLabels } from "@/lib/print/escpos";
 import { getPrintSettings, setPrintSettings, type PrintSettings } from "@/lib/print/print-settings";
 import { qzListPrinters, qzPrintRaw } from "@/lib/print/qz";
-import { printEscPosWebUsb, webUsbSupported } from "@/lib/print/webusb";
+import { printEscPosWebUsb, usbErrorKey, webUsbSupported } from "@/lib/print/webusb";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -304,7 +304,7 @@ export default function FacturacionPage() {
       await printEscPosWebUsb(bytes);
       toast.success(t("print.usbDone"));
     } catch (e) {
-      toast.error(e instanceof Error && e.message ? e.message : t("print.usbError"));
+      toast.error(t(usbErrorKey(e)));
     }
   }
 

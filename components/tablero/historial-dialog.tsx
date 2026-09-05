@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { getHistorial, type CitaEvento } from "@/lib/api/citas";
 import { humanizeKey } from "@/lib/i18n/humanize";
@@ -28,6 +28,7 @@ export function HistorialDialog({
   onClose: () => void;
 }) {
   const t = useTranslations("tableroBoard");
+  const format = useFormatter();
   const tc = useTranslations("common");
   const tRoot = useTranslations();
 
@@ -36,7 +37,7 @@ export function HistorialDialog({
 
   const fmt = (iso: string) => {
     const d = new Date(iso);
-    return isNaN(d.getTime()) ? iso : d.toLocaleString();
+    return isNaN(d.getTime()) ? iso : format.dateTime(d, "dateAndTime");
   };
   const val = (v: unknown) =>
     v == null || v === "" ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v);

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
 
@@ -11,6 +11,7 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getTiposCita, type TipoCita, type EstadoCitaCatalogo } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getDefinicion, type TableroDefinicion, type Transicion } from "@/lib/api/tablero";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
 import { useMe } from "@/hooks/use-me";
@@ -38,6 +39,7 @@ type Vista = "clasica" | "nueva";
 
 export function DiaView({ fecha }: { fecha: string }) {
   const t = useTranslations("agenda");
+  const format = useFormatter();
   const tc = useTranslations("common");
   const [centro, setCentro] = React.useState<string>(ALL);
   // Vista clásica (la de siempre, DEFAULT e intacta) vs nueva (beta, reordenamiento visual). El equipo
@@ -105,12 +107,9 @@ export function DiaView({ fecha }: { fecha: string }) {
     onInvalidate: refresh,
   });
 
-  const fechaLabel = new Date(fecha + "T00:00:00").toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  // App locale, not the browser's, and UTC-anchored so the weekday cannot slide a day.
+  const dia = parseDayUTC(fecha);
+  const fechaLabel = dia ? format.dateTime(dia, "dayWeekdayLong") : fecha;
 
   const data = state.kind === "ok" ? state.data : null;
   const centrosData = data?.centers ?? [];

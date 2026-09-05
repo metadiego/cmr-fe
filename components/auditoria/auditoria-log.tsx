@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { RefreshIcon, Copy01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
@@ -87,6 +87,7 @@ function isoDaysAgo(days: number): string {
 
 export function AuditoriaLog() {
   const t = useTranslations("auditoria");
+  const format = useFormatter();
   const tc = useTranslations("common");
 
   // Filtros (los que el endpoint soporta de verdad). page se resetea al cambiar cualquier filtro.
@@ -205,11 +206,7 @@ export function AuditoriaLog() {
     {
       key: "fecha",
       header: t("col.fecha"),
-      cell: (r) => (
-        <span className="whitespace-nowrap text-xs text-muted-foreground">
-          {new Date(r.createdAt).toLocaleString()}
-        </span>
-      ),
+      cell: (r) => <span className="whitespace-nowrap text-xs text-muted-foreground">{format.dateTime(new Date(r.createdAt), "dateAndTime")}</span>,
     },
     {
       key: "usuario",
@@ -427,7 +424,8 @@ export function AuditoriaLog() {
 // Tarjetas de resumen (conteos) + botón de purga (admin). Diagnóstico sin arrastrar la tabla.
 function ResumenCards({ resumen, admin }: { resumen: AuditResumen; admin: boolean }) {
   const t = useTranslations("auditoria");
-  const nf = (n: number) => n.toLocaleString();
+  const format = useFormatter();
+  const nf = (n: number) => format.number(n, "integer");
   const ok = resumen.porResultado.find((r) => r.resultado === "ok")?.total ?? 0;
   const err = resumen.porResultado.find((r) => r.resultado === "error")?.total ?? 0;
   const topDom = [...resumen.porDominio].sort((a, b) => b.total - a.total)[0];
@@ -555,12 +553,13 @@ function DetalleSheet({
   onCopy: (txt: string) => void;
 }) {
   const t = useTranslations("auditoria");
+  const format = useFormatter();
   return (
     <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>{t("detalleTitulo")}</SheetTitle>
-          <SheetDescription>{row ? new Date(row.createdAt).toLocaleString() : ""}</SheetDescription>
+          <SheetDescription>{row ? format.dateTime(new Date(row.createdAt), "dateAndTime") : ""}</SheetDescription>
         </SheetHeader>
         {row && (
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5 text-sm">

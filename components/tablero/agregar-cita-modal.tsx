@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 
 import type { Paciente } from "@/lib/api/pacientes";
 import { createCita, getTiposCita, type TipoCita } from "@/lib/api/citas";
 import { getOpciones, type Opcion } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import {
   Dialog,
@@ -32,11 +33,9 @@ function todayISO(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
-function fmtHoy(iso: string, locale: string): string {
-  const d = new Date(iso + "T00:00:00");
-  return Number.isNaN(d.getTime())
-    ? iso
-    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", { weekday: "short", day: "numeric", month: "short", timeZone: "America/Puerto_Rico" }).format(d);
+function fmtHoy(iso: string, format: ReturnType<typeof useFormatter>): string {
+  const d = parseDayUTC(iso);
+  return d ? format.dateTime(d, "dayWeekdayShort") : iso;
 }
 
 // Walk-in: agrega un paciente al tablero de HOY como cita CONFIRMADA (entra al
@@ -55,7 +54,7 @@ export function AgregarCitaModal({
 }) {
   const t = useTranslations("agregarCita");
   const tRoot = useTranslations();
-  const locale = useLocale();
+  const format = useFormatter();
   const hoy = todayISO();
 
   const [tipos, setTipos] = React.useState<TipoCita[]>([]);
@@ -124,7 +123,7 @@ export function AgregarCitaModal({
           <div className="flex items-center justify-between gap-3 pr-8">
             <DialogTitle className="text-xl leading-tight tracking-tight">{t("title")}</DialogTitle>
             <span className="shrink-0 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary">
-              {t("today")} · {fmtHoy(hoy, locale)}
+              {t("today")} · {fmtHoy(hoy, format)}
             </span>
           </div>
           <DialogDescription className="mt-0.5 text-xs">{t("subline")}</DialogDescription>

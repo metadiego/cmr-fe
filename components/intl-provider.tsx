@@ -2,6 +2,7 @@
 
 import { NextIntlClientProvider, IntlErrorCode, type AbstractIntlMessages } from "next-intl";
 
+import { BUSINESS_TIME_ZONE, formats } from "@/i18n/formats";
 import { humanizeKey } from "@/lib/i18n/humanize";
 
 // Client wrapper for NextIntlClientProvider. Inside a client boundary the
@@ -23,7 +24,11 @@ export function IntlProvider({
     <NextIntlClientProvider
       locale={locale}
       messages={messages}
-      timeZone="America/Puerto_Rico"
+      timeZone={BUSINESS_TIME_ZONE}
+      // Same object the server config uses (i18n/formats.ts). Without it, named
+      // formats like "monthYear" would resolve on the server and be MISSING on the
+      // client — the provider can't inherit them across the RSC boundary.
+      formats={formats}
       onError={(error) => {
         if (error.code !== IntlErrorCode.MISSING_MESSAGE) console.error(error);
       }}

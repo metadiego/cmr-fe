@@ -10,6 +10,7 @@ import { getRequestConfig } from "next-intl/server";
 import { IntlErrorCode } from "next-intl";
 
 import { defaultLocale, isLocale, LOCALE_COOKIE, type Locale } from "./config";
+import { BUSINESS_TIME_ZONE, formats } from "./formats";
 import { humanizeKey } from "@/lib/i18n/humanize";
 
 export default getRequestConfig(async () => {
@@ -24,16 +25,10 @@ export default getRequestConfig(async () => {
     messages: (await import(`../messages/${locale}.json`)).default,
     // Business is USA/Puerto Rico → AST + USD. (Ideally per-center via preferences
     // `citas.timezone`; fixed default for now.)
-    timeZone: "America/Puerto_Rico",
-    formats: {
-      dateTime: {
-        short: { day: "2-digit", month: "2-digit", year: "numeric" },
-        long: { day: "numeric", month: "long", year: "numeric" },
-      },
-      number: {
-        currency: { style: "currency", currency: "USD" },
-      },
-    },
+    timeZone: BUSINESS_TIME_ZONE,
+    // Shared with the client provider (i18n/formats.ts) so a Server Component and a
+    // Client Component asked for the same named format render the same string.
+    formats,
     // Metadata-driven boards bring labelKeys the FE may not translate yet (new
     // verticals are config-only). Missing keys fall back to a humanized label
     // instead of the raw key, silently (no dev-overlay noise).

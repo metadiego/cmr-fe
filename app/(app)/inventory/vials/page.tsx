@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import {
   getReporteViales,
@@ -44,6 +44,7 @@ function esDeVial(p: Producto): boolean {
 
 export default function VialesPage() {
   const t = useTranslations("inventarioViales");
+  const format = useFormatter();
   const tc = useTranslations("common");
   const gate = useCentroGate();
   const centro = gate.centro || gate.centros[0]?.id || "";
@@ -274,10 +275,7 @@ export default function VialesPage() {
                       {d.items.map((c, i) => (
                         <tr key={`${c.vialId}-${i}`} className="hover:bg-muted/30">
                           <td className="px-4 py-2 text-muted-foreground">
-                            {new Date(c.date).toLocaleTimeString(undefined, {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {format.dateTime(new Date(c.date), "time")}
                           </td>
                           <td className="px-4 py-2">
                             {c.patient ? (

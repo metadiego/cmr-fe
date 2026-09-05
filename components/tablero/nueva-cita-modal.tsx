@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import {
@@ -14,6 +14,7 @@ import {
 import { getOpciones, ejecutarAccion, type Opcion } from "@/lib/api/tablero";
 import { asignarRecord } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { useCan } from "@/hooks/use-can";
 import {
   Dialog,
@@ -49,18 +50,16 @@ function initials(name: string): string {
   const last = parts.length > 1 ? parts[parts.length - 1][0] ?? "" : "";
   return (first + last).toUpperCase();
 }
-function fmtHora(v: unknown): string | null {
+// 12-hour clock: the AM/PM marker is translated ("02:30 p. m." vs "02:30 PM"), so this
+// was the one time format that leaked Spanish into an English session while pinned to es-PR.
+function fmtHora(v: unknown, format: ReturnType<typeof useFormatter>): string | null {
   if (v == null || v === "") return null;
   const d = new Date(String(v));
-  return Number.isNaN(d.getTime())
-    ? null
-    : new Intl.DateTimeFormat("es-PR", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: "America/Puerto_Rico" }).format(d);
+  return Number.isNaN(d.getTime()) ? null : format.dateTime(d, "time");
 }
-function fmtFechaCorta(iso: string, locale: string): string {
-  const d = new Date(iso + "T00:00:00");
-  return Number.isNaN(d.getTime())
-    ? iso
-    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", { day: "numeric", month: "short", timeZone: "America/Puerto_Rico" }).format(d);
+function fmtFechaCorta(iso: string, format: ReturnType<typeof useFormatter>): string {
+  const d = parseDayUTC(iso);
+  return d ? format.dateTime(d, "dayMonth") : iso;
 }
 
 // Modal de AGENDAMIENTO tras marcar ASISTIDO (por `render.postAccion`, no hardcode).
@@ -83,7 +82,7 @@ export function NuevaCitaModal({
 }) {
   const t = useTranslations("nuevaCita");
   const tRoot = useTranslations();
-  const locale = useLocale();
+  const format = useFormatter();
   const { can } = useCan();
 
   const agendarEnabled = render?.agendar_cita !== false; // módulo de agendamiento (plugged por config)
@@ -278,7 +277,7 @@ export function NuevaCitaModal({
           {/* Línea de tiempo de la visita */}
           <div className="mt-5 flex items-center">
             {pasos.map((p, i) => {
-              const hora = fmtHora(p.at);
+              const hora = fmtHora(p.at, format);
               const done = !!p.at || !!p.current;
               return (
                 <React.Fragment key={p.key}>
@@ -314,7 +313,7 @@ export function NuevaCitaModal({
                 {historial.map((c) => (
                   <span key={c.id} className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-xs">
                     <span className="size-2 rounded-full" style={{ backgroundColor: colorTipo(String(c.appointmentTypeId)) ?? "var(--muted-foreground)" }} />
-                    <span className="font-medium tabular-nums">{fmtFechaCorta(String(c.date), locale)}</span>
+                    <span className="font-medium tabular-nums">{fmtFechaCorta(String(c.date), format)}</span>
                     <span className="text-muted-foreground">{nombreTipo(String(c.appointmentTypeId))}</span>
                   </span>
                 ))}
