@@ -165,7 +165,7 @@ export async function apiRequestPaged<T>(
   return { items, pagination };
 }
 
-// Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v1/api-keys.
+// Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v2/api-keys.
 export function apiFetch<T>(
   path: string,
   init: RequestInit = {},
@@ -174,7 +174,7 @@ export function apiFetch<T>(
   return apiRequest<T>(`/api/v2${path}`, init, tenant);
 }
 
-// Paginated variant of apiFetch (prefixes /api/v1).
+// Paginated variant of apiFetch (prefixes /api/v2).
 // `tenant`: undefined → default center; a string → force it; null → OMIT
 // X-Tenant-ID (multi-center "combined" read, e.g. master viewing all centers).
 export function apiFetchPaged<T>(
