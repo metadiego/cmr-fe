@@ -30,7 +30,7 @@ typecheck → lint → tests → build, on every PR and every push to `main`.
 ## Two tooling traps that cost an hour if you do not know them
 
 1. **The tests are neither vitest nor jest.** They are `node --test --experimental-strip-types`.
-   Running `npx vitest run` returns "No test suite found in file" for all 15 files and looks like
+   Running `npx vitest run` returns "No test suite found in file" for all 17 files and looks like
    a broken repo: it is not, it is the wrong runner. Use `npm test`. This is also why CI pins
    **Node 22** — `--experimental-strip-types` does not exist before 22.6, and on Node 20 the tests
    would not fail: they would never run, and the job would go green.
@@ -92,7 +92,7 @@ The exception covers the **translated string**, not the code around it. Concrete
 - **A Spanish string hardcoded into a component is NOT covered.** User-facing copy goes through
   `useTranslations`/`getTranslations` and lands in **both** `messages/es.json` and
   `messages/en.json`. A literal in JSX is invisible to the English catalogue and silently makes the
-  app monolingual again. 165 of the 234 files under `app/` and `components/` already do this
+  app monolingual again. 164 of the 235 files under `app/` and `components/` already do this
   properly, so it is the norm here, not an aspiration.
 - **Message keys and namespaces are English.** The catalogue is mid-migration — `appointments`,
   `patients`, `common` sit next to `citas`, `tablero`, `configuracion` — and new keys go in English.
@@ -106,9 +106,9 @@ original spelling because there the name is a fact, not a choice.
 **A Spanish file does not authorize the next one.** Much of this repo predates the rule and is
 still being translated; that is history, not licence.
 
-**Careful with what arrives from the API:** `/api/v1` responses carry Spanish keys (`nombre`,
-`cantidad`). That is a fact of the contract, not a choice made here — do not rename them on the fly
-(see rule 6).
+**Careful with what arrives from the API:** most of the app is on `/api/v2` and gets English keys,
+but the handful of endpoints still on `/api/v1` answer with Spanish ones (`nombre`, `cantidad`).
+That is a fact of the contract, not a choice made here — do not rename them on the fly (see rule 6).
 
 ### 3b. Dates and numbers follow the APP's language (`npm run lint`)
 `toLocaleString()` / `toLocaleDateString()` / `toLocaleTimeString()` with **no locale argument, or
@@ -137,17 +137,26 @@ anything.
 
 ### 5. Money gets tested, however inconvenient
 Today's coverage is **123 tests over pure helpers in `lib/`** and **zero component or page tests**,
-across 66 pages and 165 components. That is I-11 from the assessment and it is still open. Anything
+across 66 pages and 164 components. That is I-11 from the assessment and it is still open. Anything
 touching billing, cash or frontdesk **ships with its test in `lib/`**: if the calculation cannot be
 tested without mounting a component, the logic is in the wrong place — move it to `lib/` and test it
 there. Suggested order in `docs/specs/tests-por-donde-empezar.md`.
 
-### 6. API keys arrive in Spanish; do not "fix" them by hand
-The backend already serves **`/api/v2` in English**, but this client consumes **`/api/v1`** in
-`lib/api/client.ts` and responses arrive with Spanish keys. **Do not rename a single field on the
-fly**: migrating to v2 is its own piece of work, screen by screen, with its handoff in
-`docs/specs/api-v2-en-ingles.md`. A partial rename leaves a screen half in one language and half in
-the other, which is worse than not starting.
+### 6. The v1 leftovers answer in Spanish; do not "fix" them by hand
+The migration described here **is done**: `apiFetch` and `apiFetchPaged` prefix **`/api/v2`**, and
+the app gets English keys. What is left is a deliberate, explicit v1 lane — `apiFetchV1` /
+`apiFetchPagedV1` in `lib/api/client.ts` — for the few endpoints the backend has not published in
+English yet. Today that is exactly:
+
+- `/auditoria/*` (`lib/api/auditoria.ts`)
+- `/me/centros-donde-puedo` (`lib/api/centers.ts`)
+
+Those answer with **Spanish field names**, and that is the contract, not debt introduced here.
+**Do not rename a single field on the fly** to make them look English: a partial rename leaves a
+screen half in one language and half in the other, which is worse than not starting. The lane is
+retired endpoint by endpoint as the backend ships each v2, per
+`docs/specs/api-v2-huecos-handoff-be.md`. Reaching for `apiFetchV1` for anything **not** on that
+list is the mistake this rule exists to stop — the v2 endpoint already exists.
 
 ### 7. This file and the repo cannot diverge
 If you change a script, the CI, the test runner or a ceiling, **update this file in the same
@@ -160,9 +169,9 @@ it gets obeyed blindly.
 - **`lib/env.ts` throws on import** if `NEXT_PUBLIC_SUPABASE_URL` or
   `NEXT_PUBLIC_SUPABASE_ANON_KEY` is missing. That is why the CI build passes fake credentials:
   compiling never calls Supabase or the API.
-- **`lib/api/client.ts`** is the only door to the backend: `apiFetch` prefixes `/api/v1`, unwraps
+- **`lib/api/client.ts`** is the only door to the backend: `apiFetch` prefixes `/api/v2`, unwraps
   `.data` from the `{ data, meta }` envelope and throws `ApiError`. If the backend changes the
-  envelope, it changes here.
+  envelope, it changes here. `apiFetchV1` is the narrow exception documented in rule 6.
 - **The browser Supabase client is a singleton on purpose** (`lib/supabase/client.ts`): recreating
   it on every call left `autoRefreshToken` unrun and the session died after ~15 minutes. Do not turn
   it back into a factory.
