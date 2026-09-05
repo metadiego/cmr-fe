@@ -110,6 +110,25 @@ still being translated; that is history, not licence.
 `cantidad`). That is a fact of the contract, not a choice made here — do not rename them on the fly
 (see rule 6).
 
+### 3b. Dates and numbers follow the APP's language (`npm run lint`)
+`toLocaleString()` / `toLocaleDateString()` / `toLocaleTimeString()` with **no locale argument, or
+an explicit `undefined`, follow the BROWSER's language** — never the app's. That is not theoretical:
+it is why picking English still showed "lunes, 4 de septiembre" in the day view and "septiembre 2026"
+on the calendar headers, with a fully translated catalogue sitting right there. Both forms are now
+lint **errors**.
+
+- Format through next-intl: `useFormatter()` in a component, `getFormatter()` on the server, with a
+  **named format from `i18n/formats.ts`** (`time`, `dateAndTime`, `monthYear`, `dayLong`, …). That
+  file is imported by both `i18n/request.ts` and `components/intl-provider.tsx`, because the client
+  provider cannot inherit formats across the RSC boundary — add a format in one place, get it in both.
+- **A calendar day is not an instant.** `"2026-07-21"` from the BE is a day; rendering it in a
+  timezone is what makes an invoice show yesterday. Pair a `day*`/`monthYear` format (they pin UTC)
+  with `parseDayUTC` from `lib/format/fecha.ts` (it anchors at UTC noon). Never `new Date(iso + "T00:00:00")`.
+- **Deliberately still allowed:** `new Intl.*Format` with an *explicit* locale. Several 24-hour clocks
+  pin one on purpose and their output is digits only — "14:30" is identical in es and en — as is USD
+  money. Those carry no language, so making them locale-aware would turn 24h into "02:30 PM" in
+  English: a regression, not a fix.
+
 ### 4. A test is never deleted in silence
 When moving, renaming or splitting code, **the test count does not go down**. If a test is genuinely
 redundant, say so in the commit and explain why. CI sees tests that fail, not tests that vanish —
@@ -117,7 +136,7 @@ and with the glob limited to `lib/`, a test moved out of `lib/` disappears witho
 anything.
 
 ### 5. Money gets tested, however inconvenient
-Today's coverage is **109 tests over pure helpers in `lib/`** and **zero component or page tests**,
+Today's coverage is **123 tests over pure helpers in `lib/`** and **zero component or page tests**,
 across 66 pages and 165 components. That is I-11 from the assessment and it is still open. Anything
 touching billing, cash or frontdesk **ships with its test in `lib/`**: if the calculation cannot be
 tested without mounting a component, the logic is in the wrong place — move it to `lib/` and test it

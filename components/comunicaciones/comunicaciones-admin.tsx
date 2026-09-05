@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
@@ -160,11 +160,12 @@ function AlertasPanel() {
 function NotificacionesPanel() {
   const t = useTranslations("comunicaciones");
   const tc = useTranslations("common");
+  const format = useFormatter();
   const { state, reload } = useResource<Notificacion[]>(() => listNotificaciones());
   const rows = state.kind === "ok" ? state.data : [];
   const fecha = (n: Notificacion) => {
     const iso = n.sentAt ?? n.createdAt;
-    return iso ? new Date(iso).toLocaleString() : "—";
+    return iso ? format.dateTime(new Date(iso), "dateAndTime") : "—";
   };
 
   return (

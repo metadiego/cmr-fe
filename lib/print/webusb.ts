@@ -11,6 +11,23 @@
 
 const EPSON_VENDOR = 0x04b8;
 
+// What this module throws are CODES, not user copy. A literal message here would be stuck in
+// one language: this file has no React context, so it cannot translate anything itself. The
+// caller maps the code to a key with `usbErrorKey` and renders it with its own `t`.
+export const USB_UNSUPPORTED = "webusb/unsupported";
+export const USB_NO_ENDPOINT = "webusb/no-endpoint";
+
+const USB_ERROR_KEYS: Record<string, string> = {
+  [USB_UNSUPPORTED]: "print.usbUnsupported",
+  [USB_NO_ENDPOINT]: "print.usbNoEndpoint",
+};
+
+// i18n key for a thrown cause; anything unrecognized falls back to the generic message.
+export function usbErrorKey(e: unknown): string {
+  const code = e instanceof Error ? e.message : "";
+  return USB_ERROR_KEYS[code] ?? "print.usbError";
+}
+
 export function webUsbSupported(): boolean {
   return typeof navigator !== "undefined" && "usb" in (navigator as any);
 }
@@ -19,7 +36,7 @@ export function webUsbSupported(): boolean {
 // con endpoint bulk OUT y envía los bytes. `vendorId` configurable por si no es Epson.
 export async function printEscPosWebUsb(bytes: Uint8Array, vendorId: number = EPSON_VENDOR): Promise<void> {
   const usb = (navigator as any).usb;
-  if (!usb) throw new Error("Este navegador no soporta WebUSB (usa Chrome o Edge).");
+  if (!usb) throw new Error(USB_UNSUPPORTED);
 
   const device = await usb.requestDevice({ filters: vendorId ? [{ vendorId }] : [] });
   await device.open();
@@ -39,7 +56,7 @@ export async function printEscPosWebUsb(bytes: Uint8Array, vendorId: number = EP
     }
     if (ifaceNum >= 0) break;
   }
-  if (ifaceNum < 0) throw new Error("No se encontró un endpoint de impresión (bulk OUT) en el dispositivo.");
+  if (ifaceNum < 0) throw new Error(USB_NO_ENDPOINT);
 
   await device.claimInterface(ifaceNum);
   try {

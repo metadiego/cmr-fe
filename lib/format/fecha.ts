@@ -20,3 +20,22 @@ export function formatFechaSolo(v: unknown): string {
   const dd = String(d.getDate()).padStart(2, "0");
   return `${mm}/${dd}/${d.getFullYear()}`;
 }
+
+// A calendar day ("2026-07-21") turned into a Date to hand to the day-only formats in
+// i18n/formats.ts (`dayLong`, `monthYear`, `dayWeekdayLong`, ...), which all pin UTC.
+//
+// The anchor is UTC NOON, not midnight: UTC midnight falls on the previous day for any
+// zone to the west (PR is UTC-4), and LOCAL midnight — what the old
+// `new Date(iso + "T00:00:00")` pattern produced — falls on the previous day for any
+// browser to the east. UTC noon is the same calendar day in both directions (a 12h
+// margin either way), so pairing "UTC noon" with "format pinned to UTC" always prints
+// the intended day, on every machine.
+//
+// Accepts "YYYY-MM-DD" and full datetimes (takes their day part). Invalid -> null.
+export function parseDayUTC(v: unknown): Date | null {
+  if (v == null || v === "") return null;
+  const m = String(v).match(DATE_ONLY);
+  if (!m) return null;
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12));
+  return Number.isNaN(d.getTime()) ? null : d;
+}

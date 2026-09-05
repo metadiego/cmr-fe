@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import type { CajaDivision, ReporteDia } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
@@ -66,6 +66,7 @@ export function ResumenPagos({
   onEmail: (email: string) => void;
 }) {
   const t = useTranslations("caja");
+  const format = useFormatter();
   const tp = useTranslations("caja.payments");
   const tRoot = useTranslations();
   const [emailOpen, setEmailOpen] = React.useState(false);
@@ -168,7 +169,7 @@ export function ResumenPagos({
       <div className="space-y-2">
         {cerrado && cerradoEn && (
           <p className="text-xs text-muted-foreground">
-            {t("closedAt", { fecha: new Date(cerradoEn).toLocaleString() })}
+            {t("closedAt", { fecha: format.dateTime(new Date(cerradoEn), "dateAndTime") })}
           </p>
         )}
         {canProcesar && (

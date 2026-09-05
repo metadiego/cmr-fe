@@ -1,6 +1,6 @@
 // i18n/locale-actions.ts
 // Server Action that persists the chosen locale in a cookie. Called by the
-// client <LanguageToggle/>, which then router.refresh()es so Server Components
+// language picker in <UserMenu/>, which then router.refresh()es so Server Components
 // re-render under the new locale.
 //
 // Next 16: cookies() is async.

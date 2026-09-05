@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
@@ -435,6 +435,7 @@ function RescheduleDialog({
 // antes → después (fecha, hora, centro, médico), mapping ids to names.
 function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void }) {
   const t = useTranslations("appointments.actions");
+  const format = useFormatter();
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const { map: estadosMap } = useEstados();
@@ -455,7 +456,7 @@ function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void })
   };
   const fmt = (iso: string) => {
     const d = new Date(iso);
-    return isNaN(d.getTime()) ? iso : d.toLocaleString();
+    return isNaN(d.getTime()) ? iso : format.dateTime(d, "dateAndTime");
   };
 
   const events = histRes.state.kind === "ok" ? histRes.state.data : [];

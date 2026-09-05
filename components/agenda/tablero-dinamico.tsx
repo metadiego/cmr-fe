@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations, useFormatter } from "next-intl";
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Notification03Icon } from "@hugeicons/core-free-icons";
@@ -11,6 +11,7 @@ import { editarCelda, type Opcion, type Transicion } from "@/lib/api/tablero";
 import { asignarEnfermeraVitales } from "@/lib/api/citas";
 import { listPersonalPorCapacidad } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
@@ -77,17 +78,17 @@ function TipoConsultaCell({ value }: { value: unknown }) {
 }
 
 // Fecha corta y legible (binding fecha, p.ej. cita.proxCita). null → "—".
-function fmtFecha(v: unknown, locale: string): string {
+// Goes through the shared `dayMonthYear` format: the old hand-rolled locale ternary had
+// to be repeated at every call site, and its `+ "T00:00:00"` (LOCAL midnight) shifted the
+// day back for any browser east of the clinic.
+function fmtFecha(v: unknown, format: ReturnType<typeof useFormatter>): string {
   if (v == null || v === "") return "—";
-  const s = String(v);
-  const d = new Date(s.length <= 10 ? s + "T00:00:00" : s);
-  return Number.isNaN(d.getTime())
-    ? s
-    : new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-PR", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Puerto_Rico" }).format(d);
+  const d = parseDayUTC(v);
+  return d ? format.dateTime(d, "dayMonthYear") : String(v);
 }
 
 export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
-  const locale = useLocale();
+  const format = useFormatter();
   const text = value == null || value === "" ? "—" : String(value);
   const kind = (col.render as Record<string, unknown> | null)?.kind;
   // Renderers especiales por DATO (render.kind), no por tipo → reusables sin tocar
@@ -96,7 +97,7 @@ export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
   if (kind === "tipoConsulta") return <TipoConsultaCell value={value} />;
   // Defensivo: un binding que resuelve a OBJETO NUNCA debe caer a "[object Object]".
   if (value != null && typeof value === "object") return <FacturaCell value={value} />;
-  if (col.tipo === "fecha") return <span className="whitespace-nowrap tabular-nums">{fmtFecha(value, locale)}</span>;
+  if (col.tipo === "fecha") return <span className="whitespace-nowrap tabular-nums">{fmtFecha(value, format)}</span>;
   if (col.tipo === "badge") {
     // Color por-VALOR opcional (dato: render.valueColors {valor:hex}); si no, el
     // color fijo de la columna. Label humanizado (borrador → Borrador). Sin hardcode.

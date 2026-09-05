@@ -3,7 +3,7 @@
 // The app is deliberately bilingual, so Spanish user-facing copy is the product working as
 // intended. What is NOT intended is a key that exists only in `es.json`: it leaves a hole that
 // nobody sees until an English-speaking user opens that screen, and `next-intl` surfaces it as the
-// raw key. Today both files hold 3,214 keys and agree exactly — this test is what keeps that true.
+// raw key. Today both files hold 3,215 keys and agree exactly — this test is what keeps that true.
 //
 // Lives under `lib/` because that is the only place `npm test` looks
 // (`node --test "lib/**/*.test.ts"`), the same reason `lib/nav/manifest.test.ts` sits there.
@@ -85,4 +85,33 @@ test("no translation is blank in one language while filled in the other", () => 
     [],
     `half-translated keys:\n${lopsided.join("\n")}`,
   );
+});
+
+test("ICU placeholders match between the two catalogues", () => {
+  // A placeholder present in one language and missing in the other is a half-done translation
+  // that no key-parity check can see: the key exists on both sides, but one of them renders a
+  // sentence with the value silently dropped (or the literal "{nombre}" left in the copy).
+  const flatten = (node: Catalogue, prefix = ""): Map<string, string> => {
+    const out = new Map<string, string>();
+    for (const [k, v] of Object.entries(node)) {
+      const path = prefix ? `${prefix}.${k}` : k;
+      if (typeof v === "object" && v !== null)
+        for (const [kk, vv] of flatten(v, path)) out.set(kk, vv);
+      else out.set(path, String(v));
+    }
+    return out;
+  };
+  const names = (v: string) => [...v.matchAll(/\{\s*(\w+)/g)].map((m) => m[1]).sort().join(",");
+
+  const esValues = flatten(load("es"));
+  const enValues = flatten(load("en"));
+  const mismatched: string[] = [];
+  for (const [key, esValue] of esValues) {
+    const enValue = enValues.get(key);
+    if (enValue === undefined) continue; // covered by the parity tests above
+    if (names(esValue) !== names(enValue))
+      mismatched.push(`${key} — es: {${names(esValue)}}, en: {${names(enValue)}}`);
+  }
+
+  assert.deepEqual(mismatched, [], `placeholders differ between languages:\n${mismatched.join("\n")}`);
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Download04Icon } from "@hugeicons/core-free-icons";
 
@@ -68,6 +68,7 @@ function imprimirReporte(el: HTMLElement | null, titulo: string) {
 
 export default function EstadisticasServiciosPage() {
   const t = useTranslations("estadisticasServicios");
+  const format = useFormatter();
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const gate = useCentroGate();
@@ -245,7 +246,7 @@ export default function EstadisticasServiciosPage() {
             {/* Pie solo para impresión */}
             {data && (
               <div className="solo-print pie">
-                {t("impresoPor")}: {emailImpresor || "—"} · {new Date().toLocaleString()}
+                {t("impresoPor")}: {emailImpresor || "—"} · {format.dateTime(new Date(), "dateAndTime")}
               </div>
             )}
           </div>
