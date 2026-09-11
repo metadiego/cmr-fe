@@ -3,10 +3,13 @@
 import * as React from "react";
 
 import { subscribeCitas, type CitaStreamEvent } from "@/lib/api/citas-stream";
+import { classifyStreamFailure, type StreamFailure } from "@/lib/api/stream-retry";
 
 // Subscribes to the citas SSE stream for a scope and calls onInvalidate
 // (debounced) whenever something changes — so every open window refreshes live.
-// Reconnects with backoff and resumes via Last-Event-ID. Returns { live }.
+// Reconnects with backoff and resumes via Last-Event-ID. Returns { live } plus
+// `failure`: why the loop gave up, so a screen can say "pick a center" instead of
+// pretending the stream is merely offline.
 //   centroId: string → that clinic; null → combined (all permitted).
 export function useCitaStream(opts: {
   centroId?: string | null;
@@ -16,9 +19,10 @@ export function useCitaStream(opts: {
   onEvent?: (e: CitaStreamEvent) => void;
   debounceMs?: number;
   pollMs?: number; // safety-net refetch interval while NOT live (SSE down)
-}): { live: boolean } {
+}): { live: boolean; failure: StreamFailure | null } {
   const { centroId, enabled = true, debounceMs = 400, pollMs = 20000 } = opts;
   const [live, setLive] = React.useState(false);
+  const [failure, setFailure] = React.useState<StreamFailure | null>(null);
 
   // Keep callbacks current without re-subscribing on every render.
   const cbRef = React.useRef(opts);
@@ -74,6 +78,7 @@ export function useCitaStream(opts: {
             onOpen: () => {
               backoff = 1000;
               setLive(true);
+              setFailure(null); // connected ⇒ there is nothing left to explain
             },
             onId: (id) => {
               lastId = id;
@@ -87,11 +92,14 @@ export function useCitaStream(opts: {
           });
         } catch (err) {
           if (stopped || controller.signal.aborted) break;
-          // 401/403 = sin sesión/permiso: PARAR (no reintentar). Antes reconectaba indefinidamente
-          // → ~4 UNAUTHORIZED/min por pestaña contra /tablero/stream (mismo bug que la campana).
-          const status = (err as { status?: number } | null)?.status;
-          if (status === 401 || status === 403) {
+          // Only a transport blip or a 5xx is worth reconnecting for. Anything the client
+          // itself caused — no session, no permission, no active center — repeats for ever:
+          // that is how /tablero/stream once logged ~4 UNAUTHORIZED/min per tab.
+          const e = err as { status?: number; code?: string } | null;
+          const f = classifyStreamFailure(e?.status, e?.code);
+          if (!f.retryable) {
             setLive(false);
+            setFailure(f);
             break;
           }
         }
@@ -108,8 +116,10 @@ export function useCitaStream(opts: {
       controller.abort();
       if (debounceT) clearTimeout(debounceT);
       setLive(false);
+      // The center changed (or the stream was switched off): the old reason describes nothing now.
+      setFailure(null);
     };
   }, [centroId, enabled, debounceMs]);
 
-  return { live };
+  return { live, failure };
 }

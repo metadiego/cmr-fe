@@ -250,7 +250,8 @@
       "kpiNoShow": "No-show",
       "kpiLibres": "Cupos libres",
       "filterAll": "Todas",
-      "sinCitas": "No hay citas para este filtro."
+      "sinCitas": "No hay citas para este filtro.",
+      "pickCenter": "Elige un centro para ver la agenda de este día."
     },
     "cupos": {
       "title": "Configuración de agenda",
@@ -2729,7 +2730,8 @@
   },
   "errores": {
     "TENANT_NOT_FOUND": "El centro indicado no existe.",
-    "VIGENCIA_INVALIDA": "La fecha de fin no puede ser anterior a la de inicio."
+    "VIGENCIA_INVALIDA": "La fecha de fin no puede ser anterior a la de inicio.",
+    "TENANT_REQUIRED": "Elige un centro: esta vista trabaja con un centro a la vez."
   },
   "configAlta": {
     "title": "Datos obligatorios del paciente",

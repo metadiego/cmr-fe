@@ -250,7 +250,8 @@
       "kpiNoShow": "No-show",
       "kpiLibres": "Free slots",
       "filterAll": "All",
-      "sinCitas": "No appointments for this filter."
+      "sinCitas": "No appointments for this filter.",
+      "pickCenter": "Choose a center to see this day's schedule."
     },
     "cupos": {
       "title": "Schedule configuration",
@@ -2729,7 +2730,8 @@
   },
   "errores": {
     "TENANT_NOT_FOUND": "The specified center does not exist.",
-    "VIGENCIA_INVALIDA": "The end date can't be earlier than the start date."
+    "VIGENCIA_INVALIDA": "The end date can't be earlier than the start date.",
+    "TENANT_REQUIRED": "Choose a center: this view works one center at a time."
   },
   "configAlta": {
     "title": "Required patient data",

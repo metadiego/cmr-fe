@@ -14,6 +14,8 @@ import { getDefinicion, type TableroDefinicion, type Transicion } from "@/lib/ap
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
+import { ALL_CENTERS as ALL } from "@/lib/agenda/initial-center";
+import { useAgendaCenter } from "@/hooks/use-agenda-center";
 import { useMe } from "@/hooks/use-me";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
@@ -21,6 +23,7 @@ import { Can } from "@/components/kit/can";
 import { EstadoSelect } from "@/components/tablero/estado-select";
 import { CeldaEditable } from "@/components/tablero/celda-editable";
 import { Cell } from "@/components/agenda/tablero-dinamico";
+import { Chip, Kpi } from "@/components/agenda/dia-kpi";
 import {
   Select,
   SelectContent,
@@ -32,8 +35,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CitaModal } from "@/components/agenda/cita-modal";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
-const ALL = "__all__";
-const CENTRO_KEY = "cmr_agenda_centro";
 const VISTA_KEY = "cmr_agenda_vista"; // preferencia POR DISPOSITIVO (localStorage): "clasica" | "nueva"
 type Vista = "clasica" | "nueva";
 
@@ -41,7 +42,6 @@ export function DiaView({ fecha }: { fecha: string }) {
   const t = useTranslations("agenda");
   const format = useFormatter();
   const tc = useTranslations("common");
-  const [centro, setCentro] = React.useState<string>(ALL);
   // Vista clásica (la de siempre, DEFAULT e intacta) vs nueva (beta, reordenamiento visual). El equipo
   // puede alternar y opinar antes de decidir; se recuerda por equipo. Idea: docs/plans/agenda-dia-vista-alternativa-opcional.md
   const [vista, setVista] = React.useState<Vista>("clasica");
@@ -49,18 +49,11 @@ export function DiaView({ fecha }: { fecha: string }) {
     { fecha: string; centroId?: string; hora?: string; tipoCitaId?: string } | null
   >(null);
 
-  // Restore persisted center + view choice once.
   const [prevF, setPrevF] = React.useState(false);
   if (!prevF && typeof window !== "undefined") {
     setPrevF(true);
-    const saved = window.localStorage.getItem(CENTRO_KEY);
-    if (saved) setCentro(saved);
     const savedVista = window.localStorage.getItem(VISTA_KEY);
     if (savedVista === "nueva" || savedVista === "clasica") setVista(savedVista);
-  }
-  function pickCentro(v: string) {
-    setCentro(v);
-    if (typeof window !== "undefined") window.localStorage.setItem(CENTRO_KEY, v);
   }
   function pickVista(v: Vista) {
     setVista(v);
@@ -77,6 +70,12 @@ export function DiaView({ fecha }: { fecha: string }) {
   const puedeCombinado = puedeVerTodosLosCentros(
     meState.kind === "ok" ? meState.me : null,
   );
+  const centrosListos = centrosRes.state.kind === "ok" && meState.kind !== "loading";
+  const { center: centro, pick: pickCentro } = useAgendaCenter({
+    centerIds: centros.map((c) => c.id),
+    ready: centrosListos,
+    canSeeAllCenters: puedeCombinado,
+  });
   const medicosRes = useResource<Personal[]>(() => getMedicos());
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
@@ -93,17 +92,22 @@ export function DiaView({ fecha }: { fecha: string }) {
       .map((c) => c.clave),
   );
 
+  // No center resolved → ask for nothing: from a non-admin, a request with no `X-Tenant-ID` is a 409.
+  const emptyDay: AgendaDia = { date: fecha, columns: [], centers: [] };
   const { state, reload, refresh } = useResource<AgendaDia>(
     () =>
-      getAgendaDia(fecha, centro === ALL ? { combinado: true } : { centroId: centro }),
+      centro === null
+        ? Promise.resolve(emptyDay)
+        : getAgendaDia(fecha, centro === ALL ? { combinado: true } : { centroId: centro }),
     [fecha, centro],
   );
 
   // Live: refetch (silently) whenever anyone changes a cita in this scope, so
   // every open window stays in sync. combined → null (all permitted centers).
-  const { live } = useCitaStream({
+  const { live, failure } = useCitaStream({
     centroId: centro === ALL ? null : centro,
     entidad: "cita",
+    enabled: centro !== null,
     onInvalidate: refresh,
   });
 
@@ -168,7 +172,7 @@ export function DiaView({ fecha }: { fecha: string }) {
                 {t("cupos.configure")}
               </Link>
             </Can>
-            <Select value={centro} onValueChange={pickCentro}>
+            <Select value={centro ?? ""} onValueChange={pickCentro}>
               <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {puedeCombinado && (
@@ -183,7 +187,12 @@ export function DiaView({ fecha }: { fecha: string }) {
         }
       />
 
-      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
+      {/* No center means no agenda to ask for and no stream to open: say so, instead of leaving an
+          empty day that looks like a failure. `needsCenter` covers the BE refusing it anyway. */}
+      {centrosListos && (centro === null || failure?.needsCenter) && (
+        <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{t("dia.pickCenter")}</p>
+      )}
+      {centro !== null && state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.message}
@@ -430,35 +439,6 @@ function CeldaCita({
         <Cell col={col} value={fila[col.clave]} />
       )}
     </td>
-  );
-}
-
-function Kpi({ label, value, tono }: { label: string; value: number; tono?: "ok" | "warn" | "muted" }) {
-  const color =
-    tono === "ok" ? "text-success-foreground"
-    : tono === "warn" ? "text-warning-foreground"
-    : tono === "muted" ? "text-muted-foreground"
-    : "text-primary";
-  return (
-    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-3 py-2">
-      <div className={"text-xl font-bold tabular-nums " + color}>{value}</div>
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
-    </div>
-  );
-}
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        "rounded-full border px-3 py-1 text-xs font-medium transition-colors " +
-        (active ? "border-primary bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent/50")
-      }
-    >
-      {children}
-    </button>
   );
 }
 

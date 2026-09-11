@@ -23,6 +23,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getActiveCentro } from "@/lib/tenant";
+import { classifyStreamFailure } from "@/lib/api/stream-retry";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,8 +81,9 @@ export function AlertasBell() {
   const fallo = state.kind === "fail";
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  // SSE en vivo hasta desmontar. Reconexión con BACKOFF exponencial (3s→60s) y PARADA en 401/403:
-  // sin permiso/sesión no tiene sentido reintentar cada 3s (generaba 36k UNAUTHORIZED en la bitácora).
+  // Live SSE until unmount. Exponential BACKOFF (3s→60s) and a STOP on everything a retry cannot
+  // fix: no session, no permission, or no active center now that the bus is center-scoped.
+  // Retrying every 3s once put 36k UNAUTHORIZED entries in the log.
   React.useEffect(() => {
     const ctrl = new AbortController();
     let stop = false;
@@ -98,9 +100,9 @@ export function AlertasBell() {
             signal: ctrl.signal,
           });
         } catch (err) {
-          const status = (err as { status?: number } | null)?.status;
-          // 401/403 = no autorizado: dejar de reintentar (hasta re-montar / nueva sesión).
-          if (status === 401 || status === 403) break;
+          const e = err as { status?: number; code?: string } | null;
+          // Do not retry until a remount, a new session, or a center is chosen.
+          if (!classifyStreamFailure(e?.status, e?.code).retryable) break;
         }
         if (stop || ctrl.signal.aborted) break;
         await new Promise((r) => setTimeout(r, backoff));
