@@ -27,7 +27,7 @@ const DEBT = {
   "components/agenda/dia-view.tsx": 643,
   "components/auditoria/auditoria-log.tsx": 642,
   "components/admin/rbac-settings.tsx": 615,
-  "components/clientes/paciente-form-sheet.tsx": 609,
+  "components/clientes/paciente-form-sheet.tsx": 550,
 };
 
 const maxLines = (max) => ({

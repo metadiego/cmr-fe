@@ -186,8 +186,11 @@ export function MedicasCalendar() {
             festivos={festivos}
             onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}`)}
             onEventClick={(id) => {
+              // Pulsar una cita abre el MISMO modal en modo edición, con las acciones del puesto
+              // (confirmar/reprogramar/cancelar/no-show). El rol `citas` no llega al tablero por menú,
+              // así que la agenda es su única puerta. Handoff agenda-abrir-la-cita.
               const c = citaById.get(id);
-              router.push(`/scheduling/appointments/${c ? c.date : ""}`);
+              if (c) setModal({ fecha: c.date, cita: c });
             }}
           />
         )}

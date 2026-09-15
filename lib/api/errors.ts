@@ -23,7 +23,18 @@ export function isRateLimited(err: unknown): boolean {
   return /RATE_LIMITED|Too Many Requests|ThrottlerException/i.test(msg);
 }
 
-export function apiErrorLabel(err: unknown, t?: Translate): string {
+// Detalle de validación del BE (400 con `error.details`), para no dejar el fallo mudo: un
+// "Validation failed" a secas es indistinguible de una pantalla rota. Devuelve los mensajes
+// (con su `field` si viene) en una línea, o "" si no hay detalles.
+export function apiErrorDetails(err: unknown): string {
+  if (!(err instanceof ApiError) || !err.details?.length) return "";
+  return err.details
+    .map((d) => (d.field ? `${d.field}: ${d.message}` : d.message))
+    .filter(Boolean)
+    .join("; ");
+}
+
+function baseErrorLabel(err: unknown, t?: Translate): string {
   if (t && isRateLimited(err)) {
     const m = t("common.rateLimited");
     if (m && m !== "common.rateLimited") return m;
@@ -46,6 +57,14 @@ export function apiErrorLabel(err: unknown, t?: Translate): string {
     return err.message;
   }
   return apiErrorMessage(err);
+}
+
+export function apiErrorLabel(err: unknown, t?: Translate): string {
+  const base = baseErrorLabel(err, t);
+  // Anexa el detalle de validación (si lo hay y no está ya incluido): así un 400 "Validation failed"
+  // dice QUÉ campo falló, en vez de fallar en silencio. Handoff alta-de-paciente-mostrar-el-error.
+  const detalle = apiErrorDetails(err);
+  return detalle && !base.includes(detalle) ? `${base}: ${detalle}` : base;
 }
 
 // Shows an error toast using the i18n-aware label.

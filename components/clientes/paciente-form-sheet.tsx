@@ -49,91 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Derived from the API contract so it never drifts from schema.d.ts.
-type Sexo = NonNullable<Paciente["sex"]>;
-// Runtime whitelist of the values the BE accepts on write. Typed as Sexo[] so TS
-// errors if any value drops out of the API enum. Legacy patients still hold codes
-// like "0"/"1" (the BE v2 backfill has NOT run yet); those are coerced to "" on
-// load so a plain edit never re-submits an invalid value → avoids a 400 (BE rejects
-// non-enum sexo). See docs/plans/pacientes-v2-migracion-fe.md.
-const SEXO_VALUES: readonly Sexo[] = [
-  "femenino",
-  "masculino",
-  "otro",
-  "desconocido",
-];
-
-// Editable fields (the form's working state). Strings throughout; trimmed and
-// pruned to the API payload on submit.
-type FormState = {
-  nombres: string;
-  apellidos: string;
-  docId: string;
-  sexo: "" | Sexo;
-  fechaNacimiento: string;
-  nacionalidad: string;
-  telefono: string;
-  whatsapp: string;
-  email: string;
-  direccion: string;
-  zipcode: string;
-  record: string;
-  aseguradora: string;
-};
-
-const EMPTY: FormState = {
-  nombres: "",
-  apellidos: "",
-  docId: "",
-  sexo: "",
-  fechaNacimiento: "",
-  nacionalidad: "",
-  telefono: "",
-  whatsapp: "",
-  email: "",
-  direccion: "",
-  zipcode: "",
-  record: "",
-  aseguradora: "",
-};
-
-function fromPaciente(p: Paciente): FormState {
-  return {
-    nombres: p.firstName ?? "",
-    apellidos: p.lastName ?? "",
-    docId: p.documentId ?? "",
-    sexo: SEXO_VALUES.includes(p.sex as Sexo) ? (p.sex as Sexo) : "",
-    fechaNacimiento: p.dateOfBirth?.slice(0, 10) ?? "",
-    nacionalidad: p.nationality ?? "",
-    telefono: p.phone ?? "",
-    whatsapp: p.whatsapp ?? "",
-    email: p.email ?? "",
-    direccion: p.address ?? "",
-    zipcode: p.zipCode ?? "",
-    record: p.medicalRecordNumber ?? "",
-    aseguradora: p.insurer ?? "",
-  };
-}
-
-// Drop empty strings so optional fields aren't sent as "".
-function toPayload(f: FormState): CreatePacientePayload {
-  const t = (s: string) => (s.trim() ? s.trim() : undefined);
-  return {
-    firstName: f.nombres.trim(),
-    lastName: t(f.apellidos),
-    documentId: t(f.docId),
-    sex: f.sexo || undefined,
-    dateOfBirth: t(f.fechaNacimiento),
-    nationality: t(f.nacionalidad),
-    phone: t(f.telefono),
-    whatsapp: t(f.whatsapp),
-    email: t(f.email),
-    address: t(f.direccion),
-    zipCode: t(f.zipcode),
-    medicalRecordNumber: t(f.record),
-    insurer: t(f.aseguradora),
-  };
-}
+import { type Sexo, type FormState, EMPTY, fromPaciente, toPayload, camposDeError } from "./paciente-form-model";
 
 // Slide-in create/edit form for a patient. `paciente` null → create mode.
 export function PacienteFormSheet({
@@ -155,6 +71,9 @@ export function PacienteFormSheet({
   const [form, setForm] = React.useState<FormState>(
     paciente ? fromPaciente(paciente) : EMPTY,
   );
+  // Campos que el BE rechazó (error.details) → se marcan en rojo (aria-invalid) y se limpian al editarlos.
+  // Un guardado que falla en silencio es indistinguible de una pantalla rota. Handoff alta-de-paciente-mostrar-el-error.
+  const [errFields, setErrFields] = React.useState<Set<keyof FormState>>(new Set());
   const [submitting, setSubmitting] = React.useState(false);
   // Validación en línea del email SOLO tras salir del campo (patrón moderno: no acusar mientras
   // se escribe). Es un aviso NO bloqueante — el BE es la autoridad final del formato.
@@ -262,6 +181,13 @@ export function PacienteFormSheet({
 
   function set<K extends keyof FormState>(k: K, v: FormState[K]) {
     setForm((prev) => ({ ...prev, [k]: v }));
+    // Al editar un campo marcado, quitarle la marca de error (ya no es "el que falló").
+    setErrFields((prev) => {
+      if (!prev.has(k)) return prev;
+      const next = new Set(prev);
+      next.delete(k);
+      return next;
+    });
   }
 
   function resetFormState() {
@@ -331,6 +257,9 @@ export function PacienteFormSheet({
           }),
         );
       } else {
+        // Marca en rojo los campos que el BE rechazó (si el 400 los trae en error.details).
+        const campos = camposDeError(err);
+        if (campos.length) setErrFields(new Set(campos));
         toastError(err, tRoot);
       }
     } finally {
@@ -381,6 +310,7 @@ export function PacienteFormSheet({
               <Field label={t("nombres")} required>
                 <Input
                   value={form.nombres}
+                  aria-invalid={errFields.has("nombres") || undefined}
                   onChange={(e) => set("nombres", e.target.value)}
                   autoFocus
                 />
@@ -388,12 +318,14 @@ export function PacienteFormSheet({
               <Field label={t("apellidos")} required={req("apellidos")}>
                 <Input
                   value={form.apellidos}
+                  aria-invalid={errFields.has("apellidos") || undefined}
                   onChange={(e) => set("apellidos", e.target.value)}
                 />
               </Field>
               <Field label={t("docId")} required={req("docId")}>
                 <Input
                   value={form.docId}
+                  aria-invalid={errFields.has("docId") || undefined}
                   onChange={(e) => set("docId", e.target.value)}
                 />
               </Field>
@@ -402,7 +334,7 @@ export function PacienteFormSheet({
                   value={form.sexo || undefined}
                   onValueChange={(v) => set("sexo", v as Sexo)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full" aria-invalid={errFields.has("sexo") || undefined}>
                     <SelectValue placeholder={t("sexoPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -417,12 +349,14 @@ export function PacienteFormSheet({
                 <Input
                   type="date"
                   value={form.fechaNacimiento}
+                  aria-invalid={errFields.has("fechaNacimiento") || undefined}
                   onChange={(e) => set("fechaNacimiento", e.target.value)}
                 />
               </Field>
               <Field label={t("nacionalidad")} required={req("nacionalidad")}>
                 <Input
                   value={form.nacionalidad}
+                  aria-invalid={errFields.has("nacionalidad") || undefined}
                   onChange={(e) => set("nacionalidad", e.target.value)}
                 />
               </Field>
@@ -435,6 +369,7 @@ export function PacienteFormSheet({
                 <Input
                   type="tel"
                   value={form.telefono}
+                  aria-invalid={errFields.has("telefono") || undefined}
                   onChange={(e) => set("telefono", e.target.value)}
                 />
               </Field>
@@ -442,6 +377,7 @@ export function PacienteFormSheet({
                 <Input
                   type="tel"
                   value={form.whatsapp}
+                  aria-invalid={errFields.has("whatsapp") || undefined}
                   onChange={(e) => set("whatsapp", e.target.value)}
                 />
               </Field>
@@ -455,19 +391,21 @@ export function PacienteFormSheet({
                   value={form.email}
                   onChange={(e) => set("email", e.target.value)}
                   onBlur={() => setEmailTouched(true)}
-                  aria-invalid={emailTouched && emailInvalido}
+                  aria-invalid={(emailTouched && emailInvalido) || errFields.has("email") || undefined}
                   className={emailTouched && emailInvalido ? "border-destructive" : undefined}
                 />
               </Field>
               <Field label={t("zipcode")} required={req("zipcode")}>
                 <Input
                   value={form.zipcode}
+                  aria-invalid={errFields.has("zipcode") || undefined}
                   onChange={(e) => set("zipcode", e.target.value)}
                 />
               </Field>
               <Field label={t("direccion")} full required={req("direccion")}>
                 <Input
                   value={form.direccion}
+                  aria-invalid={errFields.has("direccion") || undefined}
                   onChange={(e) => set("direccion", e.target.value)}
                 />
               </Field>
@@ -481,7 +419,7 @@ export function PacienteFormSheet({
                   <Input
                     value={form.record}
                     onChange={(e) => set("record", e.target.value)}
-                    aria-invalid={!!dueno}
+                    aria-invalid={!!dueno || errFields.has("record") || undefined}
                     className={dueno ? "pr-8 border-destructive" : "pr-8"}
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center">
@@ -504,6 +442,7 @@ export function PacienteFormSheet({
               <Field label={t("aseguradora")} required={req("aseguradora")}>
                 <Input
                   value={form.aseguradora}
+                  aria-invalid={errFields.has("aseguradora") || undefined}
                   onChange={(e) => set("aseguradora", e.target.value)}
                 />
               </Field>

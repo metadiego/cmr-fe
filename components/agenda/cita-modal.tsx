@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PacienteSelect } from "@/components/citas/paciente-select";
+import { CitaActions } from "@/components/citas/cita-actions";
 
 // Centinela "Sin médico" para que el Select nunca quede en vacío (Radix no admite value="").
 const NONE_MEDICO = "__sin_medico__";
@@ -210,7 +211,20 @@ export function CitaModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{isEdit ? t("editTitle") : t("title")}</DialogTitle>
+          <div className="flex items-center justify-between gap-2 pr-6">
+            <DialogTitle>{isEdit ? t("editTitle") : t("title")}</DialogTitle>
+            {/* En edición, las ACCIONES DEL PUESTO (confirmar/reprogramar/cancelar/no-show) — se reusa
+                el mismo componente del tablero. Al cambiar el estado, recargar y cerrar. Handoff agenda-abrir-la-cita. */}
+            {isEdit && cita && (
+              <CitaActions
+                cita={cita}
+                onChanged={() => {
+                  onSaved();
+                  onOpenChange(false);
+                }}
+              />
+            )}
+          </div>
         </DialogHeader>
 
         <div className="space-y-4">
