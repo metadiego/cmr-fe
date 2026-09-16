@@ -312,7 +312,7 @@ function CentroSheet({
 
       {centro.franjas.map((franja) =>
         franja.tipos.map((tipo) => {
-          if (tipo.citas.length === 0 && tipo.vacios === 0) return null;
+          if (tipo.appointments.length === 0 && tipo.vacios === 0) return null;
           const key = `${franja.time ?? "sin"}-${tipo.appointmentTypeId}`;
           return (
             <section key={key} className="space-y-1">
@@ -320,7 +320,7 @@ function CentroSheet({
                 <span className="font-mono">{franja.time ?? t("dia.noTime")}</span>
                 <span>{tipo.tipoNombre}</span>
                 <span className="text-xs text-muted-foreground">
-                  {tipo.citas.length}/{tipo.cupo}
+                  {tipo.appointments.length}/{tipo.cupo}
                 </span>
               </h3>
               <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
@@ -335,7 +335,7 @@ function CentroSheet({
                     </tr>
                   </thead>
                   <tbody>
-                    {tipo.citas.map((fila) => (
+                    {tipo.appointments.map((fila) => (
                       <tr key={fila.id} className="border-t">
                         {cols.map((col) => (
                           <CeldaCita
@@ -504,7 +504,7 @@ function CentroSheetV2({
 
   // Aplanar TODAS las citas (con o sin hora) a una sola lista.
   const items = franjas.flatMap((f) =>
-    f.tipos.flatMap((tp) => tp.citas.map((fila) => ({ fila, hora: f.time, tipoCitaId: tp.appointmentTypeId }))),
+    f.tipos.flatMap((tp) => tp.appointments.map((fila) => ({ fila, hora: f.time, tipoCitaId: tp.appointmentTypeId }))),
   );
   const hayNoHora = items.some((i) => i.hora === null);
   const filtered = items.filter((i) =>
@@ -552,7 +552,7 @@ function CentroSheetV2({
       {franjasHora.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {franjasHora.map((f) => {
-            const conCitas = f.tipos.some((tp) => tp.citas.length > 0);
+            const conCitas = f.tipos.some((tp) => tp.appointments.length > 0);
             return (
               <div
                 key={f.time}

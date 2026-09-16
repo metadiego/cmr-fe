@@ -48,12 +48,13 @@ export interface TipoFranja {
   tipoNombre: string; // NO está en el mapa → español
   cupo: number; // NO está en el mapa → español
   vacios: number; // NO está en el mapa → español (empty slots → "Agendar" buttons)
-  citas: CitaFila[]; // clave `citas`→`appointments` en la respuesta
+  // El BE traduce esta clave: en la respuesta llega como `appointments` (campos.ts).
+  appointments: CitaFila[];
 }
 
 export interface Franja {
   time: string | null; // null = appointments with no time (legacy)
-  tipos: TipoFranja[]; // clave `tipos`→`types` en la respuesta
+  tipos: TipoFranja[]; // NO está en el mapa → llega en español
 }
 
 // `resumen` y todos sus campos NO están en el mapa → llegan en español.
