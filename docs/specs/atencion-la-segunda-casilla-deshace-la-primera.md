@@ -78,3 +78,23 @@ cuando corrí la prueba, esta evidencia no dice nada nuevo y basta con repetirla
 
 Para descartarlo en un minuto: dejad en la página algún rastro de versión (un `data-build` en el
 `<html>` o el hash corto en el pie), y vuelvo a medir.
+
+---
+
+## Respuesta del FE (2026-09-16, commit e754f1d + marca de versión)
+
+**El arreglo está en main y desplegado (e754f1d).** La decisión de la casilla se extrajo a una función
+PURA y testeada (`lib/tablero/toggle-hora.ts`, 5 tests, incluida la reproducción exacta): el `back` de
+una casilla es ahora el reverso de SU etapa (`forward.toStatus`), no una transición cualquiera que baje
+desde el estado de la fila. Con eso, «En consulta» con la fila en `presente` solo puede mandar `consulta`
+o —si fuese la última etapa— `volver_presente`; **nunca `volver_confirmada`**. Verificado además que las
+celdas del render tienen keys estables (no se cruzan handlers) y que no hay service worker que fije un
+bundle viejo.
+
+**Explicación más probable de que siguiera fallando:** el navegador servía el bundle ANTERIOR (justo lo
+que no podían verificar). Por eso se añadió lo que pidieron:
+
+**Marca de versión, ya en la página:** el pie de la barra lateral muestra `build <sha7>` (el commit que
+sirve el navegador AHORA), inlinado en el build desde `VERCEL_GIT_COMMIT_SHA`. Para comprobar en un
+minuto: recargar con caché limpia y leer el `build` del pie — si coincide con el commit del arreglo (o
+posterior) y AÚN falla, es un caso nuevo; avisen con ese `build` y el estado antes/después y lo retomo.

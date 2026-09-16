@@ -299,6 +299,11 @@ export function AppSidebar() {
                 {signingOut ? t("signingOut") : t("signOut")}
               </span>
             </Button>
+            {/* Marca de versión: qué build sirve el navegador AHORA. Permite confirmar en un vistazo
+                si la pantalla tiene ya el arreglo desplegado. Handoff atencion-la-segunda-casilla. */}
+            <p className="px-2 font-mono text-[10px] text-sidebar-foreground/40 group-data-[collapsible=icon]:hidden">
+              build {process.env.NEXT_PUBLIC_BUILD_SHA}
+            </p>
           </div>
         ) : (
           <Button size="sm" className="w-full" asChild>
