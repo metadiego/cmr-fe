@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
+import { resolveToggle, type EstadoLite } from "@/lib/tablero/toggle-hora";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,12 +27,11 @@ function fmtHora(v: unknown): string | null {
   return m ? `${m[1].padStart(2, "0")}:${m[2]}` : s;
 }
 
-type EstadoLite = { clave: string; orden: number };
-
 // PRESENTE / EN CONSULTA / ASISTIDO. FUNCIÓN PRIMARIA: un CHECK que PONE o QUITA.
 // Marcar = ejecuta la transición hacia adelante (render.transition) y de paso
-// sella la hora (beneficio). Desmarcar = ejecuta la transición de vuelta
-// (derivada de los estados: la que baja de estado). Optimista = reacciona al
+// sella la hora (beneficio). Desmarcar = ejecuta el reverso de ESTA etapa.
+// La decisión (qué acción mandar) vive en lib/tablero/toggle-hora.ts (pura, testeada):
+// blinda el bug atencion-la-segunda-casilla-deshace-la-primera. Optimista = reacciona al
 // instante; SSE + servidor reconcilian. Guardas del BE (p.ej. requiere médico).
 export function CeldaToggleHora({
   tablero,
@@ -61,35 +61,25 @@ export function CeldaToggleHora({
   const color = colColor(col);
 
   const transClave = (col.render as Record<string, unknown> | null)?.transition as string | undefined;
-  const forward = transClave ? transiciones.find((t) => t.slug === transClave) : undefined;
-  const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
 
-  // MARCADO = el paciente ya alcanzó (o pasó) el estado destino de esta acción.
-  // (Basado en el estado, no en la hora → desmarcar funciona aunque la hora quede.)
-  const baseChecked = !!forward && ordenOf(estado) >= ordenOf(forward.toStatus);
-  const checked = optimistic ?? baseChecked;
+  // Decisión PURA (marcado/deshabilitado/acción a ejecutar), testeada en lib/tablero/toggle-hora.
+  // `action` ya es no-op cuando la casilla no puede avanzar ni deshacer → jamás manda el back de otra etapa.
+  const { checked, disabled, action } = resolveToggle({
+    estado,
+    forwardSlug: transClave,
+    transiciones,
+    estados,
+    optimistic,
+    busy,
+  });
   const hora = checked ? fmtHora(value) : null; // la hora sellada es el BENEFICIO
 
-  // La "de vuelta" (quitar): transición desde el estado actual que BAJA de estado.
-  const back = transiciones.find(
-    (t) => t.fromStatuses.includes(estado) && t.toStatus != null && ordenOf(t.toStatus) < ordenOf(estado),
-  );
-
-  const canCheck = !checked && !!forward && (forward.fromStatuses.length === 0 || forward.fromStatuses.includes(estado));
-  // Reversible EN ORDEN (LIFO): solo se desmarca la ÚLTIMA etapa activa, es decir
-  // cuando el estado actual es EXACTAMENTE el destino de esta etapa. Para deshacer
-  // una etapa anterior, primero hay que deshacer las posteriores.
-  const isLast = !!forward && estado === forward.toStatus;
-  const canUncheck = checked && isLast && !!back;
-  const disabled = busy || (!checked && !canCheck) || (checked && !canUncheck);
-
   async function toggle() {
-    const accion = checked ? back?.slug : forward?.slug;
-    if (!accion) return;
+    if (!action) return; // no-op seguro
     setBusy(true);
     setOptimistic(!checked); // PONER / QUITAR al instante
     try {
-      await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: accion }, centroId);
+      await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action }, centroId);
       onSaved?.();
     } catch (err) {
       setOptimistic(undefined); // revertir
