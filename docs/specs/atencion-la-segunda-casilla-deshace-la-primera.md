@@ -54,3 +54,27 @@ lugar del `forward`, y el usuario ve deshacerse lo que acababa de marcar.
 
 El flujo de Atención no se puede completar desde la pantalla: el paciente no pasa de «presente».
 Es el camino diario del puesto.
+
+---
+
+## Sigue pasando DESPUÉS del arreglo `e754f1d` (16-sep, 10:19)
+
+**Verificado** contra `https://cmr-fe-gamma.vercel.app` con la sesión real de la operadora, dos
+ciclos seguidos, con refs tomados inmediatamente antes de cada clic y el estado consultado en el API
+después de cada uno:
+
+```
+ciclo 1: [ ] [disabled] [disabled]  → clic 1ª → estado = presente ; [✓ 10:17] [ ] [disabled]
+         clic 2ª → POST /board/action 201 → estado = confirmada      ← deshace
+ciclo 2: [ ] [disabled] [disabled]  → clic 1ª → estado = presente ; [✓ 10:19] [ ] [disabled]
+         clic 2ª → estado = confirmada                                ← deshace
+```
+
+Cita usada: `ada2a26a-f802-4ded-bec5-3acff5442eb1` (Bayamón, 16-sep, PRUEBA FINAL BAYAMON QA).
+
+**Supuesto, no verificado:** que el navegador estuviera sirviendo ya el build de `e754f1d`. No tengo
+forma de comprobar la versión del bundle desde aquí; si el despliegue no había llegado a esa URL
+cuando corrí la prueba, esta evidencia no dice nada nuevo y basta con repetirla.
+
+Para descartarlo en un minuto: dejad en la página algún rastro de versión (un `data-build` en el
+`<html>` o el hash corto en el pie), y vuelvo a medir.
