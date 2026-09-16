@@ -291,7 +291,33 @@ export function AppSidebar() {
       <SidebarContent>
         {/* Todo el menú sale del catálogo (GET /menu) filtrado por permisos. El bucket
             «En desarrollo» es otra raíz del catálogo (perm menu.desarrollo), no un caso especial. */}
-        {domainGroups.map((g) => renderSection(g, renderTop(g.children)))}
+        {sidebarState === "collapsed" ? (
+          // COMPRIMIDO: rail limpio de ICONOS de categoría (tooltip = nombre). No texto cortado.
+          // Clic en un icono → abre esa categoría y despliega el menú.
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {domainGroups.map((g) => (
+                  <SidebarMenuItem key={g.slug}>
+                    <SidebarMenuButton
+                      tooltip={labelOf(g)}
+                      isActive={g.children.some((c) => isActive(pathname, routeForClave(c.slug, c.path)))}
+                      onClick={() => {
+                        navOpen.setClaveOpen(g.slug, true);
+                        toggleSidebar();
+                      }}
+                    >
+                      {sectionIcon(g) ?? <span className="grid size-4 place-items-center text-[10px] font-bold">{labelOf(g).charAt(0)}</span>}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : (
+          // EXPANDIDO: secciones plegables con etiqueta e hijos.
+          domainGroups.map((g) => renderSection(g, renderTop(g.children)))
+        )}
       </SidebarContent>
 
       <SidebarFooter>
