@@ -770,7 +770,9 @@
     "planificacionCompras": "Purchase planning",
     "calendario": "Calendar",
     "recepcionFactura": "Receive from invoice",
-    "configuracion_datos_paciente": "Required patient data"
+    "configuracion_datos_paciente": "Required patient data",
+    "collapseNav": "Collapse menu",
+    "expandNav": "Expand menu"
   },
   "admin": {
     "title": "Administration",

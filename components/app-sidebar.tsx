@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Stethoscope02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Stethoscope02Icon, ArrowRight01Icon, SidebarLeft01Icon } from "@hugeicons/core-free-icons";
 
 import { isActive } from "@/lib/nav";
 import { routeForClave } from "@/lib/nav/manifest";
@@ -31,6 +31,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarSeparator,
+  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -91,7 +92,7 @@ export function AppSidebar() {
   const menu = useMenu();
   const me = useMe();
   const { can } = useCan();
-  const { state: sidebarState } = useSidebar();
+  const { state: sidebarState, toggleSidebar } = useSidebar();
   const navOpen = useNavOpenState();
   // En modo icono (rail colapsado) forzamos abierto: si no, no habría destinos que
   // mostrar. En modo expandido respetamos la preferencia (por defecto cerrado).
@@ -258,15 +259,33 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <Link
-          href="/"
-          className="flex items-center gap-2 px-2 py-1.5 font-semibold tracking-tight"
-        >
-          <span className="grid size-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
-            <HugeiconsIcon icon={Stethoscope02Icon} className="size-4" />
-          </span>
-          <span className="text-base group-data-[collapsible=icon]:hidden">CMR</span>
-        </Link>
+        {/* Cabecera: marca a la izquierda + botón para plegar/desplegar. Al colapsar (icon) la marca se
+            oculta y el botón queda centrado para poder VOLVER a abrir. También se pliega con el rail del
+            borde (SidebarRail) y con Ctrl/Cmd+B. */}
+        <div className="flex items-center gap-1">
+          <Link
+            href="/"
+            className="flex flex-1 items-center gap-2 px-2 py-1.5 font-semibold tracking-tight group-data-[collapsible=icon]:hidden"
+          >
+            <span className="grid size-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
+              <HugeiconsIcon icon={Stethoscope02Icon} className="size-4" />
+            </span>
+            <span className="text-base">CMR</span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            aria-label={sidebarState === "collapsed" ? t("expandNav") : t("collapseNav")}
+            title={sidebarState === "collapsed" ? t("expandNav") : t("collapseNav")}
+            className="size-8 shrink-0 text-sidebar-foreground/70 hover:text-sidebar-foreground group-data-[collapsible=icon]:mx-auto"
+          >
+            <HugeiconsIcon
+              icon={SidebarLeft01Icon}
+              className="size-4 transition-transform duration-200 group-data-[collapsible=icon]:rotate-180"
+            />
+          </Button>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
@@ -311,6 +330,8 @@ export function AppSidebar() {
           </Button>
         )}
       </SidebarFooter>
+      {/* Rail del borde: franja fina en el filo del menú; clic para plegar/desplegar (patrón shadcn). */}
+      <SidebarRail />
     </Sidebar>
   );
 }

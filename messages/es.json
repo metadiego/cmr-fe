@@ -770,7 +770,9 @@
     "planificacionCompras": "Planificación de compras",
     "calendario": "Calendario",
     "recepcionFactura": "Recibir desde factura",
-    "configuracion_datos_paciente": "Datos obligatorios del paciente"
+    "configuracion_datos_paciente": "Datos obligatorios del paciente",
+    "collapseNav": "Plegar menú",
+    "expandNav": "Desplegar menú"
   },
   "admin": {
     "title": "Administración",
