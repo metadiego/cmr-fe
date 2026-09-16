@@ -195,3 +195,27 @@ lo deduzco del resultado, no lo he leído.
 llega a disparar nada (cero llamadas). Solo consigo que responda aislando la fila con las pestañas
 de filtro. Puede ser cosa de mi navegador sin ratón real, pero encaja con el resto: algo en esas
 celdas depende del orden/remonte de la lista.
+
+---
+
+## CAUSA RAÍZ (2026-09-16, con la huella del servidor) — no era la transición, era el CLIC
+
+El dato del servidor lo confirmó: el 2º clic emite `volver_confirmada` (el RETROCESO), y esa acción SOLO
+la produce la casilla «Presente» al desmarcarse. O sea, el clic sobre «En consulta» estaba disparando el
+checkbox de «Presente». Y la otra pista (con dos citas, el clic sobre la 2ª fila no dispara nada) es el
+mismo problema en vertical.
+
+**Mecanismo:** el primitivo `components/ui/checkbox.tsx` agranda su área de toque con
+`after:absolute after:-inset-x-3 after:-inset-y-2` (12px a los lados, 8px arriba/abajo, invisible).
+En el flujo, los chips van pegados (gap + línea conectora) y las filas van juntas, así que esas áreas
+invisibles SOLAPAN: un clic cerca del borde aterriza en el checkbox del chip vecino («Presente») o en la
+fila de arriba. Por eso el retroceso salía de «Presente» y la 2ª fila parecía muerta.
+
+**Arreglo (commit siguiente):** en `flujo-atencion.tsx` cada chip es ahora un `<button>` propio —un ÚNICO
+destino de clic con límites propios— y el `Checkbox` queda SOLO como indicador visual
+(`pointer-events-none`, sin ese `after`). Así un clic solo puede togglear SU casilla. La lógica de qué
+transición mandar sigue en `resolveToggle` (una casilla solo manda su avance o su propio back).
+
+**Cómo lo confirman:** con el build nuevo, el mismo clic sobre «En consulta» debe emitir `action:
+"consulta"` (avanzar), y el clic sobre la 2ª fila debe responder. Si el servidor sigue registrando
+`volver_confirmada`, mándenme el `build` del pie y lo sigo.

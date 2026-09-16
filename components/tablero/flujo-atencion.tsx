@@ -121,7 +121,16 @@ export function FlujoAtencion({
             {/* Ancho FIJO por paso: así Presente/En consulta/Asistido quedan alineados en columna entre
                 filas, sin importar que un paso tenga hora sellada (más ancho) y otro esté vacío. */}
             <div className="flex w-[5.5rem] shrink-0 flex-col items-center gap-1">
-              <label
+              {/* El chip ES el botón: un ÚNICO destino de clic con límites propios. Antes era un <label>
+                  con un Checkbox cuyo área de toque (after:-inset-x-3/-inset-y-2) se extendía a los lados
+                  y arriba/abajo, solapando con el chip vecino y con la fila de al lado → el clic aterrizaba
+                  en la casilla equivocada («Presente» → volver_confirmada) o en otra fila. El Checkbox
+                  queda SOLO como indicador visual (pointer-events-none, sin ese after). Handoff
+                  atencion-la-segunda-casilla-deshace-la-primera. */}
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => toggle(col, checked, action)}
                 title={tRoot(col.labelKey)}
                 className={
                   "inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold transition-colors " +
@@ -136,11 +145,11 @@ export function FlujoAtencion({
                 <Checkbox
                   checked={checked}
                   disabled={disabled}
-                  onCheckedChange={() => toggle(col, checked, action)}
-                  className={checked ? "border-white/70 data-[state=checked]:bg-white/20 data-[state=checked]:text-white" : ""}
+                  aria-hidden
+                  className={"pointer-events-none after:hidden " + (checked ? "border-white/70 data-[state=checked]:bg-white/20 data-[state=checked]:text-white" : "")}
                 />
                 {hora && <span className="font-mono">{hora}</span>}
-              </label>
+              </button>
               <span className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{tRoot(col.labelKey)}</span>
             </div>
           </React.Fragment>
