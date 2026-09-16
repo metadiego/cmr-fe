@@ -155,3 +155,43 @@ el clic aterrizando en «Presente»), haría falta el dato decisivo:
 /api/v2/board/action` del clic que falla trae `action: "<slug>"`. Ese slug dice EXACTO qué transición se
 mandó (`consulta` vs `volver_confirmada` vs `volver_presente`). Si tras recargar con el build nuevo aún
 falla, mándenme ese `action` y el `build` del pie, y lo cierro en el acto.
+
+---
+
+## Con `ecbec12` sigue igual — y aquí está la acción exacta que pedíais (16-sep, 10:50)
+
+No puedo leer el cuerpo del POST desde mi navegador, pero **el servidor lo registra**: cada
+transición deja huella append-only en el historial de la cita
+(`GET /api/v2/appointments/:id/history`). Ahí está, sin suponer nada:
+
+```
+14:50:06 | presente  | {}
+14:50:42 | corregida | {"antes":{"estado":"presente"},
+                       "despues":{"estado":"confirmada"},
+                       "limpiados":["llegadaEn","horaInEn","horaOutEn"]}
+```
+
+**Verificado:** build `ecbec12` leído en el pie de la barra lateral en esa misma sesión, navegador
+arrancado de cero. El clic en la 1ª casilla emite `presente`; el clic en la 2ª emite la transición
+que el BE atiende con `corregirEstado(...)` — la de **volver atrás** — y por eso limpia los tres
+sellos de hora. Repetido a las 14:33 con idéntico resultado.
+
+Cita: `ada2a26a-f802-4ded-bec5-3acff5442eb1`.
+
+**Cómo leerlo vosotros mismos** (una llamada, sin tocar nada):
+
+```
+GET /api/v2/appointments/<citaId>/history
+```
+
+El último elemento con `type: "corregida"` es la acción de retroceso; si en su lugar apareciera
+`type: "en_consulta"`, el problema estaría en el BE y no en la pantalla. Hoy aparece `corregida`.
+
+**Supuesto, no verificado:** el `slug` literal que viaja en `action`. Por el efecto (presente →
+confirmada, limpiando `llegadaEn`/`horaInEn`/`horaOutEn`) solo encaja `volver_confirmada`, pero eso
+lo deduzco del resultado, no lo he leído.
+
+**Dato añadido:** cuando en el día hay **dos filas**, el clic sobre la casilla de la segunda fila no
+llega a disparar nada (cero llamadas). Solo consigo que responda aislando la fila con las pestañas
+de filtro. Puede ser cosa de mi navegador sin ratón real, pero encaja con el resto: algo en esas
+celdas depende del orden/remonte de la lista.
