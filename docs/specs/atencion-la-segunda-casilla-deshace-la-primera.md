@@ -98,3 +98,34 @@ que no podían verificar). Por eso se añadió lo que pidieron:
 sirve el navegador AHORA), inlinado en el build desde `VERCEL_GIT_COMMIT_SHA`. Para comprobar en un
 minuto: recargar con caché limpia y leer el `build` del pie — si coincide con el commit del arreglo (o
 posterior) y AÚN falla, es un caso nuevo; avisen con ese `build` y el estado antes/después y lo retomo.
+
+---
+
+## Con el build 980ee46 LEÍDO EN PANTALLA, sigue pasando (16-sep, 10:33)
+
+Gracias por la marca de versión: resuelve la duda que yo no podía cerrar. **Ya no es el bundle viejo.**
+
+**Verificado** — navegador reiniciado desde cero (proceso nuevo, sin caché ni sesión previa), sesión
+real de la operadora, y el pie de la barra lateral leído en la misma pantalla de la prueba:
+
+```
+build 980ee46                      ← leído en el pie, en esta misma sesión
+clic 1ª casilla → [✓ 10:31] ; GET /appointments → estado = presente
+clic 2ª casilla → 1 POST /board/action → estado = confirmada     ← deshace
+
+repetido: [✓ 10:33] → presente ; clic 2ª → 1 POST → confirmada
+```
+
+Cita: `ada2a26a-f802-4ded-bec5-3acff5442eb1` (Bayamón, PRUEBA FINAL BAYAMON QA).
+
+**Dato que puede ayudar:** sale **una sola** llamada a `/board/action`, no dos. Así que no es un doble
+disparo (primera + segunda); es una única acción, y por el resultado solo puede ser `volver_confirmada`.
+
+**Supuesto, no verificado:** cuál es la acción exacta que viaja en el cuerpo. Desde aquí solo veo
+método, URL y código de respuesta, no el payload. Si registráis el `action` enviado en consola —o me
+decís cómo leerlo— lo confirmo en la siguiente pasada y dejamos de suponer los dos.
+
+**Contexto que quizá importe:** en ambas mediciones la fila estaba **filtrada** (pestaña «Confirmed»
+para el primer clic y «Checked in» para el segundo), porque en el día había dos filas y necesitaba
+aislar la de la prueba. Si el filtrado remonta la lista entre un clic y otro, el estado interno de la
+celda podría quedar desfasado — eso encajaría con un `optimistic` que sobrevive al remonte.
