@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
+import { resolveToggle } from "@/lib/tablero/toggle-hora";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -52,41 +53,41 @@ export function FlujoAtencion({
   const [postAccion, setPostAccion] = React.useState<{ accion: string; render: Record<string, unknown> | null } | null>(null);
 
   const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
+  const fwdSlug = (col: ColumnaEfectiva) =>
+    (col.render as Record<string, unknown> | null)?.transition as string | undefined;
   const fwdOf = (col: ColumnaEfectiva) => {
-    const clave = (col.render as Record<string, unknown> | null)?.transition as string | undefined;
+    const clave = fwdSlug(col);
     return clave ? transiciones.find((t) => t.slug === clave) : undefined;
   };
   // Color de cada etapa = color del estado destino (dato: def.estados). Da los
   // colores del mockup (presente/en consulta/asistido) sin hardcode.
   const colorOf = (col: ColumnaEfectiva) => estados.find((e) => e.clave === fwdOf(col)?.toStatus)?.color ?? colColor(col) ?? null;
-  const isChecked = (col: ColumnaEfectiva) => opt[col.clave] ?? (fila[col.clave] != null && fila[col.clave] !== "");
+
+  // Decisión de cada etapa vía la MISMA lógica pura y testeada que CeldaToggleHora
+  // (lib/tablero/toggle-hora): una casilla solo manda SU avance o SU propio back (el reverso de su
+  // etapa), y si no puede ni avanzar ni deshacer es no-op. Antes «En consulta» calculaba el back
+  // desde el estado de la fila y podía deshacer «Presente» (handoff atencion-la-segunda-casilla).
+  const estadoFila = String(fila.estado ?? "");
+  const resolved = (col: ColumnaEfectiva) =>
+    resolveToggle({
+      estado: estadoFila,
+      forwardSlug: fwdSlug(col),
+      transiciones,
+      estados,
+      optimistic: opt[col.clave],
+      busy: busy === col.clave,
+    });
 
   // Orden de la cadena = orden del estado destino de cada etapa (dato, no la
   // composición). Así el encadenamiento respeta el flujo real.
   const orderedCols = [...cols].sort((a, b) => ordenOf(fwdOf(a)?.toStatus ?? null) - ordenOf(fwdOf(b)?.toStatus ?? null));
 
-  async function toggle(i: number) {
-    const col = orderedCols[i];
-    const checked = isChecked(col);
-    const fwd = fwdOf(col);
-    let accion: string | undefined;
-    if (!checked) {
-      accion = fwd?.slug;
-    } else if (i > 0) {
-      // Volver a la etapa anterior (su estado destino).
-      const prevTarget = fwdOf(orderedCols[i - 1])?.toStatus ?? null;
-      accion = transiciones.find((t) => t.toStatus === prevTarget && fwd && t.fromStatuses.includes(fwd.toStatus ?? ""))?.slug;
-    } else {
-      // Primera etapa: bajar por debajo de su estado destino.
-      accion = fwd
-        ? transiciones.find((t) => t.fromStatuses.includes(fwd.toStatus ?? "") && t.toStatus != null && ordenOf(t.toStatus) < ordenOf(fwd.toStatus))?.slug
-        : undefined;
-    }
-    if (!accion) return;
+  async function toggle(col: ColumnaEfectiva, checked: boolean, action: string | null) {
+    if (!action) return; // no-op seguro: la etapa no puede avanzar ni deshacer
     setBusy(col.clave);
     setOpt((o) => ({ ...o, [col.clave]: !checked }));
     try {
-      await ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: accion }, centroId);
+      await ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action }, centroId);
       onSaved?.();
       // Tras avanzar (no al desmarcar), si la columna define un postAccion,
       // abrir su modal registrado (data-driven, no hardcode).
@@ -111,13 +112,8 @@ export function FlujoAtencion({
     <>
     <div className="flex items-center justify-center gap-1">
       {orderedCols.map((col, i) => {
-        const checked = isChecked(col);
+        const { checked, disabled, action } = resolved(col);
         const hora = checked ? fmtHora(fila[col.clave]) : null;
-        const prevOk = i === 0 || isChecked(orderedCols[i - 1]);
-        const nextChecked = i < orderedCols.length - 1 && isChecked(orderedCols[i + 1]);
-        const canCheck = !checked && prevOk; // en orden hacia adelante
-        const canUncheck = checked && !nextChecked; // en orden hacia atrás (LIFO)
-        const disabled = busy === col.clave || (!checked && !canCheck) || (checked && !canUncheck);
         const color = colorOf(col);
         return (
           <React.Fragment key={col.clave}>
@@ -140,7 +136,7 @@ export function FlujoAtencion({
                 <Checkbox
                   checked={checked}
                   disabled={disabled}
-                  onCheckedChange={() => toggle(i)}
+                  onCheckedChange={() => toggle(col, checked, action)}
                   className={checked ? "border-white/70 data-[state=checked]:bg-white/20 data-[state=checked]:text-white" : ""}
                 />
                 {hora && <span className="font-mono">{hora}</span>}

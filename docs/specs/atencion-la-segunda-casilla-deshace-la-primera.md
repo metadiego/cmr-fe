@@ -129,3 +129,29 @@ decís cómo leerlo— lo confirmo en la siguiente pasada y dejamos de suponer l
 para el primer clic y «Checked in» para el segundo), porque en el día había dos filas y necesitaba
 aislar la de la prueba. Si el filtrado remonta la lista entre un clic y otro, el estado interno de la
 celda podría quedar desfasado — eso encajaría con un `optimistic` que sobrevive al remonte.
+
+---
+
+## Segundo análisis del FE (2026-09-16) — el arreglo estaba en el componente equivocado
+
+**Hallazgo (verificado):** las columnas del flujo (`presente`/`en_consulta`/`asistido`) traen
+`render.group = "flujo_atencion"`, así que NO las pinta `celda-toggle-hora.tsx` (donde fue el primer
+arreglo e754f1d) sino **`components/tablero/flujo-atencion.tsx`**, que tenía SU PROPIA lógica de back.
+Por eso el build 980ee46 seguía fallando: el arreglo real no tocaba este componente. Confirmado con la
+definición y una fila reales de prod (columnas y claves `presente/en_consulta/asistido`).
+
+**Qué se hizo:** `flujo-atencion.tsx` ahora decide con la MISMA función pura y testeada que la otra
+celda (`lib/tablero/resolveToggle`). Garantía por construcción: cada casilla solo puede mandar SU
+avance o SU propio back (el reverso de su etapa); si no puede ni avanzar ni deshacer, es no-op. Con eso,
+«En consulta» con la fila en `presente` solo puede mandar `consulta` (o, si fuese su etapa, `volver_presente`);
+**nunca `volver_confirmada`**.
+
+**Honesto — lo que NO pude verificar:** con los datos correctos NO logré reproducir que un clic en la
+2ª casilla mande `volver_confirmada`; en el código, esa transición solo la produce la casilla
+«Presente» al desmarcarse. El arreglo blinda «En consulta», pero si el disparo real fuese otro (p. ej.
+el clic aterrizando en «Presente»), haría falta el dato decisivo:
+
+**Lo único que lo confirma en un segundo:** en las DevTools, pestaña Network, el cuerpo del `POST
+/api/v2/board/action` del clic que falla trae `action: "<slug>"`. Ese slug dice EXACTO qué transición se
+mandó (`consulta` vs `volver_confirmada` vs `volver_presente`). Si tras recargar con el build nuevo aún
+falla, mándenme ese `action` y el `build` del pie, y lo cierro en el acto.
