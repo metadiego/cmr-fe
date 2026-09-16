@@ -12,6 +12,44 @@ Next.js 16 (App Router) + React 19 + Tailwind v4 + shadcn/ui. This is a **thin c
 `cmr-be`**: almost no business logic lives here. Authentication is Supabase and the data comes
 from the API. The contract between the two repos is in `../CLAUDE.md` (monorepo root).
 
+## Los estatutos — lo que se cumple SIEMPRE, en BE y en FE
+
+Vale para todo lo que se entrega, sin excepción: **API-First + MCP + Swagger + configurable +
+multi-tenant + RBAC + comentarios en DB y en cada campo + spec/plan + TDD + drift-clean + i18n**.
+Sin hardcode. **UI para TODO el CRUD de la API.** Revisar el endpoint CORRECTO, no el más cómodo. No
+duplicar código. Sin secretos. **Nunca asumir: investigar y revisar en profundidad las veces que haga
+falta.** Jamás suponer, y mucho menos confiar.
+
+**Permisos por centro.** Cada endpoint puede recibir, opcionalmente, el array de centros como
+parámetro para resolver el permiso (`read`, `write` y los que hagan falta); la UI debe pasarlo en vez
+de depender solo del centro activo.
+
+**Diseño.** Buscar en internet el layout de UI más moderno antes de diseñar, aplicarlo manteniendo la
+uniformidad del diseño existente, y hacer un uso eficiente y óptimo de la pantalla: toda la pantalla.
+
+### Las tres preguntas, antes de dar nada por terminado
+
+¿Lo entiendo? ¿Lo puedo mantener? ¿Lo probé? **Si la respuesta a alguna es NO, no se entrega: se dice
+que no.**
+
+### Lo verificado y lo supuesto van SEPARADOS
+
+Siempre, y de forma explícita. Lo verificado, con su fuente o el comando que lo comprobó. Lo supuesto,
+marcado como supuesto. **Nunca mezclados en la misma frase.**
+
+### El rigor se gradúa por lo que cuesta equivocarse
+
+Máximo en lo que va a producción, toca datos de pacientes o mueve dinero. Ligero en scripts y
+herramientas de usar y tirar.
+
+### Las herramientas del equipo (gstack)
+
+- `/qa` y `/qa-only` → QA con navegador REAL contra `localhost:8080` o `https://cmr-fe-gamma.vercel.app`
+  (flujos de frontdesk, toasts, persistencia).
+- `/review` → revisión rigurosa del branch/PR ANTES del merge a main.
+- `/cso` → auditoría de seguridad OWASP + STRIDE (datos de pacientes, auth/tenancy/RBAC).
+- `/browse` → solo como dependencia de `/qa`.
+
 ## Commands
 
 ```bash
