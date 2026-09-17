@@ -15,6 +15,7 @@ import {
   paqueteTotales,
   getComprasPaciente,
   getPendientesEntrega,
+  getAgendaPaciente,
   type PendienteEntrega,
   type ComprasPaciente,
   type CompraLinea,
@@ -39,7 +40,7 @@ import { PresentesMarca } from "@/components/frontdesk/presentes-marca";
 import { PRESENTES_DEFAULTS } from "@/lib/presentes-prefs";
 import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
 import { useRouter, usePathname } from "next/navigation";
-import { buscarPaciente } from "@/lib/api/facturas";
+import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
@@ -49,6 +50,8 @@ import { useDictado } from "@/hooks/use-dictado";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
+import { CorregirDisponibilidadDialog } from "@/components/frontdesk/corregir-disponibilidad-dialog";
+import { legendMultiplicadores } from "@/lib/frontdesk/multiplicadores";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
@@ -97,6 +100,7 @@ import {
   Mic01Icon,
   MicOff01Icon,
   Search01Icon,
+  Cancel01Icon,
   MoreHorizontalIcon,
   Tick02Icon,
   Alert02Icon,
@@ -258,6 +262,46 @@ export function FrontdeskBoard() {
   // elegido ya no existe en este centro (servicio apagado ahí), cae al primero disponible.
   const tabEfectivo = servicios.some((s) => s.slug === tab) ? tab : (servicios[0]?.slug ?? "");
   const servicioActivo = servicios.find((s) => s.slug === tabEfectivo);
+
+  // ——— Filtro por PACIENTE (idea del dueño): al elegir un paciente, las pestañas quedan solo con SUS
+  // servicios de ESTE día; un banner recuerda a quién se mira y un botón visible vuelve al día completo.
+  // Sin endpoint nuevo: getAgendaPaciente(from=to=fecha) y se cruza por `serviceSlug`. Patrón por-key (el
+  // setState va solo en el async). Handoff frontdesk-filtrar-por-paciente.
+  const [pacienteFiltro, setPacienteFiltro] = React.useState<PacienteBusqueda | null>(null);
+  const [qFiltro, setQFiltro] = React.useState("");
+  const [qFiltroDeb, setQFiltroDeb] = React.useState("");
+  React.useEffect(() => {
+    const h = setTimeout(() => setQFiltroDeb(qFiltro), 250);
+    return () => clearTimeout(h);
+  }, [qFiltro]);
+  const filtroBusq = useResource<PacienteBusqueda[]>(
+    () => (!pacienteFiltro && qFiltroDeb.trim().length >= 2 ? buscarPaciente(qFiltroDeb.trim(), gate.centro) : Promise.resolve([])),
+    [pacienteFiltro, qFiltroDeb, gate.centro],
+  );
+  const filtroResultados = filtroBusq.state.kind === "ok" ? filtroBusq.state.data : [];
+  const filtroKey = pacienteFiltro ? `${pacienteFiltro.id}|${fecha}|${gate.centro ?? ""}` : "";
+  const [filtroData, setFiltroData] = React.useState<{ key: string; slugs: Set<string> } | null>(null);
+  React.useEffect(() => {
+    if (!filtroKey || !pacienteFiltro) return;
+    let cancel = false;
+    getAgendaPaciente(pacienteFiltro.id, fecha, fecha, gate.centro)
+      .then((items) => !cancel && setFiltroData({ key: filtroKey, slugs: new Set(items.map((i) => i.serviceSlug).filter((x): x is string => !!x)) }))
+      .catch(() => {});
+    return () => { cancel = true; };
+  }, [filtroKey, pacienteFiltro, fecha, gate.centro]);
+  const filtroSlugs = filtroData && filtroData.key === filtroKey ? filtroData.slugs : null;
+  const serviciosMostrados = filtroSlugs ? servicios.filter((s) => filtroSlugs.has(s.slug)) : servicios;
+  // Al cargar el filtro, si la pestaña activa no es de este paciente, saltar a la primera visible.
+  const [filtroAuto, setFiltroAuto] = React.useState("");
+  if (filtroSlugs && filtroKey && filtroKey !== filtroAuto) {
+    setFiltroAuto(filtroKey);
+    if (serviciosMostrados.length > 0 && !serviciosMostrados.some((s) => s.slug === tabEfectivo)) {
+      setTab(serviciosMostrados[0].slug);
+    }
+  }
+  const filtroPacienteNombre = pacienteFiltro
+    ? pacienteFiltro.displayName || `${pacienteFiltro.firstName ?? ""} ${pacienteFiltro.lastName ?? ""}`.trim()
+    : "";
 
   // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
   // pacienteId, datos) unidas por id. El FE solo une; no recalcula.
@@ -626,17 +670,60 @@ export function FrontdeskBoard() {
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {/* Tabs por servicio (color del dato) + "Todos" (GAP BE: vista por paciente) */}
+          {/* Filtro por PACIENTE: buscar → deja solo SUS servicios del día; banner + botón visible para
+              volver al día completo. Reemplaza el viejo botón «Todos» inerte. Handoff frontdesk-filtrar-por-paciente. */}
+          {pacienteFiltro ? (
+            <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md bg-primary/5 px-3 py-2 ring-1 ring-primary/30">
+              <HugeiconsIcon icon={Search01Icon} className="size-4 shrink-0 text-primary" />
+              <span className="text-sm">
+                {t("viendoPaciente")} <span className="font-semibold">{filtroPacienteNombre}</span>
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto gap-1.5"
+                onClick={() => { setPacienteFiltro(null); setQFiltro(""); }}
+              >
+                <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+                {t("volverAlDia")}
+              </Button>
+            </div>
+          ) : (
+            <div className="relative mb-3 w-full max-w-sm">
+              <HugeiconsIcon icon={Search01Icon} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={qFiltro}
+                onChange={(e) => setQFiltro(e.target.value)}
+                placeholder={t("filtrarPacientePh")}
+                className="h-9 pl-8"
+                aria-label={t("filtrarPacientePh")}
+              />
+              {qFiltroDeb.trim().length >= 2 && filtroResultados.length > 0 && (
+                <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-lg">
+                  {filtroResultados.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => { setPacienteFiltro(p); setQFiltro(""); }}
+                      className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50"
+                    >
+                      <span className="font-medium">{(p.displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim()) || "—"}</span>
+                      {(p.medicalRecordNumber || p.phone) && (
+                        <span className="text-[11px] text-muted-foreground">{[p.medicalRecordNumber, p.phone].filter(Boolean).join(" · ")}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pestañas por servicio (color del dato); filtradas al paciente si hay filtro. Vacío no queda mudo. */}
+          {pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0 ? (
+            <p className="mb-4 rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{t("pacienteSinHoy")}</p>
+          ) : (
           <div className="mb-3 flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              disabled
-              title={t("todosTooltip")}
-              className="cursor-not-allowed rounded-full border border-dashed px-3 py-1.5 text-sm text-muted-foreground opacity-60"
-            >
-              {t("todosTab")}
-            </button>
-            {servicios.map((s) => {
+            {serviciosMostrados.map((s) => {
               const activo = s.slug === tabEfectivo;
               return (
                 <button
@@ -668,6 +755,7 @@ export function FrontdeskBoard() {
               );
             })}
           </div>
+          )}
 
           {/* Búsqueda con dictado */}
           <div className="mb-4 flex items-center gap-2">
@@ -1698,100 +1786,6 @@ function FilaSesion({
         </AlertDialog>
       </td>
     </tr>
-  );
-}
-
-// Leyenda del desglose multiplicador, p.ej. "12 días × 1 área". Claves DINÁMICAS del grupo
-// (nunca asumir cuáles ni cuántas); los labels salen de i18n (`mult.<clave>`, con fallback).
-function legendMultiplicadores(
-  mult: Record<string, number> | null | undefined,
-  label: (clave: string) => string,
-): string {
-  if (!mult) return "";
-  const partes = Object.entries(mult)
-    .filter(([, v]) => Number(v) > 0)
-    .map(([k, v]) => `${Number(v)} ${label(k)}`);
-  return partes.join(" × ");
-}
-
-// ————— Modal "Corregir disponibilidad" (GAP C) — PATCH …/paquetes/:id/ajuste —————
-// Corrige sesiones cuando facturación se equivocó; actualiza el saldo (no reescribe la factura).
-// RBAC: quien lo abre ya pasó el gate `frontdesk.disponibilidad.editar`.
-function CorregirDisponibilidadDialog({
-  paquete,
-  centro,
-  onClose,
-  onDone,
-}: {
-  paquete: PaqueteDisponibilidad | null; // null = cerrado (diálogo controlado por el padre)
-  centro?: string;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const t = useTranslations("frontdesk");
-  const { entregadas, totales } = paquete ? paqueteTotales(paquete) : { entregadas: 0, totales: 0 };
-  const [valor, setValor] = React.useState<string>("");
-  const [guardando, setGuardando] = React.useState(false);
-  // Reinicia el input al abrir/cambiar de paquete (patrón "ajustar estado en render", sin efecto).
-  const pid = paquete?.id ?? null;
-  const [prevPid, setPrevPid] = React.useState<string | null>(null);
-  if (pid !== prevPid) {
-    setPrevPid(pid);
-    setValor(paquete ? String(totales) : "");
-  }
-  const n = Number(valor);
-  const invalido = !Number.isFinite(n) || n < entregadas;
-  async function guardar() {
-    if (invalido || !paquete?.id) return;
-    setGuardando(true);
-    try {
-      await ajustarDisponibilidad(paquete.id, { totalSessions: n }, centro);
-      toast.success(t("corregirOk"));
-      onClose();
-      onDone();
-    } catch (e) {
-      toastError(e, t);
-    } finally {
-      setGuardando(false);
-    }
-  }
-  return (
-    <Dialog open={paquete != null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{t("corregirTitulo")}</DialogTitle>
-          <DialogDescription>{t("corregirDesc")}</DialogDescription>
-        </DialogHeader>
-        {paquete && (
-          <div className="space-y-3">
-            <div className="rounded-md bg-card px-3 py-2 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-              <span className="font-medium">{paquete.productoNombre ?? paquete.sku ?? "—"}</span>
-              {paquete.multiplicadores && (
-                <span className="ml-2 text-muted-foreground">
-                  {legendMultiplicadores(paquete.multiplicadores, (k) => (t.has(`mult.${k}`) ? t(`mult.${k}`) : k))}
-                </span>
-              )}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="corregir-sesiones">{t("corregirSesiones")}</Label>
-              <Input
-                id="corregir-sesiones"
-                type="number"
-                min={entregadas}
-                value={valor}
-                onChange={(e) => setValor(e.target.value)}
-              />
-              {invalido && <p className="text-xs text-destructive">{t("corregirMenorConsumido", { n: entregadas })}</p>}
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={guardar} disabled={invalido || guardando || !paquete.id}>
-                {t("corregirGuardar")}
-              </Button>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
   );
 }
 

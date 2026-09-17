@@ -1565,7 +1565,11 @@
         "dosis_no_comprada": "Dose not purchased",
         "entrega_sin_saldo": "Delivery without balance"
       }
-    }
+    },
+    "viendoPaciente": "Viewing:",
+    "volverAlDia": "Back to day",
+    "filtrarPacientePh": "Filter by patient…",
+    "pacienteSinHoy": "This patient has no services scheduled today."
   },
   "programarCitas": {
     "title": "Schedule sessions",

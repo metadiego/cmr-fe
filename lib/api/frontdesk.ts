@@ -141,8 +141,9 @@ export function reagendarSesion(sesionId: string, fecha: string, centroId?: stri
 export type AgendaItem = {
   date: string;
   status: string;
-  servicioNombre: string | null; // NO en el mapa (servicioNombre) — dejado en español
-  serviceSlug: string | null;
+  serviceId?: string | null; // (contrato BE handoff frontdesk-filtrar-por-paciente)
+  serviceSlug: string | null; // clave estable para cruzar con los servicios del centro
+  serviceName: string | null; // antes `servicioNombre`; el BE lo renombró a `serviceName` (2026-09-17)
   color: string | null;
 };
 export function getAgendaPaciente(

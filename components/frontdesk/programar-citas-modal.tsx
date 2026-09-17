@@ -413,9 +413,9 @@ export function ProgramarCitasModal({
                     key={i}
                     className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] tabular-nums"
                     style={a.color ? { backgroundColor: `${a.color}22`, color: a.color } : { backgroundColor: "var(--muted)" }}
-                    title={a.servicioNombre ?? ""}
+                    title={a.serviceName ?? ""}
                   >
-                    {formatFechaSolo(a.date)}{a.servicioNombre ? ` · ${a.servicioNombre}` : ""}
+                    {formatFechaSolo(a.date)}{a.serviceName ? ` · ${a.serviceName}` : ""}
                   </span>
                 ))}
               </div>

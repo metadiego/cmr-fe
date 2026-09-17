@@ -1565,7 +1565,11 @@
         "dosis_no_comprada": "Dosis no comprada",
         "entrega_sin_saldo": "Entrega sin saldo"
       }
-    }
+    },
+    "viendoPaciente": "Viendo:",
+    "volverAlDia": "Volver al día",
+    "filtrarPacientePh": "Filtrar por paciente…",
+    "pacienteSinHoy": "Este paciente no tiene servicios agendados hoy."
   },
   "programarCitas": {
     "title": "Programar citas",
