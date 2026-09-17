@@ -7,6 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
 
 import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type TipoFranja } from "@/lib/api/agenda-dia";
+import { getActiveCentro } from "@/lib/tenant";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getTiposCita, type TipoCita, type EstadoCitaCatalogo } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
@@ -189,9 +190,8 @@ export function DiaView({ fecha }: { fecha: string }) {
           {state.message}
         </p>
       )}
-
       {data && centrosData.length > 1 ? (
-        <Tabs defaultValue={centrosData[0]?.clinicId}>
+        <Tabs defaultValue={centrosData.some((c) => c.clinicId === getActiveCentro()) ? (getActiveCentro() as string) : centrosData[0]?.clinicId}>
           <TabsList className="mb-3">
             {centrosData.map((c) => (
               <TabsTrigger key={c.clinicId} value={c.clinicId}>{c.name}</TabsTrigger>
