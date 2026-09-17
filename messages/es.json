@@ -1569,7 +1569,9 @@
     "viendoPaciente": "Viendo:",
     "volverAlDia": "Volver al día",
     "filtrarPacientePh": "Filtrar por paciente…",
-    "pacienteSinHoy": "Este paciente no tiene servicios agendados hoy."
+    "pacienteSinHoy": "Este paciente no tiene servicios agendados hoy.",
+    "buscando": "Buscando…",
+    "sinResultadosEnCentro": "Sin resultados en {centro}"
   },
   "programarCitas": {
     "title": "Programar citas",

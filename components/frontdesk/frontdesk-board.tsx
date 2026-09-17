@@ -11,7 +11,6 @@ import {
   repararSesion,
   getDisponibilidadServicio,
   getHistorialPaciente,
-  ajustarDisponibilidad,
   paqueteTotales,
   getComprasPaciente,
   getPendientesEntrega,
@@ -51,6 +50,7 @@ import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { CorregirDisponibilidadDialog } from "@/components/frontdesk/corregir-disponibilidad-dialog";
+import { FiltroPacienteBar } from "@/components/frontdesk/filtro-paciente-bar";
 import { legendMultiplicadores } from "@/lib/frontdesk/multiplicadores";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
@@ -100,7 +100,6 @@ import {
   Mic01Icon,
   MicOff01Icon,
   Search01Icon,
-  Cancel01Icon,
   MoreHorizontalIcon,
   Tick02Icon,
   Alert02Icon,
@@ -268,17 +267,6 @@ export function FrontdeskBoard() {
   // Sin endpoint nuevo: getAgendaPaciente(from=to=fecha) y se cruza por `serviceSlug`. Patrón por-key (el
   // setState va solo en el async). Handoff frontdesk-filtrar-por-paciente.
   const [pacienteFiltro, setPacienteFiltro] = React.useState<PacienteBusqueda | null>(null);
-  const [qFiltro, setQFiltro] = React.useState("");
-  const [qFiltroDeb, setQFiltroDeb] = React.useState("");
-  React.useEffect(() => {
-    const h = setTimeout(() => setQFiltroDeb(qFiltro), 250);
-    return () => clearTimeout(h);
-  }, [qFiltro]);
-  const filtroBusq = useResource<PacienteBusqueda[]>(
-    () => (!pacienteFiltro && qFiltroDeb.trim().length >= 2 ? buscarPaciente(qFiltroDeb.trim(), gate.centro) : Promise.resolve([])),
-    [pacienteFiltro, qFiltroDeb, gate.centro],
-  );
-  const filtroResultados = filtroBusq.state.kind === "ok" ? filtroBusq.state.data : [];
   const filtroKey = pacienteFiltro ? `${pacienteFiltro.id}|${fecha}|${gate.centro ?? ""}` : "";
   const [filtroData, setFiltroData] = React.useState<{ key: string; slugs: Set<string> } | null>(null);
   React.useEffect(() => {
@@ -299,9 +287,6 @@ export function FrontdeskBoard() {
       setTab(serviciosMostrados[0].slug);
     }
   }
-  const filtroPacienteNombre = pacienteFiltro
-    ? pacienteFiltro.displayName || `${pacienteFiltro.firstName ?? ""} ${pacienteFiltro.lastName ?? ""}`.trim()
-    : "";
 
   // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
   // pacienteId, datos) unidas por id. El FE solo une; no recalcula.
@@ -672,51 +657,13 @@ export function FrontdeskBoard() {
         <>
           {/* Filtro por PACIENTE: buscar → deja solo SUS servicios del día; banner + botón visible para
               volver al día completo. Reemplaza el viejo botón «Todos» inerte. Handoff frontdesk-filtrar-por-paciente. */}
-          {pacienteFiltro ? (
-            <div className="mb-3 flex flex-wrap items-center gap-2 rounded-md bg-primary/5 px-3 py-2 ring-1 ring-primary/30">
-              <HugeiconsIcon icon={Search01Icon} className="size-4 shrink-0 text-primary" />
-              <span className="text-sm">
-                {t("viendoPaciente")} <span className="font-semibold">{filtroPacienteNombre}</span>
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto gap-1.5"
-                onClick={() => { setPacienteFiltro(null); setQFiltro(""); }}
-              >
-                <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
-                {t("volverAlDia")}
-              </Button>
-            </div>
-          ) : (
-            <div className="relative mb-3 w-full max-w-sm">
-              <HugeiconsIcon icon={Search01Icon} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={qFiltro}
-                onChange={(e) => setQFiltro(e.target.value)}
-                placeholder={t("filtrarPacientePh")}
-                className="h-9 pl-8"
-                aria-label={t("filtrarPacientePh")}
-              />
-              {qFiltroDeb.trim().length >= 2 && filtroResultados.length > 0 && (
-                <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-lg">
-                  {filtroResultados.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => { setPacienteFiltro(p); setQFiltro(""); }}
-                      className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-accent/50"
-                    >
-                      <span className="font-medium">{(p.displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim()) || "—"}</span>
-                      {(p.medicalRecordNumber || p.phone) && (
-                        <span className="text-[11px] text-muted-foreground">{[p.medicalRecordNumber, p.phone].filter(Boolean).join(" · ")}</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <FiltroPacienteBar
+            pacienteFiltro={pacienteFiltro}
+            centro={gate.centro}
+            centroNombre={gate.centroNombre}
+            onSelect={setPacienteFiltro}
+            onClear={() => setPacienteFiltro(null)}
+          />
 
           {/* Pestañas por servicio (color del dato); filtradas al paciente si hay filtro. Vacío no queda mudo. */}
           {pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0 ? (

@@ -1569,7 +1569,9 @@
     "viendoPaciente": "Viewing:",
     "volverAlDia": "Back to day",
     "filtrarPacientePh": "Filter by patient…",
-    "pacienteSinHoy": "This patient has no services scheduled today."
+    "pacienteSinHoy": "This patient has no services scheduled today.",
+    "buscando": "Searching…",
+    "sinResultadosEnCentro": "No results in {centro}"
   },
   "programarCitas": {
     "title": "Schedule sessions",
