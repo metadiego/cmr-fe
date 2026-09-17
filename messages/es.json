@@ -1591,7 +1591,8 @@
     "nServicios": "{n} seleccionados",
     "sinServicios": "Este centro no tiene servicios.",
     "resumen": "Agendadas {creadas}, omitidas {omitidas} (ya existían)",
-    "avisoDisponibilidad": "Algún servicio excede la disponibilidad del paciente; se agendó igual."
+    "avisoDisponibilidad": "Algún servicio excede la disponibilidad del paciente; se agendó igual.",
+    "sinSaldo": "Este paciente no tiene servicios comprados pendientes."
   },
   "fd": {
     "col": {

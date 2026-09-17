@@ -1591,7 +1591,8 @@
     "nServicios": "{n} selected",
     "sinServicios": "This center has no services.",
     "resumen": "Booked {creadas}, skipped {omitidas} (already existed)",
-    "avisoDisponibilidad": "A service exceeds the patient availability; booked anyway."
+    "avisoDisponibilidad": "A service exceeds the patient availability; booked anyway.",
+    "sinSaldo": "This patient has no purchased services pending."
   },
   "fd": {
     "col": {

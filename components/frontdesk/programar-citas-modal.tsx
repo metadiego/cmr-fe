@@ -6,9 +6,11 @@ import { toast } from "sonner";
 
 import {
   agendarVariosServicios,
+  getServiciosConSaldo,
   getDisponibilidadServicio,
   getAgendaPaciente,
   getAgendaHoras,
+  type ServicioConSaldo,
   type DisponibilidadServicio,
   type AgendaItem,
   type AgendaHora,
@@ -118,6 +120,29 @@ export function ProgramarCitasModal({
   const firstServicioId = React.useMemo(() => [...servicioIds][0] ?? "", [servicioIds]);
   const servicioClave = servicios.find((s) => s.id === firstServicioId)?.slug ?? "";
 
+  // Servicios CON SALDO del paciente (comprado y aún pendiente; comprado-y-consumido NO cuenta). Se
+  // PRE-MARCAN al abrir. Patrón por-key (setState solo en el async). Handoff citar-marcar-los-servicios-con-saldo.
+  const saldoKey = open && pacienteId ? `${pacienteId}|${centro ?? ""}` : "";
+  const [saldoData, setSaldoData] = React.useState<{ key: string; items: ServicioConSaldo[] } | null>(null);
+  React.useEffect(() => {
+    if (!saldoKey) return;
+    let cancel = false;
+    getServiciosConSaldo(pacienteId, centro)
+      .then((items) => !cancel && setSaldoData({ key: saldoKey, items }))
+      .catch(() => {});
+    return () => { cancel = true; };
+  }, [saldoKey, pacienteId, centro]);
+  const conSaldo = saldoData && saldoData.key === saldoKey ? saldoData.items : null;
+  // Siembra UNA vez por paciente: casillas de los servicios con saldo (∪ el de la pestaña activa). Vacío =
+  // nada marcado (el paciente no tiene pendientes, se avisa abajo). No pisa lo que el operador cambie luego.
+  const [saldoSeeded, setSaldoSeeded] = React.useState("");
+  if (conSaldo && saldoKey && saldoKey !== saldoSeeded) {
+    setSaldoSeeded(saldoKey);
+    const ids = new Set(conSaldo.map((s) => s.serviceId));
+    if (defaultServicioId) ids.add(defaultServicioId);
+    setServicioIds(ids);
+  }
+
   // Fechas a agendar (una cita por fecha).
   const [fechas, setFechas] = React.useState<string[]>([]);
   const [nuevaFecha, setNuevaFecha] = React.useState("");
@@ -195,7 +220,7 @@ export function ProgramarCitasModal({
       const hora = horaSel || undefined; // opcional; el BE descuenta el cupo de esa franja (no bloquea)
       // UNA sola llamada agenda el CRUCE completo: cada servicio marcado en cada fecha.
       const { data, warnings } = await agendarVariosServicios(
-        { patientId: pacienteId, servicioIds: [...servicioIds], fechas: fechasEff, time: hora },
+        { patientId: pacienteId, serviceIds: [...servicioIds], fechas: fechasEff, time: hora },
         centro,
       );
       const creadas = Array.isArray(data.creadas) ? data.creadas.length : 0;
@@ -301,6 +326,10 @@ export function ProgramarCitasModal({
                 })
               )}
             </div>
+            {/* Vacío no queda mudo: el paciente no tiene nada comprado pendiente. */}
+            {pacienteId && conSaldo && conSaldo.length === 0 && (
+              <p className="text-[11px] text-muted-foreground">{t("sinSaldo")}</p>
+            )}
           </div>
 
           {/* Fechas (una cita por fecha) */}

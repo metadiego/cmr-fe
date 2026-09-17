@@ -103,7 +103,9 @@ export async function agendarMultiple(
 // servicio (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
 export async function agendarVariosServicios(
-  payload: { patientId: string; servicioIds: string[]; fechas: string[]; time?: string },
+  // `serviceIds` (inglés) ya lo acepta la v2 (hueco cerrado, verificado 2026-09-17). `fechas` sigue en
+  // español (no está en el mapa). Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
+  payload: { patientId: string; serviceIds: string[]; fechas: string[]; time?: string },
   centroId?: string,
 ): Promise<ConWarnings<BookMultipleResult>> {
   const env = await apiFetchEnvelope<BookMultipleResult>(`/frontdesk/sessions/book-multiple`, {
@@ -115,6 +117,15 @@ export async function agendarVariosServicios(
     data: env.data ?? { creadas: [], omitidas: 0, aviso: null },
     warnings: env.meta.warnings ?? [],
   };
+}
+
+// Servicios que el paciente COMPRÓ y aún le quedan pendientes (pending > 0): comprado-y-consumido NO
+// aparece. Solo servicios activos del centro activo, ordenados por pendientes (más primero) y por nombre.
+// Sirve para pre-marcar las casillas en «Citar». `pending` sale de la misma cuenta que la disponibilidad
+// por servicio. GET /frontdesk/patients/:id/availability. Handoff citar-marcar-los-servicios-con-saldo.
+export type ServicioConSaldo = { serviceId: string; name: string; slug: string; pending: number };
+export function getServiciosConSaldo(patientId: string, centroId?: string): Promise<ServicioConSaldo[]> {
+  return apiFetch<ServicioConSaldo[]>(`/frontdesk/patients/${patientId}/availability`, {}, centroId);
 }
 
 // Reagendar una sesión a otra fecha (fechas flexibles).
