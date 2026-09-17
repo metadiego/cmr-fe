@@ -113,10 +113,22 @@ export function PagosFactura({
         </ul>
       )}
 
-      {!pagado && (
+      {/* Estado del saldo, siempre a la vista para no confundir "Total" con "lo que falta":
+          pendiente (ámbar) · saldada (verde, saldo $0) · sobre-abonada (ámbar con el exceso). */}
+      {saldo > 0.005 ? (
         <div className="flex items-center justify-between rounded-md border border-warning/40 bg-warning px-2.5 py-1.5 text-sm">
           <span className="text-warning-foreground">{t("balance")}</span>
           <span className="font-semibold tabular-nums text-warning-foreground">{money(saldo)}</span>
+        </div>
+      ) : saldo < -0.005 ? (
+        <div className="flex items-center justify-between rounded-md border border-warning/40 bg-warning px-2.5 py-1.5 text-sm">
+          <span className="text-warning-foreground">{t("overpaid")}</span>
+          <span className="font-semibold tabular-nums text-warning-foreground">{money(-saldo)}</span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-md border border-success/40 bg-success px-2.5 py-1.5 text-sm">
+          <span className="text-success-foreground">{t("settled")}</span>
+          <span className="font-semibold tabular-nums text-success-foreground">{money(0)}</span>
         </div>
       )}
 

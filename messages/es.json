@@ -1648,7 +1648,9 @@
     "motivoCorreccion": "Corrección de forma de pago",
     "motivoAnulacion": "Pago anulado",
     "exceedsTotal": "No puede exceder el total (máx {max})",
-    "splitHint": "Para dividir en varias formas, agrega un pago por cada una (máx {max})"
+    "splitHint": "Para dividir en varias formas, agrega un pago por cada una (máx {max})",
+    "settled": "Saldado",
+    "overpaid": "Sobre-abonado"
   },
   "formasPago": {
     "efectivo": "Efectivo",

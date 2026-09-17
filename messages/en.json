@@ -1648,7 +1648,9 @@
     "motivoCorreccion": "Payment method correction",
     "motivoAnulacion": "Payment voided",
     "exceedsTotal": "Cannot exceed the total (max {max})",
-    "splitHint": "To split across methods, add one payment per method (max {max})"
+    "splitHint": "To split across methods, add one payment per method (max {max})",
+    "settled": "Paid in full",
+    "overpaid": "Overpaid"
   },
   "formasPago": {
     "efectivo": "Cash",
