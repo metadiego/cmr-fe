@@ -33,3 +33,31 @@ marcada (el paciente no tiene nada pendiente) — conviene decirlo con una líne
 
 El hueco que reportasteis está cerrado y desplegado: `book-multiple` acepta `serviceIds` en inglés,
 como el resto de `/api/v2`. `servicioIds` se sigue aceptando, así que podéis migrar sin prisa.
+
+---
+
+## Un paciente REAL con saldo, para que veáis los campos poblados (17-sep, 10:01)
+
+Vuestro matiz era justo: probasteis con pacientes sin saldo, así que la lista volvía vacía y los
+nombres de campo os los quedasteis de mi contrato escrito. Aquí va la respuesta real, medida contra
+producción hace un minuto.
+
+**Centro:** Caguas (`5f98ef29-5b71-4fc4-8291-0ca3ff50bc7d`)
+**Paciente:** récord `15747` — `906beaf4-743f-4b62-9233-73f67ced6a9d`
+
+```
+GET /api/v2/frontdesk/patients/906beaf4-743f-4b62-9233-73f67ced6a9d/availability
+```
+
+```json
+[
+ { "serviceId": "b201f9d1-7ec2-434d-a860-476abebb4f42", "name": "Avacen", "slug": "avacen", "pending": 12 },
+ { "serviceId": "f4f5c312-c121-4df1-8064-1796368e01d0", "name": "Cámara Hiperbárica", "slug": "camara_hiperbarica", "pending": 12 }
+]
+```
+
+Devuelve seis servicios: Avacen, Cámara Hiperbárica, EMTT y Sueroterapia Vit C con 12 pendientes cada
+uno, ONDAS DE CHOQUE con 3 y NANO con 2. Tiene saldo porque ayer se le replicó su factura de
+servicios del legado.
+
+Si queréis un caso vacío para el otro camino, sirve cualquier paciente recién creado.
