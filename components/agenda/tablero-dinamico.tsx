@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Notification03Icon } from "@hugeicons/core-free-icons";
+import { Notification03Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { editarCelda, type Opcion, type Transicion } from "@/lib/api/tablero";
+import { facturarCita } from "@/lib/api/facturas";
 import { asignarEnfermeraVitales } from "@/lib/api/citas";
 import { listPersonalPorCapacidad } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
@@ -37,8 +39,14 @@ export function colColor(col: ColumnaEfectiva): string | null {
 // Resumen de factura (tipo REUSABLE "factura"): el binding trae un objeto
 // { numero, total, saldo, estado, modoPago, usuario }. Cualquier tablero de cita
 // puede componer una columna tipo "factura" (p.ej. la columna "pago" de atención).
-function FacturaCell({ value }: { value: unknown }) {
+// Con `citaId` la celda es un ATAJO a la factura: resuelve el borrador de la cita
+// (POST /invoices/appointment/:citaId, idempotente → devuelve la que ya existe) y
+// abre la pantalla de facturación. Sin `citaId` es solo lectura (otros contextos).
+function FacturaCell({ value, citaId, centroId }: { value: unknown; citaId?: string; centroId?: string }) {
   const t = useTranslations("tableroBoard");
+  const tRoot = useTranslations();
+  const router = useRouter();
+  const [busy, setBusy] = React.useState(false);
   const f = (value && typeof value === "object" ? value : null) as
     | { numero?: unknown; total?: unknown; saldo?: unknown; estado?: unknown; modoPago?: unknown; usuario?: unknown }
     | null;
@@ -49,7 +57,7 @@ function FacturaCell({ value }: { value: unknown }) {
   const saldo = Number(f.saldo ?? 0);
   const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
   const sub = [f.modoPago, f.usuario].map((x) => (x == null ? "" : String(x))).filter(Boolean).join(" · ");
-  return (
+  const contenido = (
     <div className="flex flex-col gap-0.5 text-xs leading-tight">
       <div className="flex flex-wrap items-center gap-1.5">
         {estado && (
@@ -63,6 +71,32 @@ function FacturaCell({ value }: { value: unknown }) {
       {sub && <span className="truncate text-muted-foreground">{sub}</span>}
       {saldo > 0 && <span className="font-medium text-warning-foreground">{t("balance")}: {money(saldo)}</span>}
     </div>
+  );
+  if (!citaId) return contenido;
+  async function abrir() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const inv = await facturarCita(citaId!, centroId);
+      const q = centroId ? `?centro=${centroId}` : "";
+      router.push(`/billing/invoices/${(inv as { id: string }).id}${q}`);
+    } catch (err) {
+      toastError(err, tRoot);
+      setBusy(false);
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={abrir}
+      disabled={busy}
+      title={t("openInvoice")}
+      aria-label={t("openInvoice")}
+      className="group -mx-1 flex w-full items-center gap-1 rounded-md px-1 py-0.5 text-left transition-colors hover:bg-muted disabled:opacity-50"
+    >
+      {contenido}
+      <HugeiconsIcon icon={ArrowRight01Icon} className="ml-auto size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+    </button>
   );
 }
 
@@ -365,6 +399,12 @@ export function TableroDinamico({
           onSaved={onRefresh}
         />
       );
+    }
+    // Columna de FACTURA (render.kind="factura", p. ej. "pago" de Atención): atajo a la factura de la
+    // cita. Se pasa el citaId (= fila.id) para que la celda resuelva y abra el borrador. En otros
+    // contextos (Cell sin fila) queda solo lectura.
+    if ((col.render as { kind?: string } | null)?.kind === "factura") {
+      return <FacturaCell value={fila[col.clave]} citaId={String(fila.id)} centroId={centroId} />;
     }
     return <Cell col={col} value={fila[col.clave]} />;
   }

@@ -72,7 +72,8 @@
       "hora": "Hora",
       "enfermeraId": "Enfermera"
     },
-    "flowTitle": "Flujo de atención"
+    "flowTitle": "Flujo de atención",
+    "openInvoice": "Ir a la factura"
   },
   "configuracion": {
     "tableros": {

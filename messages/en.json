@@ -72,7 +72,8 @@
       "hora": "Time",
       "enfermeraId": "Nurse"
     },
-    "flowTitle": "Care flow"
+    "flowTitle": "Care flow",
+    "openInvoice": "Go to invoice"
   },
   "configuracion": {
     "tableros": {
