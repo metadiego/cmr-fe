@@ -50,7 +50,7 @@ import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { toastError } from "@/lib/api/errors";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { CorregirDisponibilidadDialog } from "@/components/frontdesk/corregir-disponibilidad-dialog";
-import { FiltroPacienteBar } from "@/components/frontdesk/filtro-paciente-bar";
+import { FrontdeskSearchBar } from "@/components/frontdesk/frontdesk-search-bar";
 import { legendMultiplicadores } from "@/lib/frontdesk/multiplicadores";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
@@ -62,7 +62,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -97,9 +96,6 @@ import {
 } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Mic01Icon,
-  MicOff01Icon,
-  Search01Icon,
   MoreHorizontalIcon,
   Tick02Icon,
   Alert02Icon,
@@ -287,6 +283,9 @@ export function FrontdeskBoard() {
       setTab(serviciosMostrados[0].slug);
     }
   }
+  const filtroPacienteNombre = pacienteFiltro
+    ? pacienteFiltro.displayName || `${pacienteFiltro.firstName ?? ""} ${pacienteFiltro.lastName ?? ""}`.trim()
+    : "";
 
   // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
   // pacienteId, datos) unidas por id. El FE solo une; no recalcula.
@@ -366,24 +365,24 @@ export function FrontdeskBoard() {
     },
   });
 
-  // Búsqueda nombre/record/tel: nombre contra los textos de la fila; record/tel vía buscar-paciente
-  // (server-side) → set de pacienteIds que se cruza con la sesión unida. Debounced.
-  const [pacienteIds, setPacienteIds] = React.useState<Set<string> | null>(null);
+  // Búsqueda ÚNICA nombre/record/tel (server-side, debounced): los OBJETOS alimentan el desplegable de
+  // pacientes y el SET de ids filtra las filas. Antes había DOS cajas (ésta + un "filtrar por paciente"
+  // aparte) que confundían: una sola las reemplaza. Elegir un paciente del desplegable filtra las
+  // pestañas a SUS servicios del día (pacienteFiltro).
+  const [qDeb, setQDeb] = React.useState("");
   React.useEffect(() => {
-    const query = q.trim();
-    const centro = gate.centro;
-    // Todo el setState va DENTRO del timeout (callback async) — nunca síncrono en el cuerpo del efecto.
-    const h = setTimeout(() => {
-      if (query.length < 2 || !centro) {
-        setPacienteIds(null);
-        return;
-      }
-      buscarPaciente(query, centro)
-        .then((r) => setPacienteIds(new Set(r.map((p) => p.id))))
-        .catch(() => setPacienteIds(null));
-    }, 300);
+    const h = setTimeout(() => setQDeb(q), 300);
     return () => clearTimeout(h);
-  }, [q, gate.centro]);
+  }, [q]);
+  const busqPaciente = useResource<PacienteBusqueda[]>(
+    () => (qDeb.trim().length >= 2 && gate.centro ? buscarPaciente(qDeb.trim(), gate.centro) : Promise.resolve([])),
+    [qDeb, gate.centro],
+  );
+  const resultadosPaciente = busqPaciente.state.kind === "ok" ? busqPaciente.state.data : [];
+  const pacienteIds = React.useMemo(
+    () => (qDeb.trim().length >= 2 && busqPaciente.state.kind === "ok" ? new Set(busqPaciente.state.data.map((p) => p.id)) : null),
+    [qDeb, busqPaciente.state],
+  );
   const dictado = useDictado(locale, (texto) => setQ(texto));
 
   // Toggles agrupados (render.group, p. ej. flujo_servicio) se COLAPSAN en UN solo "Flujo" en la posición
@@ -655,14 +654,22 @@ export function FrontdeskBoard() {
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {/* Filtro por PACIENTE: buscar → deja solo SUS servicios del día; banner + botón visible para
-              volver al día completo. Reemplaza el viejo botón «Todos» inerte. Handoff frontdesk-filtrar-por-paciente. */}
-          <FiltroPacienteBar
+          {/* Caja de búsqueda ÚNICA: nombre/record/teléfono → desplegable de pacientes; elegir uno filtra
+              las pestañas a SUS servicios del día. Reemplaza las DOS cajas que confundían. */}
+          <FrontdeskSearchBar
             pacienteFiltro={pacienteFiltro}
-            centro={gate.centro}
+            nombre={filtroPacienteNombre}
+            q={q}
+            onQ={setQ}
+            mostrarLista={qDeb.trim().length >= 2}
+            estado={busqPaciente.state}
+            resultados={resultadosPaciente}
             centroNombre={gate.centroNombre}
-            onSelect={setPacienteFiltro}
-            onClear={() => setPacienteFiltro(null)}
+            dictado={dictado}
+            ocultarCanceladas={ocultarCanceladas}
+            onOcultarCanceladas={setOcultarCanceladas}
+            onPick={(p) => { setPacienteFiltro(p); setQ(""); }}
+            onClear={() => { setPacienteFiltro(null); setQ(""); }}
           />
 
           {/* Pestañas por servicio (color del dato); filtradas al paciente si hay filtro. Vacío no queda mudo. */}
@@ -703,41 +710,6 @@ export function FrontdeskBoard() {
             })}
           </div>
           )}
-
-          {/* Búsqueda con dictado */}
-          <div className="mb-4 flex items-center gap-2">
-            <div className="relative w-full max-w-md">
-              <HugeiconsIcon icon={Search01Icon} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder={t("buscarPlaceholder")}
-                className="h-9 pl-8 pr-9"
-                aria-label={t("buscar")}
-              />
-              {dictado.soportado && (
-                <button
-                  type="button"
-                  onClick={dictado.toggle}
-                  aria-label={t("dictado")}
-                  className={
-                    "absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors " +
-                    (dictado.escuchando
-                      ? "bg-destructive/15 text-destructive animate-pulse"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground")
-                  }
-                >
-                  <HugeiconsIcon icon={dictado.escuchando ? MicOff01Icon : Mic01Icon} className="size-4" />
-                </button>
-              )}
-            </div>
-            {/* Ocultar canceladas: encendido por defecto. Las canceladas del día (recargas de jornada) se
-                esconden; apagarlo las trae de vuelta con su menú de Reactivar. */}
-            <label className="ml-auto inline-flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-              <Switch checked={ocultarCanceladas} onCheckedChange={setOcultarCanceladas} aria-label={t("ocultarCanceladas")} />
-              {t("ocultarCanceladas")}
-            </label>
-          </div>
 
           {/* KPIs = filtros */}
           <div className="mb-4 flex flex-wrap gap-2">

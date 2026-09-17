@@ -1568,7 +1568,7 @@
     },
     "viendoPaciente": "Viewing:",
     "volverAlDia": "Back to day",
-    "filtrarPacientePh": "Filter by patient…",
+    "filtrarPacientePh": "Find patient: name, record or phone…",
     "pacienteSinHoy": "This patient has no services scheduled today.",
     "buscando": "Searching…",
     "sinResultadosEnCentro": "No results in {centro}"
