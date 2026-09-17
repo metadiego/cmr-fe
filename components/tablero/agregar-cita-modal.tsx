@@ -22,9 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 const NO_MEDICO = "__none__";
@@ -60,10 +58,7 @@ export function AgregarCitaModal({
   const [tipos, setTipos] = React.useState<TipoCita[]>([]);
   const [medicos, setMedicos] = React.useState<Opcion[]>([]);
   const [paciente, setPaciente] = React.useState<Paciente | null>(null);
-  const [tipoId, setTipoId] = React.useState<string>("");
-  const [esPrimeraVez, setEsPrimeraVez] = React.useState(false);
   const [medicoId, setMedicoId] = React.useState<string>(NO_MEDICO);
-  const [hora, setHora] = React.useState<string>("");
   const [notas, setNotas] = React.useState<string>("");
   const [busy, setBusy] = React.useState(false);
 
@@ -76,32 +71,35 @@ export function AgregarCitaModal({
     };
   }, [tablero, centroId]);
 
-  // Al elegir paciente: traer SU médico asignado (paciente.medicoId, cuyo valor coincide con el value de
-  // la opción). Si no tiene, queda «sin médico» — NUNCA null. El usuario puede cambiarlo aquí. El value de
-  // las opciones de médico ES el medicoId (verificado). Handoff: nueva cita en Atención precarga el médico.
+  // Al elegir paciente: precargar SU médico (paciente.doctorId, cuyo valor coincide con el value de la
+  // opción de médico — verificado). Si no tiene, queda «sin médico» — NUNCA null. Se puede cambiar aquí.
   function onPickPaciente(p: Paciente | null) {
     setPaciente(p);
-    const mid = p ? String((p as { medicoId?: string | null }).medicoId ?? "") : "";
-    setMedicoId(mid || NO_MEDICO);
+    setMedicoId(p?.doctorId ? String(p.doctorId) : NO_MEDICO);
   }
 
-  const tipo = tipos.find((x) => x.id === tipoId);
-  const medicoRequerido = !!tipo?.requiresDoctor && !esPrimeraVez;
-  const canSubmit = !!paciente && !!tipoId && (!medicoRequerido || medicoId !== NO_MEDICO) && !busy;
+  // Tipo AUTOMÁTICO, sin selector: si el paciente YA tiene récord, ya tuvo consulta → la cita es de
+  // «Seguimiento»; sin récord (paciente nuevo) → «Consulta (Nueva)». El walk-in no pregunta el tipo.
+  const tipoAuto = React.useMemo(() => {
+    if (tipos.length === 0) return null;
+    const seguimiento = tipos.find((x) => x.slug === "seguimiento");
+    const nueva = tipos.find((x) => x.slug !== "seguimiento") ?? tipos[0];
+    return paciente?.medicalRecordNumber ? (seguimiento ?? nueva ?? null) : (nueva ?? seguimiento ?? null);
+  }, [paciente, tipos]);
+  const medicoRequerido = !!tipoAuto?.requiresDoctor;
+  const canSubmit = !!paciente && !!tipoAuto && (!medicoRequerido || medicoId !== NO_MEDICO) && !busy;
 
   async function onGuardar() {
-    if (!paciente || !tipoId) return;
+    if (!paciente || !tipoAuto) return;
     setBusy(true);
     try {
       await createCita(
         {
           patientId: paciente.id,
-          appointmentTypeId: tipoId,
+          appointmentTypeId: tipoAuto.id,
           date: hoy,
           status: "confirmada", // entra al tablero de atención de hoy
-          isFirstVisit: esPrimeraVez,
           ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
-          ...(hora ? { time: hora } : {}),
           ...(notas.trim() ? { notes: notas.trim() } : {}),
         } as Parameters<typeof createCita>[0],
         centroId,
@@ -134,53 +132,32 @@ export function AgregarCitaModal({
             <PacienteSelect value={paciente} onChange={onPickPaciente} />
           </Field>
 
-          <Field label={t("type")}>
-            <div className="flex flex-wrap gap-1.5">
-              {tipos.map((tp) => {
-                const active = tp.id === tipoId;
-                const c = tp.color ?? undefined;
-                return (
-                  <button
-                    key={tp.id}
-                    type="button"
-                    onClick={() => setTipoId(tp.id)}
-                    aria-pressed={active}
-                    className={
-                      "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors " +
-                      (active ? "" : "border-input text-muted-foreground hover:border-primary/50 hover:text-foreground")
-                    }
-                    style={active && c ? { borderColor: c, color: c, backgroundColor: `${c}1a` } : undefined}
-                  >
-                    {tp.name}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Tipo AUTOMÁTICO (sin selector): solo lectura, decidido por el récord del paciente. */}
+          {tipoAuto && (
+            <Field label={t("type")}>
+              <span
+                className="inline-flex w-fit items-center rounded-md border px-3 py-1.5 text-sm font-medium"
+                style={tipoAuto.color ? { borderColor: tipoAuto.color, color: tipoAuto.color, backgroundColor: `${tipoAuto.color}1a` } : undefined}
+              >
+                {tipoAuto.name}
+              </span>
+            </Field>
+          )}
+
+          {/* Médico del paciente (precargado). La HORA no se pide en el walk-in de hoy. */}
+          <Field label={t("doctor") + (medicoRequerido ? " *" : "")}>
+            <Select value={medicoId} onValueChange={setMedicoId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("noDoctor")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_MEDICO}>{t("noDoctor")}</SelectItem>
+                {medicos.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label={t("doctor") + (medicoRequerido ? " *" : "")}>
-              <Select value={medicoId} onValueChange={setMedicoId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("noDoctor")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NO_MEDICO}>{t("noDoctor")}</SelectItem>
-                  {medicos.map((m) => (
-                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label={t("time")}>
-              <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
-            </Field>
-          </div>
-
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <Checkbox checked={esPrimeraVez} onCheckedChange={(v) => setEsPrimeraVez(v === true)} />
-            {t("firstTime")}
-          </label>
 
           <Field label={t("notes")}>
             <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />
