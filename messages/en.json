@@ -1288,7 +1288,11 @@
     "no_emitida_pendiente_pago": "Not issued: the invoice has a pending balance.",
     "ya_emitida": "The invoice was already issued (not renumbered).",
     "sin_lineas": "No lines",
-    "sin_grupo": "No group"
+    "sin_grupo": "No group",
+    "pago": {
+      "excede_total": "The payment cannot exceed the invoice total.",
+      "requiere_permiso_anular": "You do not have permission to void payments."
+    }
   },
   "zona": {
     "rodilla": "Knee",

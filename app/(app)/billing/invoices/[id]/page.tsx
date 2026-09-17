@@ -1048,7 +1048,7 @@ function Editor({
           <div className="space-y-4">
             {/* Primero se cobra, después se emite: el cobro es el paso PREVIO a emitir (regla
                 cobrar-antes-de-emitir). El BE ya acepta pagos en borrador. */}
-            <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} />
+            <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} />
             {/* Emitir solo cuando está SALDADA (nada por cobrar). Cortesía / 100% de descuento = total 0
                 → saldo 0 → habilitado de un clic. Con saldo pendiente, deshabilitado y con el importe que
                 falta a la vista (no hay que pulsarlo para enterarse). El BE es la autoridad: si igual llega
@@ -1062,7 +1062,7 @@ function Editor({
             </Button>
           </div>
         ) : (
-          <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} />
+          <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} />
         )}
       </aside>
 

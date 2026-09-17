@@ -1288,7 +1288,11 @@
     "no_emitida_pendiente_pago": "No se emitió: la factura tiene saldo pendiente de cobro.",
     "ya_emitida": "La factura ya estaba emitida (no se renumera).",
     "sin_lineas": "Sin líneas",
-    "sin_grupo": "Sin grupo"
+    "sin_grupo": "Sin grupo",
+    "pago": {
+      "excede_total": "El pago no puede pasar del total de la factura.",
+      "requiere_permiso_anular": "No tienes permiso para anular pagos."
+    }
   },
   "zona": {
     "rodilla": "Rodilla",

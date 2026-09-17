@@ -53,6 +53,7 @@ export function PagosFactura({
   run,
   saldo,
   montoAbonado,
+  esBorrador = false,
 }: {
   pagos: FacturaPago[];
   formas: FormaPago[];
@@ -62,10 +63,14 @@ export function PagosFactura({
   run: (fn: () => Promise<unknown>) => Promise<void>;
   saldo: number;
   montoAbonado: number;
+  esBorrador?: boolean;
 }) {
   const t = useTranslations("pagosFactura");
   const { can } = useCan();
-  const puedeEditar = can("factura.pago.anular");
+  // La puerta REST de editar/anular un pago es `factura.update`; el estado se comprueba en el server:
+  // en borrador cualquiera que puede tocar la factura corrige su propio abono; ya emitida exige
+  // además `factura.pago.anular` (anulación auditable). Ver pagos-tope-y-correccion-en-borrador-respuesta-be.
+  const puedeEditar = can("factura.update") && (esBorrador || can("factura.pago.anular"));
 
   const [editId, setEditId] = React.useState<string | null>(null);
   const [agregando, setAgregando] = React.useState(false);
