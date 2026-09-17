@@ -12,6 +12,7 @@ import {
 } from "@/lib/api/facturas";
 import { useCan } from "@/hooks/use-can";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
+import { topePago, pagoExcede } from "@/lib/facturacion/tope-pago";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,8 @@ export function PagosFactura({
   const [editId, setEditId] = React.useState<string | null>(null);
   const [agregando, setAgregando] = React.useState(false);
   const pagado = saldo <= 0.001;
+  // Total = lo abonado + lo que falta. Sirve de tope: un abono no puede hacer que lo abonado exceda el total.
+  const total = montoAbonado + saldo;
 
   return (
     <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
@@ -91,6 +94,8 @@ export function PagosFactura({
                 centro={centro}
                 busy={busy}
                 run={run}
+                total={total}
+                abonado={montoAbonado}
                 onDone={() => setEditId(null)}
               />
             ) : (
@@ -115,6 +120,8 @@ export function PagosFactura({
         </div>
       )}
 
+      {/* Con la factura ya saldada no se ofrece agregar otro abono (evita sobre-pagar); para corregir se
+          edita o se anula un pago existente. */}
       {agregando ? (
         <PagoAddRow
           formas={formas}
@@ -122,15 +129,15 @@ export function PagosFactura({
           centro={centro}
           busy={busy}
           run={run}
-          saldoSugerido={saldo > 0.001 ? saldo : 0}
+          tope={topePago(total, montoAbonado)}
           onDone={() => setAgregando(false)}
         />
-      ) : (
+      ) : !pagado ? (
         <Button type="button" variant="outline" size="sm" className="w-full gap-1.5" disabled={busy} onClick={() => setAgregando(true)}>
           <HugeiconsIcon icon={Add01Icon} className="size-4" />
           {t("addPayment")}
         </Button>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -232,6 +239,8 @@ function PagoEditRow({
   centro,
   busy,
   run,
+  total,
+  abonado,
   onDone,
 }: {
   pago: FacturaPago;
@@ -240,6 +249,8 @@ function PagoEditRow({
   centro?: string;
   busy: boolean;
   run: (fn: () => Promise<unknown>) => Promise<void>;
+  total: number;
+  abonado: number;
   onDone: () => void;
 }) {
   const t = useTranslations("pagosFactura");
@@ -247,7 +258,11 @@ function PagoEditRow({
   const [formaId, setFormaId] = React.useState(pago.paymentMethodId ?? "");
   const [monto, setMonto] = React.useState(String(n(pago.amount).toFixed(2)));
   const cambio = formaId !== (pago.paymentMethodId ?? "") || n(monto) !== n(pago.amount);
-  const valido = !!formaId && n(monto) > 0;
+  // Tope solo para pagos (los reembolsos tienen su propia regla): al editar, el importe ACTUAL se libera.
+  const esReembolso = pago.type === "reembolso";
+  const tope = topePago(total, abonado, n(pago.amount));
+  const excede = !esReembolso && pagoExcede(n(monto), tope);
+  const valido = !!formaId && n(monto) > 0 && !excede;
 
   function guardar() {
     if (!pago.id || !cambio || !valido || busy) return;
@@ -266,7 +281,7 @@ function PagoEditRow({
         </Select>
       </div>
       <div className="flex items-center gap-1.5">
-        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className="h-8 flex-1 text-right tabular-nums" aria-label={t("amount")} />
+        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
         <Button type="button" size="icon" className="size-8" disabled={!cambio || !valido || busy} aria-label={t("save")} onClick={guardar}>
           <HugeiconsIcon icon={Tick02Icon} className="size-4" />
         </Button>
@@ -274,6 +289,7 @@ function PagoEditRow({
           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
+      {excede && <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>}
     </li>
   );
 }
@@ -285,7 +301,7 @@ function PagoAddRow({
   centro,
   busy,
   run,
-  saldoSugerido,
+  tope,
   onDone,
 }: {
   formas: FormaPago[];
@@ -293,17 +309,18 @@ function PagoAddRow({
   centro?: string;
   busy: boolean;
   run: (fn: () => Promise<unknown>) => Promise<void>;
-  saldoSugerido: number;
+  tope: number; // máximo abonable = saldo pendiente; sugerimos ese importe y no dejamos pasarse.
   onDone: () => void;
 }) {
   const t = useTranslations("pagosFactura");
   const tRoot = useTranslations();
   const [formaId, setFormaId] = React.useState("");
-  const [monto, setMonto] = React.useState(saldoSugerido > 0 ? String(saldoSugerido.toFixed(2)) : "");
+  const [monto, setMonto] = React.useState(tope > 0 ? String(tope.toFixed(2)) : "");
   const [last4, setLast4] = React.useState("");
   const forma = formas.find((f) => f.id === formaId);
   const esTarjeta = !!forma && forma.isCash === false;
-  const valido = !!formaId && n(monto) > 0 && !busy;
+  const excede = pagoExcede(n(monto), tope);
+  const valido = !!formaId && n(monto) > 0 && !excede && !busy;
 
   function registrar() {
     if (!valido) return;
@@ -324,12 +341,16 @@ function PagoAddRow({
         <Input value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
       )}
       <div className="flex items-center gap-1.5">
-        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className="h-8 flex-1 text-right tabular-nums" aria-label={t("amount")} />
+        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
         <Button type="button" size="sm" className="h-8" disabled={!valido} onClick={registrar}>{t("register")}</Button>
         <Button type="button" variant="ghost" size="icon" className="size-8" disabled={busy} aria-label={t("cancel")} onClick={onDone}>
           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
+      {/* Split: para cobrar en varias formas se agrega un pago por cada forma; cada uno se topa al saldo restante. */}
+      {excede
+        ? <p className="text-xs text-destructive">{t("exceedsTotal", { max: money(tope) })}</p>
+        : <p className="text-[11px] text-muted-foreground">{t("splitHint", { max: money(tope) })}</p>}
     </div>
   );
 }

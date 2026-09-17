@@ -1646,7 +1646,9 @@
     "voidTitle": "Void this payment?",
     "voidBody": "The payment will be voided (auditable). This is not a return. The invoice is recomputed.",
     "motivoCorreccion": "Payment method correction",
-    "motivoAnulacion": "Payment voided"
+    "motivoAnulacion": "Payment voided",
+    "exceedsTotal": "Cannot exceed the total (max {max})",
+    "splitHint": "To split across methods, add one payment per method (max {max})"
   },
   "formasPago": {
     "efectivo": "Cash",
