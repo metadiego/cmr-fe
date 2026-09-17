@@ -62,3 +62,14 @@ dominio:
 `/invoices`, `/patients`, `/inventory/*`, `/appointments`, `/board/*`, `/cash/*`, `/statistics/*`,
 `/holidays` responden 200 con campos en inglés; los SSE abren; los cuerpos POST/PUT y query params van
 en inglés. tsc/lint/tests/build del FE en verde.
+
+---
+
+## Añadido 2026-09-17 — `servicioIds` (plural) no está en el mapa
+
+`POST /frontdesk/sessions/book-multiple` (citar varios servicios) espera **`servicioIds`** y **`fechas`**.
+Verificado en prod: enviar `serviceIds` (inglés) responde 400 «property serviceIds should not exist», y
+`servicioIds` (español) responde 201. El singular `servicioId`→`serviceId` SÍ está en el mapa, pero el
+plural `servicioIds` NO, así que el FE lo envía en español a propósito (lib/api/frontdesk `agendarVariosServicios`).
+Igual la respuesta usa `creadas`/`omitidas`/`aviso` (español). → Añadir `servicioIds`, `fechas`, `creadas`,
+`omitidas`, `aviso` al mapa `campos.ts` para que también estos vayan en inglés.

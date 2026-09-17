@@ -1586,7 +1586,12 @@
     "proximas": "Próximas citas",
     "cuposDia": "Cupos por hora",
     "cupoTitle": "{vacios} libres de {cupo}",
-    "horaElegida": "Hora elegida: {hora}"
+    "horaElegida": "Hora elegida: {hora}",
+    "servicios": "Servicios",
+    "nServicios": "{n} seleccionados",
+    "sinServicios": "Este centro no tiene servicios.",
+    "resumen": "Agendadas {creadas}, omitidas {omitidas} (ya existían)",
+    "avisoDisponibilidad": "Algún servicio excede la disponibilidad del paciente; se agendó igual."
   },
   "fd": {
     "col": {

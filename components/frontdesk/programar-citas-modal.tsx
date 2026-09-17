@@ -5,8 +5,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
-  agendarMultiple,
-  crearSesion,
+  agendarVariosServicios,
   getDisponibilidadServicio,
   getAgendaPaciente,
   getAgendaHoras,
@@ -23,6 +22,7 @@ import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -30,13 +30,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon, CheckmarkCircle02Icon, Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
@@ -54,7 +47,8 @@ function addDaysISO(iso: string, days: number): string {
 
 // Modal "Programar citas" (dominio AGENDAR, BE prod 2026-07-23). Dos disparadores (data-driven, no
 // hardcode): el botón Citar y el `render.postAccion` de una columna del tablero (p. ej. al Asistir).
-// Filas de servicio de `GET /servicios` (data-driven); fechas múltiples → agendar-multiple; una → crearSesion.
+// Servicios de `GET /servicios` (data-driven) como CHECKLIST multi-selección + fechas múltiples: una sola
+// llamada (book-multiple) agenda el cruce completo (cada servicio en cada fecha) y devuelve creadas/omitidas.
 export function ProgramarCitasModal({
   open,
   onOpenChange,
@@ -103,9 +97,26 @@ export function ProgramarCitasModal({
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
-  const [servicioId, setServicioId] = React.useState(defaultServicioId ?? "");
-  const servicioEff = servicios.some((s) => s.id === servicioId) ? servicioId : (defaultServicioId ?? servicios[0]?.id ?? "");
-  const servicioClave = servicios.find((s) => s.id === servicioEff)?.slug ?? "";
+  // Selección MÚLTIPLE de servicios (checklist). Se siembra con el servicio de la pestaña activa
+  // (defaultServicioId) al abrir; el usuario marca/desmarca los demás. Handoff citar-varios-servicios.
+  const [servicioIds, setServicioIds] = React.useState<Set<string>>(new Set());
+  const [seedKey, setSeedKey] = React.useState("");
+  const wantSeed = `${open}|${defaultServicioId ?? ""}`;
+  if (open && wantSeed !== seedKey) {
+    setSeedKey(wantSeed);
+    setServicioIds(new Set(defaultServicioId ? [defaultServicioId] : []));
+  }
+  function toggleServicio(id: string, on: boolean) {
+    setServicioIds((prev) => {
+      const n = new Set(prev);
+      if (on) n.add(id);
+      else n.delete(id);
+      return n;
+    });
+  }
+  // El primero seleccionado alimenta las vistas INFORMATIVAS por-servicio (cupos por hora, disponibilidad).
+  const firstServicioId = React.useMemo(() => [...servicioIds][0] ?? "", [servicioIds]);
+  const servicioClave = servicios.find((s) => s.id === firstServicioId)?.slug ?? "";
 
   // Fechas a agendar (una cita por fecha).
   const [fechas, setFechas] = React.useState<string[]>([]);
@@ -119,16 +130,17 @@ export function ProgramarCitasModal({
 
   // Disponibilidad (X/Y) del paciente para el servicio — informativa, NO bloquea (BE avisa igual).
   // Atada a `key`: el setState va solo en el async (evita setState-en-efecto/renders en cascada).
-  const dispKey = open && pacienteId && servicioEff ? `${pacienteId}|${servicioEff}|${centro ?? ""}` : "";
+  // Solo con UN servicio marcado (con varios, «pendientes» por servicio confundiría; el BE avisa igual).
+  const dispKey = open && pacienteId && firstServicioId && servicioIds.size === 1 ? `${pacienteId}|${firstServicioId}|${centro ?? ""}` : "";
   const [dispData, setDispData] = React.useState<{ key: string; d: DisponibilidadServicio } | null>(null);
   React.useEffect(() => {
     if (!dispKey) return;
     let cancel = false;
-    getDisponibilidadServicio(servicioEff, pacienteId, centro)
+    getDisponibilidadServicio(firstServicioId, pacienteId, centro)
       .then((d) => !cancel && setDispData({ key: dispKey, d }))
       .catch(() => {});
     return () => { cancel = true; };
-  }, [dispKey, servicioEff, pacienteId, centro]);
+  }, [dispKey, firstServicioId, pacienteId, centro]);
   const disp = dispData && dispData.key === dispKey ? dispData.d : null;
 
   // Agenda existente del paciente (coloreada por servicio) para VER lo ya agendado y no doblar. Rango
@@ -174,19 +186,24 @@ export function ProgramarCitasModal({
     const f = nuevaFecha.trim();
     return f && !fechas.includes(f) ? [...fechas, f].sort() : fechas;
   }, [fechas, nuevaFecha]);
-  const puedeGuardar = !!pacienteId && !!servicioEff && fechasEff.length > 0 && !busy;
+  const puedeGuardar = !!pacienteId && servicioIds.size > 0 && fechasEff.length > 0 && !busy;
 
   async function guardar() {
     if (!puedeGuardar) return;
     setBusy(true);
     try {
       const hora = horaSel || undefined; // opcional; el BE descuenta el cupo de esa franja (no bloquea)
-      const { warnings } =
-        fechasEff.length > 1
-          ? await agendarMultiple({ patientId: pacienteId, serviceId: servicioEff, fechas: fechasEff, time: hora }, centro)
-          : await crearSesion({ patientId: pacienteId, serviceId: servicioEff, date: fechasEff[0], time: hora }, centro);
-      toast.success(t("agendadoOk", { n: fechasEff.length }));
-      mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo — no bloquea
+      // UNA sola llamada agenda el CRUCE completo: cada servicio marcado en cada fecha.
+      const { data, warnings } = await agendarVariosServicios(
+        { patientId: pacienteId, servicioIds: [...servicioIds], fechas: fechasEff, time: hora },
+        centro,
+      );
+      const creadas = Array.isArray(data.creadas) ? data.creadas.length : 0;
+      const omitidas = Number(data.omitidas ?? 0);
+      // Resumen honesto: qué se agendó y qué se omitió por existir ya (el BE devuelve ambos).
+      toast.success(t("resumen", { creadas, omitidas }));
+      mostrarAvisos(warnings, tRoot); // cupo excedido / sin cupo por (servicio, fecha) — no bloquea
+      if (data.aviso) toast.warning(t("avisoDisponibilidad")); // disponibilidad excedida por servicio — no bloquea
       onOpenChange(false);
       setFechas([]);
       setNuevaFecha("");
@@ -205,7 +222,7 @@ export function ProgramarCitasModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{pacienteNombre || t("elegirPaciente")}</DialogDescription>
@@ -251,23 +268,40 @@ export function ProgramarCitasModal({
             )
           )}
 
-          {/* Servicio */}
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">{t("servicio")}</span>
-            <Select value={servicioEff} onValueChange={setServicioId}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("elegirServicio")} /></SelectTrigger>
-              <SelectContent>
-                {servicios.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    <span className="inline-flex items-center gap-2">
-                      {s.color && <span className="size-2 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />}
-                      {s.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </label>
+          {/* Servicios (checklist) a la IZQUIERDA y fechas a la DERECHA: se marcan los servicios, se eligen
+              las fechas, y una sola llamada agenda todo. Handoff citar-varios-servicios. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Servicios: checklist multi-selección (los mismos del centro que salen como pestañas). */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground">{t("servicios")}</span>
+              {servicioIds.size > 0 && (
+                <span className="text-[11px] tabular-nums text-muted-foreground">{t("nServicios", { n: servicioIds.size })}</span>
+              )}
+            </div>
+            <div className="max-h-44 space-y-0.5 overflow-y-auto rounded-md bg-card p-1 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+              {servicios.length === 0 ? (
+                <p className="px-2 py-3 text-center text-xs text-muted-foreground">{t("sinServicios")}</p>
+              ) : (
+                servicios.map((s) => {
+                  const checked = servicioIds.has(s.id);
+                  return (
+                    <label
+                      key={s.id}
+                      className={
+                        "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors " +
+                        (checked ? "bg-primary/5" : "hover:bg-accent/50")
+                      }
+                    >
+                      <Checkbox checked={checked} onCheckedChange={(v) => toggleServicio(s.id, v === true)} />
+                      {s.color && <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} aria-hidden />}
+                      <span className="flex-1 truncate">{s.name}</span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
+          </div>
 
           {/* Fechas (una cita por fecha) */}
           <div className="flex flex-col gap-1.5">
@@ -336,6 +370,8 @@ export function ProgramarCitasModal({
                 ))}
               </div>
             )}
+          </div>
+
           </div>
 
           {/* Agenda existente del paciente (próximas), coloreada por servicio — para no doblar citas */}

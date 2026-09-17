@@ -1586,7 +1586,12 @@
     "proximas": "Upcoming appointments",
     "cuposDia": "Slots per hour",
     "cupoTitle": "{vacios} free of {cupo}",
-    "horaElegida": "Chosen time: {hora}"
+    "horaElegida": "Chosen time: {hora}",
+    "servicios": "Services",
+    "nServicios": "{n} selected",
+    "sinServicios": "This center has no services.",
+    "resumen": "Booked {creadas}, skipped {omitidas} (already existed)",
+    "avisoDisponibilidad": "A service exceeds the patient availability; booked anyway."
   },
   "fd": {
     "col": {

@@ -95,6 +95,28 @@ export async function agendarMultiple(
   return { data: env.data, warnings: env.meta.warnings ?? [] };
 }
 
+// Agenda VARIOS servicios en VARIAS fechas (el cruce completo) para un paciente, en UNA sola llamada
+// (POST /frontdesk/sessions/book-multiple). OJO: `servicioIds` y `fechas` van en ESPAÑOL — NO están en el
+// mapa api-ingles (verificado en prod 2026-09-17: `serviceIds` responde 400 "should not exist"). Ver hueco
+// en docs/specs/api-v2-huecos-handoff-be.md. Devuelve `creadas` (las sesiones nuevas) y `omitidas` (cuántos
+// pares ya existían: idempotente), + avisos de cupo (meta.warnings) y de disponibilidad excedida por
+// servicio (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
+export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
+export async function agendarVariosServicios(
+  payload: { patientId: string; servicioIds: string[]; fechas: string[]; time?: string },
+  centroId?: string,
+): Promise<ConWarnings<BookMultipleResult>> {
+  const env = await apiFetchEnvelope<BookMultipleResult>(`/frontdesk/sessions/book-multiple`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
+  return {
+    data: env.data ?? { creadas: [], omitidas: 0, aviso: null },
+    warnings: env.meta.warnings ?? [],
+  };
+}
+
 // Reagendar una sesión a otra fecha (fechas flexibles).
 export function reagendarSesion(sesionId: string, fecha: string, centroId?: string): Promise<Sesion> {
   return apiFetch<Sesion>(
