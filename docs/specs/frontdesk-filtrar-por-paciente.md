@@ -35,3 +35,40 @@ hermanos iban en inglés; ahora es **`serviceName`**, coherente con `serviceId` 
 
 Para marcar al citar ya existe `GET /frontdesk/patients/:patientId/availability` (lo que compró y
 aún le queda). Son cosas distintas: aquí se filtra por lo que tiene HOY agendado, no por su saldo.
+
+---
+
+## Caso de prueba REAL, con datos poblados (17-sep, 11:45)
+
+Vuestro matiz era el bueno: probasteis con pacientes sin agenda, así que la lista volvía vacía.
+Aquí va uno cargado, medido contra producción hace un minuto.
+
+**Centro:** Caguas (`5f98ef29-5b71-4fc4-8291-0ca3ff50bc7d`)
+**Paciente:** ANGEL L PEREZ GARCIA — récord **15747** — `906beaf4-743f-4b62-9233-73f67ced6a9d`
+
+**Hoy (2026-09-17): cuatro servicios distintos**
+
+```
+GET /api/v2/frontdesk/patients/906beaf4-743f-4b62-9233-73f67ced6a9d/agenda?from=2026-09-17&to=2026-09-17
+```
+
+```json
+[
+ { "serviceName": "Avacen",             "serviceSlug": "avacen",             "status": "pendiente" },
+ { "serviceName": "Cámara Hiperbárica", "serviceSlug": "camara_hiperbarica", "status": "pendiente" },
+ { "serviceName": "EMTT",               "serviceSlug": "emtt",               "status": "pendiente" },
+ { "serviceName": "Sueroterapia Vit C", "serviceSlug": "vitc",               "status": "pendiente" }
+]
+```
+
+Al filtrar por él, el tablero debe quedarse con esas cuatro pestañas de veintitantas.
+
+**Ayer (2026-09-16): el mismo paciente tiene SEIS**, y una de ellas en estado `presente` — sirve para
+ver que el filtro no depende del estado. Otro caso en Bayamón: CARMEN M ROSADO FERNANDEZ, récord
+89854, con dos servicios el 16-sep.
+
+**Caso vacío**, para el otro camino: cualquier paciente recién creado, o este mismo con una fecha sin
+sesiones (por ejemplo `from=to=2026-09-20`).
+
+**Además, desplegado hoy:** `book-multiple` ya acepta `dates` en inglés además de `fechas` (antes
+daba 400, el mismo hueco que `serviceIds`). Las cuatro sesiones de arriba se crearon con esa llamada.
