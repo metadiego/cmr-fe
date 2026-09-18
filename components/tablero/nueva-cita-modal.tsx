@@ -173,9 +173,10 @@ export function NuevaCitaModal({
         date: f,
         ...(medicoId !== NO_MEDICO ? { doctorId: medicoId } : {}),
         ...(notas.trim() ? { notes: notas.trim() } : {}),
-        // Desde atención, una cita PARA HOY entra al tablero como confirmada
-        // (BE: default programada). Futuras → omitir (programada). Ver POST /citas.
-        ...(f === todayISO() ? { status: "confirmada" } : {}),
+        // Una cita dada en ATENCIÓN es directa con la persona presente en la clínica (no interviene el
+        // call-center), así que nace CONFIRMADA para cualquier fecha —no `programada`, que es lo del
+        // call-center— y por eso aparece en el tablero de Atención de su día. Ver POST /citas.
+        status: "confirmada",
       } as Parameters<typeof createCita>[0],
       centroId,
     );
