@@ -40,7 +40,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Can } from "@/components/kit/can";
+import { useCan } from "@/hooks/use-can";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
+import { CertificacionGastos } from "@/components/clientes/certificacion-gastos";
 import {
   fullName,
   initials,
@@ -109,7 +112,10 @@ function PacienteDetail({
   onDeleted: () => void;
 }) {
   const t = useTranslations("patients");
+  const tc = useTranslations("certificacionGastos");
   const format = useFormatter();
+  const { can } = useCan();
+  const puedeFactura = can("factura.read");
   const age = ageFrom(p.dateOfBirth);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -238,37 +244,53 @@ function PacienteDetail({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Sections */}
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Card title={t("form.sectionContact")}>
-          <InfoRow icon={Call02Icon} label={t("columns.phone")} value={p.phone} />
-          <InfoRow icon={WhatsappIcon} label={t("form.whatsapp")} value={p.whatsapp} />
-          <InfoRow icon={Mail01Icon} label={t("columns.email")} value={p.email} />
-          <InfoRow
-            icon={Location01Icon}
-            label={t("form.direccion")}
-            value={[p.address, p.zipCode].filter(Boolean).join(", ") || null}
-          />
-        </Card>
+      {/* Ficha como hub: pestañas. Arranca en Resumen; la Certificación de gastos se pinta con permiso
+          factura.read. Las demás pestañas (Citas, Terapias, Facturación, Documentos) se van sumando. */}
+      <Tabs defaultValue="resumen">
+        <TabsList className="mb-4">
+          <TabsTrigger value="resumen">{t("tabs.summary")}</TabsTrigger>
+          {puedeFactura && <TabsTrigger value="certificacion">{tc("title")}</TabsTrigger>}
+        </TabsList>
 
-        <Card title={t("form.sectionPersonal")}>
-          <InfoRow icon={UserIcon} label={t("form.sexo")} value={sexoLabel(t, p.sex)} />
-          <InfoRow
-            icon={Calendar03Icon}
-            label={t("form.fechaNacimiento")}
-            value={formatDate(format, p.dateOfBirth)}
-          />
-          <InfoRow icon={UserIcon} label={t("form.nacionalidad")} value={p.nationality} />
-        </Card>
+        <TabsContent value="resumen">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Card title={t("form.sectionContact")}>
+              <InfoRow icon={Call02Icon} label={t("columns.phone")} value={p.phone} />
+              <InfoRow icon={WhatsappIcon} label={t("form.whatsapp")} value={p.whatsapp} />
+              <InfoRow icon={Mail01Icon} label={t("columns.email")} value={p.email} />
+              <InfoRow
+                icon={Location01Icon}
+                label={t("form.direccion")}
+                value={[p.address, p.zipCode].filter(Boolean).join(", ") || null}
+              />
+            </Card>
 
-        <Card title={t("form.sectionClinical")}>
-          <InfoRow label={t("form.record")} value={p.medicalRecordNumber} />
-          {/* Médico del paciente: `doctorName` lo computa el BE pero aún no está en schema.d.ts (hueco de
-              tipos, ver handoffs); cast temporal, mismo patrón que en Agregar cita. */}
-          <InfoRow label={t("form.medico")} value={(p as unknown as { doctorName?: string | null }).doctorName} />
-          <InfoRow label={t("form.aseguradora")} value={p.insurer} />
-        </Card>
-      </div>
+            <Card title={t("form.sectionPersonal")}>
+              <InfoRow icon={UserIcon} label={t("form.sexo")} value={sexoLabel(t, p.sex)} />
+              <InfoRow
+                icon={Calendar03Icon}
+                label={t("form.fechaNacimiento")}
+                value={formatDate(format, p.dateOfBirth)}
+              />
+              <InfoRow icon={UserIcon} label={t("form.nacionalidad")} value={p.nationality} />
+            </Card>
+
+            <Card title={t("form.sectionClinical")}>
+              <InfoRow label={t("form.record")} value={p.medicalRecordNumber} />
+              {/* Médico del paciente: `doctorName` lo computa el BE (ya lo sirve /patients/:id); cast por el
+                  hueco de tipos hasta que gen:api lo traiga. */}
+              <InfoRow label={t("form.medico")} value={(p as unknown as { doctorName?: string | null }).doctorName} />
+              <InfoRow label={t("form.aseguradora")} value={p.insurer} />
+            </Card>
+          </div>
+        </TabsContent>
+
+        {puedeFactura && (
+          <TabsContent value="certificacion">
+            <CertificacionGastos pacienteId={p.id} centro={p.clinicId ?? undefined} />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }

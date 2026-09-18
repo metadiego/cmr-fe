@@ -300,6 +300,37 @@ export function getResumenPaciente(
   return apiFetch<ResumenPaciente>(`/invoices/patient-summary?${sp.toString()}`, {}, centroId);
 }
 
+// Certificación de gastos (legado): lo que el paciente GASTÓ de verdad en un rango (devoluciones ya
+// restadas). El concepto es el GRUPO de facturación (dato, no código); el nombre se pinta con su
+// `labelKey`. Entran consulta + facturación general. `cuadre.cuadra===false` NO debe pasar; si pasa,
+// NO se imprime. Keys en español (envelope opaco, fuera del mapa inglés). BE: GET
+// /invoices/expenses-certificate?patientId=&desde=&hasta=. Handoff ficha-del-paciente-hub-y-certificacion-de-gastos.
+export interface CertificacionConcepto {
+  clave: string;
+  labelKey: string;
+  total: number;
+  devoluciones: number;
+  facturas: number;
+}
+export interface CertificacionGastos {
+  paciente: { id: string; nombre: string; record?: string | null; docId?: string | null };
+  desde: string;
+  hasta: string;
+  conceptos: CertificacionConcepto[];
+  total: number;
+  devoluciones: number;
+  cuadre: { totalFacturas: number; totalDesglose: number; diferencia: number; cuadra: boolean };
+}
+export function getCertificacionGastos(
+  pacienteId: string,
+  desde: string,
+  hasta: string,
+  centroId?: string,
+): Promise<CertificacionGastos> {
+  const sp = new URLSearchParams({ patientId: pacienteId, desde, hasta });
+  return apiFetch<CertificacionGastos>(`/invoices/expenses-certificate?${sp.toString()}`, {}, centroId);
+}
+
 // Catálogo facturable (productos/servicios) para agregar líneas.
 // `context='consulta'` → el BE restringe a los productos de los tipos de cita activos (Consulta,
 // Seguimiento): una factura de consulta médica no ofrece el catálogo físico completo.

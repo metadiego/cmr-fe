@@ -524,7 +524,10 @@
       "sinMedico": "No doctor",
       "otroCentro": "other center"
     },
-    "acciones": "Actions"
+    "acciones": "Actions",
+    "tabs": {
+      "summary": "Summary"
+    }
   },
   "common": {
     "toggleTheme": "Toggle theme",
@@ -3828,5 +3831,30 @@
     "sinServicios": "No services.",
     "sinCitas": "No appointments."
   },
-  "clientes": {}
+  "clientes": {},
+  "certificacionGastos": {
+    "title": "Expense certificate",
+    "from": "From",
+    "to": "To",
+    "treatment": "Title",
+    "sr": "Mr.",
+    "sra": "Ms.",
+    "authorizedPerson": "Authorized person",
+    "authorizedPersonPh": "Name of the requester…",
+    "print": "Print",
+    "concept": "Concept",
+    "amount": "Amount",
+    "invoices": "Invoices",
+    "refunds": "Refunds",
+    "total": "Total",
+    "empty": "No expenses in the range.",
+    "noCuadra": "The breakdown does not match the invoices; it cannot be printed.",
+    "record": "record",
+    "bodyIntro": "Hereby, at the request of {trato} {persona}, it is certified that:",
+    "bodyPatient": "the patient {nombre}",
+    "bodyPeriod": "incurred the following expenses between {desde} and {hasta}:",
+    "footNote": "This certificate is issued for whatever purposes the interested party deems appropriate.",
+    "clinicSignature": "Authorized signature — Centro de Medicina Regenerativa",
+    "issuedOn": "Issued on {fecha}."
+  }
 }

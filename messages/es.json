@@ -524,7 +524,10 @@
       "sinMedico": "Sin médico",
       "otroCentro": "otro centro"
     },
-    "acciones": "Acciones"
+    "acciones": "Acciones",
+    "tabs": {
+      "summary": "Resumen"
+    }
   },
   "common": {
     "toggleTheme": "Cambiar tema",
@@ -3828,5 +3831,30 @@
     "sinServicios": "Sin servicios.",
     "sinCitas": "Sin citas."
   },
-  "clientes": {}
+  "clientes": {},
+  "certificacionGastos": {
+    "title": "Certificación de gastos",
+    "from": "Desde",
+    "to": "Hasta",
+    "treatment": "Trato",
+    "sr": "Sr.",
+    "sra": "Sra.",
+    "authorizedPerson": "Persona autorizada",
+    "authorizedPersonPh": "Nombre de quien la solicita…",
+    "print": "Imprimir",
+    "concept": "Concepto",
+    "amount": "Monto",
+    "invoices": "Facturas",
+    "refunds": "Devoluciones",
+    "total": "Total",
+    "empty": "Sin gastos en el rango.",
+    "noCuadra": "El desglose no cuadra con las facturas; no se puede imprimir.",
+    "record": "récord",
+    "bodyIntro": "Por medio de la presente, y a solicitud del/de la {trato} {persona}, se certifica que:",
+    "bodyPatient": "el/la paciente {nombre}",
+    "bodyPeriod": "incurrió en los siguientes gastos entre {desde} y {hasta}:",
+    "footNote": "Se expide la presente para los fines que el interesado estime convenientes.",
+    "clinicSignature": "Firma autorizada — Centro de Medicina Regenerativa",
+    "issuedOn": "Expedido el {fecha}."
+  }
 }
