@@ -25,6 +25,7 @@ import {
   type RecordDueno,
 } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { MedicoSelectField } from "@/components/clientes/medico-select-field";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { toastError } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/types";
@@ -97,9 +98,8 @@ export function PacienteFormSheet({
     ? (paciente?.clinicId ?? undefined)
     : effectiveCentro || undefined;
 
-  // Required fields come from the BE per-center config (default telefono/zipcode/
-  // sexo) — nothing hardcoded here; the BE enforces on save either way. If the
-  // config can't load we mark nothing and let the BE answer with `campos`.
+  // Required fields come from the BE per-center config (nothing hardcoded); the BE enforces on save
+  // either way. If the config can't load we mark nothing and let the BE answer with `campos`.
   const { state: configState } = useResource(
     () => getConfigAltaPacientes(tenant),
     [tenant, open],
@@ -120,16 +120,12 @@ export function PacienteFormSheet({
   );
 
   // ── Async duplicate check of the manual record number ──────────────────────
-  // Debounced 400 ms (patrón paciente-select). Keyed by tenant+record so a stale
-  // response never labels the current value; the "checking" spinner is DERIVED
-  // (no result yet for the current key), never set synchronously in the effect
-  // (patrón programar-citas-modal / react-hooks/set-state-in-effect).
+  // Debounced 400 ms, keyed by tenant+record so a stale response never labels the current value; the
+  // "checking" spinner is DERIVED (no result yet for the key), never set synchronously in the effect.
   const recordLimpio = form.record.trim();
   const recordKey = `${tenant ?? ""}|${recordLimpio}`;
-  // No tenant yet (multi-center create before picking a centro): checking would
-  // hit the BE unscoped/400 and could accuse a duplicate from ANOTHER center.
-  // recordKey includes the tenant, so picking a centro re-checks automatically.
-  // Editing and keeping the patient's own record: nothing to check either.
+  // No tenant yet (multi-center create): checking unscoped 400s / could accuse a duplicate from another
+  // center. recordKey includes the tenant (re-checks on centro change). Own record on edit: nothing to check.
   const needsCheck =
     open &&
     !!recordLimpio &&
@@ -164,9 +160,7 @@ export function PacienteFormSheet({
     recordCheck && recordCheck.key === recordKey ? recordCheck.res : null;
   const checkingRecord =
     needsCheck && (!recordCheck || recordCheck.key !== recordKey);
-  // The 409 fallback owner is KEYED by tenant+record: switching centro or
-  // editing the number invalidates it (otherwise a stale red alert from centro A
-  // would contradict a green "available" check in centro B).
+  // The 409 fallback owner is KEYED by tenant+record: switching centro or editing the number invalidates it.
   const [duenoServer, setDuenoServer] = React.useState<{
     key: string;
     dueno: NonNullable<RecordDueno["dueno"]>;
@@ -230,10 +224,8 @@ export function PacienteFormSheet({
       }
       toast.success(isEdit ? t("updated") : t("created"));
       onSaved(saved);
-      // Reset BEFORE closing: Radix controlled sheets don't fire onOpenChange
-      // for programmatic prop changes, so without this the next open shows the
-      // saved patient's data AND a false blocking duplicate alert on their own
-      // record number.
+      // Reset BEFORE closing: Radix controlled sheets don't fire onOpenChange for programmatic prop
+      // changes, so the next open would show stale data + a false duplicate alert on the own record.
       resetFormState();
       onOpenChange(false);
     } catch (err) {
@@ -444,6 +436,16 @@ export function PacienteFormSheet({
                   value={form.aseguradora}
                   aria-invalid={errFields.has("aseguradora") || undefined}
                   onChange={(e) => set("aseguradora", e.target.value)}
+                />
+              </Field>
+              {/* Médico del paciente: asignar / cambiar / quitar. Ya seleccionado el actual; se conserva aunque sea de otro centro. */}
+              <Field label={t("medico")} required={req("medicoId")}>
+                <MedicoSelectField
+                  value={form.medicoId}
+                  onChange={(v) => set("medicoId", v)}
+                  centro={tenant}
+                  doctorName={(paciente as unknown as { doctorName?: string })?.doctorName}
+                  invalid={errFields.has("medicoId")}
                 />
               </Field>
             </Grid>

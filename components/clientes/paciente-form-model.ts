@@ -32,6 +32,7 @@ export type FormState = {
   zipcode: string;
   record: string;
   aseguradora: string;
+  medicoId: string; // médico del paciente (doctorId); se asigna/cambia aquí y el walk-in lo trae de aquí.
 };
 
 export const EMPTY: FormState = {
@@ -48,6 +49,7 @@ export const EMPTY: FormState = {
   zipcode: "",
   record: "",
   aseguradora: "",
+  medicoId: "",
 };
 
 export function fromPaciente(p: Paciente): FormState {
@@ -65,6 +67,7 @@ export function fromPaciente(p: Paciente): FormState {
     zipcode: p.zipCode ?? "",
     record: p.medicalRecordNumber ?? "",
     aseguradora: p.insurer ?? "",
+    medicoId: p.doctorId ?? "",
   };
 }
 
@@ -85,6 +88,7 @@ export function toPayload(f: FormState): CreatePacientePayload {
     zipCode: t(f.zipcode),
     medicalRecordNumber: t(f.record),
     insurer: t(f.aseguradora),
+    doctorId: t(f.medicoId),
   };
 }
 
@@ -116,6 +120,8 @@ const API_TO_FIELD: Record<string, keyof FormState> = {
   record: "record",
   insurer: "aseguradora",
   aseguradora: "aseguradora",
+  doctorid: "medicoId",
+  medicoid: "medicoId",
 };
 
 // Extrae de un error 400 (`error.details`) los campos del formulario a marcar. Usa `field` si viene;

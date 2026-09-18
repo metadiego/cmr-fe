@@ -519,7 +519,10 @@
       "recordDuenoInactivo": "inactivo",
       "camposFaltantes": "Faltan campos obligatorios: {campos}",
       "emailInvalido": "Escribe un correo válido, p. ej. nombre@dominio.com",
-      "requiredLegend": "Campos obligatorios"
+      "requiredLegend": "Campos obligatorios",
+      "medico": "Médico",
+      "sinMedico": "Sin médico",
+      "otroCentro": "otro centro"
     },
     "acciones": "Acciones"
   },
