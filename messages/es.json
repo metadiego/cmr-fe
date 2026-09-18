@@ -2507,6 +2507,7 @@
     "type": "Tipo",
     "doctor": "Médico",
     "noDoctor": "Sin médico asociado",
+    "otherCenter": "Otro centro",
     "time": "Hora",
     "firstTime": "Primera vez",
     "notes": "Observación",
