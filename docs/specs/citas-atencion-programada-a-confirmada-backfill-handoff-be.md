@@ -60,3 +60,19 @@ backfill la pasaría a `confirmada`. Dos opciones a decidir por el dueño/BE:
 2. Antes del backfill, cambiar el **default del selector en `cita-form-sheet.tsx` a `'callcenter'`**
    (es el formulario del módulo de agenda/call-center) para que `canal` sea 100% fiable de aquí en
    adelante. Ese cambio de default sí es del FE; avisar y lo hago.
+
+## Corrección (verificado): el canal SÍ es fiable entre las dos vías
+
+Aclaración del dueño: «call-center» = módulo `/scheduling/appointments/...`; «atención» =
+`/boards/atencion`.
+
+- **Scheduling** crea con `components/agenda/cita-modal.tsx` (`CitaModal`), que manda
+  **`channel: "callcenter"`** (línea 188). → esas citas quedan `canal='callcenter'`. Verificado.
+- **Atención** crea con `nueva-cita-modal.tsx` / `agregar-cita-modal.tsx`, que NO mandan canal → BE
+  default `canal='atencion'`.
+
+La salvedad anterior era por `components/citas/cita-form-sheet.tsx` (selector con default `atencion`),
+pero ese componente **no lo importa nadie** (sin uso en ningún flujo vivo), así que no aplica.
+
+**Conclusión:** el backfill `estado='programada' AND canal='atencion' → 'confirmada'` es seguro: NO
+toca las del call-center (`canal='callcenter'`). No hace falta cambiar defaults en el FE.
