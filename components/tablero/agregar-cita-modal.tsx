@@ -98,8 +98,9 @@ export function AgregarCitaModal({
   const patientDoctorOption = React.useMemo(() => {
     const doctorId = paciente?.doctorId;
     if (!doctorId || medicos.some((m) => m.value === doctorId)) return null;
-    const doctorName = (paciente as unknown as { doctorName?: string }).doctorName;
-    return { value: String(doctorId), label: doctorName ?? String(doctorId) };
+    // `doctorName`/`doctorClinicName` aren't in schema.d.ts yet (BE typing gap, see handoff); cast.
+    const p = paciente as unknown as { doctorName?: string; doctorClinicName?: string };
+    return { value: String(doctorId), label: p.doctorName ?? String(doctorId), centro: p.doctorClinicName ?? "" };
   }, [paciente, medicos]);
 
   async function onGuardar() {
@@ -169,7 +170,10 @@ export function AgregarCitaModal({
                   <SelectItem value={patientDoctorOption.value}>
                     <span className="flex items-center gap-2">
                       {patientDoctorOption.label}
-                      <Badge variant="warning">{t("otherCenter")}</Badge>
+                      {/* Con varios centros, nombrar el centro del médico acelera la identificación. */}
+                      <Badge variant="warning">
+                        {patientDoctorOption.centro ? `${t("otherCenter")} · ${patientDoctorOption.centro}` : t("otherCenter")}
+                      </Badge>
                     </span>
                   </SelectItem>
                 )}
