@@ -89,7 +89,15 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
   }, [centro]);
 
-  const { live } = useCitaStream({ centroId: centro ?? null, entidad: "panel_notificacion", onInvalidate: refetch });
+  // With no center (still loading, or not chosen yet) the stream is not opened: the bus is
+  // center-scoped and the BE refuses a connection with no `X-Tenant-ID`.
+  // See docs/specs/be-sse-acotado-al-centro-handoff.md.
+  const { live } = useCitaStream({
+    centroId: centro ?? null,
+    entidad: "panel_notificacion",
+    enabled: !!centro,
+    onInvalidate: refetch,
+  });
 
   // Cola: la más antigua primero. La alarma suena mientras haya avisos pendientes.
   const pendientes = notifs;

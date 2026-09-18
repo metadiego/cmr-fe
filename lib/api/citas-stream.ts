@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
+import { streamError } from "@/lib/api/stream-retry";
 
 // Declarative realtime event from the SSE bus. The FE applies each event
 // silently (never re-emits). `channel` = clinic scope; `action` = what changed;
@@ -55,14 +56,7 @@ export async function subscribeCitas(opts: {
     headers,
     signal: opts.signal,
   });
-  if (!res.ok || !res.body) {
-    // Error con status para que el consumidor decida: 401/403 = no reintentar (sin sesión/permiso);
-    // otros = reconectar con backoff. Sin esto el bucle reintenta indefinidamente y llena la bitácora
-    // con UNAUTHORIZED (mismo patrón que components/comunicaciones/comunicaciones.ts + alertas-bell).
-    const err = new Error(`stream ${res.status}`) as Error & { status?: number };
-    err.status = res.status;
-    throw err;
-  }
+  if (!res.ok || !res.body) throw await streamError(res);
   opts.onOpen?.();
 
   const reader = res.body.getReader();
