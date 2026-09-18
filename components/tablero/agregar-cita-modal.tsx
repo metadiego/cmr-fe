@@ -9,6 +9,7 @@ import { getOpciones, type Opcion } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { PacienteSelect } from "@/components/citas/paciente-select";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -89,6 +90,18 @@ export function AgregarCitaModal({
   const medicoRequerido = !!tipoAuto?.requiresDoctor;
   const canSubmit = !!paciente && !!tipoAuto && (!medicoRequerido || medicoId !== NO_MEDICO) && !busy;
 
+  // The patient's doctor may not serve at this center (`medicos` comes filtered to the active
+  // center, see getOpciones above) — the POST is still correct, but the <Select> can't show a
+  // label without a matching SelectItem. Add that option by hand, marked, instead of leaving it
+  // blank. `doctorName` isn't in schema.d.ts yet (BE typing gap, see
+  // docs/specs/agregar-cita-medico-de-otro-centro-handoff-be.md); the cast is temporary.
+  const patientDoctorOption = React.useMemo(() => {
+    const doctorId = paciente?.doctorId;
+    if (!doctorId || medicos.some((m) => m.value === doctorId)) return null;
+    const doctorName = (paciente as unknown as { doctorName?: string }).doctorName;
+    return { value: String(doctorId), label: doctorName ?? String(doctorId) };
+  }, [paciente, medicos]);
+
   async function onGuardar() {
     if (!paciente || !tipoAuto) return;
     setBusy(true);
@@ -152,6 +165,14 @@ export function AgregarCitaModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NO_MEDICO}>{t("noDoctor")}</SelectItem>
+                {patientDoctorOption && (
+                  <SelectItem value={patientDoctorOption.value}>
+                    <span className="flex items-center gap-2">
+                      {patientDoctorOption.label}
+                      <Badge variant="warning">{t("otherCenter")}</Badge>
+                    </span>
+                  </SelectItem>
+                )}
                 {medicos.map((m) => (
                   <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
                 ))}

@@ -2507,6 +2507,7 @@
     "type": "Type",
     "doctor": "Doctor",
     "noDoctor": "No doctor assigned",
+    "otherCenter": "Other center",
     "time": "Time",
     "firstTime": "First visit",
     "notes": "Notes",
