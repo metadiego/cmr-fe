@@ -263,6 +263,9 @@ function PacienteDetail({
 
         <Card title={t("form.sectionClinical")}>
           <InfoRow label={t("form.record")} value={p.medicalRecordNumber} />
+          {/* Médico del paciente: `doctorName` lo computa el BE pero aún no está en schema.d.ts (hueco de
+              tipos, ver handoffs); cast temporal, mismo patrón que en Agregar cita. */}
+          <InfoRow label={t("form.medico")} value={(p as unknown as { doctorName?: string | null }).doctorName} />
           <InfoRow label={t("form.aseguradora")} value={p.insurer} />
         </Card>
       </div>
