@@ -44,3 +44,19 @@ VALLES 84687, CONCEPCION, y la de récord 111) son `canal='atencion'` + `program
 
 Hacerlo como migración idempotente o script de datos, como prefiera el BE. El FE no hace este cambio
 por bulk (dato = BE; sin seeds/SQL desde el FE).
+
+## Cómo se sabe el origen (canal) — y una salvedad
+
+- **Tablero de Atención** (`nueva-cita-modal.tsx`, `agregar-cita-modal.tsx`): NO mandan `canal` → el BE
+  lo deja en `'atencion'` (default de `createCita`). Fiable: lo dado en Atención siempre es `atencion`.
+- **Agenda / call-center** (`components/citas/cita-form-sheet.tsx`): tiene un **selector de canal**
+  (`channel`) que **por defecto es `'atencion'`** y el usuario puede cambiar a `'callcenter'`.
+
+**Salvedad para el backfill:** si un operador de call-center creó en la agenda y dejó el canal en el
+default (`atencion`), esa cita quedaría marcada `canal='atencion'` aunque sea del call-center, y el
+backfill la pasaría a `confirmada`. Dos opciones a decidir por el dueño/BE:
+1. Aceptarlo (el volumen de esos casos suele ser bajo y una cita del call-center marcada como Atención
+   confirmándose no es grave), o
+2. Antes del backfill, cambiar el **default del selector en `cita-form-sheet.tsx` a `'callcenter'`**
+   (es el formulario del módulo de agenda/call-center) para que `canal` sea 100% fiable de aquí en
+   adelante. Ese cambio de default sí es del FE; avisar y lo hago.
