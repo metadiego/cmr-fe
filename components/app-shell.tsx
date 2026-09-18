@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -13,6 +14,7 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { CenterSelector } from "@/components/center-selector";
@@ -77,24 +79,52 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
       <LocaleSync />
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
-          {/* Header blanco fijo (no bg-background): el branding del centro sobreescribe
-              --background a un índigo oscuro; forzamos blanco para el chrome tipo EHR. */}
-          <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4">
-            <SidebarTrigger />
-            <span className="text-sm font-semibold">{sectionTitle}</span>
-            <div className="ml-auto flex items-center gap-2">
-              <CenterSelector />
-              <SearchBar />
-              {session ? <AlertasBell /> : null}
-              <UserMenu />
-            </div>
-          </header>
-          {/* Lienzo estándar off-white (EHR): cubre el --app-bg-image de branding para
-              que ninguna página lo deje traslucir; las tarjetas blancas resaltan encima. */}
-          <main className="flex-1 bg-muted p-6">{children}</main>
-        </SidebarInset>
+        <ShellBody sectionTitle={sectionTitle} session={session}>{children}</ShellBody>
       </SidebarProvider>
     </TooltipProvider>
+  );
+}
+
+// Cuerpo del shell (dentro del SidebarProvider para poder plegar el menú). Al interactuar en el
+// CONTENIDO de la derecha (`<main>`), el menú de la izquierda se pliega solo para dar más pantalla.
+// Solo si está abierto (idempotente) y en su modo (escritorio: setOpen; móvil: setOpenMobile). Va en
+// el <main>, NO en el header, para que abrir el menú desde el trigger no lo cierre en el acto.
+function ShellBody({
+  children,
+  sectionTitle,
+  session,
+}: {
+  children: React.ReactNode;
+  sectionTitle: string;
+  session: unknown;
+}) {
+  const { open, setOpen, openMobile, setOpenMobile, isMobile } = useSidebar();
+  const colapsarAlInteractuar = React.useCallback(() => {
+    if (isMobile) {
+      if (openMobile) setOpenMobile(false);
+    } else if (open) {
+      setOpen(false);
+    }
+  }, [isMobile, open, openMobile, setOpen, setOpenMobile]);
+  return (
+    <SidebarInset>
+      {/* Header blanco fijo (no bg-background): el branding del centro sobreescribe --background a un
+          índigo oscuro; forzamos blanco para el chrome tipo EHR. */}
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4">
+        <SidebarTrigger />
+        <span className="text-sm font-semibold">{sectionTitle}</span>
+        <div className="ml-auto flex items-center gap-2">
+          <CenterSelector />
+          <SearchBar />
+          {session ? <AlertasBell /> : null}
+          <UserMenu />
+        </div>
+      </header>
+      {/* Lienzo estándar off-white (EHR): cubre el --app-bg-image de branding para que ninguna página
+          lo deje traslucir; las tarjetas blancas resaltan encima. Interactuar aquí pliega el menú. */}
+      <main className="flex-1 bg-muted p-6" onPointerDownCapture={colapsarAlInteractuar}>
+        {children}
+      </main>
+    </SidebarInset>
   );
 }
