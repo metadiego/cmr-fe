@@ -40,21 +40,25 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
     [pacienteId, desde, hasta, centro],
   );
   const data = state.kind === "ok" ? state.data : null;
-  const cuadra = data ? data.cuadre.cuadra !== false : true;
-  const puedeImprimir = !!data && cuadra && data.total > 0;
+  // Defensivo: la respuesta puede venir sin `cuadre`/`conceptos`/`total` (p. ej. paciente sin gastos),
+  // y un acceso directo tumbaba la pestaña. Optional chaining + defaults en todo lo que viene del BE.
+  const conceptos = data?.conceptos ?? [];
+  const total = data?.total ?? 0;
+  const cuadra = data?.cuadre?.cuadra !== false;
+  const puedeImprimir = !!data && cuadra && total > 0;
   const nombreConcepto = (c: { labelKey: string; clave: string }) =>
     tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave;
 
   function imprimir() {
     if (!data || !puedeImprimir) return;
-    const filas = data.conceptos
+    const filas = conceptos
       .map(
         (c) =>
           `<tr><td>${esc(nombreConcepto(c))}</td><td class="num">${money.format(c.total)}</td></tr>`,
       )
       .join("");
     const tratoLabel = trato === "sra" ? t("sra") : t("sr");
-    const rec = data.paciente.record ? ` · ${t("record")} ${esc(String(data.paciente.record))}` : "";
+    const rec = data.paciente?.record ? ` · ${t("record")} ${esc(String(data.paciente.record))}` : "";
     const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t("title"))}</title>
       <style>
         @page { margin: 2.5cm; }
@@ -77,11 +81,11 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
       <h1>${esc(t("title"))}</h1>
       <div class="body">
         <p>${esc(t("bodyIntro", { trato: tratoLabel, persona: persona.trim() || "____________________" }))}</p>
-        <p>${esc(t("bodyPatient", { nombre: data.paciente.nombre }))}${rec}, ${esc(t("bodyPeriod", { desde, hasta }))}</p>
+        <p>${esc(t("bodyPatient", { nombre: data.paciente?.nombre ?? "" }))}${rec}, ${esc(t("bodyPeriod", { desde, hasta }))}</p>
         <table>
           <thead><tr><th>${esc(t("concept"))}</th><th class="num">${esc(t("amount"))}</th></tr></thead>
           <tbody>${filas}</tbody>
-          <tfoot><tr class="total"><td>${esc(t("total"))}</td><td class="num">${money.format(data.total)}</td></tr></tfoot>
+          <tfoot><tr class="total"><td>${esc(t("total"))}</td><td class="num">${money.format(total)}</td></tr></tfoot>
         </table>
       </div>
       <div class="foot">
@@ -145,10 +149,10 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
               </tr>
             </thead>
             <tbody>
-              {data.conceptos.length === 0 ? (
+              {conceptos.length === 0 ? (
                 <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">{t("empty")}</td></tr>
               ) : (
-                data.conceptos.map((c) => (
+                conceptos.map((c) => (
                   <tr key={c.clave} className="border-t">
                     <td className="px-3 py-2">{nombreConcepto(c)}</td>
                     <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.facturas}</td>
@@ -158,11 +162,11 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
                 ))
               )}
             </tbody>
-            {data.conceptos.length > 0 && (
+            {conceptos.length > 0 && (
               <tfoot>
                 <tr className="border-t-2">
                   <td className="px-3 py-2 font-semibold" colSpan={3}>{t("total")}</td>
-                  <td className="px-3 py-2 text-right font-bold tabular-nums">{money.format(data.total)}</td>
+                  <td className="px-3 py-2 text-right font-bold tabular-nums">{money.format(total)}</td>
                 </tr>
               </tfoot>
             )}
