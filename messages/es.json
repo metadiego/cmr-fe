@@ -527,7 +527,36 @@
     "acciones": "Acciones",
     "tabs": {
       "summary": "Resumen",
-      "documents": "Documentos"
+      "documents": "Documentos",
+      "appointments": "Citas",
+      "therapies": "Terapias",
+      "billing": "Facturación"
+    },
+    "hub": {
+      "alerts": "Alertas y precauciones",
+      "allergies": "Alergias",
+      "implants": "Implantes y dispositivos",
+      "noAlerts": "Sin alertas conocidas",
+      "noAllergies": "Sin alergias conocidas",
+      "noImplants": "Sin implantes conocidos",
+      "loading": "Cargando…",
+      "noCitas": "Sin citas.",
+      "noTerapias": "Sin terapias.",
+      "noFacturas": "Sin facturas.",
+      "date": "Fecha",
+      "type": "Tipo",
+      "status": "Estado",
+      "service": "Servicio",
+      "session": "Sesión",
+      "invoice": "Factura",
+      "concept": "Concepto",
+      "net": "Neto",
+      "total": "Total",
+      "collected": "Cobrado",
+      "pending": "Pendiente",
+      "refunded": "Devuelto",
+      "lastVisit": "Última visita",
+      "noLastVisit": "Sin visitas registradas."
     }
   },
   "common": {

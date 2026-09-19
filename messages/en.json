@@ -527,7 +527,36 @@
     "acciones": "Actions",
     "tabs": {
       "summary": "Summary",
-      "documents": "Documents"
+      "documents": "Documents",
+      "appointments": "Appointments",
+      "therapies": "Therapies",
+      "billing": "Billing"
+    },
+    "hub": {
+      "alerts": "Alerts & precautions",
+      "allergies": "Allergies",
+      "implants": "Implants & devices",
+      "noAlerts": "No known alerts",
+      "noAllergies": "No known allergies",
+      "noImplants": "No known implants",
+      "loading": "Loading…",
+      "noCitas": "No appointments.",
+      "noTerapias": "No therapies.",
+      "noFacturas": "No invoices.",
+      "date": "Date",
+      "type": "Type",
+      "status": "Status",
+      "service": "Service",
+      "session": "Session",
+      "invoice": "Invoice",
+      "concept": "Concept",
+      "net": "Net",
+      "total": "Total",
+      "collected": "Collected",
+      "pending": "Pending",
+      "refunded": "Refunded",
+      "lastVisit": "Last visit",
+      "noLastVisit": "No visits on record."
     }
   },
   "common": {

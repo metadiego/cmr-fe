@@ -13,6 +13,7 @@ import {
   Location01Icon,
   Calendar03Icon,
   UserIcon,
+  Alert01Icon,
 } from "@hugeicons/core-free-icons";
 
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ import { useCan } from "@/hooks/use-can";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { CertificacionGastos } from "@/components/clientes/certificacion-gastos";
+import { FichaCitas, FichaTerapias, FichaFacturacion, FichaUltimaVisita } from "@/components/clientes/ficha-tabs";
 import {
   fullName,
   initials,
@@ -116,6 +118,8 @@ function PacienteDetail({
   const format = useFormatter();
   const { can } = useCan();
   const puedeFactura = can("factura.read");
+  const puedeCitas = can("citas.read");
+  const puedeFrontdesk = can("frontdesk.read");
   const age = ageFrom(p.dateOfBirth);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -162,14 +166,12 @@ function PacienteDetail({
 
         <div className="min-w-0 flex-1">
           <PageHeader
-            title={fullName(p)}
+            title={`${fullName(p)}${p.medicalRecordNumber ? ` · ${p.medicalRecordNumber}` : ""}`}
             description={
               <span className="inline-flex flex-wrap items-center gap-2">
-                {p.documentId && (
-                  <Badge variant="outline" className="font-mono">
-                    ID {p.documentId}
-                  </Badge>
-                )}
+                <span className="text-sm text-muted-foreground">
+                  {[formatDate(format, p.dateOfBirth), sexoLabel(t, p.sex)].filter((v) => v && v !== "—").join(" · ")}
+                </span>
                 {p.active ? (
                   <Badge variant="secondary">{t("active")}</Badge>
                 ) : (
@@ -244,16 +246,26 @@ function PacienteDetail({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Ficha como hub: pestañas. Arranca en Resumen; la Certificación de gastos se pinta con permiso
-          factura.read. Las demás pestañas (Citas, Terapias, Facturación, Documentos) se van sumando. */}
+      {/* Banda de avisos siempre visible (como la referencia): alertas, alergias, implantes. La ausencia
+          también es información. (Se poblará con datos del BE cuando existan.) */}
+      <div className="space-y-1 rounded-md border border-warning/40 bg-warning/40 px-4 py-3 text-sm">
+        <AvisoRow label={t("hub.alerts")} value={t("hub.noAlerts")} />
+        <AvisoRow label={t("hub.allergies")} value={t("hub.noAllergies")} />
+        <AvisoRow label={t("hub.implants")} value={t("hub.noImplants")} />
+      </div>
+
+      {/* Ficha como hub. Cada pestaña llama SOLO a su endpoint; se pintan según permiso. */}
       <Tabs defaultValue="resumen">
         <TabsList className="mb-4">
           <TabsTrigger value="resumen">{t("tabs.summary")}</TabsTrigger>
+          {puedeCitas && <TabsTrigger value="citas">{t("tabs.appointments")}</TabsTrigger>}
+          {puedeFrontdesk && <TabsTrigger value="terapias">{t("tabs.therapies")}</TabsTrigger>}
+          {puedeFactura && <TabsTrigger value="facturacion">{t("tabs.billing")}</TabsTrigger>}
           {puedeFactura && <TabsTrigger value="documentos">{t("tabs.documents")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="resumen">
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             <Card title={t("form.sectionContact")}>
               <InfoRow icon={Call02Icon} label={t("columns.phone")} value={p.phone} />
               <InfoRow icon={WhatsappIcon} label={t("form.whatsapp")} value={p.whatsapp} />
@@ -283,19 +295,38 @@ function PacienteDetail({
               <InfoRow label={t("form.aseguradora")} value={p.insurer} />
             </Card>
           </div>
+          <div className="mt-6"><FichaUltimaVisita pacienteId={p.id} centro={centroId} /></div>
         </TabsContent>
 
+        {puedeCitas && (
+          <TabsContent value="citas"><FichaCitas pacienteId={p.id} centro={centroId} /></TabsContent>
+        )}
+        {puedeFrontdesk && (
+          <TabsContent value="terapias"><FichaTerapias pacienteId={p.id} centro={centroId} /></TabsContent>
+        )}
+        {puedeFactura && (
+          <TabsContent value="facturacion"><FichaFacturacion pacienteId={p.id} centro={centroId} /></TabsContent>
+        )}
         {puedeFactura && (
           <TabsContent value="documentos">
             {/* «Documentos» del paciente. Por ahora: la Certificación de gastos (un documento, no una
                 pestaña propia). Aquí se irán sumando otros documentos. */}
             <div className="space-y-3">
               <h2 className="text-sm font-semibold">{tc("title")}</h2>
-              <CertificacionGastos pacienteId={p.id} centro={p.clinicId ?? undefined} />
+              <CertificacionGastos pacienteId={p.id} centro={centroId} />
             </div>
           </TabsContent>
         )}
       </Tabs>
+    </div>
+  );
+}
+
+function AvisoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <HugeiconsIcon icon={Alert01Icon} className="mt-0.5 size-4 shrink-0 text-warning-foreground/70" />
+      <span><span className="font-semibold">{label}</span> <span className="text-muted-foreground">{value}</span></span>
     </div>
   );
 }
