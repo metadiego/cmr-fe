@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
 import { getFormatoArmado, type FormatoArmado, type FormatoPie } from "@/lib/api/formatos";
+import { SeccionInner } from "@/components/frontdesk/formato-secciones";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
@@ -439,7 +440,8 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const secciones = d.sections ?? [];
   // ¿Hay un área de OBSERVACIONES (texto_libre) que pueda crecer para llenar la hoja? Si no, se usa un
   // espaciador flexible para que firmas/pie caigan al fondo y el reporte no quede amontonado arriba.
-  const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre");
+  // ¿Hay una caja de OBSERVACIONES que CREZCA? (la de "lineas" no crece). Si no, va un espaciador flexible.
+  const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre" && s.estilo !== "lineas");
   // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
   // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
   const esCampos = (d.layout ?? (cols.length ? "tabla" : "campos")) === "campos";
@@ -468,7 +470,8 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
             <div className="absolute left-0 top-0">
               <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
             </div>
-            <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>
+            {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa (solo logo + título). */}
+            {!d.letterhead?.ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
             {d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
             <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
           </div>
@@ -515,29 +518,18 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
           {/* Si NO hay área de observaciones que crezca, un espaciador flexible empuja firmas/pie al fondo. */}
           {!tieneTextoLibre && <div className="formato-grow" aria-hidden style={{ flex: "1 1 auto", minHeight: "24px" }} />}
 
-          {/* Secciones (observaciones / firmas), en cualquier layout. */}
+          {/* Secciones (observaciones / firmas / párrafo / tabla de firmas / checklist / tabla temática /
+              leyenda), en cualquier layout. El render de cada tipo vive en formato-secciones.tsx (data-driven,
+              idéntico al legacy). Solo OBSERVACIONES (texto_libre caja) crece para llenar la hoja. */}
           {secciones.map((s) => {
-            const esTexto = s.tipo === "texto_libre";
+            const crece = s.tipo === "texto_libre" && s.estilo !== "lineas";
             return (
               <div
                 key={s.clave}
-                className={"region mt-6" + (esTexto ? " formato-grow" : "")}
-                style={esTexto ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
+                className={"region mt-6" + (crece ? " formato-grow" : "")}
+                style={crece ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
               >
-                <div className="mb-1 text-sm font-bold uppercase">{label(s.labelKey)}</div>
-                {esTexto ? (
-                  // Recuadro de OBSERVACIONES que CRECE para llenar el espacio sobrante de la hoja.
-                  <div style={{ border: "1px solid #999", flex: "1 1 auto", minHeight: `${Math.max(3, s.alto ?? 3) * 30}px` }} />
-                ) : s.tipo === "firmas" ? (
-                  // Una línea horizontal por cada entrada, con su etiqueta debajo (con aire arriba).
-                  <div style={{ display: "flex", gap: "24px", marginTop: "48px" }}>
-                    {(s.lineas ?? []).map((linea, i) => (
-                      <div key={i} style={{ flex: 1, textAlign: "center" }}>
-                        <div style={{ borderTop: "1px solid #000", paddingTop: "4px", fontSize: "10px" }}>{label(linea)}</div>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
+                <SeccionInner s={s} label={label} />
               </div>
             );
           })}

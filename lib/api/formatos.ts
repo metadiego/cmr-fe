@@ -26,10 +26,43 @@ export type Formato = {
 
 // Par etiqueta/valor del encabezado (layout "campos"). Viaja dentro de `campos` (bolsa OPACA) → claves en español.
 export type FormatoCampo = { clave: string; labelKey?: string | null; valor?: string | null; origen?: string };
-// Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español): texto_libre o firmas.
+// Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español). El `tipo` discrimina.
+// Ampliado para salir IDÉNTICO al legacy (modelos médicos): además de texto_libre/firmas, se añaden
+// parrafo, campos intermedios, tabla_firmas (con bordes), checklist, tabla_tematica y leyenda. Formas
+// exactas en docs/specs/formatos-legacy-handoff-be.md. El FE dibuja lo que el BE emita; nada hardcodeado.
 export type FormatoSeccion =
-  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; alto?: number }
-  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: string[] };
+  // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
+  | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
+  // Firmas simples: línea horizontal + label debajo.
+  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: string[] }
+  // Párrafo estático (p. ej. el texto legal de una constancia).
+  | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string }
+  // Campos intermedios (label/valor) entre el título y la tabla (PEMF/Cámara, Área, Número de serie…).
+  | { clave: string; labelKey?: string | null; tipo: "campos"; campos: FormatoCampo[] }
+  // Tabla de firmas CON BORDES: `columnas` × `filas` (Nombre/Firma/Fecha), cabecera gris opcional.
+  | { clave: string; labelKey?: string | null; tipo: "tabla_firmas"; columnas: string[]; filas: string[]; cabecera?: boolean }
+  // Lista de cotejo de enfermería: bandas de sección (colspan) + casillas Sí/No/Observación.
+  | {
+      clave: string;
+      labelKey?: string | null;
+      tipo: "checklist";
+      columnas?: { pregunta?: string; si?: string; no?: string; obs?: string };
+      grupos: { titulo?: string | null; preguntas: { texto: string }[] }[];
+    }
+  // Tabla temática (procedimiento): cabecera de color, columna de descripción de color, filas pre-puestas.
+  // `cabecera` admite 1 o 2 filas (morpheus8 = 2). `filas` = descripciones ya puestas; `filasEnBlanco` añade vacías.
+  | {
+      clave: string;
+      labelKey?: string | null;
+      tipo: "tabla_tematica";
+      colorHeader?: string | null;
+      colorDescCol?: string | null;
+      cabecera: FormatoColumna[][];
+      filas?: FormatoFila[];
+      filasEnBlanco?: number;
+    }
+  // Pie de leyenda secundario centrado (además del f-b/).
+  | { clave: string; labelKey?: string | null; tipo: "leyenda"; texto: string };
 // Pie del legacy (clave `pie`→`footer`; su contenido SÍ se traduce). `login` y `fechaHora` NO están en el mapa.
 export type FormatoPie = { prefix?: string; user?: string; login?: string; fechaHora?: string } | null;
 
@@ -41,7 +74,8 @@ export type FormatoArmado = {
   labelKey?: string | null;
   layout?: string;
   // Membrete (BE PR #207): centro + logo del centro (null → el FE usa el asset por defecto).
-  letterhead?: { center?: string; logoUrl?: string | null } | null;
+  // `ocultarEmpresa` (arquetipos 1 y 4 del legacy): NO imprimir la línea "CENTRO DE MEDICINA REGENERATIVA".
+  letterhead?: { center?: string; logoUrl?: string | null; ocultarEmpresa?: boolean } | null;
   patient?: { name?: string | null; medicalRecordNumber?: string | null } | null;
   date?: string | null;
   fields?: FormatoCampo[]; // clave `campos`→`fields`; contenido opaco (FormatoCampo en español)
