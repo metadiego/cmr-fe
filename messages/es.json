@@ -40,6 +40,11 @@
       "no_schedule": "El médico no atiende ese día",
       "vacation": "El médico está de vacaciones",
       "leave": "El médico está de permiso"
+    },
+    "disponibilidad": {
+      "suggested": "Sugerida",
+      "noSlot": "Sin hueco en 60 días",
+      "useSuggested": "Usar sugerida"
     }
   },
   "tableroBoard": {
@@ -718,6 +723,7 @@
     "search": "Buscar",
     "searchPlaceholder": "Buscar…",
     "admin": "Administración",
+    "medicos": "Médicos",
     "center": "Centro",
     "clientes": "Clientes",
     "citas": "Citas",
@@ -3826,6 +3832,8 @@
   "personalFicha": {
     "title": "Personal",
     "subtitle": "Toda la ficha de cada persona en una sola pantalla.",
+    "titleDoctors": "Médicos",
+    "subtitleDoctors": "Agenda, disponibilidad, pacientes y producción de cada médico en una sola pantalla.",
     "buscar": "Buscar por nombre o cargo…",
     "cargando": "Cargando…",
     "vacio": "Sin personal.",

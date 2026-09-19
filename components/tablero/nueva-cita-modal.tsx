@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
@@ -355,6 +356,14 @@ export function NuevaCitaModal({
               />
             </div>
           </div>
+
+          {/* Aviso de disponibilidad: si el médico no está ese día, explica y ofrece la próxima fecha. */}
+          <AvisoDisponibilidad
+            doctorId={medicoId !== NO_MEDICO ? medicoId : undefined}
+            date={fecha}
+            centro={centroId}
+            onUseSuggested={setFecha}
+          />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5">

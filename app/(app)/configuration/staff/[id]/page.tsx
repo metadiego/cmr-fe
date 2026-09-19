@@ -51,10 +51,14 @@ function MedicoHub({ p }: { p: Personal }) {
   const centro = p.clinicId ?? undefined;
   const nombre = `${p.name}${p.lastName ? ` ${p.lastName}` : ""}`;
   const iniciales = nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-  const puedeAgenda = can("citas.read");
-  const puedePacientes = can("pacientes.read");
-  const puedeDisponibilidad = can("citas.read");
-  const puedeProduccion = can("citas.read");
+  // Hub de USUARIO: las secciones de médico (agenda, pacientes, disponibilidad, producción) son las
+  // «distinciones especiales» que SOLO aparecen cuando la persona tiene la capacidad de médico. Para el
+  // resto de usuarios el hub es solo el Resumen (identidad, cargo, capacidades y centros).
+  const esMedico = (p.capabilities ?? []).includes("medico");
+  const puedeAgenda = esMedico && can("citas.read");
+  const puedePacientes = esMedico && can("pacientes.read");
+  const puedeDisponibilidad = esMedico && can("citas.read");
+  const puedeProduccion = esMedico && can("citas.read");
 
   return (
     <div className="space-y-6">

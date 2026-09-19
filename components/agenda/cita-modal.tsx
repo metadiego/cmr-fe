@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { addMinutes, todayISO } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -356,6 +357,10 @@ export function CitaModal({
           <Field label={t("notes")}>
             <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} />
           </Field>
+
+          {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
+              aquí viene del slot del día, así que solo informa; el usuario decide). */}
+          <AvisoDisponibilidad doctorId={medicoId || undefined} date={fecha} centro={effectiveCentro || undefined} />
 
           {warn && (
             <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">

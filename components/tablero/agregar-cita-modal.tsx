@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 
 const NO_MEDICO = "__none__";
 
@@ -183,6 +184,12 @@ export function AgregarCitaModal({
               </SelectContent>
             </Select>
           </Field>
+
+          <AvisoDisponibilidad
+            doctorId={medicoId !== NO_MEDICO ? medicoId : undefined}
+            date={hoy}
+            centro={centroId}
+          />
 
           <Field label={t("notes")}>
             <Textarea value={notas} onChange={(e) => setNotas(e.target.value)} placeholder={t("notesPlaceholder")} rows={2} />

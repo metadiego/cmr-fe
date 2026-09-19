@@ -40,6 +40,11 @@
       "no_schedule": "The doctor does not work that day",
       "vacation": "The doctor is on vacation",
       "leave": "The doctor is on leave"
+    },
+    "disponibilidad": {
+      "suggested": "Suggested",
+      "noSlot": "No slot in 60 days",
+      "useSuggested": "Use suggested"
     }
   },
   "tableroBoard": {
@@ -718,6 +723,7 @@
     "search": "Search",
     "searchPlaceholder": "Search…",
     "admin": "Admin",
+    "medicos": "Doctors",
     "center": "Center",
     "clientes": "Clients",
     "citas": "Appointments",
@@ -3826,6 +3832,8 @@
   "personalFicha": {
     "title": "Staff",
     "subtitle": "Each person's whole record on one screen.",
+    "titleDoctors": "Doctors",
+    "subtitleDoctors": "Each doctor's schedule, availability, patients and production on one screen.",
     "buscar": "Search by name or role…",
     "cargando": "Loading…",
     "vacio": "No staff.",

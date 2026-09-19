@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -38,9 +39,13 @@ const nombreDe = (p: Personal) => [p.name, p.lastName].filter(Boolean).join(" ")
 export default function PersonalPage() {
   const t = useTranslations("personalFicha");
   const gate = useCentroGate();
+  // Cuando se llega desde «Médicos» (menú de Administración) el enlace trae ?capacity=medico y esta
+  // MISMA pantalla se acota a los médicos (sin duplicar la ficha). Sin el parámetro, es todo el personal.
+  const capacity = useSearchParams().get("capacity") ?? undefined;
+  const soloMedicos = capacity === "medico";
   const listRes = useResource<Personal[]>(
-    () => (gate.centro ? listPersonal({ limit: 100 }, gate.centro).then((r) => r.items) : Promise.resolve([])),
-    [gate.centro],
+    () => (gate.centro ? listPersonal({ limit: 100, capacidad: capacity }, gate.centro).then((r) => r.items) : Promise.resolve([])),
+    [gate.centro, capacity],
   );
   const personal = React.useMemo(
     () => (listRes.state.kind === "ok" ? listRes.state.data : []),
@@ -71,7 +76,7 @@ export default function PersonalPage() {
 
   return (
     <PageContainer>
-      <PageHeader title={t("title")} description={t("subtitle")} />
+      <PageHeader title={soloMedicos ? t("titleDoctors") : t("title")} description={soloMedicos ? t("subtitleDoctors") : t("subtitle")} />
 
       {gate.necesitaPicker && <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>}
 
