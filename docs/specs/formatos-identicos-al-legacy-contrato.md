@@ -93,7 +93,9 @@ Cada tipo nuevo se dibuja data-driven (nada hardcodeado por formato) y con su pr
 - **Verificación:** cada formato se compara **en pantalla** contra su `.php` legacy antes de darlo por bueno.
   El `assembly` se ve entero por API; QA con navegador real (`/qa`).
 
-## Decisión pendiente del dueño (para el BE)
+## Decisión del dueño — RESUELTA (2026-09-19)
 
-¿Se siguen usando y con qué campos: `nano_laser`, `nano_laser_iv`, `sueroterapia_form` (la general, distinta
-de Vit C), `peptide_rx_template`, `tirzepatide_order_form`? Sin eso el BE no los inventa.
+**Sí se siguen usando.** El dueño confirmó: `nano_laser`, `nano_laser_iv`, `sueroterapia_form` (la general,
+distinta de Vit C), `peptide_rx_template` y `tirzepatide_order_form` **están en uso** → el BE los **crea igual
+al legacy** (no los inventa: la estructura EXACTA está en su `.php`). Detalle en el handoff
+`formatos-legacy-handoff-be.md`.
