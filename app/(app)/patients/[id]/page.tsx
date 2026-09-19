@@ -249,7 +249,7 @@ function PacienteDetail({
       <Tabs defaultValue="resumen">
         <TabsList className="mb-4">
           <TabsTrigger value="resumen">{t("tabs.summary")}</TabsTrigger>
-          {puedeFactura && <TabsTrigger value="certificacion">{tc("title")}</TabsTrigger>}
+          {puedeFactura && <TabsTrigger value="documentos">{t("tabs.documents")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="resumen">
@@ -286,8 +286,13 @@ function PacienteDetail({
         </TabsContent>
 
         {puedeFactura && (
-          <TabsContent value="certificacion">
-            <CertificacionGastos pacienteId={p.id} centro={p.clinicId ?? undefined} />
+          <TabsContent value="documentos">
+            {/* «Documentos» del paciente. Por ahora: la Certificación de gastos (un documento, no una
+                pestaña propia). Aquí se irán sumando otros documentos. */}
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold">{tc("title")}</h2>
+              <CertificacionGastos pacienteId={p.id} centro={p.clinicId ?? undefined} />
+            </div>
           </TabsContent>
         )}
       </Tabs>

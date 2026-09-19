@@ -526,7 +526,8 @@
     },
     "acciones": "Actions",
     "tabs": {
-      "summary": "Summary"
+      "summary": "Summary",
+      "documents": "Documents"
     }
   },
   "common": {
