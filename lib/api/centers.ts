@@ -47,6 +47,29 @@ export interface CreateCenterPayload {
   active?: boolean;
 }
 
+// PUT /centers/:id — edita el centro, INCLUIDO el logo del membrete (RBAC centros.update).
+// Es el endpoint que faltaba: /tax-details NO acepta el logo, por eso el membrete salía vacío en TODA
+// hoja impresa. El DTO del BE (UpdateCentroDto) usa claves en ESPAÑOL — es el contrato de este endpoint,
+// no un descuido (ver hojas-de-impresion-membrete-y-formatos). `logoUrl` vacío = hojas sin logo.
+export interface UpdateCentroPayload {
+  nombre?: string;
+  direccion?: string;
+  zonaHoraria?: string; // IANA, p. ej. America/Puerto_Rico
+  logoUrl?: string;
+  activo?: boolean;
+}
+
+export function updateCenter(
+  centroId: string,
+  payload: UpdateCentroPayload,
+): Promise<Centro> {
+  return apiFetch<Centro>(
+    `/centers/${centroId}`,
+    { method: "PUT", body: JSON.stringify(payload) },
+    centroId,
+  );
+}
+
 export async function getCenters(
   page?: number,
   limit?: number,

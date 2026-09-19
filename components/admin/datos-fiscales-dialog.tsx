@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import {
   updateDatosFiscales,
+  updateCenter,
   type Centro,
   type DatosFiscalesPayload,
 } from "@/lib/api/centers";
@@ -94,8 +95,11 @@ export function DatosFiscalesDialog({
     setSubmitting(true);
     try {
       // Enviar solo campos string con contenido; trim. (Patch parcial: lo vacío no se toca.)
+      // El LOGO NO va aquí: /tax-details no lo acepta (por eso el membrete salía vacío). Va por
+      // PUT /centers/:id (updateCenter), abajo. Ver hojas-de-impresion-membrete-y-formatos.
       const payload: DatosFiscalesPayload = {};
       (Object.keys(form) as (keyof Form)[]).forEach((k) => {
+        if (k === "logoUrl") return; // el logo va por updateCenter, no por datos fiscales
         const val = form[k];
         if (typeof val !== "string") return; // el boolean se maneja aparte
         const v = val.trim();
@@ -104,6 +108,11 @@ export function DatosFiscalesDialog({
       // Enganche autopresente (boolean): siempre se envía su estado explícito.
       (payload as Record<string, unknown>).frontdeskAutoPresent = form.frontdeskAutoPresent;
       await updateDatosFiscales(centro.id, payload);
+      // Logo del membrete: solo si cambió (enviar "" borra el logo → hojas sin membrete gráfico).
+      const logo = form.logoUrl.trim();
+      if (logo !== (centro.logoUrl ?? "").trim()) {
+        await updateCenter(centro.id, { logoUrl: logo });
+      }
       toast.success(t("saved"));
       onOpenChange(false);
       onSaved?.();
