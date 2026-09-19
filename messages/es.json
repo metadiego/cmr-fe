@@ -3831,6 +3831,7 @@
   "personalFicha": {
     "title": "Personal",
     "subtitle": "Toda la ficha de cada persona en una sola pantalla.",
+    "tabFicha": "Ficha",
     "buscar": "Buscar por nombre o cargo…",
     "cargando": "Cargando…",
     "vacio": "Sin personal.",

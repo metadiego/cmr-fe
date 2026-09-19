@@ -3831,6 +3831,7 @@
   "personalFicha": {
     "title": "Staff",
     "subtitle": "Each person's whole record on one screen.",
+    "tabFicha": "Profile",
     "buscar": "Search by name or role…",
     "cargando": "Loading…",
     "vacio": "No staff.",

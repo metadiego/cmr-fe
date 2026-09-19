@@ -15,7 +15,11 @@ import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
+import { useCan } from "@/hooks/use-can";
 import { useCentroGate } from "@/hooks/use-centro-gate";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MedicoDisponibilidad } from "@/components/personal/medico-disponibilidad";
+import { MedicoAgenda, MedicoPacientes, MedicoProduccion } from "@/components/personal/medico-hub-tabs";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,10 +151,18 @@ function FichaPersonal({
 }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
+  const { can } = useCan();
   const [cargo, setCargo] = React.useState(persona.jobTitle ?? "");
   const [caps, setCaps] = React.useState<string[]>(persona.capabilities ?? []);
   const [busy, setBusy] = React.useState(false);
   const [darAcceso, setDarAcceso] = React.useState(false);
+  // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
+  // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
+  // (horarios, días libres, permisos, vacaciones) es para TODO usuario por igual. Ver hub-de-usuario-medicos.
+  const esMedico = (persona.capabilities ?? []).includes("medico");
+  const puedeAgenda = esMedico && can("citas.read");
+  const puedePacientes = esMedico && can("pacientes.read");
+  const puedeProduccion = esMedico && can("citas.read");
 
   // Etiqueta del cargo desde el catálogo (labelKey traducible; si no, la clave). Incluye el cargo actual
   // aunque no esté en el catálogo, para no perderlo.
@@ -183,79 +195,93 @@ function FichaPersonal({
   return (
     <div className="space-y-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
       {/* Identidad */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
-            {(persona.name?.[0] ?? "") + (persona.lastName?.[0] ?? "")}
-          </span>
-          <div>
-            <div className="text-lg font-semibold">{nombreDe(persona)}</div>
-            <div className="text-sm text-muted-foreground">{persona.email || (persona.profileId ? t("conCuenta") : t("sinCuenta"))}</div>
-          </div>
-        </div>
-        {/* Hub del médico: agenda, pacientes, disponibilidad y producción en una pantalla. */}
-        <Link href={`/configuration/staff/${persona.id}`} className="shrink-0 text-sm font-medium text-primary hover:underline">
-          {t("verHub")} →
-        </Link>
-      </div>
-
-      {/* Cargo + capacidades */}
-      <div className="space-y-4 border-t pt-4">
-        <div className="grid gap-2">
-          <Label>{t("cargo")}</Label>
-          <Select value={cargo || undefined} onValueChange={setCargo}>
-            <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
-            <SelectContent>
-              {cargos.map((c) => <SelectItem key={c} value={c}>{cargoLabel(c)}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="grid gap-2">
-          <Label>{t("capacidades")}</Label>
-          <div className="flex flex-wrap gap-2">
-            {capacidadOpciones.map((c) => {
-              const on = caps.includes(c);
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => toggleCap(c)}
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                    on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-                  )}
-                >
-                  {c}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <Button size="sm" onClick={guardar} disabled={!sucio || busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
+      <div className="flex items-center gap-3">
+        <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+          {(persona.name?.[0] ?? "") + (persona.lastName?.[0] ?? "")}
+        </span>
+        <div className="min-w-0">
+          <div className="truncate text-lg font-semibold">{nombreDe(persona)}</div>
+          <div className="truncate text-sm text-muted-foreground">{persona.email || (persona.profileId ? t("conCuenta") : t("sinCuenta"))}</div>
         </div>
       </div>
 
-      {/* Centros de servicio: donde la persona sale en los desplegables. El BE devuelve TODOS los centros
-          con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
-      <CentrosDePersona persona={persona} centro={centro} />
+      {/* Todo el hub del usuario, aquí mismo, en secciones. Sin saltar de pantalla. */}
+      <Tabs defaultValue="ficha">
+        <TabsList className="mb-2 flex flex-wrap">
+          <TabsTrigger value="ficha">{t("tabFicha")}</TabsTrigger>
+          <TabsTrigger value="disponibilidad">{tRoot("medicoHub.tabs.availability")}</TabsTrigger>
+          {puedeAgenda && <TabsTrigger value="agenda">{tRoot("medicoHub.tabs.agenda")}</TabsTrigger>}
+          {puedePacientes && <TabsTrigger value="pacientes">{tRoot("medicoHub.tabs.patients")}</TabsTrigger>}
+          {puedeProduccion && <TabsTrigger value="produccion">{tRoot("medicoHub.tabs.production")}</TabsTrigger>}
+        </TabsList>
 
-      {/* Acceso al sistema */}
-      <div className="border-t pt-4">
-        <Label className="mb-2 block">{t("acceso")}</Label>
-        {persona.profileId ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
-            <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
-            <span>{persona.email || t("conCuenta")}{persona.profileId ? ` · ${t("aprobado")}` : ""}</span>
-            <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
+        <TabsContent value="ficha" className="space-y-6 pt-2">
+          {/* Cargo + capacidades */}
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label>{t("cargo")}</Label>
+              <Select value={cargo || undefined} onValueChange={setCargo}>
+                <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
+                <SelectContent>
+                  {cargos.map((c) => <SelectItem key={c} value={c}>{cargoLabel(c)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>{t("capacidades")}</Label>
+              <div className="flex flex-wrap gap-2">
+                {capacidadOpciones.map((c) => {
+                  const on = caps.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleCap(c)}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                        on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
+                      )}
+                    >
+                      {c}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button size="sm" onClick={guardar} disabled={!sucio || busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
+            </div>
           </div>
-        ) : (
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
-            <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
+
+          {/* Centros de servicio: donde la persona sale en los desplegables. El BE devuelve TODOS los centros
+              con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
+          <CentrosDePersona persona={persona} centro={centro} />
+
+          {/* Acceso al sistema */}
+          <div className="border-t pt-4">
+            <Label className="mb-2 block">{t("acceso")}</Label>
+            {persona.profileId ? (
+              <div className="flex flex-wrap items-center gap-3 rounded-md border border-success/30 bg-success/10 text-success px-3 py-2 text-sm">
+                <HugeiconsIcon icon={UserAccountIcon} className="size-4 text-success" />
+                <span>{persona.email || t("conCuenta")}{persona.profileId ? ` · ${t("aprobado")}` : ""}</span>
+                <Link href="/admin" className="ml-auto text-xs font-medium text-primary hover:underline">{t("verUsuario")}</Link>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-muted-foreground">{t("sinCuentaAyuda")}</span>
+                <Button size="sm" onClick={() => setDarAcceso(true)}>{t("darAcceso")}</Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="disponibilidad" className="pt-2">
+          <MedicoDisponibilidad doctorId={persona.id} centro={centro} />
+        </TabsContent>
+        {puedeAgenda && <TabsContent value="agenda" className="pt-2"><MedicoAgenda doctorId={persona.id} centro={centro} /></TabsContent>}
+        {puedePacientes && <TabsContent value="pacientes" className="pt-2"><MedicoPacientes doctorId={persona.id} centro={centro} /></TabsContent>}
+        {puedeProduccion && <TabsContent value="produccion" className="pt-2"><MedicoProduccion doctorId={persona.id} centro={centro} /></TabsContent>}
+      </Tabs>
 
       {darAcceso && (
         <DarAccesoDialog
