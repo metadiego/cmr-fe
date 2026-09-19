@@ -27,6 +27,11 @@ export function listPersonal(
   return apiFetchPaged<Personal>(`/staff?${sp.toString()}`, {}, centroId);
 }
 
+// Ficha de UN miembro (GET /staff/:id) para el hub del médico. Tenant-scoped; `centroId` fuerza el centro.
+export function getStaff(id: string, centroId?: string): Promise<Personal> {
+  return apiFetch<Personal>(`/staff/${id}`, {}, centroId);
+}
+
 // Editar la ficha: cargo + capacidades (PUT /personal/:id). Verificado en prod. Handoff
 // ficha-de-personal-todo-en-una-pantalla.
 export function updatePersonal(

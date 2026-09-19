@@ -11,6 +11,7 @@ export interface ListPacientesParams {
   page?: number;
   limit?: number;
   q?: string;
+  doctorId?: string; // pacientes de UN médico (GET /patients?doctorId=) — para el hub del médico
 }
 
 // GET /pacientes — paginated; `q` searches name/docId/etc. Tenant scope:
@@ -21,9 +22,10 @@ export function listPacientes(
   params: ListPacientesParams = {},
   tenant?: string | null,
 ): Promise<Paginated<Paciente>> {
-  const { page = 1, limit = 20, q } = params;
+  const { page = 1, limit = 20, q, doctorId } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
+  if (doctorId) sp.set("doctorId", doctorId);
   return apiFetchPaged<Paciente>(`/patients?${sp.toString()}`, {}, tenant);
 }
 

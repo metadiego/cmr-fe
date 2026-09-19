@@ -33,7 +33,14 @@
       "nueva": "Consulta (Nueva)",
       "seguimiento": "Seguimiento"
     },
-    "paciente_ya_es_seguimiento": "Este paciente ya fue atendido: es de seguimiento, no puede agendarse como nuevo."
+    "paciente_ya_es_seguimiento": "Este paciente ya fue atendido: es de seguimiento, no puede agendarse como nuevo.",
+    "bloqueo": {
+      "sunday": "Los domingos no se atiende",
+      "holiday": "Ese día es feriado",
+      "no_schedule": "El médico no atiende ese día",
+      "vacation": "El médico está de vacaciones",
+      "leave": "El médico está de permiso"
+    }
   },
   "tableroBoard": {
     "live": "En vivo",
@@ -3848,7 +3855,8 @@
     "centros": "Centros de servicio",
     "centrosAyuda": "Marca dónde debe salir en los desplegables. Si un día cubre en otro centro, lo marcas; al volver, lo desmarcas.",
     "guardarCentros": "Guardar centros",
-    "centrosGuardados": "Centros guardados"
+    "centrosGuardados": "Centros guardados",
+    "verHub": "Ficha completa"
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
@@ -3886,5 +3894,75 @@
     "footNote": "Se expide la presente para los fines que el interesado estime convenientes.",
     "clinicSignature": "Firma autorizada — Centro de Medicina Regenerativa",
     "issuedOn": "Expedido el {fecha}."
+  },
+  "medicoHub": {
+    "back": "Personal",
+    "loading": "Cargando…",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "tabs": {
+      "summary": "Resumen",
+      "agenda": "Agenda",
+      "patients": "Pacientes",
+      "availability": "Disponibilidad",
+      "production": "Producción"
+    },
+    "profile": "Perfil",
+    "jobTitle": "Cargo",
+    "capabilities": "Capacidades",
+    "centers": "Centros",
+    "date": "Fecha",
+    "type": "Tipo",
+    "status": "Estado",
+    "name": "Nombre",
+    "record": "Record",
+    "phone": "Teléfono",
+    "patients": "Pacientes",
+    "noCitas": "Sin citas.",
+    "noPatients": "Sin pacientes.",
+    "showingFirst": "Mostrando {n} de {total}",
+    "productionYear": "Producción del {year}",
+    "apptsYear": "Citas del año",
+    "attended": "Atendidas",
+    "scheduleTitle": "Horarios (días que trabaja)",
+    "dow": {
+      "0": "Domingo",
+      "1": "Lunes",
+      "2": "Martes",
+      "3": "Miércoles",
+      "4": "Jueves",
+      "5": "Viernes",
+      "6": "Sábado"
+    },
+    "dayOff": "Libre",
+    "start": "Inicio",
+    "end": "Fin",
+    "add": "Agregar",
+    "cancel": "Cancelar",
+    "remove": "Quitar",
+    "absencesTitle": "Ausencias (vacaciones y permisos)",
+    "addAbsence": "Agregar ausencia",
+    "kind": "Tipo",
+    "vacation": "Vacaciones",
+    "leave": "Permiso",
+    "from": "Desde",
+    "to": "Hasta",
+    "reason": "Motivo",
+    "reasonPh": "Motivo (opcional)…",
+    "rangeInvalid": "La fecha final no puede ser anterior a la inicial.",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "noAbsences": "Sin ausencias.",
+    "nextDateTitle": "Probar próxima fecha válida",
+    "check": "Probar",
+    "dateOk": "Esa fecha sirve.",
+    "suggested": "Sugerida",
+    "noSlot": "sin hueco en 60 días",
+    "holidaysNote": "Los feriados son compartidos (globales o del centro); se configuran en Agenda/Configuración."
+  },
+  "disponibilidad": {
+    "ausencia": {
+      "rango_invalido": "El rango de la ausencia es inválido (fin antes del inicio)."
+    }
   }
 }

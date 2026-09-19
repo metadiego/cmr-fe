@@ -33,7 +33,14 @@
       "nueva": "Consultation (New)",
       "seguimiento": "Follow-up"
     },
-    "paciente_ya_es_seguimiento": "This patient has already been seen: they are a follow-up, cannot be booked as new."
+    "paciente_ya_es_seguimiento": "This patient has already been seen: they are a follow-up, cannot be booked as new.",
+    "bloqueo": {
+      "sunday": "Sundays are not scheduled",
+      "holiday": "That day is a holiday",
+      "no_schedule": "The doctor does not work that day",
+      "vacation": "The doctor is on vacation",
+      "leave": "The doctor is on leave"
+    }
   },
   "tableroBoard": {
     "live": "Live",
@@ -3848,7 +3855,8 @@
     "centros": "Service centers",
     "centrosAyuda": "Mark where they should appear in the dropdowns. If they cover another center one day, check it; uncheck when they return.",
     "guardarCentros": "Save centers",
-    "centrosGuardados": "Centers saved"
+    "centrosGuardados": "Centers saved",
+    "verHub": "Full profile"
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
@@ -3886,5 +3894,75 @@
     "footNote": "This certificate is issued for whatever purposes the interested party deems appropriate.",
     "clinicSignature": "Authorized signature — Centro de Medicina Regenerativa",
     "issuedOn": "Issued on {fecha}."
+  },
+  "medicoHub": {
+    "back": "Staff",
+    "loading": "Loading…",
+    "active": "Active",
+    "inactive": "Inactive",
+    "tabs": {
+      "summary": "Summary",
+      "agenda": "Agenda",
+      "patients": "Patients",
+      "availability": "Availability",
+      "production": "Production"
+    },
+    "profile": "Profile",
+    "jobTitle": "Job title",
+    "capabilities": "Capabilities",
+    "centers": "Centers",
+    "date": "Date",
+    "type": "Type",
+    "status": "Status",
+    "name": "Name",
+    "record": "Record",
+    "phone": "Phone",
+    "patients": "Patients",
+    "noCitas": "No appointments.",
+    "noPatients": "No patients.",
+    "showingFirst": "Showing {n} of {total}",
+    "productionYear": "{year} production",
+    "apptsYear": "Appointments this year",
+    "attended": "Attended",
+    "scheduleTitle": "Schedule (working days)",
+    "dow": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    },
+    "dayOff": "Off",
+    "start": "Start",
+    "end": "End",
+    "add": "Add",
+    "cancel": "Cancel",
+    "remove": "Remove",
+    "absencesTitle": "Absences (vacation & leave)",
+    "addAbsence": "Add absence",
+    "kind": "Kind",
+    "vacation": "Vacation",
+    "leave": "Leave",
+    "from": "From",
+    "to": "To",
+    "reason": "Reason",
+    "reasonPh": "Reason (optional)…",
+    "rangeInvalid": "The end date cannot be before the start date.",
+    "save": "Save",
+    "saved": "Saved",
+    "noAbsences": "No absences.",
+    "nextDateTitle": "Test next available date",
+    "check": "Check",
+    "dateOk": "That date works.",
+    "suggested": "Suggested",
+    "noSlot": "no slot in 60 days",
+    "holidaysNote": "Holidays are shared (global or per center); configured in Agenda/Configuration."
+  },
+  "disponibilidad": {
+    "ausencia": {
+      "rango_invalido": "The absence range is invalid (end before start)."
+    }
   }
 }

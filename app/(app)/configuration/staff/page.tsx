@@ -193,6 +193,10 @@ function FichaPersonal({
             <div className="text-sm text-muted-foreground">{persona.email || (persona.profileId ? t("conCuenta") : t("sinCuenta"))}</div>
           </div>
         </div>
+        {/* Hub del médico: agenda, pacientes, disponibilidad y producción en una pantalla. */}
+        <Link href={`/configuration/staff/${persona.id}`} className="shrink-0 text-sm font-medium text-primary hover:underline">
+          {t("verHub")} →
+        </Link>
       </div>
 
       {/* Cargo + capacidades */}

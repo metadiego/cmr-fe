@@ -26,3 +26,67 @@ export async function getHorariosMedico(
 export async function getFestivos(anio: number): Promise<Festivo[]> {
   return asArray<Festivo>(await apiFetch(`/holidays?anio=${anio}`));
 }
+
+// ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).
+// El día libre semanal NO es un campo: es NO tener horario ese día. Handoff agenda-dias-bloqueados-por-medico.
+export type CreateHorarioPayload = components["schemas"]["CreateHorarioMedicoDto"];
+export function createHorario(payload: CreateHorarioPayload, centroId?: string): Promise<HorarioMedico> {
+  return apiFetch<HorarioMedico>(`/doctors/schedules`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+export function updateHorario(id: string, payload: Partial<CreateHorarioPayload>, centroId?: string): Promise<HorarioMedico> {
+  return apiFetch<HorarioMedico>(`/doctors/schedules/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+export function deleteHorario(id: string, centroId?: string): Promise<void> {
+  return apiFetch<void>(`/doctors/schedules/${id}`, { method: "DELETE" }, centroId);
+}
+
+// ── Ausencias del médico (vacaciones / permisos). CRUD RBAC citas.config. NO está en el schema
+// generado (gen:api pendiente) → se tipa aquí. `kind`: vacation | leave. Rango [startDate, endDate].
+export interface DoctorAbsence {
+  id: string;
+  doctorId: string;
+  kind: "vacation" | "leave";
+  startDate: string;
+  endDate: string;
+  reason?: string | null;
+  active: boolean;
+}
+export interface DoctorAbsencePayload {
+  doctorId: string;
+  kind: "vacation" | "leave";
+  startDate: string;
+  endDate: string;
+  reason?: string;
+  active?: boolean;
+}
+export async function listDoctorAbsences(doctorId: string, from?: string, to?: string, centroId?: string): Promise<DoctorAbsence[]> {
+  const sp = new URLSearchParams({ doctorId });
+  if (from) sp.set("from", from);
+  if (to) sp.set("to", to);
+  return asArray<DoctorAbsence>(await apiFetch(`/doctors/absences?${sp.toString()}`, {}, centroId));
+}
+export function createDoctorAbsence(payload: DoctorAbsencePayload, centroId?: string): Promise<DoctorAbsence> {
+  return apiFetch<DoctorAbsence>(`/doctors/absences`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+export function updateDoctorAbsence(id: string, payload: Partial<DoctorAbsencePayload>, centroId?: string): Promise<DoctorAbsence> {
+  return apiFetch<DoctorAbsence>(`/doctors/absences/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+export function deleteDoctorAbsence(id: string, centroId?: string): Promise<void> {
+  return apiFetch<void>(`/doctors/absences/${id}`, { method: "DELETE" }, centroId);
+}
+
+// ── Próxima fecha válida: dice si la fecha pedida sirve para ese médico y, si no, la siguiente hacia
+// adelante con el motivo. Úsese al agendar. NO está en el schema → se tipa aquí.
+export interface NextAvailableDate {
+  doctorId: string;
+  askedDate: string;
+  date: string | null;
+  moved: boolean;
+  reason?: string | null; // sunday | holiday | no_schedule | vacation | leave
+  exhausted: boolean;
+  labelKey?: string | null; // citas.bloqueo.<reason>
+}
+export function getNextAvailableDate(doctorId: string, date: string, centroId?: string): Promise<NextAvailableDate> {
+  const sp = new URLSearchParams({ doctorId, date });
+  return apiFetch<NextAvailableDate>(`/availability/next-available-date?${sp.toString()}`, {}, centroId);
+}
