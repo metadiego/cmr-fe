@@ -51,13 +51,14 @@ function MedicoHub({ p }: { p: Personal }) {
   const centro = p.clinicId ?? undefined;
   const nombre = `${p.name}${p.lastName ? ` ${p.lastName}` : ""}`;
   const iniciales = nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-  // Hub de USUARIO: las secciones de médico (agenda, pacientes, disponibilidad, producción) son las
-  // «distinciones especiales» que SOLO aparecen cuando la persona tiene la capacidad de médico. Para el
-  // resto de usuarios el hub es solo el Resumen (identidad, cargo, capacidades y centros).
+  // Hub de USUARIO, todo centralizado. Disponibilidad (horarios, días libres, permisos, vacaciones) la
+  // tiene TODO usuario por igual — verificado en el BE: /doctors/absences y /doctors/schedules aceptan un
+  // usuario que NO es médico (201/204, reversible). La ÚNICA distinción del médico es que hace consultas:
+  // por eso Agenda, Pacientes y Producción solo aparecen cuando la persona tiene la capacidad de médico.
   const esMedico = (p.capabilities ?? []).includes("medico");
+  const puedeDisponibilidad = true; // toda persona del hub (ya gateado por personal.read para llegar aquí)
   const puedeAgenda = esMedico && can("citas.read");
   const puedePacientes = esMedico && can("pacientes.read");
-  const puedeDisponibilidad = esMedico && can("citas.read");
   const puedeProduccion = esMedico && can("citas.read");
 
   return (
