@@ -87,7 +87,6 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "comunicaciones", route: "/communications", group: "communications", order: 1 },
   // Admin (top-level, decision #1)
   { clave: "admin", route: "/admin", group: "admin", order: 1 },
-  { clave: "medicos", route: "/configuration/staff?capacity=medico", group: "admin", order: 2 },
   // Configuration (+ staff decision #5, + audit)
   { clave: "configuracion-tableros", route: "/configuration/boards", group: "configuration", order: 1 },
   { clave: "configuracion-modulos", route: "/configuration/board-modules", group: "configuration", order: 2 },
