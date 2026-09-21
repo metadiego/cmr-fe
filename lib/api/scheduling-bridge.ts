@@ -60,7 +60,8 @@ export function runNow(clinicId: string, dates: string[], centroId?: string): Pr
 export interface BridgeConfig {
   enabled: boolean;
   pollIntervalSeconds: number;
-  workDays: number[];
+  // Verificado en vivo: un centro nunca configurado la devuelve null, no [] — nunca asumir array.
+  workDays: number[] | null;
   workStartTime: string;
   workEndTime: string;
   externalClinicCode: "BAYAMON" | "CAGUAS" | null;

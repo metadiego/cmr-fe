@@ -34,12 +34,28 @@ function staffName(p: Personal): string {
 }
 
 const NO_STAFF: Personal[] = [];
+// El techo de paginación es SISTÉMICO (PaginationQueryDto, @Max(100)) — verificado en vivo,
+// limit:200 tira 400 "limit must not be greater than 100". Para no truncar el roster de un centro
+// con más de 100 personas, se recorren las páginas hasta agotar `pagination.total`.
+const STAFF_PAGE_LIMIT = 100;
+
+async function fetchAllStaff(centroId?: string): Promise<Personal[]> {
+  const out: Personal[] = [];
+  let page = 1;
+  for (;;) {
+    const { items, pagination } = await listPersonal({ page, limit: STAFF_PAGE_LIMIT }, centroId);
+    out.push(...items);
+    if (out.length >= pagination.total || items.length === 0) break;
+    page += 1;
+  }
+  return out;
+}
 
 // Fetched ONCE per table (not per row) and shared by the column display + the
 // add/edit dialog's picker, to avoid an N+1 fetch across mapping rows.
 function useStaffRoster(centroId?: string) {
-  const { state } = useResource(() => listPersonal({ limit: 200 }, centroId), [centroId]);
-  const staff = state.kind === "ok" ? state.data.items : NO_STAFF;
+  const { state } = useResource(() => fetchAllStaff(centroId), [centroId]);
+  const staff = state.kind === "ok" ? state.data : NO_STAFF;
   const byId = React.useMemo(() => new Map(staff.map((p) => [p.id, p])), [staff]);
   return { staff, byId };
 }
