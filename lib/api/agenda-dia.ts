@@ -88,15 +88,22 @@ export interface AgendaDia {
   centers: CentroDia[]; // `centros`→`centers`
 }
 
-// GET /appointments/day-agenda?date&centerId?
+// GET /appointments/day-agenda?date&centerId?&origenLegacy=scheduling-server
 // - centroId set → that center (tenant forced to it).
 // - combinado=true → omit X-Tenant-ID → BE returns ALL permitted centers.
 // - neither → the active center (cookie/clinic).
+// `origenLegacy=scheduling-server` is ALWAYS sent: this is the call-center bridge's own day view
+// (only consumer of getAgendaDia — see components/agenda/dia-view.tsx), not the general center
+// agenda. Without it, citas created outside the bridge (e.g. walk-ins from Atención) show up here
+// too, with "Citado por" attributed to whoever created the row instead of the call-center agent
+// who owns that patient relationship — never correct on THIS screen. The general agenda used by
+// the rest of the staff is a different consumer of the same BE endpoint and never sends this
+// param, so its behavior is untouched. Owner's rule, 2026-09-21.
 export function getAgendaDia(
   fecha: string,
   opts: { centroId?: string; combinado?: boolean } = {},
 ): Promise<AgendaDia> {
-  const sp = new URLSearchParams({ date: fecha });
+  const sp = new URLSearchParams({ date: fecha, origenLegacy: "scheduling-server" });
   if (opts.centroId) sp.set("centerId", opts.centroId);
   const tenant = opts.combinado ? null : (opts.centroId ?? undefined);
   return apiFetch<AgendaDia>(`/appointments/day-agenda?${sp.toString()}`, {}, tenant);
