@@ -50,6 +50,11 @@ centro a la vez sin cambiar el centro activo — si se omite, usa el centro acti
   del apellido, contra `personal` real — no vinieron del sistema externo, que solo manda el código). El
   código "DJ" no tiene persona que calce en ningún centro y queda sin mapear a propósito: la UI debe
   poder mostrar "sin mapear" y dejar que alguien lo complete a mano cuando se sepa quién es.
+- **9 mapeos de médico YA sembrados, verificados por nombre real** (3 Bayamón, 6 Caguas — la lista
+  completa de médicos del sistema externo, ninguno queda sin mapear). Dos médicos de Caguas (Víctor
+  Ocasio, Gilberto Caraballo) resuelven a un `personal` cuyo `clinicId` propio es Bayamón: practican en
+  ambos centros. Actualizado 2026-09-21 — al escribir este handoff la tabla de médicos todavía arrancaba
+  vacía; ya no es así, ambas tablas (médicos y agentes) traen datos reales desde el primer GET.
 
 ## UI sugerida (layout moderno — buscar referencia actual de "integration status / sync health dashboard")
 

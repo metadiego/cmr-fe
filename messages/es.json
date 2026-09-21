@@ -608,7 +608,8 @@
     "remove": "Quitar",
     "close": "Cerrar",
     "add": "Agregar",
-    "forbidden": "No tienes acceso a esta pantalla."
+    "forbidden": "No tienes acceso a esta pantalla.",
+    "saved": "Guardado."
   },
   "pending": {
     "title": "Acceso pendiente",
@@ -791,6 +792,7 @@
     "constructorTableros": "Constructor de tableros",
     "appearance": "Apariencia",
     "tableroModulos": "Módulos de tablero",
+    "schedulingBridge": "Puente de citas del call-center",
     "configFactura": "Factura (encabezado/pie)",
     "devoluciones": "Devoluciones",
     "cajaConsultas": "Caja de consultas",
@@ -3827,6 +3829,73 @@
   },
   "configGuard": {
     "sinPermiso": "No tienes acceso a esta configuración. Es solo para administradores."
+  },
+  "schedulingBridge": {
+    "title": "Puente de citas del call-center",
+    "description": "Sincroniza automáticamente las citas médicas agendadas por el call-center hacia nuestras citas. Estado, configuración y mapeo de médicos/agentes por centro.",
+    "status": {
+      "reachable": "Conectado",
+      "unreachable": "Sin conexión",
+      "enabled": "Puente activo",
+      "disabled": "Puente apagado",
+      "lastRun": "Última corrida",
+      "never": "Nunca ha corrido",
+      "ok": "OK",
+      "failed": "Falló",
+      "created": "{n} creadas",
+      "updated": "{n} actualizadas",
+      "cancelled": "{n} canceladas",
+      "runNow": "Sincronizar ahora",
+      "runNowTitle": "Sincronizar ahora",
+      "runNowHelp": "Fuerza una corrida fuera de horario para este centro, en el rango de fechas elegido.",
+      "from": "Desde",
+      "to": "Hasta",
+      "runNowSubmit": "Sincronizar",
+      "runNowNoCode": "Este centro no tiene código externo configurado todavía — configúralo abajo primero.",
+      "runNowRangeInvalid": "Elige un rango de 1 a {max} días.",
+      "runNowOk": "Sincronización lanzada."
+    },
+    "config": {
+      "title": "Configuración",
+      "enabled": "Puente activo",
+      "pollInterval": "Intervalo de sondeo (segundos)",
+      "workDays": "Días laborables",
+      "workStart": "Hora de inicio",
+      "workEnd": "Hora de fin",
+      "externalCode": "Código de centro externo",
+      "selectCode": "Elige un código",
+      "none": "Ninguno"
+    },
+    "doctorMappings": {
+      "title": "Mapeo de médicos",
+      "add": "+ Nuevo mapeo",
+      "externalName": "Nombre externo",
+      "doctor": "Médico real",
+      "selectDoctor": "Elige un médico",
+      "empty": "Sin mapeos de médicos todavía."
+    },
+    "agentMappings": {
+      "title": "Mapeo de agentes",
+      "add": "+ Nuevo mapeo",
+      "externalCode": "Código externo",
+      "agent": "Agente real",
+      "selectAgent": "Elige a alguien",
+      "provisional": "Provisional",
+      "empty": "Sin mapeos de agentes todavía."
+    },
+    "runs": {
+      "title": "Registro de corridas",
+      "started": "Inicio",
+      "finished": "Fin",
+      "result": "Resultado",
+      "ok": "OK",
+      "failed": "Falló",
+      "created": "Creadas",
+      "updated": "Actualizadas",
+      "cancelled": "Canceladas",
+      "error": "Error",
+      "empty": "Sin corridas todavía."
+    }
   },
   "personalFicha": {
     "title": "Personal",

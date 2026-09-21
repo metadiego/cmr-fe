@@ -75,4 +75,5 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/admin", labelKey: "nav.admin" },
   { path: "/configuration/preferences/appearance", labelKey: "nav.appearance" },
   { path: "/configuration/board-modules", labelKey: "nav.tableroModulos" },
+  { path: "/configuration/scheduling-bridge", labelKey: "nav.schedulingBridge" },
 ];

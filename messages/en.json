@@ -608,7 +608,8 @@
     "remove": "Remove",
     "close": "Close",
     "add": "Add",
-    "forbidden": "You do not have access to this screen."
+    "forbidden": "You do not have access to this screen.",
+    "saved": "Saved."
   },
   "pending": {
     "title": "Access pending",
@@ -791,6 +792,7 @@
     "constructorTableros": "Board builder",
     "appearance": "Appearance",
     "tableroModulos": "Board modules",
+    "schedulingBridge": "Call-center appointment bridge",
     "configFactura": "Invoice (header/footer)",
     "devoluciones": "Returns",
     "cajaConsultas": "Consultation cash",
@@ -3827,6 +3829,73 @@
   },
   "configGuard": {
     "sinPermiso": "You do not have access to this setting. Admins only."
+  },
+  "schedulingBridge": {
+    "title": "Call-center appointment bridge",
+    "description": "Automatically syncs medical appointments scheduled by the call-center into our appointments. Status, configuration and doctor/agent mapping per center.",
+    "status": {
+      "reachable": "Connected",
+      "unreachable": "Unreachable",
+      "enabled": "Bridge on",
+      "disabled": "Bridge off",
+      "lastRun": "Last run",
+      "never": "Never run",
+      "ok": "OK",
+      "failed": "Failed",
+      "created": "{n} created",
+      "updated": "{n} updated",
+      "cancelled": "{n} cancelled",
+      "runNow": "Sync now",
+      "runNowTitle": "Sync now",
+      "runNowHelp": "Forces an off-schedule run for this center, over the chosen date range.",
+      "from": "From",
+      "to": "To",
+      "runNowSubmit": "Sync",
+      "runNowNoCode": "This center has no external code configured yet — set it below first.",
+      "runNowRangeInvalid": "Pick a range of 1 to {max} days.",
+      "runNowOk": "Sync launched."
+    },
+    "config": {
+      "title": "Configuration",
+      "enabled": "Bridge on",
+      "pollInterval": "Poll interval (seconds)",
+      "workDays": "Work days",
+      "workStart": "Start time",
+      "workEnd": "End time",
+      "externalCode": "External center code",
+      "selectCode": "Pick a code",
+      "none": "None"
+    },
+    "doctorMappings": {
+      "title": "Doctor mapping",
+      "add": "+ New mapping",
+      "externalName": "External name",
+      "doctor": "Real doctor",
+      "selectDoctor": "Pick a doctor",
+      "empty": "No doctor mappings yet."
+    },
+    "agentMappings": {
+      "title": "Agent mapping",
+      "add": "+ New mapping",
+      "externalCode": "External code",
+      "agent": "Real agent",
+      "selectAgent": "Pick someone",
+      "provisional": "Provisional",
+      "empty": "No agent mappings yet."
+    },
+    "runs": {
+      "title": "Run log",
+      "started": "Started",
+      "finished": "Finished",
+      "result": "Result",
+      "ok": "OK",
+      "failed": "Failed",
+      "created": "Created",
+      "updated": "Updated",
+      "cancelled": "Cancelled",
+      "error": "Error",
+      "empty": "No runs yet."
+    }
   },
   "personalFicha": {
     "title": "Staff",
