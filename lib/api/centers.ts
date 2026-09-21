@@ -132,7 +132,13 @@ interface CentroCrudoV1 {
   codigo: string;
   direccion?: string | null;
   activo?: boolean;
+  nombreLegal?: string | null;
+  nombreComercial?: string | null;
+  registroFiscal?: string | null;
+  registroFiscalLabel?: string | null;
   telefono?: string | null;
+  direccionFiscal?: string | null;
+  zip?: string | null;
   web?: string | null;
   pieFactura?: string | null;
   logoUrl?: string | null;
@@ -146,7 +152,13 @@ function centroDeV1(c: CentroCrudoV1): Centro {
     code: c.codigo,
     address: c.direccion ?? null,
     active: c.activo,
+    legalName: c.nombreLegal ?? null,
+    tradeName: c.nombreComercial ?? null,
+    taxRegistration: c.registroFiscal ?? null,
+    taxRegistrationLabel: c.registroFiscalLabel ?? null,
     phone: c.telefono ?? null,
+    taxAddress: c.direccionFiscal ?? null,
+    zipCode: c.zip ?? null,
     website: c.web ?? null,
     invoiceFooter: c.pieFactura ?? null,
     logoUrl: c.logoUrl ?? null,
