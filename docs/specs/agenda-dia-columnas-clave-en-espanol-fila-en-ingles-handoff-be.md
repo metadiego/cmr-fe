@@ -5,6 +5,47 @@
 > "sin hora"), pero Tipo/Paciente/Record/Teléfono/Médico/Estado salen en `—` aunque el BE SÍ manda
 > esos valores. Es un bug real, del BE, no del FE.
 
+## Evidencia cruda (JSON real, capturado ahora — no descripción)
+
+Respuesta de `GET /api/v2/appointments/day-agenda?date=2026-10-01` en producción, cuenta
+`atencion@centrodemedicinaregenerativa.com`, **21-sep-2026 16:54:01 UTC**, `requestId`
+`ff68c1d3-40a5-4e87-888f-9a1d2cb2352b` (mismo payload, misma respuesta — no son dos llamadas):
+
+`data.columns[]` (recorte, las que importan aquí):
+```json
+{"clave": "tipo", "binding": "cita.tipo", ...}
+{"clave": "paciente", "binding": "paciente.nombre", ...}
+{"clave": "record", "binding": "paciente.record", ...}
+{"clave": "telefono", "binding": "paciente.telefono", ...}
+{"clave": "medico", "binding": "medico.nombre", ...}
+{"clave": "estado", "binding": "cita.estado", ...}
+```
+
+Una cita real, del **mismo `requestId`**, `data.centers[0].franjas[].tipos[].appointments[0]`
+(centro CMR Bayamon, cita `499dfeb9-5076-4b71-934c-ae67d9647714`):
+```json
+{
+  "id": "499dfeb9-5076-4b71-934c-ae67d9647714",
+  "status": "programada",
+  "time": null,
+  "type": "Consulta (Nueva)",
+  "patient": "EDITH CRESPO MALDONADO",
+  "medicalRecordNumber": null,
+  "phone": "+17872072736",
+  "doctor": null,
+  "medico__valor": null,
+  "comentarios": null,
+  "citadoPor": null,
+  "actions": null
+}
+```
+
+La cita **no tiene** las claves `paciente`, `tipo`, `estado`, `medico`, `telefono` ni `record` — tiene
+`patient`, `type`, `status`, `doctor`, `phone`. `fila["paciente"]` da `undefined` sobre esta cita real;
+`fila["patient"]` da `"EDITH CRESPO MALDONADO"`. Es el mismo objeto, en la misma respuesta HTTP, que
+trae `columns[].clave = "paciente"` al lado. Reproducible: cualquier llamada a ese endpoint con una
+cita real muestra lo mismo — no es una condición de carrera ni un caso aislado.
+
 ## La causa exacta (leída en el código, BE y FE, no supuesta)
 
 `GET /api/v2/appointments/day-agenda?date=...` arma su respuesta con dos partes que se traducen de
