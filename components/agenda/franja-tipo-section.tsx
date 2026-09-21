@@ -15,8 +15,8 @@ import { EstadoSelect } from "@/components/tablero/estado-select";
 import { CeldaEditable } from "@/components/tablero/celda-editable";
 import { Cell } from "@/components/agenda/tablero-dinamico";
 
-// Celda de una cita: MISMA lógica que usa la vista clásica y la nueva (sin duplicar). Estado = selector
-// inline; columnas editables = CeldaEditable; acción = reservado; resto = Cell de solo lectura.
+// A cita's cell: the SAME logic the classic and the new view both use (no duplication). Estado =
+// inline selector; editable columns = CeldaEditable; accion = reserved; everything else = read-only Cell.
 export function CeldaCita({
   col,
   fila,
@@ -65,9 +65,9 @@ export function CeldaCita({
   );
 }
 
-// Una franja+tipo de la vista clásica: encabezado (hora, tipo, cupo, resaltado "ahora") + tabla de
-// citas + cupos libres. Extraído de dia-view.tsx para mantener ese archivo bajo su tope de líneas.
-// `cols` llega ya deduplicada y filtrada por permiso — la decide el padre, una sola vez por render.
+// One franja+tipo of the classic view: header (time, tipo, cupo, "now" highlight) + appointments
+// table + free slots. Extracted out of dia-view.tsx to keep that file under its DEBT line ceiling.
+// `cols` arrives already deduped and permission-filtered — the parent decides that once per render.
 export function FranjaTipoSection({
   franja,
   tipo,
