@@ -24,7 +24,12 @@ export interface CentroPantalla {
   centroActivo: string; // id del centro que se está mirando (elegido, o el de la sesión, o el 1º)
   setCentro: (id: string) => void;
   puedeEscribir: boolean; // el centro elegido está en la lista de escritura
-  viendoOtroCentro: boolean; // el centro elegido ≠ el de la sesión
+  // El centro elegido ≠ el de la sesión — O no hay centro de sesión propio (Master: `activeClinicId`
+  // SIEMPRE null, sin importar qué centro tenga elegido en pantalla). Sin este segundo caso, Master
+  // nunca mandaba X-Tenant-ID desde el selector EN pantalla — el BE caía a su propio `null` de sesión
+  // y todo salía vacío. Verificado en vivo: GET .../doctor-mappings sin header trae [], con
+  // X-Tenant-ID:<bayamon> trae los 4 reales.
+  viendoOtroCentro: boolean;
   fetchCentroId?: string; // pasar en la query SOLO al leer otro centro; undefined = el de la sesión
   centroIdCrear?: string; // pasar en el body SOLO al crear en otro centro; undefined = el de la sesión
   cargando: boolean;
@@ -45,7 +50,8 @@ export function useCentroPantalla(permisoRead: string, permisoWrite: string): Ce
     (sessionCentroId && centros.some((c) => c.id === sessionCentroId) ? sessionCentroId : centros[0]?.id) ||
     "";
 
-  const viendoOtroCentro = !!centroActivo && !!sessionCentroId && centroActivo !== sessionCentroId;
+  const viendoOtroCentro =
+    !!centroActivo && (sessionCentroId ? centroActivo !== sessionCentroId : true);
   const puedeEscribir = !!centroActivo && escrituraIds.has(centroActivo);
   const idParaOtro = viendoOtroCentro ? centroActivo : undefined;
 
