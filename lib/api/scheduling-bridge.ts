@@ -67,8 +67,25 @@ export interface BridgeConfig {
   externalClinicCode: "BAYAMON" | "CAGUAS" | null;
 }
 
-export function getConfig(centroId?: string): Promise<BridgeConfig> {
-  return apiFetch<BridgeConfig>(`/scheduling-bridge/config`, {}, centroId);
+const DEFAULT_CONFIG: BridgeConfig = {
+  enabled: false,
+  pollIntervalSeconds: 300,
+  workDays: null,
+  workStartTime: "",
+  workEndTime: "",
+  externalClinicCode: null,
+};
+
+// GET responds with `data` as an ARRAY (verified live — the endpoint shares the same
+// ?centerIds= multi-center shape as /status), even when scoped to one center via
+// X-Tenant-ID: [{...}]. PUT's response is a single object, not an array — different shape
+// for the same resource. Scoped to this one center, so take the first (only) entry; a
+// center with no row yet (empty array) falls back to a sensible default instead of
+// undefined, so the form doesn't get stuck showing "loading" forever.
+export async function getConfig(centroId?: string): Promise<BridgeConfig> {
+  const res = await apiFetch<BridgeConfig[] | BridgeConfig>(`/scheduling-bridge/config`, {}, centroId);
+  if (Array.isArray(res)) return res[0] ?? DEFAULT_CONFIG;
+  return res;
 }
 
 // PUT is a partial update — send only the fields that changed.
