@@ -251,6 +251,7 @@
       "allCenters": "Todos los centros",
       "summary": "{total} citas · {atendidas} atendidas · {noShow} no-show",
       "noTime": "Sin hora",
+      "now": "Ahora",
       "book": "Agendar {tipo} {hora}",
       "freeSlots": "{n, plural, one {# cupo libre} other {# cupos libres}}",
       "closed": "cerrado",
