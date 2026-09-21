@@ -14,7 +14,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-export function SchedulingBridgeRunsLog({ centroId }: { centroId: string }) {
+export function SchedulingBridgeRunsLog({ centroId }: { centroId?: string }) {
   const t = useTranslations("schedulingBridge.runs");
   const tc = useTranslations("common");
   const format = useFormatter();

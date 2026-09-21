@@ -115,7 +115,14 @@ function RunNowDialog({
   const [hasta, setHasta] = React.useState(today);
   const [busy, setBusy] = React.useState(false);
 
+  // Off-schedule "run now" is for QA / hot-fixing a handful of days, never a bulk backfill —
+  // cap it so a typo'd range (e.g. wrong year) can't fire thousands of dates at the BE.
+  const MAX_DIAS = 31;
+  const dayCount = Math.floor((new Date(`${hasta}T00:00:00Z`).getTime() - new Date(`${desde}T00:00:00Z`).getTime()) / 86400000) + 1;
+  const rangoValido = dayCount >= 1 && dayCount <= MAX_DIAS;
+
   async function onSubmit() {
+    if (!rangoValido) return;
     setBusy(true);
     try {
       const dates: string[] = [];
@@ -142,6 +149,7 @@ function RunNowDialog({
       description={t("runNowHelp")}
       onSubmit={onSubmit}
       submitting={busy}
+      canSubmit={rangoValido}
       submitLabel={t("runNowSubmit")}
     >
       <Field label={t("from")}>
@@ -150,6 +158,9 @@ function RunNowDialog({
       <Field label={t("to")}>
         <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
       </Field>
+      {!rangoValido && (
+        <p className="text-xs text-destructive">{t("runNowRangeInvalid", { max: MAX_DIAS })}</p>
+      )}
     </FormDialog>
   );
 }

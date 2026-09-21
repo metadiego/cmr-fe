@@ -29,6 +29,7 @@ export function MetaCrud<T extends { id: string }>({
   create,
   update,
   remove,
+  readOnly = false,
 }: {
   title: string;
   addLabel: string;
@@ -43,6 +44,9 @@ export function MetaCrud<T extends { id: string }>({
   create: (draft: Draft) => Promise<unknown>;
   update: (id: string, draft: Draft) => Promise<unknown>;
   remove?: (id: string) => Promise<unknown>;
+  // Hides "add" + "edit"/"delete" row actions — for a permission-gated caller whose
+  // viewer can only READ this list. Default false keeps every existing caller unchanged.
+  readOnly?: boolean;
 }) {
   const tc = useTranslations("common");
   const tRoot = useTranslations();
@@ -88,32 +92,34 @@ export function MetaCrud<T extends { id: string }>({
     }
   }
 
-  const cols: Column<T>[] = [
-    ...columns,
-    {
-      key: "__acc",
-      header: "",
-      align: "right",
-      cell: (r) => (
-        <span className="flex justify-end gap-3">
-          <button type="button" className="text-sm text-primary hover:underline" onClick={() => openEdit(r)}>
-            {tc("edit")}
-          </button>
-          {remove && (
-            <button type="button" className="text-sm text-muted-foreground hover:text-destructive" onClick={() => del(r)}>
-              {tc("delete")}
-            </button>
-          )}
-        </span>
-      ),
-    },
-  ];
+  const cols: Column<T>[] = readOnly
+    ? columns
+    : [
+        ...columns,
+        {
+          key: "__acc",
+          header: "",
+          align: "right",
+          cell: (r) => (
+            <span className="flex justify-end gap-3">
+              <button type="button" className="text-sm text-primary hover:underline" onClick={() => openEdit(r)}>
+                {tc("edit")}
+              </button>
+              {remove && (
+                <button type="button" className="text-sm text-muted-foreground hover:text-destructive" onClick={() => del(r)}>
+                  {tc("delete")}
+                </button>
+              )}
+            </span>
+          ),
+        },
+      ];
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium">{title}</h3>
-        <Button size="sm" variant="outline" onClick={openNew}>{addLabel}</Button>
+        {!readOnly && <Button size="sm" variant="outline" onClick={openNew}>{addLabel}</Button>}
       </div>
       <DataTable
         columns={cols}

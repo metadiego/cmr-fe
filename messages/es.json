@@ -3852,6 +3852,7 @@
       "to": "Hasta",
       "runNowSubmit": "Sincronizar",
       "runNowNoCode": "Este centro no tiene código externo configurado todavía — configúralo abajo primero.",
+      "runNowRangeInvalid": "Elige un rango de 1 a {max} días.",
       "runNowOk": "Sincronización lanzada."
     },
     "config": {

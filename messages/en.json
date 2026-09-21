@@ -3852,6 +3852,7 @@
       "to": "To",
       "runNowSubmit": "Sync",
       "runNowNoCode": "This center has no external code configured yet — set it below first.",
+      "runNowRangeInvalid": "Pick a range of 1 to {max} days.",
       "runNowOk": "Sync launched."
     },
     "config": {

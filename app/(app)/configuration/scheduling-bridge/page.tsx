@@ -39,11 +39,15 @@ export default function SchedulingBridgePage() {
             />
 
             {estado.centroActivo && (
+              // fetchCentroId, NOT centroActivo: undefined for the SESSION's own center (the BE
+              // resolves it from the token) — forcing X-Tenant-ID even on your own center risks a
+              // spurious 403 for a master user with no activeClinicId. Only set for a DIFFERENT,
+              // explicitly-picked center. See hooks/use-centro-pantalla.ts.
               <>
-                <SchedulingBridgeConfigForm centroId={estado.centroActivo} puedeEscribir={estado.puedeEscribir} />
-                <DoctorMappingsTable centroId={estado.centroActivo} puedeEscribir={estado.puedeEscribir} />
-                <AgentMappingsTable centroId={estado.centroActivo} puedeEscribir={estado.puedeEscribir} />
-                <SchedulingBridgeRunsLog centroId={estado.centroActivo} />
+                <SchedulingBridgeConfigForm centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+                <DoctorMappingsTable centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+                <AgentMappingsTable centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+                <SchedulingBridgeRunsLog centroId={estado.fetchCentroId} />
               </>
             )}
           </div>

@@ -37,7 +37,7 @@ const NO_STAFF: Personal[] = [];
 
 // Fetched ONCE per table (not per row) and shared by the column display + the
 // add/edit dialog's picker, to avoid an N+1 fetch across mapping rows.
-function useStaffRoster(centroId: string) {
+function useStaffRoster(centroId?: string) {
   const { state } = useResource(() => listPersonal({ limit: 200 }, centroId), [centroId]);
   const staff = state.kind === "ok" ? state.data.items : NO_STAFF;
   const byId = React.useMemo(() => new Map(staff.map((p) => [p.id, p])), [staff]);
@@ -51,7 +51,7 @@ function looksUnedited(row: { createdAt: string; updatedAt: string }): boolean {
   return row.createdAt === row.updatedAt;
 }
 
-export function DoctorMappingsTable({ centroId, puedeEscribir }: { centroId: string; puedeEscribir: boolean }) {
+export function DoctorMappingsTable({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {
   const t = useTranslations("schedulingBridge.doctorMappings");
   const { staff, byId } = useStaffRoster(centroId);
 
@@ -68,6 +68,7 @@ export function DoctorMappingsTable({ centroId, puedeEscribir }: { centroId: str
       create={(d) => createDoctorMapping({ externalName: (d.externalName as string).trim(), staffId: d.staffId as string }, centroId)}
       update={(id, d) => updateDoctorMapping(id, { externalName: (d.externalName as string).trim(), staffId: d.staffId as string }, centroId)}
       remove={puedeEscribir ? (id) => deleteDoctorMapping(id, centroId) : undefined}
+      readOnly={!puedeEscribir}
       columns={[
         { key: "externalName", header: t("externalName"), cell: (r) => <span className="font-mono text-sm">{r.externalName}</span> },
         { key: "staff", header: t("doctor"), cell: (r) => <span className="text-sm">{byId.get(r.staffId) ? staffName(byId.get(r.staffId)!) : r.staffId}</span> },
@@ -93,7 +94,7 @@ export function DoctorMappingsTable({ centroId, puedeEscribir }: { centroId: str
   );
 }
 
-export function AgentMappingsTable({ centroId, puedeEscribir }: { centroId: string; puedeEscribir: boolean }) {
+export function AgentMappingsTable({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {
   const t = useTranslations("schedulingBridge.agentMappings");
   const { staff, byId } = useStaffRoster(centroId);
 
@@ -110,6 +111,7 @@ export function AgentMappingsTable({ centroId, puedeEscribir }: { centroId: stri
       create={(d) => createAgentMapping({ externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string }, centroId)}
       update={(id, d) => updateAgentMapping(id, { externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string }, centroId)}
       remove={puedeEscribir ? (id) => deleteAgentMapping(id, centroId) : undefined}
+      readOnly={!puedeEscribir}
       columns={[
         {
           key: "externalCode",

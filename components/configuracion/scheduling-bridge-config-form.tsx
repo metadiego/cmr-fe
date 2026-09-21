@@ -31,27 +31,33 @@ export function SchedulingBridgeConfigForm({
   centroId,
   puedeEscribir,
 }: {
-  centroId: string;
+  centroId?: string; // undefined = the session's own active center
   puedeEscribir: boolean;
 }) {
   const t = useTranslations("schedulingBridge.config");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const locale = useLocale();
-  const { state, reload } = useResource<BridgeConfig>(() => getConfig(centroId), [centroId]);
+  const { state } = useResource<BridgeConfig>(() => getConfig(centroId), [centroId]);
 
   const [draft, setDraft] = React.useState<BridgeConfig | null>(null);
+  // The last value we KNOW is correct on the server — seeded once per `centroId`, then only ever
+  // updated synchronously from a successful PUT's own response (never re-derived from the async
+  // `state`, which could still be reflecting an older reload by the time a later save fails).
+  const [lastGood, setLastGood] = React.useState<BridgeConfig | null>(null);
   const [busy, setBusy] = React.useState(false);
-  // Adjust state during render (not an effect, per react-hooks/set-state-in-effect): reseed the
-  // draft whenever a NEW server value loads (identity check, not a value comparison).
-  const [syncedFrom, setSyncedFrom] = React.useState<BridgeConfig | null>(null);
-  if (state.kind === "ok" && state.data !== syncedFrom) {
-    setSyncedFrom(state.data);
+  // Adjust state during render (not an effect, per react-hooks/set-state-in-effect): reseed ONLY
+  // when this is the first load, or the center picker moved to a DIFFERENT center — never on a
+  // same-center reload, which must not silently clobber an in-progress unsaved edit.
+  const [seededFor, setSeededFor] = React.useState<{ centroId?: string } | null>(null);
+  if (state.kind === "ok" && (seededFor === null || seededFor.centroId !== centroId)) {
+    setSeededFor({ centroId });
+    setLastGood(state.data);
     setDraft(state.data);
   }
 
-  if (state.kind === "loading" || !draft) return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
   if (state.kind === "fail") return <p className="text-sm text-destructive">{state.message}</p>;
+  if (state.kind === "loading" || !draft) return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
 
   function patch(p: Partial<BridgeConfig>) {
     setDraft((d) => (d ? { ...d, ...p } : d));
@@ -69,11 +75,11 @@ export function SchedulingBridgeConfigForm({
     try {
       const saved = await updateConfig(draft, centroId);
       setDraft(saved);
+      setLastGood(saved);
       toast.success(tc("saved"));
-      reload();
     } catch (err) {
       toastError(err, tRoot);
-      if (state.kind === "ok") setDraft(state.data); // rollback to last known-good server value
+      setDraft(lastGood); // rollback to the actual last-known-good, not a possibly-stale reload
     } finally {
       setBusy(false);
     }
