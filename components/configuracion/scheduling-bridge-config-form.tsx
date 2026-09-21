@@ -65,8 +65,10 @@ export function SchedulingBridgeConfigForm({
 
   function toggleDia(d: number) {
     if (!draft) return;
-    const on = draft.workDays.includes(d);
-    patch({ workDays: on ? draft.workDays.filter((x) => x !== d) : [...draft.workDays, d].sort() });
+    // workDays puede llegar undefined/null de un centro que nunca se configuró — nunca asumir array.
+    const dias = draft.workDays ?? [];
+    const on = dias.includes(d);
+    patch({ workDays: on ? dias.filter((x) => x !== d) : [...dias, d].sort() });
   }
 
   async function onSave() {
@@ -138,7 +140,7 @@ export function SchedulingBridgeConfigForm({
               onClick={() => toggleDia(d)}
               className={cn(
                 "min-w-11 rounded-md border px-2.5 py-1 text-sm capitalize transition-colors disabled:opacity-60",
-                draft.workDays.includes(d)
+                (draft.workDays ?? []).includes(d)
                   ? "border-primary bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted",
               )}
