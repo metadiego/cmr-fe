@@ -251,6 +251,7 @@
       "allCenters": "All centers",
       "summary": "{total} appts · {atendidas} seen · {noShow} no-show",
       "noTime": "No time",
+      "now": "Now",
       "book": "Book {tipo} {hora}",
       "freeSlots": "{n, plural, one {# free slot} other {# free slots}}",
       "closed": "closed",

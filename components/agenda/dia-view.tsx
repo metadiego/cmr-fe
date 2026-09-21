@@ -7,6 +7,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
 
 import { getAgendaDia, type AgendaDia, type CentroDia, type ColumnaEfectiva, type TipoFranja } from "@/lib/api/agenda-dia";
+import { useFranjaResaltada, AhoraBadge } from "@/components/agenda/franja-resaltada";
+import { cn } from "@/lib/utils";
 import { getActiveCentro } from "@/lib/tenant";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getTiposCita, type TipoCita, type EstadoCitaCatalogo } from "@/lib/api/citas";
@@ -21,9 +23,7 @@ import { useMe } from "@/hooks/use-me";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
-import { EstadoSelect } from "@/components/tablero/estado-select";
-import { CeldaEditable } from "@/components/tablero/celda-editable";
-import { Cell } from "@/components/agenda/tablero-dinamico";
+import { FranjaTipoSection, CeldaCita } from "@/components/agenda/franja-tipo-section";
 import { Chip, Kpi } from "@/components/agenda/dia-kpi";
 import {
   Select,
@@ -271,7 +271,6 @@ function CentroSheet({
   onChanged: () => void;
 }) {
   const t = useTranslations("agenda");
-  const tRoot = useTranslations();
   const { can } = useCan();
   // Combined mode returns each center's columns concatenated → dedupe by clave.
   const seen = new Set<string>();
@@ -281,6 +280,7 @@ function CentroSheet({
   const r = centro.resumen;
   const festivos = centro.festivos ?? [];
   const bloqueado = centro.bloqueado ?? false;
+  const horaResaltada = useFranjaResaltada(centro.franjas.map((f) => f.time));
 
   return (
     <div className="space-y-4">
@@ -324,121 +324,23 @@ function CentroSheet({
           if (tipo.appointments.length === 0 && tipo.vacios === 0) return null;
           const key = `${franja.time ?? "sin"}-${tipo.appointmentTypeId}`;
           return (
-            <section key={key} className="space-y-1">
-              <h3 className="flex items-center gap-2 text-sm font-medium">
-                <span className="font-mono">{franja.time ?? t("dia.noTime")}</span>
-                <span>{tipo.tipoNombre}</span>
-                <span className="text-xs text-muted-foreground">
-                  {tipo.appointments.length}/{tipo.cupo}
-                </span>
-              </h3>
-              <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/40 text-xs text-muted-foreground">
-                    <tr>
-                      {cols.map((col) => (
-                        <th key={col.clave} className="px-3 py-1.5 text-left font-medium whitespace-nowrap">
-                          {tRoot(col.labelKey)}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tipo.appointments.map((fila) => (
-                      <tr key={fila.id} className="border-t">
-                        {cols.map((col) => (
-                          <CeldaCita
-                            key={col.clave}
-                            col={col}
-                            fila={fila}
-                            clinicId={centro.clinicId}
-                            estados={estados}
-                            transiciones={transiciones}
-                            editableClaves={editableClaves}
-                            onChanged={onChanged}
-                          />
-                        ))}
-                      </tr>
-                    ))}
-                    {tipo.vacios > 0 && (
-                      <tr className="border-t bg-muted/10">
-                        <td colSpan={cols.length} className="px-3 py-1.5">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-muted-foreground">
-                              {t("dia.freeSlots", { n: tipo.vacios })}
-                            </span>
-                            <Can permiso="citas.create">
-                              <button
-                                type="button"
-                                onClick={() => onAgendar(franja.time, tipo)}
-                                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                              >
-                                <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
-                                {t("dia.book", { tipo: tipo.tipoNombre, hora: franja.time ?? "" })}
-                              </button>
-                            </Can>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+            <FranjaTipoSection
+              key={key}
+              franja={franja}
+              tipo={tipo}
+              cols={cols}
+              clinicId={centro.clinicId}
+              estados={estados}
+              transiciones={transiciones}
+              editableClaves={editableClaves}
+              onChanged={onChanged}
+              onAgendar={onAgendar}
+              esAhora={franja.time !== null && franja.time === horaResaltada}
+            />
           );
         }),
       )}
     </div>
-  );
-}
-
-// Celda de una cita: MISMA lógica que usa la vista clásica y la nueva (sin duplicar). Estado = selector
-// inline; columnas editables = CeldaEditable; acción = reservado; resto = Cell de solo lectura.
-function CeldaCita({
-  col,
-  fila,
-  clinicId,
-  estados,
-  transiciones,
-  editableClaves,
-  onChanged,
-}: {
-  col: ColumnaEfectiva;
-  fila: { id: string; estado?: string } & Record<string, unknown>;
-  clinicId: string;
-  estados: EstadoCitaCatalogo[];
-  transiciones: Transicion[];
-  editableClaves: Set<string>;
-  onChanged: () => void;
-}) {
-  const tRoot = useTranslations();
-  return (
-    <td className="px-3 py-1.5 whitespace-nowrap">
-      {col.clave === "estado" ? (
-        <EstadoSelect
-          tablero="citas_cc"
-          entidadId={fila.id}
-          estado={String(fila.estado ?? fila["estado"] ?? "")}
-          estados={estados}
-          transiciones={transiciones}
-          centroId={clinicId}
-          onDone={onChanged}
-        />
-      ) : editableClaves.has(col.clave) ? (
-        <CeldaEditable
-          tablero="citas_cc"
-          entidadId={fila.id}
-          columna={col.clave}
-          tipo={col.tipo}
-          value={fila[col.clave]}
-          centroId={clinicId}
-          etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
-          onChanged={onChanged}
-        />
-      ) : col.tipo === "accion" ? null : (
-        <Cell col={col} value={fila[col.clave]} />
-      )}
-    </td>
   );
 }
 
@@ -491,6 +393,7 @@ function CentroSheetV2({
     !filtro ? true : filtro === "__sinhora__" ? i.hora === null : i.tipoCitaId === filtro,
   );
   const franjasHora = franjas.filter((f) => f.time !== null);
+  const horaResaltada = useFranjaResaltada(franjasHora.map((f) => f.time));
 
   return (
     <div className="space-y-4">
@@ -533,12 +436,19 @@ function CentroSheetV2({
         <div className="flex gap-2 overflow-x-auto pb-1">
           {franjasHora.map((f) => {
             const conCitas = f.tipos.some((tp) => tp.appointments.length > 0);
+            const esAhora = f.time === horaResaltada;
             return (
               <div
                 key={f.time}
-                className={"min-w-[9.5rem] shrink-0 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2 " + (conCitas ? "ring-primary/40 bg-primary/5" : "ring-foreground/10 bg-card")}
+                className={cn(
+                  "min-w-[9.5rem] shrink-0 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2",
+                  esAhora ? "ring-2 ring-primary bg-primary/10" : conCitas ? "ring-primary/40 bg-primary/5" : "ring-foreground/10 bg-card",
+                )}
               >
-                <div className="mb-1 font-mono text-xs font-semibold">{f.time}</div>
+                <div className="mb-1 flex items-center gap-1.5 font-mono text-xs font-semibold">
+                  {f.time}
+                  {esAhora && <AhoraBadge label={t("dia.now")} className="text-[9px]" />}
+                </div>
                 <div className="space-y-0.5">
                   {f.tipos.filter((tp) => tp.cupo > 0).map((tp) => (
                     <div key={tp.appointmentTypeId} className="flex items-center justify-between gap-1.5 text-xs">
