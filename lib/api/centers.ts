@@ -120,9 +120,54 @@ export async function getMyCentrosOperativos(): Promise<Centro[]> {
 // (version:'1', sin alias en inglés). Bajo el prefijo /api/v2 de apiFetch esto responde 404. La tabla de
 // rutas del BE ya prevé el nombre inglés `allowed-centers` y el query `permiso`→`permissionSlug`, pero el
 // controlador aún no declara v2. Se deja la ruta/param en español hasta que el BE añada v2. Ver reporte.
+// El v1 crudo trae los campos en español (verificado en vivo: nombre/codigo/direccion/activo/
+// telefono/web/pieFactura/logoUrl), no el `Centro` en inglés que este archivo declara — sin
+// mapear, `.name`/`.code`/etc. quedaban `undefined` para TODO consumidor de este hook (nunca se
+// nota en un selector chico, pero sí en una card que pinta el nombre como título). No se renombra
+// nada del contrato v1 en sí (regla 6, api-ingles/v1): esto normaliza la RESPUESTA de esta única
+// función hacia el tipo `Centro` que ella misma ya declaraba y que sus llamadores ya asumen.
+interface CentroCrudoV1 {
+  id: string;
+  nombre: string;
+  codigo: string;
+  direccion?: string | null;
+  activo?: boolean;
+  nombreLegal?: string | null;
+  nombreComercial?: string | null;
+  registroFiscal?: string | null;
+  registroFiscalLabel?: string | null;
+  telefono?: string | null;
+  direccionFiscal?: string | null;
+  zip?: string | null;
+  web?: string | null;
+  pieFactura?: string | null;
+  logoUrl?: string | null;
+  frontdeskAutopresente?: boolean | null;
+}
+
+function centroDeV1(c: CentroCrudoV1): Centro {
+  return {
+    id: c.id,
+    name: c.nombre,
+    code: c.codigo,
+    address: c.direccion ?? null,
+    active: c.activo,
+    legalName: c.nombreLegal ?? null,
+    tradeName: c.nombreComercial ?? null,
+    taxRegistration: c.registroFiscal ?? null,
+    taxRegistrationLabel: c.registroFiscalLabel ?? null,
+    phone: c.telefono ?? null,
+    taxAddress: c.direccionFiscal ?? null,
+    zipCode: c.zip ?? null,
+    website: c.web ?? null,
+    invoiceFooter: c.pieFactura ?? null,
+    logoUrl: c.logoUrl ?? null,
+    frontdeskAutoPresent: c.frontdeskAutopresente ?? null,
+  };
+}
+
 export async function getCentrosDondePuedo(permiso: string): Promise<Centro[]> {
   const res: unknown = await apiFetchV1(`/me/centros-donde-puedo?permiso=${encodeURIComponent(permiso)}`);
-  if (Array.isArray(res)) return res as Centro[];
-  const items = (res as { items?: unknown } | null)?.items;
-  return Array.isArray(items) ? (items as Centro[]) : [];
+  const items = Array.isArray(res) ? res : ((res as { items?: unknown } | null)?.items ?? []);
+  return Array.isArray(items) ? (items as CentroCrudoV1[]).map(centroDeV1) : [];
 }
