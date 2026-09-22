@@ -4,8 +4,8 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
-import { getFormatoArmado, type FormatoArmado, type FormatoPie } from "@/lib/api/formatos";
-import { SeccionInner } from "@/components/frontdesk/formato-secciones";
+import { getFormatoArmado, type FormatoArmado, type FormatoPie, type FormatoSeccion } from "@/lib/api/formatos";
+import { SeccionInner, SesionesFormato } from "@/components/frontdesk/formato-secciones";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
@@ -445,6 +445,16 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
   // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
   const esCampos = (d.layout ?? (cols.length ? "tabla" : "campos")) === "campos";
+  // Metadatos declarativos del papel (bolsa `render`). ocultarEmpresa puede venir aquí o en letterhead.
+  const render = d.render ?? {};
+  const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
+  // Láser a color por sesión (multipágina): bloques por sesión con paginación; las firmas se pintan DENTRO
+  // de cada bloque (no al final), así que se sacan de las secciones normales.
+  const esSesiones = d.layout === "sessions";
+  const firmasSesion = esSesiones
+    ? secciones.find((s): s is Extract<FormatoSeccion, { tipo: "firmas" }> => s.tipo === "firmas")
+    : undefined;
+  const seccionesVisibles = esSesiones ? secciones.filter((s) => s.tipo !== "firmas") : secciones;
   // Etiqueta por labelKey: traducción si existe; si no, el ÚLTIMO segmento en MAYÚSCULAS (nunca la clave
   // cruda en el papel). Handoff §"Claves i18n": el FE solo traduce; si falta, cae al segmento.
   const label = (key?: string | null, fallback?: string) => {
@@ -471,12 +481,22 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
               <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
             </div>
             {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa (solo logo + título). */}
-            {!d.letterhead?.ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
+            {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
             {d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
             <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
           </div>
 
-          {esCampos ? (
+          {esSesiones ? (
+            /* Láser a color por sesión (multipágina): bloques por sesión con paginación. */
+            <SesionesFormato
+              columns={cols}
+              sessions={d.sessions ?? []}
+              notas={render.notas ?? []}
+              porPagina={d.porPagina ?? render.porPagina ?? 2}
+              firmas={firmasSesion}
+              label={label}
+            />
+          ) : esCampos ? (
             /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
                valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
             <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
@@ -521,7 +541,7 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
           {/* Secciones (observaciones / firmas / párrafo / tabla de firmas / checklist / tabla temática /
               leyenda), en cualquier layout. El render de cada tipo vive en formato-secciones.tsx (data-driven,
               idéntico al legacy). Solo OBSERVACIONES (texto_libre caja) crece para llenar la hoja. */}
-          {secciones.map((s) => {
+          {seccionesVisibles.map((s) => {
             const crece = s.tipo === "texto_libre" && s.estilo !== "lineas";
             return (
               <div
@@ -529,10 +549,16 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
                 className={"region mt-6" + (crece ? " formato-grow" : "")}
                 style={crece ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
               >
-                <SeccionInner s={s} label={label} />
+                <SeccionInner s={s} label={label} casillasEnFilas={render.casillasEnFilas} />
               </div>
             );
           })}
+
+          {/* Escala de dolor (HILT/MLS): imagen del legacy, tal cual, antes del pie. */}
+          {render.imagenEscalaDolor && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={render.imagenEscalaDolor} alt="" className="mt-6 w-full max-w-2xl self-center object-contain" />
+          )}
 
           {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
           <PieFormato pie={d.footer} />

@@ -66,6 +66,28 @@ export type FormatoSeccion =
 // Pie del legacy (clave `pie`→`footer`; su contenido SÍ se traduce). `login` y `fechaHora` NO están en el mapa.
 export type FormatoPie = { prefix?: string; user?: string; login?: string; fechaHora?: string } | null;
 
+// Metadatos DECLARATIVOS del papel (bolsa `render`, opaca). Verificados en vivo contra el BE:
+// - ocultarEmpresa: arquetipos 1 y 4, no imprimir la línea de empresa. (También puede venir en letterhead.)
+// - casillasEnFilas: cada fila de tabla_tematica lleva un ☐ delante (órdenes Rx que se marcan a mano).
+// - imagenEscalaDolor: ruta del asset de la escala de dolor del legacy (HILT/MLS).
+// - areas: filas-cabecera por área en la rejilla (HILT, las 10 áreas). paginas: nº de páginas físicas (HILT=2).
+// - tablasLadoALado: nº de tablas en paralelo (MLS=2). casillas: selectores de tipo (RADIAL/FOCAL).
+// - notas / porPagina: para `layout:"sessions"` — las 2 cajas de notas VACÍAS y cuántas sesiones por página.
+export type FormatoRenderMeta = {
+  ocultarEmpresa?: boolean;
+  casillasEnFilas?: boolean;
+  imagenEscalaDolor?: string | null;
+  areas?: string[];
+  paginas?: number;
+  tablasLadoALado?: number;
+  casillas?: string[];
+  notas?: string[];
+  porPagina?: number;
+};
+
+// Bloque por SESIÓN (láser a color multipágina). Clave `sesiones`→`sessions`. Las cajas de notas van vacías.
+export type FormatoSesion = { sesion?: string | null; fecha?: string | null; notas?: string[] };
+
 // Documento ARMADO (print-ready) para una sesión. El `layout` es el discriminador:
 // "campos" = encabezado de pares etiqueta/valor (no rejilla); "tabla" = rejilla de columnas/filas.
 export type FormatoArmado = {
@@ -83,6 +105,9 @@ export type FormatoArmado = {
   rows: FormatoFila[]; // clave `filas`→`rows`; celdas en blanco para llenar a mano; contenido opaco
   sections?: FormatoSeccion[]; // clave `secciones`→`sections`; contenido opaco (FormatoSeccion en español)
   footer?: FormatoPie; // clave `pie`→`footer`; en TODOS los formatos
+  render?: FormatoRenderMeta | null; // metadatos declarativos del papel (bolsa opaca)
+  sessions?: FormatoSesion[]; // clave `sesiones`→`sessions`; bloques por sesión (layout "sessions")
+  porPagina?: number; // sesiones por página física (layout "sessions"); espejo de render.porPagina
 };
 
 // GET /formats?service=<clave> — lista de formatos del servicio (para el menú / admin).

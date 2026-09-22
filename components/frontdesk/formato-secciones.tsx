@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import type { FormatoSeccion } from "@/lib/api/formatos";
+import type { FormatoColumna, FormatoSeccion, FormatoSesion } from "@/lib/api/formatos";
 
 // Render data-driven de las secciones de un formato, para salir IDÉNTICO al legacy (modelos médicos):
 // parrafo, campos intermedios, tabla_firmas (con bordes), checklist, tabla_tematica, leyenda, además de
@@ -22,7 +22,19 @@ function Titulo({ children }: { children: React.ReactNode }) {
   return <div className="mb-1 text-sm font-bold uppercase">{children}</div>;
 }
 
-export function SeccionInner({ s, label }: { s: FormatoSeccion; label: LabelFn }) {
+// Casilla vacía para marcar a mano (☐). Compartida por checklist y las órdenes Rx (casillasEnFilas).
+const Casilla = <span style={{ display: "inline-block", width: 12, height: 12, border: BORDER }} aria-hidden />;
+
+export function SeccionInner({
+  s,
+  label,
+  casillasEnFilas,
+}: {
+  s: FormatoSeccion;
+  label: LabelFn;
+  // Órdenes Rx: cada fila de tabla_tematica lleva un ☐ delante para marcar a mano (render.casillasEnFilas).
+  casillasEnFilas?: boolean;
+}) {
   switch (s.tipo) {
     case "texto_libre": {
       // OBSERVACIONES: caja que crece (por defecto) o N renglones reglados (estilo "lineas").
@@ -114,7 +126,7 @@ export function SeccionInner({ s, label }: { s: FormatoSeccion; label: LabelFn }
     case "checklist": {
       // Lista de cotejo: cabecera oscura, bandas de sección (colspan) y celdas de casilla Sí/No + observación.
       const c = s.columnas ?? {};
-      const box = <span style={{ display: "inline-block", width: 12, height: 12, border: BORDER }} aria-hidden />;
+      const box = Casilla;
       return (
         <>
           {s.labelKey && <Titulo>{label(s.labelKey)}</Titulo>}
@@ -166,6 +178,8 @@ export function SeccionInner({ s, label }: { s: FormatoSeccion; label: LabelFn }
             <thead>
               {headerRows.map((row, ri) => (
                 <tr key={ri} style={{ background: headBg, color: "#fff" }}>
+                  {/* Columna de casilla (órdenes Rx): cabecera vacía, solo en la última fila de cabecera. */}
+                  {casillasEnFilas && <th style={{ border: BORDER, padding: "6px 8px", width: 24 }} />}
                   {row.map((col, ci) => (
                     <th key={ci} style={{ border: BORDER, padding: "6px 8px", textAlign: "left" }}>{label(col.labelKey, col.clave)}</th>
                   ))}
@@ -175,6 +189,7 @@ export function SeccionInner({ s, label }: { s: FormatoSeccion; label: LabelFn }
             <tbody>
               {filas.map((f, ri) => (
                 <tr key={`f${ri}`}>
+                  {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}
                   {lastRow.map((col, ci) => (
                     <td
                       key={ci}
@@ -187,6 +202,7 @@ export function SeccionInner({ s, label }: { s: FormatoSeccion; label: LabelFn }
               ))}
               {blancas.map((_, ri) => (
                 <tr key={`b${ri}`}>
+                  {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}
                   {lastRow.map((col, ci) => (
                     <td key={ci} style={{ border: BORDER, padding: "6px 8px", height: 26, ...(ci === 0 && descBg ? { background: descBg } : {}) }} />
                   ))}
@@ -205,4 +221,69 @@ export function SeccionInner({ s, label }: { s: FormatoSeccion; label: LabelFn }
     default:
       return null;
   }
+}
+
+// Láser a color POR SESIÓN (layout "sessions"): un bloque por sesión = SESIÓN #, tabla de columnas con la
+// fecha de la sesión + 1 fila en blanco, las 2 cajas de notas VACÍAS (para escribir a mano) y las firmas.
+// `porPagina` sesiones por página física (salto de página impreso). Si el BE no manda sesiones (impresión en
+// blanco), se pinta UN bloque vacío para que la hoja sea usable. Idéntico al legacy (nano_laser*, sueroterapia).
+export function SesionesFormato({
+  columns,
+  sessions,
+  notas,
+  porPagina = 2,
+  firmas,
+  label,
+}: {
+  columns: FormatoColumna[];
+  sessions: FormatoSesion[];
+  notas: string[];
+  porPagina?: number;
+  firmas?: Extract<FormatoSeccion, { tipo: "firmas" }>;
+  label: LabelFn;
+}) {
+  const bloques = sessions.length > 0 ? sessions : [{ sesion: null, fecha: null }];
+  return (
+    <div className="mt-4">
+      {bloques.map((s, i) => {
+        const saltar = (i + 1) % porPagina === 0 && i + 1 < bloques.length;
+        return (
+          <div key={i} style={{ breakInside: "avoid", pageBreakAfter: saltar ? "always" : "auto", marginBottom: 24 }}>
+            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
+              SESIÓN{s.sesion ? ` ${s.sesion}` : ""}
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+              <thead>
+                <tr style={{ background: "#f5f5f5" }}>
+                  {columns.map((c) => (
+                    <th key={c.clave} style={{ border: BORDER, padding: "5px 8px", textAlign: "left" }}>{label(c.labelKey, c.clave)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ height: 34 }}>
+                  {columns.map((c) => (
+                    <td key={c.clave} style={{ border: BORDER, padding: "6px 8px", verticalAlign: "top" }}>
+                      {c.clave === "fecha" ? (s.fecha ?? "") : ""}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+            {/* Dos cajas de notas VACÍAS (para escribir a mano) — legacy. */}
+            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+              {(notas.length ? notas : ["", ""]).map((_, ni) => (
+                <div key={ni} style={{ flex: 1, border: "1px solid #999", minHeight: 44 }} />
+              ))}
+            </div>
+            {firmas && (
+              <div className="region" style={{ marginTop: 12 }}>
+                <SeccionInner s={firmas} label={label} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
