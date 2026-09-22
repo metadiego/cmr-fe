@@ -112,9 +112,9 @@ function Horarios({ doctorId, centro }: { doctorId: string; centro?: string }) {
                   )}
                   {puedeConfig && nuevo?.dow === d && (
                     <div className="mt-1 flex items-center gap-1.5">
-                      <Input type="time" value={nuevo.inicio} onChange={(e) => setNuevo({ ...nuevo, inicio: e.target.value })} className="h-8 w-28" aria-label={t("start")} />
+                      <Input type="time" step={60} value={nuevo.inicio} onChange={(e) => setNuevo({ ...nuevo, inicio: e.target.value })} className="h-8 w-28" aria-label={t("start")} />
                       <span className="text-muted-foreground">–</span>
-                      <Input type="time" value={nuevo.fin} onChange={(e) => setNuevo({ ...nuevo, fin: e.target.value })} className="h-8 w-28" aria-label={t("end")} />
+                      <Input type="time" step={60} value={nuevo.fin} onChange={(e) => setNuevo({ ...nuevo, fin: e.target.value })} className="h-8 w-28" aria-label={t("end")} />
                       <Button type="button" size="sm" className="h-8" disabled={!nuevo.inicio || !nuevo.fin || busy} onClick={agregar}>{t("add")}</Button>
                       <Button type="button" size="sm" variant="ghost" className="h-8" onClick={() => setNuevo(null)}>{t("cancel")}</Button>
                     </div>

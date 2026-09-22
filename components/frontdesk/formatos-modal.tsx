@@ -286,8 +286,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
           <Campo label={t("nTerapias")}><span className="font-semibold tabular-nums">{nTerapias || "—"}</span></Campo>
           <Campo label={t("tecnico")}><span>{header.tecnico || "—"}</span></Campo>
           <Campo label={t("proximaCita")}><span>{header.proximaCita || "—"}</span></Campo>
-          <Campo label={t("horaEntrada")}><input type="time" className="border-b border-dashed bg-transparent outline-none" value={horaIn} onChange={(e) => setHoraIn(e.target.value)} /></Campo>
-          <Campo label={t("horaSalida")}><input type="time" className="border-b border-dashed bg-transparent outline-none" value={horaOut} onChange={(e) => setHoraOut(e.target.value)} /></Campo>
+          <Campo label={t("horaEntrada")}><input type="time" step={60} className="border-b border-dashed bg-transparent outline-none" value={horaIn} onChange={(e) => setHoraIn(e.target.value)} /></Campo>
+          <Campo label={t("horaSalida")}><input type="time" step={60} className="border-b border-dashed bg-transparent outline-none" value={horaOut} onChange={(e) => setHoraOut(e.target.value)} /></Campo>
           <Campo label={t("escalaDolor")}><input type="number" min={0} max={10} className="w-16 border-b border-dashed bg-transparent outline-none" value={dolor} onChange={(e) => setDolor(e.target.value)} /></Campo>
         </div>
 

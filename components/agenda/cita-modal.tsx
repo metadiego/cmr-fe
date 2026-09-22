@@ -249,10 +249,10 @@ export function CitaModal({
               <Input type="date" value={fecha} readOnly className="bg-muted/40" />
             </Field>
             <Field label={t("start")} required>
-              <Input type="time" value={hora} onChange={(e) => onHoraChange(e.target.value)} />
+              <Input type="time" step={60} value={hora} onChange={(e) => onHoraChange(e.target.value)} />
             </Field>
             <Field label={t("end")} required>
-              <Input type="time" value={horaFin} onChange={(e) => { setHoraFin(e.target.value); setWarn(null); }} />
+              <Input type="time" step={60} value={horaFin} onChange={(e) => { setHoraFin(e.target.value); setWarn(null); }} />
             </Field>
           </div>
 

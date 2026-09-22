@@ -181,7 +181,7 @@ function Field({
       ) : field === "fecha" ? (
         <Input type="date" value={value} onChange={(e) => onChange(e.target.value)} />
       ) : field === "hora" ? (
-        <Input type="time" value={value} onChange={(e) => onChange(e.target.value)} />
+        <Input type="time" step={60} value={value} onChange={(e) => onChange(e.target.value)} />
       ) : isEnfermera ? (
         <Select value={value || undefined} onValueChange={onChange}>
           <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>

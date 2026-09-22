@@ -215,7 +215,7 @@ export function CitaFormSheet({
               <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
             </FieldRow>
             <FieldRow label={t("time")}>
-              <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
+              <Input type="time" step={60} value={hora} onChange={(e) => setHora(e.target.value)} />
             </FieldRow>
           </div>
 

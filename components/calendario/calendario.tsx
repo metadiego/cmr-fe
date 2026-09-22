@@ -391,8 +391,8 @@ function EventoModal({
           <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={todoDia} onChange={(e) => setTodoDia(e.target.checked)} disabled={soloLectura} />{t("field.todoDia")}</label>
           {!todoDia && (
             <div className="grid grid-cols-2 gap-3">
-              <Campo label={t("field.hora")}><Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} disabled={soloLectura} /></Campo>
-              <Campo label={t("field.horaFin")}><Input type="time" value={horaFin} onChange={(e) => setHoraFin(e.target.value)} disabled={soloLectura} /></Campo>
+              <Campo label={t("field.hora")}><Input type="time" step={60} value={hora} onChange={(e) => setHora(e.target.value)} disabled={soloLectura} /></Campo>
+              <Campo label={t("field.horaFin")}><Input type="time" step={60} value={horaFin} onChange={(e) => setHoraFin(e.target.value)} disabled={soloLectura} /></Campo>
             </div>
           )}
           <Campo label={t("field.categoria")}>
