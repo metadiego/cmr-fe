@@ -33,3 +33,21 @@ Como `lastRun.ok` llega `undefined`, es falso → se pinta «Falló»; y `lastRu
 
 El BE no cambia: los nombres actuales son los que describen lo que pasó y los que ya consumen el MCP
 y los informes.
+
+## Los ficheros y las líneas exactas (verificado en `main`, 22-sep-2026 13:05)
+
+Tres sitios, ninguno tocado todavía:
+
+1. **`lib/api/scheduling-bridge.ts`** — el tipo `SyncRun`, líneas 36-40: `ok`, `created`, `updated`,
+   `cancelled`, `error`. Ninguno de esos nombres existe en la respuesta. Hay un segundo `ok` en la
+   línea 48. Cámbialos por `createdCount`, `updatedCount`, `cancelledCount`, `skippedCount`,
+   `errorCount`, `firstError`.
+2. **`components/configuracion/scheduling-bridge-status-cards.tsx`** — líneas 68-73. Es lo que pinta
+   «Falló» en rojo y deja los contadores vacíos, que es lo que el dueño está viendo en pantalla.
+3. **`components/configuracion/scheduling-bridge-runs-log.tsx`** — líneas 35, 38 y 40, el mismo
+   problema en la tabla de corridas.
+
+`ok` no viene del BE y no va a venir: se deriva con **`errorCount === 0`**.
+
+Comprobado contra producción a las 13:05: las últimas corridas de Bayamón y Caguas tienen
+`errorCount: 0`, `firstError: null` y `skippedCount: 151`. La pantalla dice «Falló» igualmente.
