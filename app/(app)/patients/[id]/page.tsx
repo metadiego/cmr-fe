@@ -25,6 +25,7 @@ import {
   type Paciente,
 } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
+import { readCallOrigin, clearCallOrigin } from "@/lib/scheduling/call-origin";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
@@ -60,18 +61,35 @@ export default function PacienteDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const [editOpen, setEditOpen] = React.useState(false);
+  // Set only when arriving here from the call-center bridge day view mid-call (see
+  // lib/scheduling/call-origin.ts) — single-use, so it does not linger past this visit.
+  const [callOrigin] = React.useState<string | null>(() => readCallOrigin());
 
   const { state, reload } = useResource<Paciente>(() => getPaciente(id), [id]);
 
   return (
     <PageContainer>
-      <button
-        onClick={() => router.push("/patients")}
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-        {t("title")}
-      </button>
+      <div className="mb-6 flex flex-wrap items-center gap-4">
+        <button
+          onClick={() => router.push("/patients")}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+          {t("title")}
+        </button>
+        {callOrigin && (
+          <button
+            onClick={() => {
+              clearCallOrigin();
+              router.push(callOrigin);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
+          >
+            <HugeiconsIcon icon={Call02Icon} className="size-4" />
+            {t("backToCall")}
+          </button>
+        )}
+      </div>
 
       {state.kind === "loading" && <DetailSkeleton />}
 

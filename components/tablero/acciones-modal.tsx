@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import { facturarCita } from "@/lib/api/facturas";
 import { toastError } from "@/lib/api/errors";
+import { saveCallOrigin } from "@/lib/scheduling/call-origin";
 import {
   Dialog,
   DialogContent,
@@ -52,10 +53,14 @@ export function AccionesModal({
   actions,
   fila,
   centroId,
+  saveOrigin,
 }: {
   actions: AccionItem[];
   fila: CitaFila;
   centroId?: string;
+  /** True on the call-center bridge day view: remembers this URL so the ficha can jump straight
+   * back to the call mid-visit, instead of the agent hunting for the date/center again. */
+  saveOrigin?: boolean;
 }) {
   const t = useTranslations("tableroBoard");
   const tRoot = useTranslations();
@@ -107,7 +112,15 @@ export function AccionesModal({
             const cls = "flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50";
             if (a.kind === "link" && a.href) {
               return (
-                <Link key={a.key} href={resolve(a.href, fila)} onClick={() => setOpen(false)} className={cls}>
+                <Link
+                  key={a.key}
+                  href={resolve(a.href, fila)}
+                  onClick={() => {
+                    if (saveOrigin) saveCallOrigin(window.location.pathname + window.location.search);
+                    setOpen(false);
+                  }}
+                  className={cls}
+                >
                   {iconFor(a.icon)}
                   {tRoot(a.labelKey)}
                 </Link>
