@@ -51,10 +51,22 @@ async function fetchAllStaff(centroId?: string): Promise<Personal[]> {
   return out;
 }
 
+// Roster GLOBAL: los mapeos del puente son únicos para todos los centros (una sola oficina de citas), así
+// que la persona mapeada puede ser de cualquier centro. Se junta el personal de TODOS los centros visibles
+// (más el del propio de la sesión, con centroId undefined) y se deduplica por id. `allSettled` para que un
+// centro que responda 403 no tumbe el roster entero. Handoff personal-el-centro-se-enciende-y-el-callcenter-es-uno.
+async function fetchRoster(centerIds: string[]): Promise<Personal[]> {
+  const grupos = await Promise.allSettled([fetchAllStaff(undefined), ...centerIds.map((id) => fetchAllStaff(id))]);
+  const byId = new Map<string, Personal>();
+  for (const g of grupos) if (g.status === "fulfilled") for (const p of g.value) byId.set(p.id, p);
+  return [...byId.values()].sort((a, b) => staffName(a).localeCompare(staffName(b)));
+}
+
 // Fetched ONCE per table (not per row) and shared by the column display + the
 // add/edit dialog's picker, to avoid an N+1 fetch across mapping rows.
-function useStaffRoster(centroId?: string) {
-  const { state } = useResource(() => fetchAllStaff(centroId), [centroId]);
+function useStaffRoster(centerIds: string[]) {
+  const key = centerIds.join(",");
+  const { state } = useResource(() => fetchRoster(centerIds), [key]);
   const staff = state.kind === "ok" ? state.data : NO_STAFF;
   const byId = React.useMemo(() => new Map(staff.map((p) => [p.id, p])), [staff]);
   return { staff, byId };
@@ -67,23 +79,24 @@ function looksUnedited(row: { createdAt: string; updatedAt: string }): boolean {
   return row.createdAt === row.updatedAt;
 }
 
-export function DoctorMappingsTable({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {
+// Los mapeos son GLOBALES (una sola oficina de citas para todos los centros): sin selector de centro y sin
+// centroId en las llamadas. `centerIds` es solo para armar el roster de personal de todos los centros.
+export function DoctorMappingsTable({ centerIds, puedeEscribir }: { centerIds: string[]; puedeEscribir: boolean }) {
   const t = useTranslations("schedulingBridge.doctorMappings");
-  const { staff, byId } = useStaffRoster(centroId);
+  const { staff, byId } = useStaffRoster(centerIds);
 
   return (
     <MetaCrud<DoctorMapping>
       title={t("title")}
       addLabel={t("add")}
-      load={() => listDoctorMappings(centroId)}
-      deps={[centroId]}
+      load={() => listDoctorMappings()}
       getRowKey={(r) => r.id}
       initialDraft={{ externalName: "", staffId: "" }}
       toDraft={(r) => ({ externalName: r.externalName, staffId: r.staffId })}
       canSubmit={(d) => !!(d.externalName as string)?.trim() && !!d.staffId}
-      create={(d) => createDoctorMapping({ externalName: (d.externalName as string).trim(), staffId: d.staffId as string }, centroId)}
-      update={(id, d) => updateDoctorMapping(id, { externalName: (d.externalName as string).trim(), staffId: d.staffId as string }, centroId)}
-      remove={puedeEscribir ? (id) => deleteDoctorMapping(id, centroId) : undefined}
+      create={(d) => createDoctorMapping({ externalName: (d.externalName as string).trim(), staffId: d.staffId as string })}
+      update={(id, d) => updateDoctorMapping(id, { externalName: (d.externalName as string).trim(), staffId: d.staffId as string })}
+      remove={puedeEscribir ? (id) => deleteDoctorMapping(id) : undefined}
       readOnly={!puedeEscribir}
       columns={[
         { key: "externalName", header: t("externalName"), cell: (r) => <span className="font-mono text-sm">{r.externalName}</span> },
@@ -110,23 +123,22 @@ export function DoctorMappingsTable({ centroId, puedeEscribir }: { centroId?: st
   );
 }
 
-export function AgentMappingsTable({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {
+export function AgentMappingsTable({ centerIds, puedeEscribir }: { centerIds: string[]; puedeEscribir: boolean }) {
   const t = useTranslations("schedulingBridge.agentMappings");
-  const { staff, byId } = useStaffRoster(centroId);
+  const { staff, byId } = useStaffRoster(centerIds);
 
   return (
     <MetaCrud<AgentMapping>
       title={t("title")}
       addLabel={t("add")}
-      load={() => listAgentMappings(centroId)}
-      deps={[centroId]}
+      load={() => listAgentMappings()}
       getRowKey={(r) => r.id}
       initialDraft={{ externalCode: "", staffId: "" }}
       toDraft={(r) => ({ externalCode: r.externalCode, staffId: r.staffId })}
       canSubmit={(d) => !!(d.externalCode as string)?.trim() && !!d.staffId}
-      create={(d) => createAgentMapping({ externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string }, centroId)}
-      update={(id, d) => updateAgentMapping(id, { externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string }, centroId)}
-      remove={puedeEscribir ? (id) => deleteAgentMapping(id, centroId) : undefined}
+      create={(d) => createAgentMapping({ externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string })}
+      update={(id, d) => updateAgentMapping(id, { externalCode: (d.externalCode as string).trim().toUpperCase(), staffId: d.staffId as string })}
+      remove={puedeEscribir ? (id) => deleteAgentMapping(id) : undefined}
       readOnly={!puedeEscribir}
       columns={[
         {

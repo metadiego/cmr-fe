@@ -38,15 +38,20 @@ export default function SchedulingBridgePage() {
               puedeRun={can("scheduling-bridge.run")}
             />
 
+            {/* Mapeos GLOBALES: una sola oficina de citas para todos los centros → una sola lista, sin
+                selector de centro. `centerIds` es solo para el roster de personal de todos los centros.
+                Handoff personal-el-centro-se-enciende-y-el-callcenter-es-uno §2. */}
+            <DoctorMappingsTable centerIds={estado.centros.map((c) => c.id)} puedeEscribir={estado.puedeEscribir} />
+            <AgentMappingsTable centerIds={estado.centros.map((c) => c.id)} puedeEscribir={estado.puedeEscribir} />
+
             {estado.centroActivo && (
+              // La CONFIGURACIÓN del puente y su registro SÍ son por centro (cada cuánto sincroniza, horario).
               // fetchCentroId, NOT centroActivo: undefined for the SESSION's own center (the BE
               // resolves it from the token) — forcing X-Tenant-ID even on your own center risks a
               // spurious 403 for a master user with no activeClinicId. Only set for a DIFFERENT,
               // explicitly-picked center. See hooks/use-centro-pantalla.ts.
               <>
                 <SchedulingBridgeConfigForm centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
-                <DoctorMappingsTable centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
-                <AgentMappingsTable centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
                 <SchedulingBridgeRunsLog centroId={estado.fetchCentroId} />
               </>
             )}
