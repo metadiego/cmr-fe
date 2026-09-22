@@ -24,6 +24,7 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
 import { FranjaTipoSection, CeldaCita } from "@/components/agenda/franja-tipo-section";
+import { tinteFila } from "@/lib/agenda/tinte-tipo";
 import { Chip, Kpi } from "@/components/agenda/dia-kpi";
 import {
   Select,
@@ -386,7 +387,9 @@ function CentroSheetV2({
 
   // Aplanar TODAS las citas (con o sin hora) a una sola lista.
   const items = franjas.flatMap((f) =>
-    f.tipos.flatMap((tp) => tp.appointments.map((fila) => ({ fila, hora: f.time, tipoCitaId: tp.appointmentTypeId }))),
+    f.tipos.flatMap((tp) =>
+      tp.appointments.map((fila) => ({ fila, hora: f.time, tipoCitaId: tp.appointmentTypeId, tipoColor: tp.tipoColor })),
+    ),
   );
   const hayNoHora = items.some((i) => i.hora === null);
   const filtered = items.filter((i) =>
@@ -507,8 +510,9 @@ function CentroSheetV2({
                 <td colSpan={cols.length} className="px-3 py-6 text-center text-muted-foreground">{t("dia.sinCitas")}</td>
               </tr>
             ) : (
-              filtered.map(({ fila }) => (
-                <tr key={fila.id} className="border-t">
+              filtered.map(({ fila, tipoColor }) => (
+                // Misma regla de tinte que la vista clásica: la fila se tiñe por el color del tipo.
+                <tr key={fila.id} className="border-t" style={{ backgroundColor: tinteFila(tipoColor) }}>
                   {cols.map((col) => (
                     <CeldaCita
                       key={col.clave}
