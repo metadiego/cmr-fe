@@ -314,7 +314,7 @@ function SemanaGrid({
       </div>
       <p className="text-xs text-muted-foreground">{t("cupos.serviceHint")}</p>
       <div className="flex flex-wrap items-center gap-2">
-        <Input type="time" className="h-9 w-32" value={newHora} onChange={(e) => setNewHora(e.target.value)} />
+        <Input type="time" step={60} className="h-9 w-32" value={newHora} onChange={(e) => setNewHora(e.target.value)} />
         <Button type="button" variant="outline" size="sm" onClick={addRow} disabled={!newHora}>
           <HugeiconsIcon icon={Add01Icon} className="size-4" />
           {t("cupos.addHour")}

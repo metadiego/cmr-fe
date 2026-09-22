@@ -123,10 +123,10 @@ export function SchedulingBridgeConfigForm({
           </Select>
         </Field>
         <Field label={t("workStart")}>
-          <Input type="time" value={draft.workStartTime} onChange={(e) => patch({ workStartTime: e.target.value })} disabled={!puedeEscribir} />
+          <Input type="time" step={60} value={draft.workStartTime} onChange={(e) => patch({ workStartTime: e.target.value })} disabled={!puedeEscribir} />
         </Field>
         <Field label={t("workEnd")}>
-          <Input type="time" value={draft.workEndTime} onChange={(e) => patch({ workEndTime: e.target.value })} disabled={!puedeEscribir} />
+          <Input type="time" step={60} value={draft.workEndTime} onChange={(e) => patch({ workEndTime: e.target.value })} disabled={!puedeEscribir} />
         </Field>
       </div>
 

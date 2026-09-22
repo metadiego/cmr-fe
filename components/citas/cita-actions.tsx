@@ -367,7 +367,7 @@ function RescheduleDialog({
             </div>
             <div className="space-y-1.5">
               <Label>{t("time")}</Label>
-              <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
+              <Input type="time" step={60} value={hora} onChange={(e) => setHora(e.target.value)} />
             </div>
           </div>
 
