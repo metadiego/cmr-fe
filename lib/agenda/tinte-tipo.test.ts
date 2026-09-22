@@ -1,7 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { tinteFila } from "./tinte-tipo.ts";
+import { tinteFila, esTipoNueva } from "./tinte-tipo.ts";
+
+test("esTipoNueva: por clave o por nombre; el resto no", () => {
+  assert.equal(esTipoNueva("nueva", null), true);
+  assert.equal(esTipoNueva(null, "Consulta (Nueva)"), true);
+  assert.equal(esTipoNueva("seguimiento", "Seguimiento"), false);
+  assert.equal(esTipoNueva("control", "Control"), false);
+  assert.equal(esTipoNueva(null, null), false);
+});
 
 test("null / vacío / inválido → sin tinte", () => {
   assert.equal(tinteFila(null), undefined);

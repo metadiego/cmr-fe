@@ -9,7 +9,7 @@ import type { ColumnaEfectiva, TipoFranja, CitaFila } from "@/lib/api/agenda-dia
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import type { Transicion } from "@/lib/api/tablero";
 import { AhoraBadge } from "@/components/agenda/franja-resaltada";
-import { tinteFila } from "@/lib/agenda/tinte-tipo";
+import { tinteFila, esTipoNueva } from "@/lib/agenda/tinte-tipo";
 import { cn } from "@/lib/utils";
 import { Can } from "@/components/kit/can";
 import { EstadoSelect } from "@/components/tablero/estado-select";
@@ -118,6 +118,8 @@ export function FranjaTipoSection({
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>
+              {/* Ordinal 1/x (x = cupo de la hora): columna estrecha al inicio. */}
+              <th className="w-10 px-2 py-1.5 text-left font-medium" aria-hidden />
               {cols.map((col) => (
                 <th key={col.clave} className="px-3 py-1.5 text-left font-medium whitespace-nowrap">
                   {tRoot(col.labelKey)}
@@ -126,10 +128,16 @@ export function FranjaTipoSection({
             </tr>
           </thead>
           <tbody>
-            {tipo.appointments.map((fila) => (
-              // Fila teñida por el color del tipo (del catálogo, vía BE `tipoColor`): distinguir de un
-              // vistazo. Claro tal cual, saturado a capa suave. Handoff agenda-dia-el-color-del-tipo-tine-la-fila.
-              <tr key={fila.id} className="border-t" style={{ backgroundColor: tinteFila(tipo.tipoColor) }}>
+            {tipo.appointments.map((fila, i) => (
+              // Solo las citas de PACIENTE NUEVO se tiñen (las que más importan); el resto queda en blanco.
+              // Handoff agenda-dia-el-color-del-tipo-tine-la-fila + ajuste del dueño (solo nuevas + ordinal).
+              <tr
+                key={fila.id}
+                className="border-t"
+                style={{ backgroundColor: esTipoNueva(tipo.tipoClave, tipo.tipoNombre) ? tinteFila(tipo.tipoColor) : undefined }}
+              >
+                {/* Posición dentro de la hora, sobre el total de cupos. */}
+                <td className="px-2 py-1.5 text-[10px] tabular-nums text-muted-foreground">{i + 1}/{tipo.cupo}</td>
                 {cols.map((col) => (
                   <CeldaCita
                     key={col.clave}
@@ -146,7 +154,7 @@ export function FranjaTipoSection({
             ))}
             {tipo.vacios > 0 && (
               <tr className="border-t bg-muted/10">
-                <td colSpan={cols.length} className="px-3 py-1.5">
+                <td colSpan={cols.length + 1} className="px-3 py-1.5">
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-muted-foreground">{t("dia.freeSlots", { n: tipo.vacios })}</span>
                     <Can permiso="citas.create">

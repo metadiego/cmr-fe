@@ -24,7 +24,7 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
 import { FranjaTipoSection, CeldaCita } from "@/components/agenda/franja-tipo-section";
-import { tinteFila } from "@/lib/agenda/tinte-tipo";
+import { tinteFila, esTipoNueva } from "@/lib/agenda/tinte-tipo";
 import { Chip, Kpi } from "@/components/agenda/dia-kpi";
 import {
   Select,
@@ -388,7 +388,15 @@ function CentroSheetV2({
   // Aplanar TODAS las citas (con o sin hora) a una sola lista.
   const items = franjas.flatMap((f) =>
     f.tipos.flatMap((tp) =>
-      tp.appointments.map((fila) => ({ fila, hora: f.time, tipoCitaId: tp.appointmentTypeId, tipoColor: tp.tipoColor })),
+      tp.appointments.map((fila, idx) => ({
+        fila,
+        hora: f.time,
+        tipoCitaId: tp.appointmentTypeId,
+        tipoColor: tp.tipoColor,
+        tipoClave: tp.tipoClave,
+        tipoNombre: tp.tipoNombre,
+        ordinal: `${idx + 1}/${tp.cupo}`, // posición en la hora sobre el cupo
+      })),
     ),
   );
   const hayNoHora = items.some((i) => i.hora === null);
@@ -497,6 +505,8 @@ function CentroSheetV2({
         <table className="w-full text-sm">
           <thead className="bg-muted/40 text-xs text-muted-foreground">
             <tr>
+              {/* Ordinal 1/x (x = cupo de la hora). */}
+              <th className="w-10 px-2 py-1.5 text-left font-medium" aria-hidden />
               {cols.map((col) => (
                 <th key={col.clave} className="px-3 py-1.5 text-left font-medium whitespace-nowrap">
                   {tRoot(col.labelKey)}
@@ -507,12 +517,17 @@ function CentroSheetV2({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={cols.length} className="px-3 py-6 text-center text-muted-foreground">{t("dia.sinCitas")}</td>
+                <td colSpan={cols.length + 1} className="px-3 py-6 text-center text-muted-foreground">{t("dia.sinCitas")}</td>
               </tr>
             ) : (
-              filtered.map(({ fila, tipoColor }) => (
-                // Misma regla de tinte que la vista clásica: la fila se tiñe por el color del tipo.
-                <tr key={fila.id} className="border-t" style={{ backgroundColor: tinteFila(tipoColor) }}>
+              filtered.map(({ fila, tipoColor, tipoClave, tipoNombre, ordinal }) => (
+                // Solo las citas de PACIENTE NUEVO se tiñen (las que más importan). Ajuste del dueño.
+                <tr
+                  key={fila.id}
+                  className="border-t"
+                  style={{ backgroundColor: esTipoNueva(tipoClave, tipoNombre) ? tinteFila(tipoColor) : undefined }}
+                >
+                  <td className="px-2 py-1.5 text-[10px] tabular-nums text-muted-foreground">{ordinal}</td>
                   {cols.map((col) => (
                     <CeldaCita
                       key={col.clave}

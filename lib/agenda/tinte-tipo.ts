@@ -20,6 +20,12 @@ function parseHex(hex: string): [number, number, number] | null {
   return null;
 }
 
+// ¿Es un tipo de PACIENTE NUEVO? Solo esas filas se tiñen (decisión del dueño: son las que más importan).
+// Robusto ante la forma del catálogo: por clave (`nueva`) o por el nombre («Consulta (Nueva)»).
+export function esTipoNueva(clave?: string | null, nombre?: string | null): boolean {
+  return clave === "nueva" || /nueva/i.test(nombre ?? "");
+}
+
 // Color de fondo para la fila, o undefined si no hay tinte. Un color ya claro (luminancia alta) se usa
 // tal cual; uno saturado/oscuro se baja a una capa suave (rgba ~12 %) para no gritar.
 export function tinteFila(hex?: string | null): string | undefined {
