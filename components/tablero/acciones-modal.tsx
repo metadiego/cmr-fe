@@ -10,6 +10,7 @@ import type { CitaFila } from "@/lib/api/agenda-dia";
 import { facturarCita } from "@/lib/api/facturas";
 import { toastError } from "@/lib/api/errors";
 import { saveCallOrigin } from "@/lib/scheduling/call-origin";
+import { useCan } from "@/hooks/use-can";
 import {
   Dialog,
   DialogContent,
@@ -65,8 +66,15 @@ export function AccionesModal({
   const t = useTranslations("tableroBoard");
   const tRoot = useTranslations();
   const router = useRouter();
+  const { can } = useCan();
   const [open, setOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+
+  // "facturar" is billing, not just a soft-disabled kind: hide it outright for anyone without
+  // factura.create (e.g. call-center operators — cc_operator carries no factura.* permission at
+  // all), rather than showing a button that leads to a 403. The backend endpoint itself has no
+  // guard yet (flagged to BE); this is defense at the one layer FE controls.
+  const visibleActions = actions.filter((a) => a.kind !== "facturar" || can("factura.create"));
 
   // "Facturar Consulta": crea/obtiene el borrador de la cita (idempotente) y abre
   // la pantalla de facturación. POST /facturas/cita/:citaId (data-driven kind).
@@ -105,10 +113,10 @@ export function AccionesModal({
           <DialogTitle>{t("actionsTitle")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">
-          {actions.length === 0 && (
+          {visibleActions.length === 0 && (
             <p className="px-1 py-3 text-sm text-muted-foreground">{t("noActions")}</p>
           )}
-          {actions.map((a) => {
+          {visibleActions.map((a) => {
             const cls = "flex items-center gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] px-4 py-3 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50";
             if (a.kind === "link" && a.href) {
               return (
