@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import type { FormatoColumna, FormatoSeccion, FormatoSesion } from "@/lib/api/formatos";
+import type { FormatoColumna, FormatoFirmaLinea, FormatoSeccion, FormatoSesion } from "@/lib/api/formatos";
 
 // Render data-driven de las secciones de un formato, para salir IDÉNTICO al legacy (modelos médicos):
 // parrafo, campos intermedios, tabla_firmas (con bordes), checklist, tabla_tematica, leyenda, además de
@@ -20,6 +20,17 @@ export type LabelFn = (key?: string | null, fallback?: string) => string;
 // Título de sección (negrita, mayúsculas). Las secciones sin título propio (parrafo/leyenda) no lo pintan.
 function Titulo({ children }: { children: React.ReactNode }) {
   return <div className="mb-1 text-sm font-bold uppercase">{children}</div>;
+}
+
+// Texto de una línea de firma: el BE la manda como objeto { label, labelKey } (o, por compat, como string).
+// Se PREFIERE `label`; si no, se traduce el labelKey. NUNCA se le pasa un objeto a `label()` (evita el crash).
+function lineaText(linea: FormatoFirmaLinea, label: LabelFn): string {
+  if (typeof linea === "string") return label(linea);
+  return linea.label ?? label(linea.labelKey);
+}
+// Etiqueta de columna: se prefiere el `label` ya listo del BE; si no, se traduce el labelKey (o cae a la clave).
+function colLabel(col: FormatoColumna, label: LabelFn): string {
+  return col.label ?? label(col.labelKey, col.clave);
 }
 
 // Casilla vacía para marcar a mano (☐). Compartida por checklist y las órdenes Rx (casillasEnFilas).
@@ -68,7 +79,7 @@ export function SeccionInner({
           <div style={{ display: "flex", gap: 24, marginTop: 48 }}>
             {(s.lineas ?? []).map((linea, i) => (
               <div key={i} style={{ flex: 1, textAlign: "center" }}>
-                <div style={{ borderTop: BORDER, paddingTop: 4, fontSize: 10 }}>{label(linea)}</div>
+                <div style={{ borderTop: BORDER, paddingTop: 4, fontSize: 10 }}>{lineaText(linea, label)}</div>
               </div>
             ))}
           </div>
@@ -85,7 +96,7 @@ export function SeccionInner({
         <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px", fontSize: 12 }}>
           {s.campos.map((c) => (
             <div key={c.clave} style={{ display: "flex", gap: 6 }}>
-              <span style={{ fontWeight: 700 }}>{label(c.labelKey)}:</span>
+              <span style={{ fontWeight: 700 }}>{c.label ?? `${label(c.labelKey)}:`}</span>
               <span style={{ borderBottom: BORDER, minWidth: 120, display: "inline-block" }}>{c.valor ?? ""}</span>
             </div>
           ))}
@@ -181,7 +192,7 @@ export function SeccionInner({
                   {/* Columna de casilla (órdenes Rx): cabecera vacía, solo en la última fila de cabecera. */}
                   {casillasEnFilas && <th style={{ border: BORDER, padding: "6px 8px", width: 24 }} />}
                   {row.map((col, ci) => (
-                    <th key={ci} style={{ border: BORDER, padding: "6px 8px", textAlign: "left" }}>{label(col.labelKey, col.clave)}</th>
+                    <th key={ci} style={{ border: BORDER, padding: "6px 8px", textAlign: "left" }}>{colLabel(col, label)}</th>
                   ))}
                 </tr>
               ))}
@@ -256,7 +267,7 @@ export function SesionesFormato({
               <thead>
                 <tr style={{ background: "#f5f5f5" }}>
                   {columns.map((c) => (
-                    <th key={c.clave} style={{ border: BORDER, padding: "5px 8px", textAlign: "left" }}>{label(c.labelKey, c.clave)}</th>
+                    <th key={c.clave} style={{ border: BORDER, padding: "5px 8px", textAlign: "left" }}>{colLabel(c, label)}</th>
                   ))}
                 </tr>
               </thead>

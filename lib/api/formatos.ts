@@ -6,7 +6,11 @@ import { apiFetch } from "./client";
 // propia (/laser/formato/:tipo). Contrato: HANDOFF-formatos-terapia (BE PR #192).
 
 // FormatoColumna viaja SIEMPRE dentro de `columnas` (bolsa OPACA) → sus claves NO se traducen: quedan en español.
-export type FormatoColumna = { clave: string; labelKey?: string | null };
+// El BE incluye `label` (texto ya listo) además de labelKey; se PREFIERE `label` al pintar.
+export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null };
+// Etiqueta de firma: el BE la manda como OBJETO { label, labelKey } (no string). Se acepta también string
+// por compatibilidad. Se PREFIERE `label`. (Verificado en vivo: apex_rf firmas.lineas son objetos.)
+export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null };
 export type FormatoFila = Record<string, string>; // dentro de `filas` (opaca): sus claves son claves de columna (datos)
 
 // Definición de un formato (lista/admin).
@@ -25,7 +29,8 @@ export type Formato = {
 };
 
 // Par etiqueta/valor del encabezado (layout "campos"). Viaja dentro de `campos` (bolsa OPACA) → claves en español.
-export type FormatoCampo = { clave: string; labelKey?: string | null; valor?: string | null; origen?: string };
+// El BE incluye `label` (texto ya listo) además de labelKey; se PREFIERE `label` al pintar.
+export type FormatoCampo = { clave: string; label?: string | null; labelKey?: string | null; valor?: string | null; origen?: string };
 // Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español). El `tipo` discrimina.
 // Ampliado para salir IDÉNTICO al legacy (modelos médicos): además de texto_libre/firmas, se añaden
 // parrafo, campos intermedios, tabla_firmas (con bordes), checklist, tabla_tematica y leyenda. Formas
@@ -33,8 +38,8 @@ export type FormatoCampo = { clave: string; labelKey?: string | null; valor?: st
 export type FormatoSeccion =
   // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
   | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
-  // Firmas simples: línea horizontal + label debajo.
-  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: string[] }
+  // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
+  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[] }
   // Párrafo estático (p. ej. el texto legal de una constancia).
   | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string }
   // Campos intermedios (label/valor) entre el título y la tabla (PEMF/Cámara, Área, Número de serie…).

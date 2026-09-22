@@ -457,9 +457,11 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const seccionesVisibles = esSesiones ? secciones.filter((s) => s.tipo !== "firmas") : secciones;
   // Etiqueta por labelKey: traducción si existe; si no, el ÚLTIMO segmento en MAYÚSCULAS (nunca la clave
   // cruda en el papel). Handoff §"Claves i18n": el FE solo traduce; si falta, cae al segmento.
+  // Defensivo: `key` debe ser string. El BE a veces manda etiquetas como OBJETO (p. ej. firmas.lineas =
+  // { label, labelKey }); si llegara algo que no es string, NO se rompe la pantalla — se cae al fallback.
   const label = (key?: string | null, fallback?: string) => {
-    if (key && t.has(key)) return t(key);
-    const seg = (key ?? "").split(".").pop() ?? "";
+    if (typeof key === "string" && key && t.has(key)) return t(key);
+    const seg = (typeof key === "string" ? key : "").split(".").pop() ?? "";
     return (fallback ?? seg.replace(/_/g, " ")).toUpperCase();
   };
   return (
@@ -502,7 +504,8 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
             <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
               {campos.map((c) => (
                 <div key={c.clave} className="campo flex gap-2">
-                  <span className="font-bold">{label(c.labelKey)} :</span>
+                  {/* Se PREFIERE el `label` que manda el BE (ya con dos puntos); si no, se traduce el labelKey. */}
+                  <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>
                   <span>{c.valor ?? ""}</span>
                 </div>
               ))}
@@ -521,7 +524,7 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
               <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
                 <thead>
                   <tr className="bg-neutral-100 text-left">
-                    {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{label(c.labelKey, c.clave)}</th>)}
+                    {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{c.label ?? label(c.labelKey, c.clave)}</th>)}
                   </tr>
                 </thead>
                 <tbody>
@@ -541,11 +544,11 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
           {/* Secciones (observaciones / firmas / párrafo / tabla de firmas / checklist / tabla temática /
               leyenda), en cualquier layout. El render de cada tipo vive en formato-secciones.tsx (data-driven,
               idéntico al legacy). Solo OBSERVACIONES (texto_libre caja) crece para llenar la hoja. */}
-          {seccionesVisibles.map((s) => {
+          {seccionesVisibles.map((s, i) => {
             const crece = s.tipo === "texto_libre" && s.estilo !== "lineas";
             return (
               <div
-                key={s.clave}
+                key={s.clave ?? `sec-${i}`}
                 className={"region mt-6" + (crece ? " formato-grow" : "")}
                 style={crece ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
               >
