@@ -9,6 +9,7 @@ import type { ColumnaEfectiva, TipoFranja, CitaFila } from "@/lib/api/agenda-dia
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import type { Transicion } from "@/lib/api/tablero";
 import { AhoraBadge } from "@/components/agenda/franja-resaltada";
+import { tinteFila } from "@/lib/agenda/tinte-tipo";
 import { cn } from "@/lib/utils";
 import { Can } from "@/components/kit/can";
 import { EstadoSelect } from "@/components/tablero/estado-select";
@@ -126,7 +127,9 @@ export function FranjaTipoSection({
           </thead>
           <tbody>
             {tipo.appointments.map((fila) => (
-              <tr key={fila.id} className="border-t">
+              // Fila teñida por el color del tipo (del catálogo, vía BE `tipoColor`): distinguir de un
+              // vistazo. Claro tal cual, saturado a capa suave. Handoff agenda-dia-el-color-del-tipo-tine-la-fila.
+              <tr key={fila.id} className="border-t" style={{ backgroundColor: tinteFila(tipo.tipoColor) }}>
                 {cols.map((col) => (
                   <CeldaCita
                     key={col.clave}

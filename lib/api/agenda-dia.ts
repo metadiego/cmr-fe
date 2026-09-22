@@ -46,6 +46,7 @@ export interface TipoFranja {
   appointmentTypeId: string;
   tipoClave: string; // NO está en el mapa → español
   tipoNombre: string; // NO está en el mapa → español
+  tipoColor?: string | null; // NO está en el mapa → español; hex del catálogo de tipos (tiñe la fila)
   cupo: number; // NO está en el mapa → español
   vacios: number; // NO está en el mapa → español (empty slots → "Agendar" buttons)
   // El BE traduce esta clave: en la respuesta llega como `appointments` (campos.ts).
