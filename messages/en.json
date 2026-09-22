@@ -473,6 +473,7 @@
   },
   "patients": {
     "title": "Patients",
+    "backToCall": "Back to the call",
     "searchPlaceholder": "Search by name or ID…",
     "active": "Active",
     "inactive": "Inactive",

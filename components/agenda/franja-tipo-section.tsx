@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
-import type { ColumnaEfectiva, TipoFranja } from "@/lib/api/agenda-dia";
+import type { ColumnaEfectiva, TipoFranja, CitaFila } from "@/lib/api/agenda-dia";
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import type { Transicion } from "@/lib/api/tablero";
 import { AhoraBadge } from "@/components/agenda/franja-resaltada";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { Can } from "@/components/kit/can";
 import { EstadoSelect } from "@/components/tablero/estado-select";
 import { CeldaEditable } from "@/components/tablero/celda-editable";
+import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { Cell } from "@/components/agenda/tablero-dinamico";
 
 // A cita's cell: the SAME logic the classic and the new view both use (no duplication). Estado =
@@ -27,7 +28,7 @@ export function CeldaCita({
   onChanged,
 }: {
   col: ColumnaEfectiva;
-  fila: { id: string; estado?: string } & Record<string, unknown>;
+  fila: CitaFila;
   clinicId: string;
   estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
@@ -58,7 +59,16 @@ export function CeldaCita({
           etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
           onChanged={onChanged}
         />
-      ) : col.tipo === "accion" ? null : (
+      ) : col.tipo === "accion" ? (
+        // This view is only ever the call-center bridge day agenda — always remember the call
+        // origin so a ficha opened from here can jump straight back.
+        <AccionesModal
+          actions={((col.render as Record<string, unknown> | null)?.actions as AccionItem[] | undefined) ?? []}
+          fila={fila}
+          centroId={clinicId}
+          saveOrigin
+        />
+      ) : (
         <Cell col={col} value={fila[col.clave]} />
       )}
     </td>
