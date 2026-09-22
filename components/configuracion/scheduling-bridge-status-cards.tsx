@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations, useFormatter } from "next-intl";
 import { toast } from "sonner";
 
-import { getStatus, runNow, type ClinicStatus } from "@/lib/api/scheduling-bridge";
+import { getStatus, runNow, runOk, type ClinicStatus } from "@/lib/api/scheduling-bridge";
 import { useResource } from "@/hooks/use-resource";
 import { toastError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
@@ -65,12 +65,12 @@ export function SchedulingBridgeStatusCards({
               {c.lastRun ? (
                 <>
                   {format.dateTime(new Date(c.lastRun.startedAt), "dateAndTime")} ·{" "}
-                  <span className={c.lastRun.ok ? "text-success" : "text-destructive"}>
-                    {c.lastRun.ok ? t("ok") : t("failed")}
+                  <span className={runOk(c.lastRun) ? "text-success" : "text-destructive"}>
+                    {runOk(c.lastRun) ? t("ok") : t("failed")}
                   </span>
                   {" · "}
-                  {t("created", { n: c.lastRun.created })} · {t("updated", { n: c.lastRun.updated })} ·{" "}
-                  {t("cancelled", { n: c.lastRun.cancelled })}
+                  {t("created", { n: c.lastRun.createdCount })} · {t("updated", { n: c.lastRun.updatedCount })} ·{" "}
+                  {t("cancelled", { n: c.lastRun.cancelledCount })}
                 </>
               ) : (
                 t("never")

@@ -3895,6 +3895,7 @@
       "created": "Created",
       "updated": "Updated",
       "cancelled": "Cancelled",
+      "skipped": "Skipped",
       "error": "Error",
       "empty": "No runs yet."
     }

@@ -28,16 +28,25 @@ export function getStatus(centerIds: string[]): Promise<StatusResponse> {
   return apiFetch<StatusResponse>(`/scheduling-bridge/status${qs ? `?${qs}` : ""}`);
 }
 
+// Forma REAL del BE (verificada en vivo 2026-09-22): los contadores son `*Count` y el error es
+// `firstError`; NO hay `ok` (se deriva de errorCount === 0). La pantalla leía `ok/created/updated/
+// cancelled/error` —campos que ya no existen— y por eso pintaba «Falló» y sin números.
 export interface SyncRun {
   id: string;
   clinicId: string;
   startedAt: string;
   finishedAt: string | null;
-  ok: boolean;
-  created: number;
-  updated: number;
-  cancelled: number;
-  error: string | null;
+  createdCount: number;
+  updatedCount: number;
+  cancelledCount: number;
+  skippedCount: number;
+  errorCount: number;
+  firstError: string | null;
+}
+
+// Una corrida salió bien si terminó y no acumuló errores. Único lugar donde se decide «ok».
+export function runOk(r: SyncRun): boolean {
+  return !!r.finishedAt && r.errorCount === 0;
 }
 
 export function listRuns(centroId?: string): Promise<SyncRun[]> {

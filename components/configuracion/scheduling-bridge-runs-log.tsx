@@ -5,7 +5,7 @@ import { useTranslations, useFormatter } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
-import { listRuns, type SyncRun } from "@/lib/api/scheduling-bridge";
+import { listRuns, runOk, type SyncRun } from "@/lib/api/scheduling-bridge";
 import { useResource } from "@/hooks/use-resource";
 import { DataTable, type Column } from "@/components/kit/data-table";
 import {
@@ -31,14 +31,16 @@ export function SchedulingBridgeRunsLog({ centroId }: { centroId?: string }) {
     {
       key: "result",
       header: t("result"),
-      cell: (r) => (
-        <span className={r.ok ? "text-success" : "text-destructive"}>{r.ok ? t("ok") : t("failed")}</span>
-      ),
+      cell: (r) => {
+        const ok = runOk(r);
+        return <span className={ok ? "text-success" : "text-destructive"}>{ok ? t("ok") : t("failed")}</span>;
+      },
     },
-    { key: "created", header: t("created"), align: "right", cell: (r) => r.created },
-    { key: "updated", header: t("updated"), align: "right", cell: (r) => r.updated },
-    { key: "cancelled", header: t("cancelled"), align: "right", cell: (r) => r.cancelled },
-    { key: "error", header: t("error"), cell: (r) => (r.error ? <span className="text-destructive">{r.error}</span> : "—") },
+    { key: "created", header: t("created"), align: "right", cell: (r) => r.createdCount },
+    { key: "updated", header: t("updated"), align: "right", cell: (r) => r.updatedCount },
+    { key: "cancelled", header: t("cancelled"), align: "right", cell: (r) => r.cancelledCount },
+    { key: "skipped", header: t("skipped"), align: "right", cell: (r) => r.skippedCount },
+    { key: "error", header: t("error"), cell: (r) => (r.firstError ? <span className="text-destructive">{r.firstError}</span> : "—") },
   ];
 
   return (

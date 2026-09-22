@@ -3895,6 +3895,7 @@
       "created": "Creadas",
       "updated": "Actualizadas",
       "cancelled": "Canceladas",
+      "skipped": "Omitidas",
       "error": "Error",
       "empty": "Sin corridas todavía."
     }
