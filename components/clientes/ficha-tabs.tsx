@@ -81,7 +81,7 @@ export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; cent
       {hist.map((s) => (
         <tr key={s.id} className="border-t">
           <Td>{dia(s.date)}</Td>
-          <Td>{s.servicioNombre ?? "—"}</Td>
+          <Td>{s.serviceName ?? "—"}</Td>
           <Td className="tabular-nums text-muted-foreground">{s.sesionNumero != null && s.totalSessions != null ? `${s.sesionNumero}/${s.totalSessions}` : "—"}</Td>
           <Td><Estado value={s.status} /></Td>
         </tr>
