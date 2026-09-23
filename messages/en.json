@@ -4020,6 +4020,8 @@
     "end": "End",
     "add": "Add",
     "cancel": "Cancel",
+    "applyToDays": "Also apply to:",
+    "allDays": "All",
     "remove": "Remove",
     "absencesTitle": "Absences (vacation & leave)",
     "addAbsence": "Add absence",
