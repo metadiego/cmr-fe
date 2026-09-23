@@ -24,6 +24,10 @@ export interface CalendarioEvento {
   isGlobal?: boolean;
   createdBy?: string | null;
   legacyId?: string | null;
+  // Projected staff absence (Disponibilidad tab in /configuration/staff), not a real calendar_events
+  // row: `id` is "absence:<uuid>" and PUT/DELETE on it 404s — edit only from Disponibilidad.
+  origin?: "staff_absence" | null;
+  sourceId?: string | null;
 }
 export interface CrearEventoPayload {
   day: string;

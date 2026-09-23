@@ -3662,6 +3662,9 @@
   "calendario": {
     "hoy": "Today",
     "nuevo": "New event",
+    "categoria": {
+      "ausenciaPersonal": "Staff absence"
+    },
     "mesAnterior": "Previous month",
     "mesSiguiente": "Next month",
     "global": "Global (all centers)",

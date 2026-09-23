@@ -77,7 +77,10 @@ export function Calendario() {
   const miId = me.kind === "ok" ? me.me.profileId : null;
   const miUserId = me.kind === "ok" ? me.me.id : null;
   const esMio = (ev?: CalendarioEvento) => !!ev?.createdBy && (ev.createdBy === miId || ev.createdBy === miUserId);
-  const puedeTocar = (ev?: CalendarioEvento) => puedeEscribir && (esAdmin || esMio(ev));
+  // Staff absences are projected read-only rows (see lib/api/calendario.ts): they don't belong to
+  // calendar_events, so editing/deleting them here 404s — only Disponibilidad can change them.
+  const puedeTocar = (ev?: CalendarioEvento) =>
+    ev?.origin !== "staff_absence" && puedeEscribir && (esAdmin || esMio(ev));
 
   const [vista, setVista] = React.useState<Vista>("mes");
   const [cursor, setCursor] = React.useState(new Date());
