@@ -1,4 +1,8 @@
 {
+  "shell": {
+    "noProfileTitle": "Your account has no profile assigned",
+    "noProfileBody": "You're signed in, but an administrator hasn't linked your account to a profile with permissions yet. Contact an administrator to get it assigned."
+  },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",
     "hora_fin_invalida": "End time must be after the start time.",

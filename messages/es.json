@@ -1,4 +1,8 @@
 {
+  "shell": {
+    "noProfileTitle": "Tu cuenta no tiene un perfil asignado",
+    "noProfileBody": "Iniciaste sesión, pero un administrador aún no ha enlazado tu cuenta a un perfil con permisos. Contacta a un administrador para que te lo asigne."
+  },
   "citas": {
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
     "hora_fin_invalida": "La hora de fin debe ser posterior a la hora de inicio.",

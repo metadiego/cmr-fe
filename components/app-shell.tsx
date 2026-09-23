@@ -57,6 +57,11 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   const menu = useMenu();
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
+  // Sesión válida (/auth/me respondió 200) pero SIN perfil: cuenta autenticada que el BE no resuelve a un
+  // perfil con permisos (ni es master). Antes se veía una pantalla muda; ahora se avisa para diagnosticar
+  // rápido (p. ej. cuenta sin perfil enlazado). Handoff atencion-usuarios-sin-perfil-rbac-handoff-be.
+  const sinPerfil =
+    me.kind === "ok" && !me.me.isMaster && !me.me.profileId && (me.me.permissions?.length ?? 0) === 0;
 
   // Título de sección: el ítem de menú activo más específico (path más largo que
   // matchea la ruta). Deriva del mismo menú del BE; sin match, se omite.
@@ -79,7 +84,7 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
       <LocaleSync />
       <SidebarProvider>
         <AppSidebar />
-        <ShellBody sectionTitle={sectionTitle} session={session}>{children}</ShellBody>
+        <ShellBody sectionTitle={sectionTitle} session={session} sinPerfil={sinPerfil}>{children}</ShellBody>
       </SidebarProvider>
     </TooltipProvider>
   );
@@ -93,11 +98,14 @@ function ShellBody({
   children,
   sectionTitle,
   session,
+  sinPerfil,
 }: {
   children: React.ReactNode;
   sectionTitle: string;
   session: unknown;
+  sinPerfil?: boolean;
 }) {
+  const t = useTranslations("shell");
   const { open, setOpen, openMobile, setOpenMobile, isMobile } = useSidebar();
   const colapsarAlInteractuar = React.useCallback(() => {
     if (isMobile) {
@@ -123,7 +131,14 @@ function ShellBody({
       {/* Lienzo estándar off-white (EHR): cubre el --app-bg-image de branding para que ninguna página
           lo deje traslucir; las tarjetas blancas resaltan encima. Interactuar aquí pliega el menú. */}
       <main className="flex-1 bg-muted p-6" onPointerDownCapture={colapsarAlInteractuar}>
-        {children}
+        {sinPerfil ? (
+          <div className="mx-auto mt-16 max-w-md rounded-md border border-warning/40 bg-warning/10 p-6 text-center">
+            <p className="text-base font-semibold text-warning-foreground">{t("noProfileTitle")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("noProfileBody")}</p>
+          </div>
+        ) : (
+          children
+        )}
       </main>
     </SidebarInset>
   );
