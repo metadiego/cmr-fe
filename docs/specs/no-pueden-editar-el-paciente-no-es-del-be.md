@@ -37,3 +37,25 @@ puedan ni llegar.
 
 Decir **en qué pantalla y con qué botón** lo intentan, y qué ven: si el botón no aparece, es el `Can`;
 si aparece y falla, el error exacto del toast. Con eso se caza en minutos.
+
+## Ampliación: el botón de ACCIONES también llega completo (23-sep-2026)
+
+El dueño precisó que lo intentan desde el **botón de acciones del tablero de Atención**. Comprobado con
+el token de Berkaira:
+
+- `GET /tablero/definicion?tablero=atencion` le devuelve la columna **`acciones`** con
+  `editar_paciente` (`kind: "link"`, `href: "/patients/:pacienteId"`) y `facturar`.
+- `GET /tablero/filas?tablero=atencion` devuelve cada fila con **`pacienteId`** y con `acciones`.
+
+Es decir: el BE le da el botón, la acción y el id con el que construir el enlace. Lo que falle está
+entre el `AccionesModal` y la navegación a `/patients/:id`.
+
+Tres cosas concretas que mirar en ese orden:
+
+1. **El `AccionesModal` pinta la acción `kind: "link"`?** Hoy sabe pintar `facturar`; si el `link` no
+   tiene su rama, el menú saldría vacío o sin esa entrada.
+2. **El `href` se resuelve** sustituyendo `:pacienteId` por el de la fila. Si se pinta literal, el
+   enlace lleva a `/patients/:pacienteId` y la página no existe.
+3. **La página `/patients/[id]`** se abre para el rol `atencion`. La ruta no está en su menú (su menú
+   trae `clientes`), así que si hay un guardián que compara la ruta contra el menú, ahí se corta — el
+   sidebar traduce por `slug` con `routeForClave`, pero un guardián de ruta puede no hacerlo.
