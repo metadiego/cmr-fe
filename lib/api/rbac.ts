@@ -75,6 +75,17 @@ export async function getRoles(): Promise<Rol[]> {
   return asArray<Rol>(await apiFetch(`/roles`))
 }
 
+// Rol con las CLAVES de sus permisos, para la rejilla de un vistazo (una sola llamada en vez de una por
+// rol). GET /roles?conPermisos=true. El BE puede devolver la lista como `permissions` (inglés) o `permisos`
+// (español, hueco del mapa) → se normaliza a `permissions`. Handoff roles-la-rejilla-de-un-vistazo.
+export type RolConPermisos = Rol & { permissions: string[] }
+export async function getRolesConPermisos(): Promise<RolConPermisos[]> {
+  const raw = asArray<Rol & { permissions?: string[]; permisos?: string[] }>(
+    await apiFetch(`/roles?conPermisos=true`),
+  )
+  return raw.map((r) => ({ ...r, permissions: r.permissions ?? r.permisos ?? [] }))
+}
+
 export function createRole(payload: {
   slug: string
   name: string

@@ -7,18 +7,18 @@ import { toast } from "sonner"
 import {
   getRoles,
   getPermisos,
-  getRolePermisos,
   getRoleMenu,
   setRoleMenu,
   createRole,
   updateRole,
   deleteRole,
-  setRolePermisos,
   type Rol,
   type Permiso,
   type ProfileMenuItem,
 } from "@/lib/api/rbac"
 import { apiErrorMessage } from "@/lib/api/errors"
+import { PermisosDialog } from "@/components/admin/permisos-dialog"
+import { RbacGrid } from "@/components/admin/rbac-grid"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -57,6 +57,8 @@ export function RbacSettings() {
   const [menuFor, setMenuFor] = React.useState<Rol | null>(null)
   const [editFor, setEditFor] = React.useState<Rol | null>(null)
   const [busyId, setBusyId] = React.useState<string | null>(null)
+  // Vista lista (la de siempre) vs rejilla (todos los roles a la vez, marcando en la tarjeta).
+  const [vista, setVista] = React.useState<"lista" | "rejilla">("lista")
 
   const load = React.useCallback(async () => {
     try {
@@ -105,20 +107,41 @@ export function RbacSettings() {
           <h2 className="text-lg font-medium">{t("title")}</h2>
           <p className="text-sm text-muted-foreground">{t("help")}</p>
         </div>
-        <Button size="sm" onClick={() => setCreateOpen(true)}>
-          {t("create")}
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Toggle de vista (por dispositivo no hace falta recordarlo; es una preferencia de sesión). */}
+          <div className="inline-flex rounded-md border p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setVista("lista")}
+              className={"rounded-md px-2.5 py-1 font-medium transition-colors " + (vista === "lista" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+            >
+              {t("viewList")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setVista("rejilla")}
+              className={"rounded-md px-2.5 py-1 font-medium transition-colors " + (vista === "rejilla" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+            >
+              {t("viewGrid")}
+            </button>
+          </div>
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            {t("create")}
+          </Button>
+        </div>
       </div>
 
-      {state.kind === "loading" && (
+      {vista === "rejilla" && <RbacGrid />}
+
+      {vista === "lista" && state.kind === "loading" && (
         <p className="text-sm text-muted-foreground">{t("loading")}</p>
       )}
-      {state.kind === "fail" && (
+      {vista === "lista" && state.kind === "fail" && (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {state.message}
         </p>
       )}
-      {state.kind === "ok" && (
+      {vista === "lista" && state.kind === "ok" && (
         <DataTable>
           <TableHeader>
             <TableRow>
@@ -497,116 +520,6 @@ function CreateRoleDialog({
             disabled={submitting || !clave.trim() || !nombre.trim()}
           >
             {submitting ? t("creating") : t("createSubmit")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function PermisosDialog({
-  role,
-  permisos,
-  onOpenChange,
-}: {
-  role: Rol | null
-  permisos: Permiso[]
-  onOpenChange: (open: boolean) => void
-}) {
-  const t = useTranslations("admin.rbac")
-  const tc = useTranslations("admin")
-  const [selected, setSelected] = React.useState<Set<string>>(new Set())
-  const [loaded, setLoaded] = React.useState(false)
-  const [submitting, setSubmitting] = React.useState(false)
-
-  // PRECARGA las claves actuales del rol: sin esto, guardar con el set vacío
-  // BORRABA los permisos del rol (el PUT es un replace completo).
-  React.useEffect(() => {
-    if (!role) return
-    let active = true
-    getRolePermisos(role.id)
-      .then((claves) => {
-        if (!active) return
-        setSelected(new Set(claves))
-        setLoaded(true)
-      })
-      .catch((err) => active && toast.error(apiErrorMessage(err)))
-    return () => {
-      active = false
-    }
-  }, [role])
-
-  const byModulo = React.useMemo(() => {
-    const acc: Record<string, Permiso[]> = {}
-    for (const p of permisos) (acc[p.module] ??= []).push(p)
-    return acc
-  }, [permisos])
-
-  function toggle(clave: string, on: boolean) {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (on) next.add(clave)
-      else next.delete(clave)
-      return next
-    })
-  }
-
-  async function onSubmit() {
-    if (!role) return
-    setSubmitting(true)
-    try {
-      await setRolePermisos(role.id, [...selected])
-      toast.success(t("permisosSaved"))
-      onOpenChange(false)
-    } catch (err) {
-      toast.error(apiErrorMessage(err))
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <Dialog open={role !== null} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {t("permisosTitle", { role: role?.name ?? "" })}
-          </DialogTitle>
-          <DialogDescription>{t("permisosHelp")}</DialogDescription>
-        </DialogHeader>
-
-        {!loaded && (
-          <p className="text-sm text-muted-foreground">{t("loading")}</p>
-        )}
-        <div className="space-y-4">
-          {loaded &&
-            Object.entries(byModulo).map(([modulo, list]) => (
-              <div key={modulo} className="space-y-2">
-                <p className="text-sm font-semibold capitalize">{modulo}</p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {list.map((p) => (
-                    <label
-                      key={p.slug}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <Checkbox
-                        checked={selected.has(p.slug)}
-                        onCheckedChange={(v) => toggle(p.slug, v === true)}
-                      />
-                      <span className="font-mono text-xs">{p.action}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-        </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {tc("cancel")}
-          </Button>
-          <Button onClick={onSubmit} disabled={submitting || !loaded}>
-            {submitting ? t("saving") : t("save")}
           </Button>
         </DialogFooter>
       </DialogContent>

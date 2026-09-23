@@ -26,7 +26,6 @@ const DEBT = {
   "components/servicios/servicios-admin.tsx": 686,
   "components/agenda/dia-view.tsx": 623,
   "components/auditoria/auditoria-log.tsx": 642,
-  "components/admin/rbac-settings.tsx": 615,
   "components/clientes/paciente-form-sheet.tsx": 550,
 };
 
