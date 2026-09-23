@@ -59,3 +59,15 @@ personal de Atención** por si hay más cuentas sin perfil/rol (mismo síntoma: 
 Cuando `/auth/me` vuelve **vacío** (usuario autenticado pero sin perfil), la app hoy no lo distingue de
 «sin permisos» y simplemente esconde todo, dejando al usuario sin pistas. Valorar un aviso claro
 («Tu cuenta no tiene un perfil asignado; contacta a un administrador») en vez de una pantalla muda.
+
+## Cierre (23-sep, dato autoritativo del BE — corrige lo anterior)
+
+El BE lo comprobó con acceso directo a Supabase + auth logs: **los tres perfiles están bien enlazados**
+a su usuario real de Supabase, y **Erikamari entra bien con sus 41 permisos**, igual que Berkaira. Mis
+lecturas de «0 permisos / auth/me vacío» para Erikamari salieron **falseadas por el rate-limit de Supabase**
+(tantos mint de token seguidos), no eran reales — retiro esa parte del diagnóstico.
+
+**Lo único que falla es Laesi, y es la CONTRASEÑA** (Supabase: `invalid_credentials`). Su cuenta está
+confirmada y entró el 21-sep, así que probablemente la cambió ella. Acción: restablecer su contraseña
+(a la de la lista, o enviar enlace de set-password para que ponga la suya). No hay nada que tocar en FE
+ni en RBAC.
