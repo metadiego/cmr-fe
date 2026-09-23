@@ -76,8 +76,9 @@ export async function getRoles(): Promise<Rol[]> {
 }
 
 // Rol con las CLAVES de sus permisos, para la rejilla de un vistazo (una sola llamada en vez de una por
-// rol). GET /roles?conPermisos=true. El BE puede devolver la lista como `permissions` (inglés) o `permisos`
-// (español, hueco del mapa) → se normaliza a `permissions`. Handoff roles-la-rejilla-de-un-vistazo.
+// rol). GET /roles?conPermisos=true. En v2 el BE ya traduce el campo a `permissions` (verificado por el BE);
+// el fallback a `permisos` es solo defensivo (v1 / por si acaso), NO un hueco del mapa. Handoff
+// roles-la-rejilla-de-un-vistazo.
 export type RolConPermisos = Rol & { permissions: string[] }
 export async function getRolesConPermisos(): Promise<RolConPermisos[]> {
   const raw = asArray<Rol & { permissions?: string[]; permisos?: string[] }>(
