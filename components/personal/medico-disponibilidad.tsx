@@ -70,13 +70,27 @@ function Horarios({ doctorId, centro }: { doctorId: string; centro?: string }) {
   const { state, reload } = useResource<HorarioMedico[]>(() => getHorariosMedico(doctorId), [doctorId]);
   const horarios = state.kind === "ok" ? state.data : [];
   const [busy, setBusy] = React.useState(false);
-  const [nuevo, setNuevo] = React.useState<{ dow: number; inicio: string; fin: string } | null>(null);
+  const [nuevo, setNuevo] = React.useState<{ dow: number; dias: Set<number>; inicio: string; fin: string } | null>(null);
 
+  function toggleDia(d: number) {
+    if (!nuevo) return;
+    const dias = new Set(nuevo.dias);
+    if (dias.has(d)) dias.delete(d);
+    else dias.add(d);
+    setNuevo({ ...nuevo, dias });
+  }
+
+  // Same start/end applied to every checked day at once (owner's request, 2026-09-22) — one
+  // schedule row per day server-side (createHorario has no bulk endpoint), fired together.
   async function agregar() {
-    if (!nuevo || !nuevo.inicio || !nuevo.fin || busy) return;
+    if (!nuevo || !nuevo.inicio || !nuevo.fin || nuevo.dias.size === 0 || busy) return;
     setBusy(true);
     try {
-      await createHorario({ doctorId, dayOfWeek: nuevo.dow, startTime: nuevo.inicio, endTime: nuevo.fin }, centro);
+      await Promise.all(
+        [...nuevo.dias].map((dow) =>
+          createHorario({ doctorId, dayOfWeek: dow, startTime: nuevo.inicio, endTime: nuevo.fin }, centro),
+        ),
+      );
       setNuevo(null);
       reload();
     } catch (e) { toastError(e); } finally { setBusy(false); }
@@ -111,17 +125,36 @@ function Horarios({ doctorId, centro }: { doctorId: string; centro?: string }) {
                     ))
                   )}
                   {puedeConfig && nuevo?.dow === d && (
-                    <div className="mt-1 flex items-center gap-1.5">
-                      <Input type="time" step={60} value={nuevo.inicio} onChange={(e) => setNuevo({ ...nuevo, inicio: e.target.value })} className="h-8 w-28" aria-label={t("start")} />
-                      <span className="text-muted-foreground">–</span>
-                      <Input type="time" step={60} value={nuevo.fin} onChange={(e) => setNuevo({ ...nuevo, fin: e.target.value })} className="h-8 w-28" aria-label={t("end")} />
-                      <Button type="button" size="sm" className="h-8" disabled={!nuevo.inicio || !nuevo.fin || busy} onClick={agregar}>{t("add")}</Button>
-                      <Button type="button" size="sm" variant="ghost" className="h-8" onClick={() => setNuevo(null)}>{t("cancel")}</Button>
+                    <div className="mt-1 space-y-2">
+                      <div className="flex items-center gap-1.5">
+                        <Input type="time" step={60} value={nuevo.inicio} onChange={(e) => setNuevo({ ...nuevo, inicio: e.target.value })} className="h-8 w-28" aria-label={t("start")} />
+                        <span className="text-muted-foreground">–</span>
+                        <Input type="time" step={60} value={nuevo.fin} onChange={(e) => setNuevo({ ...nuevo, fin: e.target.value })} className="h-8 w-28" aria-label={t("end")} />
+                        <Button type="button" size="sm" className="h-8" disabled={!nuevo.inicio || !nuevo.fin || nuevo.dias.size === 0 || busy} onClick={agregar}>{t("add")}</Button>
+                        <Button type="button" size="sm" variant="ghost" className="h-8" onClick={() => setNuevo(null)}>{t("cancel")}</Button>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <span>{t("applyToDays")}</span>
+                        <label className="flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            checked={nuevo.dias.size === DOW.length}
+                            onChange={(e) => setNuevo({ ...nuevo, dias: new Set(e.target.checked ? DOW : []) })}
+                          />
+                          {t("allDays")}
+                        </label>
+                        {DOW.map((dd) => (
+                          <label key={dd} className="flex items-center gap-1">
+                            <input type="checkbox" checked={nuevo.dias.has(dd)} onChange={() => toggleDia(dd)} />
+                            {t(`dow.${dd}`)}
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
                 {puedeConfig && nuevo?.dow !== d && (
-                  <button type="button" onClick={() => setNuevo({ dow: d, inicio: "", fin: "" })} className="shrink-0 text-xs text-primary hover:underline">+ {t("add")}</button>
+                  <button type="button" onClick={() => setNuevo({ dow: d, dias: new Set([d]), inicio: "", fin: "" })} className="shrink-0 text-xs text-primary hover:underline">+ {t("add")}</button>
                 )}
               </div>
             );

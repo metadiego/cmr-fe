@@ -4020,6 +4020,8 @@
     "end": "Fin",
     "add": "Agregar",
     "cancel": "Cancelar",
+    "applyToDays": "Aplicar también a:",
+    "allDays": "Todos",
     "remove": "Quitar",
     "absencesTitle": "Ausencias (vacaciones y permisos)",
     "addAbsence": "Agregar ausencia",
