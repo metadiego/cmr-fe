@@ -78,13 +78,36 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
     .sort((a, b) => b.route.length - a.route.length)[0]?.item;
   const sectionTitle = active ? labelOf(active) : "";
 
+  // Pinned = the user's deliberate choice (header toggle / Ctrl+B), same cookie-backed state
+  // shadcn always had. Peeking = hovering the collapsed rail (owner's request, 2026-09-23):
+  // a transient, NEVER persisted override — the sidebar shows expanded while the mouse is over
+  // it and collapses again the instant it leaves, without touching the pinned preference. Lifted
+  // here (not inside AppSidebar) because SidebarProvider — the thing peeking has to control — is
+  // the PARENT of AppSidebar.
+  const [pinnedOpen, setPinnedOpen] = React.useState(true);
+  const [peeking, setPeeking] = React.useState(false);
+  // NOT `onOpenChange={setPinnedOpen}`: SidebarProvider's toggle always computes its next value as
+  // `!open`, and `open` here is the OR'd `pinnedOpen || peeking` — mid-peek that's `!true`, so a
+  // real pin attempt (header button, Ctrl+B, SidebarRail, or the collapsed-icon click path) would
+  // silently compute "false" again and never actually pin. Every toggle call in ui/sidebar.tsx is
+  // a flip with no other caller passing an explicit value, so the argument here is meaningless —
+  // flipping our OWN previous value is the only way a toggle mid-peek correctly pins open.
+  const togglePinned = React.useCallback(() => setPinnedOpen((prev) => !prev), []);
+  // Explicit (non-flip) collapse for colapsarAlInteractuar below: that one means "make sure it's
+  // collapsed", not "toggle" — going through togglePinned there would flip it back OPEN if it
+  // happened to already be collapsed. Peeking is never true when this fires (it can only be true
+  // while the mouse is over the sidebar, and this runs on a pointerdown inside <main>, the
+  // opposite side of the screen), so touching only pinnedOpen is correct here.
+  const collapseNow = React.useCallback(() => setPinnedOpen(false), []);
   return (
     <TooltipProvider>
       {/* Aplica el idioma del usuario al arrancar (cookie ↔ /auth/me). No pinta nada. */}
       <LocaleSync />
-      <SidebarProvider>
-        <AppSidebar />
-        <ShellBody sectionTitle={sectionTitle} session={session} sinPerfil={sinPerfil}>{children}</ShellBody>
+      <SidebarProvider open={pinnedOpen || peeking} onOpenChange={togglePinned}>
+        <AppSidebar onHoverChange={setPeeking} />
+        <ShellBody sectionTitle={sectionTitle} session={session} sinPerfil={sinPerfil} onCollapseRequest={collapseNow}>
+          {children}
+        </ShellBody>
       </SidebarProvider>
     </TooltipProvider>
   );
@@ -92,28 +115,30 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
 
 // Cuerpo del shell (dentro del SidebarProvider para poder plegar el menú). Al interactuar en el
 // CONTENIDO de la derecha (`<main>`), el menú de la izquierda se pliega solo para dar más pantalla.
-// Solo si está abierto (idempotente) y en su modo (escritorio: setOpen; móvil: setOpenMobile). Va en
-// el <main>, NO en el header, para que abrir el menú desde el trigger no lo cierre en el acto.
+// Solo si está abierto (idempotente) y en su modo (escritorio: onCollapseRequest; móvil: setOpenMobile). Va
+// en el <main>, NO en el header, para que abrir el menú desde el trigger no lo cierre en el acto.
 function ShellBody({
   children,
   sectionTitle,
   session,
   sinPerfil,
+  onCollapseRequest,
 }: {
   children: React.ReactNode;
   sectionTitle: string;
   session: unknown;
   sinPerfil?: boolean;
+  onCollapseRequest: () => void;
 }) {
   const t = useTranslations("shell");
-  const { open, setOpen, openMobile, setOpenMobile, isMobile } = useSidebar();
+  const { open, openMobile, setOpenMobile, isMobile } = useSidebar();
   const colapsarAlInteractuar = React.useCallback(() => {
     if (isMobile) {
       if (openMobile) setOpenMobile(false);
     } else if (open) {
-      setOpen(false);
+      onCollapseRequest();
     }
-  }, [isMobile, open, openMobile, setOpen, setOpenMobile]);
+  }, [isMobile, open, openMobile, onCollapseRequest, setOpenMobile]);
   return (
     <SidebarInset>
       {/* Header blanco fijo (no bg-background): el branding del centro sobreescribe --background a un
