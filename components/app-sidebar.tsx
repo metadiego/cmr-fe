@@ -288,7 +288,11 @@ export function AppSidebar({ onHoverChange }: { onHoverChange?: (hovering: boole
             «En desarrollo» es otra raíz del catálogo (perm menu.desarrollo), no un caso especial. */}
         {sidebarState === "collapsed" ? (
           // COMPRIMIDO: rail limpio de ICONOS de categoría (tooltip = nombre). No texto cortado.
-          // Clic en un icono → abre esa categoría y despliega el menú.
+          // Clic en un icono → abre esa categoría y despliega el menú. Con mouse esto ya no se
+          // alcanza en la práctica: el hover-peek expande el árbol completo (con etiquetas reales)
+          // ANTES de que un clic pueda llegar, así que el mouse termina clicando ahí en vez de acá
+          // — mejor experiencia (ve el nombre antes de elegir), no una regresión. Sigue sirviendo
+          // para navegación por teclado (Tab+Enter no pasa por mouseenter).
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>

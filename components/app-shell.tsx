@@ -81,11 +81,18 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   // the PARENT of AppSidebar.
   const [pinnedOpen, setPinnedOpen] = React.useState(true);
   const [peeking, setPeeking] = React.useState(false);
+  // NOT `onOpenChange={setPinnedOpen}`: SidebarProvider's toggle always computes its next value as
+  // `!open`, and `open` here is the OR'd `pinnedOpen || peeking` — mid-peek that's `!true`, so a
+  // real pin attempt (header button, Ctrl+B, SidebarRail, or the collapsed-icon click path) would
+  // silently compute "false" again and never actually pin. Every toggle call in ui/sidebar.tsx is
+  // a flip with no other caller passing an explicit value, so the argument here is meaningless —
+  // flipping our OWN previous value is the only way a toggle mid-peek correctly pins open.
+  const togglePinned = React.useCallback(() => setPinnedOpen((prev) => !prev), []);
   return (
     <TooltipProvider>
       {/* Aplica el idioma del usuario al arrancar (cookie ↔ /auth/me). No pinta nada. */}
       <LocaleSync />
-      <SidebarProvider open={pinnedOpen || peeking} onOpenChange={setPinnedOpen}>
+      <SidebarProvider open={pinnedOpen || peeking} onOpenChange={togglePinned}>
         <AppSidebar onHoverChange={setPeeking} />
         <ShellBody sectionTitle={sectionTitle} session={session}>{children}</ShellBody>
       </SidebarProvider>
