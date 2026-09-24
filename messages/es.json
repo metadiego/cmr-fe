@@ -13,7 +13,20 @@
     "modalTitle": "Faltan datos para el EHR",
     "modalHelp": "El EHR exige estos datos antes de registrar la llegada. Complétalos para marcar Presente.",
     "saving": "Guardando…",
-    "saveAndContinue": "Guardar y marcar Presente"
+    "saveAndContinue": "Guardar y marcar Presente",
+    "orphans": {
+      "title": "Huérfanos del EHR",
+      "help": "Pacientes creados en el EHR (desde «Registrar llegada») que aún no están atados a uno nuestro.",
+      "empty": "No hay huérfanos por enlazar.",
+      "colEhr": "En el EHR",
+      "colOurs": "Nuestro paciente",
+      "colAction": "Acción",
+      "suggested": "Sugerido · doc {doc}",
+      "link": "Enlazar",
+      "linking": "Enlazando…",
+      "linked": "Paciente enlazado.",
+      "refresh": "Actualizar"
+    }
   },
   "citas": {
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",

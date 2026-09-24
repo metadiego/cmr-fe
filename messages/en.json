@@ -13,7 +13,20 @@
     "modalTitle": "Missing data for the EHR",
     "modalHelp": "The EHR requires these fields before recording the arrival. Fill them in to mark Present.",
     "saving": "Saving…",
-    "saveAndContinue": "Save and mark Present"
+    "saveAndContinue": "Save and mark Present",
+    "orphans": {
+      "title": "EHR orphans",
+      "help": "Patients created in the EHR (via \"Record arrival\") that aren't linked to one of ours yet.",
+      "empty": "No orphans to link.",
+      "colEhr": "In the EHR",
+      "colOurs": "Our patient",
+      "colAction": "Action",
+      "suggested": "Suggested · doc {doc}",
+      "link": "Link",
+      "linking": "Linking…",
+      "linked": "Patient linked.",
+      "refresh": "Refresh"
+    }
   },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",

@@ -10,6 +10,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { ConfigGuard } from "@/components/configuracion/config-guard";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
+import { EhrOrphans } from "@/components/configuracion/ehr-orphans";
 import { Switch } from "@/components/ui/switch";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
@@ -25,7 +26,10 @@ export default function EhrIntegrationConfigPage() {
       <PageContainer>
         <PageHeader title={t("title")} description={t("description")} actions={<CentroPantallaSelector estado={estado} />} />
         {estado.cargando ? null : estado.centroActivo ? (
-          <EhrToggle centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+          <div className="space-y-8">
+            <EhrToggle centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+            <EhrOrphans centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+          </div>
         ) : (
           <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>
         )}

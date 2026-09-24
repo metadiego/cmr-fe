@@ -11,9 +11,13 @@ import { apiFetch } from "./client";
 export type EhrReadinessField = "idType" | "docId" | "sexo" | "fechaNacimiento" | "zipcode";
 
 // GET /ehr-integration/patients/:id/readiness — ¿tiene los 5 datos? Permiso ehr-integration.read.
+// `ehrPatientId`/`ehrRecordId` son INFORMATIVOS (ya está allá o no); el FE NO decide con ellos — el
+// emparejamiento lo hace el BE por nuestro récord + código de centro (BAY-064230), no por nombre.
 export interface EhrReadiness {
   listo: boolean;
   faltantes: EhrReadinessField[];
+  ehrPatientId?: string | null;
+  ehrRecordId?: string | null;
 }
 export function getEhrReadiness(patientId: string, centroId?: string): Promise<EhrReadiness> {
   return apiFetch<EhrReadiness>(`/ehr-integration/patients/${patientId}/readiness`, {}, centroId);
@@ -37,6 +41,33 @@ export function setEhrConfig(habilitado: boolean, centroId?: string, centerIds?:
     { method: "PUT", body: JSON.stringify({ habilitado }) },
     centroId,
   );
+}
+
+// Huérfanos del EHR: pacientes creados en el otro sistema (desde su «Registrar llegada») que aún no están
+// atados a uno nuestro. El BE propone el nuestro cuando el documento coincide (`pacienteSugeridoId`), o
+// `null` si hay que elegirlo a mano. GET /ehr-integration/orphans (permiso ehr-integration.read).
+export interface EhrOrphan {
+  ehrPatientId: string;
+  ehrRecordId: string | null;
+  nombre: string | null;
+  fechaNacimiento: string | null;
+  documento: string | null;
+  pacienteSugeridoId: string | null;
+}
+export async function listEhrOrphans(limit = 500, centroId?: string): Promise<EhrOrphan[]> {
+  const res = await apiFetch<unknown>(`/ehr-integration/orphans?limit=${limit}`, {}, centroId);
+  if (Array.isArray(res)) return res as EhrOrphan[];
+  const items = (res as { items?: unknown } | null)?.items;
+  return Array.isArray(items) ? (items as EhrOrphan[]) : [];
+}
+
+// PUT /ehr-integration/patients/:patientId/link — ata NUESTRO paciente al del EHR. Permiso ehr-integration.config.
+export function linkEhrPatient(
+  patientId: string,
+  body: { ehrPatientId: string; ehrRecordId: string | null },
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(`/ehr-integration/patients/${patientId}/link`, { method: "PUT", body: JSON.stringify(body) }, centroId);
 }
 
 // Lectura del interruptor TOLERANTE a que el BE aún no esté desplegado (hoy responde 404): cualquier
