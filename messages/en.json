@@ -3,6 +3,18 @@
     "noProfileTitle": "Your account has no profile assigned",
     "noProfileBody": "You're signed in, but an administrator hasn't linked your account to a profile with permissions yet. Contact an administrator to get it assigned."
   },
+  "ehrIntegration": {
+    "title": "EHR integration",
+    "description": "When you mark Present in Atención, the patient is also registered in the EHR. Enabled per center.",
+    "elegirCentro": "Pick a center to see its settings.",
+    "toggleLabel": "Push to the EHR when marking Present",
+    "toggleHelp": "On: marking Present creates/updates the patient in the EHR and records their arrival. Off: nothing happens.",
+    "saved": "Settings saved.",
+    "modalTitle": "Missing data for the EHR",
+    "modalHelp": "The EHR requires these fields before recording the arrival. Fill them in to mark Present.",
+    "saving": "Saving…",
+    "saveAndContinue": "Save and mark Present"
+  },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",
     "hora_fin_invalida": "End time must be after the start time.",
@@ -520,6 +532,12 @@
       "sexoMasculino": "Male",
       "sexoOtro": "Other",
       "sexoDesconocido": "Unknown",
+      "idType": "ID type",
+      "idTypePlaceholder": "Select…",
+      "idType_drivers_license": "Driver's license",
+      "idType_passport": "Passport",
+      "idType_green_card": "Green card",
+      "idType_state_id": "State ID",
       "fechaNacimiento": "Date of birth",
       "nacionalidad": "Nationality",
       "telefono": "Phone",

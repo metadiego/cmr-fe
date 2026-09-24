@@ -6,10 +6,12 @@ import { useTranslations } from "next-intl";
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { resolveToggle } from "@/lib/tablero/toggle-hora";
+import { isEhrEnabled, getEhrReadiness, type EhrReadinessField } from "@/lib/api/ehr-integration";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PostAccionHost } from "@/components/tablero/post-accion";
+import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 
 function fmtHora(v: unknown): string | null {
   if (v == null || v === "") return null;
@@ -51,6 +53,9 @@ export function FlujoAtencion({
   // Modal de post-acción (p.ej. "Nueva cita" al marcar asistido). La clave y la
   // config salen de `columna.render` (dato), enrutadas por PostAccionHost.
   const [postAccion, setPostAccion] = React.useState<{ accion: string; render: Record<string, unknown> | null } | null>(null);
+  // Enganche EHR: al marcar PRESENTE, si el centro tiene el interruptor encendido y al paciente le faltan
+  // datos, se bloquea con un modal hasta completarlos. Guarda la etapa pendiente para reanudarla al guardar.
+  const [ehrGate, setEhrGate] = React.useState<{ col: ColumnaEfectiva; action: string; faltantes: EhrReadinessField[] } | null>(null);
 
   const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
   const fwdSlug = (col: ColumnaEfectiva) =>
@@ -82,8 +87,9 @@ export function FlujoAtencion({
   // composición). Así el encadenamiento respeta el flujo real.
   const orderedCols = [...cols].sort((a, b) => ordenOf(fwdOf(a)?.toStatus ?? null) - ordenOf(fwdOf(b)?.toStatus ?? null));
 
-  async function toggle(col: ColumnaEfectiva, checked: boolean, action: string | null) {
-    if (!action) return; // no-op seguro: la etapa no puede avanzar ni deshacer
+  // Ejecuta la transición de la etapa (el trabajo real). Separado de `toggle` para poder interponer el
+  // gate del EHR antes de marcar Presente y reanudar aquí tras completar los datos.
+  async function runAccion(col: ColumnaEfectiva, checked: boolean, action: string) {
     setBusy(col.clave);
     setOpt((o) => ({ ...o, [col.clave]: !checked }));
     try {
@@ -106,6 +112,27 @@ export function FlujoAtencion({
     } finally {
       setBusy(null);
     }
+  }
+
+  async function toggle(col: ColumnaEfectiva, checked: boolean, action: string | null) {
+    if (!action) return; // no-op seguro: la etapa no puede avanzar ni deshacer
+    // Gate EHR: SOLO al MARCAR la etapa cuyo destino es "presente". Si el enganche está apagado o el EHR
+    // no responde, NO se bloquea (fail-open): Presente sigue funcionando como siempre.
+    const pacienteId = fila.pacienteId ? String(fila.pacienteId) : "";
+    if (!checked && fwdOf(col)?.toStatus === "presente" && pacienteId) {
+      try {
+        if (await isEhrEnabled(centroId)) {
+          const r = await getEhrReadiness(pacienteId, centroId);
+          if (!r.listo && r.faltantes?.length) {
+            setEhrGate({ col, action, faltantes: r.faltantes });
+            return; // bloquea hasta completar los datos
+          }
+        }
+      } catch {
+        /* EHR/readiness caído o sin desplegar → no bloquear */
+      }
+    }
+    await runAccion(col, checked, action);
   }
 
   return (
@@ -156,6 +183,19 @@ export function FlujoAtencion({
         );
       })}
     </div>
+    {ehrGate && fila.pacienteId && (
+      <EhrReadinessModal
+        pacienteId={String(fila.pacienteId)}
+        faltantes={ehrGate.faltantes}
+        centroId={centroId}
+        onCancel={() => setEhrGate(null)}
+        onCompleted={() => {
+          const g = ehrGate;
+          setEhrGate(null);
+          void runAccion(g.col, false, g.action);
+        }}
+      />
+    )}
     {postAccion && (
       <PostAccionHost
         postAccion={postAccion.accion}

@@ -3,6 +3,18 @@
     "noProfileTitle": "Tu cuenta no tiene un perfil asignado",
     "noProfileBody": "Iniciaste sesión, pero un administrador aún no ha enlazado tu cuenta a un perfil con permisos. Contacta a un administrador para que te lo asigne."
   },
+  "ehrIntegration": {
+    "title": "Enganche con el EHR",
+    "description": "Al marcar Presente en Atención, el paciente se registra también en el EHR. Se enciende por centro.",
+    "elegirCentro": "Elige un centro para ver su configuración.",
+    "toggleLabel": "Empujar al EHR al marcar Presente",
+    "toggleHelp": "Encendido: al marcar Presente se crea/actualiza el paciente en el EHR y se registra su llegada. Apagado: no pasa nada.",
+    "saved": "Configuración guardada.",
+    "modalTitle": "Faltan datos para el EHR",
+    "modalHelp": "El EHR exige estos datos antes de registrar la llegada. Complétalos para marcar Presente.",
+    "saving": "Guardando…",
+    "saveAndContinue": "Guardar y marcar Presente"
+  },
   "citas": {
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
     "hora_fin_invalida": "La hora de fin debe ser posterior a la hora de inicio.",
@@ -520,6 +532,12 @@
       "sexoMasculino": "Masculino",
       "sexoOtro": "Otro",
       "sexoDesconocido": "Desconocido",
+      "idType": "Tipo de ID",
+      "idTypePlaceholder": "Selecciona…",
+      "idType_drivers_license": "Licencia de conducir",
+      "idType_passport": "Pasaporte",
+      "idType_green_card": "Green card",
+      "idType_state_id": "ID estatal",
       "fechaNacimiento": "Fecha de nacimiento",
       "nacionalidad": "Nacionalidad",
       "telefono": "Teléfono",
