@@ -169,12 +169,13 @@ export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; cent
           </Select>
         </div>
       )}
-      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("service")}</Th><Th>{t("session")}</Th><Th>{t("status")}</Th></tr>}>
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("service")}</Th><Th>{t("session")}</Th><Th>{t("technician")}</Th><Th>{t("status")}</Th></tr>}>
         {filtrado.map((s) => (
           <tr key={s.id} className="border-t">
             <Td>{dia(s.date)}</Td>
             <Td>{s.serviceName ?? "—"}</Td>
             <Td className="tabular-nums text-muted-foreground">{s.sesionNumero != null && s.totalSessions != null ? `${s.sesionNumero}/${s.totalSessions}` : "—"}</Td>
+            <Td>{s.staffNombre ?? "—"}</Td>
             <Td><Estado value={s.status} /></Td>
           </tr>
         ))}

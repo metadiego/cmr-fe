@@ -600,6 +600,7 @@
       "status": "Estado",
       "service": "Servicio",
       "allServices": "Todos los servicios",
+      "technician": "Técnico / Enfermera",
       "session": "Sesión",
       "invoice": "Factura",
       "concept": "Concepto",

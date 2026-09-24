@@ -600,6 +600,7 @@
       "status": "Status",
       "service": "Service",
       "allServices": "All services",
+      "technician": "Technician / Nurse",
       "session": "Session",
       "invoice": "Invoice",
       "concept": "Concept",
