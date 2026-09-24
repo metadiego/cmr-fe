@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { listCitas, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
@@ -18,12 +18,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 // techo. Handoff ficha-del-paciente-hub-y-certificacion-de-gastos.
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
+// Fecha con el MES PRIMERO (negocio USA/PR), igual en es y en: MM/DD/YYYY. Locale EXPLÍCITO en-US a
+// propósito (permitido por la norma 3b) porque los formatos con nombre siguen el orden del locale y en
+// español pondrían el día primero. UTC + parseDayUTC: un día del BE es un día, no un instante.
+const fechaMesPrimero = new Intl.DateTimeFormat("en-US", { month: "2-digit", day: "2-digit", year: "numeric", timeZone: "UTC" });
+
 function useDia() {
-  const format = useFormatter();
   return (iso?: string | null) => {
     if (!iso) return "—";
     const d = parseDayUTC(iso);
-    return d ? format.dateTime(d, "dayMonthYear") : String(iso);
+    return d ? fechaMesPrimero.format(d) : String(iso);
   };
 }
 
