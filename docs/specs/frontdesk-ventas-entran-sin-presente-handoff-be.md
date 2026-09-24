@@ -47,7 +47,29 @@ En ambos casos el `source` de esa fila debería reflejar que vino de venta (p. e
 - Si es cambio de comportamiento sin config: nada que tocar en el FE (la fila entra sin presente sola);
   se verifica en pantalla.
 
-## Pregunta para el dueño (la decide él, no el FE ni el BE)
+## Decisión del dueño — RESUELTA (2026-09-24): CONFIGURABLE POR CENTRO → opción 1 (tri-estado)
 
-¿Este cambio es para **todos los centros** o **configurable por centro**? Si es para todos y sin vuelta
-atrás, la opción 2 es más simple. Si quieren poder encender el auto-presente en algún centro, la 1.
+El dueño lo quiere **configurable por centro**. Por tanto: **opción 1**, sustituir el boolean
+`frontdeskAutoPresent` por un tri-estado por centro (p. ej. `frontdeskVentaEntrada:
+"off" | "entra" | "entra_presente"`, nombres en inglés a gusto del BE), con **migración** del valor
+actual (true → `entra_presente`, false → `off`) para no perder la configuración de ningún centro.
+El default para los centros nuevos lo decide el dueño; hoy la mayoría querrá **`entra`** (entra sin
+presente). El FE cambiará el `Switch` por un selector de 3 opciones cuando el contrato esté.
+
+## Normas que el BE debe cumplir en esta entrega (recordatorio del dueño)
+
+API-First + MCP + Swagger + configurable + multi-tenant + RBAC + comentarios en DB y en cada Field +
+spec/plan + TDD + drift-clean + i18n. **Sin hardcode.** UI para TODO el CRUD de la API. **Revisar el
+endpoint CORRECTO, no el más cómodo.** No duplicar código. Sin secretos. **Nunca asumir: investigar y
+revisar en profundidad las veces que haga falta; jamás suponer ni confiar.** Aplica a BE y FE.
+
+- **Permisos por centro:** cada endpoint puede recibir, opcionalmente, el array de centros como
+  parámetro para resolver el permiso (`read`, `write` y los que hagan falta).
+- **Nombres en INGLÉS:** tablas, entidades, campos/fields, comentarios en DB, endpoints, variables,
+  constantes, funciones y métodos.
+- **Probar por HTTP** antes de decir que está bien. Separar lo verificado (con su fuente/comando) de lo
+  supuesto (marcado), nunca mezclados. Graduar el rigor: **máximo** aquí (toca frontdesk/flujo del día).
+- **Las tres preguntas** antes de dar por terminado: ¿lo entiendo? ¿lo puedo mantener? ¿lo probé? Si
+  alguna es NO, no se entrega: se dice que no.
+- **`/review`** antes del merge a main; **`/cso`** (OWASP + STRIDE) por tocar auth/tenancy/RBAC y flujo
+  clínico; entregar completo, no a medias, y proponer por escrito cualquier mejora.
