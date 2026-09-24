@@ -9,6 +9,9 @@ import { getResumenPaciente, type ResumenPaciente } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { HistorialDialog } from "@/components/citas/cita-actions";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Pestañas de la ficha (hub): listas simples FECHA · TIPO/CONCEPTO · ESTADO, cada una llamando SOLO a
 // su endpoint (nada de recomponer lo que el BE ya suma). Extraídas de la página para mantenerla bajo el
@@ -47,6 +50,7 @@ function Tabla({ head, children }: { head: React.ReactNode; children: React.Reac
 export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
   const t = useTranslations("patients.hub");
   const dia = useDia();
+  const [histOpen, setHistOpen] = React.useState(false);
   const citasRes = useResource<{ items: Cita[] }>(() => listCitas({ patientId: pacienteId, limit: 100 }, centro), [pacienteId, centro]);
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data.items : [];
@@ -60,15 +64,64 @@ export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?
   if (citasRes.state.kind === "fail") return <p className="text-sm text-destructive">{citasRes.state.message}</p>;
   if (citas.length === 0) return <Vacio texto={t("noCitas")} />;
   return (
-    <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("status")}</Th></tr>}>
-      {citasOrdenadas.map((c) => (
-        <tr key={c.id} className="border-t">
-          <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
-          <Td>{tipoNombre(c.appointmentTypeId)}</Td>
-          <Td><Estado value={c.status} /></Td>
-        </tr>
-      ))}
-    </Tabla>
+    <div className="space-y-3">
+      {/* El rastro de reagendamientos NO se lista aquí (el BE ya no devuelve las `reprogramada`): va detrás
+          de este botón. Handoff be-citas-el-rastro-va-detras-de-un-boton. */}
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={() => setHistOpen(true)}>{t("historialReagendamientos")}</Button>
+      </div>
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("status")}</Th></tr>}>
+        {citasOrdenadas.map((c) => (
+          <tr key={c.id} className="border-t">
+            <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
+            <Td>{tipoNombre(c.appointmentTypeId)}</Td>
+            <Td><Estado value={c.status} /></Td>
+          </tr>
+        ))}
+      </Tabla>
+      {histOpen && <ReagendamientosDialog pacienteId={pacienteId} centro={centro} onClose={() => setHistOpen(false)} />}
+    </div>
+  );
+}
+
+// Modal con las citas REPROGRAMADAS del paciente (fecha, hora, motivo). Cada una abre su traza completa
+// antes→después reusando HistorialDialog. GET /appointments?patientId&status=reprogramada.
+function ReagendamientosDialog({ pacienteId, centro, onClose }: { pacienteId: string; centro?: string; onClose: () => void }) {
+  const t = useTranslations("patients.hub");
+  const tc = useTranslations("common");
+  const dia = useDia();
+  const res = useResource<{ items: Cita[] }>(
+    () => listCitas({ patientId: pacienteId, status: "reprogramada", limit: 100 }, centro),
+    [pacienteId, centro],
+  );
+  const [trace, setTrace] = React.useState<Cita | null>(null);
+  const items = res.state.kind === "ok" ? res.state.data.items : [];
+  const ordenadas = [...items].sort((a, b) => `${b.date ?? ""} ${b.time ?? ""}`.localeCompare(`${a.date ?? ""} ${a.time ?? ""}`));
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{t("historialReagendamientos")}</DialogTitle>
+        </DialogHeader>
+        {res.state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
+        {res.state.kind === "fail" && <p className="text-sm text-destructive">{res.state.message}</p>}
+        {res.state.kind === "ok" && ordenadas.length === 0 && (
+          <p className="rounded-md bg-muted/40 px-3 py-6 text-center text-sm text-muted-foreground">{t("noReagendamientos")}</p>
+        )}
+        <ol className="space-y-2">
+          {ordenadas.map((c) => (
+            <li key={c.id} className="rounded-md bg-card p-3 text-sm ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-medium tabular-nums">{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</span>
+                <button type="button" onClick={() => setTrace(c)} className="text-xs font-medium text-primary hover:underline">{t("verRastro")}</button>
+              </div>
+              {c.reason && <p className="mt-1 text-xs text-muted-foreground">{c.reason}</p>}
+            </li>
+          ))}
+        </ol>
+        {trace && <HistorialDialog cita={trace} onClose={() => setTrace(null)} />}
+      </DialogContent>
+    </Dialog>
   );
 }
 

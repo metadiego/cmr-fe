@@ -433,7 +433,9 @@ function RescheduleDialog({
 
 // Audit trail viewer (GET /citas/:id/historial). Shows each event with its
 // antes → después (fecha, hora, centro, médico), mapping ids to names.
-function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void }) {
+// Exportado para reusarlo desde la ficha del paciente (historial de reagendamientos) sin duplicar la
+// traza antes→después. No duplicar código (norma).
+export function HistorialDialog({ cita, onClose }: { cita: Cita; onClose: () => void }) {
   const t = useTranslations("appointments.actions");
   const format = useFormatter();
   const tc = useTranslations("common");
