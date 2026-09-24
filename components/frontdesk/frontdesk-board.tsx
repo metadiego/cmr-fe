@@ -35,7 +35,7 @@ import {
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { PresentesMarca } from "@/components/frontdesk/presentes-marca";
+import { ServiciosTabs } from "@/components/frontdesk/servicios-tabs";
 import { PRESENTES_DEFAULTS } from "@/lib/presentes-prefs";
 import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
 import { useRouter, usePathname } from "next/navigation";
@@ -338,6 +338,13 @@ export function FrontdeskBoard() {
   // Preferencias del indicador: por ahora los defaults (el endpoint de preferencias lo confirma el BE;
   // la corporativa mandará sobre la personal). El contrato de la barra no cambia. Handoff presentes-por-servicio.
   const presentesPrefs = PRESENTES_DEFAULTS;
+  // Ocultar tabs de servicio SIN actividad hoy (dueño, 2026-09-24): la fila se veía "aparatosa" con
+  // casi todos en 0. El tab actualmente seleccionado NUNCA se oculta aunque llegue a 0 a mitad de
+  // uso (p.ej. se cancela el único paciente de "APEX") — si no, el filtro botaría al usuario de su
+  // propia vista. Ver .personal/frontdesk-tabs-mayusculas-y-solo-actividad-handoff.md.
+  const serviciosVisibles = serviciosMostrados.filter(
+    (s) => s.slug === tabEfectivo || (presentesPorClave.get(s.slug) ?? 0) > 0,
+  );
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
   const sesiones = React.useMemo(
     () => new Map((sesRes.state.kind === "ok" ? sesRes.state.data : []).map((s) => [s.id, s])),
@@ -672,44 +679,15 @@ export function FrontdeskBoard() {
             onClear={() => { setPacienteFiltro(null); setQ(""); }}
           />
 
-          {/* Pestañas por servicio (color del dato); filtradas al paciente si hay filtro. Vacío no queda mudo. */}
-          {pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0 ? (
-            <p className="mb-4 rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{t("pacienteSinHoy")}</p>
-          ) : (
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {serviciosMostrados.map((s) => {
-              const activo = s.slug === tabEfectivo;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => { setTab(s.slug); setEstadoFiltro(""); }}
-                  className={
-                    "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors " +
-                    (activo
-                      ? "border-transparent bg-primary text-primary-foreground shadow-sm"
-                      : "bg-background text-foreground hover:bg-muted")
-                  }
-                >
-                  {s.color && (
-                    <span
-                      className="size-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: s.color }}
-                      aria-hidden
-                    />
-                  )}
-                  {s.name}
-                  {/* Contador de presentes (la burbuja del legado): color solo donde hay gente. */}
-                  <PresentesMarca
-                    presentes={presentesPorClave.get(s.slug) ?? 0}
-                    prefs={presentesPrefs}
-                    max={presentesMax}
-                  />
-                </button>
-              );
-            })}
-          </div>
-          )}
+          <ServiciosTabs
+            vacioPaciente={!!(pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0)}
+            serviciosVisibles={serviciosVisibles}
+            tabEfectivo={tabEfectivo}
+            onPick={(slug) => { setTab(slug); setEstadoFiltro(""); }}
+            presentesPorClave={presentesPorClave}
+            presentesPrefs={presentesPrefs}
+            presentesMax={presentesMax}
+          />
 
           {/* KPIs = filtros */}
           <div className="mb-4 flex flex-wrap gap-2">
