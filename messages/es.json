@@ -601,6 +601,7 @@
       "service": "Servicio",
       "allServices": "Todos los servicios",
       "technician": "Técnico / Enfermera",
+      "doctor": "Médico",
       "session": "Sesión",
       "invoice": "Factura",
       "concept": "Concepto",

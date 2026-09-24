@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { listCitas, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
+import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
 import { getResumenPaciente, type ResumenPaciente } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
@@ -58,9 +59,17 @@ export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?
   const [histOpen, setHistOpen] = React.useState(false);
   const citasRes = useResource<{ items: Cita[] }>(() => listCitas({ patientId: pacienteId, limit: 100 }, centro), [pacienteId, centro]);
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
+  // La cita solo trae `doctorId` (CitaEntity no incluye el nombre); se resuelve con el roster de médicos
+  // del centro. Un médico de otro centro no estará en la lista → cae a guion (no se inventa nada).
+  const medicosRes = useResource<Personal[]>(() => getMedicos(centro), [centro]);
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data.items : [];
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
+  const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
   const tipoNombre = (id?: string | null) => tipos.find((x) => x.id === id)?.name ?? "—";
+  const medicoNombre = (id?: string | null) => {
+    const m = medicos.find((x) => x.id === id);
+    return m ? [m.name, m.lastName].filter(Boolean).join(" ").trim() || "—" : "—";
+  };
   // Más reciente primero: por fecha y, a igualdad, por hora (ambas descendentes).
   const citasOrdenadas = [...citas].sort((a, b) =>
     `${b.date ?? ""} ${b.time ?? ""}`.localeCompare(`${a.date ?? ""} ${a.time ?? ""}`),
@@ -75,11 +84,12 @@ export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?
       <div className="flex justify-end">
         <Button variant="outline" size="sm" onClick={() => setHistOpen(true)}>{t("historialReagendamientos")}</Button>
       </div>
-      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("status")}</Th></tr>}>
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("doctor")}</Th><Th>{t("status")}</Th></tr>}>
         {citasOrdenadas.map((c) => (
           <tr key={c.id} className="border-t">
             <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
             <Td>{tipoNombre(c.appointmentTypeId)}</Td>
+            <Td>{medicoNombre(c.doctorId)}</Td>
             <Td><Estado value={c.status} /></Td>
           </tr>
         ))}

@@ -601,6 +601,7 @@
       "service": "Service",
       "allServices": "All services",
       "technician": "Technician / Nurse",
+      "doctor": "Doctor",
       "session": "Session",
       "invoice": "Invoice",
       "concept": "Concept",
