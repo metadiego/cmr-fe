@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { HistorialDialog } from "@/components/citas/cita-actions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Pestañas de la ficha (hub): listas simples FECHA · TIPO/CONCEPTO · ESTADO, cada una llamando SOLO a
 // su endpoint (nada de recomponer lo que el BE ya suma). Extraídas de la página para mantenerla bajo el
@@ -132,22 +133,53 @@ function ReagendamientosDialog({ pacienteId, centro, onClose }: { pacienteId: st
 export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
   const t = useTranslations("patients.hub");
   const dia = useDia();
+  const [filtro, setFiltro] = React.useState<string>(""); // "" = todos; si no, serviceId/nombre
   const res = useResource<HistorialSesion[]>(() => getHistorialPaciente(pacienteId, undefined, centro), [pacienteId, centro]);
   const hist = res.state.kind === "ok" ? res.state.data : [];
+  // Más reciente primero.
+  const ordenado = [...hist].sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")));
+  // El filtro SOLO ofrece los servicios que el paciente YA tiene (nada de listar los que no filtrarían).
+  const claveServicio = (s: HistorialSesion) => s.serviceId ?? s.serviceName ?? "";
+  const servicios = React.useMemo(() => {
+    const m = new Map<string, string>();
+    for (const s of hist) {
+      const k = claveServicio(s);
+      if (k) m.set(k, s.serviceName ?? k);
+    }
+    return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [hist]);
+  const filtrado = filtro ? ordenado.filter((s) => claveServicio(s) === filtro) : ordenado;
+
   if (res.state.kind === "loading") return <Vacio texto={t("loading")} />;
   if (res.state.kind === "fail") return <p className="text-sm text-destructive">{res.state.message}</p>;
   if (hist.length === 0) return <Vacio texto={t("noTerapias")} />;
   return (
-    <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("service")}</Th><Th>{t("session")}</Th><Th>{t("status")}</Th></tr>}>
-      {hist.map((s) => (
-        <tr key={s.id} className="border-t">
-          <Td>{dia(s.date)}</Td>
-          <Td>{s.serviceName ?? "—"}</Td>
-          <Td className="tabular-nums text-muted-foreground">{s.sesionNumero != null && s.totalSessions != null ? `${s.sesionNumero}/${s.totalSessions}` : "—"}</Td>
-          <Td><Estado value={s.status} /></Td>
-        </tr>
-      ))}
-    </Tabla>
+    <div className="space-y-3">
+      {/* Filtro por servicio: solo aparece si hay más de uno (con uno solo no filtra nada). */}
+      {servicios.length > 1 && (
+        <div className="flex justify-end">
+          <Select value={filtro || "__all__"} onValueChange={(v) => setFiltro(v === "__all__" ? "" : v)}>
+            <SelectTrigger className="h-9 w-64"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">{t("allServices")}</SelectItem>
+              {servicios.map(([k, nombre]) => (
+                <SelectItem key={k} value={k}>{nombre}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("service")}</Th><Th>{t("session")}</Th><Th>{t("status")}</Th></tr>}>
+        {filtrado.map((s) => (
+          <tr key={s.id} className="border-t">
+            <Td>{dia(s.date)}</Td>
+            <Td>{s.serviceName ?? "—"}</Td>
+            <Td className="tabular-nums text-muted-foreground">{s.sesionNumero != null && s.totalSessions != null ? `${s.sesionNumero}/${s.totalSessions}` : "—"}</Td>
+            <Td><Estado value={s.status} /></Td>
+          </tr>
+        ))}
+      </Tabla>
+    </div>
   );
 }
 

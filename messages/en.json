@@ -599,6 +599,7 @@
       "type": "Type",
       "status": "Status",
       "service": "Service",
+      "allServices": "All services",
       "session": "Session",
       "invoice": "Invoice",
       "concept": "Concept",
