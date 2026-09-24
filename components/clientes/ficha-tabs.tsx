@@ -52,12 +52,16 @@ export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data.items : [];
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const tipoNombre = (id?: string | null) => tipos.find((x) => x.id === id)?.name ?? "—";
+  // Más reciente primero: por fecha y, a igualdad, por hora (ambas descendentes).
+  const citasOrdenadas = [...citas].sort((a, b) =>
+    `${b.date ?? ""} ${b.time ?? ""}`.localeCompare(`${a.date ?? ""} ${a.time ?? ""}`),
+  );
   if (citasRes.state.kind === "loading") return <Vacio texto={t("loading")} />;
   if (citasRes.state.kind === "fail") return <p className="text-sm text-destructive">{citasRes.state.message}</p>;
   if (citas.length === 0) return <Vacio texto={t("noCitas")} />;
   return (
     <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("status")}</Th></tr>}>
-      {citas.map((c) => (
+      {citasOrdenadas.map((c) => (
         <tr key={c.id} className="border-t">
           <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
           <Td>{tipoNombre(c.appointmentTypeId)}</Td>
