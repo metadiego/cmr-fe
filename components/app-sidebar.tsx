@@ -40,37 +40,18 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Estado de expandido/colapsado del nav plegable, recordado en localStorage.
-// Por defecto TODO colapsado (sin preferencia guardada => cerrado): decisión de
-// producto para un rail compacto; el usuario abre lo que usa y se recuerda.
-const NAV_OPEN_KEY = "cmr:nav:open";
-
+// Estado de expandido/colapsado del nav plegable — SOLO en memoria, nunca persistido. Por defecto
+// TODO colapsado. Antes se recordaba en localStorage entre sesiones; con el rail que ahora se abre
+// solo con pasar el mouse (owner's request, 2026-09-23), recordarlo hacía que cada peek mostrara
+// acumulado TODO lo que se hubiera abierto alguna vez — un peek rápido debe mostrar el menú limpio
+// cada vez, no el árbol entero desplegado. `resetAll` se llama al empezar un peek.
 function useNavOpenState() {
   const [open, setOpen] = React.useState<Record<string, boolean>>({});
-  // Se lee DESPUÉS de montar para no romper la hidratación (server = todo cerrado).
-  React.useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(NAV_OPEN_KEY);
-      // Lectura ÚNICA al montar (hidratación: server = todo cerrado). Es el patrón recomendado para
-      // localStorage; el setState aquí no encadena renders (corre una vez). Ver react.dev/you-might-not-need-an-effect.
-      // eslint-disable-next-line
-      if (raw) setOpen(JSON.parse(raw) as Record<string, boolean>);
-    } catch {
-      /* localStorage no disponible: se queda con el default (todo cerrado). */
-    }
-  }, []);
   const setClaveOpen = React.useCallback((clave: string, next: boolean) => {
-    setOpen((prev) => {
-      const updated = { ...prev, [clave]: next };
-      try {
-        window.localStorage.setItem(NAV_OPEN_KEY, JSON.stringify(updated));
-      } catch {
-        /* ignore */
-      }
-      return updated;
-    });
+    setOpen((prev) => ({ ...prev, [clave]: next }));
   }, []);
-  return { isOpen: (c: string) => open[c] === true, setClaveOpen };
+  const resetAll = React.useCallback(() => setOpen({}), []);
+  return { isOpen: (c: string) => open[c] === true, setClaveOpen, resetAll };
 }
 
 // Animación de altura (Radix Collapsible) — keyframes en globals.css.
@@ -85,14 +66,14 @@ const COLLAPSE_ANIM =
 // (buildNavGroups) y se testea ahí. El respaldo del esquema anterior:
 // docs/specs/backups/nav-manifest-y-buckets-respaldo-2026-09-03.md.
 
-export function AppSidebar() {
+export function AppSidebar({ onHoverChange }: { onHoverChange?: (hovering: boolean) => void }) {
   const pathname = usePathname();
   const tRoot = useTranslations();
   const t = useTranslations("nav");
   const menu = useMenu();
   const me = useMe();
   const { can } = useCan();
-  const { state: sidebarState, toggleSidebar } = useSidebar();
+  const { state: sidebarState, toggleSidebar, isMobile } = useSidebar();
   const navOpen = useNavOpenState();
   // En modo icono (rail colapsado) forzamos abierto: si no, no habría destinos que
   // mostrar. En modo expandido respetamos la preferencia (por defecto cerrado).
@@ -256,8 +237,22 @@ export function AppSidebar() {
     ? fullName || (session.email ? session.email.split("@")[0] : "")
     : "";
 
+  // Hover-to-peek (desktop only — touch has no hover, and mobile renders in a Sheet that ignores
+  // this anyway): entering the rail WHILE COLLAPSED opens it; leaving closes it again. Only guards
+  // on "collapsed" so re-entering an already PINNED-open sidebar (header toggle) never resets
+  // sections the user deliberately expanded. Every peek starts from a clean, fully-collapsed menu
+  // (resetAll) so it never shows whatever was left open from a previous visit or a previous peek.
+  const handleMouseEnter =
+    isMobile || sidebarState !== "collapsed"
+      ? undefined
+      : () => {
+          navOpen.resetAll();
+          onHoverChange?.(true);
+        };
+  const handleMouseLeave = isMobile ? undefined : () => onHoverChange?.(false);
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <SidebarHeader>
         {/* Cabecera: marca a la izquierda + botón para plegar/desplegar. Al colapsar (icon) la marca se
             oculta y el botón queda centrado para poder VOLVER a abrir. También se pliega con el rail del

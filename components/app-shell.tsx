@@ -73,12 +73,20 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
     .sort((a, b) => b.route.length - a.route.length)[0]?.item;
   const sectionTitle = active ? labelOf(active) : "";
 
+  // Pinned = the user's deliberate choice (header toggle / Ctrl+B), same cookie-backed state
+  // shadcn always had. Peeking = hovering the collapsed rail (owner's request, 2026-09-23):
+  // a transient, NEVER persisted override — the sidebar shows expanded while the mouse is over
+  // it and collapses again the instant it leaves, without touching the pinned preference. Lifted
+  // here (not inside AppSidebar) because SidebarProvider — the thing peeking has to control — is
+  // the PARENT of AppSidebar.
+  const [pinnedOpen, setPinnedOpen] = React.useState(true);
+  const [peeking, setPeeking] = React.useState(false);
   return (
     <TooltipProvider>
       {/* Aplica el idioma del usuario al arrancar (cookie ↔ /auth/me). No pinta nada. */}
       <LocaleSync />
-      <SidebarProvider>
-        <AppSidebar />
+      <SidebarProvider open={pinnedOpen || peeking} onOpenChange={setPinnedOpen}>
+        <AppSidebar onHoverChange={setPeeking} />
         <ShellBody sectionTitle={sectionTitle} session={session}>{children}</ShellBody>
       </SidebarProvider>
     </TooltipProvider>
