@@ -2286,7 +2286,7 @@ function HistorialModal({
                       </Badge>
                     </td>
                     <td className="px-3 py-2.5">
-                      <span className="font-medium">{r.servicioNombre ?? "—"}</span>
+                      <span className="font-medium">{r.serviceName ?? "—"}</span>
                       <span className="block text-xs text-muted-foreground">
                         {t("histSesion")}: {r.sesionNumero != null && r.totalSessions != null ? `${r.sesionNumero}/${r.totalSessions}` : "—"}
                         {r.areas != null ? ` · ${t("histAreas")}: ${r.areas}` : ""}

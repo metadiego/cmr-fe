@@ -57,6 +57,11 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   const menu = useMenu();
   const me = useMe();
   const session = me.kind === "ok" ? me.me : null;
+  // Sesión válida (/auth/me respondió 200) pero SIN perfil: cuenta autenticada que el BE no resuelve a un
+  // perfil con permisos (ni es master). Antes se veía una pantalla muda; ahora se avisa para diagnosticar
+  // rápido (p. ej. cuenta sin perfil enlazado). Handoff atencion-usuarios-sin-perfil-rbac-handoff-be.
+  const sinPerfil =
+    me.kind === "ok" && !me.me.isMaster && !me.me.profileId && (me.me.permissions?.length ?? 0) === 0;
 
   // Título de sección: el ítem de menú activo más específico (path más largo que
   // matchea la ruta). Deriva del mismo menú del BE; sin match, se omite.
@@ -88,13 +93,21 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   // a flip with no other caller passing an explicit value, so the argument here is meaningless —
   // flipping our OWN previous value is the only way a toggle mid-peek correctly pins open.
   const togglePinned = React.useCallback(() => setPinnedOpen((prev) => !prev), []);
+  // Explicit (non-flip) collapse for colapsarAlInteractuar below: that one means "make sure it's
+  // collapsed", not "toggle" — going through togglePinned there would flip it back OPEN if it
+  // happened to already be collapsed. Peeking is never true when this fires (it can only be true
+  // while the mouse is over the sidebar, and this runs on a pointerdown inside <main>, the
+  // opposite side of the screen), so touching only pinnedOpen is correct here.
+  const collapseNow = React.useCallback(() => setPinnedOpen(false), []);
   return (
     <TooltipProvider>
       {/* Aplica el idioma del usuario al arrancar (cookie ↔ /auth/me). No pinta nada. */}
       <LocaleSync />
       <SidebarProvider open={pinnedOpen || peeking} onOpenChange={togglePinned}>
         <AppSidebar onHoverChange={setPeeking} />
-        <ShellBody sectionTitle={sectionTitle} session={session}>{children}</ShellBody>
+        <ShellBody sectionTitle={sectionTitle} session={session} sinPerfil={sinPerfil} onCollapseRequest={collapseNow}>
+          {children}
+        </ShellBody>
       </SidebarProvider>
     </TooltipProvider>
   );
@@ -102,25 +115,30 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
 
 // Cuerpo del shell (dentro del SidebarProvider para poder plegar el menú). Al interactuar en el
 // CONTENIDO de la derecha (`<main>`), el menú de la izquierda se pliega solo para dar más pantalla.
-// Solo si está abierto (idempotente) y en su modo (escritorio: setOpen; móvil: setOpenMobile). Va en
-// el <main>, NO en el header, para que abrir el menú desde el trigger no lo cierre en el acto.
+// Solo si está abierto (idempotente) y en su modo (escritorio: onCollapseRequest; móvil: setOpenMobile). Va
+// en el <main>, NO en el header, para que abrir el menú desde el trigger no lo cierre en el acto.
 function ShellBody({
   children,
   sectionTitle,
   session,
+  sinPerfil,
+  onCollapseRequest,
 }: {
   children: React.ReactNode;
   sectionTitle: string;
   session: unknown;
+  sinPerfil?: boolean;
+  onCollapseRequest: () => void;
 }) {
-  const { open, setOpen, openMobile, setOpenMobile, isMobile } = useSidebar();
+  const t = useTranslations("shell");
+  const { open, openMobile, setOpenMobile, isMobile } = useSidebar();
   const colapsarAlInteractuar = React.useCallback(() => {
     if (isMobile) {
       if (openMobile) setOpenMobile(false);
     } else if (open) {
-      setOpen(false);
+      onCollapseRequest();
     }
-  }, [isMobile, open, openMobile, setOpen, setOpenMobile]);
+  }, [isMobile, open, openMobile, onCollapseRequest, setOpenMobile]);
   return (
     <SidebarInset>
       {/* Header blanco fijo (no bg-background): el branding del centro sobreescribe --background a un
@@ -138,7 +156,14 @@ function ShellBody({
       {/* Lienzo estándar off-white (EHR): cubre el --app-bg-image de branding para que ninguna página
           lo deje traslucir; las tarjetas blancas resaltan encima. Interactuar aquí pliega el menú. */}
       <main className="flex-1 bg-muted p-6" onPointerDownCapture={colapsarAlInteractuar}>
-        {children}
+        {sinPerfil ? (
+          <div className="mx-auto mt-16 max-w-md rounded-md border border-warning/40 bg-warning/10 p-6 text-center">
+            <p className="text-base font-semibold text-warning-foreground">{t("noProfileTitle")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("noProfileBody")}</p>
+          </div>
+        ) : (
+          children
+        )}
       </main>
     </SidebarInset>
   );

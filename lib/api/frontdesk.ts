@@ -492,13 +492,14 @@ export function getNurseStatusActuales(fecha: string, centroId?: string): Promis
 }
 // Historial de terapias del paciente por servicio (PR #148) — alimenta el modal "Historial de terapias".
 // Todo proyectado por el BE (X/Y, áreas, staff); el FE solo pinta. Migradas viejas → sesionNumero/staff null.
-// `servicioNombre`/`sesionNumero`/`areas`/`staffNombre` NO en el mapa — dejados en español.
+// El nombre del servicio viaja en INGLÉS bajo v2 (`serviceName`); `sesionNumero`/`areas`/`staffNombre` NO
+// están en el mapa y quedan en español. Handoff HANDOFF-terapias-del-paciente-sin-guiones.
 export type HistorialSesion = {
   id: string;
   date: string;
   status: string;
   serviceId: string;
-  servicioNombre: string | null;
+  serviceName: string | null;
   sesionNumero: number | null;
   totalSessions: number | null;
   areas: number | null;
