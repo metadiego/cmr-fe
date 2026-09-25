@@ -8,9 +8,8 @@ import type { PresentesPrefs } from "@/lib/presentes-prefs";
 
 // Pestañas por servicio (color del dato); filtradas al paciente si hay filtro. Vacío no queda mudo.
 // Extraído de frontdesk-board.tsx para mantener ese archivo bajo su tope de líneas (DEBT,
-// eslint.config.mjs). `serviciosVisibles` == `serviciosMostrados` hoy — el filtro por actividad se
-// revirtió ahí mismo (ver el comentario en frontdesk-board.tsx: el conteo disponible es "presente
-// ahora mismo", no "tiene citas hoy", y escondía servicios enteros sin forma de volver a abrirlos).
+// eslint.config.mjs). `serviciosVisibles` llega ya filtrado por `citasHoy` desde frontdesk-board.tsx
+// (el seleccionado nunca se oculta; sin dato resuelto, todos visibles) — ver el comentario ahí.
 export function ServiciosTabs({
   vacioPaciente,
   serviciosVisibles,

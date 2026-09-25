@@ -342,7 +342,7 @@ export function FrontdeskBoard() {
   // Ocultar tabs sin citas hoy (el seleccionado nunca se oculta); sin dato resuelto, TODOS visibles.
   // Handoff frontdesk-tabs-mayusculas-y-solo-actividad.
   const serviciosVisibles =
-    presentesRes.state.kind === "ok"
+    presentesRes.state.kind === "ok" && presentesRes.state.data
       ? serviciosMostrados.filter((s) => s.slug === tabEfectivo || (citasPorClave.get(s.slug) ?? 0) > 0)
       : serviciosMostrados;
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
