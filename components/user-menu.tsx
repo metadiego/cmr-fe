@@ -16,7 +16,7 @@ import {
 
 import { setLocale } from "@/i18n/locale-actions";
 import { locales, type Locale } from "@/i18n/config";
-import { setMyLanguage } from "@/lib/api/preferences";
+import { setMyLanguage, setMyTheme } from "@/lib/api/preferences";
 import { toastError } from "@/lib/api/errors";
 import { createClient } from "@/lib/supabase/client";
 import { useMe } from "@/hooks/use-me";
@@ -102,6 +102,13 @@ export function UserMenu() {
     void setMyLanguage(next).catch((e) => toastError(e, tRoot));
   }
 
+  function changeTheme(next: string) {
+    // Doble escritura, como el idioma: setTheme lo aplica al instante en este navegador, y el PUT lo
+    // GUARDA en el perfil para que viaje con la persona a cualquier equipo. Contrato: "claro" | "oscuro".
+    setTheme(next);
+    void setMyTheme(next === "dark" ? "oscuro" : "claro").catch((e) => toastError(e, tRoot));
+  }
+
   return (
     <DropdownMenu>
       <Tooltip content={displayName}>
@@ -144,7 +151,7 @@ export function UserMenu() {
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           {t("theme")}
         </DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={theme ?? "light"} onValueChange={setTheme}>
+        <DropdownMenuRadioGroup value={theme ?? "light"} onValueChange={changeTheme}>
           <DropdownMenuRadioItem value="light">{t("themeLight")}</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="dark">{t("themeDark")}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>

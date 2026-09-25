@@ -64,6 +64,12 @@ export interface ThemeConfig {
    * guardarlo hay que MEZCLARLO con la capa del usuario (no reemplazarla). Handoff idioma-por-usuario.
    */
   idioma?: string;
+  /**
+   * Tema claro/oscuro elegido por la persona (capa `usuario`): "claro" | "oscuro". El BE lo resuelve
+   * por precedencia y lo devuelve ya resuelto en /me/preferences (`tema`). Vive en el mismo blob que la
+   * apariencia → al guardarlo se MEZCLA con la capa del usuario. Handoff be-el-tema-arranca-en-claro.
+   */
+  tema?: string;
 }
 
 // Redesign navy (2026-09): el ÚNICO color personalizable es el color de marca

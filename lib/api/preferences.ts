@@ -27,6 +27,12 @@ export interface PreferenceLayers {
 export interface MyPreferences {
   effective: ThemeConfig;
   layers: PreferenceLayers;
+  // Tema RESUELTO por el BE (igual que el idioma): "claro" por defecto; gana la elección del usuario en
+  // cualquier máquina; un valor raro cae en "claro". El FE lo aplica al arrancar. Handoff be-el-tema-arranca-en-claro.
+  tema?: string;
+  temasDisponibles?: string[];
+  idioma?: string;
+  idiomasDisponibles?: string[];
 }
 
 // Anonymous (landing/login): system + center defaults only.
@@ -61,6 +67,21 @@ export async function setMyLanguage(idioma: string | null): Promise<ThemeConfig>
   delete usuario.language;
   if (idioma) usuario.idioma = idioma;
   else delete usuario.idioma;
+  return updateMyPreferences(usuario);
+}
+
+// Guarda SOLO el tema en la capa del usuario, sin borrar el resto de su apariencia personal (colores,
+// radio, fondo, idioma). Mismo patrón que setMyLanguage: leer la capa `usuario` y MEZCLAR `tema`. Valores
+// del contrato: "claro" | "oscuro"; `null` vuelve al defecto (quita la clave → se resuelve claro). Handoff
+// be-el-tema-arranca-en-claro.
+export async function setMyTheme(tema: string | null): Promise<ThemeConfig> {
+  const prefs = await getMyPreferences();
+  // PRESERVAR toda la capa del usuario (idioma/colores/fondo) y solo mezclar `tema`. NO borrar `language`
+  // aquí: hoy la capa guarda el idioma bajo esa clave (verificado en vivo: layers.user = {language:"es"}),
+  // y borrarla dejaría al usuario sin idioma. Solo setMyLanguage migra esa clave.
+  const usuario: ThemeConfig = { ...(prefs.layers.user ?? {}) };
+  if (tema) usuario.tema = tema;
+  else delete usuario.tema;
   return updateMyPreferences(usuario);
 }
 

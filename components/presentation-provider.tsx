@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTheme } from "next-themes";
 
 import { useIsDark } from "@/hooks/use-is-dark";
 import { createClient } from "@/lib/supabase/client";
@@ -37,6 +38,7 @@ export function useHasCustomBackground(): boolean {
 // theme flip, not another network round trip.
 export function PresentationProvider({ children }: { children: React.ReactNode }) {
   const isDark = useIsDark();
+  const { setTheme } = useTheme();
   const [effective, setEffective] = React.useState<ThemeConfig | null>(null);
   const [hasBackground, setHasBackground] = React.useState(false);
 
@@ -55,6 +57,13 @@ export function PresentationProvider({ children }: { children: React.ReactNode }
         setEffective(res?.effective ?? null);
         const bg = res?.effective?.background;
         setHasBackground(!!(bg?.imageUrl || bg?.videoUrl));
+        // El tema vive en el PERFIL, no en el navegador: se aplica el que resuelve el BE (claro por
+        // defecto; oscuro solo si el usuario lo eligió), IGNORANDO lo que hubiera en localStorage — eso
+        // es justo lo que antes dejaba el oscuro pegado en un Chrome. Handoff be-el-tema-arranca-en-claro.
+        if (session) {
+          const tema = (res as MyPreferences)?.tema;
+          setTheme(tema === "oscuro" ? "dark" : "light");
+        }
       } catch {
         // No preferences / not reachable → keep globals.css defaults.
       }
@@ -63,7 +72,8 @@ export function PresentationProvider({ children }: { children: React.ReactNode }
     return () => {
       active = false;
     };
-  }, []);
+    // setTheme de next-themes es estable; se incluye para satisfacer exhaustive-deps sin re-fetch.
+  }, [setTheme]);
 
   React.useEffect(() => {
     if (!effective) return;
