@@ -1307,7 +1307,7 @@
   },
   "appearance": {
     "title": "Apariencia",
-    "description": "Tu foto de perfil.",
+    "description": "Tu foto de perfil, tu color de marca y el fondo de tu pantalla.",
     "brandColor": "Color de marca",
     "brandHint": "El resto del diseño se genera a partir de este color para mantener todo coherente.",
     "brand_navy": "Azul marino",
@@ -1321,7 +1321,15 @@
     "avatarRemove": "Quitar",
     "avatarSaved": "Foto actualizada.",
     "avatarRemoved": "Foto eliminada.",
-    "uploading": "Subiendo…"
+    "uploading": "Subiendo…",
+    "backgroundTitle": "Fondo de pantalla",
+    "backgroundImage": "Imagen",
+    "backgroundVideo": "Video",
+    "backgroundEmpty": "Sin fondo personalizado.",
+    "backgroundUpload": "Subir",
+    "backgroundRemove": "Quitar fondo",
+    "lockedTitle": "Tu centro fijó estos colores para todos",
+    "lockedBody": "El administrador de tu centro bloqueó la apariencia — no se puede personalizar mientras esté activo."
   },
   "apiHealth": {
     "title": "Prueba de conexión con el API",
@@ -3555,7 +3563,9 @@
     "loading": "Cargando…",
     "noAccess": "No tienes acceso a la apariencia corporativa. Tu apariencia personal se cambia desde tu avatar.",
     "overrideRemoveConfirm": "¿Desactivar «{nombre}»? Todos volverán a la apariencia que les toque.",
-    "centroVacio": "No hay centros disponibles para tu usuario."
+    "centroVacio": "No hay centros disponibles para tu usuario.",
+    "lockLabel": "Bloquear estos colores para todo el centro",
+    "lockHint": "Nadie de este centro podrá personalizar su propio color mientras esté activo."
   },
   "numeracion": {
     "title": "Numeración de documentos",

@@ -88,5 +88,12 @@ export function configToCssVars(config: ThemeConfig | null | undefined): Record<
   const ancho = Number(config.recibo?.anchoMm);
   if (Number.isFinite(ancho) && ancho > 0) vars["--recibo-ancho"] = `${ancho}mm`;
 
+  // Fondo de pantalla — solo IMAGEN se pinta por CSS var (globals.css ya tiene el hook
+  // --app-bg-image, wired aquí por primera vez, 2026-09-25). Video no puede ser un valor de
+  // background-image: PresentationProvider monta un <video> real cuando hay videoUrl.
+  if (config.background?.imageUrl) {
+    vars["--app-bg-image"] = `url("${config.background.imageUrl}")`;
+  }
+
   return vars;
 }

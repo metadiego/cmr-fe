@@ -25,6 +25,7 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -67,6 +68,15 @@ export default function AparienciaCorporativaPage() {
   const [centro, setCentro] = React.useState<Estado<ThemeConfig>>({ kind: "loading" });
   const originalCentro = React.useRef<ThemeConfig | null>(null);
   const [guardandoCentro, setGuardandoCentro] = React.useState(false);
+  // GET /preferences/center/:id todavía NO devuelve si el centro está bloqueado (verificado en vivo,
+  // 2026-09-25 — solo trae el config) — el switch arranca en `false` sin poder reflejar el estado
+  // real hasta que el BE lo agregue a esa respuesta. Se resetea al cambiar de centro para no mostrar
+  // el valor del centro anterior. Ver .personal/apariencia-personal-restaurar-y-bloqueo-de-centro-handoff.md.
+  const [bloqueadoCentro, setBloqueadoCentro] = React.useState(false);
+  // Solo se manda `bloqueado` en el PUT si el admin de verdad tocó el switch en ESTA sesión — si no,
+  // como no se puede leer el valor real de hoy, guardar solo un cambio de color desbloquearía por
+  // accidente un centro que estaba bloqueado (el PUT ignora `bloqueado` ausente, no lo toca).
+  const [bloqueadoTocado, setBloqueadoTocado] = React.useState(false);
 
   // --- OVERRIDES ---
   const [overrides, setOverrides] = React.useState<Override[]>([]);
@@ -101,6 +111,8 @@ export default function AparienciaCorporativaPage() {
         if (!active) return;
         originalCentro.current = c;
         setCentro({ kind: "ok", value: c });
+        setBloqueadoCentro(false);
+        setBloqueadoTocado(false);
       })
       .catch((e) => active && setCentro({ kind: "fail", message: apiErrorMessage(e) }));
     return () => {
@@ -130,7 +142,9 @@ export default function AparienciaCorporativaPage() {
       await updateCentroPreferences(
         centroId,
         mezclarSoloTema(originalCentro.current, centro.value),
+        bloqueadoTocado ? bloqueadoCentro : undefined,
       );
+      setBloqueadoTocado(false);
       toast.success(t("savedCentro"));
     } catch (e) {
       toast.error(apiErrorMessage(e));
@@ -260,8 +274,25 @@ export default function AparienciaCorporativaPage() {
                   value={centro.value}
                   onChange={(value) => setCentro({ kind: "ok", value })}
                 />
+                <div className="mt-6 flex items-center gap-3 rounded-md border p-3">
+                  <Switch
+                    id="ap-bloqueado"
+                    checked={bloqueadoCentro}
+                    onCheckedChange={(v) => {
+                      setBloqueadoCentro(v);
+                      setBloqueadoTocado(true);
+                    }}
+                    aria-label={t("lockLabel")}
+                  />
+                  <Label htmlFor="ap-bloqueado" className="flex-1 cursor-pointer">
+                    {t("lockLabel")}
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      {t("lockHint")}
+                    </span>
+                  </Label>
+                </div>
                 <Button
-                  className="mt-6"
+                  className="mt-4"
                   onClick={guardarCentro}
                   disabled={guardandoCentro || !centroId}
                 >
