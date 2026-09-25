@@ -338,13 +338,11 @@ export function FrontdeskBoard() {
   // Preferencias del indicador: por ahora los defaults (el endpoint de preferencias lo confirma el BE;
   // la corporativa mandará sobre la personal). El contrato de la barra no cambia. Handoff presentes-por-servicio.
   const presentesPrefs = PRESENTES_DEFAULTS;
-  // Ocultar tabs de servicio SIN actividad hoy (dueño, 2026-09-24): la fila se veía "aparatosa" con
-  // casi todos en 0. El tab actualmente seleccionado NUNCA se oculta aunque llegue a 0 a mitad de
-  // uso (p.ej. se cancela el único paciente de "APEX") — si no, el filtro botaría al usuario de su
-  // propia vista. Ver .personal/frontdesk-tabs-mayusculas-y-solo-actividad-handoff.md.
-  const serviciosVisibles = serviciosMostrados.filter(
-    (s) => s.slug === tabEfectivo || (presentesPorClave.get(s.slug) ?? 0) > 0,
-  );
+  // REVERTIDO (2026-09-24): `presentesPorClave` cuenta "presente AHORA MISMO", no "tiene citas hoy"
+  // (lib/api/frontdesk.ts) — filtrar tabs por ese conteo dejó 18 de 19 servicios de Bayamón
+  // imposibles de abrir (el tab es la ÚNICA forma de cambiar de tablero). Sin dato de "actividad del
+  // día" del BE, no hay filtro seguro todavía. Ver el handoff de esta pantalla en `.personal/`.
+  const serviciosVisibles = serviciosMostrados;
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
   const sesiones = React.useMemo(
     () => new Map((sesRes.state.kind === "ok" ? sesRes.state.data : []).map((s) => [s.id, s])),
