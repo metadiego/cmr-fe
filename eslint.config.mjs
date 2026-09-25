@@ -19,7 +19,7 @@ import nextTs from "eslint-config-next/typescript";
 const CEILING = 600;
 
 const DEBT = {
-  "components/frontdesk/frontdesk-board.tsx": 2495,
+  "components/frontdesk/frontdesk-board.tsx": 2473,
   "app/(app)/billing/invoices/[id]/page.tsx": 2274,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,
