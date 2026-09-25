@@ -2,12 +2,15 @@
 
 import * as React from "react";
 
+import { useIsDark } from "@/hooks/use-is-dark";
 import { createClient } from "@/lib/supabase/client";
 import {
   getPublicPreferences,
   getMyPreferences,
+  type PublicPreferences,
+  type MyPreferences,
 } from "@/lib/api/preferences";
-import { configToCssVars } from "@/lib/theme/config";
+import { configToCssVars, type ThemeConfig } from "@/lib/theme/config";
 
 // Whether AppShell's <main> (and anything else opaque) should back off to let the personal/center
 // background show through the gaps. false by default: nobody's screen changes unless they (or their
@@ -24,13 +27,17 @@ export function useHasCustomBackground(): boolean {
 // Paints the effective theme (config por capas #51) by setting CSS custom
 // properties on <html>. The BE resolves precedence (override → user → center →
 // system); we only apply `effective`. If anything fails we keep the globals.css
-// defaults. next-themes still owns light/dark.
-//
-// Note: this fetches client-side, so a custom theme applies just after mount
-// (no flash for default themes, since effective == globals.css). Server-side
-// injection is a future optimization.
+// defaults. next-themes still owns light/dark — but a brand color's derived
+// --accent tint DOES depend on which one is active (lib/theme/brand.ts), so this
+// re-applies whenever the `dark` class flips, not just once at mount (2026-09-25
+// review of #69: toggling the theme was leaving a stale, wrong-mode accent tint
+// stuck until a hard reload — next-themes' own `resolvedTheme` wasn't reliably
+// propagating to this consumer in time, `useIsDark`'s MutationObserver is). The
+// fetch itself stays a one-time thing — only the CSS-var application re-runs on a
+// theme flip, not another network round trip.
 export function PresentationProvider({ children }: { children: React.ReactNode }) {
-  const [videoUrl, setVideoUrl] = React.useState<string | null>(null);
+  const isDark = useIsDark();
+  const [effective, setEffective] = React.useState<ThemeConfig | null>(null);
   const [hasBackground, setHasBackground] = React.useState(false);
 
   React.useEffect(() => {
@@ -41,27 +48,12 @@ export function PresentationProvider({ children }: { children: React.ReactNode }
         const {
           data: { session },
         } = await createClient().auth.getSession();
-        const res = session
+        const res: PublicPreferences | MyPreferences = session
           ? await getMyPreferences()
           : await getPublicPreferences();
         if (!active) return;
-
-        const vars = configToCssVars(res?.effective);
-        const el = document.documentElement;
-        for (const [name, value] of Object.entries(vars)) {
-          el.style.setProperty(name, value);
-        }
-        // El ancho del recibo por centro se aplica por la variable --recibo-ancho (la escribe
-        // configToCssVars desde effective.recibo.anchoMm) que usa `.recibo-print` como ancho del
-        // CONTENIDO. No inyectamos `@page size`: `<medida> auto` es inválido y romper la página a
-        // Letter; el papel lo define el media térmico elegido en el driver.
-
-        // Imagen: --app-bg-image ya la pinta configToCssVars y globals.css la aplica en <body>
-        // (background-image/size/position/attachment) — nada más que hacer aquí. Video: no hay
-        // forma de hacer loop de un <video> por CSS puro, así que se monta un elemento real, fijo,
-        // detrás de todo. Mutuamente excluyentes (ThemeEditor nunca guarda ambos a la vez).
+        setEffective(res?.effective ?? null);
         const bg = res?.effective?.background;
-        setVideoUrl(bg?.videoUrl ?? null);
         setHasBackground(!!(bg?.imageUrl || bg?.videoUrl));
       } catch {
         // No preferences / not reachable → keep globals.css defaults.
@@ -72,6 +64,21 @@ export function PresentationProvider({ children }: { children: React.ReactNode }
       active = false;
     };
   }, []);
+
+  React.useEffect(() => {
+    if (!effective) return;
+    const vars = configToCssVars(effective);
+    const el = document.documentElement;
+    for (const [name, value] of Object.entries(vars)) {
+      el.style.setProperty(name, value);
+    }
+    // El ancho del recibo por centro se aplica por la variable --recibo-ancho (la escribe
+    // configToCssVars desde effective.recibo.anchoMm) que usa `.recibo-print` como ancho del
+    // CONTENIDO. No inyectamos `@page size`: `<medida> auto` es inválido y romper la página a
+    // Letter; el papel lo define el media térmico elegido en el driver.
+  }, [effective, isDark]);
+
+  const videoUrl = effective?.background?.videoUrl ?? null;
 
   return (
     <BackgroundContext.Provider value={hasBackground}>

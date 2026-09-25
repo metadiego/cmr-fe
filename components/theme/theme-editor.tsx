@@ -13,6 +13,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useIsDark } from "@/hooks/use-is-dark";
 
 // Selector de COLOR DE MARCA + fondo de página (imagen o video). Controlado: el padre es dueño del
 // `value` y lo persiste. Previsualiza escribiendo las vars derivadas en <html> (el padre recarga al
@@ -32,15 +33,20 @@ export function ThemeEditor({
   disabled?: boolean;
 }) {
   const t = useTranslations("appearance");
+  const isDark = useIsDark();
 
   // Color: se queda "pegado" en <html> hasta que se guarda y la página recarga al estado
   // autoritativo (comportamiento de siempre, sin limpieza — cambiar de pantalla sin guardar no debe
-  // devolver la app entera al color por defecto a medio uso).
+  // devolver la app entera al color por defecto a medio uso). SÍ depende de `isDark`: el tinte de
+  // --accent que deriveBrandVars calcula es distinto en claro/oscuro (lib/theme/brand.ts), así que
+  // togglear el tema mientras este editor está abierto tiene que recalcularlo, no dejarlo pegado del
+  // modo con el que se abrió la pantalla (encontrado en la revisión de #69 — next-themes'
+  // `resolvedTheme` no bastaba para forzar el recálculo en este componente, `useIsDark` sí).
   React.useEffect(() => {
     const vars = configToCssVars(value);
     const el = document.documentElement;
     for (const [name, v] of Object.entries(vars)) el.style.setProperty(name, v);
-  }, [value]);
+  }, [value, isDark]);
 
   // Fondo de imagen: a diferencia del color, esta pantalla ofrece un botón para QUITARLO — sin
   // limpieza, --app-bg-image se quedaría pegado en <html> para siempre tras "Quitar fondo" o al
