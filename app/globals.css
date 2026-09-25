@@ -103,6 +103,61 @@
     --sidebar-ring: oklch(0.53 0.10 250);
 }
 
+/* Modo oscuro (owner's request, 2026-09-24): paleta tipo editor de código — carbón casi negro,
+   tarjetas apenas más claras que el fondo, texto gris claro, acentos discretos. Referencia real: la
+   captura que el dueño mandó (VS Code + este mismo panel de Claude Code), no un dark mode genérico
+   invertido — de ahí los tintes neutros (hue ~260, chroma bajo) en vez de oscurecer el azul de marca
+   tal cual. El rail lateral se acerca a la misma familia neutra/carbón en vez de su navy de modo
+   claro, para que todo el shell luzca de una sola pieza al cambiar de tema. */
+.dark {
+    --background: oklch(0.16 0.004 260);
+    --foreground: oklch(0.93 0.004 260);
+    --card: oklch(0.20 0.005 260);
+    --card-foreground: oklch(0.93 0.004 260);
+    --popover: oklch(0.20 0.005 260);
+    --popover-foreground: oklch(0.93 0.004 260);
+    /* Primario/destructivo se quedan a la MISMA luminosidad que en modo claro (curado en brand.ts:
+       "todos a ~L0.53 para contraste garantizado con texto blanco") — ese contraste no depende del
+       fondo de la página, solo del propio botón, así que el texto sigue blanco en ambos modos. */
+    --primary: oklch(0.53 0.10 250);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.25 0.006 260);
+    --secondary-foreground: oklch(0.85 0.01 260);
+    --muted: oklch(0.22 0.006 260);
+    --muted-foreground: oklch(0.62 0.015 260);
+    --accent: oklch(0.27 0.03 250);
+    --accent-foreground: oklch(0.85 0.02 250);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(1 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 12%);
+    --ring: oklch(0.62 0.12 250);
+
+    --success: oklch(0.30 0.05 150);
+    --success-foreground: oklch(0.82 0.09 150);
+    --warning: oklch(0.32 0.06 75);
+    --warning-foreground: oklch(0.84 0.10 75);
+    --info: oklch(0.27 0.03 250);
+    --info-foreground: oklch(0.84 0.05 250);
+
+    --overlay: oklch(0 0 0 / 0.7);
+
+    --chart-1: oklch(0.65 0.12 250);
+    --chart-2: oklch(0.58 0.11 252);
+    --chart-3: oklch(0.50 0.10 255);
+    --chart-4: oklch(0.42 0.08 258);
+    --chart-5: oklch(0.32 0.06 262);
+
+    --sidebar: oklch(0.13 0.01 260);
+    --sidebar-foreground: oklch(0.85 0.01 260);
+    --sidebar-primary: oklch(0.53 0.10 250);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(1 0 0 / 6%);
+    --sidebar-accent-foreground: oklch(1 0 0);
+    --sidebar-border: oklch(1 0 0 / 8%);
+    --sidebar-ring: oklch(0.53 0.10 250);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
