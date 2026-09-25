@@ -10,9 +10,18 @@ export interface PublicPreferences {
 
 export interface PreferenceLayers {
   sistema?: ThemeConfig | null;
-  centro?: ThemeConfig | null;
-  usuario?: ThemeConfig | null;
+  // `centro`/`usuario` are opaque-to-api-ingles at the TOP level but "center"/"user" happen to be in
+  // its shared field map, so /me/preferences answers with these two translated to English while
+  // `sistema`/`override`/`centroBloqueado` stay Spanish — verified live, same pattern as agenda-dia's
+  // columns/rows split. Fixed here; was wrongly typed `centro`/`usuario` before (silently broke
+  // setMyLanguage's read of the user's own layer).
+  center?: ThemeConfig | null;
+  user?: ThemeConfig | null;
   override?: ThemeConfig | null;
+  // True when the center's admin locked its color for everyone (docs/specs in cmr-be:
+  // centro-bloquea-apariencia-personal.md) — `effective` already resolves with the right
+  // precedence when this is true; the FE only uses this to show the notice/disable the picker.
+  centroBloqueado?: boolean;
 }
 
 export interface MyPreferences {
@@ -45,7 +54,11 @@ export function updateMyPreferences(config: ThemeConfig): Promise<ThemeConfig> {
 // solo ofrece los de /auth/me, así que no debería pasar. Handoff idioma-por-usuario.
 export async function setMyLanguage(idioma: string | null): Promise<ThemeConfig> {
   const prefs = await getMyPreferences();
-  const usuario: ThemeConfig = { ...(prefs.layers.usuario ?? {}) };
+  const usuario: ThemeConfig & { language?: unknown } = { ...(prefs.layers.user ?? {}) };
+  // The raw layer stores it as `language` (api-inglés translates it that way — verified live), but
+  // every PUT the FE has ever made writes `idioma`; drop the stale English key so a save never sends
+  // both and leaves BE to guess which one is current.
+  delete usuario.language;
   if (idioma) usuario.idioma = idioma;
   else delete usuario.idioma;
   return updateMyPreferences(usuario);
@@ -64,6 +77,10 @@ export function updateSystemPreferences(config: ThemeConfig): Promise<ThemeConfi
   });
 }
 
+// Verified live (2026-09-25): this GET still answers with ONLY the config blob, no `bloqueado` —
+// the admin screen has no way to show whether a center is CURRENTLY locked before saving. Flagged
+// back in .personal/apariencia-personal-restaurar-y-bloqueo-de-centro-handoff.md; the PUT below
+// already accepts it per that same handoff.
 export function getCentroPreferences(centroId: string): Promise<ThemeConfig> {
   return apiFetch<ThemeConfig>(`/preferences/center/${centroId}`);
 }
@@ -71,10 +88,13 @@ export function getCentroPreferences(centroId: string): Promise<ThemeConfig> {
 export function updateCentroPreferences(
   centroId: string,
   config: ThemeConfig,
+  // Omit to leave the lock untouched (e.g. saving just a color change) — never sent as `false`
+  // unless the admin explicitly flips the switch off.
+  bloqueado?: boolean,
 ): Promise<ThemeConfig> {
   return apiFetch<ThemeConfig>(`/preferences/center/${centroId}`, {
     method: "PUT",
-    body: JSON.stringify({ config }),
+    body: JSON.stringify(bloqueado === undefined ? { config } : { config, bloqueado }),
   });
 }
 

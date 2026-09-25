@@ -1307,7 +1307,7 @@
   },
   "appearance": {
     "title": "Appearance",
-    "description": "Your profile photo.",
+    "description": "Your profile photo, your brand color, and your screen background.",
     "brandColor": "Brand color",
     "brandHint": "The rest of the design is generated from this color to keep everything cohesive.",
     "brand_navy": "Navy",
@@ -1321,7 +1321,15 @@
     "avatarRemove": "Remove",
     "avatarSaved": "Photo updated.",
     "avatarRemoved": "Photo removed.",
-    "uploading": "Uploading…"
+    "uploading": "Uploading…",
+    "backgroundTitle": "Screen background",
+    "backgroundImage": "Image",
+    "backgroundVideo": "Video",
+    "backgroundEmpty": "No custom background.",
+    "backgroundUpload": "Upload",
+    "backgroundRemove": "Remove background",
+    "lockedTitle": "Your center set these colors for everyone",
+    "lockedBody": "Your center's admin locked the appearance — it can't be personalized while that's active."
   },
   "apiHealth": {
     "title": "API connection test",
@@ -3555,7 +3563,9 @@
     "loading": "Loading…",
     "noAccess": "You do not have access to the corporate appearance. Your personal look is set from your avatar.",
     "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
-    "centroVacio": "No centers available for your user."
+    "centroVacio": "No centers available for your user.",
+    "lockLabel": "Lock these colors for the whole center",
+    "lockHint": "No one at this center will be able to personalize their own color while this is on."
   },
   "numeracion": {
     "title": "Document numbering",
