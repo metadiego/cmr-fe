@@ -323,26 +323,28 @@ export function FrontdeskBoard() {
     () => (gate.centro ? getPresentes(gate.centro) : Promise.resolve(null)),
     [gate.centro, fecha],
   );
-  const presentesPorClave = React.useMemo(() => {
-    const m = new Map<string, number>();
+  // `present` = ahora mismo; `citasHoy` = agenda de hoy, dato correcto para si un tab muestra algo
+  // (lib/api/frontdesk.ts; `present` NO sirve para eso).
+  const [presentesPorClave, citasPorClave] = React.useMemo(() => {
+    const p = new Map<string, number>(), c = new Map<string, number>();
     if (presentesRes.state.kind === "ok" && presentesRes.state.data) {
-      for (const s of presentesRes.state.data.services) m.set(s.slug, s.present);
+      for (const s of presentesRes.state.data.services) { p.set(s.slug, s.present); c.set(s.slug, s.citasHoy); }
     }
-    return m;
+    return [p, c];
   }, [presentesRes.state]);
   const presentesMax = React.useMemo(() => {
     let mx = 1;
     for (const v of presentesPorClave.values()) mx = Math.max(mx, v);
     return mx;
   }, [presentesPorClave]);
-  // Preferencias del indicador: por ahora los defaults (el endpoint de preferencias lo confirma el BE;
-  // la corporativa mandará sobre la personal). El contrato de la barra no cambia. Handoff presentes-por-servicio.
+  // Preferencias del indicador: por ahora los defaults (BE confirma el endpoint). Handoff presentes-por-servicio.
   const presentesPrefs = PRESENTES_DEFAULTS;
-  // REVERTIDO (2026-09-24): `presentesPorClave` cuenta "presente AHORA MISMO", no "tiene citas hoy"
-  // (lib/api/frontdesk.ts) — filtrar tabs por ese conteo dejó 18 de 19 servicios de Bayamón
-  // imposibles de abrir (el tab es la ÚNICA forma de cambiar de tablero). Sin dato de "actividad del
-  // día" del BE, no hay filtro seguro todavía. Ver el handoff de esta pantalla en `.personal/`.
-  const serviciosVisibles = serviciosMostrados;
+  // Ocultar tabs sin citas hoy (el seleccionado nunca se oculta); sin dato resuelto, TODOS visibles.
+  // Handoff frontdesk-tabs-mayusculas-y-solo-actividad.
+  const serviciosVisibles =
+    presentesRes.state.kind === "ok"
+      ? serviciosMostrados.filter((s) => s.slug === tabEfectivo || (citasPorClave.get(s.slug) ?? 0) > 0)
+      : serviciosMostrados;
   const board = boardRes.state.kind === "ok" ? boardRes.state.data : null;
   const sesiones = React.useMemo(
     () => new Map((sesRes.state.kind === "ok" ? sesRes.state.data : []).map((s) => [s.id, s])),
