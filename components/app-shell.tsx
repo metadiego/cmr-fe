@@ -22,6 +22,8 @@ import { SearchBar } from "@/components/search-bar";
 import { UserMenu } from "@/components/user-menu";
 import { LocaleSync } from "@/components/locale-sync";
 import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
+import { useHasCustomBackground } from "@/components/presentation-provider";
+import { cn } from "@/lib/utils";
 
 // Shell ÚNICO: rail navy (AppSidebar) + inset con header y contenido. Reemplaza el
 // esquema dual anterior (SiteHeader clásico / NavSidebar beta, alternados por
@@ -132,6 +134,7 @@ function ShellBody({
 }) {
   const t = useTranslations("shell");
   const { open, openMobile, setOpenMobile, isMobile } = useSidebar();
+  const hasCustomBackground = useHasCustomBackground();
   const colapsarAlInteractuar = React.useCallback(() => {
     if (isMobile) {
       if (openMobile) setOpenMobile(false);
@@ -153,9 +156,19 @@ function ShellBody({
           <UserMenu />
         </div>
       </header>
-      {/* Lienzo estándar off-white (EHR): cubre el --app-bg-image de branding para que ninguna página
-          lo deje traslucir; las tarjetas blancas resaltan encima. Interactuar aquí pliega el menú. */}
-      <main className="flex-1 bg-muted p-6" onPointerDownCapture={colapsarAlInteractuar}>
+      {/* Lienzo estándar off-white (EHR): opaco por default, cubre el --app-bg-image/video para que
+          ninguna página lo deje traslucir. SOLO cuando el usuario (o su centro) eligió un fondo
+          propio se afloja (translúcido + blur) para que se vea en los huecos alrededor de las
+          tarjetas — el contenido en sí sigue leyéndose sobre `bg-card` opaco siempre, esta clase
+          nunca lo toca. Interactuar aquí pliega el menú. Ver .personal/
+          apariencia-personal-restaurar-y-bloqueo-de-centro-handoff.md. */}
+      <main
+        className={cn(
+          "flex-1 p-6",
+          hasCustomBackground ? "bg-muted/75 backdrop-blur-sm" : "bg-muted",
+        )}
+        onPointerDownCapture={colapsarAlInteractuar}
+      >
         {sinPerfil ? (
           <div className="mx-auto mt-16 max-w-md rounded-md border border-warning/40 bg-warning/10 p-6 text-center">
             <p className="text-base font-semibold text-warning-foreground">{t("noProfileTitle")}</p>
