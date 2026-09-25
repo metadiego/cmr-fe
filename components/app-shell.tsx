@@ -144,9 +144,11 @@ function ShellBody({
   }, [isMobile, open, openMobile, onCollapseRequest, setOpenMobile]);
   return (
     <SidebarInset>
-      {/* Header blanco fijo (no bg-background): el branding del centro sobreescribe --background a un
-          índigo oscuro; forzamos blanco para el chrome tipo EHR. */}
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4">
+      {/* Header blanco fijo en modo claro (no bg-background): el branding del centro sobreescribe
+          --background a un índigo oscuro; forzamos blanco para el chrome tipo EHR. En modo oscuro
+          (2026-09-24) ese problema no existe — el centro nunca definió un `.dark`, así que se pinta
+          con `--card` (ya parte de la paleta carbón) en vez de quedar blanco a la fuerza. */}
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4 dark:bg-card">
         <SidebarTrigger />
         <span className="text-sm font-semibold">{sectionTitle}</span>
         <div className="ml-auto flex items-center gap-2">

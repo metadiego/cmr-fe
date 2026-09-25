@@ -48,19 +48,25 @@ export function brandKeyFor(primary: string | null | undefined): string | null {
 // tokens del diseño no se tocan. SOLO se aplica si el primario es un color APROBADO; toda
 // config no aprobada (heredada del editor libre viejo, hex, etc.) se ignora y se cae al
 // default navy del diseño — así se garantiza que solo pintan colores de la lista curada.
+//
+// `--accent` es un tinte CLARO del primario (hover/acento sutil) — correcto sobre el fondo casi
+// blanco de modo claro, pero un tinte L0.94 se ve como un parche blanco roto sobre el carbón casi
+// negro del modo oscuro (2026-09-24). Se detecta `.dark` en <html> (siempre corre en cliente —
+// ambos llamadores son componentes "use client" dentro de un efecto) y se oscurece el tinte en vez
+// de aclararlo, mismo tono.
 export function deriveBrandVars(
   primary: string | null | undefined,
 ): Record<string, string> {
   if (!primary || !brandKeyFor(primary)) return {};
   const h = hueOf(primary);
   if (h == null) return {};
+  const dark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
   return {
     "--primary": primary,
     "--ring": primary,
     "--sidebar-primary": primary,
     "--sidebar-ring": primary,
-    // Tinte claro y su texto, mismo tono que el primario (hover/acento sutil).
-    "--accent": `oklch(0.94 0.03 ${h})`,
-    "--accent-foreground": `oklch(0.33 0.06 ${h})`,
+    "--accent": dark ? `oklch(0.27 0.03 ${h})` : `oklch(0.94 0.03 ${h})`,
+    "--accent-foreground": dark ? `oklch(0.85 0.02 ${h})` : `oklch(0.33 0.06 ${h})`,
   };
 }

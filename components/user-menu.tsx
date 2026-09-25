@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Settings02Icon,
@@ -51,6 +52,7 @@ export function UserMenu() {
   const menu = useMenu();
   const puedeConfigurar = menu.some((m) => routeForClave(m.slug, m.path).startsWith("/configuration/"));
   const locale = useLocale() as Locale;
+  const { theme, setTheme } = useTheme();
 
   const [signingOut, setSigningOut] = React.useState(false);
   async function signOut() {
@@ -133,6 +135,18 @@ export function UserMenu() {
               {tRoot.has(`userMenu.lang_${l}`) ? t(`lang_${l}`) : l.toUpperCase()}
             </DropdownMenuRadioItem>
           ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
+
+        {/* Tema — Claro/Oscuro, mismo patrón de radio group que el idioma. Elección explícita, no
+            enableSystem: cambiar de tema solo porque el SO del usuario está en oscuro sería
+            sorpresivo. Owner's request, 2026-09-24. */}
+        <DropdownMenuLabel className="text-xs text-muted-foreground">
+          {t("theme")}
+        </DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={theme ?? "light"} onValueChange={setTheme}>
+          <DropdownMenuRadioItem value="light">{t("themeLight")}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">{t("themeDark")}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
 
