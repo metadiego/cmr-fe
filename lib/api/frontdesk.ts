@@ -43,11 +43,19 @@ export function getSesion(id: string): Promise<Sesion> {
 // Cuenta SOLO el estado `presente` (en_terapia y asistido no cuentan). Trae TODOS los servicios del
 // centro con presentes:0 incluido (el FE decide esconder vacíos o no). Permiso frontdesk.read. Se refresca
 // por el SSE que la pantalla ya escucha; NO sondear. Handoff presentes-por-servicio.
+//
+// `citasHoy` (2026-09-25, docs/specs/presentes-por-servicio.md en cmr-be): sesiones del servicio
+// para la fecha en cualquier estado salvo `cancelada` — NO "presente ahora mismo". Es el dato
+// correcto para decidir si un tab de servicio tiene algo que mostrar hoy; `present` NO sirve para
+// eso (verificado en vivo: escondía 18 de 19 servicios de Bayamón porque nadie estaba físicamente
+// ahí en ese instante, aunque varios tuvieran agenda para más tarde — handoff
+// frontdesk-tabs-mayusculas-y-solo-actividad, revertido y corregido el mismo día).
 export interface PresentePorServicio {
   serviceId: string;
   slug: string;
   labelKey: string;
   present: number;
+  citasHoy: number;
 }
 export interface PresentesResumen {
   date: string;
