@@ -15,11 +15,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // Selector de COLOR DE MARCA + fondo de página (imagen o video). Controlado: el padre es dueño del
-// `value` y lo persiste. Previsualiza el color escribiendo las vars derivadas en <html> (el padre
-// recarga al guardar para llegar al estado autoritativo); el fondo se previsualiza inline, sin tocar
-// <html> (lo pinta PresentationProvider una vez guardado). `disabled` apaga TODO el editor de una vez
-// — el bloqueo del centro es de la capa entera, no campo por campo (handoff
-// apariencia-personal-restaurar-y-bloqueo-de-centro).
+// `value` y lo persiste. Previsualiza escribiendo las vars derivadas en <html> (el padre recarga al
+// guardar para llegar al estado autoritativo). El fondo de VIDEO no tiene preview de página completa
+// (no hay CSS var para eso; ver BackgroundPicker más abajo para su preview inline propia) pero
+// imageUrl SÍ escribe --app-bg-image aquí igual que el color — con LIMPIEZA explícita al desmontar o
+// al cambiar `value`, para que quitar el fondo (o cambiarlo) no deje una var vieja pegada en <html>.
+// `disabled` apaga TODO el editor de una vez — el bloqueo del centro es de la capa entera, no campo
+// por campo (handoff apariencia-personal-restaurar-y-bloqueo-de-centro).
 export function ThemeEditor({
   value,
   onChange,
@@ -31,11 +33,27 @@ export function ThemeEditor({
 }) {
   const t = useTranslations("appearance");
 
+  // Color: se queda "pegado" en <html> hasta que se guarda y la página recarga al estado
+  // autoritativo (comportamiento de siempre, sin limpieza — cambiar de pantalla sin guardar no debe
+  // devolver la app entera al color por defecto a medio uso).
   React.useEffect(() => {
     const vars = configToCssVars(value);
     const el = document.documentElement;
     for (const [name, v] of Object.entries(vars)) el.style.setProperty(name, v);
   }, [value]);
+
+  // Fondo de imagen: a diferencia del color, esta pantalla ofrece un botón para QUITARLO — sin
+  // limpieza, --app-bg-image se quedaría pegado en <html> para siempre tras "Quitar fondo" o al
+  // cambiar de imagen a video. Efecto propio y acotado (no toca las vars de color de arriba).
+  React.useEffect(() => {
+    const el = document.documentElement;
+    const url = value.background?.imageUrl;
+    if (!url) return;
+    el.style.setProperty("--app-bg-image", `url("${url}")`);
+    return () => {
+      el.style.removeProperty("--app-bg-image");
+    };
+  }, [value.background?.imageUrl]);
 
   const current = brandKeyFor(value.colors?.primary);
   // Solo se guarda el primario; se descartan las claves de color heredadas (fondo, etc.).
