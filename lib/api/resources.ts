@@ -116,3 +116,40 @@ export function planPatientDay(
 ): Promise<PatientDayResult> {
   return apiFetch<PatientDayResult>(`/resources/patient-day`, { method: "POST", body: JSON.stringify(body) }, centroId);
 }
+
+// --- Panorama del día por RECURSO × hora (GET /resources/day-occupancy) ---
+// Un corte de TODOS los recursos del centro y sus tramos, sin pedir servicio: la «agenda del recurso» (rooms
+// de láser, sillas de suero…) con puestos usados/libres por hora. Contrato verificado en prod 26-sep.
+// `cappedBy`: `stations` (no quedan puestos → otra hora) | `staff` (no hay quien lo dé → poner a alguien) |
+// null (queda hueco). `summary` = puestos-hora usados/disponibles y su % (el cuello de botella, ya calculado).
+export interface OccupancyCell {
+  time: string; // "HH:mm"
+  used: number;
+  free: number;
+  cappedBy: "stations" | "staff" | null;
+}
+export interface ResourceDayOccupancy {
+  id: string;
+  slug: string;
+  name: string;
+  labelKey: string;
+  capacity: number;
+  staffRole: string | null;
+  staffOnShift: number | null; // gente de turno de ese cargo; null = sin techo humano (manda el puesto)
+  cells: OccupancyCell[];
+  summary: { used: number; available: number; pct: number };
+}
+export interface DayOccupancy {
+  date: string;
+  slots: string[]; // "07:00"…"17:00" — las genera el BE, NO inventarlas
+  resources: ResourceDayOccupancy[];
+}
+export function getDayOccupancy(
+  date: string,
+  centroId?: string,
+  centerIds?: string[],
+): Promise<DayOccupancy> {
+  const sp = new URLSearchParams({ date });
+  for (const c of centerIds ?? []) sp.append("centerIds", c);
+  return apiFetch<DayOccupancy>(`/resources/day-occupancy?${sp.toString()}`, {}, centroId);
+}

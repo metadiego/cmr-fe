@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Kpi, Chip } from "@/components/agenda/dia-kpi";
 import { PlanificarDiaModal } from "@/components/agenda/planificar-dia-modal";
+import { ResourceOccupancyGrid } from "@/components/agenda/resource-occupancy-grid";
 import { PageContainer } from "@/components/ui/page";
 import type { Paciente } from "@/lib/api/pacientes";
 
@@ -173,6 +174,15 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
         <Kpi label={t("kpi.attended")} value={kpis.attended} tono="muted" />
         <Kpi label={t("kpi.pending")} value={kpis.pending} tono="warn" />
       </div>
+
+      {/* Panorama por RECURSO × hora del día completo (agenda del recurso + % de ocupación) */}
+      <details className="group mb-4" open>
+        <summary className="mb-2 flex cursor-pointer list-none items-center gap-2 text-sm font-semibold">
+          <span className="transition-transform group-open:rotate-90">›</span>
+          {t("occupancyTitle")}
+        </summary>
+        <ResourceOccupancyGrid fecha={fecha} centro={centro.fetchCentroId} />
+      </details>
 
       {/* Filtro por servicio (terapia) */}
       <div className="mb-3 flex flex-wrap items-center gap-2">

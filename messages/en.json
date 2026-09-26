@@ -4234,6 +4234,10 @@
     },
     "filterService": "Therapy",
     "filterStatus": "Status",
-    "searchPatient": "Search patient by name or record…"
+    "searchPatient": "Search patient by name or record…",
+    "occupancyTitle": "Resource occupancy by hour",
+    "resource": "Resource",
+    "usedOf": "{used}/{available} station-hours",
+    "cap": "cap {n}"
   }
 }

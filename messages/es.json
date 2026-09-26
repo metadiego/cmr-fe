@@ -4234,6 +4234,10 @@
     },
     "filterService": "Terapia",
     "filterStatus": "Estado",
-    "searchPatient": "Buscar paciente por nombre o récord…"
+    "searchPatient": "Buscar paciente por nombre o récord…",
+    "occupancyTitle": "Ocupación de recursos por hora",
+    "resource": "Recurso",
+    "usedOf": "{used}/{available} puestos-hora",
+    "cap": "cap {n}"
   }
 }
