@@ -69,7 +69,7 @@ export function CenterSelector() {
 
   return (
     <Select value={current} onValueChange={onChange}>
-      <SelectTrigger className="h-9 w-40 gap-2" aria-label={t("center")}>
+      <SelectTrigger className="h-9 w-44 gap-2" aria-label={t("center")}>
         {/* No pintamos el punto aquí: SelectValue ya replica el contenido de la opción activa
             (que incluye su punto). Pintarlo también duplicaría el acento en el trigger. */}
         <SelectValue placeholder={t("center")} />
@@ -77,9 +77,9 @@ export function CenterSelector() {
       <SelectContent>
         {centros.map((c) => (
           <SelectItem key={c.id} value={c.id}>
-            <span className="flex items-center gap-2">
+            <span className="flex min-w-0 items-center gap-2">
               {dot(c.id)}
-              {c.name}
+              <span className="truncate">{c.name}</span>
             </span>
           </SelectItem>
         ))}
