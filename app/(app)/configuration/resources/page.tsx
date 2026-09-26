@@ -17,6 +17,8 @@ import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { ConfigGuard } from "@/components/configuracion/config-guard";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
+import { ServiceResourcesEditor } from "@/components/configuracion/service-resources-editor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -39,7 +41,18 @@ export default function ResourcesPage() {
       <PageContainer>
         <PageHeader title={t("title")} description={t("description")} actions={<CentroPantallaSelector estado={estado} />} />
         {estado.cargando ? null : estado.centroActivo ? (
-          <ResourcesList centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+          <Tabs defaultValue="recursos">
+            <TabsList className="mb-4">
+              <TabsTrigger value="recursos">{t("tabResources")}</TabsTrigger>
+              <TabsTrigger value="consumo">{t("tabConsumo")}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="recursos">
+              <ResourcesList centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+            </TabsContent>
+            <TabsContent value="consumo">
+              <ServiceResourcesEditor centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+            </TabsContent>
+          </Tabs>
         ) : (
           <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>
         )}
