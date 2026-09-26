@@ -50,7 +50,15 @@
       "addLine": "Add resource",
       "saved": "Consumption saved.",
       "perHelp": "\"Area\" multiplies the minutes by the patient's areas.",
-      "blockingHelp": "Without \"occupies the patient\": it holds the station but not the patient (the helmet during the IV)."
+      "blockingHelp": "Without \"occupies the patient\": it holds the station but not the patient (the helmet during the IV).",
+      "staffRole": "Attended by",
+      "staffInherit": "Inherit from resource",
+      "roleTecnico": "Technician",
+      "roleEnfermera": "Nurse",
+      "roleMedico": "Doctor",
+      "patientsPerStaff": "Handles at once",
+      "patientsPerStaffHelp": "\"Handles at once\": 1 = one-on-one with the patient; more than 1 = several at once (like the chambers)",
+      "laserWarning": "One-on-one with the patient: takes a whole technician; if it shares the role with laser, it steals stations."
     },
     "add": "New resource",
     "colName": "Name",

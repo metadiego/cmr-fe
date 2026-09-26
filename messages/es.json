@@ -50,7 +50,15 @@
       "addLine": "Agregar recurso",
       "saved": "Consumo guardado.",
       "perHelp": "«Área» multiplica los minutos por las áreas del paciente.",
-      "blockingHelp": "Sin «ocupa al paciente»: ocupa el puesto pero no al paciente (el casco durante el suero)."
+      "blockingHelp": "Sin «ocupa al paciente»: ocupa el puesto pero no al paciente (el casco durante el suero).",
+      "staffRole": "Atiende",
+      "staffInherit": "Hereda del recurso",
+      "roleTecnico": "Técnico",
+      "roleEnfermera": "Enfermera",
+      "roleMedico": "Médico",
+      "patientsPerStaff": "Lleva a la vez",
+      "patientsPerStaffHelp": "«Lleva a la vez»: 1 = se queda con el paciente; más de 1 = atiende a varios (como en las cámaras)",
+      "laserWarning": "1-a-1 con el paciente: ocupa un técnico completo; si comparte cargo con el láser, le resta puestos."
     },
     "add": "Nuevo recurso",
     "colName": "Nombre",

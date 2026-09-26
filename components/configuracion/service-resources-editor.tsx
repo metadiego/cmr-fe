@@ -49,8 +49,11 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
   const recName = (id: string) => recursos.find((r) => r.id === id)?.name ?? id;
   function addLine() {
     const first = recursos[0]?.id ?? "";
-    setLines((ls) => [...ls, { resourceId: first, minutes: 10, per: "session", blocking: true }]);
+    setLines((ls) => [...ls, { resourceId: first, minutes: 10, per: "session", blocking: true, staffRole: null, patientsPerStaff: 1 }]);
   }
+  // Cargo efectivo de la línea: el de la terapia, o el que hereda del recurso.
+  const effStaff = (l: ServiceResourceLine) =>
+    l.staffRole || recursos.find((r) => r.id === l.resourceId)?.staffRole || null;
   function patch(i: number, p: Partial<ServiceResourceLine>) {
     setLines((ls) => ls.map((l, idx) => (idx === i ? { ...l, ...p } : l)));
   }
@@ -128,6 +131,34 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
                       </Select>
                     </Field>
                   </div>
+                  <div className="w-36">
+                    <Field label={t("staffRole")}>
+                      <Select
+                        value={l.staffRole || "__inherit__"}
+                        onValueChange={(v) => patch(i, { staffRole: v === "__inherit__" ? null : v })}
+                        disabled={!puedeEscribir}
+                      >
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__inherit__">{t("staffInherit")}</SelectItem>
+                          <SelectItem value="tecnico">{t("roleTecnico")}</SelectItem>
+                          <SelectItem value="enfermera">{t("roleEnfermera")}</SelectItem>
+                          <SelectItem value="medico">{t("roleMedico")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                  <div className="w-28">
+                    <Field label={t("patientsPerStaff")}>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={l.patientsPerStaff ?? 1}
+                        onChange={(e) => patch(i, { patientsPerStaff: Math.max(1, Number(e.target.value) || 1) })}
+                        disabled={!puedeEscribir}
+                      />
+                    </Field>
+                  </div>
                   <label className="flex items-center gap-2 pb-2 text-sm">
                     <Switch checked={l.blocking} onCheckedChange={(v) => patch(i, { blocking: v })} disabled={!puedeEscribir} />
                     {t("blocking")}
@@ -135,11 +166,17 @@ export function ServiceResourcesEditor({ centroId, puedeEscribir }: { centroId?:
                   {puedeEscribir && (
                     <Button variant="ghost" size="sm" className="pb-2 text-destructive" onClick={() => remove(i)}>{t("remove")}</Button>
                   )}
+                  {/* Aviso «vale oro»: una terapia 1-a-1 con técnico resta puestos a las demás del mismo cargo (láser). */}
+                  {effStaff(l) === "tecnico" && (l.patientsPerStaff ?? 1) <= 1 && (
+                    <p className="w-full rounded-md border border-warning/40 bg-warning/10 px-3 py-1.5 text-xs text-warning-foreground">
+                      {t("laserWarning")}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>
           )}
-          <p className="text-xs text-muted-foreground">{t("perHelp")} · {t("blockingHelp")}</p>
+          <p className="text-xs text-muted-foreground">{t("perHelp")} · {t("blockingHelp")} · {t("patientsPerStaffHelp")}</p>
           {puedeEscribir && (
             <div className="flex items-center justify-between">
               <Button variant="outline" size="sm" onClick={addLine} disabled={recursos.length === 0}>{t("addLine")}</Button>

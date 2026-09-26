@@ -56,6 +56,11 @@ export interface ServiceResourceLine {
   minutes: number;
   per: "session" | "area";
   blocking: boolean;
+  // El CARGO va en la TERAPIA, no en el recurso: el mismo room puede llevar técnico (NPT) o enfermera (GLP-1).
+  // Vacío/null = hereda el `staffRole` del recurso. Handoff HANDOFF-FE-agenda-de-terapias.
+  staffRole?: string | null;
+  // Cuántos pacientes lleva a la vez esa persona: 1 = uno-a-uno (láser); 6 = las cámaras. Vacío/null = 1.
+  patientsPerStaff?: number | null;
 }
 export async function getServiceResources(serviceId: string, centroId?: string): Promise<ServiceResourceLine[]> {
   const r = await apiFetch<{ resources?: ServiceResourceLine[] } | ServiceResourceLine[]>(
