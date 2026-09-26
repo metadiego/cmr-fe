@@ -17,6 +17,7 @@ import { usePacienteMap } from "@/lib/agenda/use-paciente-map";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Kpi, Chip } from "@/components/agenda/dia-kpi";
 import { PlanificarDiaModal } from "@/components/agenda/planificar-dia-modal";
 import { PageContainer } from "@/components/ui/page";
@@ -39,6 +40,8 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
 
   const centro = useCentroPantalla("frontdesk.read", "frontdesk.create");
   const [servicioId, setServicioId] = React.useState(ALL);
+  const [estado, setEstado] = React.useState<EstadoSesion | typeof ALL>(ALL);
+  const [pacienteQ, setPacienteQ] = React.useState("");
   const [planFor, setPlanFor] = React.useState<{ paciente?: Paciente | null } | null>(null);
 
   const serviciosRes = useResource<Servicio[]>(() => getServicios(centro.fetchCentroId), [centro.fetchCentroId]);
@@ -91,10 +94,28 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
       .sort((a, b) => b.n - a.n);
   }, [vivas, servById]);
 
-  const filtradas = React.useMemo(
-    () => (servicioId === ALL ? vivas : vivas.filter((s) => s.serviceId === servicioId)).slice().sort(sortByTime),
-    [vivas, servicioId],
-  );
+  // Conteo por estado (para los chips) — sobre el filtro de servicio, no sobre el de estado.
+  const porEstado = React.useMemo(() => {
+    const base = servicioId === ALL ? vivas : vivas.filter((s) => s.serviceId === servicioId);
+    const m = new Map<EstadoSesion, number>();
+    for (const s of base) m.set(s.status, (m.get(s.status) ?? 0) + 1);
+    return m;
+  }, [vivas, servicioId]);
+
+  const q = pacienteQ.trim().toLowerCase();
+  const filtradas = React.useMemo(() => {
+    return vivas
+      .filter((s) => servicioId === ALL || s.serviceId === servicioId)
+      .filter((s) => estado === ALL || s.status === estado)
+      .filter((s) => {
+        if (!q) return true;
+        const p = pacientes[s.patientId];
+        const nombre = p ? (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")) : "";
+        return nombre.toLowerCase().includes(q) || (p?.medicalRecordNumber ?? "").toLowerCase().includes(q);
+      })
+      .slice()
+      .sort(sortByTime);
+  }, [vivas, servicioId, estado, q, pacientes]);
 
   // Huecos por hora del servicio filtrado (solo si tiene recurso configurado). Panorama del cuello de botella.
   const availRes = useResource<Availability | null>(
@@ -153,8 +174,9 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
         <Kpi label={t("kpi.pending")} value={kpis.pending} tono="warn" />
       </div>
 
-      {/* Filtro por servicio */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      {/* Filtro por servicio (terapia) */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("filterService")}</span>
         <Chip active={servicioId === ALL} onClick={() => setServicioId(ALL)}>
           {t("all")} ({vivas.length})
         </Chip>
@@ -164,6 +186,20 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
             {s.name} ({s.n})
           </Chip>
         ))}
+      </div>
+
+      {/* Filtro por estado + búsqueda por paciente */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("filterStatus")}</span>
+        <Chip active={estado === ALL} onClick={() => setEstado(ALL)}>{t("all")}</Chip>
+        {(["pendiente", "presente", "en_terapia", "asistido"] as EstadoSesion[]).map((e) => (
+          <Chip key={e} active={estado === e} onClick={() => setEstado(e)}>
+            {tEstado(e)} ({porEstado.get(e) ?? 0})
+          </Chip>
+        ))}
+        <div className="ml-auto w-full sm:w-64">
+          <Input value={pacienteQ} onChange={(ev) => setPacienteQ(ev.target.value)} placeholder={t("searchPatient")} className="h-9" />
+        </div>
       </div>
 
       {/* Huecos por hora del servicio filtrado (parpadean los libres; apagados los llenos) */}

@@ -4231,6 +4231,9 @@
       "qty": "Cant.",
       "staff": "Atiende",
       "status": "Estado"
-    }
+    },
+    "filterService": "Terapia",
+    "filterStatus": "Estado",
+    "searchPatient": "Buscar paciente por nombre o récord…"
   }
 }

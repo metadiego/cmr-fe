@@ -4231,6 +4231,9 @@
       "qty": "Qty",
       "staff": "Staff",
       "status": "Status"
-    }
+    },
+    "filterService": "Therapy",
+    "filterStatus": "Status",
+    "searchPatient": "Search patient by name or record…"
   }
 }
