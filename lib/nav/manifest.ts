@@ -100,6 +100,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "personal", route: "/configuration/staff", group: "configuration", order: 10 },
   { clave: "scheduling-bridge", route: "/configuration/scheduling-bridge", group: "configuration", order: 11 },
   { clave: "ehr-integration", route: "/configuration/ehr-integration", group: "configuration", order: 12 },
+  { clave: "resources", route: "/configuration/resources", group: "configuration", order: 13 },
   // Loose roots — carried for resolver completeness; NOT surfaced as domain leaves
   // (buildNavGroups filters them out). home = the logo link; dashboard = admin diagnostic.
   { clave: "home", route: "/", group: "configuration", order: 98 },

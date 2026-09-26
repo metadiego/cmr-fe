@@ -28,6 +28,58 @@
       "refresh": "Actualizar"
     }
   },
+  "resources": {
+    "title": "Recursos",
+    "description": "Cuartos, sillas y personas que limitan la agenda de terapias. El cuello no es el servicio, es el recurso.",
+    "elegirCentro": "Elige un centro para ver sus recursos.",
+    "add": "Nuevo recurso",
+    "colName": "Nombre",
+    "colKind": "Tipo",
+    "colCapacity": "Capacidad",
+    "colConcurrency": "Concurrencia",
+    "colMaxMin": "Máx. min/paciente",
+    "colStaff": "Personal",
+    "colStatus": "Estado",
+    "colActions": "Acciones",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "activated": "Recurso activado.",
+    "deactivated": "Recurso desactivado.",
+    "blocksAgenda": "Bloquea agenda",
+    "edit": "Editar",
+    "empty": "Aún no hay recursos.",
+    "editTitle": "Editar recurso",
+    "createTitle": "Nuevo recurso",
+    "createHelp": "Cuánta gente atiende a la vez, quién lo da y cuánto dura.",
+    "created": "Recurso creado.",
+    "updated": "Recurso actualizado.",
+    "fName": "Nombre",
+    "fSlug": "Clave",
+    "fKind": "Tipo",
+    "fCapacity": "Capacidad (pacientes a la vez)",
+    "fConcurrency": "Concurrencia",
+    "fMaxMin": "Máximo de minutos por paciente",
+    "fMaxMinPlaceholder": "sin tope",
+    "fStaffRole": "Cargo que lo atiende",
+    "fBlocksAgenda": "El recurso es una persona y bloquea su agenda",
+    "fBlocksAgendaHelp": "Para la doctora de EMPOWER: al agendarla, se bloquean sus horas de consulta.",
+    "kind": { "room": "Cuarto", "chair": "Silla", "person": "Persona" },
+    "concurrency": {
+      "sequential": "Secuencial",
+      "simultaneous": "Simultánea",
+      "help": {
+        "sequential": "Del mismo paciente se SUMAN: las terapias van una tras otra (room de NPT).",
+        "simultaneous": "Varias terapias A LA VEZ: el puesto se ocupa lo que dure la más larga (silla de suero)."
+      }
+    }
+  },
+  "therapies": {
+    "full": "Lleno: no quedan puestos a esa hora.",
+    "noStaff": "Sin personal: no hay quien lo dé a esa hora.",
+    "overMaxPerPatient": "Se pasa del tope de minutos por paciente."
+  },
   "citas": {
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
     "hora_fin_invalida": "La hora de fin debe ser posterior a la hora de inicio.",
@@ -768,6 +820,7 @@
     "searchPlaceholder": "Buscar…",
     "admin": "Administración",
     "ehrIntegration": "Enganche con el EHR",
+    "resources": "Recursos",
     "center": "Centro",
     "clientes": "Clientes",
     "citas": "Citas",

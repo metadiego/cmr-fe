@@ -28,6 +28,58 @@
       "refresh": "Refresh"
     }
   },
+  "resources": {
+    "title": "Resources",
+    "description": "Rooms, chairs and people that cap the therapy schedule. The bottleneck isn't the service, it's the resource.",
+    "elegirCentro": "Pick a center to see its resources.",
+    "add": "New resource",
+    "colName": "Name",
+    "colKind": "Kind",
+    "colCapacity": "Capacity",
+    "colConcurrency": "Concurrency",
+    "colMaxMin": "Max min/patient",
+    "colStaff": "Staff",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "activated": "Resource activated.",
+    "deactivated": "Resource deactivated.",
+    "blocksAgenda": "Blocks agenda",
+    "edit": "Edit",
+    "empty": "No resources yet.",
+    "editTitle": "Edit resource",
+    "createTitle": "New resource",
+    "createHelp": "How many are served at once, who provides it, and how long it takes.",
+    "created": "Resource created.",
+    "updated": "Resource updated.",
+    "fName": "Name",
+    "fSlug": "Key",
+    "fKind": "Kind",
+    "fCapacity": "Capacity (patients at once)",
+    "fConcurrency": "Concurrency",
+    "fMaxMin": "Max minutes per patient",
+    "fMaxMinPlaceholder": "no cap",
+    "fStaffRole": "Role that provides it",
+    "fBlocksAgenda": "The resource is a person and blocks their agenda",
+    "fBlocksAgendaHelp": "For the EMPOWER doctor: booking them blocks their consultation hours.",
+    "kind": { "room": "Room", "chair": "Chair", "person": "Person" },
+    "concurrency": {
+      "sequential": "Sequential",
+      "simultaneous": "Simultaneous",
+      "help": {
+        "sequential": "For the same patient they ADD UP: therapies run one after another (NPT room).",
+        "simultaneous": "Several therapies AT ONCE: the station is busy for as long as the longest one (IV chair)."
+      }
+    }
+  },
+  "therapies": {
+    "full": "Full: no stations left at that time.",
+    "noStaff": "No staff: nobody to provide it at that time.",
+    "overMaxPerPatient": "Exceeds the per-patient minute cap."
+  },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",
     "hora_fin_invalida": "End time must be after the start time.",
@@ -768,6 +820,7 @@
     "searchPlaceholder": "Search…",
     "admin": "Admin",
     "ehrIntegration": "EHR integration",
+    "resources": "Resources",
     "center": "Center",
     "clientes": "Clients",
     "citas": "Appointments",
