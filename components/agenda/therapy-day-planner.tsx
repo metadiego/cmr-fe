@@ -21,20 +21,43 @@ export function TherapyDayPlanner({
   services,
   centro,
   defaultDate,
+  date: dateProp,
+  onDateChange,
+  time: timeProp,
+  onTimeChange,
   onConfirm,
 }: {
   patient: { id: string; name: string; record?: string | null };
   services: PlannerService[];
   centro?: string;
   defaultDate?: string;
+  // Fecha/hora CONTROLADAS (opcionales): cuando el contenedor agenda (p. ej. el
+  // scheduler del calendario) necesita leer la fecha y la hora elegidas. Sin
+  // ellas, el planner las gestiona por dentro (embed del Citar, uso suelto).
+  date?: string;
+  onDateChange?: (date: string) => void;
+  time?: string;
+  onTimeChange?: (time: string) => void;
   onConfirm?: (date: string, time: string) => void;
 }) {
   const t = useTranslations("therapyPlanner");
   const tRoot = useTranslations();
-  const [date, setDate] = React.useState(defaultDate ?? new Date().toISOString().slice(0, 10));
+  const [dateSelf, setDateSelf] = React.useState(defaultDate ?? new Date().toISOString().slice(0, 10));
+  const [timeSelf, setTimeSelf] = React.useState<string>("");
+  const date = dateProp ?? dateSelf;
+  const time = timeProp ?? timeSelf;
+  const setTime = React.useCallback(
+    (v: string) => (onTimeChange ? onTimeChange(v) : setTimeSelf(v)),
+    [onTimeChange],
+  );
+  // Cambiar la fecha limpia la hora (los huecos son de esa fecha).
+  const changeDate = (d: string) => {
+    if (onDateChange) onDateChange(d);
+    else setDateSelf(d);
+    setTime("");
+  };
   const [areas, setAreas] = React.useState<Record<string, number>>({});
   const [selId, setSelId] = React.useState<string>(services[0]?.id ?? "");
-  const [time, setTime] = React.useState<string>("");
 
   const areasOf = (id: string) => areas[id] ?? 1;
   const serviceIds = React.useMemo(() => services.map((s) => s.id), [services]);
@@ -63,7 +86,7 @@ export function TherapyDayPlanner({
         </div>
         <label className="text-sm">
           <span className="mr-2 text-muted-foreground">{t("date")}</span>
-          <Input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime(""); }} className="inline-block h-9 w-auto" />
+          <Input type="date" value={date} onChange={(e) => changeDate(e.target.value)} className="inline-block h-9 w-auto" />
         </label>
       </div>
 

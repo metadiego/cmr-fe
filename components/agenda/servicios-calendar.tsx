@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Can } from "@/components/kit/can";
 import { MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
-import { SesionModal } from "@/components/agenda/sesion-modal";
+import { PlanificarDiaModal } from "@/components/agenda/planificar-dia-modal";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import type { Paciente } from "@/lib/api/pacientes";
 
@@ -118,8 +118,6 @@ export function ServiciosCalendar() {
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 8 } }),
     [q],
   );
-
-  const servicioInicial = servicioId === ALL ? undefined : servicioId;
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_18rem]">
@@ -215,13 +213,11 @@ export function ServiciosCalendar() {
       </aside>
 
       {modal && (
-        <SesionModal
+        <PlanificarDiaModal
           open
           fecha={modal.fecha}
-          servicios={servicios}
-          servicioInicial={servicioInicial}
-          pacienteInicial={modal.paciente}
-          centroInicial={centro.centroActivo || undefined}
+          paciente={modal.paciente}
+          centro={centro.centroActivo || undefined}
           onOpenChange={(o) => !o && setModal(null)}
           onSaved={reload}
         />

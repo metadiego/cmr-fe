@@ -85,7 +85,11 @@
     "fStaffRole": "Role that provides it",
     "fBlocksAgenda": "The resource is a person and blocks their agenda",
     "fBlocksAgendaHelp": "For the EMPOWER doctor: booking them blocks their consultation hours.",
-    "kind": { "room": "Room", "chair": "Chair", "person": "Person" },
+    "kind": {
+      "room": "Room",
+      "chair": "Chair",
+      "person": "Person"
+    },
     "concurrency": {
       "sequential": "Sequential",
       "simultaneous": "Simultaneous",
@@ -118,7 +122,9 @@
     "pickPatient": "Patient",
     "pickServices": "Therapies for the day",
     "choosePatientFirst": "Pick a patient to see their therapies.",
-    "noServices": "Select at least one therapy to plan."
+    "noServices": "Select at least one therapy to plan.",
+    "bookN": "Schedule {n} therapy(ies)",
+    "bookHint": "Booked on the chosen day; the slot time is advisory."
   },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",

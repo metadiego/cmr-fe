@@ -85,7 +85,11 @@
     "fStaffRole": "Cargo que lo atiende",
     "fBlocksAgenda": "El recurso es una persona y bloquea su agenda",
     "fBlocksAgendaHelp": "Para la doctora de EMPOWER: al agendarla, se bloquean sus horas de consulta.",
-    "kind": { "room": "Cuarto", "chair": "Silla", "person": "Persona" },
+    "kind": {
+      "room": "Cuarto",
+      "chair": "Silla",
+      "person": "Persona"
+    },
     "concurrency": {
       "sequential": "Secuencial",
       "simultaneous": "Simultánea",
@@ -118,7 +122,9 @@
     "pickPatient": "Paciente",
     "pickServices": "Terapias del día",
     "choosePatientFirst": "Elige un paciente para ver sus terapias.",
-    "noServices": "Marca al menos una terapia para programar."
+    "noServices": "Marca al menos una terapia para programar.",
+    "bookN": "Agendar {n} terapia(s)",
+    "bookHint": "Se agenda para el día elegido; la hora del hueco es orientativa."
   },
   "citas": {
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
