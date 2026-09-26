@@ -444,9 +444,9 @@ function CentroSheetV2({
         </div>
       )}
 
-      {/* Franja compacta de cupos por hora (reemplaza las ~20 tablas vacías). Envuelve en vez de
-          scrollear horizontal: en un monitor ancho una sola fila fija dejaba cientos de px de
-          espacio muerto a la derecha (mismo hallazgo del 2026-09-26 que las tarjetas KPI). */}
+      {/* Compact per-hour quota strip (replaces the ~20 empty tables). Wraps instead of scrolling
+          horizontally: on a wide monitor a single fixed row left hundreds of px of dead space to
+          the right (same 2026-09-26 finding as the KPI tiles above). */}
       {franjasHora.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {franjasHora.map((f) => {
