@@ -51,6 +51,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "cupos", route: "/scheduling/slots", group: "scheduling", order: 2 },
   { clave: "calendario", route: "/scheduling/calendar", group: "scheduling", order: 3 },
   { clave: "atencion", route: "/boards/atencion", group: "scheduling", order: 4 }, // board surfaced in scheduling
+  { clave: "therapy-day", route: "/scheduling/therapy-day", group: "scheduling", order: 5 },
   // Patients
   { clave: "clientes", route: "/patients", group: "patients", order: 1 },
   { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "patients", order: 2 },
