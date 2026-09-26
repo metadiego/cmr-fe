@@ -33,6 +33,24 @@ Créalo por los endpoints reales (`POST /resources` + `PUT /resources/services/:
 para que quede en el mismo camino que usará la UI. Cuando esté, avísame con **un servicio de ejemplo** que
 YA tenga consumo (p. ej. láser) para probar `availability` y armar la Pantalla 2 contra datos reales.
 
+## Observado en las hojas REALES del 26-sep (Google Sheets de Bayamón y Caguas)
+
+El dueño compartió las hojas del día. Confirman el modelo por recurso: cada hoja son **tres carriles**,
+uno por recurso, y en cada HORA se apilan pacientes hasta la capacidad del recurso:
+
+1. **LASER** — con `# AREAS` por paciente (2,4,5,7…). Hasta **5 pacientes por hora** → capacidad ~5 rooms,
+   `sequential`, minutos `per: area`. APEX aparece en este carril → **APEX ocupa un room de láser**.
+2. **ENDOLASER Y SUERO** — varios pacientes por hora → las **sillas** (handoff dice 7), `simultaneous`.
+3. **OTRAS TERAPIAS** — con columna `TERAPIA`: **GLP1, APEX, NPT, TRANS (Transcraneal), VIT-INTRA** → el
+   room compartido / recursos sueltos. `TRANS` es el casco → `blocking:false`.
+
+Otros datos útiles: horas 7:00–16:30 (hora y media-hora), flag `CONFIRMADO` por cita, y muchas filas
+`+DR`/`+DOCTOR` (el paciente además ve al médico → enlace con la agenda de consultas / staffBlocks). Un
+mismo paciente aparece en Láser y en Suero a horas distintas (recursos que se suman en su día).
+
+Estas hojas son, además, lo que un futuro motor de **citas de servicio** podría ingerir (hoy el motor de
+GCP solo trae consultas; el de servicio aún no corre).
+
 ## Normas que aplican a esta entrega (recordatorio del dueño)
 
 API-First + MCP + Swagger + configurable + multi-tenant + RBAC + comentarios en DB y en cada Field +
