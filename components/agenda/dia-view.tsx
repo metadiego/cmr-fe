@@ -408,8 +408,10 @@ function CentroSheetV2({
 
   return (
     <div className="space-y-4">
-      {/* KPIs */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      {/* KPIs: tiles cap their width (sm:max-w-2xl) instead of stretching the grid tracks — on a
+          wide monitor 4 equal-width tracks across the full page turn 4 small counters into 4 huge,
+          mostly-empty boxes (found live on a 27" screen, 2026-09-26). */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:max-w-2xl">
         <Kpi label={t("dia.kpiCitas")} value={r?.totalCitas ?? 0} />
         <Kpi label={t("dia.kpiAtendidas")} value={r?.atendidas ?? 0} tono="ok" />
         <Kpi label={t("dia.kpiNoShow")} value={r?.noShow ?? 0} tono="warn" />
@@ -442,9 +444,11 @@ function CentroSheetV2({
         </div>
       )}
 
-      {/* Franja compacta de cupos por hora (reemplaza las ~20 tablas vacías). */}
+      {/* Compact per-hour quota strip (replaces the ~20 empty tables). Wraps instead of scrolling
+          horizontally: on a wide monitor a single fixed row left hundreds of px of dead space to
+          the right (same 2026-09-26 finding as the KPI tiles above). */}
       {franjasHora.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-2">
           {franjasHora.map((f) => {
             const conCitas = f.tipos.some((tp) => tp.appointments.length > 0);
             const esAhora = f.time === horaResaltada;
@@ -452,7 +456,7 @@ function CentroSheetV2({
               <div
                 key={f.time}
                 className={cn(
-                  "min-w-[9.5rem] shrink-0 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2",
+                  "min-w-[9.5rem] max-w-[16rem] flex-1 rounded-md ring-1 shadow-sm shadow-[rgba(16,32,64,0.06)] p-2",
                   esAhora ? "ring-2 ring-primary bg-primary/10" : conCitas ? "ring-primary/40 bg-primary/5" : "ring-foreground/10 bg-card",
                 )}
               >
