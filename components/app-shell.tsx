@@ -9,6 +9,7 @@ import { routeForClave } from "@/lib/nav/manifest";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { MeProvider } from "@/components/me-provider";
+import { MenuProvider } from "@/components/menu-provider";
 import { TooltipProvider } from "@/components/ui/tooltip-radix";
 import {
   SidebarInset,
@@ -46,9 +47,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // y hacían sus propios fetches locales de /auth/me (useMe + useCan). Uno de esos fetches en estado no-ok
   // (carrera/transitorio) dejaba al rail sin permisos → buildNavGroups filtraba todo → nav vacío + "Iniciar
   // sesión" aunque la página (su propio provider) estuviera logueada. Una sola fuente elimina ese desfase.
+  // MenuProvider mismo motivo, para /menu: sin él, el rail + el menú de usuario + el header + /configuration
+  // (4 sitios) hacían su propio fetch de /menu cada uno — encontrado en vivo (2026-09-26) contribuyendo a
+  // un 429 del BE (mismo cupo de throttle por usuario) en un endpoint sin relación.
   return (
     <MeProvider>
-      <ShellChrome>{children}</ShellChrome>
+      <MenuProvider>
+        <ShellChrome>{children}</ShellChrome>
+      </MenuProvider>
     </MeProvider>
   );
 }
