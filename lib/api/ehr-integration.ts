@@ -13,11 +13,15 @@ export type EhrReadinessField = "idType" | "docId" | "sexo" | "fechaNacimiento" 
 // GET /ehr-integration/patients/:id/readiness — ¿tiene los 5 datos? Permiso ehr-integration.read.
 // `ehrPatientId`/`ehrRecordId` son INFORMATIVOS (ya está allá o no); el FE NO decide con ellos — el
 // emparejamiento lo hace el BE por nuestro récord + código de centro (BAY-064230), no por nombre.
+// `nuevo` (26-sep-2026, ya resuelto por el BE: nunca tuvo una cita con llegada sellada antes de
+// esta): el modal de datos faltantes SOLO aplica a pacientes nuevos — a uno de seguimiento ya se le
+// pidieron esos datos en persona, así que Presente sigue su curso aunque falten.
 export interface EhrReadiness {
   listo: boolean;
   faltantes: EhrReadinessField[];
   ehrPatientId?: string | null;
   ehrRecordId?: string | null;
+  nuevo: boolean;
 }
 export function getEhrReadiness(patientId: string, centroId?: string): Promise<EhrReadiness> {
   return apiFetch<EhrReadiness>(`/ehr-integration/patients/${patientId}/readiness`, {}, centroId);

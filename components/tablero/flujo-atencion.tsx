@@ -123,7 +123,9 @@ export function FlujoAtencion({
       try {
         if (await isEhrEnabled(centroId)) {
           const r = await getEhrReadiness(pacienteId, centroId);
-          if (!r.listo && r.faltantes?.length) {
+          // Solo pacientes NUEVOS bloquean: a uno de seguimiento ya se le pidieron estos datos en
+          // persona antes, así que Presente sigue su curso aunque `listo` sea false.
+          if (r.nuevo && !r.listo && r.faltantes?.length) {
             setEhrGate({ col, action, faltantes: r.faltantes });
             return; // bloquea hasta completar los datos
           }
