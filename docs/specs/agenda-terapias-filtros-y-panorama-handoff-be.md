@@ -82,3 +82,68 @@ solo confírmalo aquí y lo consumo.
 
 Cuando (1) y (2) estén, el FE pinta la rejilla por recurso y mueve los filtros a server-side. Marca aquí qué
 queda listo y con qué nombres exactos de campo, y hago `gen:api` + conecto.
+
+---
+
+# RESPUESTA DEL BE — 26-sep-2026
+
+Los tres puntos, contestados. Lo verificado lleva la llamada que lo comprobó; lo que queda abierto
+va dicho como tal.
+
+## 1. Panorama por horas — HECHO, con el contrato que propusiste
+
+```
+GET /api/v2/resources/day-occupancy?date=YYYY-MM-DD[&centerIds=…]
+```
+
+Devuelve exactamente lo que pediste, más una cosa que te va a servir:
+
+```json
+{ "date": "2026-09-26",
+  "slots": ["07:00","07:30", … "17:00"],
+  "resources": [
+    { "id":"…", "slug":"laser_rooms", "name":"Rooms de láser", "labelKey":"resources.laserRooms",
+      "capacity":5, "staffRole":null, "staffOnShift":null,
+      "cells":[ {"time":"07:00","used":4,"free":1,"cappedBy":null},
+                {"time":"08:00","used":5,"free":0,"cappedBy":"stations"} ],
+      "summary": { "used":33, "available":105, "pct":31 } } ] }
+```
+
+- `cappedBy` distingue **`stations`** (no quedan puestos: se arregla con otra hora) de **`staff`**
+  (no hay quien lo dé: se arregla poniendo a alguien de turno). Null cuando queda hueco.
+- `free` ya aplica el **menor entre puestos y personal de turno**, igual que `availability`.
+- **`summary` es el punto 3 que pedías**: puestos-hora usados sobre disponibles y su porcentaje,
+  por recurso. Ahí se ve el cuello de botella sin tener que sumar celdas en el FE.
+- `staffOnShift` es la gente de ese cargo de turno; **null** cuando el recurso no declara
+  `staffRole` — y entonces no hay techo humano, manda el puesto.
+
+## 2. Filtros server-side — HECHOS, en `GET /api/v2/frontdesk/sessions`
+
+Declarados en el DTO (salen en Swagger), todos opcionales:
+
+| Filtro | Nombre en v2 | Nota |
+|---|---|---|
+| Estado | `status` | uno suelto, repetido, **o separado por comas** |
+| Técnico | `technicianId` | ya existía |
+| Enfermera | `nurseId` | nuevo |
+| Médico | `doctorId` | nuevo |
+| Con/sin hora | `withTime` | `true` = solo con hora; `false` = solo las del día entero; omitido = todas |
+| Paciente | `patientId` | ya existía |
+| Servicio | `serviceId` | ya existía |
+
+Dos detalles pensados: una **lista vacía no filtra** (dejaría la pantalla en blanco sin que nadie lo
+pidiera), y el orden pasa a ser **fecha y luego hora**, para que la lista salga en orden de agenda.
+
+## 3. Las ÁREAS ya viajan: es `quantity`
+
+No hace falta añadir nada a la entidad. La sesión ya tiene la cantidad de áreas/dosis de esa visita
+y en `/api/v2` sale como **`quantity`** (`cantidad` en v1). Es lo que se cargó con la jornada real
+del 26: los pacientes de láser de Bayamón traen sus 1..8 áreas ahí.
+
+Si además quieres las **aplicadas** (lo que se acabó dando, que puede diferir de lo agendado), vive
+en `data.aplicadas` de la sesión, y el historial por paciente ya lo resuelve en `areas`
+(`GET /frontdesk/patients/:id/history`).
+
+## Lo que NO cambió
+
+`availability` por servicio y `patient-day` siguen idénticos. Agendar sigue por `book-multiple`.
