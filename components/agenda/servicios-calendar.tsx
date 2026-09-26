@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
@@ -36,6 +37,7 @@ const ALL = "__all__";
 export function ServiciosCalendar() {
   const t = useTranslations("agenda");
   const format = useFormatter();
+  const router = useRouter();
   const now = new Date();
   const [year, setYear] = React.useState(now.getFullYear());
   const [month0, setMonth0] = React.useState(now.getMonth());
@@ -141,7 +143,7 @@ export function ServiciosCalendar() {
             </Select>
             {/* «Nuevo servicio» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
             {centro.puedeEscribir && (
-              <Button size="sm" onClick={() => setModal({ fecha: toISO(new Date()) })}>
+              <Button size="sm" onClick={() => router.push(`/scheduling/appointments/${toISO(new Date())}?tab=servicios`)}>
                 <HugeiconsIcon icon={Add01Icon} className="size-4" />
                 {t("newService")}
               </Button>
@@ -160,7 +162,7 @@ export function ServiciosCalendar() {
             weekdays={weekdays}
             eventsByDate={eventsByDate}
             festivos={festivos}
-            onDayClick={(iso) => setModal({ fecha: iso })}
+            onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}?tab=servicios`)}
             onEventClick={() => { /* sessions are managed on the day-of board */ }}
           />
         )}

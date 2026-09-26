@@ -124,7 +124,15 @@
     "choosePatientFirst": "Pick a patient to see their therapies.",
     "noServices": "Select at least one therapy to plan.",
     "bookN": "Schedule {n} therapy(ies)",
-    "bookHint": "Booked on the chosen day; the slot time is advisory."
+    "bookHint": "Booked on the chosen day; the slot time is advisory.",
+    "change": "Change",
+    "bought": "Already purchased",
+    "remaining": "{n} left",
+    "addTherapy": "Add therapy",
+    "hoursFor": "Hours · {service}",
+    "pickCard": "Pick a therapy to see its hours",
+    "dragHint": "Drag the card onto a time, or click",
+    "noHour": "Pick a time to check the day fits"
   },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",
@@ -4203,6 +4211,26 @@
   "disponibilidad": {
     "ausencia": {
       "rango_invalido": "The absence range is invalid (end before start)."
+    }
+  },
+  "serviceDay": {
+    "kpi": {
+      "total": "Appointments",
+      "present": "Present",
+      "attended": "Attended",
+      "pending": "Pending"
+    },
+    "all": "All",
+    "plan": "Plan the day",
+    "occupancy": "Hourly occupancy · {service}",
+    "empty": "No service appointments for this day.",
+    "col": {
+      "time": "Time",
+      "service": "Service",
+      "patient": "Patient",
+      "qty": "Qty",
+      "staff": "Staff",
+      "status": "Status"
     }
   }
 }

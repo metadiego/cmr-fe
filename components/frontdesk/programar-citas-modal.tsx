@@ -16,7 +16,6 @@ import {
   type AgendaHora,
 } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { TherapyDayPlanner, type PlannerService } from "@/components/agenda/therapy-day-planner";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
@@ -119,11 +118,6 @@ export function ProgramarCitasModal({
   }
   // El primero seleccionado alimenta las vistas INFORMATIVAS por-servicio (cupos por hora, disponibilidad).
   const firstServicioId = React.useMemo(() => [...servicioIds][0] ?? "", [servicioIds]);
-  // Terapias marcadas → alimentan el planificador de recursos embebido (mismo componente que la ruta aparte).
-  const plannerServices: PlannerService[] = React.useMemo(
-    () => servicios.filter((s) => servicioIds.has(s.id)).map((s) => ({ id: s.id, name: s.name })),
-    [servicios, servicioIds],
-  );
   const servicioClave = servicios.find((s) => s.id === firstServicioId)?.slug ?? "";
 
   // Servicios CON SALDO del paciente (comprado y aún pendiente; comprado-y-consumido NO cuenta). Se
@@ -436,17 +430,6 @@ export function ProgramarCitasModal({
             </div>
           )}
 
-          {/* Programar el día por RECURSOS: el MISMO planificador que la ruta aparte, aquí más grande. Ve los
-              huecos reales donde cabe cada terapia marcada. Informativo (agendar sigue por este modal). */}
-          {pacienteId && plannerServices.length > 0 && (
-            <div className="rounded-md border-t pt-4">
-              <TherapyDayPlanner
-                patient={{ id: pacienteId, name: pacienteNombre, record: sel?.medicalRecordNumber ?? null }}
-                services={plannerServices}
-                centro={centro}
-              />
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end gap-2">
