@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon, Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
 
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import {
@@ -27,16 +27,11 @@ import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
+import { RecurringBookingModal } from "@/components/agenda/recurring-booking-modal";
+import { AddTherapySelect } from "@/components/agenda/add-therapy-select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 // COCKPIT PARTIDO — la pieza que ve el mostrador al citar terapias (aprobado por el dueño 26-sep, sobre su
 // visión del 24). IZQUIERDA: paciente + récord (héroe) y las terapias del día como mini-tarjetas de color con
@@ -103,6 +98,9 @@ export function TherapyDayScheduler({
   const [time, setTime] = React.useState("");
   const [dragOver, setDragOver] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  // Which card's "schedule a series" modal is open (its serviceId), or null — additive-only feature,
+  // fully independent from the single-date flow above.
+  const [recurringFor, setRecurringFor] = React.useState<string | null>(null);
 
   const areasOf = (id: string) => areas[id] ?? 1;
 
@@ -294,7 +292,7 @@ export function TherapyDayScheduler({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">{t("pickServices")}</label>
-                <AddTherapy
+                <AddTherapySelect
                   servicios={servicios.filter((s) => !sel.has(s.id))}
                   onAdd={(id) => toggle(id)}
                   label={t("addTherapy")}
@@ -382,6 +380,18 @@ export function TherapyDayScheduler({
                             planRes.refresh();
                           }}
                         />
+                        {/* Additive-only entry point: opens the pattern-based bulk scheduler for THIS
+                            service, never touches the single-date flow above. */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRecurringFor(s.id);
+                          }}
+                          className="mt-1 text-[11px] text-primary hover:underline"
+                        >
+                          {t("recurringButton")}
+                        </button>
                       </div>
                     );
                   })}
@@ -547,37 +557,27 @@ export function TherapyDayScheduler({
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
 
-// «Agregar terapia»: un select compacto de los servicios aún no elegidos.
-function AddTherapy({
-  servicios,
-  onAdd,
-  label,
-}: {
-  servicios: Servicio[];
-  onAdd: (id: string) => void;
-  label: string;
-}) {
-  if (servicios.length === 0) return null;
-  return (
-    <Select value="" onValueChange={onAdd}>
-      <SelectTrigger className="h-8 w-auto gap-1 border-dashed text-xs">
-        <HugeiconsIcon icon={Add01Icon} className="size-3.5" />
-        <SelectValue placeholder={label} />
-      </SelectTrigger>
-      <SelectContent>
-        {servicios.map((s) => (
-          <SelectItem key={s.id} value={s.id}>
-            <span className="inline-flex items-center gap-2">
-              <span className="size-2.5 rounded-full" style={{ backgroundColor: s.color ?? "#4a90d9" }} />
-              {s.name}
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+      {recurringFor && paciente && (
+        <RecurringBookingModal
+          open
+          serviceId={recurringFor}
+          serviceName={servById.get(recurringFor)?.name ?? ""}
+          serviceColor={servById.get(recurringFor)?.color}
+          patientId={paciente.id}
+          areas={areasOf(recurringFor)}
+          centro={centro}
+          defaultDate={date}
+          defaultTime={time || undefined}
+          existingDates={(upcomingByService.get(recurringFor) ?? []).map((s) => s.date)}
+          onOpenChange={(o) => !o && setRecurringFor(null)}
+          onBooked={() => {
+            upcomingRes.refresh();
+            availRes.refresh();
+            planRes.refresh();
+          }}
+        />
+      )}
+    </div>
   );
 }
