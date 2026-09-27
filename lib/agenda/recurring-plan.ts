@@ -64,15 +64,18 @@ export async function buildRecurringPlan(
     count: number;
     // How many days forward/backward to search for an alternate date before giving up. Default 14.
     searchWindowDays?: number;
+    // Dates (YYYY-MM-DD) this patient ALREADY has a pending session of this service on — same reason as
+    // `usedDates` below: the BE dedupes by (patient, service, date), so proposing one of these would be
+    // silently dropped as a duplicate. Pass the caller's own "already scheduled" data (it already has it).
+    existingDates?: string[];
   },
   fetchAvailability: AvailabilityLookup,
 ): Promise<RecurringPlanItem[]> {
   const { serviceId, centro, areas, startDate, everyDays, preferredTime, count } = params;
   const windowDays = params.searchWindowDays ?? 14;
 
-  // Per-date availability cache, MUTATED locally as this plan reserves a slot — so two sessions in the
-  // same series don't collide with each other before anything is actually saved to the BE (the BE knows
-  // nothing about this plan yet; this is a purely client-side simulation).
+  // Per-date availability cache (read-only from the BE's point of view — see `usedDates` below for
+  // what actually keeps this plan internally consistent).
   const cache = new Map<string, AvailabilitySlot[]>();
   async function slotsFor(date: string): Promise<AvailabilitySlot[]> {
     const hit = cache.get(date);
@@ -82,27 +85,29 @@ export async function buildRecurringPlan(
     cache.set(date, slots);
     return slots;
   }
-  function reserve(date: string, time: string) {
-    const slots = cache.get(date);
-    const idx = slots?.findIndex((s) => s.time === time) ?? -1;
-    if (!slots || idx === -1) return;
-    const s = slots[idx];
-    const free = (s.freeStations ?? (s.fits ? 1 : 0)) - 1;
-    slots[idx] = { ...s, freeStations: Math.max(0, free), fits: free > 0 };
-  }
+
+  // The BE dedupes a booking by (patient, service, DATE) — not date+time, so it can hold only ONE
+  // session per date for this series no matter which hour it's at. Two plan items that resolved to the
+  // same date at two DIFFERENT times would look fine here but collide for real at booking time: the
+  // second `agendar-multiple` call would silently come back as "already exists" and create nothing,
+  // while this plan and its summary toast would still claim it as booked. So a date used by any item in
+  // this plan is fully off the table for every other item, regardless of which time freed up on it —
+  // found live via adversarial review before this shipped (2026-09-26).
+  const usedDates = new Set<string>(params.existingDates ?? []);
 
   const items: RecurringPlanItem[] = [];
   for (let i = 0; i < count; i++) {
     const requestedDate = addDays(startDate, i * everyDays);
     let resolved: { date: string; time: string; status: RecurringPlanStatus } | null = null;
 
-    const daySlots = await slotsFor(requestedDate);
-    const t0 = bestTimeInDay(daySlots, preferredTime);
-    if (t0) {
-      resolved = { date: requestedDate, time: t0, status: t0 === preferredTime ? "asRequested" : "adjustedTime" };
-    } else {
+    if (!usedDates.has(requestedDate)) {
+      const t0 = bestTimeInDay(await slotsFor(requestedDate), preferredTime);
+      if (t0) resolved = { date: requestedDate, time: t0, status: t0 === preferredTime ? "asRequested" : "adjustedTime" };
+    }
+    if (!resolved) {
       for (let off = 1; off <= windowDays && !resolved; off++) {
         for (const cand of [addDays(requestedDate, off), addDays(requestedDate, -off)]) {
+          if (usedDates.has(cand)) continue;
           const t = bestTimeInDay(await slotsFor(cand), preferredTime);
           if (t) {
             resolved = { date: cand, time: t, status: "adjustedDate" };
@@ -113,7 +118,7 @@ export async function buildRecurringPlan(
     }
 
     if (resolved) {
-      reserve(resolved.date, resolved.time);
+      usedDates.add(resolved.date);
       items.push({ index: i, requestedDate, date: resolved.date, time: resolved.time, status: resolved.status });
     } else {
       items.push({ index: i, requestedDate, date: requestedDate, time: preferredTime, status: "unresolved" });

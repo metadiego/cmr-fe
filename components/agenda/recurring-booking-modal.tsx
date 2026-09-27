@@ -40,6 +40,7 @@ export function RecurringBookingModal({
   centro,
   defaultDate,
   defaultTime,
+  existingDates,
   onOpenChange,
   onBooked,
 }: {
@@ -52,6 +53,9 @@ export function RecurringBookingModal({
   centro?: string;
   defaultDate: string;
   defaultTime?: string;
+  // Dates this patient already has a pending session of this service on (the caller already has this —
+  // it's the same data behind the "Already scheduled" badge) — kept off the table, see recurring-plan.ts.
+  existingDates?: string[];
   onOpenChange: (open: boolean) => void;
   onBooked: () => void;
 }) {
@@ -78,6 +82,7 @@ export function RecurringBookingModal({
           everyDays: Math.max(1, everyDays),
           preferredTime: time,
           count: Math.max(1, count),
+          existingDates,
         },
         (date, sid, ar, c) => getAvailability({ date, serviceId: sid, areas: ar }, c),
       );
@@ -96,33 +101,43 @@ export function RecurringBookingModal({
   async function confirm() {
     if (!plan || confirming) return;
     setConfirming(true);
-    try {
-      const bookable = plan.filter((i) => i.status !== "unresolved");
-      const skipped = plan.length - bookable.length;
-      // The BE endpoint takes ONE time for ALL its dates — group by exact resolved time so a series that
-      // mostly landed on the preferred hour still goes out as one call per distinct time, not one per date.
-      const byTime = new Map<string, string[]>();
-      for (const item of bookable) {
-        const arr = byTime.get(item.time) ?? [];
-        arr.push(item.date);
-        byTime.set(item.time, arr);
-      }
-      let booked = 0;
-      const allWarnings: ApiWarning[] = [];
-      for (const [groupTime, fechas] of byTime) {
+    const bookable = plan.filter((i) => i.status !== "unresolved");
+    const skipped = plan.length - bookable.length;
+    // The BE endpoint takes ONE time for ALL its dates — group by exact resolved time so a series that
+    // mostly landed on the preferred hour still goes out as one call per distinct time, not one per date.
+    const byTime = new Map<string, string[]>();
+    for (const item of bookable) {
+      const arr = byTime.get(item.time) ?? [];
+      arr.push(item.date);
+      byTime.set(item.time, arr);
+    }
+    // Each time-group is its own try/catch: one group failing (network error, 500) must not stop the
+    // others from being attempted, and the summary must reflect only what actually got created — not
+    // what was merely requested. Found by adversarial review before this shipped (2026-09-26).
+    let booked = 0;
+    let failedGroups = 0;
+    const allWarnings: ApiWarning[] = [];
+    for (const [groupTime, fechas] of byTime) {
+      try {
         const { warnings } = await agendarMultiple({ patientId, serviceId, fechas, time: groupTime }, centro);
         booked += fechas.length;
         allWarnings.push(...warnings);
+      } catch (err) {
+        failedGroups++;
+        toastError(err, tRoot);
       }
-      mostrarAvisos(allWarnings, tRoot);
+    }
+    mostrarAvisos(allWarnings, tRoot);
+    if (booked > 0) {
       toast.success(t("recurringSummary", { booked, skipped }));
       onBooked();
+    }
+    setConfirming(false);
+    // Only close/reset on full success — a failed group leaves the plan visible so staff can see exactly
+    // what still needs a retry instead of a modal that vanished on a partial success.
+    if (failedGroups === 0) {
       onOpenChange(false);
       setPlan(null);
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setConfirming(false);
     }
   }
 

@@ -569,6 +569,7 @@ export function TherapyDayScheduler({
           centro={centro}
           defaultDate={date}
           defaultTime={time || undefined}
+          existingDates={(upcomingByService.get(recurringFor) ?? []).map((s) => s.date)}
           onOpenChange={(o) => !o && setRecurringFor(null)}
           onBooked={() => {
             upcomingRes.refresh();

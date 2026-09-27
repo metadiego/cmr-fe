@@ -74,18 +74,62 @@ test("no fitting slot anywhere within the search window: unresolved, keeps the r
   assert.equal(item.time, "09:00");
 });
 
-test("two sessions of the series don't collide: the plan reserves locally as it allocates", async () => {
-  // Only ONE free station at 09:00 that day — two candidates asking for the SAME day must not both get it.
+test("two sessions of the series never land on the SAME DATE, even at different times", async () => {
+  // The BE dedupes agendar-multiple by (patient, service, date) — not date+time — so a date already used
+  // by one item in this plan must be off the table for every other item, no matter which hour is free.
+  // Every date in this fake has room at both 09:00 and 09:30; if the plan let two items share a date, this
+  // test would still pass on "different times" alone, which is exactly the bug this guards against.
   const fake = async () => ({
     configured: true,
-    slots: [slot("09:00", true, 1), slot("09:30", true, 1)],
+    slots: [slot("09:00", true, 2), slot("09:30", true, 2)],
   });
   const items = await buildRecurringPlan(
-    // everyDays: 0 forces both candidates onto the same requested date on purpose, to prove the local
-    // reservation (not the BE) is what keeps them from doubling up on 09:00.
+    // everyDays: 0 forces both candidates to REQUEST the same date on purpose.
     { serviceId: "svc", areas: 1, startDate: "2026-09-26", everyDays: 0, preferredTime: "09:00", count: 2 },
     fake,
   );
-  const times = items.map((i: RecurringPlanItem) => i.time).sort();
-  assert.deepEqual(times, ["09:00", "09:30"]);
+  const dates = items.map((i: RecurringPlanItem) => i.date);
+  assert.notEqual(dates[0], dates[1]);
+  assert.equal(items[0].date, "2026-09-26");
+  assert.equal(items[0].time, "09:00");
+  assert.equal(items[1].status, "adjustedDate");
+});
+
+test("a date already used by an earlier item is skipped entirely during neighbor search", async () => {
+  // Day 1 (2026-09-27) has room; day 0 (09-26) is full and day 2 (09-28) also has room. If item 1 (which
+  // requests 09-26, finds nothing, and searches neighbors) were allowed to reuse 09-27 after item 0 already
+  // claimed it, both would end up on 09-27 — which the BE would collapse into one session.
+  const fake = async (date: string) => {
+    if (date === "2026-09-26") return { configured: true, slots: [slot("09:00", false, 0)] };
+    return { configured: true, slots: [slot("09:00", true, 1)] };
+  };
+  const items = await buildRecurringPlan(
+    { serviceId: "svc", areas: 1, startDate: "2026-09-26", everyDays: 1, preferredTime: "09:00", count: 2 },
+    fake,
+  );
+  // item 0 requests 09-26 (full) -> neighbor search finds 09-27 first.
+  assert.equal(items[0].date, "2026-09-27");
+  // item 1 requests 09-27, but it's already used -> must NOT be offered again; falls through to 09-28.
+  assert.equal(items[1].date, "2026-09-28");
+});
+
+test("existingDates (patient's pre-existing sessions) are treated as already used from the start", async () => {
+  // The requested date already has a pending session of this same service for this patient (found via
+  // the caller's own "already scheduled" lookup) — proposing it again would collide with that existing
+  // session at booking time exactly like an in-plan collision, so it must be skipped too.
+  const fake = async () => ({ configured: true, slots: [slot("09:00", true, 1)] });
+  const [item] = await buildRecurringPlan(
+    {
+      serviceId: "svc",
+      areas: 1,
+      startDate: "2026-09-26",
+      everyDays: 1,
+      preferredTime: "09:00",
+      count: 1,
+      existingDates: ["2026-09-26"],
+    },
+    fake,
+  );
+  assert.equal(item.date, "2026-09-27");
+  assert.equal(item.status, "adjustedDate");
 });
