@@ -309,6 +309,7 @@ export function TherapyDayScheduler({
                   {chosen.map((s) => {
                     const active = selEff === s.id;
                     const existentes = upcomingByService.get(s.id) ?? [];
+                    const color = s.color ?? "#4a90d9";
                     return (
                       <div
                         key={s.id}
@@ -324,12 +325,21 @@ export function TherapyDayScheduler({
                         }}
                         className={cn(
                           "group cursor-grab rounded-lg border-l-4 bg-card p-2.5 pl-3 ring-1 transition-all active:cursor-grabbing",
-                          active ? "shadow-md ring-primary/40" : "ring-foreground/10 hover:ring-foreground/20",
+                          active ? "shadow-md" : "ring-foreground/10 hover:ring-foreground/20",
                         )}
-                        style={{ borderLeftColor: s.color ?? "#4a90d9" }}
+                        style={{
+                          borderLeftColor: color,
+                          // Activa = mismo color de la tarjeta, no un azul genérico: es el vínculo visual
+                          // con el borde/punto del panel de horas a la derecha (mismo color en los dos lados).
+                          ...(active ? { boxShadow: `0 0 0 2px ${color}66`, backgroundColor: `${color}0f` } : {}),
+                        }}
                       >
                         <div className="flex items-center gap-2">
-                          <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
+                          {active ? (
+                            <span aria-hidden className="size-2.5 shrink-0 animate-pulse rounded-full" style={{ backgroundColor: color }} />
+                          ) : (
+                            <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
+                          )}
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-medium">{s.name}</div>
                             <label
@@ -382,10 +392,23 @@ export function TherapyDayScheduler({
         </aside>
 
         {/* ————— DERECHA: horas del servicio activo ————— */}
-        <section className="rounded-xl bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+        {/* Borde izquierdo del MISMO color que la tarjeta activa (izquierda): antes solo el texto "Hours ·
+            X" decía cuál era, y con 2+ tarjetas de peso visual parecido no quedaba claro cuál correspondía
+            a este panel. El color es el vínculo visual entre ambos lados. */}
+        <section
+          className="rounded-xl border-l-4 bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10"
+          style={{ borderLeftColor: selEff ? (servById.get(selEff)?.color ?? "#4a90d9") : "transparent" }}
+        >
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <div className="text-sm font-semibold">
+              <div className="flex items-center gap-1.5 text-sm font-semibold">
+                {selEff && (
+                  <span
+                    aria-hidden
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: servById.get(selEff)?.color ?? "#4a90d9" }}
+                  />
+                )}
                 {selEff ? t("hoursFor", { service: servById.get(selEff)?.name ?? "" }) : t("pickCard")}
               </div>
               {avail?.configured && (
