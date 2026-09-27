@@ -203,11 +203,14 @@ export function TherapyDayScheduler({
       toast.success(tp("resumen", { creadas, omitidas }));
       mostrarAvisos(warnings, tRoot);
       if (data.aviso) toast.warning(tp("avisoDisponibilidad"));
-      // «Agendar y seguir»: limpia la selección/hora para el próximo grupo de terapias del MISMO
-      // paciente/día, sin cerrar. El paciente se conserva a propósito.
+      // «Agendar y seguir»: limpia selección/hora/áreas para el próximo grupo de terapias del MISMO
+      // paciente/día, sin cerrar. El paciente se conserva a propósito. `areas` también se limpia: si
+      // no, re-agregar el mismo servicio en la próxima ronda heredaba en silencio el número de áreas
+      // de la ronda anterior en vez de arrancar en 1.
       if (!close) {
         setSel(new Set());
         setTime("");
+        setAreas({});
       }
       upcomingRes.refresh();
       onBooked?.({ close });
@@ -358,7 +361,17 @@ export function TherapyDayScheduler({
                             <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
                           </button>
                         </div>
-                        <ExistingSessionsBadge sesiones={existentes} centro={centro} onChanged={upcomingRes.refresh} />
+                        <ExistingSessionsBadge
+                          sesiones={existentes}
+                          centro={centro}
+                          onChanged={() => {
+                            // Reagendar puede liberar o consumir un puesto en la fecha/hora que la
+                            // tarjeta activa está mostrando ahora mismo — sin esto quedaban obsoletos.
+                            upcomingRes.refresh();
+                            availRes.refresh();
+                            planRes.refresh();
+                          }}
+                        />
                       </div>
                     );
                   })}
