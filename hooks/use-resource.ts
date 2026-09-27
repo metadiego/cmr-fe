@@ -41,6 +41,31 @@ export function useResource<T>(
   // literal (no spread) — required by the react-hooks lint rules.
   const depsKey = JSON.stringify(deps);
 
+  // When `deps` change (e.g. a different id), `state` still holds the PREVIOUS
+  // resource's "ok" data while the new fetch is in flight — a caller that seeds
+  // its own editable copy on "kind === ok" (the common "adjust state in render"
+  // pattern) reads that stale data as if it were the new one. `setState` alone
+  // does not fix this: it is deferred to the NEXT render, so a caller reading
+  // `state` in THIS SAME render (the one where `deps` just changed) still sees
+  // the old "ok" — exactly the render where its own seeding check fires, using
+  // the wrong data, and never re-fires once the real data lands because its own
+  // "already seeded" guard is now satisfied. Computing `effectiveState` inline
+  // reports "loading" to the caller in that very render, not one render late.
+  // Reproduced live: switching the resources-per-service dropdown from one
+  // therapy to another kept showing the FIRST therapy's resource line forever,
+  // including the very FIRST real selection after the empty placeholder state
+  // (27-sep-2026). `reload()` already floors to "loading" itself; only a plain
+  // deps change was missing it.
+  const [prevDepsKey, setPrevDepsKey] = React.useState(depsKey);
+  const depsChanged = prevDepsKey !== depsKey;
+  if (depsChanged) {
+    setPrevDepsKey(depsKey);
+    if (state.kind !== "loading") setState({ kind: "loading" });
+  }
+  const effectiveState: ResourceState<T> = depsChanged
+    ? { kind: "loading" }
+    : state;
+
   React.useEffect(() => {
     let active = true;
     fetcherRef.current()
@@ -66,5 +91,5 @@ export function useResource<T>(
     setNonce((n) => n + 1);
   }, []);
 
-  return { state, reload, refresh };
+  return { state: effectiveState, reload, refresh };
 }
