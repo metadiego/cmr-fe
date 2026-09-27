@@ -12,7 +12,7 @@ import {
   type Resource,
   type ResourceConcurrency,
 } from "@/lib/api/resources";
-import { listPersonal, type Personal } from "@/lib/api/personal";
+import { listPersonal, getStaff, type Personal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
@@ -214,7 +214,19 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
           <Field label={t("fName")}><Input value={form.name} onChange={(e) => set("name", e.target.value)} /></Field>
           <Field label={t("fSlug")}><Input value={form.slug} onChange={(e) => set("slug", e.target.value)} className="font-mono" placeholder="laser_rooms" /></Field>
           <Field label={t("fKind")}>
-            <Select value={form.kind} onValueChange={(v) => set("kind", v)}>
+            <Select
+              value={form.kind}
+              onValueChange={(v) =>
+                setForm((f) =>
+                  // Leaving "person": staffId/blocksStaffAgenda are meaningless for a room/chair/machine
+                  // and must not ride along silently — otherwise a room could save with a real staffId
+                  // and blocksStaffAgenda:true from before the kind change, telling the scheduler to
+                  // block an unrelated person's agenda for a room booking. Found by adversarial review
+                  // before merging (2026-09-27) — impossible before this PR (staffId was always null).
+                  v === "person" ? { ...f, kind: v } : { ...f, kind: v, staffId: "", blocksStaffAgenda: false },
+                )
+              }
+            >
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="room">{t("kind.room")}</SelectItem>
@@ -248,14 +260,17 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
             </Field>
           )}
         </div>
-        {/* Recurso que ES una persona (la doctora de EMPOWER): al agendarlo, opcionalmente bloquea su agenda. */}
-        <div className="mt-2 flex items-start justify-between gap-4 rounded-md bg-muted/30 p-3">
-          <div className="space-y-0.5">
-            <p className="text-sm font-medium">{t("fBlocksAgenda")}</p>
-            <p className="text-xs text-muted-foreground">{t("fBlocksAgendaHelp")}</p>
+        {/* Solo tiene sentido para un recurso que ES una persona (la doctora de EMPOWER) — antes se
+            mostraba siempre, para cualquier kind, aunque staffId nunca se pudiera elegir. */}
+        {form.kind === "person" && (
+          <div className="mt-2 flex items-start justify-between gap-4 rounded-md bg-muted/30 p-3">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">{t("fBlocksAgenda")}</p>
+              <p className="text-xs text-muted-foreground">{t("fBlocksAgendaHelp")}</p>
+            </div>
+            <Switch checked={form.blocksStaffAgenda} onCheckedChange={(v) => set("blocksStaffAgenda", v)} />
           </div>
-          <Switch checked={form.blocksStaffAgenda} onCheckedChange={(v) => set("blocksStaffAgenda", v)} />
-        </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
           <Button onClick={guardar} disabled={!puedeGuardar || busy}>{busy ? tc("saving") : tc("save")}</Button>
@@ -290,15 +305,27 @@ function StaffSelectField({
     [centroId],
   );
   const personal = state.kind === "ok" ? state.data : [];
-  // Ya elegido pero no en la lista del centro activo (p. ej. persona de otro centro): se conserva por
-  // id en vez de perderse en silencio al guardar sin tocar este campo.
-  const foraneo = value && !personal.some((p) => p.id === value) ? { id: value } : null;
+  // Ya elegido pero no en la lista del centro activo (p. ej. persona activa en otro centro, ver
+  // updatePersonalCentros): se conserva por id en vez de perderse en silencio al guardar sin tocar este
+  // campo. Se resuelve su nombre real con una llamada aparte — un id crudo como etiqueta no le dice a
+  // nadie quién es esa persona.
+  const esForaneo = !!value && !personal.some((p) => p.id === value);
+  const foraneoRes = useResource<Personal | null>(
+    () => (esForaneo ? getStaff(value) : Promise.resolve(null)),
+    [esForaneo, value],
+  );
+  const foraneo =
+    esForaneo && foraneoRes.state.kind === "ok" && foraneoRes.state.data
+      ? { id: value, label: [foraneoRes.state.data.name, foraneoRes.state.data.lastName].filter(Boolean).join(" ") }
+      : esForaneo
+        ? { id: value, label: value }
+        : null;
   return (
     <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
       <SelectTrigger className="w-full"><SelectValue placeholder={t("fStaffIdPlaceholder")} /></SelectTrigger>
       <SelectContent>
         <SelectItem value={NONE}>{t("fStaffIdPlaceholder")}</SelectItem>
-        {foraneo && <SelectItem value={foraneo.id}>{foraneo.id}</SelectItem>}
+        {foraneo && <SelectItem value={foraneo.id}>{foraneo.label}</SelectItem>}
         {personal.map((p) => (
           <SelectItem key={p.id} value={p.id}>
             {[p.name, p.lastName].filter(Boolean).join(" ")}
