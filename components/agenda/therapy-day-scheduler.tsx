@@ -21,6 +21,7 @@ import {
   type PatientDayResult,
 } from "@/lib/api/resources";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
+import { todayPR, inDaysPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
@@ -42,19 +43,6 @@ import { Badge } from "@/components/ui/badge";
 // Reserva por el MISMO endpoint del frontdesk (book-multiple). Handoff HANDOFF-FE-agenda-de-terapias.
 
 export type PatientLite = { id: string; name: string; record?: string | null; phone?: string | null };
-
-// Fecha de HOY en la zona de la clínica (PR, UTC-4, sin horario de verano), no la del navegador. `new
-// Date().toISOString()` (usado antes para el `date` inicial) da la fecha en UTC: de 20:00 a 23:59 AST ya
-// es el día siguiente en UTC, así que agendar/buscar "hoy" de noche caía en mañana. Verificado en vivo:
-// escondía las sesiones agendadas del propio día en la consulta de "ya agendadas" (2026-09-26).
-function todayPR(): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(new Date());
-}
-function inDaysPR(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(d);
-}
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);

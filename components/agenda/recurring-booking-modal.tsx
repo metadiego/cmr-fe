@@ -6,16 +6,30 @@ import { toast } from "sonner";
 
 import { getAvailability } from "@/lib/api/resources";
 import { agendarMultiple } from "@/lib/api/frontdesk";
-import { buildRecurringPlan, type RecurringPlanItem, type RecurringPlanStatus } from "@/lib/agenda/recurring-plan";
+import { buildRecurringPlan, weekdayOf, type RecurringPlanItem, type RecurringPlanStatus } from "@/lib/agenda/recurring-plan";
 import type { ApiWarning } from "@/lib/api/types";
-import { formatFechaSolo } from "@/lib/format/fecha";
+import { formatFechaSolo, todayPR, nowTimePR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Field } from "@/components/kit/form-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+// 0=Sunday..6=Saturday, Monday-first display order (L-M-M-J-V-S-D). Labels come from i18n
+// (therapyPlanner.weekday*) so English shows M-T-W-T-F-S-S instead of the Spanish letters.
+const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+const WEEKDAY_KEY: Record<number, string> = {
+  0: "weekdaySun",
+  1: "weekdayMon",
+  2: "weekdayTue",
+  3: "weekdayWed",
+  4: "weekdayThu",
+  5: "weekdayFri",
+  6: "weekdaySat",
+};
 
 // "Schedule a series" — additive, opt-in mode alongside the normal single-date flow (never replaces it,
 // never touches its code path). Solves the gap the owner named directly: wiring the BE's bulk endpoint
@@ -61,15 +75,30 @@ export function RecurringBookingModal({
 }) {
   const t = useTranslations("therapyPlanner");
   const tRoot = useTranslations();
-  const [startDate, setStartDate] = React.useState(defaultDate);
-  const [everyDays, setEveryDays] = React.useState(2);
+  // Never before today — the date input's own `min` blocks the picker, this is the belt-and-suspenders
+  // floor for whatever value arrives via `defaultDate`. Owner's rule (2026-09-27): no appointment before
+  // right now, ever.
+  const floor = todayPR();
+  const [startDate, setStartDate] = React.useState(defaultDate < floor ? floor : defaultDate);
+  const [weekdays, setWeekdays] = React.useState<Set<number>>(() => new Set([weekdayOf(defaultDate < floor ? floor : defaultDate)]));
   const [time, setTime] = React.useState(defaultTime ?? "09:00");
   const [count, setCount] = React.useState(10);
   const [plan, setPlan] = React.useState<RecurringPlanItem[] | null>(null);
   const [previewing, setPreviewing] = React.useState(false);
   const [confirming, setConfirming] = React.useState(false);
 
+  function toggleWeekday(d: number) {
+    setWeekdays((prev) => {
+      const next = new Set(prev);
+      if (next.has(d)) next.delete(d);
+      else next.add(d);
+      return next;
+    });
+    setPlan(null);
+  }
+
   async function preview() {
+    if (weekdays.size === 0) return;
     setPreviewing(true);
     setPlan(null);
     try {
@@ -79,10 +108,12 @@ export function RecurringBookingModal({
           centro,
           areas,
           startDate,
-          everyDays: Math.max(1, everyDays),
+          weekdays: [...weekdays],
           preferredTime: time,
           count: Math.max(1, count),
           existingDates,
+          // Only today's own date gets a floor — buildRecurringPlan applies it exclusively to `startDate`.
+          minTimeOnStartDate: startDate === todayPR() ? nowTimePR() : undefined,
         },
         (date, sid, ar, c) => getAvailability({ date, serviceId: sid, areas: ar }, c),
       );
@@ -154,23 +185,39 @@ export function RecurringBookingModal({
 
         <div className="grid grid-cols-2 gap-3">
           <Field label={t("recurringStartDate")}>
-            <Input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPlan(null); }} />
+            <Input
+              type="date"
+              min={floor}
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value < floor ? floor : e.target.value); setPlan(null); }}
+            />
           </Field>
           <Field label={t("recurringTime")}>
             <Input type="time" value={time} onChange={(e) => { setTime(e.target.value); setPlan(null); }} />
           </Field>
-          <Field label={t("recurringEveryLabel")}>
-            <div className="flex items-center gap-1.5">
-              <Input
-                type="number"
-                min={1}
-                value={everyDays}
-                onChange={(e) => { setEveryDays(Math.max(1, Number(e.target.value) || 1)); setPlan(null); }}
-                className="w-16"
-              />
-              <span className="text-sm text-muted-foreground">{t("recurringDays")}</span>
-            </div>
-          </Field>
+          <div className="col-span-2 space-y-1.5">
+            <Field label={t("recurringWeekdays")}>
+              <div className="flex gap-1">
+                {WEEKDAY_ORDER.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => toggleWeekday(d)}
+                    aria-pressed={weekdays.has(d)}
+                    className={cn(
+                      "flex size-8 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
+                      weekdays.has(d)
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-input text-muted-foreground hover:border-primary hover:text-primary",
+                    )}
+                  >
+                    {t(WEEKDAY_KEY[d])}
+                  </button>
+                ))}
+              </div>
+            </Field>
+            {weekdays.size === 0 && <p className="text-xs text-destructive">{t("recurringPickAWeekday")}</p>}
+          </div>
           <Field label={t("recurringCount")}>
             <Input
               type="number"
@@ -178,10 +225,17 @@ export function RecurringBookingModal({
               value={count}
               onChange={(e) => { setCount(Math.max(1, Number(e.target.value) || 1)); setPlan(null); }}
             />
+            {/* Sessions are DAYS, not raw calendar time: 12 sessions on Mon/Wed/Fri (3 days/week) is
+                exactly 4 weeks — owner's framing (2026-09-27), shown live as the two inputs change. */}
+            {weekdays.size > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("recurringWeeksApprox", { n: Math.ceil(count / weekdays.size) })}
+              </p>
+            )}
           </Field>
         </div>
 
-        <Button variant="outline" onClick={preview} disabled={previewing}>
+        <Button variant="outline" onClick={preview} disabled={previewing || weekdays.size === 0}>
           {previewing ? t("recurringPreviewing") : t("recurringPreview")}
         </Button>
 
