@@ -449,17 +449,12 @@ export function TherapyDayScheduler({
                         setTime(sl.time);
                         setDragOver(null);
                       }}
-                      // No `animate-pulse` on the free slots: with 15-20 of them mounting together their
-                      // pulse phases drift out of sync, so a screenshot (or just a glance) catches a random
-                      // mix of dim/bright buttons that looks like the data changed when it didn't — reported
-                      // live as "availability doesn't update per date" when the numbers were actually correct
-                      // (verified against the real API, 2026-09-26).
                       className={cn(
                         "flex flex-col items-start rounded-lg border p-2 text-left transition-all",
                         active
                           ? "border-primary bg-primary text-primary-foreground shadow-md"
                           : sl.fits
-                            ? "border-success/40 bg-success/10 hover:bg-success/20"
+                            ? "animate-pulse border-success/40 bg-success/10 hover:animate-none hover:bg-success/20"
                             : "cursor-not-allowed border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground/40",
                         over && "scale-105 ring-2 ring-success",
                       )}
