@@ -70,6 +70,15 @@ export interface ThemeConfig {
    * apariencia → al guardarlo se MEZCLA con la capa del usuario. Handoff be-el-tema-arranca-en-claro.
    */
   tema?: string;
+  /**
+   * Free-standing behavior toggles that aren't CSS/visual tokens but still live in the same
+   * layered config blob (system → center → user → override) so they follow the same precedence,
+   * API, and MCP door as everything else here — no new mechanism. First use: whether the
+   * available-slot indicators in the therapy scheduler pulse (default true). Verified live
+   * (2026-09-27): the BE's config JSONB is free-form and round-trips an unrecognized key with no
+   * BE change needed — confirmed via a real PUT/GET against production before this was typed.
+   */
+  availability?: { blinkEnabled?: boolean };
 }
 
 // Redesign navy (2026-09): el ÚNICO color personalizable es el color de marca

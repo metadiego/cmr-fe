@@ -23,6 +23,7 @@ import {
 import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { todayPR, inDaysPR } from "@/lib/format/fecha";
 import { toastError } from "@/lib/api/errors";
+import { getMyPreferences } from "@/lib/api/preferences";
 import { type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
@@ -95,6 +96,13 @@ export function TherapyDayScheduler({
   const servRes = useResource<Servicio[]>(() => getServicios(centro), [centro]);
   const servicios = servRes.state.kind === "ok" ? servRes.state.data : [];
   const servById = React.useMemo(() => new Map(servicios.map((s) => [s.id, s])), [servicios]);
+
+  // Whether the free-slot indicators pulse — a layered preference (system→center→user→override),
+  // not a code decision: this exact behavior was flipped by hand twice in one week (removed as a
+  // suspected glitch, reverted the same day because the owner likes it). Default true so nobody who
+  // hasn't set a preference sees a behavior change. docs/specs/therapy-slot-color-and-blink-config-handoff-be.md
+  const prefsRes = useResource(() => getMyPreferences());
+  const blinkEnabled = prefsRes.state.kind === "ok" ? (prefsRes.state.data.effective.availability?.blinkEnabled ?? true) : true;
 
   // Servicios comprados con saldo pendiente (para agregar de un toque). Degrada a [] si el endpoint falla.
   const saldoRes = useResource<ServicioConSaldo[]>(
@@ -475,7 +483,7 @@ export function TherapyDayScheduler({
                         active
                           ? "border-primary bg-primary text-primary-foreground shadow-md"
                           : sl.fits
-                            ? "animate-pulse border-success/40 bg-success/10 hover:animate-none hover:bg-success/20"
+                            ? cn("border-success/40 bg-success/10 hover:bg-success/20", blinkEnabled && "animate-pulse hover:animate-none")
                             : "cursor-not-allowed border-dashed border-muted-foreground/25 bg-muted/20 text-muted-foreground/40",
                         over && "scale-105 ring-2 ring-success",
                       )}
