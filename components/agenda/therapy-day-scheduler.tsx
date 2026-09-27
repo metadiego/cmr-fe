@@ -7,7 +7,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Cancel01Icon, DragDropIcon } from "@hugeicons/core-free-icons";
 
 import { getServicios, type Servicio } from "@/lib/api/servicios";
-import { agendarVariosServicios, getServiciosConSaldo, type ServicioConSaldo } from "@/lib/api/frontdesk";
+import {
+  agendarVariosServicios,
+  getServiciosConSaldo,
+  listSesionesRango,
+  type ServicioConSaldo,
+  type Sesion,
+} from "@/lib/api/frontdesk";
 import {
   getAvailability,
   planPatientDay,
@@ -20,6 +26,7 @@ import { type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { PacienteSelect } from "@/components/citas/paciente-select";
+import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +48,19 @@ import {
 
 export type PatientLite = { id: string; name: string; record?: string | null; phone?: string | null };
 
+// Fecha de HOY en la zona de la clínica (PR, UTC-4, sin horario de verano), no la del navegador. `new
+// Date().toISOString()` (usado antes para el `date` inicial) da la fecha en UTC: de 20:00 a 23:59 AST ya
+// es el día siguiente en UTC, así que agendar/buscar "hoy" de noche caía en mañana. Verificado en vivo:
+// escondía las sesiones agendadas del propio día en la consulta de "ya agendadas" (2026-09-26).
+function todayPR(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(new Date());
+}
+function inDaysPR(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(d);
+}
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "·";
@@ -58,7 +78,9 @@ export function TherapyDayScheduler({
   // Paciente FIJADO (p. ej. desde «Citar» tras Asistir): se muestra el héroe y no se pide buscar.
   lockedPatient?: PatientLite;
   centro?: string;
-  onBooked?: () => void;
+  // `close: true` = el botón «agendar y cerrar»; `close: false` = «agendar y seguir» (limpia la
+  // selección y se queda abierto para agregar más terapias al mismo paciente/día).
+  onBooked?: (opts: { close: boolean }) => void;
 }) {
   const t = useTranslations("therapyPlanner");
   const tp = useTranslations("programarCitas");
@@ -77,7 +99,7 @@ export function TherapyDayScheduler({
   const [sel, setSel] = React.useState<Set<string>>(new Set());
   const [areas, setAreas] = React.useState<Record<string, number>>({});
   const [selId, setSelId] = React.useState<string>("");
-  const [date, setDate] = React.useState(defaultDate ?? new Date().toISOString().slice(0, 10));
+  const [date, setDate] = React.useState(defaultDate ?? todayPR());
   const [time, setTime] = React.useState("");
   const [dragOver, setDragOver] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
@@ -94,6 +116,30 @@ export function TherapyDayScheduler({
     [paciente?.id, centro],
   );
   const saldo = saldoRes.state.kind === "ok" ? saldoRes.state.data : [];
+
+  // Sesiones YA agendadas del paciente (hoy en adelante, cualquier servicio): hace visible el doble-agendado
+  // — el motivo de esto es real (una técnica citó lo mismo que ya había citado otra). Ventana amplia (120
+  // días) para no perder algo agendado bien a futuro; se re-lee sola al cambiar de paciente o tras reagendar.
+  // `Date.now()` va DENTRO del fetcher (corre en un efecto, no en render) — llamarlo en render viola la
+  // regla de pureza de hooks (react-hooks/purity).
+  const upcomingRes = useResource<Sesion[]>(() => {
+    if (!paciente) return Promise.resolve([]);
+    const hoy = todayPR();
+    const horizonte = inDaysPR(120);
+    return listSesionesRango({ desde: hoy, hasta: horizonte, pacienteId: paciente.id, centroId: centro });
+  }, [paciente?.id, centro]);
+  const upcomingByService = React.useMemo(() => {
+    const m = new Map<string, Sesion[]>();
+    if (upcomingRes.state.kind === "ok") {
+      for (const s of upcomingRes.state.data) {
+        if (s.status === "cancelada" || s.status === "asistido") continue;
+        const arr = m.get(s.serviceId) ?? [];
+        arr.push(s);
+        m.set(s.serviceId, arr);
+      }
+    }
+    return m;
+  }, [upcomingRes.state]);
 
   const chosen = servicios.filter((s) => sel.has(s.id));
   // Tarjeta activa (sus horas se muestran). Si la seleccionada ya no está, cae en la primera elegida.
@@ -144,7 +190,7 @@ export function TherapyDayScheduler({
 
   const canBook = !!paciente && sel.size > 0 && !!date && !submitting;
 
-  async function book() {
+  async function book(close: boolean) {
     if (!paciente || sel.size === 0) return;
     setSubmitting(true);
     try {
@@ -157,7 +203,17 @@ export function TherapyDayScheduler({
       toast.success(tp("resumen", { creadas, omitidas }));
       mostrarAvisos(warnings, tRoot);
       if (data.aviso) toast.warning(tp("avisoDisponibilidad"));
-      onBooked?.();
+      // «Agendar y seguir»: limpia selección/hora/áreas para el próximo grupo de terapias del MISMO
+      // paciente/día, sin cerrar. El paciente se conserva a propósito. `areas` también se limpia: si
+      // no, re-agregar el mismo servicio en la próxima ronda heredaba en silencio el número de áreas
+      // de la ronda anterior en vez de arrancar en 1.
+      if (!close) {
+        setSel(new Set());
+        setTime("");
+        setAreas({});
+      }
+      upcomingRes.refresh();
+      onBooked?.({ close });
     } catch (err) {
       toastError(err, tRoot);
     } finally {
@@ -252,6 +308,7 @@ export function TherapyDayScheduler({
                 <div className="space-y-2">
                   {chosen.map((s) => {
                     const active = selEff === s.id;
+                    const existentes = upcomingByService.get(s.id) ?? [];
                     return (
                       <div
                         key={s.id}
@@ -266,42 +323,55 @@ export function TherapyDayScheduler({
                           setTime("");
                         }}
                         className={cn(
-                          "group flex cursor-grab items-center gap-2 rounded-lg border-l-4 bg-card p-2.5 pl-3 ring-1 transition-all active:cursor-grabbing",
+                          "group cursor-grab rounded-lg border-l-4 bg-card p-2.5 pl-3 ring-1 transition-all active:cursor-grabbing",
                           active ? "shadow-md ring-primary/40" : "ring-foreground/10 hover:ring-foreground/20",
                         )}
                         style={{ borderLeftColor: s.color ?? "#4a90d9" }}
                       >
-                        <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-medium">{s.name}</div>
-                          <label
-                            className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
-                            onClick={(e) => e.stopPropagation()}
+                        <div className="flex items-center gap-2">
+                          <HugeiconsIcon icon={DragDropIcon} className="size-4 shrink-0 text-muted-foreground/50" />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-medium">{s.name}</div>
+                            <label
+                              className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {t("areas")}
+                              <Input
+                                type="number"
+                                min={1}
+                                value={areasOf(s.id)}
+                                onChange={(e) => {
+                                  setAreas((a) => ({ ...a, [s.id]: Math.max(1, Number(e.target.value) || 1) }));
+                                  if (s.id === selEff) setTime("");
+                                }}
+                                className="h-6 w-14 px-1 py-0 text-xs"
+                              />
+                            </label>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeService(s.id);
+                            }}
+                            className="shrink-0 rounded p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                            aria-label={tRoot("common.delete")}
                           >
-                            {t("areas")}
-                            <Input
-                              type="number"
-                              min={1}
-                              value={areasOf(s.id)}
-                              onChange={(e) => {
-                                setAreas((a) => ({ ...a, [s.id]: Math.max(1, Number(e.target.value) || 1) }));
-                                if (s.id === selEff) setTime("");
-                              }}
-                              className="h-6 w-14 px-1 py-0 text-xs"
-                            />
-                          </label>
+                            <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeService(s.id);
+                        <ExistingSessionsBadge
+                          sesiones={existentes}
+                          centro={centro}
+                          onChanged={() => {
+                            // Reagendar puede liberar o consumir un puesto en la fecha/hora que la
+                            // tarjeta activa está mostrando ahora mismo — sin esto quedaban obsoletos.
+                            upcomingRes.refresh();
+                            availRes.refresh();
+                            planRes.refresh();
                           }}
-                          className="shrink-0 rounded p-1 text-muted-foreground/50 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
-                          aria-label={tRoot("common.delete")}
-                        >
-                          <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
-                        </button>
+                        />
                       </div>
                     );
                   })}
@@ -442,9 +512,17 @@ export function TherapyDayScheduler({
             </>
           ) : null}
         </div>
-        <Button size="lg" onClick={book} disabled={!canBook}>
-          {submitting ? tRoot("common.saving") : t("bookN", { n: sel.size })}
-        </Button>
+        {/* Dos botones en vez de un cierre automático: el mostrador suele citar varias terapias del
+            MISMO paciente en una sola visita — cerrar tras la primera obligaba a reabrir. «Seguir»
+            limpia la selección y se queda en el mismo paciente/día; «Cerrar» hace lo de antes. */}
+        <div className="flex items-center gap-2">
+          <Button size="lg" variant="outline" onClick={() => book(false)} disabled={!canBook}>
+            {submitting ? tRoot("common.saving") : t("bookAndContinue")}
+          </Button>
+          <Button size="lg" onClick={() => book(true)} disabled={!canBook}>
+            {submitting ? tRoot("common.saving") : t("bookAndClose")}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -140,7 +140,12 @@
     "hoursFor": "Horas · {service}",
     "pickCard": "Elige una terapia para ver sus horas",
     "dragHint": "Arrastra la tarjeta a una hora o haz clic",
-    "noHour": "Elige una hora para ver si el día cuadra"
+    "noHour": "Elige una hora para ver si el día cuadra",
+    "bookAndContinue": "Agendar y seguir",
+    "bookAndClose": "Agendar y cerrar",
+    "alreadyScheduled": "Ya agendada",
+    "reschedule": "Reagendar",
+    "rescheduled": "Reagendada"
   },
   "citas": {
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
