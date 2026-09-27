@@ -18,14 +18,19 @@ export interface Resource {
   kind: ResourceKind;
   concurrency: ResourceConcurrency;
   maxMinutesPerPatient: number | null; // tope por paciente (90 en las sillas)
-  staffRole: string | null; // cargo que lo atiende; el techo real = menor entre puestos y gente de turno
+  staffRole: string | null; // cargo EDITABLE del recurso; casi siempre vacío a propósito (ver `effectiveStaffRole`)
+  // Cargo YA RESUELTO por el BE (PR #368): usar ESTE para pintar la columna "Staff", no `staffRole` a
+  // secas. Un recurso compartido por varios cargos (p. ej. el room de NPT/GLP-1/NEUROCATCH) lo trae
+  // `null` A PROPÓSITO — mezcla roles, y el BE no inventa uno. Verificado en vivo contra prod, 2026-09-27.
+  effectiveStaffRole: string | null;
   staffId: string | null; // cuando el recurso ES una persona (la doctora de EMPOWER)
   blocksStaffAgenda: boolean; // si ocupa la agenda de consultas de esa persona
   active: boolean;
 }
 
-// Payload de alta/edición (id/active los maneja el server; DELETE desactiva).
-export type ResourcePayload = Omit<Resource, "id" | "active"> & { active?: boolean };
+// Payload de alta/edición (id/active los maneja el server; DELETE desactiva). `effectiveStaffRole` es
+// SOLO LECTURA (lo calcula el BE) — nunca se manda de vuelta.
+export type ResourcePayload = Omit<Resource, "id" | "active" | "effectiveStaffRole"> & { active?: boolean };
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];

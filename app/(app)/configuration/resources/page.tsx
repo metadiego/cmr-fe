@@ -12,6 +12,7 @@ import {
   type Resource,
   type ResourceConcurrency,
 } from "@/lib/api/resources";
+import { listPersonal, type Personal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
@@ -115,7 +116,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
               <TableCell>{concLabel(r.concurrency)}</TableCell>
               <TableCell className="text-right tabular-nums">{r.maxMinutesPerPatient ?? "—"}</TableCell>
               <TableCell className="text-muted-foreground">
-                {r.staffRole ?? "—"}
+                {r.effectiveStaffRole ?? "—"}
                 {r.blocksStaffAgenda && <Badge variant="warning" className="ml-2">{t("blocksAgenda")}</Badge>}
               </TableCell>
               <TableCell>
@@ -238,6 +239,14 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
           </div>
           <Field label={t("fMaxMin")}><Input type="number" min={0} value={form.maxMinutesPerPatient} onChange={(e) => set("maxMinutesPerPatient", e.target.value)} placeholder={t("fMaxMinPlaceholder")} /></Field>
           <Field label={t("fStaffRole")}><Input value={form.staffRole} onChange={(e) => set("staffRole", e.target.value)} placeholder="tecnico" /></Field>
+          {/* Solo cuando el recurso ES una persona (kind: person, p. ej. la doctora de EMPOWER): antes no
+              había forma de elegirla, así que `staffId` siempre se guardaba null y el bloqueo de agenda
+              (staffBlocks) nunca se activaba. Handoff HANDOFF-FE-staff-picker-recursos-persona. */}
+          {form.kind === "person" && (
+            <Field label={t("fStaffId")}>
+              <StaffSelectField value={form.staffId} onChange={(v) => set("staffId", v)} centroId={centroId} />
+            </Field>
+          )}
         </div>
         {/* Recurso que ES una persona (la doctora de EMPOWER): al agendarlo, opcionalmente bloquea su agenda. */}
         <div className="mt-2 flex items-start justify-between gap-4 rounded-md bg-muted/30 p-3">
@@ -253,5 +262,49 @@ function ResourceDialog({ resource, centroId, onClose, onSaved }: {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+const NONE = "__none__";
+
+// Selector de personal para un recurso `kind: person` (p. ej. la doctora de EMPOWER): antes no existía
+// ningún control para esto, así que `staffId` siempre se guardaba `null` y `staffBlocks` (el bloqueo de
+// agenda al agendar) nunca se activaba — el campo ya existía y ya se validaba en el BE, solo faltaba la
+// UI. No se limita a médicos (`getMedicos`): el modelo de recursos-persona es genérico a propósito.
+// Mismo patrón que components/clientes/medico-select-field.tsx. Handoff
+// HANDOFF-FE-staff-picker-recursos-persona.
+function StaffSelectField({
+  value,
+  onChange,
+  centroId,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  centroId?: string;
+}) {
+  const t = useTranslations("resources");
+  const { state } = useResource<Personal[]>(
+    // 100 = el tope real del BE (verificado en vivo: pedir 200 devuelve 400 "limit must not be greater
+    // than 100"), no un número elegido a ojo.
+    () => listPersonal({ limit: 100 }, centroId).then((r) => r.items),
+    [centroId],
+  );
+  const personal = state.kind === "ok" ? state.data : [];
+  // Ya elegido pero no en la lista del centro activo (p. ej. persona de otro centro): se conserva por
+  // id en vez de perderse en silencio al guardar sin tocar este campo.
+  const foraneo = value && !personal.some((p) => p.id === value) ? { id: value } : null;
+  return (
+    <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
+      <SelectTrigger className="w-full"><SelectValue placeholder={t("fStaffIdPlaceholder")} /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value={NONE}>{t("fStaffIdPlaceholder")}</SelectItem>
+        {foraneo && <SelectItem value={foraneo.id}>{foraneo.id}</SelectItem>}
+        {personal.map((p) => (
+          <SelectItem key={p.id} value={p.id}>
+            {[p.name, p.lastName].filter(Boolean).join(" ")}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

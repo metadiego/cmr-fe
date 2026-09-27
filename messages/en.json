@@ -91,6 +91,8 @@
     "fMaxMin": "Max minutes per patient",
     "fMaxMinPlaceholder": "no cap",
     "fStaffRole": "Role that provides it",
+    "fStaffId": "Person",
+    "fStaffIdPlaceholder": "No person assigned",
     "fBlocksAgenda": "The resource is a person and blocks their agenda",
     "fBlocksAgendaHelp": "For the EMPOWER doctor: booking them blocks their consultation hours.",
     "kind": {
