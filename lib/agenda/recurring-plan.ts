@@ -92,6 +92,11 @@ export async function buildRecurringPlan(
 ): Promise<RecurringPlanItem[]> {
   const { serviceId, centro, areas, startDate, preferredTime, count } = params;
   const weekdaySet = new Set(params.weekdays);
+  // `eligibleFrom` below is an infinite generator (walks forward until it finds a matching weekday) — an
+  // empty set would never yield and hang the caller forever. The UI disables its own trigger for this,
+  // but a pure function callable from anywhere must not trust that; nothing to plan is a valid, cheap
+  // answer. Found by adversarial review (2026-09-27).
+  if (weekdaySet.size === 0 || count <= 0) return [];
   const windowOccurrences = params.searchWindowOccurrences ?? 8;
 
   const cache = new Map<string, AvailabilitySlot[]>();

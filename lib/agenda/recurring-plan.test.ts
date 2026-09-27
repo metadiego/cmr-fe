@@ -139,3 +139,32 @@ test("minTimeOnStartDate drops earlier slots on the start date only", async () =
   assert.equal(items[1].time, "07:00");
   assert.equal(items[1].status, "asRequested");
 });
+
+test("weekdays: [] returns no items instead of hanging (infinite generator guard)", async () => {
+  const fake = async () => ({ configured: true, slots: [slot("09:00", true, 1)] });
+  const items = await buildRecurringPlan(
+    { serviceId: "svc", areas: 1, startDate: "2026-09-28", weekdays: [], preferredTime: "09:00", count: 5 },
+    fake,
+  );
+  assert.deepEqual(items, []);
+});
+
+test("a fallback landing on another item's own requested date is still caught (multi-weekday)", async () => {
+  // Mon/Wed selected, starting Monday 09-28. Monday is full, so item 0's fallback walks forward to the
+  // next eligible date — Wednesday 09-30 — and claims it. Item 1's OWN requested date (the 2nd eligible
+  // date in the sequence) is that SAME Wednesday: it must be rejected by usedDates and fall through to
+  // its own fallback (the following Monday, 10-05), not silently double-book 09-30.
+  const fake = async (date: string) => {
+    if (date === "2026-09-28") return { configured: true, slots: [slot("09:00", false, 0)] };
+    return { configured: true, slots: [slot("09:00", true, 1)] };
+  };
+  const items = await buildRecurringPlan(
+    { serviceId: "svc", areas: 1, startDate: "2026-09-28", weekdays: [MON, WED], preferredTime: "09:00", count: 2 },
+    fake,
+  );
+  assert.equal(items[0].date, "2026-09-30");
+  assert.equal(items[0].status, "adjustedDate");
+  assert.equal(items[1].date, "2026-10-05");
+  assert.equal(items[1].status, "adjustedDate");
+  assert.notEqual(items[0].date, items[1].date);
+});

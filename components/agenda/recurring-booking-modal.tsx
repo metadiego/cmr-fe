@@ -102,18 +102,24 @@ export function RecurringBookingModal({
     setPreviewing(true);
     setPlan(null);
     try {
+      // Re-floor against a FRESH "today", not the `startDate` state value: if this modal was left open
+      // across midnight without anyone touching the date field, `startDate` (set once at mount/on-change)
+      // would otherwise silently read as yesterday relative to the real clock, skipping the minTime floor
+      // for a date that's actually in the past. Found by adversarial review (2026-09-27).
+      const today = todayPR();
+      const effectiveStart = startDate < today ? today : startDate;
       const items = await buildRecurringPlan(
         {
           serviceId,
           centro,
           areas,
-          startDate,
+          startDate: effectiveStart,
           weekdays: [...weekdays],
           preferredTime: time,
           count: Math.max(1, count),
           existingDates,
           // Only today's own date gets a floor — buildRecurringPlan applies it exclusively to `startDate`.
-          minTimeOnStartDate: startDate === todayPR() ? nowTimePR() : undefined,
+          minTimeOnStartDate: effectiveStart === today ? nowTimePR() : undefined,
         },
         (date, sid, ar, c) => getAvailability({ date, serviceId: sid, areas: ar }, c),
       );
