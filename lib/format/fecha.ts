@@ -39,3 +39,29 @@ export function parseDayUTC(v: unknown): Date | null {
   const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12));
   return Number.isNaN(d.getTime()) ? null : d;
 }
+
+// "Today" in the CLINIC's timezone (America/Puerto_Rico, UTC-4, no DST) — never the browser's / server's.
+// `new Date().toISOString()` is UTC: from 8pm to midnight AST that's already tomorrow, so any "today"
+// derived that way silently drifts a day late in the evening (found live, 2026-09-26 — see
+// components/agenda/therapy-day-scheduler.tsx and lib/agenda/recurring-plan.ts).
+export function todayPR(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(new Date());
+}
+
+// `todayPR()` + N days, same day-only YYYY-MM-DD shape.
+export function inDaysPR(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Puerto_Rico" }).format(d);
+}
+
+// Current wall-clock time in the clinic's timezone, "HH:mm" (24h) — for gating "don't offer a time
+// that's already passed today" without going through the browser's local zone.
+export function nowTimePR(): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Puerto_Rico",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date());
+}
