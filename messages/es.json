@@ -91,6 +91,8 @@
     "fMaxMin": "Máximo de minutos por paciente",
     "fMaxMinPlaceholder": "sin tope",
     "fStaffRole": "Cargo que lo atiende",
+    "fStaffId": "Persona",
+    "fStaffIdPlaceholder": "Sin persona asignada",
     "fBlocksAgenda": "El recurso es una persona y bloquea su agenda",
     "fBlocksAgendaHelp": "Para la doctora de EMPOWER: al agendarla, se bloquean sus horas de consulta.",
     "kind": {
