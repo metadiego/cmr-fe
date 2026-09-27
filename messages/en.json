@@ -140,7 +140,12 @@
     "hoursFor": "Hours · {service}",
     "pickCard": "Pick a therapy to see its hours",
     "dragHint": "Drag the card onto a time, or click",
-    "noHour": "Pick a time to check the day fits"
+    "noHour": "Pick a time to check the day fits",
+    "bookAndContinue": "Schedule and keep going",
+    "bookAndClose": "Schedule and close",
+    "alreadyScheduled": "Already scheduled",
+    "reschedule": "Reschedule",
+    "rescheduled": "Rescheduled"
   },
   "citas": {
     "medico_requerido": "This appointment type requires a doctor (except for first visits).",

@@ -40,9 +40,9 @@ export function PlanificarDiaModal({
           defaultDate={fecha}
           defaultPatient={paciente}
           centro={centro}
-          onBooked={() => {
+          onBooked={({ close }) => {
             onSaved();
-            onOpenChange(false);
+            if (close) onOpenChange(false);
           }}
         />
       </DialogContent>
