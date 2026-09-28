@@ -426,8 +426,6 @@
     "tabMedicas": "Citas Médicas",
     "tabServicios": "Citas de Servicio",
     "today": "Hoy",
-    "goToResources": "Ir a Recursos",
-    "resourcesMovedNote": "La disponibilidad de terapias por servicio se calcula ahora en Recursos (cuartos, sillas y personal reales), no aquí.",
     "dia": {
       "allCenters": "Todos los centros",
       "summary": "{total} citas · {atendidas} atendidas · {noShow} no-show",
@@ -478,6 +476,9 @@
       "saved": "Cupos guardados",
       "todos": "Todos los días",
       "todosHint": "Aplica la capacidad de esta hora a todos los días (Lun–Dom); se guarda como default base."
+    },
+    "recursos": {
+      "tab": "Recursos"
     },
     "festivos": {
       "tab": "Feriados",

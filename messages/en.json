@@ -426,8 +426,6 @@
     "tabMedicas": "Medical appointments",
     "tabServicios": "Service appointments",
     "today": "Today",
-    "goToResources": "Go to Resources",
-    "resourcesMovedNote": "Per-service therapy availability is now calculated in Resources (real rooms, chairs and staff), not here.",
     "dia": {
       "allCenters": "All centers",
       "summary": "{total} appts · {atendidas} seen · {noShow} no-show",
@@ -478,6 +476,9 @@
       "saved": "Slots saved",
       "todos": "All days",
       "todosHint": "Apply this hour's capacity to every day (Mon–Sun); saved as the base default."
+    },
+    "recursos": {
+      "tab": "Resources"
     },
     "festivos": {
       "tab": "Holidays",
