@@ -9,12 +9,11 @@ import {
   getServiciosConSaldo,
   getDisponibilidadServicio,
   getAgendaPaciente,
-  getAgendaHoras,
   type ServicioConSaldo,
   type DisponibilidadServicio,
   type AgendaItem,
-  type AgendaHora,
 } from "@/lib/api/frontdesk";
+import { getAvailability, type AvailabilitySlot } from "@/lib/api/resources";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -118,7 +117,6 @@ export function ProgramarCitasModal({
   }
   // El primero seleccionado alimenta las vistas INFORMATIVAS por-servicio (cupos por hora, disponibilidad).
   const firstServicioId = React.useMemo(() => [...servicioIds][0] ?? "", [servicioIds]);
-  const servicioClave = servicios.find((s) => s.id === firstServicioId)?.slug ?? "";
 
   // Servicios CON SALDO del paciente (comprado y aún pendiente; comprado-y-consumido NO cuenta). Se
   // PRE-MARCAN al abrir. Patrón por-key (setState solo en el async). Handoff citar-marcar-los-servicios-con-saldo.
@@ -183,19 +181,20 @@ export function ProgramarCitasModal({
   }, [agKey, pacienteId, hoy, centro]);
   const agenda = agData && agData.key === agKey ? agData.items : [];
 
-  // Cupos por HORA del servicio en la fecha que se está por agregar (vista-día). Informativa: muestra
-  // vacíos por hora para elegir un día con espacio. Data-driven (BE /frontdesk/agenda). Patrón por-key.
-  const horaKey = open && servicioClave && nuevaFecha ? `${servicioClave}|${nuevaFecha}|${centro ?? ""}` : "";
-  const [horaData, setHoraData] = React.useState<{ key: string; horas: AgendaHora[] } | null>(null);
+  // Huecos REALES por hora del servicio en la fecha que se está por agregar (vista-día): cuartos +
+  // personal de turno, no un cupo tecleado a mano (GET /resources/availability). Informativa: muestra
+  // dónde cabe de verdad para elegir un día con espacio. Patrón por-key.
+  const horaKey = open && firstServicioId && nuevaFecha ? `${firstServicioId}|${nuevaFecha}|${pacienteId}|${centro ?? ""}` : "";
+  const [horaData, setHoraData] = React.useState<{ key: string; slots: AvailabilitySlot[] } | null>(null);
   React.useEffect(() => {
     if (!horaKey) return;
     let cancel = false;
-    getAgendaHoras(servicioClave, nuevaFecha, centro)
-      .then((r) => !cancel && setHoraData({ key: horaKey, horas: r.horas ?? [] }))
+    getAvailability({ date: nuevaFecha, serviceId: firstServicioId, patientId: pacienteId || undefined }, centro)
+      .then((r) => !cancel && setHoraData({ key: horaKey, slots: r.configured ? r.slots : [] }))
       .catch(() => {});
     return () => { cancel = true; };
-  }, [horaKey, servicioClave, nuevaFecha, centro]);
-  const horas = horaData && horaData.key === horaKey ? horaData.horas : [];
+  }, [horaKey, firstServicioId, nuevaFecha, pacienteId, centro]);
+  const horas = horaData && horaData.key === horaKey ? horaData.slots : [];
 
   // Hora elegida (opcional, "HH:mm"). Clic en un cupo la fija; NO bloquea (se puede elegir una franja
   // llena y el BE avisa). Se resetea al cambiar de día (los cupos son por fecha). Patrón "ajustar en render".
@@ -348,31 +347,31 @@ export function ProgramarCitasModal({
                 {t("agregarFecha")}
               </Button>
             </div>
-            {/* Cupos por hora del día elegido (vacíos por hora): ayuda a ver si hay espacio. Informativo. */}
+            {/* Huecos reales por hora del día elegido (cuartos + personal de turno): ayuda a ver dónde
+                cabe de verdad. Informativo: una franja sin hueco sigue siendo elegible (no bloquea). */}
             {nuevaFecha && horas.length > 0 && (
               <div className="mt-1 rounded-md bg-card p-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("cuposDia")}</p>
                 <div className="flex flex-wrap gap-1">
                   {horas.map((h) => {
-                    const lleno = h.vacios <= 0;
                     const activa = horaSel === h.time;
                     return (
                       <button
                         key={h.time}
                         type="button"
-                        // Clic = elegir/soltar la hora (opcional). Franja llena también es elegible (no bloquea).
+                        // Clic = elegir/soltar la hora (opcional). Franja sin hueco también es elegible (no bloquea).
                         onClick={() => setHoraSel((prev) => (prev === h.time ? "" : h.time))}
-                        title={t("cupoTitle", { vacios: h.vacios, cupo: h.cupo })}
+                        title={h.fits ? t("cupoTitle", { vacios: h.freeStations ?? 0 }) : (h.reasonKey ? tRoot(h.reasonKey as never) : "")}
                         aria-pressed={activa}
                         className={
                           "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] tabular-nums transition ring-offset-1 hover:brightness-110 " +
                           (activa ? "ring-2 ring-primary " : "") +
-                          (lleno
+                          (!h.fits
                             ? "bg-destructive/10 text-destructive line-through"
                             : "bg-success text-success-foreground")
                         }
                       >
-                        {h.time}<span className="opacity-70">·{h.vacios}</span>
+                        {h.time}{h.fits && h.freeStations != null && <span className="opacity-70">·{h.freeStations}</span>}
                       </button>
                     );
                   })}

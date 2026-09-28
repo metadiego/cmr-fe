@@ -166,20 +166,6 @@ export function getAgendaPaciente(
   );
 }
 
-// Vista-día por HORA (cupos) de un servicio: horas con cupo/agendadas/vacíos (BE prod 2026-07-23).
-// Cupos configurables por POST/PUT /citas/cupos (precedencia fecha>diaSemana>default, centro>global).
-// `cupo`/`agendadas`/`vacios`/`horas` NO están en el mapa — dejados en español.
-export type AgendaHora = { time: string; cupo: number; agendadas: number; vacios: number };
-export type AgendaDiaHoras = { serviceId?: string; date?: string; horas: AgendaHora[] };
-export function getAgendaHoras(
-  servicioClave: string,
-  fecha: string,
-  centroId?: string,
-): Promise<AgendaDiaHoras> {
-  const sp = new URLSearchParams({ service: servicioClave, date: fecha });
-  return apiFetch<AgendaDiaHoras>(`/frontdesk/agenda?${sp}`, {}, centroId);
-}
-
 // ——— Vista diaria del frontdesk (F4) — ver docs/plans/fe-frontdesk-dia.md ———
 
 // Proyección del día por servicio: columnas efectivas del tablero + filas ya resueltas por el BE

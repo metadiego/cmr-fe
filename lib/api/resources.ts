@@ -94,12 +94,13 @@ export interface Availability {
   slots: AvailabilitySlot[];
 }
 export function getAvailability(
-  params: { date: string; serviceId: string; areas?: number },
+  params: { date: string; serviceId: string; areas?: number; patientId?: string },
   centroId?: string,
   centerIds?: string[],
 ): Promise<Availability> {
   const sp = new URLSearchParams({ date: params.date, serviceId: params.serviceId });
   if (params.areas != null) sp.set("areas", String(params.areas));
+  if (params.patientId) sp.set("patientId", params.patientId);
   for (const c of centerIds ?? []) sp.append("centerIds", c);
   return apiFetch<Availability>(`/resources/availability?${sp.toString()}`, {}, centroId);
 }

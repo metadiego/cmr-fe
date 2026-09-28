@@ -112,7 +112,8 @@
   "therapies": {
     "full": "Lleno: no quedan puestos a esa hora.",
     "noStaff": "Sin personal: no hay quien lo dé a esa hora.",
-    "overMaxPerPatient": "Se pasa del tope de minutos por paciente."
+    "overMaxPerPatient": "Se pasa del tope de minutos por paciente.",
+    "holiday": "Día festivo: la agenda está cerrada."
   },
   "therapyPlanner": {
     "title": "Programar el día",
@@ -423,6 +424,8 @@
     "tabMedicas": "Citas Médicas",
     "tabServicios": "Citas de Servicio",
     "today": "Hoy",
+    "goToResources": "Ir a Recursos",
+    "resourcesMovedNote": "La disponibilidad de terapias por servicio se calcula ahora en Recursos (cuartos, sillas y personal reales), no aquí.",
     "dia": {
       "allCenters": "Todos los centros",
       "summary": "{total} citas · {atendidas} atendidas · {noShow} no-show",
@@ -471,7 +474,6 @@
       "addHour": "Añadir hora",
       "empty": "Sin cupos aquí. Añade una hora para empezar.",
       "saved": "Cupos guardados",
-      "serviceTab": "Servicios",
       "todos": "Todos los días",
       "todosHint": "Aplica la capacidad de esta hora a todos los días (Lun–Dom); se guarda como default base."
     },
@@ -1852,8 +1854,8 @@
     "agendando": "Agendando…",
     "agendadoOk": "{n} cita(s) agendada(s)",
     "proximas": "Próximas citas",
-    "cuposDia": "Cupos por hora",
-    "cupoTitle": "{vacios} libres de {cupo}",
+    "cuposDia": "Huecos por hora",
+    "cupoTitle": "{vacios} puestos libres",
     "horaElegida": "Hora elegida: {hora}",
     "servicios": "Servicios",
     "nServicios": "{n} seleccionados",
