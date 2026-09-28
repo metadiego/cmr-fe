@@ -112,7 +112,8 @@
   "therapies": {
     "full": "Full: no stations left at that time.",
     "noStaff": "No staff: nobody to provide it at that time.",
-    "overMaxPerPatient": "Exceeds the per-patient minute cap."
+    "overMaxPerPatient": "Exceeds the per-patient minute cap.",
+    "holiday": "Holiday: the schedule is closed."
   },
   "therapyPlanner": {
     "title": "Plan the day",
@@ -423,6 +424,8 @@
     "tabMedicas": "Medical appointments",
     "tabServicios": "Service appointments",
     "today": "Today",
+    "goToResources": "Go to Resources",
+    "resourcesMovedNote": "Per-service therapy availability is now calculated in Resources (real rooms, chairs and staff), not here.",
     "dia": {
       "allCenters": "All centers",
       "summary": "{total} appts · {atendidas} seen · {noShow} no-show",
@@ -471,7 +474,6 @@
       "addHour": "Add hour",
       "empty": "No slots here. Add an hour to get started.",
       "saved": "Slots saved",
-      "serviceTab": "Services",
       "todos": "All days",
       "todosHint": "Apply this hour's capacity to every day (Mon–Sun); saved as the base default."
     },
@@ -1852,8 +1854,8 @@
     "agendando": "Scheduling…",
     "agendadoOk": "{n} session(s) scheduled",
     "proximas": "Upcoming appointments",
-    "cuposDia": "Slots per hour",
-    "cupoTitle": "{vacios} free of {cupo}",
+    "cuposDia": "Real openings per hour",
+    "cupoTitle": "{vacios} stations free",
     "horaElegida": "Chosen time: {hora}",
     "servicios": "Services",
     "nServicios": "{n} selected",
