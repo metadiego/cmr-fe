@@ -26,11 +26,16 @@ export interface Resource {
   staffId: string | null; // cuando el recurso ES una persona (la doctora de EMPOWER)
   blocksStaffAgenda: boolean; // si ocupa la agenda de consultas de esa persona
   active: boolean;
+  // Servicios que consumen este recurso, con SUS minutos reales (PR cmr-be #371) — sin esto había
+  // que entrar a "Consumption per service" uno por uno para ver cuánto dura cada terapia aquí.
+  // NUNCA un solo número: un recurso compartido tiene duraciones distintas por servicio
+  // (laser_rooms: láser 10·área, APEX 60·sesión) y promediar sería inventar un dato falso.
+  services: Array<{ serviceId: string; slug: string; name: string; minutes: number; per: string }>;
 }
 
-// Payload de alta/edición (id/active los maneja el server; DELETE desactiva). `effectiveStaffRole` es
-// SOLO LECTURA (lo calcula el BE) — nunca se manda de vuelta.
-export type ResourcePayload = Omit<Resource, "id" | "active" | "effectiveStaffRole"> & { active?: boolean };
+// Payload de alta/edición (id/active los maneja el server; DELETE desactiva). `effectiveStaffRole` y
+// `services` son SOLO LECTURA (los calcula el BE) — nunca se mandan de vuelta.
+export type ResourcePayload = Omit<Resource, "id" | "active" | "effectiveStaffRole" | "services"> & { active?: boolean };
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];

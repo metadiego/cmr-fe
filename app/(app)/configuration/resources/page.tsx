@@ -101,6 +101,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
             <TableHead>{t("colKind")}</TableHead>
             <TableHead className="text-right">{t("colCapacity")}</TableHead>
             <TableHead>{t("colConcurrency")}</TableHead>
+            <TableHead>{t("colServices")}</TableHead>
             <TableHead className="text-right">{t("colMaxMin")}</TableHead>
             <TableHead>{t("colStaff")}</TableHead>
             <TableHead>{t("colStatus")}</TableHead>
@@ -114,6 +115,20 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
               <TableCell className="text-muted-foreground">{r.kind}</TableCell>
               <TableCell className="text-right tabular-nums">{r.capacity}</TableCell>
               <TableCell>{concLabel(r.concurrency)}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {!r.services?.length ? (
+                  "—"
+                ) : (
+                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs">
+                    {r.services.map((s) => (
+                      <span key={s.serviceId} className="whitespace-nowrap">
+                        {s.name} <span className="tabular-nums">{s.minutes}</span>
+                        {s.per === "area" ? t("perArea") : ""}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </TableCell>
               <TableCell className="text-right tabular-nums">{r.maxMinutesPerPatient ?? "—"}</TableCell>
               <TableCell className="text-muted-foreground">
                 {r.effectiveStaffRole ?? "—"}
