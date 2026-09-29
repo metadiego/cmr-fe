@@ -33,6 +33,14 @@ export function useCitaStream(opts: {
   React.useEffect(() => {
     liveRef.current = live;
   }, [live]);
+  // Once the stream loop gives up for a non-retryable reason (401/403/409 — a dead session or no
+  // active center), the safety-net poll must STOP too: refetching the four REST routes every 20s
+  // with the same dead credential is exactly the loop that logged ~46k UNAUTHORIZED over 12 days
+  // from a single forgotten tab. Handoff el-tablero-se-pide-de-una-vez.
+  const failureRef = React.useRef(failure);
+  React.useEffect(() => {
+    failureRef.current = failure;
+  }, [failure]);
 
   // Self-heal: refetch when the tab regains focus or the network comes back
   // (a crashed/slept connection may have missed events). And while the SSE is
@@ -40,12 +48,18 @@ export function useCitaStream(opts: {
   React.useEffect(() => {
     if (!enabled) return;
     const onVisible = () => {
+      // Coming back to the tab tries ONE recovery refetch even after a failure (the session may have
+      // been renewed elsewhere); the interval below is what must never loop.
       if (document.visibilityState === "visible") cbRef.current.onInvalidate();
     };
     const onOnline = () => cbRef.current.onInvalidate();
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("online", onOnline);
     const poll = setInterval(() => {
+      // A) nobody watches a hidden tab — the 3am polling was forgotten tabs; B) a dead session never
+      // heals by retrying. Only poll a VISIBLE tab whose stream is merely offline (no hard failure).
+      if (document.visibilityState !== "visible") return;
+      if (failureRef.current) return;
       if (!liveRef.current) cbRef.current.onInvalidate();
     }, pollMs);
     return () => {
