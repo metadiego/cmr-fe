@@ -6,9 +6,17 @@ import { apiFetch, apiFetchEnvelope } from "./client";
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
 export type ConWarnings<T> = { data: T; warnings: ApiWarning[] };
 
+// Ficha MÍNIMA del paciente que TODA respuesta con `patientId` trae ahora adjunta (BE 29-sep): récord +
+// nombre resueltos en el borde, para no pedir el paciente fila a fila. `medicalRecordNumber` puede ser null
+// (ficha sin récord en NUESTRA base, ~5 de 29); `patient` entero puede ser null (borrado / de otro centro).
+// Handoff el-paciente-viaja-con-su-record.
+export type EmbeddedPatient = { id: string; medicalRecordNumber: string | null; name: string | null };
+
 // Service session (frontdesk). Unlike medical citas, sessions are per-DAY
 // (no hora/horaFin) — the service calendar schedules by date only.
-export type Sesion = components["schemas"]["FrontdeskSesionEntity"];
+// `patient` viene adjunto (ver EmbeddedPatient); es opcional en el tipo porque el schema generado aún no lo
+// declara, pero el API ya lo manda (verificado en prod 29-sep).
+export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null };
 export type CreateSesionPayload = components["schemas"]["CreateSesionDto"];
 export type EstadoSesion = Sesion["status"];
 

@@ -13,7 +13,6 @@ import { getAvailability, type Availability } from "@/lib/api/resources";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
-import { usePacienteMap } from "@/lib/agenda/use-paciente-map";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -72,8 +71,6 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
     return () => clearInterval(id);
   }, [reload]);
 
-  const pacientes = usePacienteMap(sesiones.map((s) => s.patientId));
-
   // El día, sin canceladas, es lo que cuenta para el panorama.
   const vivas = React.useMemo(() => sesiones.filter((s) => s.status !== "cancelada"), [sesiones]);
   const kpis = React.useMemo(() => {
@@ -110,13 +107,12 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
       .filter((s) => estado === ALL || s.status === estado)
       .filter((s) => {
         if (!q) return true;
-        const p = pacientes[s.patientId];
-        const nombre = p ? (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")) : "";
-        return nombre.toLowerCase().includes(q) || (p?.medicalRecordNumber ?? "").toLowerCase().includes(q);
+        const nombre = s.patient?.name ?? "";
+        return nombre.toLowerCase().includes(q) || (s.patient?.medicalRecordNumber ?? "").toLowerCase().includes(q);
       })
       .slice()
       .sort(sortByTime);
-  }, [vivas, servicioId, estado, q, pacientes]);
+  }, [vivas, servicioId, estado, q]);
 
   // Huecos por hora del servicio filtrado (solo si tiene recurso configurado). Panorama del cuello de botella.
   const availRes = useResource<Availability | null>(
@@ -262,8 +258,8 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
             </thead>
             <tbody>
               {filtradas.map((s) => {
-                const p = pacientes[s.patientId];
-                const nombre = p ? p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ") : "…";
+                const nombre = s.patient?.name ?? "—";
+                const record = s.patient?.medicalRecordNumber;
                 const serv = servById.get(s.serviceId);
                 const staff = s.technicianId ?? s.nurseId ?? s.doctorId;
                 return (
@@ -275,7 +271,10 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
                         {serv?.name ?? "…"}
                       </span>
                     </td>
-                    <td className="px-3 py-2">{nombre}</td>
+                    <td className="px-3 py-2">
+                      {record && <span className="mr-2 font-mono text-xs text-muted-foreground">#{record}</span>}
+                      {nombre}
+                    </td>
                     <td className="px-3 py-2 tabular-nums">{s.quantity}</td>
                     <td className="px-3 py-2 text-muted-foreground">{staff ? personalById.get(staff) ?? "—" : "—"}</td>
                     <td className="px-3 py-2">

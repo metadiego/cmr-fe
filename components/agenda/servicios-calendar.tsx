@@ -13,7 +13,6 @@ import { listPacientes } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
-import { usePacienteMap } from "@/lib/agenda/use-paciente-map";
 import { monthMatrix, toISO } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,21 +77,23 @@ export function ServiciosCalendar() {
     return () => clearInterval(id);
   }, [reload]);
 
-  const pacientes = usePacienteMap(sesiones.map((s) => s.patientId));
   const servById = React.useMemo(() => new Map(servicios.map((s) => [s.id, s])), [servicios]);
 
   const eventsByDate = React.useMemo(() => {
     const map = new Map<string, AgendaEvent[]>();
     for (const s of sesiones) {
-      const p = pacientes[s.patientId];
-      const label = p ? (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")) : "…";
+      // Nombre + récord vienen adjuntos en la sesión (no se pide el paciente fila a fila). El récord al
+      // frente ayuda a identificar de un vistazo. Handoff el-paciente-viaja-con-su-record.
+      const nombre = s.patient?.name ?? "…";
+      const record = s.patient?.medicalRecordNumber;
+      const label = record ? `#${record} · ${nombre}` : nombre;
       const color = servById.get(s.serviceId)?.color ?? "#4a90d9";
       const arr = map.get(s.date) ?? [];
       arr.push({ id: s.id, hora: null, label, color });
       map.set(s.date, arr);
     }
     return map;
-  }, [sesiones, pacientes, servById]);
+  }, [sesiones, servById]);
 
   function shiftMonth(delta: number) {
     const d = new Date(year, month0 + delta, 1);
