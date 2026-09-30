@@ -41,6 +41,57 @@ test("12 sessions on Mon/Wed/Fri starting a Monday span exactly 4 calendar weeks
   assert.equal(items[11].date, addDays("2026-09-28", 25)); // 2026-10-23, the 4th Friday
 });
 
+test("prefers a LATER fitting time over a closer-but-EARLIER one (default: preferForwardTime)", async () => {
+  // 08:30 is only 30min from the requested 09:00; 10:00 is 60min away — the OLD "closest wins"
+  // logic would have picked 08:30. Real bug found live (30-sep-2026): a series requested at 9:00am
+  // proposed 8:30am for several dates. See docs/specs/reversas-de-la-serie-solo-hacia-adelante.md.
+  const fake = async () => ({
+    configured: true,
+    slots: [slot("08:30", true, 1), slot("09:00", false, 0), slot("10:00", true, 1)],
+  });
+  const [item] = await buildRecurringPlan(
+    { serviceId: "svc", areas: 1, startDate: "2026-09-28", weekdays: [MON], preferredTime: "09:00", count: 1 },
+    fake,
+  );
+  assert.equal(item.time, "10:00");
+  assert.equal(item.status, "adjustedTime");
+});
+
+test("preferForwardTime still falls back to an earlier time when NOTHING fits at or after the requested one", async () => {
+  const fake = async () => ({
+    configured: true,
+    slots: [slot("08:00", true, 1), slot("08:30", true, 1), slot("09:00", false, 0)],
+  });
+  const [item] = await buildRecurringPlan(
+    { serviceId: "svc", areas: 1, startDate: "2026-09-28", weekdays: [MON], preferredTime: "09:00", count: 1 },
+    fake,
+  );
+  // 08:30 is the closest of the two earlier options — same day, better than skipping to another date.
+  assert.equal(item.time, "08:30");
+  assert.equal(item.status, "adjustedTime");
+});
+
+test("preferForwardTime: false opts back into the old closest-in-either-direction behavior", async () => {
+  const fake = async () => ({
+    configured: true,
+    slots: [slot("08:30", true, 1), slot("09:00", false, 0), slot("10:00", true, 1)],
+  });
+  const [item] = await buildRecurringPlan(
+    {
+      serviceId: "svc",
+      areas: 1,
+      startDate: "2026-09-28",
+      weekdays: [MON],
+      preferredTime: "09:00",
+      count: 1,
+      preferForwardTime: false,
+    },
+    fake,
+  );
+  assert.equal(item.time, "08:30"); // closer by absolute distance (30min vs 60min)
+  assert.equal(item.status, "adjustedTime");
+});
+
 test("requested time full that day, another time fits: adjustedTime, same date", async () => {
   const fake = async () => ({
     configured: true,

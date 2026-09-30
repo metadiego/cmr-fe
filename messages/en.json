@@ -167,6 +167,8 @@
     "weekdaySat": "S",
     "recurringTime": "Preferred time",
     "recurringCount": "How many sessions",
+    "recurringPreferForward": "Prefer later times",
+    "recurringPreferForwardHelp": "If the requested time has no room, propose a time AFTER it before an earlier one. Only falls back to an earlier time when nothing fits that day at or after it.",
     "recurringPreview": "Preview",
     "recurringPreviewing": "Checking availability…",
     "recurringAsRequested": "As requested",
