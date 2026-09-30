@@ -57,12 +57,29 @@ function toMinutes(time: string): number {
 // Closest fitting time to the one requested, on a given day's slots. Exact match wins if it fits.
 // `minTime`, when given, drops any slot earlier than it — used to keep "today" from offering an hour
 // that's already passed.
-function bestTimeInDay(slots: AvailabilitySlot[], wanted: string, minTime?: string): string | null {
+//
+// `preferForward` (default true, docs/specs/reversas-de-la-serie-solo-hacia-adelante.md): a session
+// should not move EARLIER than what was asked. Real bug found live (30-sep-2026): requesting 9:00am
+// proposed 8:30am for several dates because the old rule picked whichever fitting slot was
+// numerically closest, with no preference for direction. With `preferForward`, the closest slot AT
+// OR AFTER `wanted` wins; only when NOTHING fits at or after it does this fall back to the closest
+// slot in either direction — a session a little earlier beats no session that day at all (the
+// forward-only DATE search already covers "nothing fits this day" by trying the next occurrence).
+function bestTimeInDay(
+  slots: AvailabilitySlot[],
+  wanted: string,
+  minTime?: string,
+  preferForward = true,
+): string | null {
   let fitting = slots.filter((s) => s.fits);
   if (minTime) fitting = fitting.filter((s) => s.time >= minTime);
   if (fitting.length === 0) return null;
   const exact = fitting.find((s) => s.time === wanted);
   if (exact) return exact.time;
+  if (preferForward) {
+    const onOrAfter = fitting.filter((s) => s.time >= wanted).sort((a, b) => a.time.localeCompare(b.time));
+    if (onOrAfter.length > 0) return onOrAfter[0].time;
+  }
   const w = toMinutes(wanted);
   return [...fitting].sort((a, b) => Math.abs(toMinutes(a.time) - w) - Math.abs(toMinutes(b.time) - w))[0].time;
 }
@@ -87,10 +104,14 @@ export async function buildRecurringPlan(
     // Earliest allowed time (HH:mm), applied ONLY on `startDate` itself — the caller passes "now" in the
     // clinic's timezone when startDate is today, and omits it otherwise (a future day has no such floor).
     minTimeOnStartDate?: string;
+    // Per-center preference (GET /resources/recurring-booking-config) — default true. See
+    // `bestTimeInDay`. The caller fetches it once and passes it through; this function stays pure.
+    preferForwardTime?: boolean;
   },
   fetchAvailability: AvailabilityLookup,
 ): Promise<RecurringPlanItem[]> {
   const { serviceId, centro, areas, startDate, preferredTime, count } = params;
+  const preferForwardTime = params.preferForwardTime ?? true;
   const weekdaySet = new Set(params.weekdays);
   // `eligibleFrom` below is an infinite generator (walks forward until it finds a matching weekday) — an
   // empty set would never yield and hang the caller forever. The UI disables its own trigger for this,
@@ -133,7 +154,7 @@ export async function buildRecurringPlan(
     let resolved: { date: string; time: string; status: RecurringPlanStatus } | null = null;
 
     if (!usedDates.has(requestedDate)) {
-      const t0 = bestTimeInDay(await slotsFor(requestedDate), preferredTime, minTimeFor(requestedDate));
+      const t0 = bestTimeInDay(await slotsFor(requestedDate), preferredTime, minTimeFor(requestedDate), preferForwardTime);
       if (t0) resolved = { date: requestedDate, time: t0, status: t0 === preferredTime ? "asRequested" : "adjustedTime" };
     }
     if (!resolved) {
@@ -141,7 +162,7 @@ export async function buildRecurringPlan(
       for (let n = 0; n < windowOccurrences && !resolved; n++) {
         const cand = forward.next().value as string;
         if (usedDates.has(cand)) continue;
-        const t = bestTimeInDay(await slotsFor(cand), preferredTime, minTimeFor(cand));
+        const t = bestTimeInDay(await slotsFor(cand), preferredTime, minTimeFor(cand), preferForwardTime);
         if (t) resolved = { date: cand, time: t, status: "adjustedDate" };
       }
     }

@@ -167,6 +167,8 @@
     "weekdaySat": "S",
     "recurringTime": "Hora preferida",
     "recurringCount": "Cuántas sesiones",
+    "recurringPreferForward": "Preferir horas más tardías",
+    "recurringPreferForwardHelp": "Si la hora pedida no tiene cupo, propone una hora DESPUÉS antes que una antes. Solo cae hacia atrás si no hay ningún hueco ese día a esa hora o después.",
     "recurringPreview": "Vista previa",
     "recurringPreviewing": "Revisando disponibilidad…",
     "recurringAsRequested": "Como se pidió",

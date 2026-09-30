@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { getAvailability } from "@/lib/api/resources";
+import { getAvailability, getRecurringBookingConfig, setRecurringBookingConfig } from "@/lib/api/resources";
 import { agendarMultiple } from "@/lib/api/frontdesk";
 import { buildRecurringPlan, weekdayOf, type RecurringPlanItem, type RecurringPlanStatus } from "@/lib/agenda/recurring-plan";
 import type { ApiWarning } from "@/lib/api/types";
@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Field } from "@/components/kit/form-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -86,6 +87,34 @@ export function RecurringBookingModal({
   const [plan, setPlan] = React.useState<RecurringPlanItem[] | null>(null);
   const [previewing, setPreviewing] = React.useState(false);
   const [confirming, setConfirming] = React.useState(false);
+  // Per-center preference (GET /resources/recurring-booking-config): does the planner prefer a
+  // same-or-later time over the closest one in either direction? Loaded fresh each time the modal
+  // opens (not on every keystroke) and editable right here — no separate settings screen needed for
+  // one switch. See docs/specs/reversas-de-la-serie-solo-hacia-adelante.md.
+  const [preferForwardTime, setPreferForwardTime] = React.useState(true);
+  const [savingPreference, setSavingPreference] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!open) return;
+    getRecurringBookingConfig(centro)
+      .then((c) => setPreferForwardTime(c.preferForwardTime))
+      .catch(() => {}); // Best-effort: the default (true) already matches the fix.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  async function togglePreferForward(next: boolean) {
+    setPreferForwardTime(next); // Optimistic: the toggle should feel instant.
+    setSavingPreference(true);
+    try {
+      await setRecurringBookingConfig(next, centro);
+    } catch (err) {
+      setPreferForwardTime(!next); // Revert on failure — never claim a preference that didn't save.
+      toastError(err, tRoot);
+    } finally {
+      setSavingPreference(false);
+    }
+    setPlan(null); // The existing preview no longer reflects the new preference.
+  }
 
   function toggleWeekday(d: number) {
     setWeekdays((prev) => {
@@ -120,6 +149,7 @@ export function RecurringBookingModal({
           existingDates,
           // Only today's own date gets a floor — buildRecurringPlan applies it exclusively to `startDate`.
           minTimeOnStartDate: effectiveStart === today ? nowTimePR() : undefined,
+          preferForwardTime,
         },
         (date, sid, ar, c) => getAvailability({ date, serviceId: sid, areas: ar }, c),
       );
@@ -239,6 +269,18 @@ export function RecurringBookingModal({
               </p>
             )}
           </Field>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium">{t("recurringPreferForward")}</p>
+            <p className="text-xs text-muted-foreground">{t("recurringPreferForwardHelp")}</p>
+          </div>
+          <Switch
+            checked={preferForwardTime}
+            onCheckedChange={togglePreferForward}
+            disabled={savingPreference}
+          />
         </div>
 
         <Button variant="outline" onClick={preview} disabled={previewing || weekdays.size === 0}>

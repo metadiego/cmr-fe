@@ -110,6 +110,24 @@ export function getAvailability(
   return apiFetch<Availability>(`/resources/availability?${sp.toString()}`, {}, centroId);
 }
 
+// --- Preferencia del planificador de series (docs/specs/reversas-de-la-serie-solo-hacia-adelante) ---
+export interface RecurringBookingConfig {
+  preferForwardTime: boolean;
+}
+export function getRecurringBookingConfig(centroId?: string): Promise<RecurringBookingConfig> {
+  return apiFetch<RecurringBookingConfig>(`/resources/recurring-booking-config`, {}, centroId);
+}
+export function setRecurringBookingConfig(
+  preferForwardTime: boolean,
+  centroId?: string,
+): Promise<RecurringBookingConfig> {
+  return apiFetch<RecurringBookingConfig>(
+    `/resources/recurring-booking-config`,
+    { method: "PUT", body: JSON.stringify({ preferForwardTime }) },
+    centroId,
+  );
+}
+
 // --- El día completo del paciente (calcula y valida; NO agenda; agendar sigue por frontdesk) ---
 export interface PatientDayStaffBlock {
   staffId: string;
