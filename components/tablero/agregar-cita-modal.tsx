@@ -88,8 +88,14 @@ export function AgregarCitaModal({
     const nueva = tipos.find((x) => x.slug !== "seguimiento") ?? tipos[0];
     return paciente?.medicalRecordNumber ? (seguimiento ?? nueva ?? null) : (nueva ?? seguimiento ?? null);
   }, [paciente, tipos]);
-  const medicoRequerido = !!tipoAuto?.requiresDoctor;
-  const canSubmit = !!paciente && !!tipoAuto && (!medicoRequerido || medicoId !== NO_MEDICO) && !busy;
+  // El walk-in NO exige médico: desde Atención el médico se asigna al MARCAR PRESENTE, no al agendar
+  // (pedirlo antes es pedir un dato que recepción aún no tiene — mismo caso que la enfermera en frontdesk).
+  // La regla real del BE (en-atencion-el-medico-se-sabe-despues) NO aplica al canal atencion, así que aquí
+  // nunca hace falta; sin médico el BE estampa el «Sin Medico» del centro (legacyCode 000). El asterisco y el
+  // botón bloqueado eran artefactos del FE. Si algún tipo lo exigiera de verdad, el BE responde 400 claro y
+  // toastError lo muestra — no lo adivinamos aquí. Handoff walk-in-sin-medico-habilitar-el-boton.
+  const medicoRequerido = false;
+  const canSubmit = !!paciente && !!tipoAuto && !busy;
 
   // The patient's doctor may not serve at this center (`medicos` comes filtered to the active
   // center, see getOpciones above) — the POST is still correct, but the <Select> can't show a
