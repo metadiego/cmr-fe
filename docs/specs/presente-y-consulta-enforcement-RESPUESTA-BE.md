@@ -75,3 +75,38 @@ Cualquier 403 por permiso dice ahora **cuál falta**:
 3. `FORBIDDEN` → podéis mostrar `error.faltan` en vez de un «sin permiso» genérico.
 
 El candado del cliente puede quedarse como camino feliz; ya no es lo único que hay.
+
+---
+
+## AÑADIDO 30-sep 12:55 — la pantalla PINTA Presente aunque el servidor lo rechace
+
+El dueño, en directo con la usuaria **Leasy Martínez**: el paciente nuevo **JOSE DAVID COLON
+SIMONETTI** (récord 102725) *«no muestra el modal y pasa directo al presente»*.
+
+**El servidor lo rechazó.** Su cita es `7952be25-2fda-45cc-92f9-39d8d0490b9b`, y en la base, ahora
+mismo:
+
+```
+status = confirmada · arrived_at = (nunca llegó)
+```
+
+Y llamando al endpoint por HTTP:
+
+```
+POST /api/v2/appointments/7952be25-…/present  → 400
+{"code":"PACIENTE_DATOS_REQUERIDOS","faltantes":["docId","idType","fechaNacimiento","zipcode"]}
+```
+
+O sea: **la regla funciona y el paciente NO está presente**. Lo que falla es que la pantalla se
+pinta como si hubiera pasado. Es una actualización optimista que no se revierte cuando la
+transición devuelve 400, y es peor que el defecto original: recepción cree que el paciente está
+dentro cuando el sistema dice que no.
+
+**Lo que hay que arreglar en el FE:**
+
+1. **No pintar el nuevo estado hasta que el servidor conteste 2xx**, o revertirlo al recibir el
+   error (`runAccion` ya captura el error; lo que falta es deshacer el pintado).
+2. Con `PACIENTE_DATOS_REQUERIDOS`, abrir `EhrReadinessModal` con `error.faltantes` — que es
+   exactamente lo que el dueño esperaba ver y no vio.
+
+Mientras eso no esté, la pantalla seguirá mintiendo aunque el candado del servidor esté puesto.

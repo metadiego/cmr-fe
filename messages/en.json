@@ -727,7 +727,8 @@
       "requiredLegend": "Required fields",
       "medico": "Doctor",
       "sinMedico": "No doctor",
-      "otroCentro": "other center"
+      "otroCentro": "other center",
+      "idTypeFirst": "Pick the ID type first"
     },
     "acciones": "Actions",
     "tabs": {

@@ -40,6 +40,15 @@ export function EhrReadinessModal({
   // Todos los faltantes tienen valor con contenido.
   const completo = faltantes.every((f) => (form[f] ?? "").trim() !== "");
 
+  // Orden de presentación: PRIMERO el tipo de ID, LUEGO el ID (regla del dueño 30-sep) — el número de ID sin
+  // saber de qué documento es no sirve. El resto conserva un orden estable. `faltantes` puede venir en
+  // cualquier orden desde el BE, así que se ordena aquí, no se asume.
+  const FIELD_ORDER: EhrReadinessField[] = ["idType", "docId", "fechaNacimiento", "sexo", "zipcode"];
+  const ordered = [...faltantes].sort((a, b) => FIELD_ORDER.indexOf(a) - FIELD_ORDER.indexOf(b));
+  // El ID no se puede escribir hasta elegir el tipo (solo cuando el tipo también se está pidiendo aquí).
+  const idTypeMissing = faltantes.includes("idType");
+  const docIdBloqueado = (f: EhrReadinessField) => f === "docId" && idTypeMissing && !form.idType;
+
   async function guardar() {
     if (!completo || busy) return;
     setBusy(true);
@@ -65,7 +74,7 @@ export function EhrReadinessModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {faltantes.map((f) => (
+          {ordered.map((f) => (
             <Field key={f} label={t(f)}>
               {f === "idType" ? (
                 <Select value={form[f] || undefined} onValueChange={(v) => set(f, v)}>
@@ -91,6 +100,8 @@ export function EhrReadinessModal({
                   type={f === "fechaNacimiento" ? "date" : "text"}
                   value={form[f] ?? ""}
                   onChange={(e) => set(f, e.target.value)}
+                  disabled={docIdBloqueado(f)}
+                  placeholder={docIdBloqueado(f) ? t("idTypeFirst") : undefined}
                 />
               )}
             </Field>
