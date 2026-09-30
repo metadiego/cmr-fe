@@ -226,7 +226,9 @@
       "suggested": "Sugerida",
       "noSlot": "Sin hueco en 60 días",
       "useSuggested": "Usar sugerida"
-    }
+    },
+    "medico_requerido_en_consulta": "Para entrar en consulta la cita necesita un médico asignado.",
+    "datos_requeridos_para_presente": "Faltan datos obligatorios del paciente para marcarlo presente."
   },
   "tableroBoard": {
     "live": "En vivo",

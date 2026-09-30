@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
+import { ApiError } from "@/lib/api/types";
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
 import { resolveToggle } from "@/lib/tablero/toggle-hora";
 import { isEhrEnabled, getEhrReadiness, type EhrReadinessField } from "@/lib/api/ehr-integration";
@@ -108,6 +109,17 @@ export function FlujoAtencion({
         delete n[col.clave];
         return n;
       });
+      // El candado del BE es fail-CLOSED (respuesta presente-y-consulta-enforcement): si rechaza Presente
+      // por faltar datos del paciente, abrimos el MISMO modal con `error.faltantes` (OJO: `faltantes`, no
+      // `faltan`) en vez de solo avisar — así, aunque el pre-gate del cliente se saltara, el paciente no
+      // queda presente sin completar. Al guardar, onCompleted reanuda la transición.
+      if (err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS") {
+        const faltantes = (err.data?.faltantes as EhrReadinessField[] | undefined) ?? [];
+        if (faltantes.length) {
+          setEhrGate({ col, action, faltantes });
+          return;
+        }
+      }
       toastError(err, tRoot);
     } finally {
       setBusy(null);

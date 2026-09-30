@@ -226,7 +226,9 @@
       "suggested": "Suggested",
       "noSlot": "No slot in 60 days",
       "useSuggested": "Use suggested"
-    }
+    },
+    "medico_requerido_en_consulta": "To enter consultation the appointment needs an assigned doctor.",
+    "datos_requeridos_para_presente": "The patient is missing required data to be marked present."
   },
   "tableroBoard": {
     "live": "Live",
