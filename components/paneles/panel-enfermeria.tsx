@@ -116,8 +116,8 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
   }, [actual, audioActual, alarma]);
 
   const personal = def?.staff ?? [];
-  const estatusById = new Map((def?.estatus ?? []).map((e) => [e.staffId, e]));
-  const contByPersona = new Map((def?.contadores ?? []).map((c) => [c.staffId, c]));
+  const estatusById = new Map((def?.statuses ?? []).map((e) => [e.staffId, e]));
+  const contByPersona = new Map((def?.counters ?? []).map((c) => [c.staffId, c]));
 
   async function aceptar(notifId: string, personalId: string) {
     try { await aceptarNotificacion(notifId, personalId, centro); refetch(); }
@@ -159,7 +159,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {personal.map((p) => {
                   const cont = contByPersona.get(p.id);
-                  const nSec = cont?.porSeccion?.[s.clave] ?? 0;
+                  const nSec = cont?.bySection?.[s.clave] ?? 0;
                   const est = estatusById.get(p.id);
                   const pc = colorForName(p.name);
                   const activo = nSec > 0;
@@ -185,12 +185,12 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
                           {nSec}
                         </span>
                       </div>
-                      {cont && Object.keys(cont.porSeccion || {}).length > 1 && (
+                      {cont && Object.keys(cont.bySection || {}).length > 1 && (
                         <div className="flex flex-wrap gap-x-2.5 gap-y-1 border-t border-foreground/5 pt-2 text-[11px] text-muted-foreground">
                           {secciones.map((sx) => (
                             <span key={sx.clave} className="tabular-nums">
                               {tRoot(sx.labelKey)}{" "}
-                              <span className="font-semibold text-foreground/70">{cont.porSeccion?.[sx.clave] ?? 0}</span>
+                              <span className="font-semibold text-foreground/70">{cont.bySection?.[sx.clave] ?? 0}</span>
                             </span>
                           ))}
                         </div>

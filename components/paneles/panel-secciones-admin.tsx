@@ -123,7 +123,7 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
   );
   const contadorDe = (claveSeccion: string) => {
     if (contState.kind !== "ok") return 0;
-    return contState.data.reduce((sum, c) => sum + (c.porSeccion?.[claveSeccion] ?? 0), 0);
+    return contState.data.reduce((sum, c) => sum + (c.bySection?.[claveSeccion] ?? 0), 0);
   };
 
   // Selección / formulario. `creando` = alta (clave editable); si no, edición de la seleccionada.

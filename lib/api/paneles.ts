@@ -50,15 +50,15 @@ export type PanelEstatus = {
   label?: string | null; // NO en el mapa → queda como está (`label`)
   color?: string | null; // se dice igual (CAMPOS_IGUALES)
 };
-// `estatus` y `contadores` NO están en el mapa → esas claves del contenedor quedan en español.
-// `config` es bolsa OPACA → su contenido no se traduce (Record).
+// `config` es bolsa OPACA → su contenido no se traduce (Record). `statuses`/`counters` SÍ se traducen al
+// inglés en /api/v2 (BE 1-oct, regla nueva: el NOMBRE del campo se traduce, sus CLAVES internas no).
 export type PanelDefinicion = {
   panel: { slug: string; labelKey: string; layout: string; config: Record<string, unknown> | null };
   sections: PanelSeccion[]; // clave `secciones`→`sections`; contenido opaco (PanelSeccion en español)
   staff: PanelPersonal[]; // clave `personal`→`staff`
-  estatus: PanelEstatus[];
+  statuses: PanelEstatus[];
   // Contadores del día YA vienen aquí (BE) → no hace falta la llamada aparte a /contadores.
-  contadores?: PanelContador[];
+  counters?: PanelContador[];
 };
 
 export type PanelNotificacion = {
@@ -79,8 +79,9 @@ export type PanelNotificacion = {
   servicioNombre?: string | null;
 };
 
-// `porSeccion` NO está en el mapa → queda en español (sus claves internas son claves de sección = datos).
-export type PanelContador = { staffId: string; total: number; porSeccion: Record<string, number> };
+// `bySection` se traduce al inglés en /api/v2 (BE 1-oct); sus CLAVES internas vuelven a ser la `clave` de la
+// sección (vitales, intravenoso) = datos, no se traducen → ya emparejan con `sections[].clave`.
+export type PanelContador = { staffId: string; total: number; bySection: Record<string, number> };
 
 // GET /paneles/:clave/definicion — UNA llamada: panel + secciones + personal + estatus vivo.
 export function getPanelDefinicion(clave: string, centroId?: string): Promise<PanelDefinicion> {
