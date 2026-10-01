@@ -4168,6 +4168,7 @@
     "ehrEditarTitulo": "Edit {nombre}'s EHR role",
     "ehrEditarDesc": "Changes the role on the already-linked account. The email stays the same.",
     "ehrCorreoAviso": "An email will be sent to {email} to activate their EHR account.",
+    "ehrFaltaCorreo": "This person has no email on file — add one first so the EHR has somewhere to send the invite.",
     "ehrRol": "EHR role",
     "ehrRolPlaceholder": "Pick a role…",
     "ehrGuardando": "Saving…",

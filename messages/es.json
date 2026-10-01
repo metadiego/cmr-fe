@@ -4168,6 +4168,7 @@
     "ehrEditarTitulo": "Editar el rol de {nombre} en el EHR",
     "ehrEditarDesc": "Cambia el rol de la cuenta ya vinculada. El correo no cambia.",
     "ehrCorreoAviso": "Se le enviará un correo a {email} para que active su cuenta en el EHR.",
+    "ehrFaltaCorreo": "Esta persona no tiene correo en su ficha — agrégalo primero para que el EHR tenga adónde mandar la invitación.",
     "ehrRol": "Rol en el EHR",
     "ehrRolPlaceholder": "Elige un rol…",
     "ehrGuardando": "Guardando…",
