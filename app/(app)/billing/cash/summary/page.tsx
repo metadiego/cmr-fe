@@ -88,9 +88,9 @@ export default function CuadreGeneralPage() {
     if (state.kind !== "ok") return [] as Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
     const m = new Map<string, { usuarioId: string | null; nombre: string | null; total: number }>();
     for (const c of [...(state.data.general.porCajero ?? []), ...(state.data.consulta.porCajero ?? [])]) {
-      const k = c.userId ?? "sin";
+      const k = c.usuarioId ?? "sin";
       const prev = m.get(k);
-      m.set(k, { usuarioId: c.userId, nombre: c.name ?? prev?.nombre ?? null, total: (prev?.total ?? 0) + Number(c.total ?? 0) });
+      m.set(k, { usuarioId: c.usuarioId, nombre: c.nombre ?? prev?.nombre ?? null, total: (prev?.total ?? 0) + Number(c.total ?? 0) });
     }
     return [...m.values()].sort((a, b) => b.total - a.total);
   }, [state]);

@@ -57,19 +57,22 @@ export interface ReporteDia {
     bruto: number;
     devuelto: number;
     neto: number;
-    porEstado: Record<string, number>;
-    porMedio: Record<string, number>;
+    byStatus: Record<string, number>; // `porEstado`→`byStatus` en /api/v2 (verificado live 1-oct)
+    byPaymentMethod: Record<string, number>; // `porMedio`→`byPaymentMethod` (verificado live 1-oct)
   };
   refunds: { quantity: number; total: number };
   anulaciones: { quantity: number; total: number };
-  porMetodo: Record<string, number>;
+  byMethod: Record<string, number>; // `porMetodo`→`byMethod` en /api/v2 (verificado live 1-oct)
   porGrupo: Record<string, number>;
   // QUIÉN facturó (BE 2026-08-20): SIEMPRE presente (antes solo con `division`). Sin división = todos
   // los facturadores de las dos divisiones; con división = los de esa; con userId = solo ese. Un
   // cajero que no es gerencia recibe una sola fila (la suya), lo fija el BE. La Σ de `porCajero` debe
   // dar `detalle.total` (hay prueba del BE); si en pantalla no cuadra, es defecto, no se maquilla.
   // Handoff cuadre-quien-facturo-por-cajero. Nombre resuelto por el BE.
-  porCajero?: Array<{ userId: string | null; name: string | null; total: number }>;
+  // OJO: este contenedor NO se englishifica (verificado live 1-oct): el BE devuelve `usuarioId` y `nombre`
+  // en español. El tipo decía `userId`/`name` y por eso los nombres de cajero salían en blanco. Son DATOS
+  // del contenedor, no se traducen. Handoff cuadre-quien-facturo-por-cajero.
+  porCajero?: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
   detalle: {
     efectivo: { quantity: number; amount: number };
     tarjetas: DetalleMetodoRow[];

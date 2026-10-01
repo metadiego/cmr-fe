@@ -61,7 +61,7 @@ export interface Franja {
 // `resumen` y todos sus campos NO están en el mapa → llegan en español.
 export interface ResumenDia {
   totalCitas: number;
-  porTipo: Record<string, number>;
+  byType: Record<string, number>; // se traduce al inglés en /api/v2 (verificado live 1-oct); claves de tipo = datos
   cupoTotal: Record<string, number>;
   atendidas: number;
   noShow: number;
@@ -77,7 +77,7 @@ export interface CentroDia {
   clinicId: string;
   name: string;
   notasDia: NotaDia[]; // contenedor `notasDia` NO está en el mapa → clave en español
-  festivos: FestivoDia[]; // clave `festivos`→`holidays` en la respuesta
+  holidays: FestivoDia[]; // `festivos`→`holidays` en /api/v2 (verificado live 1-oct; el tipo decía `festivos` y los feriados nunca salían)
   bloqueado: boolean; // NO está en el mapa → español (holiday closes the day)
   franjas: Franja[]; // contenedor `franjas` NO está en el mapa → clave en español
   resumen: ResumenDia; // contenedor `resumen` NO está en el mapa → clave en español

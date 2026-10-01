@@ -367,10 +367,10 @@ function Editor({
       : [
           ...(meId ? [{ usuarioId: meId, nombre: t("scope.mine") }] : []),
           ...porCajero
-            .filter((c): c is { userId: string; name: string | null; total: number } =>
-              !!c.userId && c.userId !== meId,
+            .filter((c): c is { usuarioId: string; nombre: string | null; total: number } =>
+              !!c.usuarioId && c.usuarioId !== meId,
             )
-            .map((c) => ({ usuarioId: c.userId, nombre: c.name ?? c.userId.slice(0, 8) })),
+            .map((c) => ({ usuarioId: c.usuarioId, nombre: c.nombre ?? c.usuarioId.slice(0, 8) })),
         ];
 
   async function procesarCierre() {

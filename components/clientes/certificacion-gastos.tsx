@@ -44,10 +44,10 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
   // y un acceso directo tumbaba la pestaña. Optional chaining + defaults en todo lo que viene del BE.
   const conceptos = data?.conceptos ?? [];
   const total = data?.total ?? 0;
-  const cuadra = data?.cuadre?.cuadra !== false;
+  const cuadra = data?.reconciliation?.cuadra !== false;
   const puedeImprimir = !!data && cuadra && total > 0;
-  const nombreConcepto = (c: { labelKey: string; clave: string }) =>
-    tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.clave;
+  const nombreConcepto = (c: { labelKey: string; slug: string }) =>
+    tRoot.has(c.labelKey) ? tRoot(c.labelKey) : c.slug;
 
   function imprimir() {
     if (!data || !puedeImprimir) return;
@@ -58,7 +58,7 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
       )
       .join("");
     const tratoLabel = trato === "sra" ? t("sra") : t("sr");
-    const rec = data.paciente?.record ? ` · ${t("record")} ${esc(String(data.paciente.record))}` : "";
+    const rec = data.patient?.medicalRecordNumber ? ` · ${t("record")} ${esc(String(data.patient.medicalRecordNumber))}` : "";
     const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(t("title"))}</title>
       <style>
         @page { margin: 2.5cm; }
@@ -81,7 +81,7 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
       <h1>${esc(t("title"))}</h1>
       <div class="body">
         <p>${esc(t("bodyIntro", { trato: tratoLabel, persona: persona.trim() || "____________________" }))}</p>
-        <p>${esc(t("bodyPatient", { nombre: data.paciente?.nombre ?? "" }))}${rec}, ${esc(t("bodyPeriod", { desde, hasta }))}</p>
+        <p>${esc(t("bodyPatient", { nombre: data.patient?.name ?? "" }))}${rec}, ${esc(t("bodyPeriod", { desde, hasta }))}</p>
         <table>
           <thead><tr><th>${esc(t("concept"))}</th><th class="num">${esc(t("amount"))}</th></tr></thead>
           <tbody>${filas}</tbody>
@@ -153,10 +153,10 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
                 <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">{t("empty")}</td></tr>
               ) : (
                 conceptos.map((c) => (
-                  <tr key={c.clave} className="border-t">
+                  <tr key={c.slug} className="border-t">
                     <td className="px-3 py-2">{nombreConcepto(c)}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.facturas}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.devoluciones ? money.format(c.devoluciones) : "—"}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.invoices}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{c.refunds ? money.format(c.refunds) : "—"}</td>
                     <td className="px-3 py-2 text-right font-medium tabular-nums">{money.format(c.total)}</td>
                   </tr>
                 ))

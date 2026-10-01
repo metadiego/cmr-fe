@@ -489,7 +489,7 @@ export interface FrontdeskAvisosReporte {
   from?: string;
   to?: string;
   total: number;
-  porTipo: Record<string, number>; // NO en el mapa — dejado en español
+  byType: Record<string, number>; // se traduce al inglés en /api/v2 (verificado live 1-oct; sus claves de tipo son datos)
   avisos: FrontdeskAviso[]; // `avisos` NO en el mapa — dejado en español
 }
 export function getAvisosFrontdesk(

@@ -279,7 +279,7 @@ function CentroSheet({
     .filter((c) => (seen.has(c.clave) ? false : (seen.add(c.clave), true)))
     .filter((c) => !c.permiso || can(c.permiso));
   const r = centro.resumen;
-  const festivos = centro.festivos ?? [];
+  const festivos = centro.holidays ?? [];
   const bloqueado = centro.bloqueado ?? false;
   const horaResaltada = useFranjaResaltada(centro.franjas.map((f) => f.time));
 
@@ -376,7 +376,7 @@ function CentroSheetV2({
     .filter((c) => !c.permiso || can(c.permiso));
   const r = centro.resumen;
   const franjas = centro.franjas ?? [];
-  const festivos = centro.festivos ?? [];
+  const festivos = centro.holidays ?? [];
   const bloqueado = centro.bloqueado ?? false;
 
   // Tipos únicos (para los chips) + cupos libres del día.

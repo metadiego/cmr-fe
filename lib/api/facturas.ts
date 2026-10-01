@@ -305,21 +305,24 @@ export function getResumenPaciente(
 // `labelKey`. Entran consulta + facturación general. `cuadre.cuadra===false` NO debe pasar; si pasa,
 // NO se imprime. Keys en español (envelope opaco, fuera del mapa inglés). BE: GET
 // /invoices/expenses-certificate?patientId=&desde=&hasta=. Handoff ficha-del-paciente-hub-y-certificacion-de-gastos.
+// La RESPUESTA SÍ se englishifica (verificado live 1-oct): patient/from/to/refunds/reconciliation, conceptos
+// con slug/refunds/invoices. Antes el tipo estaba en español y el nombre del paciente salía en blanco.
 export interface CertificacionConcepto {
-  clave: string;
+  grupoId: string;
+  slug: string;
   labelKey: string;
   total: number;
-  devoluciones: number;
-  facturas: number;
+  refunds: number;
+  invoices: number;
 }
 export interface CertificacionGastos {
-  paciente: { id: string; nombre: string; record?: string | null; docId?: string | null };
-  desde: string;
-  hasta: string;
+  patient: { id: string; name: string; medicalRecordNumber?: string | null; documentId?: string | null };
+  from: string;
+  to: string;
   conceptos: CertificacionConcepto[];
   total: number;
-  devoluciones: number;
-  cuadre: { totalFacturas: number; totalDesglose: number; diferencia: number; cuadra: boolean };
+  refunds: number;
+  reconciliation: { totalFacturas: number; totalDesglose: number; difference: number; cuadra: boolean };
 }
 export function getCertificacionGastos(
   pacienteId: string,

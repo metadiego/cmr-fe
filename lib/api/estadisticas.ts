@@ -6,11 +6,13 @@ import { apiFetch } from "./client";
 
 // Fila de la matriz GENERAL: un miembro del personal y sus participaciones por servicio (solo las claves
 // con valor; las ausentes son 0). `personalId: null` + nombre "Sin asignar" = visita sin esa persona.
-// `porServicio` y `participaciones` NO están en el mapa → el BE los devuelve en español.
+// `byService` SÍ se traduce al inglés en /api/v2 (verificado live 1-oct; el comentario viejo decía lo
+// contrario y por eso el FE leía `porServicio` y la matriz salía vacía/rompía). Sus CLAVES internas (slug del
+// servicio) son datos y no se traducen. `participaciones` dentro de los bloques de rol sigue en español.
 export type EstGeneralFila = {
   staffId: string | null;
   name: string;
-  porServicio: Record<string, number>;
+  byService: Record<string, number>;
   total: number;
 };
 // Fila dentro de un bloque de rol. `porcentaje` ya viene redondeado a 2 decimales y cada bloque suma 100.

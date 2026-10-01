@@ -433,7 +433,7 @@ function buildPrintHtml(args: {
          <thead><tr><th>${esc(L.colCajero)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
          <tbody>${[...porCajero]
            .sort((a, b) => b.total - a.total)
-           .map((c) => `<tr><td>${esc(c.name || "—")}</td><td class="r mono">${esc(money(c.total))}</td></tr>`)
+           .map((c) => `<tr><td>${esc(c.nombre || "—")}</td><td class="r mono">${esc(money(c.total))}</td></tr>`)
            .join("")}</tbody>
          <tfoot><tr class="tot"><td class="r dim">${esc(L.whoTotal)}</td><td class="r mono">${esc(money(porCajero.reduce((sum, c) => sum + Number(c.total ?? 0), 0)))}</td></tr></tfoot>
        </table>`

@@ -839,7 +839,7 @@ export function FrontdeskBoard() {
                     key={tp}
                     className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1"
                   >
-                    <span className="font-semibold tabular-nums">{avisos.porTipo?.[tp] ?? 0}</span>
+                    <span className="font-semibold tabular-nums">{avisos.byType?.[tp] ?? 0}</span>
                     <span className="text-muted-foreground">{t(`avisos.tipo.${tp}`)}</span>
                   </span>
                 ))}
