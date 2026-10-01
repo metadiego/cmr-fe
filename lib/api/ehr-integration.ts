@@ -85,3 +85,73 @@ export async function isEhrEnabled(centroId?: string): Promise<boolean> {
     return false;
   }
 }
+
+// ——— Vincular PERSONAL con el EHR (crear/actualizar/habilitar-deshabilitar) ———
+// Handoff docs/specs/vincular-personal-con-el-ehr-handoff-fe.md. BE: PR #381 (cmr-be), mergeado a
+// main 2026-10-01, TODAVÍA NO desplegado a producción (verificado en vivo: /ehr-integration/roles
+// responde 404 en prod a esa fecha) — las funciones de abajo están escritas contra el contrato
+// documentado, pendientes de confirmar por HTTP real en cuanto el BE despliegue.
+
+// Roles del EHR: lista VIVA (sembrados + los que el cliente cree a mano allá, p. ej. "waldemar") —
+// NUNCA una lista fija en el FE. Permiso ehr-integration.read.
+export interface EhrRole {
+  id: string;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+}
+export function getEhrRoles(centroId?: string): Promise<EhrRole[]> {
+  return apiFetch<EhrRole[]>(`/ehr-integration/roles`, {}, centroId);
+}
+
+// Vínculos personal↔EHR ya guardados. Permiso ehr-integration.read.
+// OJO: el handoff documentaba `personalId`, pero la v2 real responde `staffId` — verificado en vivo
+// contra producción el 2026-10-01 (GET /ehr-integration/staff-links, 200, 17 vínculos reales). El
+// nombre de la RUTA (`/staff-links/:personalId/...`) sigue tal cual el handoff; solo el campo del
+// CUERPO de la lista difiere. Nunca confiar en el handoff sin probar por HTTP — así se encontró esto.
+export interface EhrStaffLink {
+  staffId: string;
+  name: string;
+  ehrUserId: string;
+  ehrEmail: string;
+}
+export async function listEhrStaffLinks(centroId?: string): Promise<EhrStaffLink[]> {
+  const res = await apiFetch<unknown>(`/ehr-integration/staff-links`, {}, centroId);
+  if (Array.isArray(res)) return res as EhrStaffLink[];
+  const items = (res as { items?: unknown } | null)?.items;
+  return Array.isArray(items) ? (items as EhrStaffLink[]) : [];
+}
+
+// Crea la cuenta del EHR para esta persona (o actualiza el rol si ya existía — `created: false`,
+// NUNCA duplica). Del lado del EHR dispara un correo REAL de invitación (su propio POST
+// /users/invite) — avisar en la UI antes de confirmar, no es un efecto nuestro. Permiso
+// ehr-integration.config.
+export interface EhrProvisionResult {
+  ehrUserId: string;
+  created: boolean;
+}
+export function provisionEhrStaff(
+  personalId: string,
+  ehrRoleId: string,
+  centroId?: string,
+): Promise<EhrProvisionResult> {
+  return apiFetch<EhrProvisionResult>(
+    `/ehr-integration/staff-links/${personalId}/provision`,
+    { method: "POST", body: JSON.stringify({ ehrRoleId }) },
+    centroId,
+  );
+}
+
+// Actualiza la cuenta YA vinculada (hoy solo el rol) — no vuelve a pedir el correo, eso no cambia.
+// Permiso ehr-integration.config.
+export function updateEhrStaffLink(
+  personalId: string,
+  payload: { ehrRoleId?: string; fullName?: string },
+  centroId?: string,
+): Promise<EhrStaffLink> {
+  return apiFetch<EhrStaffLink>(
+    `/ehr-integration/staff-links/${personalId}`,
+    { method: "PATCH", body: JSON.stringify(payload) },
+    centroId,
+  );
+}

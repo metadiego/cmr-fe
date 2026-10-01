@@ -13,6 +13,8 @@ import {
 } from "@/lib/api/personal";
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
+import { getEhrRoles, listEhrStaffLinks, type EhrRole, type EhrStaffLink } from "@/lib/api/ehr-integration";
+import { EhrLinkSection } from "@/components/personal/ehr-link-section";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
@@ -55,6 +57,13 @@ export default function PersonalPage() {
   // Catálogo de cargos del BE (ruta ya arreglada). Si por lo que sea no llega, se cae a valores del listado.
   const cargosRes = useResource<CargoCatalogo[]>(() => (gate.centro ? getCargos(gate.centro) : Promise.resolve([])), [gate.centro]);
   const cargoCatalogo = cargosRes.state.kind === "ok" ? cargosRes.state.data : [];
+  // Vincular con el EHR (handoff vincular-personal-con-el-ehr): BE todavía no desplegado en prod a
+  // esta fecha (verificado: 404) — tolerante al fallo, igual que isEhrEnabled, así el botón no rompe
+  // la ficha mientras tanto; sencillamente no tiene opciones que ofrecer hasta que el BE despliegue.
+  const ehrRolesRes = useResource<EhrRole[]>(() => (gate.centro ? getEhrRoles(gate.centro).catch(() => []) : Promise.resolve([])), [gate.centro]);
+  const ehrRoles = ehrRolesRes.state.kind === "ok" ? ehrRolesRes.state.data : [];
+  const ehrLinksRes = useResource<EhrStaffLink[]>(() => (gate.centro ? listEhrStaffLinks(gate.centro).catch(() => []) : Promise.resolve([])), [gate.centro]);
+  const ehrLinks = ehrLinksRes.state.kind === "ok" ? ehrLinksRes.state.data : [];
 
   const [q, setQ] = React.useState("");
   const [selId, setSelId] = React.useState<string>("");
@@ -125,8 +134,11 @@ export default function PersonalPage() {
               cargoCatalogo={cargoCatalogo}
               capacidadOpciones={capacidadOpciones}
               roles={roles}
+              ehrRoles={ehrRoles}
+              ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
               centro={gate.centro}
               onChanged={() => listRes.reload()}
+              onEhrChanged={() => ehrLinksRes.reload()}
             />
           ) : (
             <div className="flex min-h-[40vh] items-center justify-center rounded-md border border-dashed text-sm text-muted-foreground">
@@ -140,14 +152,17 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoCatalogo, capacidadOpciones, roles, centro, onChanged,
+  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, centro, onChanged, onEhrChanged,
 }: {
   persona: Personal;
   cargoCatalogo: CargoCatalogo[];
   capacidadOpciones: string[];
   roles: Rol[];
+  ehrRoles: EhrRole[];
+  ehrLink: EhrStaffLink | undefined;
   centro?: string;
   onChanged: () => void;
+  onEhrChanged: () => void;
 }) {
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
@@ -273,6 +288,10 @@ function FichaPersonal({
               </div>
             )}
           </div>
+
+          {/* Vincular con el EHR: en TODA ficha, sin excepción (decisión del dueño, 01-oct-2026) —
+              cualquier cargo puede necesitar la cuenta, no se gatea por capacidad/rol. */}
+          <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centro={centro} onChanged={onEhrChanged} />
         </TabsContent>
 
         <TabsContent value="disponibilidad" className="pt-2">

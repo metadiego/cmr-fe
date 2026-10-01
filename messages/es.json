@@ -4159,7 +4159,21 @@
     "centrosAyuda": "Marca dónde debe salir en los desplegables. Si un día cubre en otro centro, lo marcas; al volver, lo desmarcas.",
     "guardarCentros": "Guardar centros",
     "centrosGuardados": "Centros guardados",
-    "verHub": "Ficha completa"
+    "verHub": "Ficha completa",
+    "ehrLabel": "Cuenta del EHR",
+    "ehrSinVinculo": "Todavía no tiene cuenta vinculada en el EHR.",
+    "ehrVincular": "Vincular con el EHR",
+    "ehrEditar": "Editar",
+    "ehrVincularTitulo": "Vincular a {nombre} con el EHR",
+    "ehrEditarTitulo": "Editar el rol de {nombre} en el EHR",
+    "ehrEditarDesc": "Cambia el rol de la cuenta ya vinculada. El correo no cambia.",
+    "ehrCorreoAviso": "Se le enviará un correo a {email} para que active su cuenta en el EHR.",
+    "ehrRol": "Rol en el EHR",
+    "ehrRolPlaceholder": "Elige un rol…",
+    "ehrGuardando": "Guardando…",
+    "ehrGuardar": "Guardar",
+    "ehrVinculado": "Vinculado con el EHR.",
+    "ehrActualizado": "Rol del EHR actualizado."
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
