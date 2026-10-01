@@ -4159,7 +4159,22 @@
     "centrosAyuda": "Mark where they should appear in the dropdowns. If they cover another center one day, check it; uncheck when they return.",
     "guardarCentros": "Save centers",
     "centrosGuardados": "Centers saved",
-    "verHub": "Full profile"
+    "verHub": "Full profile",
+    "ehrLabel": "EHR account",
+    "ehrSinVinculo": "No EHR account linked yet.",
+    "ehrVincular": "Link with the EHR",
+    "ehrEditar": "Edit",
+    "ehrVincularTitulo": "Link {nombre} with the EHR",
+    "ehrEditarTitulo": "Edit {nombre}'s EHR role",
+    "ehrEditarDesc": "Changes the role on the already-linked account. The email stays the same.",
+    "ehrCorreoAviso": "An email will be sent to {email} to activate their EHR account.",
+    "ehrFaltaCorreo": "This person has no email on file — add one first so the EHR has somewhere to send the invite.",
+    "ehrRol": "EHR role",
+    "ehrRolPlaceholder": "Pick a role…",
+    "ehrGuardando": "Saving…",
+    "ehrGuardar": "Save",
+    "ehrVinculado": "Linked with the EHR.",
+    "ehrActualizado": "EHR role updated."
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
