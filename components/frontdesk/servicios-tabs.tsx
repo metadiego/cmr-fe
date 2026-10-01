@@ -18,6 +18,7 @@ export function ServiciosTabs({
   presentesPorClave,
   presentesPrefs,
   presentesMax,
+  extraTab,
 }: {
   // El paciente filtrado no tiene NINGÚN servicio hoy (antes de aplicar el filtro de actividad):
   // decide el padre (pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0).
@@ -28,6 +29,9 @@ export function ServiciosTabs({
   presentesPorClave: Map<string, number>;
   presentesPrefs: PresentesPrefs;
   presentesMax: number;
+  // Pestaña que NO es un servicio (hoy: Consulta → tablero de Atención). Va al final, tras un separador,
+  // para que se lea como «otra cosa». Handoff consulta-como-pestana-del-frontdesk.
+  extraTab?: { slug: string; label: string; color?: string | null } | null;
 }) {
   const t = useTranslations("frontdesk");
   if (vacioPaciente) {
@@ -62,6 +66,26 @@ export function ServiciosTabs({
           </button>
         );
       })}
+      {extraTab && (
+        <>
+          <span className="mx-1 w-px self-stretch bg-border" aria-hidden />
+          <button
+            type="button"
+            onClick={() => onPick(extraTab.slug)}
+            className={
+              "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm uppercase transition-colors " +
+              (extraTab.slug === tabEfectivo
+                ? "border-transparent bg-primary text-primary-foreground shadow-sm"
+                : "bg-background text-foreground hover:bg-muted")
+            }
+          >
+            {extraTab.color && (
+              <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: extraTab.color }} aria-hidden />
+            )}
+            {extraTab.label}
+          </button>
+        </>
+      )}
     </div>
   );
 }

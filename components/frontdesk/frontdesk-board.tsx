@@ -29,13 +29,17 @@ import {
   transferirTratamiento,
   getAvisosFrontdesk,
   getPresentes,
+  getFrontdeskTabs,
   type FrontdeskAvisosReporte,
   type PresentesResumen,
+  type FrontdeskTab,
 } from "@/lib/api/frontdesk";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { ServiciosTabs } from "@/components/frontdesk/servicios-tabs";
+import { GenericBoard } from "@/components/tablero/generic-board";
+import { ACCION_ICON, HANDLERS_FE, todayISO, fmtHora, POSTACCION_PROGRAMAR, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
 import { PRESENTES_DEFAULTS } from "@/lib/presentes-prefs";
 import { getDefinicion, getOpciones, editarCelda, ejecutarAccion, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro, type Transicion } from "@/lib/api/tablero";
 import { useRouter, usePathname } from "next/navigation";
@@ -99,54 +103,11 @@ import {
   MoreHorizontalIcon,
   Tick02Icon,
   Alert02Icon,
-  Calendar01Icon,
   PencilEdit01Icon,
   ArrowRight01Icon,
   Notification03Icon,
   ShoppingCart01Icon,
 } from "@hugeicons/core-free-icons";
-
-// Íconos disponibles para las acciones enchufables del tablero (mapa string→hugeicon, data-driven).
-const ACCION_ICON: Record<string, typeof Calendar01Icon> = {
-  calendar: Calendar01Icon,
-};
-
-// Handlers de acciones (hooks) que el FE SABE ejecutar. El BE declara las acciones por dato
-// (tableros.acciones, editable por PUT /tableros/:id); el FE solo pinta las de handler conocido, así
-// enchufar/quitar es por dato y nunca aparecen botones que el FE no puede despachar.
-const HANDLERS_FE = new Set(["abrir_citas_servicio"]);
-
-const todayISO = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
-
-// El BE sella en UTC (p. ej. "2026-07-30T14:29:31Z"). SIEMPRE mostrar en la zona de la clínica
-// (América/Puerto_Rico), no en la del navegador: pintar el ISO crudo salían 4 horas de más (14:29→debe
-// verse 10:29). Zona fija del negocio, no `getHours()` (que depende de la máquina). Contrato del handoff.
-const HORA_FMT = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-  timeZone: "America/Puerto_Rico",
-});
-function fmtHora(iso: string | null | undefined): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return HORA_FMT.format(d);
-}
-
-// Valor de `render.postAccion` que abre el modal "Programar citas" (convención compartida con el BE;
-// el BE lo declara en la columna/estado que debe dispararlo — data-driven, sin hardcodear el estado).
-const POSTACCION_PROGRAMAR = "programar_citas";
-
-// Sello de hora por estado del flujo — mapeo del contrato del BE (FrontdeskSesionEntity), único punto.
-const STAMP_FIELD: Record<string, keyof Sesion> = {
-  presente: "presentAt",
-  en_terapia: "therapyStartedAt",
-  asistido: "attendedAt",
-};
 
 // ————————————————————————————————————————————————————————————————————————————
 // Frontdesk del día (F4): tabs por servicio (data-driven /servicios) + KPIs-filtro + tabla dinámica
@@ -237,6 +198,17 @@ export function FrontdeskBoard() {
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name)),
     [servRes.state],
   );
+  // Pestañas del frontdesk (BE): las de servicio coinciden por slug con `servicios`; esta solo AÑADE la de
+  // Consulta (boardSlug "atencion"), que monta el tablero de Atención que ya existe. Degrada a null si el
+  // endpoint no responde → el frontdesk queda EXACTAMENTE como antes. Handoff consulta-como-pestana-del-frontdesk.
+  const tabsRes = useResource<FrontdeskTab[]>(
+    () => (gate.centro ? getFrontdeskTabs(gate.centro).catch(() => []) : Promise.resolve([])),
+    [gate.centro],
+  );
+  const consultaTab = React.useMemo(
+    () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => tb.boardSlug === "atencion") ?? null : null),
+    [tabsRes.state],
+  );
   const defRes = useResource<TableroDefinicion>(
     () => (gate.centro ? getDefinicion("servicios", gate.centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [gate.centro],
@@ -253,10 +225,12 @@ export function FrontdeskBoard() {
     return estados.filter((e) => trans.has(e.slug) && STAMP_FIELD[e.slug]);
   }, [def, estados]);
 
+  // La pestaña de Consulta está seleccionada (monta el tablero de Atención, no un servicio).
+  const isConsulta = !!consultaTab && tab === consultaTab.slug;
   // Tab efectivo derivado (primer servicio por defecto) — sin efecto, sin renders en cascada. Si el tab
-  // elegido ya no existe en este centro (servicio apagado ahí), cae al primero disponible.
-  const tabEfectivo = servicios.some((s) => s.slug === tab) ? tab : (servicios[0]?.slug ?? "");
-  const servicioActivo = servicios.find((s) => s.slug === tabEfectivo);
+  // elegido ya no existe en este centro (servicio apagado ahí), cae al primero disponible. Consulta manda.
+  const tabEfectivo = isConsulta ? consultaTab!.slug : servicios.some((s) => s.slug === tab) ? tab : (servicios[0]?.slug ?? "");
+  const servicioActivo = isConsulta ? undefined : servicios.find((s) => s.slug === tabEfectivo);
 
   // ——— Filtro por PACIENTE (idea del dueño): al elegir un paciente, las pestañas quedan solo con SUS
   // servicios de ESTE día; un banner recuerda a quién se mira y un botón visible vuelve al día completo.
@@ -289,12 +263,14 @@ export function FrontdeskBoard() {
 
   // Datos del día: proyección del tablero (columnas+filas del BE) + entidades de sesión (sellos de hora,
   // pacienteId, datos) unidas por id. El FE solo une; no recalcula.
+  // En Consulta NO se pide el board de servicios (lo pinta GenericBoard "atencion"); así no se gasta ni
+  // falla una llamada a un tablero de servicio con la clave "consulta".
   const boardRes = useResource<FrontdeskTablero>(
     () =>
-      gate.centro && tabEfectivo
+      gate.centro && tabEfectivo && !isConsulta
         ? getFrontdeskTablero(tabEfectivo, fecha, gate.centro, rango)
         : Promise.resolve({ columns: [], rows: [] }),
-    [gate.centro, tabEfectivo, fecha, rango?.hasta],
+    [gate.centro, tabEfectivo, fecha, rango?.hasta, isConsulta],
   );
   const sesRes = useResource<Sesion[]>(
     () =>
@@ -687,8 +663,15 @@ export function FrontdeskBoard() {
             presentesPorClave={presentesPorClave}
             presentesPrefs={presentesPrefs}
             presentesMax={presentesMax}
+            extraTab={consultaTab ? { slug: consultaTab.slug, label: tRoot.has(consultaTab.labelKey) ? tRoot(consultaTab.labelKey) : consultaTab.name, color: consultaTab.color } : null}
           />
 
+          {isConsulta ? (
+            /* Consulta se VE aquí pero su dato vive en `citas`: montamos el tablero de Atención que ya existe
+               (mismas llamadas, acciones y permisos que /boards/atencion). Handoff consulta-como-pestana. */
+            <GenericBoard tablero="atencion" />
+          ) : (
+          <>
           {/* KPIs = filtros */}
           <div className="mb-4 flex flex-wrap gap-2">
             <KpiTile
@@ -808,12 +791,14 @@ export function FrontdeskBoard() {
               </table>
             </div>
           )}
+          </>
+          )}
         </>
       )}
 
       {/* Leyenda del flujo (data-driven): sale del NOMBRE de las columnas del flujo (configurable) +
           el color de su estado destino. Como el mockup del AP-Board. */}
-      {flujoCols.length > 0 && (
+      {!isConsulta && flujoCols.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-muted-foreground">
           {flujoCols.map((c, i) => {
             const r = (c.render ?? {}) as { transition?: string; labelKey?: string; color?: string };

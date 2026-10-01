@@ -144,6 +144,26 @@ export function getServiciosConSaldo(patientId: string, centroId?: string): Prom
   return apiFetch<ServicioConSaldo[]>(`/frontdesk/patients/${patientId}/availability`, {}, centroId);
 }
 
+// Pestañas de la pantalla de frontdesk (BE 1-oct). Cada una dice QUÉ tablero la sirve: `boardSlug`
+// "servicios" → el board por servicio de siempre; "atencion" → el tablero de Atención que ya existe. En
+// /api/v2 los campos van en INGLÉS (boardSlug/slug/entity/serviceId/sortOrder), NO en español. Unifica la
+// VISTA, no el modelo: Consulta se ve aquí pero su dato sigue en `citas`. Handoff
+// consulta-como-pestana-del-frontdesk. Configurable por centro (frontdeskShowsConsultation/…Order).
+export interface FrontdeskTab {
+  slug: string;
+  name: string;
+  labelKey: string;
+  boardSlug: string; // "servicios" | "atencion"
+  entity: string; // "sesion" | "cita"
+  serviceId: string | null;
+  sortOrder: number;
+  color: string | null;
+  icon: string | null;
+}
+export function getFrontdeskTabs(centroId?: string): Promise<FrontdeskTab[]> {
+  return apiFetch<FrontdeskTab[]>(`/frontdesk/tabs`, {}, centroId).then((r) => (Array.isArray(r) ? r : []));
+}
+
 // Reagendar una sesión a otra fecha (fechas flexibles).
 export function reagendarSesion(sesionId: string, fecha: string, centroId?: string): Promise<Sesion> {
   return apiFetch<Sesion>(
