@@ -41,16 +41,16 @@ export function FichaCambioProtocolo({ pacienteId, centro }: { pacienteId: strin
         ) : (
           <ul className="space-y-2">
             {historial.map((c) => (
-              <li key={c.cambioId} className="rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+              <li key={c.changeId} className="rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-medium">{format.dateTime(parseDayUTC(c.fecha.slice(0, 10)) ?? new Date(c.fecha), "dayLong")}</span>
+                  <span className="text-sm font-medium">{format.dateTime(parseDayUTC(c.date.slice(0, 10)) ?? new Date(c.date), "dayLong")}</span>
                   <span className="text-xs text-muted-foreground">
-                    {t("cambioResumen", { cerrados: c.paquetesCerrados.length, creados: c.paquetesCreados.length })}
+                    {t("cambioResumen", { cerrados: c.closedPackages.length, creados: c.createdPackages.length })}
                   </span>
                 </div>
                 <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-                  <span>{t("motivo")}: {c.motivo || "—"}</span>
-                  <span>{t("medico")}: {c.medicoId ? (medById.get(c.medicoId) ?? "—") : "—"}</span>
+                  <span>{t("motivo")}: {c.reason || "—"}</span>
+                  <span>{t("medico")}: {c.doctorId ? (medById.get(c.doctorId) ?? "—") : "—"}</span>
                 </div>
               </li>
             ))}

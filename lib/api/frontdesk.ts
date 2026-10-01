@@ -454,10 +454,10 @@ export function aplicarCambioProtocolo(
 // un motivo, un médico; `medicoId` puede ser null). GET /invoices/packages/protocol-change/:patientId (inglesa,
 // viva 1-oct). Handoff cambio-de-protocolo-a-la-ficha.
 export interface CambioProtocoloHistorial {
-  cambioId: string;
-  fecha: string;
-  motivo: string | null; medicoId: string | null; actorId: string | null;
-  paquetesCerrados: string[]; paquetesCreados: string[];
+  changeId: string;
+  date: string;
+  reason: string | null; doctorId: string | null;
+  closedPackages: string[]; createdPackages: string[];
 }
 export function getCambiosProtocolo(pacienteId: string, centroId?: string): Promise<CambioProtocoloHistorial[]> {
   return apiFetch<CambioProtocoloHistorial[]>(`/invoices/packages/protocol-change/${encodeURIComponent(pacienteId)}`, {}, centroId)
