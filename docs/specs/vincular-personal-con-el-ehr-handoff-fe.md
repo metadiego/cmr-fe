@@ -62,9 +62,16 @@ correo a {email} para que active su cuenta en el EHR» — para que quien hace c
 En la ficha de Personal (`/configuration/staff` o la ficha individual, donde ya se edita
 cargo/email):
 
+- **El botón va en TODA ficha de Personal, sin excepción** — médico, enfermera, técnico o
+  cualquier otro cargo: cualquiera puede necesitar la cuenta, no es exclusivo de un rol. Decisión
+  del dueño, 01-oct-2026.
 - **Sin vínculo todavía**: botón «Vincular con el EHR» → abre un selector de rol (poblado con
-  `GET ehr-integration/roles`) → confirma → `POST .../provision`. Mostrar el aviso del correo
-  antes de confirmar (ver arriba).
+  `GET ehr-integration/roles`) **con una sugerencia PRE-MARCADA**, nunca elegida en silencio:
+  comparar `personal.cargo` contra los `name` de la lista, sin acentos y en minúscula
+  (`medico`→`Doctor`, `enfermera`→`Nurse`, `tecnico`→`Therapist` o `Staff` — a falta de un match
+  exacto, no marcar nada y dejar que elijan). Es una sugerencia de UI local, recalculada cada vez
+  contra la lista viva — no se guarda ni se vuelve una regla fija. Confirma → `POST
+  .../provision`. Mostrar el aviso del correo antes de confirmar (ver arriba).
 - **Ya vinculado**: mostrar el email/rol del EHR (de `GET staff-links`), con un botón «Editar»
   que permite cambiar el rol (`PATCH`) — sin pedir de nuevo el correo, eso no cambia.
 - **Habilitar/Deshabilitar**: **no hace falta ningún botón nuevo** — ya ocurre solo al marcar a la
