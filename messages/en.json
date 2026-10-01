@@ -736,7 +736,8 @@
       "documents": "Documents",
       "appointments": "Appointments",
       "therapies": "Therapies",
-      "billing": "Billing"
+      "billing": "Billing",
+      "protocolChange": "Protocol change"
     },
     "hub": {
       "alerts": "Alerts & precautions",
@@ -3680,7 +3681,12 @@
       "motivoPlaceholder": "Clinical reason for the change",
       "aviso": "New quantities are the doctor’s judgment: not validated against pending. The system warns if far off, but does not block.",
       "aplicar": "Apply change",
-      "aplicado": "Protocol change applied."
+      "aplicado": "Protocol change applied.",
+      "historialTitulo": "Previous changes",
+      "sinHistorial": "No protocol changes.",
+      "cargando": "Loading…",
+      "cambioResumen": "{cerrados} closed · {creados} new",
+      "nuevoTitulo": "New change"
     }
   },
   "perfiles": {

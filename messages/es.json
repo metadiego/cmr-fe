@@ -736,7 +736,8 @@
       "documents": "Documentos",
       "appointments": "Citas",
       "therapies": "Terapias",
-      "billing": "Facturación"
+      "billing": "Facturación",
+      "protocolChange": "Cambio de protocolo"
     },
     "hub": {
       "alerts": "Alertas y precauciones",
@@ -3680,7 +3681,12 @@
       "motivoPlaceholder": "Motivo clínico del cambio",
       "aviso": "Las cantidades nuevas son juicio del médico: no se validan contra lo pendiente. El sistema avisa si se alejan, pero no bloquea.",
       "aplicar": "Aplicar cambio",
-      "aplicado": "Cambio de protocolo aplicado."
+      "aplicado": "Cambio de protocolo aplicado.",
+      "historialTitulo": "Cambios anteriores",
+      "sinHistorial": "Sin cambios de protocolo.",
+      "cargando": "Cargando…",
+      "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
+      "nuevoTitulo": "Nuevo cambio"
     }
   },
   "perfiles": {

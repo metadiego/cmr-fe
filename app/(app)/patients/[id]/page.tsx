@@ -47,6 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { CertificacionGastos } from "@/components/clientes/certificacion-gastos";
 import { FichaCitas, FichaTerapias, FichaFacturacion, FichaUltimaVisita } from "@/components/clientes/ficha-tabs";
+import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
 import {
   fullName,
   initials,
@@ -138,6 +139,7 @@ function PacienteDetail({
   const puedeFactura = can("factura.read");
   const puedeCitas = can("citas.read");
   const puedeFrontdesk = can("frontdesk.read");
+  const puedeProtocolo = can("tratamiento.cambio_protocolo");
   const age = ageFrom(p.dateOfBirth);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -280,6 +282,7 @@ function PacienteDetail({
           {puedeFrontdesk && <TabsTrigger value="terapias">{t("tabs.therapies")}</TabsTrigger>}
           {puedeFactura && <TabsTrigger value="facturacion">{t("tabs.billing")}</TabsTrigger>}
           {puedeFactura && <TabsTrigger value="documentos">{t("tabs.documents")}</TabsTrigger>}
+          {puedeProtocolo && <TabsTrigger value="protocolo">{t("tabs.protocolChange")}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="resumen">
@@ -333,6 +336,11 @@ function PacienteDetail({
               <h2 className="text-sm font-semibold">{tc("title")}</h2>
               <CertificacionGastos pacienteId={p.id} centro={centroId} />
             </div>
+          </TabsContent>
+        )}
+        {puedeProtocolo && (
+          <TabsContent value="protocolo">
+            <FichaCambioProtocolo pacienteId={p.id} centro={centroId} />
           </TabsContent>
         )}
       </Tabs>

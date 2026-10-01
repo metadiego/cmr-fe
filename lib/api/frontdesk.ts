@@ -6,16 +6,12 @@ import { apiFetch, apiFetchEnvelope } from "./client";
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
 export type ConWarnings<T> = { data: T; warnings: ApiWarning[] };
 
-// Ficha MÍNIMA del paciente que TODA respuesta con `patientId` trae ahora adjunta (BE 29-sep): récord +
-// nombre resueltos en el borde, para no pedir el paciente fila a fila. `medicalRecordNumber` puede ser null
-// (ficha sin récord en NUESTRA base, ~5 de 29); `patient` entero puede ser null (borrado / de otro centro).
-// Handoff el-paciente-viaja-con-su-record.
+// Ficha MÍNIMA del paciente adjunta a toda respuesta con `patientId` (BE 29-sep): récord + nombre en el
+// borde, para no pedirlo fila a fila. Ambos pueden ser null. Handoff el-paciente-viaja-con-su-record.
 export type EmbeddedPatient = { id: string; medicalRecordNumber: string | null; name: string | null };
 
-// Service session (frontdesk). Unlike medical citas, sessions are per-DAY
-// (no hora/horaFin) — the service calendar schedules by date only.
-// `patient` viene adjunto (ver EmbeddedPatient); es opcional en el tipo porque el schema generado aún no lo
-// declara, pero el API ya lo manda (verificado en prod 29-sep).
+// Service session (frontdesk). Day-based (no hora/horaFin). `patient` viene adjunto (ver EmbeddedPatient),
+// opcional en el tipo porque el schema aún no lo declara, pero el API ya lo manda (verificado prod 29-sep).
 export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null };
 export type CreateSesionPayload = components["schemas"]["CreateSesionDto"];
 export type EstadoSesion = Sesion["status"];
@@ -144,11 +140,8 @@ export function getServiciosConSaldo(patientId: string, centroId?: string): Prom
   return apiFetch<ServicioConSaldo[]>(`/frontdesk/patients/${patientId}/availability`, {}, centroId);
 }
 
-// Pestañas de la pantalla de frontdesk (BE 1-oct). Cada una dice QUÉ tablero la sirve: `boardSlug`
-// "servicios" → el board por servicio de siempre; "atencion" → el tablero de Atención que ya existe. En
-// /api/v2 los campos van en INGLÉS (boardSlug/slug/entity/serviceId/sortOrder), NO en español. Unifica la
-// VISTA, no el modelo: Consulta se ve aquí pero su dato sigue en `citas`. Handoff
-// consulta-como-pestana-del-frontdesk. Configurable por centro (frontdeskShowsConsultation/…Order).
+// Pestañas del frontdesk (BE 1-oct). `boardSlug` dice qué tablero la sirve: "servicios" o "atencion" (el
+// tablero de Atención que ya existe). /api/v2 en inglés. Handoff consulta-como-pestana-del-frontdesk.
 export interface FrontdeskTab {
   slug: string;
   name: string;
@@ -157,13 +150,11 @@ export interface FrontdeskTab {
   entity: string; // "sesion" | "cita"
   serviceId: string | null;
   sortOrder: number;
-  color: string | null;
-  icon: string | null;
+  color: string | null; icon: string | null;
 }
 export function getFrontdeskTabs(centroId?: string): Promise<FrontdeskTab[]> {
   return apiFetch<FrontdeskTab[]>(`/frontdesk/tabs`, {}, centroId).then((r) => (Array.isArray(r) ? r : []));
 }
-
 // Reagendar una sesión a otra fecha (fechas flexibles).
 export function reagendarSesion(sesionId: string, fecha: string, centroId?: string): Promise<Sesion> {
   return apiFetch<Sesion>(
@@ -457,6 +448,20 @@ export function aplicarCambioProtocolo(
     { method: "POST", body: JSON.stringify(payload) },
     centroId,
   );
+}
+
+// HISTORIAL de cambios de protocolo del paciente, del más reciente al más viejo, agrupado por cambio (un día,
+// un motivo, un médico; `medicoId` puede ser null). GET /invoices/packages/protocol-change/:patientId (inglesa,
+// viva 1-oct). Handoff cambio-de-protocolo-a-la-ficha.
+export interface CambioProtocoloHistorial {
+  cambioId: string;
+  fecha: string;
+  motivo: string | null; medicoId: string | null; actorId: string | null;
+  paquetesCerrados: string[]; paquetesCreados: string[];
+}
+export function getCambiosProtocolo(pacienteId: string, centroId?: string): Promise<CambioProtocoloHistorial[]> {
+  return apiFetch<CambioProtocoloHistorial[]>(`/invoices/packages/protocol-change/${encodeURIComponent(pacienteId)}`, {}, centroId)
+    .then((r) => (Array.isArray(r) ? r : []));
 }
 
 // AVISOS / DESCUIDOS del día (GET /frontdesk/reportes/avisos?desde&hasta). El BE ya no pierde el

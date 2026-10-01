@@ -18,16 +18,22 @@ desplegadas:
 GET /api/v2/invoices/packages/protocol-change/:patientId
 ```
 
-Devuelve los cambios **del más reciente al más viejo**, agrupados por cambio:
+Devuelve los cambios **del más reciente al más viejo**, agrupados por cambio.
+**Verificado llamando a producción el 1-oct 12:42**, y estos son los nombres de verdad en `/api/v2`
+(la primera versión de este handoff los traía en español: era un error mío, perdón):
 
 ```json
-[ { "cambioId": "…", "fecha": "2026-09-20T10:00:00Z", "motivo": "alergia",
-    "medicoId": null, "actorId": "…",
-    "paquetesCerrados": ["…"], "paquetesCreados": ["…"] } ]
+[ { "changeId": "326ffea3…", "date": "2026-08-19T15:24:28.235Z",
+    "reason": "se reemplazan PEMF y EMTT por vitamina C",
+    "doctorId": "5d3b15fe…", "actorId": "fcdc1ccc…",
+    "closedPackages": ["edd9a15f…", "438ff37b…"], "createdPackages": ["…"] } ]
 ```
 
+(En v1 los mismos campos son `cambioId`, `fecha`, `motivo`, `medicoId`, `paquetesCerrados`,
+`paquetesCreados`.)
+
 Un cambio es **un hecho** —un día, un motivo, un médico— aunque mueva varios paquetes: por eso viene
-agrupado y no una fila por paquete. `medicoId` puede ser `null`: la decisión pudo no registrarlo, y
+agrupado y no una fila por paquete. `doctorId` puede ser `null`: la decisión pudo no registrarlo, y
 eso se muestra, no se esconde.
 
 ### Lo que falta por hacer (la acción) — **sin cambios**
