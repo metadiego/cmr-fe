@@ -554,7 +554,17 @@
     },
     "fecha": "Date",
     "prevDay": "Previous day",
-    "nextDay": "Next day"
+    "nextDay": "Next day",
+    "time": "Time",
+    "endAuto": "Ends {time} · automatic",
+    "slot": {
+      "free": "{n} free",
+      "freeShort": "{n} free",
+      "full": "full",
+      "placeholder": "Pick an available time",
+      "variantDropdown": "List",
+      "variantChips": "Grid"
+    }
   },
   "appointments": {
     "title": "Appointments",

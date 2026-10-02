@@ -554,7 +554,17 @@
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
-    "nextDay": "Día siguiente"
+    "nextDay": "Día siguiente",
+    "time": "Hora",
+    "endAuto": "Termina {time} · automático",
+    "slot": {
+      "free": "{n} libres",
+      "freeShort": "{n} lib",
+      "full": "lleno",
+      "placeholder": "Elige una hora disponible",
+      "variantDropdown": "Lista",
+      "variantChips": "Rejilla"
+    }
   },
   "appointments": {
     "title": "Citas",
