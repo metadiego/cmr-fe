@@ -29,12 +29,16 @@ export function EhrLinkSection({
   persona,
   roles,
   link,
+  centerIds,
   centro,
   onChanged,
 }: {
   persona: Personal;
   roles: EhrRole[];
   link: EhrStaffLink | undefined;
+  // Todos los centros donde quien mira tiene ehr-integration.read — la cuenta del EHR no es por
+  // centro, pero el BE la guarda contra el de alta, así que hay que pedirlos todos, no solo el activo.
+  centerIds: string[] | undefined;
   centro?: string;
   onChanged: () => void;
 }) {
@@ -62,6 +66,7 @@ export function EhrLinkSection({
           persona={persona}
           roles={roles}
           link={link}
+          centerIds={centerIds}
           centro={centro}
           onClose={() => setOpen(false)}
           onDone={() => {
@@ -78,6 +83,7 @@ function EhrLinkDialog({
   persona,
   roles,
   link: linkSnapshot,
+  centerIds,
   centro,
   onClose,
   onDone,
@@ -88,6 +94,7 @@ function EhrLinkDialog({
   // pestaña/persona vinculó mientras tanto) — solo sirve para el primer render (botón Vincular vs
   // Editar). La fuente de verdad real es `freshRes` de abajo, releída al ABRIR este diálogo.
   link: EhrStaffLink | undefined;
+  centerIds: string[] | undefined;
   centro?: string;
   onClose: () => void;
   onDone: () => void;
@@ -96,8 +103,11 @@ function EhrLinkDialog({
   const tRoot = useTranslations();
   // Vuelve a pedir los vínculos justo al abrir — no confía en el snapshot del padre. Encontrado por
   // revisión adversarial (2026-10-01): sin esto, un vínculo creado por otra persona/pestaña mientras
-  // la ficha estaba abierta se veía como "sin vincular" y disparaba un provision redundante.
-  const freshRes = useResource<EhrStaffLink[]>(() => listEhrStaffLinks(centro), [persona.id, centro]);
+  // la ficha estaba abierta se veía como "sin vincular" y disparaba un provision redundante. Pide
+  // TODOS los centros (no solo el activo): la cuenta del EHR se guarda contra el centro de alta, no
+  // contra la persona sola — verificado en vivo 2026-10-01 con Glorimar/Javier (de alta en Bayamón,
+  // "sin vincular" al mirar desde Caguas).
+  const freshRes = useResource<EhrStaffLink[]>(() => listEhrStaffLinks(centro, centerIds), [persona.id, centro, centerIds]);
   const link =
     freshRes.state.kind === "ok"
       ? freshRes.state.data.find((l) => l.staffId === persona.id)

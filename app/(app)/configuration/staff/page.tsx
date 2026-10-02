@@ -14,6 +14,7 @@ import {
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
 import { getEhrRoles, listEhrStaffLinks, type EhrRole, type EhrStaffLink } from "@/lib/api/ehr-integration";
+import { getCentrosDondePuedo } from "@/lib/api/centers";
 import { EhrLinkSection } from "@/components/personal/ehr-link-section";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
@@ -62,7 +63,19 @@ export default function PersonalPage() {
   // la ficha mientras tanto; sencillamente no tiene opciones que ofrecer hasta que el BE despliegue.
   const ehrRolesRes = useResource<EhrRole[]>(() => (gate.centro ? getEhrRoles(gate.centro).catch(() => []) : Promise.resolve([])), [gate.centro]);
   const ehrRoles = ehrRolesRes.state.kind === "ok" ? ehrRolesRes.state.data : [];
-  const ehrLinksRes = useResource<EhrStaffLink[]>(() => (gate.centro ? listEhrStaffLinks(gate.centro).catch(() => []) : Promise.resolve([])), [gate.centro]);
+  // La cuenta del EHR no es por centro (una persona, una cuenta) pero el BE la guarda contra el centro
+  // donde se creó: pedir solo el centro activo deja afuera a quien se vinculó desde otro (verificado en
+  // vivo 2026-10-01, Glorimar/Javier de alta en Bayamón salían "sin vincular" vistos desde Caguas). Se
+  // piden TODOS los centros donde el que mira tiene el permiso, igual que el patrón de selector-de-centro.
+  const ehrCentrosRes = useResource<Awaited<ReturnType<typeof getCentrosDondePuedo>>>(
+    () => getCentrosDondePuedo("ehr-integration.read").catch(() => []),
+    [],
+  );
+  const ehrCenterIds = ehrCentrosRes.state.kind === "ok" ? ehrCentrosRes.state.data.map((c) => c.id) : undefined;
+  const ehrLinksRes = useResource<EhrStaffLink[]>(
+    () => (gate.centro ? listEhrStaffLinks(gate.centro, ehrCenterIds).catch(() => []) : Promise.resolve([])),
+    [gate.centro, ehrCenterIds],
+  );
   const ehrLinks = ehrLinksRes.state.kind === "ok" ? ehrLinksRes.state.data : [];
 
   const [q, setQ] = React.useState("");
@@ -136,6 +149,7 @@ export default function PersonalPage() {
               roles={roles}
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
+              ehrCenterIds={ehrCenterIds}
               centro={gate.centro}
               onChanged={() => listRes.reload()}
               onEhrChanged={() => ehrLinksRes.reload()}
@@ -152,7 +166,7 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, centro, onChanged, onEhrChanged,
+  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, centro, onChanged, onEhrChanged,
 }: {
   persona: Personal;
   cargoCatalogo: CargoCatalogo[];
@@ -160,6 +174,7 @@ function FichaPersonal({
   roles: Rol[];
   ehrRoles: EhrRole[];
   ehrLink: EhrStaffLink | undefined;
+  ehrCenterIds: string[] | undefined;
   centro?: string;
   onChanged: () => void;
   onEhrChanged: () => void;
@@ -291,7 +306,7 @@ function FichaPersonal({
 
           {/* Vincular con el EHR: en TODA ficha, sin excepción (decisión del dueño, 01-oct-2026) —
               cualquier cargo puede necesitar la cuenta, no se gatea por capacidad/rol. */}
-          <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centro={centro} onChanged={onEhrChanged} />
+          <EhrLinkSection persona={persona} roles={ehrRoles} link={ehrLink} centerIds={ehrCenterIds} centro={centro} onChanged={onEhrChanged} />
         </TabsContent>
 
         <TabsContent value="disponibilidad" className="pt-2">
