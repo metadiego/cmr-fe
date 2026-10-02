@@ -298,7 +298,7 @@ function PagoEditRow({
         </Select>
       </div>
       <div className="flex items-center gap-1.5">
-        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
+        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" onFocus={(e) => e.currentTarget.select()} className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
         <Button type="button" size="icon" className="size-8" disabled={!cambio || !valido || busy} aria-label={t("save")} onClick={guardar}>
           <HugeiconsIcon icon={Tick02Icon} className="size-4" />
         </Button>
@@ -369,7 +369,8 @@ function PagoAddRow({
         <Input value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
       )}
       <div className="flex items-center gap-1.5">
-        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
+        {/* Monto enfocado y SELECCIONADO al abrir: para dividir, se teclea el parcial de una sin borrar. */}
+        <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" autoFocus onFocus={(e) => e.currentTarget.select()} className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
         {/* Sin botón «Registrar»: al elegir el tipo se aplica solo. La TARJETA conserva un visto para confirmar
             tras anotar los últimos 4 (que no se autoaplica). Handoff: pedido del mostrador (menos clics). */}
         {esTarjeta && (
