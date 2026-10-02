@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { updatePaciente } from "@/lib/api/pacientes";
 import { type EhrReadinessField } from "@/lib/api/ehr-integration";
 import { toastError } from "@/lib/api/errors";
+import { todayPR } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/kit/form-dialog";
@@ -37,8 +38,12 @@ export function EhrReadinessModal({
   const [busy, setBusy] = React.useState(false);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  // Fecha de nacimiento futura = dato imposible, nunca un valor válido que el EHR pueda recibir.
+  // El `max` del input ya lo impide en la mayoría de navegadores, pero esto es el respaldo real
+  // (alguien puede pegar un valor a mano) — mismo criterio que paciente-form-sheet.tsx.
+  const fechaNacimientoValida = !form.fechaNacimiento || form.fechaNacimiento <= todayPR();
   // Todos los faltantes tienen valor con contenido.
-  const completo = faltantes.every((f) => (form[f] ?? "").trim() !== "");
+  const completo = faltantes.every((f) => (form[f] ?? "").trim() !== "") && fechaNacimientoValida;
 
   // Orden de presentación: PRIMERO el tipo de ID, LUEGO el ID (regla del dueño 30-sep) — el número de ID sin
   // saber de qué documento es no sirve. El resto conserva un orden estable. `faltantes` puede venir en
@@ -96,13 +101,20 @@ export function EhrReadinessModal({
                   </SelectContent>
                 </Select>
               ) : (
-                <Input
-                  type={f === "fechaNacimiento" ? "date" : "text"}
-                  value={form[f] ?? ""}
-                  onChange={(e) => set(f, e.target.value)}
-                  disabled={docIdBloqueado(f)}
-                  placeholder={docIdBloqueado(f) ? t("idTypeFirst") : undefined}
-                />
+                <>
+                  <Input
+                    type={f === "fechaNacimiento" ? "date" : "text"}
+                    value={form[f] ?? ""}
+                    max={f === "fechaNacimiento" ? todayPR() : undefined}
+                    aria-invalid={f === "fechaNacimiento" && !fechaNacimientoValida ? true : undefined}
+                    onChange={(e) => set(f, e.target.value)}
+                    disabled={docIdBloqueado(f)}
+                    placeholder={docIdBloqueado(f) ? t("idTypeFirst") : undefined}
+                  />
+                  {f === "fechaNacimiento" && !fechaNacimientoValida && (
+                    <p className="text-xs text-destructive">{t("fechaNacimientoFutura")}</p>
+                  )}
+                </>
               )}
             </Field>
           ))}
