@@ -143,7 +143,9 @@ export function CitaModal({
   );
   const slots: Slot[] = React.useMemo(() => {
     if (cuposRes.state.kind !== "ok" || !cuposRes.state.data) return [];
-    return cuposRes.state.data.slots.map((s) => ({ time: s.time, vacios: s.free, cupo: s.capacity }));
+    // Tolera `slots` o `franjas` (el BE oscila el nombre) y NUNCA `.map` sobre undefined → reventaba el modal.
+    const arr = cuposRes.state.data.slots ?? cuposRes.state.data.franjas ?? [];
+    return arr.map((s) => ({ time: s.time, vacios: s.free, cupo: s.capacity }));
   }, [cuposRes.state]);
   // Duración del tipo (del endpoint; manda sobre el catálogo). Se usa para derivar la hora de fin.
   const slotDuration = cuposRes.state.kind === "ok" ? cuposRes.state.data?.durationMinutes ?? null : null;

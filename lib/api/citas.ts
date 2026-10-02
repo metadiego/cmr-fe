@@ -281,7 +281,10 @@ export interface CuposLibres {
   date: string;
   appointmentTypeId: string;
   durationMinutes: number | null;
-  slots: SlotLibre[];
+  // El BE oscila el nombre del array entre `slots` y `franjas` (el glosario global de /api/v2 lo movió otra
+  // vez el 2-oct). Ambos opcionales; el FE lee el que venga (`slots ?? franjas`) para no romperse en el vaivén.
+  slots?: SlotLibre[];
+  franjas?: SlotLibre[];
 }
 export function getCuposLibres(
   date: string,
