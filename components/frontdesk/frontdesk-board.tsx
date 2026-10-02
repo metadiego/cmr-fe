@@ -37,6 +37,7 @@ import {
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { useFrontdeskTab } from "@/hooks/use-frontdesk-default-tab";
 import { ServiciosTabs } from "@/components/frontdesk/servicios-tabs";
 import { GenericBoard } from "@/components/tablero/generic-board";
 import { ACCION_ICON, HANDLERS_FE, todayISO, fmtHora, POSTACCION_PROGRAMAR, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
@@ -160,7 +161,6 @@ export function FrontdeskBoard() {
   const [hasta, setHasta] = React.useState("");
   const puedeRango = can("frontdesk.rango");
   const rango = puedeRango && hasta && hasta > fecha ? { desde: fecha, hasta } : undefined;
-  const [tab, setTab] = React.useState<string>("");
   const [estadoFiltro, setEstadoFiltro] = React.useState("");
   // Ocultar canceladas: ENCENDIDO por defecto (la jornada se recarga y las anteriores quedan canceladas
   // como borrado lógico; no son bug, pero estorban el día). Filtro de cliente sobre estado==='cancelada'.
@@ -209,6 +209,7 @@ export function FrontdeskBoard() {
     () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => tb.boardSlug === "atencion") ?? null : null),
     [tabsRes.state],
   );
+  const [tab, setTab] = useFrontdeskTab(gate.centro, consultaTab); // handoff aterrizar-en-consulta
   const defRes = useResource<TableroDefinicion>(
     () => (gate.centro ? getDefinicion("servicios", gate.centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [gate.centro],
@@ -667,9 +668,8 @@ export function FrontdeskBoard() {
           />
 
           {isConsulta ? (
-            /* Consulta se VE aquí pero su dato vive en `citas`: montamos el tablero de Atención que ya existe
-               (mismas llamadas, acciones y permisos que /boards/atencion). Handoff consulta-como-pestana. */
-            <GenericBoard tablero="atencion" />
+            /* Vive en `citas` (consulta-como-pestana); `volverHref` regresa aquí al facturar (aterrizar-en-consulta #2). */
+            <GenericBoard tablero="atencion" volverHref={`/boards/frontdesk?tab=${encodeURIComponent(consultaTab!.slug)}`} />
           ) : (
           <>
           {/* KPIs = filtros */}

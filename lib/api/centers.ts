@@ -23,11 +23,23 @@ export interface Centro {
   // Enganche facturación↔frontdesk: al saldar una factura del día, cada línea a_la_entrega
   // entra sola al frontdesk marcada "presente". Default true; se apaga por centro (PR #172).
   frontdeskAutoPresent?: boolean | null;
+  // Pestaña Consulta dentro de Frontdesk (handoff consulta-como-pestana-del-frontdesk): si el centro
+  // la enseña (default sí) y en qué posición entre las de servicio (`null` = al final). Verificado en
+  // vivo 2026-10-01 contra `/auth/me/centers` — ya están en el BE aunque `schema.d.ts` todavía no los
+  // trae (gen:api necesita el BE local en :3001, no disponible en esta sesión).
+  frontdeskShowsConsultation?: boolean | null;
+  frontdeskConsultationOrder?: number | null;
 }
 
 // PUT /centers/:id/tax-details — patch parcial (todos opcionales). La dirección
 // se ENVÍA como `taxAddress` (el GET la lee como `address`). RBAC centro.fiscal.write.
-export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"];
+// Los dos campos de Consulta se añaden A MANO (mismo motivo que en `Centro` arriba): el schema
+// generado todavía no los trae, pero el PUT los acepta tal cual — mismo endpoint que ya usa
+// `frontdeskAutoPresent`, que SÍ está en el DTO generado y confirma el patrón.
+export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"] & {
+  frontdeskShowsConsultation?: boolean;
+  frontdeskConsultationOrder?: number | null;
+};
 
 export function updateDatosFiscales(
   centroId: string,

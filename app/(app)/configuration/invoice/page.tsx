@@ -73,6 +73,8 @@ type FormState = {
   web: string;
   pieFactura: string;
   frontdeskAutopresente: boolean;
+  frontdeskMuestraConsulta: boolean;
+  frontdeskOrdenConsulta: string;
 };
 
 function seed(c: Centro): FormState {
@@ -89,6 +91,10 @@ function seed(c: Centro): FormState {
     pieFactura: c.invoiceFooter ?? "",
     // Enganche facturación↔frontdesk (auto-presente al saldar). Default true si el BE aún no lo trae.
     frontdeskAutopresente: c.frontdeskAutoPresent ?? true,
+    // Pestaña Consulta en Frontdesk. Default mostrarla (lo mismo que decide el BE si el centro nunca
+    // lo tocó); orden vacío = "al final".
+    frontdeskMuestraConsulta: c.frontdeskShowsConsultation ?? true,
+    frontdeskOrdenConsulta: c.frontdeskConsultationOrder != null ? String(c.frontdeskConsultationOrder) : "",
   };
 }
 
@@ -117,6 +123,8 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
       website: form.web.trim(),
       invoiceFooter: form.pieFactura,
       frontdeskAutoPresent: form.frontdeskAutopresente,
+      frontdeskShowsConsultation: form.frontdeskMuestraConsulta,
+      frontdeskConsultationOrder: form.frontdeskOrdenConsulta.trim() === "" ? null : Number(form.frontdeskOrdenConsulta),
     };
     try {
       await updateDatosFiscales(centro.id, payload);
@@ -178,6 +186,35 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
               onCheckedChange={(v) => setForm((p) => ({ ...p, frontdeskAutopresente: v }))}
             />
           </div>
+        </section>
+
+        {/* Pestaña Consulta en Frontdesk (handoff consulta-como-pestana-del-frontdesk) */}
+        <section className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
+          <h2 className="text-sm font-semibold">{t("consultaTabTitle")}</h2>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-sm font-medium">{t("consultaTabLabel")}</span>
+              <p className="text-xs text-muted-foreground">{t("consultaTabHelp")}</p>
+            </div>
+            <Switch
+              checked={form.frontdeskMuestraConsulta}
+              disabled={!canWrite}
+              onCheckedChange={(v) => setForm((p) => ({ ...p, frontdeskMuestraConsulta: v }))}
+            />
+          </div>
+          {form.frontdeskMuestraConsulta && (
+            <Field label={t("consultaTabOrden")} hint={t("consultaTabOrdenHint")}>
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={form.frontdeskOrdenConsulta}
+                disabled={!canWrite}
+                onChange={(e) => setForm((p) => ({ ...p, frontdeskOrdenConsulta: e.target.value }))}
+                placeholder={t("consultaTabOrdenPlaceholder")}
+                className="max-w-[10rem]"
+              />
+            </Field>
+          )}
         </section>
 
         <div className="flex items-center gap-3">

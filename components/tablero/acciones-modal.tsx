@@ -55,6 +55,7 @@ export function AccionesModal({
   fila,
   centroId,
   saveOrigin,
+  volverHref,
 }: {
   actions: AccionItem[];
   fila: CitaFila;
@@ -62,6 +63,11 @@ export function AccionesModal({
   /** True on the call-center bridge day view: remembers this URL so the ficha can jump straight
    * back to the call mid-visit, instead of the agent hunting for the date/center again. */
   saveOrigin?: boolean;
+  /** A dónde debe volver la factura al terminar (p. ej. "/boards/frontdesk?tab=consulta") — sin esto,
+   * la pantalla de factura cae a su "Volver" genérico ("/boards/atencion"), que saca a quien facturó
+   * una Consulta desde DENTRO de Frontdesk hacia la pantalla de Atención sola. Handoff
+   * aterrizar-en-consulta-handoff-fe, punto 2. */
+  volverHref?: string;
 }) {
   const t = useTranslations("tableroBoard");
   const tRoot = useTranslations();
@@ -83,7 +89,10 @@ export function AccionesModal({
     try {
       const f = await facturarCita(String(fila.id), centroId);
       setOpen(false);
-      const q = centroId ? `?centro=${centroId}` : "";
+      const qp = new URLSearchParams();
+      if (centroId) qp.set("centro", centroId);
+      if (volverHref) qp.set("volver", volverHref);
+      const q = qp.toString() ? `?${qp.toString()}` : "";
       router.push(`/billing/invoices/${(f as { id: string }).id}${q}`);
     } catch (err) {
       toastError(err, tRoot);

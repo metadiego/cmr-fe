@@ -51,7 +51,16 @@ function defaultCentro(centros: Centro[]): string {
 // Fully generic board (any registered vertical). Driven by the registry +
 // definicion (columns/estados/transiciones/subTipos) + filas. Live via the
 // single bus, filtered by the vertical's `entidad`. Adding a vertical = config.
-export function GenericBoard({ tablero }: { tablero: string }) {
+export function GenericBoard({
+  tablero,
+  volverHref,
+}: {
+  tablero: string;
+  // A dónde debe volver la factura al terminar — ver el mismo prop en AccionesModal. Pass-through:
+  // GenericBoard monta este tablero tanto en su propia pantalla ("/boards/atencion") como DENTRO del
+  // frontdesk (pestaña Consulta), y solo el segundo caso necesita decir "vuelve aquí".
+  volverHref?: string;
+}) {
   const t = useTranslations("tableroBoard");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
@@ -231,7 +240,7 @@ export function GenericBoard({ tablero }: { tablero: string }) {
             // resolvió antes en la celda (render.kind). Handoff HANDOFF-columnas-reusables-binding.
             const actions = (col.render as Record<string, unknown> | null)?.actions as AccionItem[] | undefined;
             if (registro?.entity === "cita" || actions) {
-              return <AccionesModal actions={actions ?? []} fila={fila} centroId={centroId} />;
+              return <AccionesModal actions={actions ?? []} fila={fila} centroId={centroId} volverHref={volverHref} />;
             }
             return (
               <TableroAcciones
