@@ -339,16 +339,27 @@ function PagoAddRow({
   const excede = pagoExcede(n(monto), tope);
   const valido = !!formaId && n(monto) > 0 && !excede && !busy;
 
-  function registrar() {
-    if (!valido) return;
+  // Registra con el monto ACTUAL. Acepta la forma por parámetro porque al autoaplicar desde el select el
+  // estado `formaId` aún no se actualizó (setState es asíncrono). Guardado por `busy` → sin doble cobro.
+  function registrar(fid: string = formaId) {
+    if (!fid || n(monto) <= 0 || pagoExcede(n(monto), tope) || busy) return;
     const notas = last4.length === 4 ? `•••• ${last4}` : undefined;
-    run(() => registrarPago(id, { paymentMethodId: formaId, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro)).then(onDone);
+    run(() => registrarPago(id, { paymentMethodId: fid, amount: n(monto), ...(notas ? { notes: notas } : {}) } as never, centro)).then(onDone);
+  }
+  // Menos clics (pedido del mostrador): al elegir el tipo de pago se aplica YA, con el monto puesto (el saldo).
+  // La TARJETA no se autoaplica: deja anotar los últimos 4 antes de registrar. Para dividir, edita el monto a
+  // la parte antes de elegir el tipo; se aplica esa parte y el resto queda para otro pago. Pantalla de dinero:
+  // reversible (anular) y topado al saldo; el `busy` evita el doble registro.
+  function onPickForma(v: string) {
+    setFormaId(v);
+    const f = formas.find((x) => x.id === v);
+    if (f && f.isCash !== false) registrar(v); // no-tarjeta → aplica al instante
   }
 
   return (
     <div className="space-y-1.5 rounded-md border border-primary/30 bg-primary/5 px-2.5 py-2">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("addPayment")}</span>
-      <Select value={formaId} onValueChange={setFormaId}>
+      <Select value={formaId} onValueChange={onPickForma}>
         <SelectTrigger size="sm" className="h-8 w-full"><SelectValue placeholder={t("method")} /></SelectTrigger>
         <SelectContent>
           {formas.filter((f) => f.active !== false).map((f) => <SelectItem key={f.id} value={f.id}>{formaPagoLabel(tRoot, f.slug, f.name)}</SelectItem>)}
@@ -359,7 +370,13 @@ function PagoAddRow({
       )}
       <div className="flex items-center gap-1.5">
         <Input value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="decimal" className={"h-8 flex-1 text-right tabular-nums" + (excede ? " ring-1 ring-destructive" : "")} aria-invalid={excede} aria-label={t("amount")} />
-        <Button type="button" size="sm" className="h-8" disabled={!valido} onClick={registrar}>{t("register")}</Button>
+        {/* Sin botón «Registrar»: al elegir el tipo se aplica solo. La TARJETA conserva un visto para confirmar
+            tras anotar los últimos 4 (que no se autoaplica). Handoff: pedido del mostrador (menos clics). */}
+        {esTarjeta && (
+          <Button type="button" size="icon" className="size-8" disabled={!valido} aria-label={t("register")} onClick={() => registrar()}>
+            <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+          </Button>
+        )}
         <Button type="button" variant="ghost" size="icon" className="size-8" disabled={busy} aria-label={t("cancel")} onClick={onDone}>
           <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
