@@ -9,7 +9,8 @@ import { Search01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
 
 import {
   listPersonal, updatePersonal, getCargos, getPersonalCentros, updatePersonalCentros,
-  type Personal, type CargoCatalogo, type CentroDePersonal,
+  updateFrontdeskStartsOnConsultation,
+  type Personal, type CargoCatalogo, type CentroDePersonal, type PersonalConPreferenciaFrontdesk,
 } from "@/lib/api/personal";
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -287,6 +289,12 @@ function FichaPersonal({
               con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
           <CentrosDePersona persona={persona} centro={centro} />
 
+          {/* Aterrizar en Consulta al entrar a Frontdesk (handoff aterrizar-en-consulta-handoff-fe):
+              BE PR #386 EN REVISIÓN, sin desplegar a esta fecha — el interruptor guarda su propio PUT,
+              separado de cargo/capacidades, para que un 400 de "campo desconocido" de hoy no toque nada
+              más. Mientras el BE no despliegue, esto no hace nada observable (el campo no existe). */}
+          <FrontdeskConsultaPreferencia persona={persona} centro={centro} />
+
           {/* Acceso al sistema */}
           <div className="border-t pt-4">
             <Label className="mb-2 block">{t("acceso")}</Label>
@@ -391,6 +399,48 @@ function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: str
       {sucio && (
         <div className="mt-3 flex justify-end">
           <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCentros")}</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FrontdeskConsultaPreferencia({ persona, centro }: { persona: Personal; centro?: string }) {
+  const t = useTranslations("personalFicha");
+  const tRoot = useTranslations();
+  // Lee su propio valor ya traído en la lista (ningún GET nuevo): hoy el campo no existe en prod
+  // (PR #386 sin desplegar), así que esto da `undefined` → el switch nace apagado, sin romper nada.
+  const actual = (persona as PersonalConPreferenciaFrontdesk).frontdeskStartsOnConsultation ?? false;
+  const [valor, setValor] = React.useState(actual);
+  const [busy, setBusy] = React.useState(false);
+  const sucio = valor !== actual;
+
+  async function guardar() {
+    if (busy || !sucio) return;
+    setBusy(true);
+    try {
+      await updateFrontdeskStartsOnConsultation(persona.id, valor, centro);
+      toast.success(t("frontdeskConsultaGuardado"));
+    } catch (e) {
+      toastError(e, tRoot);
+      setValor(actual);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="border-t pt-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-0.5">
+          <Label>{t("frontdeskConsultaLabel")}</Label>
+          <p className="text-xs text-muted-foreground">{t("frontdeskConsultaAyuda")}</p>
+        </div>
+        <Switch checked={valor} disabled={busy} onCheckedChange={setValor} />
+      </div>
+      {sucio && (
+        <div className="mt-3 flex justify-end">
+          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
         </div>
       )}
     </div>

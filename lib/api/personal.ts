@@ -6,6 +6,16 @@ import type { Paginated } from "./types";
 // filter who can be assigned to an appointment.
 export type Personal = components["schemas"]["PersonalEntity"];
 
+// `frontdeskStartsOnConsultation` (BE PR #386, EN REVISIÓN — sin desplegar a esta fecha): dato de la
+// persona, mismo GET/PUT /staff/:id de siempre, sin ruta nueva. Se declara A MANO porque el schema
+// generado todavía no lo trae (gen:api necesita el BE local en :3001, no disponible en esta sesión) —
+// quitar este tipo y usar el campo real en cuanto `npm run gen:api` lo traiga. Handoff
+// aterrizar-en-consulta-handoff-fe. SIN VERIFICAR EN VIVO: el PUT con este campo no se ha probado
+// contra prod (el BE de hoy no lo conoce todavía); si lo rechaza, falla con un toast, no rompe nada más.
+export type PersonalConPreferenciaFrontdesk = Personal & {
+  frontdeskStartsOnConsultation?: boolean | null;
+};
+
 export interface ListPersonalParams {
   page?: number;
   limit?: number;
@@ -71,6 +81,22 @@ export function getPersonalCentros(id: string, centroId?: string): Promise<Centr
 // `centroIds` NO está en el mapa de campos → el body va tal cual (el middleware lo deja pasar al DTO).
 export function updatePersonalCentros(id: string, centroIds: string[], centroId?: string): Promise<Personal> {
   return apiFetch<Personal>(`/staff/${id}/centers`, { method: "PUT", body: JSON.stringify({ centroIds }) }, centroId);
+}
+
+// Guardado APARTE del de cargo/capacidades (updatePersonal) a propósito: si el BE de hoy todavía no
+// conoce `frontdeskStartsOnConsultation` (PR #386 sin desplegar) y lo rechaza, que falle SOLO este
+// interruptor con su propio toast — nunca el guardado de cargo/capacidades, que es otro dominio y ya
+// funciona. Ver PersonalConPreferenciaFrontdesk arriba. Handoff aterrizar-en-consulta-handoff-fe.
+export function updateFrontdeskStartsOnConsultation(
+  id: string,
+  frontdeskStartsOnConsultation: boolean,
+  centroId?: string,
+): Promise<PersonalConPreferenciaFrontdesk> {
+  return apiFetch<PersonalConPreferenciaFrontdesk>(
+    `/staff/${id}`,
+    { method: "PUT", body: JSON.stringify({ frontdeskStartsOnConsultation }) },
+    centroId,
+  );
 }
 
 // Roster por CAPACIDAD (enfermera/tecnico/medico…), agnóstico al tablero: GET /personal/por-capacidad/:cap.
