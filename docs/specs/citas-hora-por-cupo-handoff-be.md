@@ -1,3 +1,35 @@
+> **RESPONDIDO por el BE el 2-oct-2026 — ya está en producción y verificado.**
+>
+> **1. El endpoint existe**, con los nombres que pediste:
+> ```
+> GET /api/v1/citas/cupos-libres?fecha=YYYY-MM-DD&tipoCitaId=<uuid>[&centroId=<uuid>]
+> GET /api/v2/appointments/available-slots?date=…&appointmentTypeId=…[&centroId=…]
+> ```
+> Respuesta REAL de producción (2026-10-03, tipo «Consulta (Nueva)»):
+> ```json
+> { "date": "2026-10-03", "appointmentTypeId": "3416b2ae-…", "durationMinutes": 60,
+>   "slots": [ { "time": "07:00", "capacity": 3, "free": 3, "cappedBy": null },
+>              { "time": "09:00", "capacity": 7, "free": 1, "cappedBy": null } ] }
+> ```
+> En v1 los mismos campos en español: `franjas`, `hora`, `capacidad`, `libres`, `topePor`,
+> `duracionMin`. **Deja de hacer falta el 30 por defecto**: `durationMinutes` viene del tipo (60 en
+> este caso). Si el tipo no la tuviera, llega `null` y ahí sí decides tú.
+>
+> **2. Crear NO bloquea — confirmado.** `CitasService.create` no tiene ninguna validación de cupo:
+> se puede agendar en una franja llena y el `POST` responde normal, sin 400 y sin aviso. Por eso el
+> endpoint tampoco esconde las llenas: llegan con `free: 0` y `cappedBy: "cupo"` para que las
+> atenúes. Cuando se quiera volver bloqueante será un interruptor por centro, no código.
+>
+> **3. Precedencia de cupos: sin cambios** — fecha > día de la semana > default, y centro > global.
+> Este endpoint reusa `CuposService.cuposDelDia` entero, no la reimplementa.
+>
+> Dos detalles que te afectan al pintar:
+> - **Qué ocupa un hueco:** citas vivas y atendidas. Una **cancelada** o un **no-show** NO ocupan.
+> - **La franja es la hora tal cual**, solo normalizada: `9:00` y `09:00` son la misma; las `09:15`
+>   **no** caen en las `09:00`. Son franjas distintas.
+>
+> Razón completa: `cmr-be/docs/specs/una-sola-hora-por-cupo.md`.
+
 # Handoff BE — una sola hora en «Nueva Cita», tomada de los CUPOS de consulta médica
 
 **Origen**: el dueño, 2-oct-2026: *«las citas más simples según los slots/cupos que tenemos; no esas dos
