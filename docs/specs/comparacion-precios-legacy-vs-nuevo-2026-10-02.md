@@ -3,6 +3,24 @@
 Investigación de solo lectura (SELECT contra el MSSQL del legado + GET contra la API de
 producción). No se modificó ningún dato en ningún sistema.
 
+## Cambios aplicados en producción el 2026-10-02 (después de la investigación)
+
+1. **Protocolo articular, las 4 zonas: $4,000 → $7,020.** Decisión del dueño: el FULL (que ya se
+   factura como protocolo + infiltración, $3,000) debe sumar $10,020 igual que el legado —
+   verificado con una factura de prueba real (creada y descartada). Afecta `RODILLA223`,
+   `PROTCADERA01`, `PROTCODO01`, `PROTHOMBRO01`, ambos centros. Precio anterior respaldado en este
+   documento (sección de abajo) antes de tocar nada.
+2. **Nuevo producto `TIRZEPATIDE01` "Tirzepatide" — $2,000, ambos centros.** El legado tiene DOS
+   presentaciones de Tirzepatide: la plana ($2,000, con precio) y una combinada con B6
+   (`TIRZB6`, 62.5mg/50mg/5mL, SIN precio ni siquiera en el legado, de feb-2026). El sistema nuevo
+   ya tenía un producto con sku `tirzpatide` pero mal identificado: nombrado "Tirzepatide + B6
+   (vial 60 mg / 3 mL)" — una dosis que no coincide con NINGUNA de las dos del legado — tipo
+   `base` (insumo, no vendible), sin precio. Se creó un producto NUEVO y separado para la
+   presentación plana (que sí tiene precio claro en el legado), sin tocar el existente. La
+   combinación B6 queda sin agregar: no hay ningún precio de referencia, ni en el legado, para
+   inventarla — y el producto `tirzpatide` existente, aunque mal etiquetado en su dosis, podría
+   ser ya el intento de representarla.
+
 ## Metodología (verificado)
 
 - Precio legacy = tabla `MPrecios` con `codtipre='00'` (lista "Detal"), cruzada con
