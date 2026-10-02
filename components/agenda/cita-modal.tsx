@@ -105,7 +105,13 @@ export function CitaModal({
     const start = cita?.time ?? horaInicial ?? "09:00";
     return tp ? addMinutes(start, tp.durationMinutes) : "09:30";
   });
-  const [esPrimeraVez, setEsPrimeraVez] = React.useState(cita?.isFirstVisit ?? false);
+  // Tres estados, no un booleano forzado: `undefined` = nadie lo declaró, y el BE corre su propio
+  // chequeo por los datos reales del paciente (récord, historial, médico en ficha) para decidir si
+  // es de verdad primera vez — pero SOLO cuando el payload no manda nada. Mandar `false` por
+  // defecto (como antes) apagaba ese chequeo siempre y el personal de call-center, que no tiene por
+  // qué saber que hay que marcar la casilla a mano, terminaba citando pacientes nuevos como si
+  // fueran de seguimiento. Handoff bug-primera-vez-fuerza-medico-handoff-fe.
+  const [esPrimeraVez, setEsPrimeraVez] = React.useState<boolean | undefined>(cita?.isFirstVisit);
   // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Sale del
   // CATÁLOGO (`esInicial`), no de una regla escrita aquí: antes una cita de HOY nacía "confirmada", y
   // confirmada entra DIRECTA al tablero de Atención cuando todavía no se está seguro de que el paciente
@@ -130,7 +136,12 @@ export function CitaModal({
   // rechazar. Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
   const yaSeguimiento = !!(paciente as { atendidoPor?: string | null } | null)?.atendidoPor;
   const esPrimeraVezEff = yaSeguimiento ? false : esPrimeraVez;
-  const medicoRequired = !!tipo?.requiresDoctor && !esPrimeraVezEff;
+  // Solo exige médico cuando alguien DECLARÓ explícitamente que no es primera vez (`false`); con
+  // `undefined` (nadie tocó la casilla) o `true` no se exige aquí — igual que el payload, que deja
+  // sin declarar hasta que el usuario decide. Antes `!esPrimeraVezEff` trataba "nadie lo sabe" como
+  // "seguro que no es primera vez", bloqueando el formulario pidiendo un médico que el BE nunca iba
+  // a necesitar.
+  const medicoRequired = !!tipo?.requiresDoctor && esPrimeraVezEff === false;
 
   // Pick a type → auto-fill end time (start + duración), reset any prior warning.
   function onTipoChange(id: string) {
@@ -346,7 +357,9 @@ export function CitaModal({
             </p>
           ) : (
             <label className="flex items-center gap-2 text-sm">
-              <Checkbox checked={esPrimeraVez} onCheckedChange={(v) => setEsPrimeraVez(v === true)} />
+              {/* Visualmente nace desmarcada igual que antes; por dentro el estado sigue `undefined`
+                  hasta que se toque — es lo que viaja (o no) en el payload. */}
+              <Checkbox checked={esPrimeraVez ?? false} onCheckedChange={(v) => setEsPrimeraVez(v === true)} />
               {t("firstVisit")}
             </label>
           )}
