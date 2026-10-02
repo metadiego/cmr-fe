@@ -79,7 +79,11 @@ export interface CentroDia {
   notasDia: NotaDia[]; // contenedor `notasDia` NO está en el mapa → clave en español
   holidays: FestivoDia[]; // `festivos`→`holidays` en /api/v2 (verificado live 1-oct; el tipo decía `festivos` y los feriados nunca salían)
   bloqueado: boolean; // NO está en el mapa → español (holiday closes the day)
-  slots: Franja[]; // `franjas`→`slots` en /api/v2 (verificado live 2-oct; antes el FE leía `franjas` y reventaba)
+  // El BE oscila el nombre de este contenedor entre `franjas` y `slots` según el despliegue (verificado live
+  // 2-oct: cambió dos veces en minutos). Ambos opcionales y el FE lee el que venga (`slots ?? franjas`), para
+  // no romperse en cada vaivén. Handoff al BE para fijar UNO. Handoff drift-tipos-a-mano-vs-ingles.
+  slots?: Franja[];
+  franjas?: Franja[];
   resumen: ResumenDia; // contenedor `resumen` NO está en el mapa → clave en español
 }
 

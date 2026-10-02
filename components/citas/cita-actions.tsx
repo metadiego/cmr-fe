@@ -288,10 +288,10 @@ function RescheduleDialog({
     if (!c) return null;
     const vaciosOf = (fr: { tipos: { appointmentTypeId: string; vacios: number }[] }) =>
       fr.tipos.find((tp) => tp.appointmentTypeId === cita.appointmentTypeId)?.vacios ?? 0;
-    const here = c.slots.find((fr) => fr.time === hora);
+    const here = (c.slots ?? c.franjas ?? []).find((fr) => fr.time === hora);
     const vacios = here ? vaciosOf(here) : 0;
     const next =
-      c.slots
+      (c.slots ?? c.franjas ?? [])
         .filter((fr) => fr.time && vaciosOf(fr) > 0)
         .map((fr) => fr.time as string)
         .sort()

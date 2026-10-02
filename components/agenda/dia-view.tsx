@@ -320,7 +320,7 @@ function CentroSheet({
   const bloqueado = centro.bloqueado ?? false;
   // `franjas` puede faltar (centro sin agenda ese día): nunca `.map` directo — reventaba la pantalla entera
   // ("can't access property map, franjas is undefined"). Igual que el guard de la vista nueva (abajo).
-  const franjas = centro.slots ?? [];
+  const franjas = centro.slots ?? centro.franjas ?? [];
   const horaResaltada = useFranjaResaltada(franjas.map((f) => f.time));
 
   return (
@@ -415,7 +415,7 @@ function CentroSheetV2({
     .filter((c) => (seen.has(c.clave) ? false : (seen.add(c.clave), true)))
     .filter((c) => !c.permiso || can(c.permiso));
   const r = centro.resumen;
-  const franjas = centro.slots ?? [];
+  const franjas = centro.slots ?? centro.franjas ?? [];
   const festivos = centro.holidays ?? [];
   const bloqueado = centro.bloqueado ?? false;
 
