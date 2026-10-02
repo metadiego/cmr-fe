@@ -3,6 +3,9 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import { ApiError } from "@/lib/api/types";
 import type { ColumnaEfectiva, CitaFila } from "@/lib/api/agenda-dia";
@@ -10,7 +13,7 @@ import { resolveToggle } from "@/lib/tablero/toggle-hora";
 import { isEhrEnabled, getEhrReadiness, type EhrReadinessField } from "@/lib/api/ehr-integration";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
-import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import { PostAccionHost } from "@/components/tablero/post-accion";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 
@@ -165,9 +168,12 @@ export function FlujoAtencion({
               {/* El chip ES el botón: un ÚNICO destino de clic con límites propios. Antes era un <label>
                   con un Checkbox cuyo área de toque (after:-inset-x-3/-inset-y-2) se extendía a los lados
                   y arriba/abajo, solapando con el chip vecino y con la fila de al lado → el clic aterrizaba
-                  en la casilla equivocada («Presente» → volver_confirmada) o en otra fila. El Checkbox
-                  queda SOLO como indicador visual (pointer-events-none, sin ese after). Handoff
-                  atencion-la-segunda-casilla-deshace-la-primera. */}
+                  en la casilla equivocada («Presente» → volver_confirmada) o en otra fila. Handoff
+                  atencion-la-segunda-casilla-deshace-la-primera.
+                  El indicador es un <span>, no el <Checkbox> del design system: ese componente renderiza
+                  un <button> real (Radix), y un <button> dentro de este <button> es HTML inválido —
+                  provocaba un error de hidratación. Aquí es puramente decorativo (sin su propio clic ni
+                  teclado), así que un <span> con el mismo aspecto es lo correcto, no un atajo. */}
               <button
                 type="button"
                 disabled={disabled}
@@ -183,12 +189,16 @@ export function FlujoAtencion({
                 }
                 style={checked ? { backgroundColor: color ?? "var(--primary)", color: "#fff" } : undefined}
               >
-                <Checkbox
-                  checked={checked}
-                  disabled={disabled}
+                <span
                   aria-hidden
-                  className={"pointer-events-none after:hidden " + (checked ? "border-white/70 data-[state=checked]:bg-white/20 data-[state=checked]:text-white" : "")}
-                />
+                  className={cn(
+                    "flex size-4 shrink-0 items-center justify-center rounded-[6px] border transition-shadow",
+                    checked ? "border-white/70 bg-white/20 text-white" : "border-input",
+                    disabled && "opacity-50",
+                  )}
+                >
+                  {checked && <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-3.5" />}
+                </span>
                 {hora && <span className="font-mono">{hora}</span>}
               </button>
               <span className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{tRoot(col.labelKey)}</span>
