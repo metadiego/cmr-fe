@@ -554,7 +554,8 @@
       "time": "Hora",
       "endAuto": "Fin automático {time}",
       "variantList": "Lista",
-      "variantGrid": "Rejilla"
+      "variantGrid": "Rejilla",
+      "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea)."
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",

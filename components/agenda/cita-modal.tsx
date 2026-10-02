@@ -30,7 +30,6 @@ import { Input } from "@/components/ui/input";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -148,6 +147,8 @@ export function CitaModal({
   }, [cuposRes.state]);
   // Duración del tipo (del endpoint; manda sobre el catálogo). Se usa para derivar la hora de fin.
   const slotDuration = cuposRes.state.kind === "ok" ? cuposRes.state.data?.durationMinutes ?? null : null;
+  // La hora elegida ya no tiene cupo → aviso NO bloqueante (el BE deja agendar igual).
+  const slotLleno = !!hora && slots.some((s) => s.time === hora && s.vacios <= 0);
 
   // Tres estados, no un booleano forzado: `undefined` = nadie lo declaró, y el BE corre su propio
   // chequeo por los datos reales del paciente (récord, historial, médico en ficha) para decidir si
@@ -155,7 +156,6 @@ export function CitaModal({
   // defecto (como antes) apagaba ese chequeo siempre y el personal de call-center, que no tiene por
   // qué saber que hay que marcar la casilla a mano, terminaba citando pacientes nuevos como si
   // fueran de seguimiento. Handoff bug-primera-vez-fuerza-medico-handoff-fe.
-  const [esPrimeraVez, setEsPrimeraVez] = React.useState<boolean | undefined>(cita?.isFirstVisit);
   // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Sale del
   // CATÁLOGO (`esInicial`), no de una regla escrita aquí: antes una cita de HOY nacía "confirmada", y
   // confirmada entra DIRECTA al tablero de Atención cuando todavía no se está seguro de que el paciente
@@ -174,21 +174,31 @@ export function CitaModal({
   const [warn, setWarn] = React.useState<CitaConflicto[] | null>(null);
 
   const tipo = tipos.find((x) => x.id === tipoCitaId);
-  // "Primera vez" es un HECHO del historial, no una preferencia: si el paciente ya fue atendido
-  // (`atendidoPor`), es de seguimiento y el BE rechaza crearlo como nuevo (400
-  // CITA_PACIENTE_YA_ES_SEGUIMIENTO). No ofrecemos la opción para no dejar elegir algo que se va a
-  // rechazar. Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
-  const yaSeguimiento = !!(paciente as { atendidoPor?: string | null } | null)?.atendidoPor;
-  const esPrimeraVezEff = yaSeguimiento ? false : esPrimeraVez;
-  // Solo exige médico cuando alguien DECLARÓ explícitamente que no es primera vez (`false`); con
-  // `undefined` (nadie tocó la casilla) o `true` no se exige aquí — igual que el payload, que deja
-  // sin declarar hasta que el usuario decide. Antes `!esPrimeraVezEff` trataba "nadie lo sabe" como
-  // "seguro que no es primera vez", bloqueando el formulario pidiendo un médico que el BE nunca iba
-  // a necesitar.
+  // El TIPO y "primera vez" son un HECHO del historial, no una preferencia: asistido ALGUNA vez ⇒ Seguimiento;
+  // si no ⇒ Nueva. Se decide SOLO, sin casilla (regla del dueño, repetida). La señal es `attendedBy` (clave v2;
+  // antes el FE leía `atendidoPor` y por eso nunca casaba) con `atendidoPor` de respaldo (v1/filas del board).
+  const yaSeguimiento = !!(
+    (paciente as { attendedBy?: string | null; atendidoPor?: string | null } | null)?.attendedBy ??
+    (paciente as { atendidoPor?: string | null } | null)?.atendidoPor
+  );
+  const esPrimeraVezEff = !yaSeguimiento;
+  // El tipo se autoselecciona al elegir paciente (seguimiento/nueva), salvo que el usuario lo cambie a mano.
+  const [tipoTouched, setTipoTouched] = React.useState(false);
+  const tipoAutoId = React.useMemo(() => {
+    if (!paciente) return "";
+    const slug = yaSeguimiento ? "seguimiento" : "nueva";
+    return tipos.find((x) => (x as { slug?: string | null }).slug === slug)?.id ?? "";
+  }, [paciente, yaSeguimiento, tipos]);
+  const [autoPid, setAutoPid] = React.useState<string | null>(null);
+  if (!cita && paciente && tipoAutoId && !tipoTouched && autoPid !== paciente.id) {
+    setAutoPid(paciente.id);
+    setTipoCitaId(tipoAutoId);
+  }
   const medicoRequired = !!tipo?.requiresDoctor && esPrimeraVezEff === false;
 
   // Pick a type → auto-fill end time (start + duración), reset any prior warning.
   function onTipoChange(id: string) {
+    setTipoTouched(true); // el usuario lo cambió a mano → no volver a autoseleccionar
     setTipoCitaId(id);
     const tp = tipos.find((x) => x.id === id);
     if (tp) setHoraFin(addMinutes(hora, tp.durationMinutes));
@@ -322,6 +332,13 @@ export function CitaModal({
                 </div>
               </div>
               <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
+              {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así
+                  que el aviso lo da el FE. Handoff citas-hora-por-cupo-handoff-be. */}
+              {slotLleno && (
+                <p className="mt-1.5 rounded-md border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-xs text-warning-foreground">
+                  {t("slotFullWarn")}
+                </p>
+              )}
             </Field>
           </div>
 
@@ -408,19 +425,8 @@ export function CitaModal({
             </Field>
           </div>
 
-          {yaSeguimiento ? (
-            // Paciente con historial: no se ofrece "primera vez" (es de seguimiento). Solo informa.
-            <p className="inline-flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
-              {t("followUpPatient")}
-            </p>
-          ) : (
-            <label className="flex items-center gap-2 text-sm">
-              {/* Visualmente nace desmarcada igual que antes; por dentro el estado sigue `undefined`
-                  hasta que se toque — es lo que viaja (o no) en el payload. */}
-              <Checkbox checked={esPrimeraVez ?? false} onCheckedChange={(v) => setEsPrimeraVez(v === true)} />
-              {t("firstVisit")}
-            </label>
-          )}
+          {/* Sin casilla "Primera vez" (regla del dueño): el tipo ya lo dice —Nueva/Seguimiento— y se decide
+              solo por si el paciente fue asistido alguna vez (`attendedBy`). */}
 
           <Field label={t("reason")}>
             <Textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} />

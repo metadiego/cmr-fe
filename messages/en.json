@@ -554,7 +554,8 @@
       "time": "Time",
       "endAuto": "Ends {time} (auto)",
       "variantList": "List",
-      "variantGrid": "Grid"
+      "variantGrid": "Grid",
+      "slotFullWarn": "That time is full; it books anyway (non-blocking)."
     },
     "fecha": "Date",
     "prevDay": "Previous day",
