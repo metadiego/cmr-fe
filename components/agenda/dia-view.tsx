@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
@@ -35,7 +36,17 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CitaModal } from "@/components/agenda/cita-modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+
+// Día ± delta, en UTC (la fecha de la agenda es un DÍA, no un instante). Para las flechas prev/next.
+function shiftDay(iso: string, delta: number): string {
+  const d = parseDayUTC(iso);
+  if (!d) return iso;
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
 
 const VISTA_KEY = "cmr_agenda_vista"; // preferencia POR DISPOSITIVO (localStorage): "clasica" | "nueva"
 type Vista = "clasica" | "nueva";
@@ -44,6 +55,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   const t = useTranslations("agenda");
   const format = useFormatter();
   const tc = useTranslations("common");
+  const router = useRouter();
   // Vista clásica (la de siempre, DEFAULT e intacta) vs nueva (beta, reordenamiento visual). El equipo
   // puede alternar y opinar antes de decidir; se recuerda por equipo. Idea: docs/plans/agenda-dia-vista-alternativa-opcional.md
   const [vista, setVista] = React.useState<Vista>("clasica");
@@ -133,6 +145,19 @@ export function DiaView({ fecha }: { fecha: string }) {
               <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
               {t("today")}
             </Link>
+            {/* Selector de fecha + flechas día anterior/siguiente: antes solo se podía trabajar HOY y había
+                que editar la URL a mano. La fecha vive en la ruta. Handoff bug-agenda-sin-selector-de-fecha §1. */}
+            <div className="inline-flex items-center gap-1">
+              <Button variant="outline" size="icon" className="size-8" aria-label={t("prevDay")} onClick={() => router.push(`/scheduling/appointments/${shiftDay(fecha, -1)}`)}>‹</Button>
+              <Input
+                type="date"
+                value={fecha}
+                onChange={(e) => e.target.value && router.push(`/scheduling/appointments/${e.target.value}`)}
+                className="h-8 w-auto"
+                aria-label={t("fecha")}
+              />
+              <Button variant="outline" size="icon" className="size-8" aria-label={t("nextDay")} onClick={() => router.push(`/scheduling/appointments/${shiftDay(fecha, 1)}`)}>›</Button>
+            </div>
             {live && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
                 <span className="relative flex size-2">
@@ -185,6 +210,17 @@ export function DiaView({ fecha }: { fecha: string }) {
                 ))}
               </SelectContent>
             </Select>
+            {/* «Nueva cita» desde la propia vista del día, con la fecha que se está viendo ya puesta (antes
+                solo se podía citar desde el calendario mensual, y para hoy). Handoff bug-agenda-sin-selector §2. */}
+            <Can permiso="citas.create">
+              <Button
+                size="sm"
+                onClick={() => setModal({ fecha, centroId: centro && centro !== ALL ? centro : (centros[0]?.id ?? undefined) })}
+              >
+                <HugeiconsIcon icon={Add01Icon} className="size-4" />
+                {t("new")}
+              </Button>
+            </Can>
           </>
         }
       />

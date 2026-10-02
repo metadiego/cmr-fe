@@ -551,7 +551,10 @@
       "updated": "Appointment updated.",
       "noDoctor": "No doctor",
       "followUpPatient": "Follow-up patient (already seen)"
-    }
+    },
+    "fecha": "Date",
+    "prevDay": "Previous day",
+    "nextDay": "Next day"
   },
   "appointments": {
     "title": "Appointments",

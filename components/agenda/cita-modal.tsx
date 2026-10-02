@@ -112,7 +112,10 @@ export function CitaModal({
     if (cita?.endTime) return cita.endTime;
     const tp = tipos.find((x) => x.id === (cita?.appointmentTypeId ?? tipoCitaIdInicial));
     const start = cita?.time ?? horaInicial ?? "09:00";
-    return tp ? addMinutes(start, tp.durationMinutes) : "09:30";
+    // La hora de fin SIEMPRE deriva del inicio (+ duración del tipo, o 30 min por defecto). Antes caía a
+    // "09:30" fija cuando aún no había tipo, y con inicio a las 14:00 la cita "terminaba" a las 9:30 AM
+    // (antes de empezar). Handoff bug-agenda-sin-selector-de-fecha §3.
+    return addMinutes(start, tp?.durationMinutes ?? 30);
   });
   // Tres estados, no un booleano forzado: `undefined` = nadie lo declaró, y el BE corre su propio
   // chequeo por los datos reales del paciente (récord, historial, médico en ficha) para decidir si
@@ -161,7 +164,9 @@ export function CitaModal({
   }
   function onHoraChange(value: string) {
     setHora(value);
-    if (tipo) setHoraFin(addMinutes(value, tipo.durationMinutes));
+    // Derivar SIEMPRE la hora de fin del inicio (aunque no haya tipo: 30 min por defecto), para que nunca
+    // quede antes del inicio. Handoff bug-agenda-sin-selector-de-fecha §3.
+    setHoraFin(addMinutes(value, tipo?.durationMinutes ?? 30));
     setWarn(null);
   }
 

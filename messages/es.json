@@ -551,7 +551,10 @@
       "updated": "Cita actualizada.",
       "noDoctor": "Sin médico",
       "followUpPatient": "Paciente de seguimiento (ya fue atendido)"
-    }
+    },
+    "fecha": "Fecha",
+    "prevDay": "Día anterior",
+    "nextDay": "Día siguiente"
   },
   "appointments": {
     "title": "Citas",
