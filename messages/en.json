@@ -416,7 +416,7 @@
       "telefono": "Phone",
       "medico": "Doctor",
       "comentarios": "Comments",
-      "citadoPor": "Booked by",
+      "citadoPor": "User",
       "estado": "Status",
       "acciones": "Actions",
       "centro": "Center",
@@ -1844,7 +1844,10 @@
     "filtrarPacientePh": "Find patient: name, record or phone…",
     "pacienteSinHoy": "This patient has no services scheduled today.",
     "buscando": "Searching…",
-    "sinResultadosEnCentro": "No results in {centro}"
+    "sinResultadosEnCentro": "No results in {centro}",
+    "pestana": {
+      "ondas_choque": "Sonic"
+    }
   },
   "programarCitas": {
     "title": "Schedule sessions",

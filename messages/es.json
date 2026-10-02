@@ -416,7 +416,7 @@
       "telefono": "Teléfono",
       "medico": "Médico",
       "comentarios": "Comentarios",
-      "citadoPor": "Citado por",
+      "citadoPor": "Usuario",
       "estado": "Estado",
       "acciones": "Acciones",
       "centro": "Centro",
@@ -1844,7 +1844,10 @@
     "filtrarPacientePh": "Buscar paciente: nombre, record o teléfono…",
     "pacienteSinHoy": "Este paciente no tiene servicios agendados hoy.",
     "buscando": "Buscando…",
-    "sinResultadosEnCentro": "Sin resultados en {centro}"
+    "sinResultadosEnCentro": "Sin resultados en {centro}",
+    "pestana": {
+      "ondas_choque": "Sónica"
+    }
   },
   "programarCitas": {
     "title": "Programar citas",
