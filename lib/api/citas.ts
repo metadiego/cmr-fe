@@ -266,3 +266,28 @@ export async function getTiposCita(): Promise<TipoCita[]> {
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as TipoCita[]) : [];
 }
+
+// Cupos libres de UN tipo de cita en UN día (BE 2-oct, available-slots). Devuelve las franjas con huecos
+// libres/capacidad y la duración del tipo (para derivar la hora de fin). NO bloqueante: las llenas llegan
+// con free:0 y cappedBy:"cupo". Reusa CuposService (precedencia fecha>diaSemana>default, centro>global).
+// Handoff citas-hora-por-cupo-handoff-be.
+export interface SlotLibre {
+  time: string;
+  capacity: number;
+  free: number;
+  cappedBy: string | null;
+}
+export interface CuposLibres {
+  date: string;
+  appointmentTypeId: string;
+  durationMinutes: number | null;
+  slots: SlotLibre[];
+}
+export function getCuposLibres(
+  date: string,
+  appointmentTypeId: string,
+  centroId?: string,
+): Promise<CuposLibres> {
+  const sp = new URLSearchParams({ date, appointmentTypeId });
+  return apiFetch<CuposLibres>(`/appointments/available-slots?${sp.toString()}`, {}, centroId);
+}

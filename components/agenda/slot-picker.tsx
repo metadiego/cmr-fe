@@ -28,15 +28,18 @@ export function SlotPicker({
   const libresLabel = (s: Slot) => (s.vacios > 0 ? t("free", { n: s.vacios }) : t("full"));
 
   if (slots.length === 0) {
-    // Sin cupos para este tipo/día: no se atrapa al usuario — un campo de hora simple (no bloqueante).
+    // Sin cupos para este tipo/día: NO se atrapa al usuario (no bloqueante), pero tampoco el reloj con minutos
+    // ni horas de noche — las citas médicas son por HORA ENTERA, de día. Desplegable 7:00–18:00, hora en punto.
+    const horas = Array.from({ length: 12 }, (_, i) => `${String(7 + i).padStart(2, "0")}:00`);
     return (
-      <input
-        type="time"
-        step={60}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-      />
+      <Select value={value || undefined} onValueChange={onChange}>
+        <SelectTrigger className="w-full"><SelectValue placeholder={t("placeholder")} /></SelectTrigger>
+        <SelectContent>
+          {horas.map((h) => (
+            <SelectItem key={h} value={h}><span className="font-mono tabular-nums">{h}</span></SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
   }
 

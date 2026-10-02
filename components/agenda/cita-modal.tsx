@@ -8,14 +8,15 @@ import {
   validarCita,
   crearCitaAgenda,
   actualizarCitaAgenda,
+  getCuposLibres,
   type Cita,
   type TipoCita,
   type CitaConflicto,
+  type CuposLibres,
 } from "@/lib/api/citas";
 import type { Personal } from "@/lib/api/personal";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { getAgendaDia, type AgendaDia } from "@/lib/api/agenda-dia";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { toastError } from "@/lib/api/errors";
@@ -123,9 +124,9 @@ export function CitaModal({
     return addMinutes(start, tp?.durationMinutes ?? 30);
   });
 
-  // UNA sola hora, tomada de los CUPOS de consulta médica del día (`getAgendaDia` → franjas por tipo), en vez
-  // de los dos campos libres. La hora de fin se deriva sola (duración del tipo). NO bloqueante. Dos variantes
-  // (desplegable/chips) para comparar cuál sirve. Handoff citas-hora-por-cupo-handoff-be.
+  // UNA sola hora, de los CUPOS del TIPO ese día (endpoint dedicado available-slots, BE 2-oct): franjas en
+  // horas enteras con huecos libres/capacidad + la duración del tipo (para la hora de fin). NO bloqueante.
+  // Dos variantes (desplegable/chips) para comparar. Handoff citas-hora-por-cupo-handoff-be.
   const [slotVar, setSlotVar] = React.useState<SlotVariant>("dropdown");
   const [slotSeeded, setSlotSeeded] = React.useState(false);
   if (!slotSeeded && typeof window !== "undefined") {
@@ -137,21 +138,16 @@ export function CitaModal({
     setSlotVar(v);
     try { window.localStorage.setItem("cmr_slot_variant", v); } catch { /* storage bloqueado */ }
   }
-  const agendaRes = useResource<AgendaDia | null>(
-    () => (effectiveCentro && fechaSel ? getAgendaDia(fechaSel, { centroId: effectiveCentro }) : Promise.resolve(null)),
-    [effectiveCentro, fechaSel],
+  const cuposRes = useResource<CuposLibres | null>(
+    () => (effectiveCentro && fechaSel && tipoCitaId ? getCuposLibres(fechaSel, tipoCitaId, effectiveCentro) : Promise.resolve(null)),
+    [effectiveCentro, fechaSel, tipoCitaId],
   );
   const slots: Slot[] = React.useMemo(() => {
-    if (agendaRes.state.kind !== "ok" || !agendaRes.state.data) return [];
-    const franjas = agendaRes.state.data.centers?.[0]?.slots ?? [];
-    const out: Slot[] = [];
-    for (const f of franjas) {
-      if (!f.time) continue;
-      const tp = f.tipos.find((x) => x.appointmentTypeId === tipoCitaId);
-      if (tp) out.push({ time: f.time, vacios: tp.vacios, cupo: tp.cupo });
-    }
-    return out;
-  }, [agendaRes.state, tipoCitaId]);
+    if (cuposRes.state.kind !== "ok" || !cuposRes.state.data) return [];
+    return cuposRes.state.data.slots.map((s) => ({ time: s.time, vacios: s.free, cupo: s.capacity }));
+  }, [cuposRes.state]);
+  // Duración del tipo (del endpoint; manda sobre el catálogo). Se usa para derivar la hora de fin.
+  const slotDuration = cuposRes.state.kind === "ok" ? cuposRes.state.data?.durationMinutes ?? null : null;
 
   // Tres estados, no un booleano forzado: `undefined` = nadie lo declaró, y el BE corre su propio
   // chequeo por los datos reales del paciente (récord, historial, médico en ficha) para decidir si
@@ -202,7 +198,7 @@ export function CitaModal({
     setHora(value);
     // Derivar SIEMPRE la hora de fin del inicio (aunque no haya tipo: 30 min por defecto), para que nunca
     // quede antes del inicio. Handoff bug-agenda-sin-selector-de-fecha §3.
-    setHoraFin(addMinutes(value, tipo?.durationMinutes ?? 30));
+    setHoraFin(addMinutes(value, slotDuration ?? tipo?.durationMinutes ?? 30));
     setWarn(null);
   }
 
@@ -305,30 +301,29 @@ export function CitaModal({
             </Field>
           )}
 
+          {/* Fecha y Hora LADO A LADO (aprovecha el ancho; deja aire para Notas abajo). La hora es por CUPOS
+              del tipo ese día, horas enteras, fin automática, no bloqueante. Handoff citas-hora-por-cupo. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("date")} required>
               <Input type="date" value={fechaSel} onChange={(e) => e.target.value && setFechaSel(e.target.value)} />
             </Field>
-          </div>
-
-          {/* UNA hora, por cupos del día (consulta médica). La de fin se calcula sola. Toggle de variante para
-              comparar desplegable vs chips. No bloqueante. Handoff citas-hora-por-cupo-handoff-be. */}
-          <Field label={t("time")} required>
-            <div className="mb-1.5 flex items-center justify-between gap-2">
-              <span className="text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</span>
-              <div className="inline-flex rounded-md border p-0.5 text-xs">
-                <button type="button" onClick={() => pickSlotVar("dropdown")}
-                  className={"rounded px-2 py-0.5 " + (slotVar === "dropdown" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                  {t("slot.variantDropdown")}
-                </button>
-                <button type="button" onClick={() => pickSlotVar("chips")}
-                  className={"rounded px-2 py-0.5 " + (slotVar === "chips" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                  {t("slot.variantChips")}
-                </button>
+            <Field label={t("time")} required>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <span className="text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</span>
+                <div className="inline-flex rounded-md border p-0.5 text-xs">
+                  <button type="button" onClick={() => pickSlotVar("dropdown")}
+                    className={"rounded px-2 py-0.5 " + (slotVar === "dropdown" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
+                    {t("variantList")}
+                  </button>
+                  <button type="button" onClick={() => pickSlotVar("chips")}
+                    className={"rounded px-2 py-0.5 " + (slotVar === "chips" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
+                    {t("variantGrid")}
+                  </button>
+                </div>
               </div>
-            </div>
-            <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
-          </Field>
+              <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
+            </Field>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("patient")} required>

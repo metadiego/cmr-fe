@@ -550,7 +550,11 @@
       "created": "Appointment created.",
       "updated": "Appointment updated.",
       "noDoctor": "No doctor",
-      "followUpPatient": "Follow-up patient (already seen)"
+      "followUpPatient": "Follow-up patient (already seen)",
+      "time": "Time",
+      "endAuto": "Ends {time} (auto)",
+      "variantList": "List",
+      "variantGrid": "Grid"
     },
     "fecha": "Date",
     "prevDay": "Previous day",

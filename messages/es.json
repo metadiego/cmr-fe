@@ -550,7 +550,11 @@
       "created": "Cita creada.",
       "updated": "Cita actualizada.",
       "noDoctor": "Sin médico",
-      "followUpPatient": "Paciente de seguimiento (ya fue atendido)"
+      "followUpPatient": "Paciente de seguimiento (ya fue atendido)",
+      "time": "Hora",
+      "endAuto": "Fin automático {time}",
+      "variantList": "Lista",
+      "variantGrid": "Rejilla"
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
