@@ -58,6 +58,7 @@ export function CitaModal({
   tipoCitaIdInicial,
   tipos,
   medicos,
+  canal,
   onOpenChange,
   onSaved,
 }: {
@@ -70,6 +71,14 @@ export function CitaModal({
   tipoCitaIdInicial?: string; // prefill appointment type from the block
   tipos: TipoCita[];
   medicos: Personal[];
+  // Quién abre ESTE modal, para la regla de cartera del BE (duenoDeLaCartera: solo `callcenter`
+  // "estrena" al agente como dueño de un paciente sin cartera todavía). Antes viajaba
+  // "callcenter" fijo para CUALQUIER invocador de este modal compartido — incluida la ficha del
+  // paciente (acciones-paciente-sheet.tsx), que no es call-center y le atribuía la cartera a quien
+  // sea que creara la cita ahí. Cada pantalla declara la suya; sin declarar, no viaja nada y el BE
+  // cae a su propio default ('atencion'). Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md
+  // (su diagnóstico original estaba al revés: el dato SÍ viajaba, pero desde donde no debía).
+  canal?: "atencion" | "callcenter";
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
 }) {
@@ -197,7 +206,7 @@ export function CitaModal({
         date: fecha,
         time: hora,
         endTime: horaFin,
-        channel: "callcenter" as const,
+        channel: canal,
         isFirstVisit: esPrimeraVezEff,
         reason: motivo.trim() || undefined,
         notes: notas.trim() || undefined,

@@ -251,6 +251,7 @@ export function MedicasCalendar() {
           centroId={centro.centroActivo || undefined}
           tipos={tipos}
           medicos={medicos}
+          canal="callcenter"
           onOpenChange={(o) => !o && setModal(null)}
           onSaved={reload}
         />

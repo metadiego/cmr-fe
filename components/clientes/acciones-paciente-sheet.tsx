@@ -193,6 +193,9 @@ function CrearCitaLazy({ paciente, centro, onClose }: { paciente: Paciente; cent
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
   return (
+    // Sin `canal`: esto es cualquier personal con acceso a la ficha, no call-center — antes
+    // heredaba "callcenter" fijo del propio CitaModal y le atribuía la cartera del paciente a quien
+    // fuera que abriera esta ficha. Handoff bug-canal-callcenter-no-se-manda-handoff-fe.md.
     <CitaModal
       open
       fecha={hoy}

@@ -1,3 +1,17 @@
+> **CORREGIDO el 2026-10-02, el diagnóstico de abajo estaba al revés.** El `grep canal` que dio
+> "cero resultados" buscó el nombre VIEJO: el campo se renombró `canal`→`channel` en la
+> migración a inglés del 3-sep-2026 (commit `b78674ed`), y bajo ese nombre SÍ se manda — siempre,
+> fijo (`channel: "callcenter" as const`), desde el primer commit del componente (`07a3dee0`).
+> El bug real es el opuesto al descrito aquí: `CitaModal` es un modal COMPARTIDO por 3 pantallas
+> (`medicas-calendar.tsx`, `dia-view.tsx` — ambas call-center de verdad — y
+> `acciones-paciente-sheet.tsx`, la ficha del paciente, que NO es call-center), y las 3 mandaban
+> `callcenter` por igual. Cualquier cita creada desde la ficha del paciente, por CUALQUIER
+> personal con acceso a ella, ya le atribuía la cartera del paciente a quien la creó — en
+> producción, desde julio-2026. Arreglado agregando un prop `canal` explícito a `CitaModal`:
+> `medicas-calendar.tsx`/`dia-view.tsx` pasan `"callcenter"`, `acciones-paciente-sheet.tsx` no
+> pasa nada (cae al default del BE, `atencion`). El resto de este documento es el diagnóstico
+> ORIGINAL (incorrecto), dejado tal cual para que quede el rastro de por qué se pensó así.
+
 # Bug — la pantalla de call-center nunca manda `canal`, así que nadie estrena cartera
 
 **Reportado por:** call-center / control de citas, WhatsApp, 02-oct-2026 — *"al crear paciente
