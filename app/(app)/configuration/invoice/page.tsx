@@ -73,6 +73,7 @@ type FormState = {
   web: string;
   pieFactura: string;
   frontdeskAutopresente: boolean;
+  autoPresenteMismoDia: boolean;
   frontdeskMuestraConsulta: boolean;
   frontdeskOrdenConsulta: string;
 };
@@ -91,6 +92,8 @@ function seed(c: Centro): FormState {
     pieFactura: c.invoiceFooter ?? "",
     // Enganche facturación↔frontdesk (auto-presente al saldar). Default true si el BE aún no lo trae.
     frontdeskAutopresente: c.frontdeskAutoPresent ?? true,
+    // Auto-presente al AGENDAR para hoy. Default FALSE (al revés que el de saldar). Handoff el-tercer-interruptor.
+    autoPresenteMismoDia: c.autoPresentSameDayBooking ?? false,
     // Pestaña Consulta en Frontdesk. Default mostrarla (lo mismo que decide el BE si el centro nunca
     // lo tocó); orden vacío = "al final".
     frontdeskMuestraConsulta: c.frontdeskShowsConsultation ?? true,
@@ -123,6 +126,7 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
       website: form.web.trim(),
       invoiceFooter: form.pieFactura,
       frontdeskAutoPresent: form.frontdeskAutopresente,
+      autoPresentSameDayBooking: form.autoPresenteMismoDia,
       frontdeskShowsConsultation: form.frontdeskMuestraConsulta,
       frontdeskConsultationOrder: form.frontdeskOrdenConsulta.trim() === "" ? null : Number(form.frontdeskOrdenConsulta),
     };
@@ -184,6 +188,19 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
               checked={form.frontdeskAutopresente}
               disabled={!canWrite}
               onCheckedChange={(v) => setForm((p) => ({ ...p, frontdeskAutopresente: v }))}
+            />
+          </div>
+          {/* Tercer interruptor (BE PR #382): agendar para HOY desde «Programar Citas» nace Presente.
+              Default APAGADO a propósito. Handoff el-tercer-interruptor-de-auto-presente. */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-sm font-medium">{t("autopresenteMismoDiaLabel")}</span>
+              <p className="text-xs text-muted-foreground">{t("autopresenteMismoDiaHelp")}</p>
+            </div>
+            <Switch
+              checked={form.autoPresenteMismoDia}
+              disabled={!canWrite}
+              onCheckedChange={(v) => setForm((p) => ({ ...p, autoPresenteMismoDia: v }))}
             />
           </div>
         </section>

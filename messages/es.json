@@ -3255,7 +3255,9 @@
       "zip": "Código postal",
       "pieFactura": "Texto del pie",
       "pieFacturaHint": "Multilínea. Aparece al final del recibo."
-    }
+    },
+    "autopresenteMismoDiaLabel": "Agendar para hoy marca Presente",
+    "autopresenteMismoDiaHelp": "Programar Citas se usa con el paciente delante: un servicio agendado para hoy entra ya como Presente. Agendar para otro día nunca."
   },
   "devoluciones": {
     "title": "Devoluciones",

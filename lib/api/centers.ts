@@ -29,6 +29,10 @@ export interface Centro {
   // trae (gen:api necesita el BE local en :3001, no disponible en esta sesión).
   frontdeskShowsConsultation?: boolean | null;
   frontdeskConsultationOrder?: number | null;
+  // Auto-presente al AGENDAR para HOY desde «Programar Citas» (con el paciente delante): la sesión de un
+  // servicio agendado para hoy nace ya «presente». Por par (servicio,fecha); «hoy» lo decide el BE con la
+  // zona del centro. Default FALSE (al revés que los otros dos). BE PR #382. Handoff el-tercer-interruptor-de-auto-presente.
+  autoPresentSameDayBooking?: boolean | null;
 }
 
 // PUT /centers/:id/tax-details — patch parcial (todos opcionales). La dirección
@@ -39,6 +43,7 @@ export interface Centro {
 export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"] & {
   frontdeskShowsConsultation?: boolean;
   frontdeskConsultationOrder?: number | null;
+  autoPresentSameDayBooking?: boolean; // nace del mismo PUT (schema generado aún no lo trae). PR #382.
 };
 
 export function updateDatosFiscales(

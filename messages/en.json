@@ -3255,7 +3255,9 @@
       "zip": "ZIP code",
       "pieFactura": "Footer text",
       "pieFacturaHint": "Multiline. Shows at the bottom of the receipt."
-    }
+    },
+    "autopresenteMismoDiaLabel": "Booking for today marks Present",
+    "autopresenteMismoDiaHelp": "Scheduling is done with the patient present: a service booked for today enters as Present. Booking for another day never does."
   },
   "devoluciones": {
     "title": "Returns",
