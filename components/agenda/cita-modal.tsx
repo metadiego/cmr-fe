@@ -143,7 +143,7 @@ export function CitaModal({
   );
   const slots: Slot[] = React.useMemo(() => {
     if (agendaRes.state.kind !== "ok" || !agendaRes.state.data) return [];
-    const franjas = agendaRes.state.data.centers?.[0]?.franjas ?? [];
+    const franjas = agendaRes.state.data.centers?.[0]?.slots ?? [];
     const out: Slot[] = [];
     for (const f of franjas) {
       if (!f.time) continue;

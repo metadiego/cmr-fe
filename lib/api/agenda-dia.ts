@@ -79,7 +79,7 @@ export interface CentroDia {
   notasDia: NotaDia[]; // contenedor `notasDia` NO está en el mapa → clave en español
   holidays: FestivoDia[]; // `festivos`→`holidays` en /api/v2 (verificado live 1-oct; el tipo decía `festivos` y los feriados nunca salían)
   bloqueado: boolean; // NO está en el mapa → español (holiday closes the day)
-  franjas: Franja[]; // contenedor `franjas` NO está en el mapa → clave en español
+  slots: Franja[]; // `franjas`→`slots` en /api/v2 (verificado live 2-oct; antes el FE leía `franjas` y reventaba)
   resumen: ResumenDia; // contenedor `resumen` NO está en el mapa → clave en español
 }
 
