@@ -726,6 +726,7 @@
       "idType_green_card": "Green card",
       "idType_state_id": "State ID",
       "fechaNacimiento": "Date of birth",
+      "fechaNacimientoFutura": "Date of birth can't be in the future.",
       "nacionalidad": "Nationality",
       "telefono": "Phone",
       "whatsapp": "WhatsApp",

@@ -14,6 +14,7 @@ import {
   Call02Icon,
   Stethoscope02Icon,
 } from "@hugeicons/core-free-icons";
+import { todayPR } from "@/lib/format/fecha";
 
 import {
   createPaciente,
@@ -21,7 +22,6 @@ import {
   getRecordDueno,
   getConfigAltaPacientes,
   type Paciente,
-  type CreatePacientePayload,
   type RecordDueno,
 } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
@@ -114,10 +114,9 @@ export function PacienteFormSheet({
   const req = (campo: keyof FormState) => requeridos.has(campo);
   // Only fields this form captures can gate the submit; anything else the
   // center requires is the BE's final word (surfaced via the 400 toast).
-  const faltantes = [...requeridos].filter(
-    (campo) =>
-      campo in form && !form[campo as keyof FormState].trim(),
-  );
+  const faltantes = [...requeridos].filter((campo) => campo in form && !form[campo as keyof FormState].trim());
+  // Respaldo real detrás del `max` del input (alguien puede pegar una fecha futura a mano).
+  const fechaNacimientoValida = !form.fechaNacimiento || form.fechaNacimiento <= todayPR();
 
   // ── Async duplicate check of the manual record number ──────────────────────
   // Debounced 400 ms, keyed by tenant+record so a stale response never labels the current value; the
@@ -198,7 +197,7 @@ export function PacienteFormSheet({
 
   const canSubmit =
     form.nombres.trim().length > 0 &&
-    faltantes.length === 0 &&
+    faltantes.length === 0 && fechaNacimientoValida &&
     !dueno &&
     !checkingRecord &&
     !submitting &&
@@ -341,9 +340,10 @@ export function PacienteFormSheet({
                 <Input
                   type="date"
                   value={form.fechaNacimiento}
-                  aria-invalid={errFields.has("fechaNacimiento") || undefined}
-                  onChange={(e) => set("fechaNacimiento", e.target.value)}
-                />
+                  max={todayPR()}
+                  aria-invalid={errFields.has("fechaNacimiento") || !fechaNacimientoValida || undefined}
+                  onChange={(e) => set("fechaNacimiento", e.target.value)} />
+                {!fechaNacimientoValida && <p className="text-xs text-destructive">{t("fechaNacimientoFutura")}</p>}
               </Field>
               <Field label={t("nacionalidad")} required={req("nacionalidad")}>
                 <Input
