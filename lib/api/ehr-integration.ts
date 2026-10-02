@@ -109,14 +109,21 @@ export function getEhrRoles(centroId?: string): Promise<EhrRole[]> {
 // contra producción el 2026-10-01 (GET /ehr-integration/staff-links, 200, 17 vínculos reales). El
 // nombre de la RUTA (`/staff-links/:personalId/...`) sigue tal cual el handoff; solo el campo del
 // CUERPO de la lista difiere. Nunca confiar en el handoff sin probar por HTTP — así se encontró esto.
+//
+// La cuenta del EHR NO es por centro (una persona, una cuenta), pero el BE la guarda contra el centro
+// donde se creó: consultar con un solo `X-Tenant-ID` activo deja AFUERA a cualquiera vinculado desde
+// otro centro — verificado en vivo el 2026-10-01 (Glorimar/Javier, dados de alta en Bayamón, salían
+// "sin vincular" al mirar su ficha desde Caguas). El endpoint ya acepta `centerIds` (mismo patrón que
+// `getEhrConfig`) para resolver el permiso contra varios centros a la vez; la UI debe mandar TODOS los
+// centros de la persona o del que mira, no solo el activo. Regla «Permisos por centro» del CLAUDE.md.
 export interface EhrStaffLink {
   staffId: string;
   name: string;
   ehrUserId: string;
   ehrEmail: string;
 }
-export async function listEhrStaffLinks(centroId?: string): Promise<EhrStaffLink[]> {
-  const res = await apiFetch<unknown>(`/ehr-integration/staff-links`, {}, centroId);
+export async function listEhrStaffLinks(centroId?: string, centerIds?: string[]): Promise<EhrStaffLink[]> {
+  const res = await apiFetch<unknown>(`/ehr-integration/staff-links${centerQs(centerIds)}`, {}, centroId);
   if (Array.isArray(res)) return res as EhrStaffLink[];
   const items = (res as { items?: unknown } | null)?.items;
   return Array.isArray(items) ? (items as EhrStaffLink[]) : [];
