@@ -334,8 +334,14 @@ function PagoAddRow({
   const [formaId, setFormaId] = React.useState("");
   const [monto, setMonto] = React.useState(tope > 0 ? String(tope.toFixed(2)) : "");
   const [last4, setLast4] = React.useState("");
+  const last4Ref = React.useRef<HTMLInputElement>(null);
   const forma = formas.find((f) => f.id === formaId);
   const esTarjeta = !!forma && forma.isCash === false;
+  // Tarjeta: al elegirla, el foco salta directo al campo de los últimos 4 (velocidad del mostrador). Desde ahí
+  // un solo Enter cierra el pago, se anoten los 4 dígitos o no.
+  React.useEffect(() => {
+    if (esTarjeta) last4Ref.current?.focus();
+  }, [esTarjeta]);
   const excede = pagoExcede(n(monto), tope);
   const valido = !!formaId && n(monto) > 0 && !excede && !busy;
 
@@ -366,7 +372,7 @@ function PagoAddRow({
         </SelectContent>
       </Select>
       {esTarjeta && (
-        <Input value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
+        <Input ref={last4Ref} value={last4} onChange={(e) => setLast4(e.target.value.replace(/\D/g, "").slice(0, 4))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); registrar(); } }} placeholder={t("cardLast4")} className="h-8 w-full tabular-nums" inputMode="numeric" aria-label={t("cardLast4")} />
       )}
       <div className="flex items-center gap-1.5">
         {/* Monto enfocado y SELECCIONADO al abrir: para dividir, se teclea el parcial de una sin borrar. */}
