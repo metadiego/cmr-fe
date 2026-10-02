@@ -875,7 +875,7 @@ function Editor({
                 {serverItems.map((it) => {
                   const e = edits[it.id] ?? { quantity: n(it.quantity), unitPrice: n(it.unitPrice) };
                   return (
-                    <TableRow key={it.id}>
+                    <TableRow key={it.id} className={!esGeneral ? "border-l-2 border-l-primary bg-primary/5" : undefined}>
                       <TableCell>
                         <span>{it.description ?? "—"}</span>
                         {esBorrador && esKit(it) && (
