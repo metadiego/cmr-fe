@@ -338,9 +338,12 @@ function PagoAddRow({
   const forma = formas.find((f) => f.id === formaId);
   const esTarjeta = !!forma && forma.isCash === false;
   // Tarjeta: al elegirla, el foco salta directo al campo de los últimos 4 (velocidad del mostrador). Desde ahí
-  // un solo Enter cierra el pago, se anoten los 4 dígitos o no.
+  // un solo Enter cierra el pago, se anoten los 4 dígitos o no. El Select de Radix devuelve el foco a su
+  // trigger al cerrarse, así que se enfoca tras un tick para ganarle a esa restauración (si no, se queda en él).
   React.useEffect(() => {
-    if (esTarjeta) last4Ref.current?.focus();
+    if (!esTarjeta) return;
+    const h = setTimeout(() => last4Ref.current?.focus(), 60);
+    return () => clearTimeout(h);
   }, [esTarjeta]);
   const excede = pagoExcede(n(monto), tope);
   const valido = !!formaId && n(monto) > 0 && !excede && !busy;
