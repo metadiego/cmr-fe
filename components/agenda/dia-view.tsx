@@ -246,6 +246,7 @@ export function DiaView({ fecha }: { fecha: string }) {
           tipoCitaIdInicial={modal.tipoCitaId}
           tipos={tipos}
           medicos={medicos}
+          canal="callcenter"
           onOpenChange={(o) => !o && setModal(null)}
           onSaved={reload}
         />
