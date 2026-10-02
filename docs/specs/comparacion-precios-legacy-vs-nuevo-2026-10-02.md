@@ -21,13 +21,15 @@ producción). No se modificó ningún dato en ningún sistema.
    el 17-sep-2026 y el sistema nuevo nunca se sincronizó. No es un bug viejo: es un precio que
    cambió y quedó desfasado.
 
-2. **Protocolo articular "FULL" ($10,020) — 4 SKUs completos faltan o están mal.**
-   - `RODILLA223` existe en el nuevo sistema pero cobra **$4,000** (el precio de la variante
-     BASE), cuando ese código en el legado vale **$10,020** (variante FULL).
-   - `HIP223` / `ELBOW223` / `SHLDR223` (las otras 3 variantes FULL, $10,020 cada una) **no
-     existen bajo ningún código** en el sistema nuevo.
-   - Las 4 variantes BASE ($4,000) sí sobrevivieron, correctas, con otros nombres
-     (`PROTCADERA01`, `PROTCODO01`, `PROTHOMBRO01`, y `RODILLA223` que debería ser la FULL).
+2. **Protocolo articular "FULL" ($10,020) — CORREGIDO el 2026-10-02, no es un hueco.**
+   El dueño aclaró: el protocolo FULL es el BASE ($4,000) + la infiltración intraarticular
+   (`INFILTRA01`, $3,000 — ya existe en el catálogo nuevo) — ambos productos YA EXISTEN y se
+   facturan como dos líneas separadas, por cualquier zona. El $10,020 del legado no cuadra con
+   esa suma ($4,000+$3,000=$7,000, faltan $3,020) — es, como `GELWH01`, un precio que subieron en
+   el legado en algún momento sin que corresponda a la composición real. **No hay que crear
+   ningún producto nuevo.** Las 4 variantes BASE del legado (`HIP224`/`ELBOW224`/`SHLDR224`/
+   `*223`) ya están correctas en el nuevo sistema como `PROTCADERA01`/`PROTCODO01`/
+   `PROTHOMBRO01`/`RODILLA223`, las 4 a $4,000.
 
 3. **EXOS01 "Amnisoma": Bayamón cobra $40 de menos.** Legacy Bayamón $2,040, legacy Caguas
    $2,000, nuevo (mismo precio en ambos centros) $2,000 — coincide con Caguas, no con Bayamón.
