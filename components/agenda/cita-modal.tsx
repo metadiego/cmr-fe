@@ -101,6 +101,9 @@ export function CitaModal({
   const effectiveCentro =
     centroSel || cita?.clinicId || centroId || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
 
+  // La fecha es EDITABLE dentro del modal (antes era de solo lectura): se puede citar para otro día sin salir.
+  // Nace con la que trae el contexto (la vista del día / la cita en edición). Handoff bug-agenda-sin-selector §1.
+  const [fechaSel, setFechaSel] = React.useState(fecha);
   const [paciente, setPaciente] = React.useState<Paciente | null>(pacienteInicial ?? null);
   const [tipoCitaId, setTipoCitaId] = React.useState(cita?.appointmentTypeId ?? tipoCitaIdInicial ?? "");
   // El médico llega PRESELECCIONADO: el de la cita (edición) o el asignado al paciente (`paciente.doctorId`).
@@ -173,7 +176,7 @@ export function CitaModal({
   const canSubmit =
     !!paciente &&
     !!tipoCitaId &&
-    !!fecha &&
+    !!fechaSel &&
     !!hora &&
     !!horaFin &&
     (!medicoRequired || !!medicoId) &&
@@ -189,7 +192,7 @@ export function CitaModal({
         const res = await validarCita(
           {
             doctorId: medicoId || undefined,
-            date: fecha,
+            date: fechaSel,
             time: hora,
             endTime: horaFin,
             appointmentTypeId: tipoCitaId,
@@ -208,7 +211,7 @@ export function CitaModal({
         patientId: paciente.id,
         appointmentTypeId: tipoCitaId,
         doctorId: medicoId || undefined,
-        date: fecha,
+        date: fechaSel,
         time: hora,
         endTime: horaFin,
         channel: canal,
@@ -271,7 +274,7 @@ export function CitaModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Field label={t("date")} required>
-              <Input type="date" value={fecha} readOnly className="bg-muted/40" />
+              <Input type="date" value={fechaSel} onChange={(e) => e.target.value && setFechaSel(e.target.value)} />
             </Field>
             <Field label={t("start")} required>
               <Input type="time" step={60} value={hora} onChange={(e) => onHoraChange(e.target.value)} />
@@ -387,7 +390,7 @@ export function CitaModal({
 
           {/* Aviso de disponibilidad: si el médico no está ese día, lo advierte con el motivo (la fecha
               aquí viene del slot del día, así que solo informa; el usuario decide). */}
-          <AvisoDisponibilidad doctorId={medicoId || undefined} date={fecha} centro={effectiveCentro || undefined} />
+          <AvisoDisponibilidad doctorId={medicoId || undefined} date={fechaSel} centro={effectiveCentro || undefined} />
 
           {warn && (
             <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm">
