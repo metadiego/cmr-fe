@@ -875,7 +875,7 @@ function Editor({
                 {serverItems.map((it) => {
                   const e = edits[it.id] ?? { quantity: n(it.quantity), unitPrice: n(it.unitPrice) };
                   return ( // border-l-* nunca compiló aquí (0 reglas en el CSS cargado): inline style
-                    <TableRow key={it.id} className={!esGeneral ? "bg-primary/10" : undefined} style={!esGeneral ? { borderLeft: "3px solid var(--primary)" } : undefined}>
+                    <TableRow key={it.id} className="bg-primary/10" style={{ borderLeft: "3px solid var(--primary)" }}>
                       <TableCell>
                         <span>{it.description ?? "—"}</span>
                         {esBorrador && esKit(it) && (
