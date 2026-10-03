@@ -254,6 +254,7 @@
     "soon": "próximamente",
     "empty": "Sin registros para este día.",
     "all": "Todos",
+    "filteringPatient": "Filtrando: {name}",
     "actions": "Acciones",
     "confirmAction": "¿Confirmas esta acción?",
     "transitionNotAllowed": "Ese cambio de estado no está permitido.",

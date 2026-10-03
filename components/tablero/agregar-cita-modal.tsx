@@ -6,8 +6,11 @@ import { useTranslations, useFormatter } from "next-intl";
 import type { Paciente } from "@/lib/api/pacientes";
 import { createCita, getTiposCita, type TipoCita } from "@/lib/api/citas";
 import { getOpciones, type Opcion } from "@/lib/api/tablero";
+import { ApiError } from "@/lib/api/types";
+import { type EhrReadinessField } from "@/lib/api/ehr-integration";
 import { toastError } from "@/lib/api/errors";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { PacienteSelect } from "@/components/citas/paciente-select";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -46,11 +49,16 @@ export function AgregarCitaModal({
   centroId,
   onClose,
   onSaved,
+  onFilterPatient,
 }: {
   tablero: string;
   centroId?: string;
   onClose: () => void;
   onSaved?: () => void;
+  // Al paciente NUEVO sin datos, el BE rechaza con 400 (faltan docId/sexo/… para el EHR): se abre el MISMO
+  // modal de datos que en Presente; si el usuario lo cierra sin completar, se deja la pantalla FILTRADA en ese
+  // paciente para rematarlo sin buscarlo. Handoff traer-al-dia-y-la-pestana-inicial, §2.
+  onFilterPatient?: (p: { id: string; nombre: string }) => void;
 }) {
   const t = useTranslations("agregarCita");
   const tRoot = useTranslations();
@@ -63,6 +71,11 @@ export function AgregarCitaModal({
   const [medicoId, setMedicoId] = React.useState<string>(NO_MEDICO);
   const [notas, setNotas] = React.useState<string>("");
   const [busy, setBusy] = React.useState(false);
+  // Faltantes del EHR que devolvió el 400: abren el modal de datos. null = sin gate.
+  const [ehrGate, setEhrGate] = React.useState<EhrReadinessField[] | null>(null);
+
+  const nombrePaciente = (p: Paciente): string =>
+    (p as { displayName?: string }).displayName || `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim() || p.id;
 
   React.useEffect(() => {
     let active = true;
@@ -128,6 +141,16 @@ export function AgregarCitaModal({
       onSaved?.();
       onClose();
     } catch (err) {
+      // Candado fail-closed del BE: paciente nuevo sin los datos del EHR → abrir el MISMO modal de datos que
+      // en Presente (campo `faltantes`, no `faltan`). Al completar se reintenta el alta; al cerrarlo, el padre
+      // deja la pantalla filtrada en el paciente.
+      if (err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS") {
+        const faltantes = (err.data?.faltantes as EhrReadinessField[] | undefined) ?? [];
+        if (faltantes.length) {
+          setEhrGate(faltantes);
+          return;
+        }
+      }
       toastError(err, tRoot);
     } finally {
       setBusy(false);
@@ -135,6 +158,7 @@ export function AgregarCitaModal({
   }
 
   return (
+    <>
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
         <div className="relative bg-gradient-to-br from-primary/12 via-primary/5 to-transparent px-6 pt-6 pb-5">
@@ -212,6 +236,25 @@ export function AgregarCitaModal({
         </div>
       </DialogContent>
     </Dialog>
+    {ehrGate && paciente && (
+      <EhrReadinessModal
+        pacienteId={paciente.id}
+        faltantes={ehrGate}
+        centroId={centroId}
+        onCancel={() => {
+          // Cerrado sin completar: dejar la pantalla filtrada en este paciente para rematarlo sin buscarlo.
+          setEhrGate(null);
+          onFilterPatient?.({ id: paciente.id, nombre: nombrePaciente(paciente) });
+          onClose();
+        }}
+        onCompleted={() => {
+          // Datos completos → reintentar el alta, que ahora sí pasa el candado del BE.
+          setEhrGate(null);
+          void onGuardar();
+        }}
+      />
+    )}
+    </>
   );
 }
 
