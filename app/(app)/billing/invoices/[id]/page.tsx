@@ -401,7 +401,7 @@ export default function FacturacionPage() {
   // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
   // El encabezado y el "Volver" deben reflejarlo (no mezclar: una venta general NO dice "Facturar consulta").
   const esGeneral = !factura.appointmentId;
-  const backHref = safeInternalPath(search.get("volver")) ?? (esGeneral ? "/billing/invoices" : "/boards/atencion"); // "volver": Frontdesk vuelve a su pestaña Consulta
+  const backHref = safeInternalPath(search.get("volver")) ?? (esGeneral ? "/billing/invoices" : "/boards/frontdesk?tab=consulta"); // consulta: Frontdesk→Consulta
   const nombre = paciente ? (paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ")) : "";
   const record = paciente?.medicalRecordNumber ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
