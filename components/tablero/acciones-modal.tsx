@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -63,15 +63,18 @@ export function AccionesModal({
   /** True on the call-center bridge day view: remembers this URL so the ficha can jump straight
    * back to the call mid-visit, instead of the agent hunting for the date/center again. */
   saveOrigin?: boolean;
-  /** A dónde debe volver la factura al terminar (p. ej. "/boards/frontdesk?tab=consulta") — sin esto,
-   * la pantalla de factura cae a su "Volver" genérico ("/boards/atencion"), que saca a quien facturó
-   * una Consulta desde DENTRO de Frontdesk hacia la pantalla de Atención sola. Handoff
-   * aterrizar-en-consulta-handoff-fe, punto 2. */
+  /** Override explícito de a dónde volver (p. ej. Frontdesk manda su propio slug de pestaña, que no
+   * vive en la URL). Sin esto, se usa la URL ACTUAL (pathname+query) de quien invocó: "devolver a
+   * quien llamó", no un destino fijo — este mismo modal se abre desde la ficha del paciente, la
+   * agenda y Atención/Frontdesk por igual, y cada uno es un "quien llamó" distinto. Handoff
+   * aterrizar-en-consulta-handoff-fe + corrección 02-oct (no solo Frontdesk). */
   volverHref?: string;
 }) {
   const t = useTranslations("tableroBoard");
   const tRoot = useTranslations();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { can } = useCan();
   const [open, setOpen] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -89,10 +92,12 @@ export function AccionesModal({
     try {
       const f = await facturarCita(String(fila.id), centroId);
       setOpen(false);
+      const qsActual = searchParams.toString();
+      const volver = volverHref ?? pathname + (qsActual ? `?${qsActual}` : "");
       const qp = new URLSearchParams();
       if (centroId) qp.set("centro", centroId);
-      if (volverHref) qp.set("volver", volverHref);
-      const q = qp.toString() ? `?${qp.toString()}` : "";
+      qp.set("volver", volver);
+      const q = `?${qp.toString()}`;
       router.push(`/billing/invoices/${(f as { id: string }).id}${q}`);
     } catch (err) {
       toastError(err, tRoot);

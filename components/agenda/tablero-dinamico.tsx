@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -46,6 +46,8 @@ function FacturaCell({ value, citaId, centroId }: { value: unknown; citaId?: str
   const t = useTranslations("tableroBoard");
   const tRoot = useTranslations();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [busy, setBusy] = React.useState(false);
   const f = (value && typeof value === "object" ? value : null) as
     | { numero?: unknown; total?: unknown; saldo?: unknown; estado?: unknown; modoPago?: unknown; usuario?: unknown }
@@ -78,8 +80,13 @@ function FacturaCell({ value, citaId, centroId }: { value: unknown; citaId?: str
     setBusy(true);
     try {
       const inv = await facturarCita(citaId!, centroId);
-      const q = centroId ? `?centro=${centroId}` : "";
-      router.push(`/billing/invoices/${(inv as { id: string }).id}${q}`);
+      // "volver" = esta misma pantalla (pathname+query) — devuelve a quien llamó, no a un destino
+      // fijo: esta celda se usa igual en la agenda de call-center que en el tablero de Atención.
+      const qsActual = searchParams.toString();
+      const qp = new URLSearchParams();
+      if (centroId) qp.set("centro", centroId);
+      qp.set("volver", pathname + (qsActual ? `?${qsActual}` : ""));
+      router.push(`/billing/invoices/${(inv as { id: string }).id}?${qp.toString()}`);
     } catch (err) {
       toastError(err, tRoot);
       setBusy(false);
