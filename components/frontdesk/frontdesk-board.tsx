@@ -1564,7 +1564,6 @@ function FilaSesion({
             formAcciones={servicio.formActions}
             pacienteNombre={String(fila.paciente ?? "")}
             sesionNN={fila["fd_sesiones"] != null ? String(fila["fd_sesiones"]) : undefined} servicioId={servicio?.id} pacienteId={sesion?.patientId}
-            areasDefault={Number(fila["fd_aplicadas"]) || undefined}
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
             sesionId={fila.id}
             centro={centro}

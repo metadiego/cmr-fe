@@ -94,7 +94,6 @@ export function FormatosModal({
   sesionNN,
   servicioId,
   pacienteId,
-  areasDefault,
   tecnicoNombre,
   proximaCita,
   sesionId,
@@ -115,7 +114,6 @@ export function FormatosModal({
   // el-modal-de-laser-ya-no-pide-lo-que-sabemos.
   servicioId?: string;
   pacienteId?: string;
-  areasDefault?: number; // respaldo si la disponibilidad no resuelve el paquete del tipo
   tecnicoNombre?: string | null;
   proximaCita?: string | null;
   sesionId?: string; // fila/sesión → arma el formato genérico con sus datos (membrete/paciente/fecha)
@@ -157,8 +155,10 @@ export function FormatosModal({
   const esFormato = tipo === "hilt" || tipo === "mls";
   const pkg = tipo ? paquetes.find((p) => `${p.productoNombre ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
   const areasAuto = pkg?.multiplicadores?.areas;
-  // Áreas DERIVADAS de la disponibilidad (editable: override manual tiene precedencia). Sin efecto de siembra.
-  const areas = areasOverride ?? (areasAuto != null ? String(areasAuto) : areasDefault != null ? String(areasDefault) : "");
+  // Áreas DERIVADAS de la disponibilidad (editable: override manual tiene precedencia). Si el paquete NO trae
+  // áreas (p. ej. tras un cambio de protocolo a una terapia sin áreas), se deja VACÍO — nunca un 1 inventado
+  // (regla del BE: la respuesta del handoff). nTerapias con áreas vacías cae a "—".
+  const areas = areasOverride ?? (areasAuto != null ? String(areasAuto) : "");
   const diasActual = Number(pkg?.multiplicadores?.days ?? pkg?.multiplicadores?.dias ?? 0);
 
   return (
