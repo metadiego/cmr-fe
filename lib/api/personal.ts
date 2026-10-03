@@ -25,6 +25,10 @@ export interface ListPersonalParams {
   limit?: number;
   q?: string;
   capacidad?: string;
+  // Bajas lógicas: `onlyInactive` solo los dados de baja (para verlos/reactivarlos), `includeInactive` los
+  // mezcla con los activos. Verificado en vivo contra /api/v2/staff. Handoff personal-crud-completo.
+  onlyInactive?: boolean;
+  includeInactive?: boolean;
 }
 
 // `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, para el selector de centro EN
@@ -34,10 +38,12 @@ export function listPersonal(
   params: ListPersonalParams = {},
   centroId?: string,
 ): Promise<Paginated<Personal>> {
-  const { page = 1, limit = 50, q, capacidad } = params;
+  const { page = 1, limit = 50, q, capacidad, onlyInactive, includeInactive } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
   if (capacidad) sp.set("capacity", capacidad);
+  if (onlyInactive) sp.set("onlyInactive", "true");
+  if (includeInactive) sp.set("includeInactive", "true");
   return apiFetchPaged<Personal>(`/staff?${sp.toString()}`, {}, centroId);
 }
 
@@ -46,14 +52,43 @@ export function getStaff(id: string, centroId?: string): Promise<Personal> {
   return apiFetch<Personal>(`/staff/${id}`, {}, centroId);
 }
 
-// Editar la ficha: cargo + capacidades (PUT /personal/:id). Verificado en prod. Handoff
-// ficha-de-personal-todo-en-una-pantalla.
+// Campos editables de la ficha (PUT /staff/:id). Se escriben a mano porque el schema generado va DETRÁS del
+// BE (p. ej. `color`/`sex` se añadieron al DTO el 3-oct y gen:api no corrió en esta sesión — necesita el BE
+// local). Verificado en vivo que /staff/:id acepta name/lastName/specialty/phone/email/sex/color/active +
+// jobTitle/capabilities/profileId. `initials` NO va: el BE las recalcula solas. Handoff personal-crud-completo.
+export type StaffEditable = {
+  name?: string;
+  lastName?: string | null;
+  jobTitle?: string | null;
+  capabilities?: string[];
+  specialty?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  sex?: string | null;
+  color?: string;
+  profileId?: string | null;
+  active?: boolean;
+};
+
+// Editar la ficha (PUT /personal/:id). Verificado en prod. Handoff personal-crud-completo / ficha-de-personal.
 export function updatePersonal(
   id: string,
-  payload: { jobTitle?: string | null; capabilities?: string[] },
+  payload: StaffEditable,
   centroId?: string,
 ): Promise<Personal> {
   return apiFetch<Personal>(`/staff/${id}`, { method: "PUT", body: JSON.stringify(payload) }, centroId);
+}
+
+// Alta de personal (POST /staff). `name` es lo único obligatorio; los centros se asignan aparte con
+// updatePersonalCentros (regla del BE: sin centros no aparece en selects). Handoff personal-crud-completo.
+export function createPersonal(payload: StaffEditable, centroId?: string): Promise<Personal> {
+  return apiFetch<Personal>(`/staff`, { method: "POST", body: JSON.stringify(payload) }, centroId);
+}
+
+// Baja LÓGICA (DELETE /staff/:id): la persona sigue firmando sus citas/facturas y conserva su cartera; se
+// reactiva con updatePersonal(active:true). Handoff personal-crud-completo.
+export function deletePersonal(id: string, centroId?: string): Promise<unknown> {
+  return apiFetch(`/staff/${id}`, { method: "DELETE" }, centroId);
 }
 
 // Catálogo de cargos (GET /personal/cargos) → [{ clave, labelKey }]. Ruta arreglada por el BE (antes

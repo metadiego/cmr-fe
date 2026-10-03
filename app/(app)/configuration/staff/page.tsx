@@ -8,10 +8,12 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Search01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
 
 import {
-  listPersonal, updatePersonal, getCargos, getPersonalCentros, updatePersonalCentros,
+  listPersonal, getCargos, getPersonalCentros, updatePersonalCentros,
   updateFrontdeskStartsOnConsultation, updateConsultationBoardInitialTab,
   type Personal, type CargoCatalogo, type CentroDePersonal, type PersonalConPreferenciaFrontdesk,
 } from "@/lib/api/personal";
+import { FichaEditor } from "@/components/personal/ficha-editor";
+import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
 import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
@@ -50,9 +52,11 @@ const nombreDe = (p: Personal) => [p.name, p.lastName].filter(Boolean).join(" ")
 export function StaffPanel() {
   const t = useTranslations("personalFicha");
   const gate = useCentroGate();
+  const [verInactivos, setVerInactivos] = React.useState(false);
+  const [nuevoOpen, setNuevoOpen] = React.useState(false);
   const listRes = useResource<Personal[]>(
-    () => (gate.centro ? listPersonal({ limit: 100 }, gate.centro).then((r) => r.items) : Promise.resolve([])),
-    [gate.centro],
+    () => (gate.centro ? listPersonal({ limit: 100, onlyInactive: verInactivos }, gate.centro).then((r) => r.items) : Promise.resolve([])),
+    [gate.centro, verInactivos],
   );
   const personal = React.useMemo(
     () => (listRes.state.kind === "ok" ? listRes.state.data : []),
@@ -107,6 +111,13 @@ export function StaffPanel() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Lista */}
         <aside className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <input type="checkbox" checked={verInactivos} onChange={(e) => { setVerInactivos(e.target.checked); setSelId(""); }} className="size-3.5" />
+              {t("verInactivos")}
+            </label>
+          </div>
           <div className="relative">
             <HugeiconsIcon icon={Search01Icon} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("buscar")} className="h-9 pl-8" />
@@ -164,6 +175,14 @@ export function StaffPanel() {
           )}
         </section>
       </div>
+
+      {nuevoOpen && (
+        <NuevoPersonalDialog
+          centro={gate.centro}
+          onClose={() => setNuevoOpen(false)}
+          onCreated={(id) => { setNuevoOpen(false); setVerInactivos(false); listRes.reload(); setSelId(id); }}
+        />
+      )}
     </>
   );
 }
@@ -196,9 +215,6 @@ function FichaPersonal({
   const t = useTranslations("personalFicha");
   const tRoot = useTranslations();
   const { can } = useCan();
-  const [cargo, setCargo] = React.useState(persona.jobTitle ?? "");
-  const [caps, setCaps] = React.useState<string[]>(persona.capabilities ?? []);
-  const [busy, setBusy] = React.useState(false);
   const [darAcceso, setDarAcceso] = React.useState(false);
   // Hub de USUARIO en la MISMA pantalla (sin ir «más adentro»): la ficha, y —solo para quien hace
   // consultas, es decir tiene la capacidad «medico»— su agenda, pacientes y producción. La disponibilidad
@@ -207,34 +223,6 @@ function FichaPersonal({
   const puedeAgenda = esMedico && can("citas.read");
   const puedePacientes = esMedico && can("pacientes.read");
   const puedeProduccion = esMedico && can("citas.read");
-
-  // Etiqueta del cargo desde el catálogo (labelKey traducible; si no, la clave). Incluye el cargo actual
-  // aunque no esté en el catálogo, para no perderlo.
-  const cargoLabel = (clave: string) => {
-    const c = cargoCatalogo.find((x) => x.slug === clave);
-    if (c?.labelKey && tRoot.has(c.labelKey)) return tRoot(c.labelKey);
-    return c?.name ?? clave;
-  };
-  const claves = cargoCatalogo.map((c) => c.slug);
-  const cargos = cargo && !claves.includes(cargo) ? [...claves, cargo] : claves;
-  const sucio = cargo !== (persona.jobTitle ?? "") || JSON.stringify([...caps].sort()) !== JSON.stringify([...(persona.capabilities ?? [])].sort());
-
-  function toggleCap(c: string) {
-    setCaps((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
-  }
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updatePersonal(persona.id, { jobTitle: cargo || null, capabilities: caps }, centro);
-      toast.success(t("guardado"));
-      onChanged();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <div className="space-y-6 rounded-md bg-card p-6 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
@@ -260,42 +248,8 @@ function FichaPersonal({
         </TabsList>
 
         <TabsContent value="ficha" className="space-y-6 pt-2">
-          {/* Cargo + capacidades */}
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label>{t("cargo")}</Label>
-              <Select value={cargo || undefined} onValueChange={setCargo}>
-                <SelectTrigger className="w-full sm:w-64"><SelectValue placeholder={t("cargoPlaceholder")} /></SelectTrigger>
-                <SelectContent>
-                  {cargos.map((c) => <SelectItem key={c} value={c}>{cargoLabel(c)}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label>{t("capacidades")}</Label>
-              <div className="flex flex-wrap gap-2">
-                {capacidadOpciones.map((c) => {
-                  const on = caps.includes(c);
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => toggleCap(c)}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                        on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-                      )}
-                    >
-                      {c}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <Button size="sm" onClick={guardar} disabled={!sucio || busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
-            </div>
-          </div>
+          {/* Ficha completa: identidad + cargo + capacidades + color + baja/reactivar (handoff personal-crud-completo). */}
+          <FichaEditor persona={persona} cargoCatalogo={cargoCatalogo} capacidadOpciones={capacidadOpciones} centro={centro} onChanged={onChanged} />
 
           {/* Centros de servicio: donde la persona sale en los desplegables. El BE devuelve TODOS los centros
               con un `activo` por cada uno (ya resuelto, sin replicar reglas). Marca/desmarca y guarda. */}
