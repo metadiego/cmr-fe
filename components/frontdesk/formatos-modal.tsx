@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
 import { getFormatoArmado, type FormatoArmado, type FormatoPie, type FormatoSeccion } from "@/lib/api/formatos";
+import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
 import { SeccionInner, SesionesFormato } from "@/components/frontdesk/formato-secciones";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -90,7 +91,9 @@ export function FormatosModal({
   formAcciones,
   pacienteNombre,
   record,
-  sesionDefault,
+  sesionNN,
+  servicioId,
+  pacienteId,
   areasDefault,
   tecnicoNombre,
   proximaCita,
@@ -105,8 +108,14 @@ export function FormatosModal({
   formAcciones: unknown;
   pacienteNombre: string;
   record?: string | null;
-  sesionDefault?: number;
-  areasDefault?: number;
+  // Sesión como "n/n" (p. ej. "1/12") de la fila (fd_sesiones): se muestra tal cual, no un número suelto.
+  sesionNN?: string | null;
+  // Para leer las ÁREAS y DÍAS por FORMATO (MLS/HILT) de la DISPONIBILIDAD, no de la factura: un cambio de
+  // protocolo no genera factura, solo mueve la disponibilidad, así que es la fuente de verdad. Handoff
+  // el-modal-de-laser-ya-no-pide-lo-que-sabemos.
+  servicioId?: string;
+  pacienteId?: string;
+  areasDefault?: number; // respaldo si la disponibilidad no resuelve el paquete del tipo
   tecnicoNombre?: string | null;
   proximaCita?: string | null;
   sesionId?: string; // fila/sesión → arma el formato genérico con sus datos (membrete/paciente/fecha)
@@ -119,14 +128,20 @@ export function FormatosModal({
   const [report, setReport] = React.useState<ReportAccion | null>(null);
   const [generado, setGenerado] = React.useState(false);
   const [sesion, setSesion] = React.useState<string>("");
-  const [areas, setAreas] = React.useState<string>("");
+  const [areasOverride, setAreasOverride] = React.useState<string | null>(null); // null = usar el de la disponibilidad
+
+  // Disponibilidad del paciente para ESTE servicio: de aquí salen ÁREAS y DÍAS por formato (MLS/HILT). La
+  // factura NO es la fuente — un cambio de protocolo no la genera, solo mueve la disponibilidad. El paquete
+  // se cruza por nombre/sku del producto (contiene "mls"/"hilt").
+  const dispRes = useResource<PaqueteDisponibilidad[]>(
+    () => (open && servicioId && pacienteId ? getDisponibilidadServicio(servicioId, pacienteId, centro).then((d) => d.paquetes) : Promise.resolve([])),
+    [open, servicioId, pacienteId, centro],
+  );
+  const paquetes = dispRes.state.kind === "ok" ? dispRes.state.data : [];
 
   function elegir(r: ReportAccion) {
-    const f = r.editable_fields ?? [];
-    const dSes = f.find((x) => x.name === "session" || x.name === "sesion")?.default;
-    const dAre = f.find((x) => x.name === "areas")?.default;
-    setSesion(String(sesionDefault ?? dSes ?? ""));
-    setAreas(String(areasDefault ?? dAre ?? ""));
+    setSesion(String(sesionNN ?? "")); // n/n de la fila
+    setAreasOverride(null); // nacen del dato de la disponibilidad
     setReport(r);
     setGenerado(false);
   }
@@ -140,6 +155,11 @@ export function FormatosModal({
   }
   const tipo = ((report?.id || report?.function || report?.action || "") as string).toLowerCase() as LaserTipo;
   const esFormato = tipo === "hilt" || tipo === "mls";
+  const pkg = tipo ? paquetes.find((p) => `${p.productoNombre ?? ""} ${p.sku ?? ""}`.toLowerCase().includes(tipo)) : undefined;
+  const areasAuto = pkg?.multiplicadores?.areas;
+  // Áreas DERIVADAS de la disponibilidad (editable: override manual tiene precedencia). Sin efecto de siembra.
+  const areas = areasOverride ?? (areasAuto != null ? String(areasAuto) : areasDefault != null ? String(areasDefault) : "");
+  const diasActual = Number(pkg?.multiplicadores?.days ?? pkg?.multiplicadores?.dias ?? 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -196,12 +216,14 @@ export function FormatosModal({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
+                {/* Sesión como "n/n" (p. ej. 1/12): texto, nace puesta desde la fila, editable por si acaso. */}
                 <Label htmlFor="fmt-sesion">{t("colSesion")}</Label>
-                <Input id="fmt-sesion" type="number" min={1} value={sesion} onChange={(e) => setSesion(e.target.value)} />
+                <Input id="fmt-sesion" inputMode="numeric" placeholder="n/n" value={sesion} onChange={(e) => setSesion(e.target.value)} />
               </div>
               <div className="space-y-1">
+                {/* Áreas por formato desde la DISPONIBILIDAD (MLS 4, HILT 2), editable. */}
                 <Label htmlFor="fmt-areas">{t("colAreas")}</Label>
-                <Input id="fmt-areas" type="number" min={1} value={areas} onChange={(e) => setAreas(e.target.value)} />
+                <Input id="fmt-areas" type="number" min={1} value={areas} onChange={(e) => setAreasOverride(e.target.value)} />
               </div>
             </div>
             <div className="flex justify-between">
@@ -219,8 +241,9 @@ export function FormatosModal({
             header={{
               paciente: pacienteNombre,
               record: record ?? "",
-              sesion: Number(sesion) || 0,
+              sesion: sesion || (sesionNN ?? ""),
               areas: Number(areas) || 0,
+              dias: diasActual,
               tecnico: tecnicoNombre ?? "",
               proximaCita: proximaCita ?? "",
             }}
@@ -237,7 +260,7 @@ export function FormatosModal({
   );
 }
 
-type Header = { paciente: string; record: string; sesion: number; areas: number; tecnico: string; proximaCita: string };
+type Header = { paciente: string; record: string; sesion: string; areas: number; dias: number; tecnico: string; proximaCita: string };
 
 function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; centro?: string; header: Header; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
@@ -246,7 +269,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   const [horaIn, setHoraIn] = React.useState("");
   const [horaOut, setHoraOut] = React.useState("");
   const [dolor, setDolor] = React.useState("");
-  const nTerapias = header.sesion * header.areas;
+  // Número de terapias = días × áreas (lo que cobra el láser y dice el pie de la factura: «12 días en 4 áreas»).
+  const nTerapias = header.dias * header.areas;
   const printRef = React.useRef<HTMLDivElement>(null);
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;

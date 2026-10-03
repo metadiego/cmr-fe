@@ -1563,8 +1563,8 @@ function FilaSesion({
             servicioNombre={servicio.name}
             formAcciones={servicio.formActions}
             pacienteNombre={String(fila.paciente ?? "")}
-            sesionDefault={Number(String(fila["fd_sesiones"] ?? "").split("/")[0]) || undefined}
-            areasDefault={Number(fila["fd_aplicadas"] ?? (sesion?.data as Record<string, unknown> | null)?.aplicadas) || undefined}
+            sesionNN={fila["fd_sesiones"] != null ? String(fila["fd_sesiones"]) : undefined} servicioId={servicio?.id} pacienteId={sesion?.patientId}
+            areasDefault={Number(fila["fd_aplicadas"]) || undefined}
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
             sesionId={fila.id}
             centro={centro}
