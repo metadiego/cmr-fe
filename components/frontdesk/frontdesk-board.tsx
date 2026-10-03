@@ -487,17 +487,17 @@ export function FrontdeskBoard() {
     [sesiones],
   );
 
-  // Filtro compuesto: búsqueda (texto de fila O pacienteId) → ocultar canceladas → KPI de estado.
+  // Filtro compuesto: paciente FIJADO (desplegable) filtra las filas de TODOS los servicios a ese paciente; si no, búsqueda (texto O pacienteId) → ocultar canceladas → KPI.
+  const pacienteFiltroId = pacienteFiltro?.id ?? null;
   const visibles = React.useMemo(() => {
     const filas = board?.rows ?? [];
     const conBusqueda = filas.filter((f) => {
-      const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
-      const porTexto = coincide(textos, q);
       const ses = sesiones.get(f.id);
+      if (pacienteFiltroId) return !!ses && String(ses.patientId) === pacienteFiltroId;
+      const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
       const porPaciente = !!pacienteIds && !!ses && pacienteIds.has(String(ses.patientId));
-      return q.trim().length >= 2 ? porTexto || porPaciente : porTexto;
+      return q.trim().length >= 2 ? coincide(textos, q) || porPaciente : coincide(textos, q);
     });
-    // Ocultar canceladas (salvo que el filtro explícito sea justamente "cancelada").
     const conVisibilidad =
       ocultarCanceladas && estadoFiltro !== "cancelada"
         ? conBusqueda.filter((f) => estadoFila(f) !== "cancelada")
@@ -505,7 +505,7 @@ export function FrontdeskBoard() {
     return estadoFiltro
       ? conVisibilidad.filter((f) => estadoFila(f) === estadoFiltro)
       : conVisibilidad;
-  }, [board, columnas, q, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila]);
+  }, [board, columnas, q, pacienteFiltroId, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila]);
 
   // Orden del board. Natural (sort=null): por PRESENTE (hora de llegada) asc = orden de TURNO; los que
   // aún no están presentes van al final. Clic en un encabezado ordena por esa columna (asc/desc). Clic en
