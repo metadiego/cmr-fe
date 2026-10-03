@@ -45,7 +45,9 @@ import { PageContainer, PageHeader } from "@/components/ui/page";
 // solo hay PUT; sin GET no se pueden precargar los checkboxes sin arriesgar borrar lo que no se ve).
 const nombreDe = (p: Personal) => [p.name, p.lastName].filter(Boolean).join(" ").trim() || p.name;
 
-export default function PersonalPage() {
+// Contenido de la ficha de Personal SIN contenedor/encabezado, para poder montarlo tanto en su ruta propia
+// como dentro de la pestaña «Personal» de «Personal y accesos» (handoff personal-y-accesos-una-sola-pagina).
+export function StaffPanel() {
   const t = useTranslations("personalFicha");
   const gate = useCentroGate();
   const listRes = useResource<Personal[]>(
@@ -99,9 +101,7 @@ export default function PersonalPage() {
   const sel = personal.find((p) => p.id === selId) ?? null;
 
   return (
-    <PageContainer>
-      <PageHeader title={t("title")} description={t("subtitle")} />
-
+    <>
       {gate.necesitaPicker && <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
@@ -164,6 +164,17 @@ export default function PersonalPage() {
           )}
         </section>
       </div>
+    </>
+  );
+}
+
+// Ruta propia de Personal (se mantiene). «Personal y accesos» monta StaffPanel en su primera pestaña.
+export default function PersonalPage() {
+  const t = useTranslations("personalFicha");
+  return (
+    <PageContainer>
+      <PageHeader title={t("title")} description={t("subtitle")} />
+      <StaffPanel />
     </PageContainer>
   );
 }

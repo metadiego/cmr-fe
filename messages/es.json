@@ -1094,10 +1094,12 @@
   },
   "admin": {
     "title": "Administración",
+    "hubTitle": "Personal y accesos",
     "loading": "Cargando…",
     "noAccess": "No tienes acceso a esta sección.",
     "comingSoon": "Próximamente.",
     "tabs": {
+      "personal": "Personal",
       "pending": "Pendientes",
       "users": "Usuarios",
       "centers": "Centros",

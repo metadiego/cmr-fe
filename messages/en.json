@@ -1094,10 +1094,12 @@
   },
   "admin": {
     "title": "Administration",
+    "hubTitle": "Staff & access",
     "loading": "Loading…",
     "noAccess": "You don't have access to this section.",
     "comingSoon": "Coming soon.",
     "tabs": {
+      "personal": "Staff",
       "pending": "Pending",
       "users": "Users",
       "centers": "Centers",

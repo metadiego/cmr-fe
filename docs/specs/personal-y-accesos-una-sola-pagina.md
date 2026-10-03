@@ -1,3 +1,15 @@
+> **FE HECHO (3-oct-2026).** El hub `/admin` pasa a llamarse **«Personal y accesos»** con **Personal de
+> primera pestaña** (la ficha, `StaffPanel`, reutilizada de `/configuration/staff`) seguida de
+> Usuarios · Roles · Permisos · Editor de rol · Pendientes · Centros · Tema · Menú, y la pestaña es
+> **enlazable por `?tab=`** (p. ej. `?tab=personal`). La ficha sigue también en su ruta propia.
+>
+> **MATIZ DE PERMISOS para el BE antes de quitar el ítem:** el hub está bajo `AdminGuard` (solo admin),
+> porque reúne usuarios/roles/permisos. Pero **los gerentes NO son admin** y usan la ficha de Personal
+> (alta, invitar, centros). Por eso la ficha se dejó TAMBIÉN en su ruta propia `/configuration/staff`.
+> Al quitar el duplicado del menú, **no borres el ítem de Personal para los no-admin**: quítalo solo para
+> quien ya ve el hub (admin). Si el menú no distingue por rol, deja `personal` y quita el redundante del
+> admin. Confírmame el criterio y lo afino.
+
 # Personal y accesos: una sola página, no nueve sitios
 
 **Pedido del dueño, 3-oct-2026:**
