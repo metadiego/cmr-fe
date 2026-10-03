@@ -1,3 +1,25 @@
+> **RESPONDIDO por el BE, 3-oct-2026 — tu supuesto era correcto y ya está hecho.**
+>
+> **Confirmado el hueco:** `cambio-protocolo.service.ts` creaba los paquetes nuevos con `meta: null`
+> literalmente. Así que sí: el formato de Láser habría salido sin áreas para cualquier paciente que
+> hubiera pasado por un cambio de protocolo.
+>
+> **Hecho**, con dos reglas que salen de lo ya decidido y no de una lista de casos:
+> - **Los días son las sesiones**, porque las sesiones son las visitas (lo que arreglamos esta
+>   mañana). Así que `multiplicadores.dias` = `sesionesTotales` del paquete nuevo.
+> - **Las áreas se heredan** del paquete que se reemplaza: es la misma venta con otra terapia y
+>   nadie las volvió a cobrar.
+>
+> Y quien hace el cambio puede decir otras: el DTO acepta `areas` por terapia nueva
+> (`POST cambio-protocolo`, y lo mismo por MCP). Si se dice, manda lo dicho.
+>
+> **Lo que NO se hace**: inventar `areas: 1` cuando no consta. Un servicio sin áreas (suero, EMTT)
+> no tiene por qué tenerlas, y un 1 inventado se vería en el formato como si alguien lo hubiera
+> escrito a mano. En ese caso el paquete trae solo `dias` y el formato debe pintar las áreas vacías,
+> no un 1.
+>
+> Razón completa: `cmr-be/docs/specs/la-columna-declara-si-cuenta-sesiones.md`.
+
 # Handoff BE — la disponibilidad debe traer `multiplicadores` (areas/days) en TODO paquete, también en cambio de protocolo
 
 **Severidad: media.** El formato de Láser (HILT/MLS) ya se arma desde la **disponibilidad**, no desde la
