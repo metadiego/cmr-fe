@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Calendar03Icon, InvoiceIcon, StethoscopeIcon, Add01Icon } from "@hugeicons/core-free-icons";
@@ -108,6 +109,11 @@ function Cargando() {
 
 function Compras({ pid, centro }: { pid: string; centro?: string }) {
   const t = useTranslations("acciones");
+  // "volver": esta misma pantalla (p. ej. /patients con su búsqueda) — abrir una compra desde aquí
+  // debe regresar aquí, no a un destino fijo. Mismo criterio que acciones-modal.tsx.
+  const pathname = usePathname();
+  const qsActual = useSearchParams().toString();
+  const volver = encodeURIComponent(pathname + (qsActual ? `?${qsActual}` : ""));
   // Solo EMITIDAS (decisión del dueño): nada de borradores ni presupuestos.
   const res = useResource<Factura[]>(
     () => listFacturas({ patientId: pid, status: "emitida", limit: 100 }, centro).then((r) => r.items),
@@ -128,7 +134,7 @@ function Compras({ pid, centro }: { pid: string; centro?: string }) {
           </span>
           <span className="flex shrink-0 items-center gap-3">
             <span className="tabular-nums">{money((f as { total?: number }).total)}</span>
-            <Link href={centro ? `/billing/invoices/${f.id}?centro=${centro}` : `/billing/invoices/${f.id}`} className="text-xs font-medium text-primary hover:underline">
+            <Link href={`/billing/invoices/${f.id}?${centro ? `centro=${centro}&` : ""}volver=${volver}`} className="text-xs font-medium text-primary hover:underline">
               {t("abrir")}
             </Link>
           </span>

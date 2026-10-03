@@ -668,8 +668,8 @@ export function FrontdeskBoard() {
           />
 
           {isConsulta ? (
-            /* Vive en `citas` (consulta-como-pestana); `volverHref` regresa aquí al facturar (aterrizar-en-consulta #2). */
-            <GenericBoard tablero="atencion" volverHref={`/boards/frontdesk?tab=${encodeURIComponent(consultaTab!.slug)}`} />
+            /* Vive en `citas`; "Volver" al facturar se autodetecta de la URL (useFrontdeskTab ya la mantiene al día). */
+            <GenericBoard tablero="atencion" />
           ) : (
           <>
           {/* KPIs = filtros */}
