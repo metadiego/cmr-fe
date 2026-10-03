@@ -101,11 +101,13 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "personal", route: "/configuration/staff", group: "configuration", order: 10 },
   { clave: "scheduling-bridge", route: "/configuration/scheduling-bridge", group: "configuration", order: 11 },
   { clave: "ehr-integration", route: "/configuration/ehr-integration", group: "configuration", order: 12 },
+  // clave real del BE confirmada en cmr-be/src/scripts/menu-items.ts: "config-panel".
+  { clave: "config-panel", route: "/configuration/panel", group: "configuration", order: 13 },
   // "resources" sigue siendo su propio renglón del menú (clave real del catálogo del BE — quitarla
   // de aquí sin tocar la fila en el BE la manda a un bucket huérfano, no la borra). Ahora TAMBIÉN
   // vive como pestaña de "cupos" (/scheduling/slots), así que las dos rutas llevan a la misma
   // pantalla en la práctica; no se toca el menú en producción sin verificarlo primero.
-  { clave: "resources", route: "/configuration/resources", group: "configuration", order: 13 },
+  { clave: "resources", route: "/configuration/resources", group: "configuration", order: 14 },
   // Loose roots — carried for resolver completeness; NOT surfaced as domain leaves
   // (buildNavGroups filters them out). home = the logo link; dashboard = admin diagnostic.
   { clave: "home", route: "/", group: "configuration", order: 98 },
