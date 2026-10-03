@@ -57,6 +57,7 @@ export function GenericBoard({
   tablero,
   volverHref,
   initialEstado,
+  pacienteFiltro: pacienteFiltroProp,
 }: {
   tablero: string;
   // A dónde debe volver la factura al terminar — ver el mismo prop en AccionesModal. Pass-through:
@@ -67,6 +68,10 @@ export function GenericBoard({
   // preferencia de la persona (handoff traer-al-dia-y-la-pestana-inicial). La pantalla propia /boards/* no lo
   // pasa → abre como siempre ("Todos"). Solo fija la SELECCIÓN inicial; el orden de las tarjetas no cambia.
   initialEstado?: string | null;
+  // Filtro por paciente CONTROLADO desde fuera: el buscador del frontdesk ("Viendo: X") lo pasa para que el
+  // tablero de Consulta también muestre solo ese paciente. Tiene precedencia sobre el filtro interno (el que
+  // deja "Agregar cita"). Su limpieza la gobierna quien lo pasa (la X del buscador del frontdesk).
+  pacienteFiltro?: { id: string; nombre: string } | null;
 }) {
   const t = useTranslations("tableroBoard");
   const tc = useTranslations("common");
@@ -123,15 +128,17 @@ export function GenericBoard({
     initialAplicado.current = true;
     setEstadoFiltro(initialEstado);
   }, [initialEstado]);
-  // Filtro por PACIENTE: lo fija "Agregar cita" cuando el paciente que tiene delante ya está en la lista
-  // pero le faltan datos (traer al día → modal de datos → cerrado) para que recepción lo tenga enfrente sin
-  // buscarlo. Se LIMPIA con la X del chip. Handoff traer-al-dia-y-la-pestana-inicial, §2.
-  const [pacienteFiltro, setPacienteFiltro] = React.useState<{ id: string; nombre: string } | null>(null);
+  // Filtro por PACIENTE interno: lo fija "Agregar cita" cuando el paciente que tiene delante ya está en la
+  // lista pero le faltan datos (traer al día → modal de datos → cerrado) para tenerlo enfrente sin buscarlo.
+  // Se LIMPIA con la X del chip. El buscador del frontdesk lo pasa aparte (pacienteFiltroProp, con precedencia).
+  // Handoff traer-al-dia-y-la-pestana-inicial, §2.
+  const [pacienteFiltroLocal, setPacienteFiltroLocal] = React.useState<{ id: string; nombre: string } | null>(null);
+  const pacienteFiltro = pacienteFiltroProp ?? pacienteFiltroLocal;
   // Al filtrar por paciente se quita el filtro de estado: el paciente debe verse esté en el estado que esté.
   const filtrarPaciente = (p: { id: string; nombre: string }) => {
     initialAplicado.current = true;
     setEstadoFiltro("");
-    setPacienteFiltro(p);
+    setPacienteFiltroLocal(p);
   };
 
   const [fecha, setFecha] = React.useState(todayISO());
@@ -234,7 +241,8 @@ export function GenericBoard({
         // La tarjeta del estado seleccionado (incluida la preferencia inicial) se muestra aunque tenga 0: la
         // persona que abre "en Presente" debe ver esa pestaña activa aunque hoy esté vacía (handoff §3).
         const kpiEstados = def.statuses.filter((e) => (counts.get(e.slug) ?? 0) > 0 || e.slug === estadoFiltro);
-        const porEstado = estadoFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
+        // Con un paciente filtrado, el estado se ignora: debe verse esté como esté (confirmada, presente…).
+        const porEstado = estadoFiltro && !pacienteFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
         const filtered = pacienteFiltro
           ? porEstado.filter((f) => String((f as { pacienteId?: unknown }).pacienteId ?? "") === pacienteFiltro.id)
           : porEstado;
@@ -258,13 +266,15 @@ export function GenericBoard({
                 />
               ))}
             </div>
-            {pacienteFiltro && (
+            {/* El chip solo para el filtro INTERNO (el que deja "Agregar cita"). El externo (buscador del
+                frontdesk) ya muestra su propia barra "Viendo: X" con su limpieza. */}
+            {pacienteFiltroLocal && !pacienteFiltroProp && (
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                  {t("filteringPatient", { name: pacienteFiltro.nombre })}
+                  {t("filteringPatient", { name: pacienteFiltroLocal.nombre })}
                   <button
                     type="button"
-                    onClick={() => setPacienteFiltro(null)}
+                    onClick={() => setPacienteFiltroLocal(null)}
                     aria-label={tc("clear")}
                     className="-mr-1 inline-flex size-5 items-center justify-center rounded-full hover:bg-primary/20"
                   >

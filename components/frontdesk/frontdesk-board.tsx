@@ -254,7 +254,7 @@ export function FrontdeskBoard() {
   const [filtroAuto, setFiltroAuto] = React.useState("");
   if (filtroSlugs && filtroKey && filtroKey !== filtroAuto) {
     setFiltroAuto(filtroKey);
-    if (serviciosMostrados.length > 0 && !serviciosMostrados.some((s) => s.slug === tabEfectivo)) {
+    if (!isConsulta && serviciosMostrados.length > 0 && !serviciosMostrados.some((s) => s.slug === tabEfectivo)) { // Consulta: el buscador filtra el propio tablero, no salta de pestaña
       setTab(serviciosMostrados[0].slug);
     }
   }
@@ -657,7 +657,7 @@ export function FrontdeskBoard() {
           />
 
           <ServiciosTabs
-            vacioPaciente={!!(pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0)}
+            vacioPaciente={!!(!isConsulta && pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0)}
             serviciosVisibles={serviciosVisibles}
             tabEfectivo={tabEfectivo}
             onPick={(slug) => { setTab(slug); setEstadoFiltro(""); }}
@@ -668,8 +668,8 @@ export function FrontdeskBoard() {
           />
 
           {isConsulta ? (
-            /* Vive en `citas`; "Volver" al facturar se autodetecta de la URL (useFrontdeskTab ya la mantiene al día). */
-            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} />
+            /* "Volver" al facturar se autodetecta de la URL. El buscador de arriba ("Viendo: X") también filtra este tablero. */
+            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} />
           ) : (
           <>
           {/* KPIs = filtros */}
