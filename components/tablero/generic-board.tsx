@@ -54,12 +54,17 @@ function defaultCentro(centros: Centro[]): string {
 export function GenericBoard({
   tablero,
   volverHref,
+  initialEstado,
 }: {
   tablero: string;
   // A dónde debe volver la factura al terminar — ver el mismo prop en AccionesModal. Pass-through:
   // GenericBoard monta este tablero tanto en su propia pantalla ("/boards/atencion") como DENTRO del
   // frontdesk (pestaña Consulta), y solo el segundo caso necesita decir "vuelve aquí".
   volverHref?: string;
+  // Estado con el que abre el tablero (clave de estado). Lo pasa la pestaña Consulta del frontdesk desde la
+  // preferencia de la persona (handoff traer-al-dia-y-la-pestana-inicial). La pantalla propia /boards/* no lo
+  // pasa → abre como siempre ("Todos"). Solo fija la SELECCIÓN inicial; el orden de las tarjetas no cambia.
+  initialEstado?: string | null;
 }) {
   const t = useTranslations("tableroBoard");
   const tc = useTranslations("common");
@@ -108,6 +113,14 @@ export function GenericBoard({
   }, [tablero]);
   // KPI filter: click a card to filter rows by estado.
   const [estadoFiltro, setEstadoFiltro] = React.useState<string>("");
+  // `initialEstado` (preferencia de la persona) fija la SELECCIÓN inicial una sola vez, al llegar el dato
+  // (el fetch del staff resuelve después del montaje), y nunca pisa un clic manual posterior en una tarjeta.
+  const initialAplicado = React.useRef(false);
+  React.useEffect(() => {
+    if (initialAplicado.current || !initialEstado) return;
+    initialAplicado.current = true;
+    setEstadoFiltro(initialEstado);
+  }, [initialEstado]);
 
   const [fecha, setFecha] = React.useState(todayISO());
   const [subTipo, setSubTipo] = React.useState<string>("");
@@ -206,12 +219,19 @@ export function GenericBoard({
           const e = String(f.estado ?? "");
           counts.set(e, (counts.get(e) ?? 0) + 1);
         }
-        const kpiEstados = def.statuses.filter((e) => (counts.get(e.slug) ?? 0) > 0);
+        // La tarjeta del estado seleccionado (incluida la preferencia inicial) se muestra aunque tenga 0: la
+        // persona que abre "en Presente" debe ver esa pestaña activa aunque hoy esté vacía (handoff §3).
+        const kpiEstados = def.statuses.filter((e) => (counts.get(e.slug) ?? 0) > 0 || e.slug === estadoFiltro);
         const filtered = estadoFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
+        // Un clic manual en una tarjeta congela la selección: una preferencia que llegue tarde ya no la pisa.
+        const pick = (slug: string) => {
+          initialAplicado.current = true;
+          setEstadoFiltro(slug);
+        };
         return (
           <>
             <div className="flex flex-wrap gap-2">
-              <KpiCard label={t("all")} count={base.length} active={estadoFiltro === ""} onClick={() => setEstadoFiltro("")} />
+              <KpiCard label={t("all")} count={base.length} active={estadoFiltro === ""} onClick={() => pick("")} />
               {kpiEstados.map((e) => (
                 <KpiCard
                   key={e.slug}
@@ -219,7 +239,7 @@ export function GenericBoard({
                   count={counts.get(e.slug) ?? 0}
                   color={e.color}
                   active={estadoFiltro === e.slug}
-                  onClick={() => setEstadoFiltro(estadoFiltro === e.slug ? "" : e.slug)}
+                  onClick={() => pick(estadoFiltro === e.slug ? "" : e.slug)}
                 />
               ))}
             </div>

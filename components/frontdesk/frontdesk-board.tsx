@@ -209,7 +209,7 @@ export function FrontdeskBoard() {
     () => (tabsRes.state.kind === "ok" ? tabsRes.state.data.find((tb) => tb.boardSlug === "atencion") ?? null : null),
     [tabsRes.state],
   );
-  const [tab, setTab] = useFrontdeskTab(gate.centro, consultaTab); // handoff aterrizar-en-consulta
+  const [tab, setTab, consultaInitialEstado] = useFrontdeskTab(gate.centro, consultaTab); // handoff aterrizar-en-consulta
   const defRes = useResource<TableroDefinicion>(
     () => (gate.centro ? getDefinicion("servicios", gate.centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
     [gate.centro],
@@ -669,7 +669,7 @@ export function FrontdeskBoard() {
 
           {isConsulta ? (
             /* Vive en `citas`; "Volver" al facturar se autodetecta de la URL (useFrontdeskTab ya la mantiene al día). */
-            <GenericBoard tablero="atencion" />
+            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} />
           ) : (
           <>
           {/* KPIs = filtros */}

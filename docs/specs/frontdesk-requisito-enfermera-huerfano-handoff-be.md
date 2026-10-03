@@ -1,3 +1,29 @@
+> **RESUELTO por el BE, 3-oct-2026 — ya corregido en producción, en los dos centros.**
+>
+> Diagnóstico confirmado, y la causa era **más honda** que un requisito mal puesto: `enfermera` no
+> estaba escrita en `formAcciones.campos`, se **deriva** del atributo `requiereEnfermera` del
+> servicio (`campos-que-el-servicio-exige.ts`). Trece servicios lo tenían en `true` sin deberlo, así
+> que borrar el requisito no habría bastado: volvía a aparecer en la siguiente lectura.
+>
+> **Hecho:**
+> 1. `requiereEnfermera: false` en los 13 servicios de técnico (6 Bayamón + 7 Caguas). Barrido
+>    posterior con tu mismo método —contrastar requeridos contra columnas, servicio por servicio—:
+>    **0 servicios con requisito imposible** en ambos centros. **Asistir ya cierra en Láser.**
+> 2. **Invariante blindado**: `PUT /servicios/:id` rechaza ahora cualquier cambio que dejaría al
+>    servicio exigiendo un campo sin columna, venga el requisito declarado o derivado. Responde 400
+>    con `labelKey: frontdesk.servicio.requisito_sin_columna` y el array `campos` con los huérfanos,
+>    por si quieres pintarlo en la pantalla de configuración del servicio.
+>
+> El guardia va en el GUARDADO y no solo en una prueba, porque esto era configuración: el dato
+> validaba perfectamente — dos piezas correctas por separado que juntas formaban un muro. Ni el
+> build ni los 5.168 tests podían verlo, igual que decías.
+>
+> **Tu supuesto era el correcto**: en servicios de técnico la intención es NO pedir enfermera. Si
+> algún día uno sí la necesita, se le compone `fd_enfermera` y se reactiva; lo que ya no se puede es
+> dejar el requisito colgando.
+>
+> Razón completa: `cmr-be/docs/specs/lo-que-se-exige-tiene-donde-escribirse.md`.
+
 # Handoff BE — "Asistir" pide una ENFERMERA que no existe en el servicio (callejón sin salida)
 
 **Severidad: ALTA.** Bloquea el cierre del flujo (`asistido`) en servicios de técnico reales, en

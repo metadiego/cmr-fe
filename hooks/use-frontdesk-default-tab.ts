@@ -21,7 +21,7 @@ import { useResource } from "@/hooks/use-resource";
 export function useFrontdeskTab(
   centro: string | undefined,
   consultaTab: FrontdeskTab | null,
-): [string, (slug: string) => void] {
+): [string, (slug: string) => void, string | null] {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -44,5 +44,9 @@ export function useFrontdeskTab(
   if (tab === "" && prefRes.state.kind === "ok" && consultaTab && prefRes.state.data?.frontdeskStartsOnConsultation) {
     setTab(consultaTab.slug);
   }
-  return [tab, setTab];
+  // Pestaña de ESTADO con la que abre el tablero de Consulta, de la persona logueada (null = por defecto).
+  // La consume GenericBoard para seleccionar ese estado al montar. Handoff traer-al-dia-y-la-pestana-inicial.
+  const consultaInitialEstado =
+    prefRes.state.kind === "ok" ? prefRes.state.data?.consultationBoardInitialTab ?? null : null;
+  return [tab, setTab, consultaInitialEstado];
 }

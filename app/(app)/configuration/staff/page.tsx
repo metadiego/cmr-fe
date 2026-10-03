@@ -9,9 +9,10 @@ import { Search01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
 
 import {
   listPersonal, updatePersonal, getCargos, getPersonalCentros, updatePersonalCentros,
-  updateFrontdeskStartsOnConsultation,
+  updateFrontdeskStartsOnConsultation, updateConsultationBoardInitialTab,
   type Personal, type CargoCatalogo, type CentroDePersonal, type PersonalConPreferenciaFrontdesk,
 } from "@/lib/api/personal";
+import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
 import { getRoles, type Rol } from "@/lib/api/rbac";
 import { inviteUser } from "@/lib/api/profiles";
 import { getEhrRoles, listEhrStaffLinks, type EhrRole, type EhrStaffLink } from "@/lib/api/ehr-integration";
@@ -443,6 +444,62 @@ function FrontdeskConsultaPreferencia({ persona, centro }: { persona: Personal; 
           <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
         </div>
       )}
+      <ConsultaInitialTab persona={persona} centro={centro} />
+    </div>
+  );
+}
+
+// Con qué pestaña de ESTADO abre el tablero de Consulta — preferencia de la persona (handoff
+// traer-al-dia-y-la-pestana-inicial). Opciones data-driven desde los estados del tablero de Atención: hoy
+// "Como está configurado" (null) + cada estado; si mañana se añade uno, aparece solo, es dato no código.
+function ConsultaInitialTab({ persona, centro }: { persona: Personal; centro?: string }) {
+  const t = useTranslations("personalFicha");
+  const tRoot = useTranslations();
+  const AS_IS = "__as_is__"; // null no es value válido de <Select>: se mapea a null al guardar
+  const actual = (persona as PersonalConPreferenciaFrontdesk).consultationBoardInitialTab ?? null;
+  const [valor, setValor] = React.useState<string>(actual ?? AS_IS);
+  const [busy, setBusy] = React.useState(false);
+  const sucio = (valor === AS_IS ? null : valor) !== actual;
+  const defRes = useResource<TableroDefinicion>(
+    () => (centro ? getDefinicion("atencion", centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
+    [centro],
+  );
+  const estados = defRes.state.kind === "ok" ? defRes.state.data.statuses : [];
+
+  async function guardar() {
+    if (busy || !sucio) return;
+    setBusy(true);
+    try {
+      await updateConsultationBoardInitialTab(persona.id, valor === AS_IS ? null : valor, centro);
+      toast.success(t("consultaInicialGuardado"));
+    } catch (e) {
+      toastError(e, tRoot);
+      setValor(actual ?? AS_IS);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 flex items-start justify-between gap-4">
+      <div className="space-y-0.5">
+        <Label>{t("consultaInicialLabel")}</Label>
+        <p className="text-xs text-muted-foreground">{t("consultaInicialAyuda")}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <Select value={valor} disabled={busy} onValueChange={setValor}>
+          <SelectTrigger size="sm" className="w-56"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value={AS_IS}>{t("consultaInicialAsIs")}</SelectItem>
+            {estados.map((e) => (
+              <SelectItem key={e.slug} value={e.slug}>{tRoot.has(e.labelKey) ? tRoot(e.labelKey) : e.slug}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {sucio && (
+          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
+        )}
+      </div>
     </div>
   );
 }

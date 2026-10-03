@@ -14,6 +14,10 @@ export type Personal = components["schemas"]["PersonalEntity"];
 // contra prod (el BE de hoy no lo conoce todavía); si lo rechaza, falla con un toast, no rompe nada más.
 export type PersonalConPreferenciaFrontdesk = Personal & {
   frontdeskStartsOnConsultation?: boolean | null;
+  // Con qué pestaña de ESTADO abre el tablero de Consulta (clave del estado, p. ej. "presente"); null =
+  // como está hoy. Es de la PERSONA que mira (handoff traer-al-dia-y-la-pestana-inicial-de-consulta). Mismo
+  // GET/PUT /staff/:id; se declara a mano hasta que `npm run gen:api` lo traiga (igual que el campo hermano).
+  consultationBoardInitialTab?: string | null;
 };
 
 export interface ListPersonalParams {
@@ -95,6 +99,22 @@ export function updateFrontdeskStartsOnConsultation(
   return apiFetch<PersonalConPreferenciaFrontdesk>(
     `/staff/${id}`,
     { method: "PUT", body: JSON.stringify({ frontdeskStartsOnConsultation }) },
+    centroId,
+  );
+}
+
+// Guardado APARTE (su propio PUT, su propio toast) de la pestaña inicial del tablero de Consulta, por el
+// mismo motivo que su hermano de arriba: si falla, que no tumbe el guardado de cargo/capacidades. `null`
+// = volver al comportamiento por defecto. Acepta la clave de CUALQUIER estado del tablero (dato, no código).
+// Handoff traer-al-dia-y-la-pestana-inicial-de-consulta.
+export function updateConsultationBoardInitialTab(
+  id: string,
+  consultationBoardInitialTab: string | null,
+  centroId?: string,
+): Promise<PersonalConPreferenciaFrontdesk> {
+  return apiFetch<PersonalConPreferenciaFrontdesk>(
+    `/staff/${id}`,
+    { method: "PUT", body: JSON.stringify({ consultationBoardInitialTab }) },
     centroId,
   );
 }
