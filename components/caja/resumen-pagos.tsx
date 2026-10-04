@@ -35,6 +35,7 @@ export function ResumenPagos({
   contado,
   aDepositar,
   diferencia,
+  sinContar,
   cerrado,
   cerradoEn,
   canProcesar,
@@ -55,6 +56,8 @@ export function ResumenPagos({
   contado: number;
   aDepositar: number;
   diferencia: number;
+  /** true = nadie ha guardado un conteo real todavía — avisar descuadre, nunca pintar "cuadra". */
+  sinContar: boolean;
   cerrado: boolean;
   cerradoEn: string | null;
   canProcesar: boolean;
@@ -72,9 +75,16 @@ export function ResumenPagos({
   const [emailOpen, setEmailOpen] = React.useState(false);
   const [email, setEmail] = React.useState("");
 
-  // Estado del cuadre (etiqueta legacy): 0 = cuadra, < 0 = falta, > 0 = sobra.
-  const estado =
-    Math.abs(diferencia) < 0.01 ? "ok" : diferencia < 0 ? "short" : "over";
+  // Estado del cuadre (etiqueta legacy): 0 = cuadra, < 0 = falta, > 0 = sobra. `sinContar` manda
+  // sobre todo lo demás: nadie ha guardado un conteo real, nunca se pinta "cuadra" aunque la cifra
+  // en pantalla sea $0.00 (bug real, 03-oct-2026 — handoff cuadre-efectivo-sin-conteo-descuadra).
+  const estado = sinContar
+    ? "sinContar"
+    : Math.abs(diferencia) < 0.01
+      ? "ok"
+      : diferencia < 0
+        ? "short"
+        : "over";
 
   return (
     <div className="space-y-4 lg:sticky lg:top-20">
@@ -150,17 +160,23 @@ export function ResumenPagos({
         <div
           className={cn(
             "mt-2 flex items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold",
-            estado === "ok"
-              ? "bg-success text-success-foreground"
-              : estado === "over"
-                ? "bg-warning text-warning-foreground"
-                : "bg-destructive/10 text-destructive",
+            estado === "sinContar"
+              ? "animate-pulse bg-destructive text-destructive-foreground"
+              : estado === "ok"
+                ? "bg-success text-success-foreground"
+                : estado === "over"
+                  ? "bg-warning text-warning-foreground"
+                  : "bg-destructive/10 text-destructive",
           )}
         >
-          <span>
-            {t("summary.variance")}
-            <span className="ml-1 font-normal">({tp(`status.${estado}`)})</span>
-          </span>
+          {sinContar ? (
+            <span>{t("summary.notCounted", { monto: money(Math.abs(diferencia)) })}</span>
+          ) : (
+            <span>
+              {t("summary.variance")}
+              <span className="ml-1 font-normal">({tp(`status.${estado}`)})</span>
+            </span>
+          )}
           <span className="tabular-nums">{money(diferencia)}</span>
         </div>
       </section>

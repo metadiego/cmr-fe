@@ -1,5 +1,8 @@
 import type { components } from "./schema";
 import { apiFetch } from "./client";
+import type { CuadreReconciliacion } from "@/lib/caja/totales";
+
+export type { CuadreReconciliacion };
 
 // Caja / Cuadre (BE módulo `caja`, v2 `cash`). Tenant-scoped: el X-Tenant-ID lo adjunta client.ts desde el
 // centro activo. TODO el I/O de caja pasa por aquí (API-First). Los tipos de catálogo/DTO salen del
@@ -116,6 +119,11 @@ export interface ReporteDia {
     refundedAmount: number;
     reason: string | null;
   }>;
+  // Reconciliación lista para pintar (BE PR #389, `cuadre`→`reconciliation` en /api/v2): reemplaza
+  // calcular "Diferencia (cuadra)" a mano en el FE. `contado:false` = nadie ha guardado un conteo
+  // real todavía — NUNCA pintar el verde de "cuadra" en ese caso (handoff
+  // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md). Ver lib/caja/totales.ts (estadoCuadreVivo).
+  reconciliation?: CuadreReconciliacion | null;
   // Conteo de efectivo SELLADO del día (hoja del legado): denominaciones de mayor a menor + total.
   // `reconciliationId`/`userId` null = SUMA de las cajas del día (consolidado). `null` = aún sin contar (o
   // el admin ve varios centros a la vez, donde sumar cajas no significa nada) → "sin conteo todavía".
