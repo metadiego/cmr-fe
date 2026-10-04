@@ -136,8 +136,8 @@ export function FlujoAtencion({
     const pacienteId = fila.pacienteId ? String(fila.pacienteId) : "";
     if (!checked && fwdOf(col)?.toStatus === "presente" && pacienteId) {
       try {
-        if (await isEhrEnabled(centroId)) {
-          const r = await getEhrReadiness(pacienteId, centroId);
+        if (await isEhrEnabled(centroId, "consulta")) {
+          const r = await getEhrReadiness(pacienteId, centroId, "consulta");
           // Solo pacientes NUEVOS bloquean: a uno de seguimiento ya se le pidieron estos datos en
           // persona antes, así que Presente sigue su curso aunque `listo` sea false.
           if (r.nuevo && !r.listo && r.faltantes?.length) {

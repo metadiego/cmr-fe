@@ -23,14 +23,27 @@ export interface EhrReadiness {
   ehrRecordId?: string | null;
   nuevo: boolean;
 }
-export function getEhrReadiness(patientId: string, centroId?: string): Promise<EhrReadiness> {
-  return apiFetch<EhrReadiness>(`/ehr-integration/patients/${patientId}/readiness`, {}, centroId);
+// `tipo` (cmr-be PR #393): Consulta y Servicios bloquean por su propio interruptor
+// (`enabledForConsultations`/`enabledForServices`). Omitido = "consulta" (default del BE), así el
+// flujo de Consulta que ya llamaba esto sin `tipo` sigue funcionando sin cambios.
+export function getEhrReadiness(
+  patientId: string,
+  centroId?: string,
+  tipo?: EhrIntegrationTipo,
+): Promise<EhrReadiness> {
+  const qs = tipo ? `?tipo=${tipo}` : "";
+  return apiFetch<EhrReadiness>(`/ehr-integration/patients/${patientId}/readiness${qs}`, {}, centroId);
 }
 
-// GET/PUT /ehr-integration/config — el interruptor por centro. Sin fila para un centro = apagado.
+// GET/PUT /ehr-integration/config — dos interruptores INDEPENDIENTES por centro (cmr-be PR #393,
+// 04-oct-2026): prender uno NO prende el otro. Antes era un solo `habilitado` que gobernaba
+// Consulta Y cualquier servicio con `pushesToEhrOnPresente` juntos — breaking change, campo
+// renombrado, no solo agregado. Sin fila para un centro = los dos apagados.
 // Permiso ehr-integration.config. Aceptan ?centerIds= para resolver permiso contra otros centros.
+export type EhrIntegrationTipo = "consulta" | "servicio";
 export interface EhrConfig {
-  habilitado: boolean;
+  enabledForConsultations: boolean;
+  enabledForServices: boolean;
 }
 function centerQs(centerIds?: string[]): string {
   if (!centerIds?.length) return "";
@@ -39,10 +52,16 @@ function centerQs(centerIds?: string[]): string {
 export function getEhrConfig(centroId?: string, centerIds?: string[]): Promise<EhrConfig> {
   return apiFetch<EhrConfig>(`/ehr-integration/config${centerQs(centerIds)}`, {}, centroId);
 }
-export function setEhrConfig(habilitado: boolean, centroId?: string, centerIds?: string[]): Promise<EhrConfig> {
+// Manda SOLO los campos que cambiaron (el DTO real los trata todos como opcionales) — nunca el
+// objeto `EhrConfig` completo, para no apagar por accidente el otro tipo.
+export function setEhrConfig(
+  cambios: Partial<EhrConfig>,
+  centroId?: string,
+  centerIds?: string[],
+): Promise<EhrConfig> {
   return apiFetch<EhrConfig>(
     `/ehr-integration/config${centerQs(centerIds)}`,
-    { method: "PUT", body: JSON.stringify({ habilitado }) },
+    { method: "PUT", body: JSON.stringify(cambios) },
     centroId,
   );
 }
@@ -76,11 +95,12 @@ export function linkEhrPatient(
 
 // Lectura del interruptor TOLERANTE a que el BE aún no esté desplegado (hoy responde 404): cualquier
 // fallo → apagado. Así el enganche nace inerte y nunca rompe Presente hasta que el BE exista y alguien
-// lo encienda. Es el «enchufe» del handoff (apagado y no pasa nada).
-export async function isEhrEnabled(centroId?: string): Promise<boolean> {
+// lo encienda. Es el «enchufe» del handoff (apagado y no pasa nada). Por TIPO desde PR #393: Consulta
+// y Servicios prenden/apagan por separado.
+export async function isEhrEnabled(centroId: string | undefined, tipo: EhrIntegrationTipo): Promise<boolean> {
   try {
     const cfg = await getEhrConfig(centroId);
-    return !!cfg.habilitado;
+    return tipo === "consulta" ? !!cfg.enabledForConsultations : !!cfg.enabledForServices;
   } catch {
     return false;
   }

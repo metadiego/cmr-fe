@@ -38,21 +38,59 @@ export default function EhrIntegrationConfigPage() {
   );
 }
 
+// Dos interruptores INDEPENDIENTES (cmr-be PR #393): Consultas y Servicios prenden/apagan por
+// separado — uno no prende el otro. Cada uno manda SOLO su propio campo al PUT (nunca el objeto
+// completo), para no pisar el otro tipo por accidente.
 function EhrToggle({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {
   const t = useTranslations("ehrIntegration");
   const tRoot = useTranslations();
   const { state } = useResource<EhrConfig>(() => getEhrConfig(centroId), [centroId]);
-  // Estado local con rollback: si el PUT falla, se vuelve al último valor bueno del servidor.
-  const [on, setOn] = React.useState<boolean | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [seededFor, setSeededFor] = React.useState<{ centroId?: string } | null>(null);
-  if (state.kind === "ok" && (seededFor === null || seededFor.centroId !== centroId)) {
-    setSeededFor({ centroId });
-    setOn(state.data.habilitado);
-  }
 
   if (state.kind === "fail") return <p className="text-sm text-destructive">{state.message}</p>;
-  if (state.kind === "loading" || on === null) return <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
+  if (state.kind === "loading") return <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
+
+  return (
+    <div className="space-y-3">
+      <EhrSwitchRow
+        campo="enabledForConsultations"
+        valorInicial={state.data.enabledForConsultations}
+        label={t("toggleLabelConsultas")}
+        help={t("toggleHelpConsultas")}
+        centroId={centroId}
+        puedeEscribir={puedeEscribir}
+      />
+      <EhrSwitchRow
+        campo="enabledForServices"
+        valorInicial={state.data.enabledForServices}
+        label={t("toggleLabelServicios")}
+        help={t("toggleHelpServicios")}
+        centroId={centroId}
+        puedeEscribir={puedeEscribir}
+      />
+    </div>
+  );
+}
+
+function EhrSwitchRow({
+  campo,
+  valorInicial,
+  label,
+  help,
+  centroId,
+  puedeEscribir,
+}: {
+  campo: keyof EhrConfig;
+  valorInicial: boolean;
+  label: string;
+  help: string;
+  centroId?: string;
+  puedeEscribir: boolean;
+}) {
+  const t = useTranslations("ehrIntegration");
+  const tRoot = useTranslations();
+  // Estado local con rollback: si el PUT falla, se vuelve al último valor bueno del servidor.
+  const [on, setOn] = React.useState(valorInicial);
+  const [busy, setBusy] = React.useState(false);
 
   async function cambiar(next: boolean) {
     if (busy || !puedeEscribir) return;
@@ -60,7 +98,7 @@ function EhrToggle({ centroId, puedeEscribir }: { centroId?: string; puedeEscrib
     setOn(next);
     setBusy(true);
     try {
-      await setEhrConfig(next, centroId);
+      await setEhrConfig({ [campo]: next }, centroId);
       toast.success(t("saved"));
     } catch (e) {
       setOn(prev); // rollback
@@ -73,8 +111,8 @@ function EhrToggle({ centroId, puedeEscribir }: { centroId?: string; puedeEscrib
   return (
     <div className="flex items-start justify-between gap-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="space-y-0.5">
-        <p className="text-sm font-medium">{t("toggleLabel")}</p>
-        <p className="text-xs text-muted-foreground">{t("toggleHelp")}</p>
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-xs text-muted-foreground">{help}</p>
       </div>
       <Switch checked={on} onCheckedChange={cambiar} disabled={busy || !puedeEscribir} />
     </div>
