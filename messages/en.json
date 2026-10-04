@@ -1999,7 +1999,14 @@
     "seguro": "Insurance",
     "transferencia": "Transfer",
     "master": "Mastercard",
-    "visa": "Visa"
+    "visa": "Visa",
+    "amex": "Amex",
+    "ath": "ATH",
+    "care_credit": "Care Credit",
+    "discover": "Discover",
+    "deducible": "Deductible (insurance)",
+    "exonerada": "Waived",
+    "prepagado": "Prepaid"
   },
   "facturacionList": {
     "title": "Invoices",
