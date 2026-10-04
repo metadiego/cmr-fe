@@ -6,6 +6,7 @@ import {
   totalConteo,
   diferenciaCaja,
   ordenarDenominaciones,
+  estadoCuadreVivo,
   money,
 } from "./totales.ts";
 
@@ -62,6 +63,51 @@ test("ordenarDenominaciones: por valor DESC (mayor→menor); no muta", () => {
   );
   // el arreglo original no se muta
   assert.equal(input[0].valor, 20);
+});
+
+test("estadoCuadreVivo: sin reconciliación aún (primera carga) usa la fórmula local", () => {
+  const r = estadoCuadreVivo({
+    escribiendo: false,
+    contadoLocal: 0,
+    inicioLocal: 50,
+    salesCash: 100,
+    reconciliacion: null,
+  });
+  assert.deepEqual(r, { contado: 0, inicio: 50, aDepositar: -50, diferencia: -150, sinContar: false });
+});
+
+test("estadoCuadreVivo: escribiendo (cajero contando en vivo) ignora al BE aunque diga sin contar", () => {
+  const r = estadoCuadreVivo({
+    escribiendo: true,
+    contadoLocal: 150,
+    inicioLocal: 50,
+    salesCash: 100,
+    reconciliacion: { contado: false, fondoInicial: 0, countedCash: 0, expectedCash: 100, difference: -100 },
+  });
+  assert.deepEqual(r, { contado: 150, inicio: 50, aDepositar: 100, diferencia: 0, sinContar: false });
+});
+
+test("estadoCuadreVivo: BUG REAL — nadie contó ($100 esperado, $0 contado) nunca es un $0.00 verde", () => {
+  const r = estadoCuadreVivo({
+    escribiendo: false,
+    contadoLocal: 0,
+    inicioLocal: 0,
+    salesCash: 100,
+    reconciliacion: { contado: false, fondoInicial: 0, countedCash: 0, expectedCash: 100, difference: -100 },
+  });
+  assert.equal(r.sinContar, true);
+  assert.equal(r.diferencia, -100);
+});
+
+test("estadoCuadreVivo: con conteo real guardado, usa la reconciliación del BE tal cual (sobrante)", () => {
+  const r = estadoCuadreVivo({
+    escribiendo: false,
+    contadoLocal: 0,
+    inicioLocal: 0,
+    salesCash: 800,
+    reconciliacion: { contado: true, fondoInicial: 50, countedCash: 870, expectedCash: 800, difference: 20 },
+  });
+  assert.deepEqual(r, { contado: 870, inicio: 50, aDepositar: 820, diferencia: 20, sinContar: false });
 });
 
 test("money formatea a $0.00, con separador de miles, y tolera NaN", () => {

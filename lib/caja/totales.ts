@@ -40,6 +40,66 @@ export function diferenciaCaja(
 }
 
 /**
+ * Reconciliación de efectivo resuelta por el BE (`CajaReportesService.reporteDia()`, PR #389,
+ * campo `cuadre`→`reconciliation` por /api/v2). `contado` es la bandera explícita de si YA existe
+ * un conteo real GUARDADO para el alcance pedido (un cajero o el consolidado): `false` nunca se
+ * debe confundir con "cuadró en $0" — trae `difference` negativa por el efectivo esperado
+ * completo. `contado`/`fondoInicial` no están en el mapa api-ingles (quedan en español);
+ * `efectivoContado`→`countedCash`, `efectivoEsperado`→`expectedCash`, `diferencia`→`difference`
+ * sí se traducen — verificado leyendo cmr-be/src/core/api-ingles/campos.ts.
+ */
+export interface CuadreReconciliacion {
+  contado: boolean;
+  fondoInicial: number;
+  countedCash: number;
+  expectedCash: number;
+  difference: number;
+}
+
+/** Lo que pinta "Diferencia (cuadra)" en vivo, antes de cerrar el día. */
+export interface EstadoCuadreVivo {
+  contado: number;
+  inicio: number;
+  aDepositar: number;
+  diferencia: number;
+  /** true = nadie ha guardado un conteo real todavía — pintar aviso, NUNCA el verde de "cuadra". */
+  sinContar: boolean;
+}
+
+/**
+ * Resuelve qué pintar en el resumen EN VIVO (antes de cerrar). Mientras el cajero está TECLEANDO su
+ * propio conteo (`escribiendo`), se usa la fórmula legacy local para feedback instantáneo — el BE no
+ * puede conocer lo que aún no se ha guardado. En cualquier otro caso (recién abierto, o la vista
+ * consolidada de gerencia) se usa SIEMPRE la reconciliación ya resuelta por el BE, nunca una
+ * reconstrucción local: evita el "$0.00" falso cuando nadie ha contado (bug real, 03-oct-2026).
+ */
+export function estadoCuadreVivo(args: {
+  escribiendo: boolean;
+  contadoLocal: number;
+  inicioLocal: number;
+  salesCash: number;
+  reconciliacion: CuadreReconciliacion | null | undefined;
+}): EstadoCuadreVivo {
+  const { escribiendo, contadoLocal, inicioLocal, salesCash, reconciliacion } = args;
+  if (escribiendo || !reconciliacion) {
+    return {
+      contado: contadoLocal,
+      inicio: inicioLocal,
+      aDepositar: contadoLocal - inicioLocal,
+      diferencia: diferenciaCaja(contadoLocal, inicioLocal, salesCash),
+      sinContar: false,
+    };
+  }
+  return {
+    contado: reconciliacion.countedCash,
+    inicio: reconciliacion.fondoInicial,
+    aDepositar: reconciliacion.countedCash - reconciliacion.fondoInicial,
+    diferencia: reconciliacion.difference,
+    sinContar: !reconciliacion.contado,
+  };
+}
+
+/**
  * Orden de la grilla de conteo: por `valor` DESC (mayor→menor), la convención universal de arqueo
  * de caja (denominación mayor primero). Devuelve una copia (no muta el arreglo de entrada).
  */

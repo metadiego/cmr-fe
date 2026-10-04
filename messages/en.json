@@ -3411,7 +3411,8 @@
       "variance": "Variance",
       "over": "Over",
       "short": "Short",
-      "ok": "Balanced"
+      "ok": "Balanced",
+      "notCounted": "Not counted yet — short {monto}"
     },
     "close": "Close count",
     "closeConfirmTitle": "Close count",

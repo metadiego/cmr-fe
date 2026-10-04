@@ -25,7 +25,7 @@ import {
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
-import { totalConteo, diferenciaCaja } from "@/lib/caja/totales";
+import { totalConteo, estadoCuadreVivo } from "@/lib/caja/totales";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
@@ -296,41 +296,32 @@ function Editor({
     for (const c of cuadres) if (c.userId) m[c.userId] = c.countedCash;
     return m;
   }, [cuadres]);
-  // Consolidado = UNIÓN de todos los cajeros (Σ de sus cuadres del día): conteo, fondo, a depositar
-  // y diferencia SELLADA. No se recalcula el cierre en el cliente.
-  const cons = React.useMemo(() => {
-    let contado = 0;
-    let inicio = 0;
-    let aDepositar = 0;
-    let diferencia = 0;
-    for (const c of cuadres) {
-      contado += c.countedCash || 0;
-      inicio += c.declaredPettyCash || 0;
-      aDepositar += (c.countedCash || 0) - (c.declaredPettyCash || 0);
-      diferencia += c.difference || 0;
-    }
-    return { contado, inicio, aDepositar, diferencia };
-  }, [cuadres]);
-
   const contadoLocal = React.useMemo(
     () => totalConteo(denoms.map((d) => ({ valor: d.value, cantidad: conteo[d.id] ?? 0 }))),
     [denoms, conteo],
   );
   const salesCash = reporte.detalle.efectivo.amount;
-  const inicio = esConsolidado
-    ? cons.inicio
-    : aplicarInicio
-      ? Math.max(0, Number(inicioStr) || 0)
-      : 0;
-  const contado = esConsolidado ? cons.contado : contadoLocal;
-  // Diferencia (fórmula legacy: contado − inicio − ventasEfectivo). En consolidado = Σ de las
-  // diferencias selladas de cada cajero (no aplica un conteo unificado).
-  const diferencia = esConsolidado
-    ? cons.diferencia
-    : cerrado
-      ? (cuadreInicial?.difference ?? 0)
-      : diferenciaCaja(contado, inicio, salesCash);
-  const aDepositar = esConsolidado ? cons.aDepositar : contado - inicio;
+  const inicioInput = aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
+  // Mientras el cajero está TECLEANDO su propio conteo se usa la fórmula legacy en vivo (el BE no
+  // puede conocer lo que aún no se guardó); en cualquier otro caso — recién abierto, o el
+  // consolidado de gerencia (ya NO se suma a mano, bug real 03-oct-2026) — manda siempre la
+  // reconciliación resuelta por el BE. El cuadre ya CERRADO queda fuera: su diferencia está
+  // sellada y no se toca (no-scope del handoff).
+  const escribiendo = !esConsolidado && !cerrado && Object.values(conteo).some((c) => c > 0);
+  const vivo = estadoCuadreVivo({
+    escribiendo,
+    contadoLocal,
+    inicioLocal: inicioInput,
+    salesCash,
+    reconciliacion: reporte.reconciliation ?? null,
+  });
+  const inicio = cerrado ? inicioInput : vivo.inicio;
+  const contado = cerrado ? contadoLocal : vivo.contado;
+  const diferencia = cerrado ? (cuadreInicial?.difference ?? 0) : vivo.diferencia;
+  const aDepositar = cerrado ? contado - inicio : vivo.aDepositar;
+  // Nadie ha guardado un conteo real todavía: nunca el verde de "cuadra" (handoff
+  // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md).
+  const sinContar = !cerrado && vivo.sinContar;
   const porCajero = reporte.porCajero ?? [];
 
   // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): grupos configurables cuyas
@@ -537,6 +528,7 @@ function Editor({
           contado={contado}
           aDepositar={aDepositar}
           diferencia={diferencia}
+          sinContar={sinContar}
           cerrado={cerrado}
           cerradoEn={cuadreInicial?.closedAt ?? null}
           canProcesar={contarHabilitado && canCerrar}

@@ -3411,7 +3411,8 @@
       "variance": "Diferencia",
       "over": "Sobra",
       "short": "Falta",
-      "ok": "Cuadra"
+      "ok": "Cuadra",
+      "notCounted": "Sin contar — falta {monto}"
     },
     "close": "Cerrar cuadre",
     "closeConfirmTitle": "Cerrar cuadre",
