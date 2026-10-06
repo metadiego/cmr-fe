@@ -329,12 +329,12 @@ export default function FacturacionPage() {
       .join("\n");
     return (
       `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
-      // ANCHO LIBRE: sin @page size ni ancho fijo, el recibo (width:auto) se ajusta SOLO al papel del
-      // driver, en todo navegador. Firefox encogía la LETRA porque su "ajustar al ancho" reduce toda la
-      // hoja cuando ALGO del contenido es más ancho que el papel (p. ej. las líneas largas del pie sin
-      // espacios que corten). Solución sin imponer tamaño: forzar que TODO parta línea y nada desborde.
+      // ANCHO LIBRE: sin @page size ni ancho fijo; width:auto se ajusta al papel del driver, y que todo
+      // parta línea evita el encogido de Firefox. La BASE va en `vw` (1 % del ancho de la página), no en
+      // `pt`: 8.25pt son 2.91mm fijos y nunca llenaban el rollo — 4.04vw da ese mismo tamaño sobre los
+      // 72mm imprimibles del rollo de 80 y escala solo en cualquier otro. Dentro del recibo, todo en `em`.
       `<style>@page{margin:0}html,body{margin:0;padding:0;background:#fff}` +
-      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important;max-width:100%!important}` +
+      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important;max-width:100%!important;font-size:4.04vw!important}` +
       `.recibo-print *{overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%!important}` +
       `.recibo-print img{max-width:100%!important;height:auto!important}</style>` +
       // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
