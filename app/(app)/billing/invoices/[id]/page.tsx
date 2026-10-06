@@ -328,14 +328,15 @@ export default function FacturacionPage() {
       .join("\n");
     return (
       `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
-      // ANCHO LIBRE: sin @page size ni ancho fijo, el recibo (width:auto) se ajusta SOLO al papel del
-      // driver, en todo navegador. Firefox encogía la LETRA porque su "ajustar al ancho" reduce toda la
-      // hoja cuando ALGO del contenido es más ancho que el papel (p. ej. las líneas largas del pie sin
-      // espacios que corten). Solución sin imponer tamaño: forzar que TODO parta línea y nada desborde.
-      `<style>@page{margin:0}html,body{margin:0;padding:0;background:#fff}` +
-      `.recibo-print{position:static!important;visibility:visible!important;margin:0!important;width:auto!important;max-width:100%!important}` +
+      // ANCHO FIJO AL ROLLO (80mm), como el legado: se le DICE a la página que mide 80mm (`@page size`) y el
+      // recibo se fija a 80mm. Así no hay nada que el driver pueda "ajustar al ancho" y encoger —que es lo que
+      // aplastaba las líneas con la impresora compartida en red cuyo papel por defecto no es el rollo. Todo
+      // parte línea para que nada desborde esos 80mm.
+      `<style>@page{size:80mm auto;margin:0}html,body{margin:0;padding:0;background:#fff}` +
+      `.recibo-print{position:static!important;visibility:visible!important;margin:0 auto!important;width:80mm!important;max-width:80mm!important}` +
       `.recibo-print *{overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%!important}` +
-      `.recibo-print img{max-width:100%!important;height:auto!important}</style>` +
+      // El logo es lo ÚNICO raster: al papel va solo texto (como el legado), se oculta en impresión.
+      `.recibo-print img{display:none!important}</style>` +
       // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
       `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
     );
