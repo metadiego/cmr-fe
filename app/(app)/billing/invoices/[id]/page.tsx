@@ -134,6 +134,11 @@ export default function FacturacionPage() {
   const [formas, setFormas] = React.useState<FormaPago[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [busy, setBusy] = React.useState(false);
+  // Visor del recibo en un MODAL (no se sale de facturación) con botón para imprimir/reimprimir. Dentro va un
+  // iframe a la página dedicada /print/invoice/:id?embed=1 (solo el recibo, como el legado); imprimir ese
+  // iframe manda solo el recibo al papel. Handoff: visor de recibo + reimprimir sin salir de la pantalla.
+  const [reciboOpen, setReciboOpen] = React.useState(false);
+  const reciboIframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const refetch = React.useCallback(() => {
     return getFactura(id, centro)
@@ -212,12 +217,16 @@ export default function FacturacionPage() {
   // cuadre) antes de imprimir; uno sin cobrar imprime igual pero avisa que no quedó emitido. Refrescamos
   // la factura con lo que devuelve el BE y, tras pintar el recibo definitivo, mandamos a imprimir.
   // Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
+  // Abre el VISOR del recibo en un modal (no se sale de facturación). El recibo lo pinta la página dedicada
+  // dentro de un iframe; el botón del modal lo imprime/reimprime.
   function imprimir() {
-    // Imprime desde una PÁGINA DEDICADA (/print/invoice/:id) que contiene SOLO el recibo, como el print.php del
-    // legado: sin la app alrededor no hay nada que esconder ni descuadre, y el diálogo abre en TODO navegador
-    // (también Firefox). Esa página emite la factura (idempotente), arma el recibo y se autoimprime. Se abre en
-    // una pestaña nueva para no perder esta. Al volver, refrescamos el estado por si quedó emitida.
-    window.open(`/print/invoice/${id}`, "_blank", "noopener");
+    setReciboOpen(true);
+  }
+  function imprimirDesdeVisor() {
+    const w = reciboIframeRef.current?.contentWindow;
+    if (!w) return;
+    w.focus();
+    w.print();
   }
 
   // Etiquetas del recibo ESC/POS (la lib es pura; el texto i18n viene de aquí). Objeto plano: el React
@@ -473,6 +482,28 @@ export default function FacturacionPage() {
                 {tRoot("common.save")}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Visor del recibo (no se sale de facturación): iframe a la página dedicada (solo el recibo) + imprimir. */}
+      <Dialog open={reciboOpen} onOpenChange={setReciboOpen}>
+        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[400px]">
+          <DialogHeader className="border-b px-4 py-3">
+            <DialogTitle className="text-base">{tRoot("receipt.print")}</DialogTitle>
+          </DialogHeader>
+          <iframe
+            ref={reciboIframeRef}
+            src={reciboOpen ? `/print/invoice/${id}?embed=1` : "about:blank"}
+            title={tRoot("receipt.previewTitle")}
+            className="h-[66vh] w-full bg-white"
+          />
+          <div className="flex justify-end gap-2 border-t px-4 py-3">
+            <Button variant="outline" size="sm" onClick={() => setReciboOpen(false)}>{tRoot("common.cancel")}</Button>
+            <Button size="sm" onClick={imprimirDesdeVisor}>
+              <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+              {tRoot("receipt.print")}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

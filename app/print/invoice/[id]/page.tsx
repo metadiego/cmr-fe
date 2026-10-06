@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 import { imprimirFactura, getCatalogoFacturacion, getFormasPago } from "@/lib/api/facturas";
 import { buildRecibo, type Recibo } from "@/lib/factura/build-recibo";
@@ -15,6 +15,9 @@ import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 export default function PrintInvoicePage() {
   const params = useParams<{ id: string }>();
   const id = String(params?.id ?? "");
+  // `?embed=1`: va DENTRO del visor (iframe) del modal de facturación — no se auto-imprime; el botón del
+  // modal manda a imprimir. Sin embed (pestaña propia) sí se auto-imprime, como el print.php del legado.
+  const embed = useSearchParams()?.get("embed") === "1";
   const [recibo, setRecibo] = React.useState<Recibo | null>(null);
   const [error, setError] = React.useState(false);
 
@@ -50,12 +53,13 @@ export default function PrintInvoicePage() {
     };
   }, [id]);
 
-  // Autoimprimir cuando el recibo ya está pintado (y los estilos/imagen cargados).
+  // Autoimprimir cuando el recibo ya está pintado (y los estilos/imagen cargados). En modo visor (embed) NO:
+  // el usuario imprime/reimprime desde el botón del modal.
   React.useEffect(() => {
-    if (!recibo) return;
+    if (!recibo || embed) return;
     const h = setTimeout(() => window.print(), 400);
     return () => clearTimeout(h);
-  }, [recibo]);
+  }, [recibo, embed]);
 
   if (error) return <p style={{ padding: 16, fontSize: 14 }}>No se pudo cargar el recibo.</p>;
   if (!recibo) return <p style={{ padding: 16, fontSize: 14 }}>Preparando recibo…</p>;
