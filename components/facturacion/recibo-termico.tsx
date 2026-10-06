@@ -70,7 +70,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           IMPRESIÓN es width:auto → se ajusta al papel del driver (Chrome/Firefox, cualquier rollo).
           Fuente en pt (unidad del papel), no px, para que no dependa del ancho de pantalla. */}
       {recibo.anulada && (
-        <div className="mb-1 border border-black py-0.5 text-center text-[1.45em] font-bold tracking-widest">
+        <div className="mb-1 border border-black py-0.5 text-center text-[12pt] font-bold tracking-widest">
           {t("void")}
         </div>
       )}
@@ -82,9 +82,9 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         <img
           src={recibo.logoUrl ?? "/img/logo_cmr.png"}
           alt=""
-          className="mx-auto mb-1 max-h-[6.2em] w-auto object-contain"
+          className="mx-auto mb-1 max-h-[18mm] w-auto object-contain"
         />
-        <div className="text-[1.18em] font-bold uppercase">{emp?.legalName ?? ""}</div>
+        <div className="text-[9.75pt] font-bold uppercase">{emp?.legalName ?? ""}</div>
         {emp?.tradeName && <div>{emp.tradeName}</div>}
         {emp?.sucursal && <div>{emp.sucursal}</div>}
         {emp?.address && (
@@ -221,7 +221,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       {conMultiplicadores.length > 0 && (
         <>
           <Dashed />
-          <div className="space-y-0.5 text-[0.91em]">
+          <div className="space-y-0.5 text-[7.5pt]">
             {conMultiplicadores.map((it, i) => (
               <div key={i}>* {it.descripcion} — {multTexto(it.multiplicadores!)}</div>
             ))}
