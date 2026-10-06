@@ -49,7 +49,7 @@ import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { reciboToEscPos, type EscPosLabels } from "@/lib/print/escpos";
 import { getPrintSettings, setPrintSettings, type PrintSettings } from "@/lib/print/print-settings";
-import { qzListPrinters, qzPrintRaw } from "@/lib/print/qz";
+import { qzListPrinters } from "@/lib/print/qz";
 import { printEscPosWebUsb, usbErrorKey, webUsbSupported } from "@/lib/print/webusb";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
@@ -212,61 +212,12 @@ export default function FacturacionPage() {
   // cuadre) antes de imprimir; uno sin cobrar imprime igual pero avisa que no quedó emitido. Refrescamos
   // la factura con lo que devuelve el BE y, tras pintar el recibo definitivo, mandamos a imprimir.
   // Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
-  async function imprimir() {
-    // Dos rutas según el ajuste del DISPOSITIVO (por defecto navegador → todo igual que antes):
-    //  - "navegador": ventana propia aislada (portable). Se abre YA, sincrónico con el clic, para
-    //    conservar la activación del usuario (si no, el navegador la bloquea como popup).
-    //  - "qz": ESC/POS crudo a la impresora térmica vía QZ Tray (independiente del navegador). Si algo
-    //    falla (QZ no corriendo, sin impresora, error), SIEMPRE cae al navegador — nunca deja sin imprimir.
-    const cfg = getPrintSettings();
-    // Mientras QZ_PRINT_UI esté oculto, SIEMPRE navegador (aunque un equipo tenga 'qz' guardado de antes).
-    const usarQz = QZ_PRINT_UI && cfg.metodo === "qz";
-    let facturaFinal = factura;
-    let numPres = presupuestoNum;
-    try {
-      const r = await imprimirFactura(id, centro);
-      setFactura(r.invoice);
-      facturaFinal = r.invoice;
-      // Presupuesto: guardar el nº que asigna el BE (se reusa al reimprimir) para pintarlo en el recibo y
-      // en la ficha. Handoff imprimir-presupuesto-cuando-no-esta-cobrada.
-      if (r.documento === "presupuesto" && r.quoteNumber) {
-        setPresupuestoNum(r.quoteNumber);
-        numPres = r.quoteNumber;
-      }
-      if (!r.emitida && r.reason) {
-        // El motivo viene como labelKey del BE (factura.no_emitida_pendiente_pago, factura.ya_emitida…).
-        // Ámbar solo cuando falta cobrar (hay `pendiente`); neutral para reimpresiones normales (ya
-        // emitida/anulada/devuelta). Nunca como error: imprimir es válido igual.
-        const msg = tRoot.has(r.reason) ? tRoot(r.reason) : t("imprimirNoEmitida");
-        if (r.pendiente) toast.warning(msg);
-        else toast.info(msg);
-      }
-    } catch (err) {
-      // Un fallo al emitir NO debe impedir imprimir: se avisa y se imprime igual.
-      toastError(err, tRoot);
-    } finally {
-      if (usarQz) {
-        try {
-          if (!cfg.impresora) throw new Error("sin impresora configurada");
-          // Reconstruir el recibo del BE recién devuelto (el `recibo` de render aún es el viejo).
-          const reciboFinal = facturaFinal
-            ? buildRecibo(facturaFinal, diasCatalogo, clavePorFormaId, numPres)
-            : recibo;
-          await qzPrintRaw(cfg.impresora, reciboToEscPos(reciboFinal, escposLabels, cfg.columnas));
-          toast.success(t("print.doneQz"));
-        } catch {
-          // QZ falló → respaldo por navegador (ventana propia aislada), sin dejar al usuario sin recibo.
-          toast.warning(t("print.qzFallback"));
-          const w = window.open("", "cmr_recibo", "width=380,height=760");
-          requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(w)));
-        }
-      } else {
-        // Impresión DIRECTA de la página (no ventana aparte): el CSS global (@media print/.recibo-print) deja
-        // solo el recibo. La ventana emergente con document.write NUNCA abría el diálogo en Firefox; la página
-        // propia sí lo abre en todos. Se esperan 2 frames a que el recibo se repinte con nº/estado finales.
-        requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
-      }
-    }
+  function imprimir() {
+    // Imprime desde una PÁGINA DEDICADA (/print/invoice/:id) que contiene SOLO el recibo, como el print.php del
+    // legado: sin la app alrededor no hay nada que esconder ni descuadre, y el diálogo abre en TODO navegador
+    // (también Firefox). Esa página emite la factura (idempotente), arma el recibo y se autoimprime. Se abre en
+    // una pestaña nueva para no perder esta. Al volver, refrescamos el estado por si quedó emitida.
+    window.open(`/print/invoice/${id}`, "_blank", "noopener");
   }
 
   // Etiquetas del recibo ESC/POS (la lib es pura; el texto i18n viene de aquí). Objeto plano: el React
@@ -318,80 +269,6 @@ export default function FacturacionPage() {
     } finally {
       setBuscandoImpresoras(false);
     }
-  }
-
-  // Documento HTML autónomo del recibo: reusa los estilos ya cargados (Tailwind + globals, sin duplicar
-  // CSS) y fuerza el recibo a ancho completo. Se auto-imprime al cargar (body onload) — patrón portable
-  // que funciona en Chrome, Safari, Firefox y Edge.
-  function reciboDocHtml(node: Element): string {
-    const estilos = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((el) => el.outerHTML)
-      .join("\n");
-    return (
-      `<!doctype html><html><head><meta charset="utf-8"><title>${tRoot("receipt.previewTitle")}</title>${estilos}` +
-      // ANCHO FIJO AL ROLLO (80mm), como el legado: se le DICE a la página que mide 80mm (`@page size`) y el
-      // recibo se fija a 80mm. Así no hay nada que el driver pueda "ajustar al ancho" y encoger —que es lo que
-      // aplastaba las líneas con la impresora compartida en red cuyo papel por defecto no es el rollo. Todo
-      // parte línea para que nada desborde esos 80mm.
-      `<style>@page{size:80mm auto;margin:0}html,body{margin:0;padding:0;background:#fff}` +
-      `.recibo-print{position:static!important;visibility:visible!important;margin:0 auto!important;width:80mm!important;max-width:80mm!important}` +
-      `.recibo-print *{overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%!important}` +
-      `.recibo-print img{max-width:100%!important;height:auto!important}</style>` +
-      // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
-      `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
-    );
-  }
-
-  // Imprime SOLO el recibo aislado. Antes hacíamos window.print() sobre la página completa: el recibo
-  // salía incrustado en el layout (chico y con el fondo de la app). PRIMARIO: una ventana propia que se
-  // auto-imprime (portable, funciona en Safari). RESPALDO: un iframe oculto (si el popup fue bloqueado).
-  function imprimirReciboAislado(win: Window | null) {
-    const node = document.querySelector(".recibo-print");
-    if (!node) {
-      win?.close();
-      window.print();
-      return;
-    }
-    if (win && !win.closed) {
-      win.document.open();
-      win.document.write(reciboDocHtml(node));
-      win.document.close();
-      win.onafterprint = () => {
-        try {
-          win.close();
-        } catch {
-          /* noop */
-        }
-      };
-      return;
-    }
-    // Popup bloqueado → iframe oculto (funciona al menos en Chrome/Edge/Firefox).
-    const iframe = document.createElement("iframe");
-    iframe.setAttribute("aria-hidden", "true");
-    Object.assign(iframe.style, {
-      position: "fixed",
-      right: "0",
-      bottom: "0",
-      width: "0",
-      height: "0",
-      border: "0",
-    });
-    document.body.appendChild(iframe);
-    const doc = iframe.contentWindow?.document;
-    if (!doc) {
-      iframe.remove();
-      window.print();
-      return;
-    }
-    doc.open();
-    doc.write(reciboDocHtml(node));
-    doc.close();
-    // El body onload del documento dispara la impresión; limpiamos el iframe al terminar.
-    const cw = iframe.contentWindow;
-    if (cw) cw.onafterprint = () => setTimeout(() => iframe.remove(), 500);
-    setTimeout(() => {
-      if (iframe.isConnected) iframe.remove();
-    }, 8000);
   }
 
   if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
