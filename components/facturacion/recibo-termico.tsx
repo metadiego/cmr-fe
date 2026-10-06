@@ -245,6 +245,10 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           </div>
         )}
       </div>
+
+      {/* Espacio en blanco al FINAL para que el cortador térmico avance y corte DEBAJO del texto: sin esto, el
+          corte (a distancia fija del final) se comía las últimas líneas. ~16mm ≈ varias líneas de avance. */}
+      <div aria-hidden style={{ height: "16mm" }} />
     </div>
   );
 }
