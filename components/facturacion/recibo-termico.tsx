@@ -69,6 +69,8 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       {/* Sin ancho impuesto aquí: en PANTALLA el ancho lo pone @media screen (--recibo-ancho); en
           IMPRESIÓN es width:auto → se ajusta al papel del driver (Chrome/Firefox, cualquier rollo).
           Fuente en pt (unidad del papel), no px, para que no dependa del ancho de pantalla. */}
+      {/* Aire ARRIBA: unos milímetros de avance para que el encabezado no arranque pegado al borde/corte previo. */}
+      <div aria-hidden style={{ height: "6mm" }} />
       {recibo.anulada && (
         <div className="mb-1 border border-black py-0.5 text-center text-[12pt] font-bold tracking-widest">
           {t("void")}
@@ -247,8 +249,8 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       </div>
 
       {/* Espacio en blanco al FINAL para que el cortador térmico avance y corte DEBAJO del texto: sin esto, el
-          corte (a distancia fija del final) se comía las últimas líneas. ~16mm ≈ varias líneas de avance. */}
-      <div aria-hidden style={{ height: "16mm" }} />
+          corte (a distancia fija del final, ~25mm en la TM-T20II) se comía las últimas líneas. 30mm da margen. */}
+      <div aria-hidden style={{ height: "30mm" }} />
     </div>
   );
 }
