@@ -2009,7 +2009,8 @@
     "discover": "Discover",
     "deducible": "Deductible (insurance)",
     "exonerada": "Waived",
-    "prepagado": "Prepaid"
+    "prepagado": "Prepaid",
+    "forma_desconocida": "Unknown method"
   },
   "facturacionList": {
     "title": "Invoices",
@@ -4081,6 +4082,7 @@
     "abrir": "Open",
     "devuelto": "returned",
     "devueltoTotal": "Returned",
+    "formasPago": "Payment methods",
     "totalGeneral": "Grand total",
     "cobrado": "Paid",
     "pendiente": "Pending",

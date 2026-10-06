@@ -2009,7 +2009,8 @@
     "discover": "Discover",
     "deducible": "Deducible (seguro)",
     "exonerada": "Exonerada",
-    "prepagado": "Prepagado"
+    "prepagado": "Prepagado",
+    "forma_desconocida": "Forma desconocida"
   },
   "facturacionList": {
     "title": "Facturas",
@@ -4081,6 +4082,7 @@
     "abrir": "Abrir",
     "devuelto": "devuelto",
     "devueltoTotal": "Devuelto",
+    "formasPago": "Formas de pago",
     "totalGeneral": "Total general",
     "cobrado": "Cobrado",
     "pendiente": "Pendiente",

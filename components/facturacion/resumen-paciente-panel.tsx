@@ -7,6 +7,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 
 import { getResumenPaciente, type ResumenPaciente } from "@/lib/api/facturas";
+import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,11 @@ export function ResumenPacientePanel({
     (keys ?? [])
       .map((k) => (tRoot.has(k) ? tRoot(k) : k.split(".").pop() ?? k))
       .join(", ");
+
+  // Texto de la forma de pago: el resolver estándar traduce por CLAVE (formasPago.<clave>) y cae al `nombre`
+  // del BE para formas personalizadas/desconocidas. Mismo criterio que en el resto de facturación.
+  const formaLabel = (p: { paymentMethodKey?: string | null; name?: string | null }): string =>
+    formaPagoLabel(tRoot, p.paymentMethodKey, p.name);
 
   const data = res.state.kind === "ok" ? res.state.data : null;
 
@@ -81,12 +87,14 @@ export function ResumenPacientePanel({
                   <tbody className="divide-y">
                     {data.invoices.map((f) => {
                       const actual = f.id === facturaActualId;
+                      const pagos = f.payments ?? [];
                       return (
+                        <React.Fragment key={f.id}>
                         <tr
-                          key={f.id}
                           className={cn(
                             actual && "bg-primary/5",
                             !f.cuenta && "opacity-50",
+                            pagos.length > 0 && "border-b-0",
                           )}
                         >
                           <td className="px-2 py-1.5">
@@ -114,6 +122,30 @@ export function ResumenPacientePanel({
                             )}
                           </td>
                         </tr>
+                        {/* Cómo se pagó ESTA factura: método + monto (reembolso en negativo/rojo), con la referencia
+                            pequeña si viene. El caso que motivó esto: una factura pagada con varios métodos. */}
+                        {pagos.length > 0 && (
+                          <tr className={cn(actual && "bg-primary/5", !f.cuenta && "opacity-50")}>
+                            <td />
+                            <td className="px-2 pb-1.5 text-[11px] text-muted-foreground" colSpan={3}>
+                              <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                                {pagos.map((p, i) => {
+                                  const reembolso = p.type === "reembolso";
+                                  return (
+                                    <span key={i} className="inline-flex items-center gap-1">
+                                      <span>{formaLabel(p)}</span>
+                                      <span className={cn("tabular-nums", reembolso && "text-destructive")}>
+                                        {reembolso ? "−" : ""}{money(Math.abs(p.amount))}
+                                      </span>
+                                      {p.reference && <span className="opacity-70">· {p.reference}</span>}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        </React.Fragment>
                       );
                     })}
                   </tbody>
@@ -130,6 +162,21 @@ export function ResumenPacientePanel({
                       </td>
                       <td className="px-2 pb-2 text-right" colSpan={2} />
                     </tr>
+                    {/* Consolidado de formas de pago del rango (ya ordenado por el BE): «¿y en total con qué pagó?». */}
+                    {(data.paymentMethods?.length ?? 0) > 0 && (
+                      <tr className="text-xs">
+                        <td className="px-2 pb-2 align-top font-medium text-muted-foreground">{t("formasPago")}</td>
+                        <td className="px-2 pb-2" colSpan={3}>
+                          <div className="flex flex-wrap gap-x-4 gap-y-0.5">
+                            {data.paymentMethods!.map((p, i) => (
+                              <span key={i} className="tabular-nums">
+                                <span className="text-muted-foreground">{formaLabel(p)}</span> {money(p.amount)}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tfoot>
                 </table>
               )}

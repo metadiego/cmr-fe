@@ -7,9 +7,8 @@ export type Factura = components["schemas"]["FacturaEntity"];
 export type FacturaItem = components["schemas"]["FacturaItemEntity"];
 export type Producto = components["schemas"]["ProductoEntity"];
 export type FormaPago = components["schemas"]["FormaPagoEntity"];
-// `meta` sale como Record<string,never> en OpenAPI (quirk) → lo tipamos usable: los
-// valores de columnas por su clave. NÚMERO para multiplicador/informativo (áreas, días…) y STRING para
-// los select de captura (p. ej. zona = rodilla|codo|cadera|hombro del Protocolo Articular).
+// `meta` sale como Record<string,never> en OpenAPI (quirk) → lo tipamos usable: NÚMERO para multiplicador/
+// informativo (áreas, días…) y STRING para los select de captura (zona = rodilla|codo|cadera|hombro…).
 export type AgregarItemPayload = Omit<components["schemas"]["AgregarItemDto"], "meta"> & {
   meta?: Record<string, number | string>;
 };
@@ -53,13 +52,9 @@ export type FacturaPago = {
   date?: string | null;
 };
 
-// La factura con sus líneas + proyección enriquecida de GET /invoices/:id (BE):
-// patient, doctor, empresa (bloque fiscal), payments[], emisor, emitidaEn, displayNumber.
-// createdBy/issuedBy (BE PR #82): usuario que CREÓ el borrador y quien lo EMITIÓ/cobró (del
-// RequestContext, no falsificable). En la entidad base son IDs string → los sobreescribimos como
-// objeto {id,name} que trae la proyección de getById. `emisor`/`issuerId` quedan deprecados.
-// Nota: las claves `empresa`, `emisor`, `emitidaEn`, `esLlave` y `componentes` NO están en el mapa
-// api-ingles → el BE las deja en español (el CONTENIDO de los objetos sí se traduce por recursión).
+// Factura + líneas + proyección enriquecida de GET /invoices/:id (patient/doctor/empresa/payments/emisor…).
+// createdBy/issuedBy (PR #82) se sobreescriben a {id,name}. empresa/emisor/emitidaEn/esLlave/componentes NO
+// están en el mapa api-ingles (quedan en español; su contenido sí se traduce por recursión).
 export type FacturaConItems = Omit<Factura, "createdBy" | "issuedBy"> & {
   items?: FacturaItem[];
   patient?: {
@@ -266,6 +261,9 @@ export function getFactura(id: string, centroId?: string): Promise<FacturaConIte
 // consultas son otro departamento). Sin from/to = hoy. Handoff resumen-de-facturas-del-paciente.
 // Varias claves de este resumen (referencia→reference, estado→status, facturas→invoices están en el mapa;
 // conceptoLabelKeys/devuelto/neto/cobrado/pendiente/cuenta/total* NO → siguen en español).
+// CÓMO se pagó (handoff resumen-del-paciente-como-se-pago). ResumenPago = un movimiento de una factura (type "pago"/"reembolso"); ResumenFormaPago = consolidado del rango. Anulados no llegan.
+export type ResumenPago = { paymentMethodId: string; paymentMethodKey: string | null; labelKey: string | null; name: string | null; amount: number; type: string; reference: string | null };
+export type ResumenFormaPago = { paymentMethodId: string; paymentMethodKey: string | null; labelKey: string | null; name: string | null; amount: number };
 export interface ResumenFacturaFila {
   id: string;
   reference: string; // nº emitida, nº presupuesto si borrador, o «borrador» — un solo campo, no decidir en el FE
@@ -277,6 +275,7 @@ export interface ResumenFacturaFila {
   cobrado: number;
   pendiente: number;
   cuenta: boolean; // false = se ve pero NO suma (anuladas)
+  payments?: ResumenPago[]; // opcional: tolerante si el BE aún no lo manda. Handoff resumen-del-paciente-como-se-pago
 }
 export interface ResumenPaciente {
   patientId: string;
@@ -288,6 +287,7 @@ export interface ResumenPaciente {
   totalCobrado: number;
   totalPendiente: number;
   anuladasExcluidas: number;
+  paymentMethods?: ResumenFormaPago[]; // consolidado del rango, de mayor a menor. Handoff resumen-del-paciente-como-se-pago
 }
 export function getResumenPaciente(
   pacienteId: string,
