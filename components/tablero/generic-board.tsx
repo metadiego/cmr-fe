@@ -36,6 +36,7 @@ import { TableroAcciones } from "@/components/tablero/tablero-acciones";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { AgregarCitaModal } from "@/components/tablero/agregar-cita-modal";
 import { readDensity, type Density } from "@/hooks/use-board-prefs";
+import { coincide } from "@/lib/frontdesk/search";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 
@@ -58,6 +59,7 @@ export function GenericBoard({
   volverHref,
   initialEstado,
   pacienteFiltro: pacienteFiltroProp,
+  q,
 }: {
   tablero: string;
   // A dónde debe volver la factura al terminar — ver el mismo prop en AccionesModal. Pass-through:
@@ -72,6 +74,12 @@ export function GenericBoard({
   // tablero de Consulta también muestre solo ese paciente. Tiene precedencia sobre el filtro interno (el que
   // deja "Agregar cita"). Su limpieza la gobierna quien lo pasa (la X del buscador del frontdesk).
   pacienteFiltro?: { id: string; nombre: string } | null;
+  // Filtro de texto EN VIVO (sin Enter), 100% local sobre las filas YA cargadas — nunca una llamada nueva
+  // al servidor. Lo pasa el buscador único del frontdesk; sin esto, escribir ahí no tocaba este tablero
+  // (handoff HANDOFF-filtro-en-vivo-reciproco-consulta-servicios.md). Reciprocidad con Servicios: el mismo
+  // texto se vuelve a aplicar, con los datos propios de CADA tablero, al cambiar de pestaña — no hay (ni
+  // hace falta) una llamada nueva solo para cruzar las dos tablas.
+  q?: string;
 }) {
   const t = useTranslations("tableroBoard");
   const tc = useTranslations("common");
@@ -243,9 +251,13 @@ export function GenericBoard({
         const kpiEstados = def.statuses.filter((e) => (counts.get(e.slug) ?? 0) > 0 || e.slug === estadoFiltro);
         // Con un paciente filtrado, el estado se ignora: debe verse esté como esté (confirmada, presente…).
         const porEstado = estadoFiltro && !pacienteFiltro ? base.filter((f) => String(f.estado ?? "") === estadoFiltro) : base;
+        // Filtro de texto en vivo: match local sobre las columnas visibles de ESTE tablero (nombre, record…).
+        // `coincide` con query vacía/indefinida siempre da true (no-op para quien no pasa `q`).
         const filtered = pacienteFiltro
           ? porEstado.filter((f) => String((f as { pacienteId?: unknown }).pacienteId ?? "") === pacienteFiltro.id)
-          : porEstado;
+          : porEstado.filter((f) =>
+              coincide(data.columns.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null)), q ?? ""),
+            );
         // Un clic manual en una tarjeta congela la selección: una preferencia que llegue tarde ya no la pisa.
         const pick = (slug: string) => {
           initialAplicado.current = true;
