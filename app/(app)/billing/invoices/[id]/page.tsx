@@ -221,7 +221,6 @@ export default function FacturacionPage() {
     const cfg = getPrintSettings();
     // Mientras QZ_PRINT_UI esté oculto, SIEMPRE navegador (aunque un equipo tenga 'qz' guardado de antes).
     const usarQz = QZ_PRINT_UI && cfg.metodo === "qz";
-    const win = usarQz ? null : window.open("", "cmr_recibo", "width=380,height=760");
     let facturaFinal = factura;
     let numPres = presupuestoNum;
     try {
@@ -262,8 +261,10 @@ export default function FacturacionPage() {
           requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(w)));
         }
       } else {
-        // Esperar a que el recibo se repinte con el número/estado definitivos antes de imprimir.
-        requestAnimationFrame(() => requestAnimationFrame(() => imprimirReciboAislado(win)));
+        // Impresión DIRECTA de la página (no ventana aparte): el CSS global (@media print/.recibo-print) deja
+        // solo el recibo. La ventana emergente con document.write NUNCA abría el diálogo en Firefox; la página
+        // propia sí lo abre en todos. Se esperan 2 frames a que el recibo se repinte con nº/estado finales.
+        requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
       }
     }
   }
