@@ -66,9 +66,25 @@ export function FrontdeskSearchBar({
             value={q}
             onChange={(e) => onQ(e.target.value)}
             placeholder={t("filtrarPacientePh")}
-            className="h-9 pl-8 pr-9"
+            className={"h-9 pl-8 " + (dictado.soportado ? "pr-16" : "pr-9")}
             aria-label={t("filtrarPacientePh")}
           />
+          {/* Restablecer el filtro en vivo (handoff HANDOFF-filtro-en-vivo-reciproco-consulta-servicios):
+              un clic rápido para volver a ver TODAS las filas sin recargar la página. */}
+          {q && (
+            <button
+              type="button"
+              onClick={() => onQ("")}
+              aria-label={t("limpiarBusqueda")}
+              title={t("limpiarBusqueda")}
+              className={
+                "absolute top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground " +
+                (dictado.soportado ? "right-8" : "right-1.5")
+              }
+            >
+              <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+            </button>
+          )}
           {dictado.soportado && (
             <button
               type="button"

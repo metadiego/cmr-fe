@@ -1909,6 +1909,7 @@
     "viendoPaciente": "Viewing:",
     "volverAlDia": "Back to day",
     "filtrarPacientePh": "Find patient: name, record or phone…",
+    "limpiarBusqueda": "Clear search",
     "pacienteSinHoy": "This patient has no services scheduled today.",
     "buscando": "Searching…",
     "sinResultadosEnCentro": "No results in {centro}",

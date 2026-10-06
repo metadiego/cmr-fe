@@ -495,8 +495,9 @@ export function FrontdeskBoard() {
       const ses = sesiones.get(f.id);
       if (pacienteFiltroId) return !!ses && String(ses.patientId) === pacienteFiltroId;
       const textos = columnas.map((c) => (typeof f[c.clave] === "string" ? (f[c.clave] as string) : null));
+      const textosConPaciente = ses?.patient ? [...textos, ses.patient.medicalRecordNumber, ses.patient.name] : textos;
       const porPaciente = !!pacienteIds && !!ses && pacienteIds.has(String(ses.patientId));
-      return q.trim().length >= 2 ? coincide(textos, q) || porPaciente : coincide(textos, q);
+      return q.trim().length >= 2 ? coincide(textosConPaciente, q) || porPaciente : coincide(textosConPaciente, q);
     });
     const conVisibilidad =
       ocultarCanceladas && estadoFiltro !== "cancelada"
@@ -669,7 +670,7 @@ export function FrontdeskBoard() {
 
           {isConsulta ? (
             /* "Volver" al facturar se autodetecta de la URL. El buscador de arriba ("Viendo: X") también filtra este tablero. */
-            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} />
+            <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} q={q} />
           ) : (
           <>
           {/* KPIs = filtros */}
