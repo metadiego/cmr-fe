@@ -199,10 +199,14 @@
     visibility: visible !important;
   }
   .recibo-print {
-    position: static !important;
-    width: 80mm !important;
-    max-width: 80mm !important;
-    margin: 0 auto !important;
+    /* Pegado al borde superior-izquierdo: lo demás se oculta con visibility:hidden pero SIGUE ocupando su
+       hueco; sin esto, el recibo arrancaba más abajo con un gran espacio en blanco (el del menú/barra). */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
     color: #000 !important;
@@ -218,10 +222,9 @@
     height: auto !important;
     filter: grayscale(100%) contrast(1.15);
   }
-  /* Ancho FIJO al rollo (80mm): se le dice a la página cuánto mide para que el driver NO la "ajuste al
-     ancho" y la encoja (líneas encimadas con impresora compartida). Como el legado, pero explícito. */
+  /* Como el legado: NO se impone `@page size` — la página la define el papel del driver (rollo de 80mm en
+     la térmica). Solo quitamos el margen. Imprimir la página directamente (no popup) ya evita el aplastado. */
   @page {
-    size: 80mm auto;
     margin: 0;
   }
 }
