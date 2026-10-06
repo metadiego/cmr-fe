@@ -96,12 +96,11 @@ const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
 // Impresión ESC/POS por QZ Tray: OCULTA por ahora (exige instalar QZ en cada equipo → no práctico).
-// El código queda intacto para el futuro; en false todo imprime por el navegador. Cambiar a true para
-// volver a exponer el botón «Opciones de impresión» y la ruta QZ.
-const QZ_PRINT_UI = false;
-// Botón «Probar USB directo» (impresión WebUSB): OCULTO por ahora (no funcional/experimental). El código
-// queda para el futuro; poner en true para volver a mostrarlo.
-const USB_TEST_UI = false;
+// ESC/POS térmico: el navegador RASTERIZA el recibo HTML a la térmica (Epson TM-T20II) y lo aplasta; la
+// cura es texto crudo ESC/POS. Reactivado (default sigue "navegador"; opt-in por equipo, con respaldo).
+const QZ_PRINT_UI = true;
+// «Probar USB directo» (WebUSB ESC/POS): sin instalar nada (Chrome/Edge), pide elegir impresora una vez.
+const USB_TEST_UI = true;
 // Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
 // pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
 const RESUMEN_PACIENTE_ENABLED = true;
