@@ -96,11 +96,11 @@ const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
 // Impresión ESC/POS por QZ Tray: OCULTA por ahora (exige instalar QZ en cada equipo → no práctico).
-// ESC/POS térmico: el navegador RASTERIZA el recibo HTML a la térmica (Epson TM-T20II) y lo aplasta; la
-// cura es texto crudo ESC/POS. Reactivado (default sigue "navegador"; opt-in por equipo, con respaldo).
-const QZ_PRINT_UI = true;
-// «Probar USB directo» (WebUSB ESC/POS): sin instalar nada (Chrome/Edge), pide elegir impresora una vez.
-const USB_TEST_UI = true;
+// QZ Tray / WebUSB quedan OCULTOS: con la impresora COMPARTIDA en red no hay USB local que reclamar (WebUSB
+// no la ve) ni conviene colgar la impresión esperando a QZ Tray. La cura real es imprimir texto por el
+// navegador con ancho fijo del rollo (ver reciboDocHtml + globals .recibo-print). Default "navegador" SIEMPRE.
+const QZ_PRINT_UI = false;
+const USB_TEST_UI = false;
 // Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
 // pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
 const RESUMEN_PACIENTE_ENABLED = true;
