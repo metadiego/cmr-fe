@@ -335,8 +335,7 @@ export default function FacturacionPage() {
       `<style>@page{size:80mm auto;margin:0}html,body{margin:0;padding:0;background:#fff}` +
       `.recibo-print{position:static!important;visibility:visible!important;margin:0 auto!important;width:80mm!important;max-width:80mm!important}` +
       `.recibo-print *{overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%!important}` +
-      // El logo es lo ÚNICO raster: al papel va solo texto (como el legado), se oculta en impresión.
-      `.recibo-print img{display:none!important}</style>` +
+      `.recibo-print img{max-width:100%!important;height:auto!important}</style>` +
       // Auto-imprimir tras cargar estilos/imágenes; el propio documento cierra su ventana al terminar.
       `</head><body onload="setTimeout(function(){window.focus();window.print();},300)">${node.outerHTML}</body></html>`
     );

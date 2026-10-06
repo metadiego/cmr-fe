@@ -213,10 +213,10 @@
     word-break: break-word !important;
     max-width: 100% !important;
   }
-  /* El logo es el ÚNICO elemento raster del recibo; el legado imprime encabezado de solo texto y sale
-     limpio en cualquier térmica. Al papel NO va imagen: se oculta en impresión (el preview lo conserva). */
   .recibo-print img {
-    display: none !important;
+    max-width: 100% !important;
+    height: auto !important;
+    filter: grayscale(100%) contrast(1.15);
   }
   /* Ancho FIJO al rollo (80mm): se le dice a la página cuánto mide para que el driver NO la "ajuste al
      ancho" y la encoja (líneas encimadas con impresora compartida). Como el legado, pero explícito. */
