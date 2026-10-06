@@ -17,6 +17,7 @@ import { parseDayUTC } from "@/lib/format/fecha";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
+import { CeldaEditable } from "@/components/tablero/celda-editable";
 import { CeldaSelect } from "@/components/tablero/celda-select";
 import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
 import { CeldaToggleIcon } from "@/components/tablero/celda-toggle-icon";
@@ -412,6 +413,25 @@ export function TableroDinamico({
     // contextos (Cell sin fila) queda solo lectura.
     if ((col.render as { kind?: string } | null)?.kind === "factura") {
       return <FacturaCell value={fila[col.clave]} citaId={String(fila.id)} centroId={centroId} />;
+    }
+    // Columna de texto/número/hora editable SIN selector (p. ej. "record" en Atención, que llega
+    // con editable:true pero no pasaba por ninguna rama de arriba): mismo endpoint que ya usan
+    // select/toggle, mismo widget que ya usa la agenda del call-center (CeldaCita). Faltaba este
+    // branch — por eso la celda se veía editable (editable:true del BE) pero nunca disparaba el
+    // POST. Handoff HANDOFF-record-editable-en-consultas.md.
+    if (col.editable && tablero) {
+      return (
+        <CeldaEditable
+          tablero={tablero}
+          entidadId={fila.id}
+          columna={col.clave}
+          tipo={col.tipo}
+          value={fila[col.clave]}
+          centroId={centroId}
+          etiqueta={col.label ?? (tRoot.has(col.labelKey) ? tRoot(col.labelKey) : col.clave)}
+          onChanged={onRefresh ?? (() => {})}
+        />
+      );
     }
     return <Cell col={col} value={fila[col.clave]} />;
   }
