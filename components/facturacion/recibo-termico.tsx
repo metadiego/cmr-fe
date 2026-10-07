@@ -249,8 +249,9 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       </div>
 
       {/* Espacio en blanco al FINAL para que el cortador térmico avance y corte DEBAJO del texto: sin esto, el
-          corte (a distancia fija del final en la TM-T20II) se comía las últimas líneas. 45mm da margen de sobra. */}
-      <div aria-hidden style={{ height: "45mm" }} />
+          corte (a distancia fija del final en la TM-T20II) se comía las últimas líneas. 70mm ≈ una pulgada más
+          de tolerancia que antes, para que el corte caiga bien por debajo del texto. */}
+      <div aria-hidden style={{ height: "70mm" }} />
     </div>
   );
 }
