@@ -13,8 +13,11 @@ import {
   type DisponibilidadServicio,
   type PaqueteDisponibilidad,
 } from "@/lib/api/frontdesk";
+import { fijarSesionesSinPaquete } from "@/lib/api/frontdesk-fijar-sesiones";
+import type { Servicio } from "@/lib/api/servicios";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
+import { listAlmacenes, type Almacen, type Producto } from "@/lib/api/inventario";
+import { listProductosDeGrupo } from "@/lib/api/inventario-grupos";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { toastError } from "@/lib/api/errors";
@@ -210,26 +213,133 @@ export function TransferirTratamientoDialog({
   );
 }
 
+// ————— Fijar sesiones SIN paquete previo (PATCH .../session-count, opt-in por servicio) —————
+// Gap distinto del de "Corregir disponibilidad": ese diálogo corrige un paquete que YA EXISTE; este
+// cubre el paciente que no tiene NINGUNO — antes, sin ningún paquete, no había forma de tocar el
+// número de sesión (handoff columna-sesiones-sin-paquete-handoff-be.md). Solo aparece si el servicio
+// tiene `allowSessionFixWithoutPackage` prendido (configurable por servicio, pantalla de Servicios).
+function FijarSesionesSinPaqueteDialog({
+  servicio,
+  pacienteId,
+  centro,
+  onClose,
+  onDone,
+}: {
+  servicio: Servicio | null;
+  pacienteId?: string;
+  centro?: string;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const t = useTranslations("frontdesk");
+  // Servicio de GRUPO (varios productos, p. ej. Láser HILT+MLS) sin productId propio: el BE exige
+  // indicar a cuál anclar el paquete nuevo. Sin grupo o con productId propio, no hace falta.
+  const esDeGrupo = !!servicio && !servicio.productId && !!servicio.billingGroupId;
+
+  const [sesiones, setSesiones] = React.useState("");
+  const [productoId, setProductoId] = React.useState("");
+  const [guardando, setGuardando] = React.useState(false);
+
+  // Reset al abrir/cambiar de servicio (sin efecto).
+  const sid = servicio?.id ?? null;
+  const [prevSid, setPrevSid] = React.useState<string | null>(null);
+  if (sid !== prevSid) {
+    setPrevSid(sid);
+    setSesiones("");
+    setProductoId("");
+  }
+
+  const productosRes = useResource<Producto[]>(
+    () => (esDeGrupo && servicio?.billingGroupId ? listProductosDeGrupo(servicio.billingGroupId, centro) : Promise.resolve([])),
+    [esDeGrupo, servicio?.billingGroupId, centro],
+  );
+  const productos = productosRes.state.kind === "ok" ? productosRes.state.data : [];
+
+  const n = Number(sesiones);
+  const sesionesInvalidas = sesiones.trim() === "" || !Number.isFinite(n) || n < 0;
+  const faltaProducto = esDeGrupo && !productoId;
+  const puede = !!servicio?.id && !!pacienteId && !sesionesInvalidas && !faltaProducto;
+
+  async function guardar() {
+    if (!puede || !servicio || !pacienteId) return;
+    setGuardando(true);
+    try {
+      await fijarSesionesSinPaquete(
+        pacienteId,
+        servicio.id,
+        { sesionesTotales: n, ...(productoId ? { productoId } : {}) },
+        centro,
+      );
+      toast.success(t("fijarSinPaqueteOk"));
+      onClose();
+      onDone();
+    } catch (e) {
+      toastError(e, t);
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  return (
+    <Dialog open={servicio != null} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("fijarSinPaqueteTitulo")}</DialogTitle>
+          <DialogDescription>{t("fijarSinPaqueteDesc")}</DialogDescription>
+        </DialogHeader>
+        {servicio && (
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label>{t("fijarSinPaqueteCampoSesiones")}</Label>
+              <Input type="number" min={0} value={sesiones} onChange={(e) => setSesiones(e.target.value)} />
+            </div>
+
+            {esDeGrupo && (
+              <div className="space-y-1">
+                <Label>{t("fijarSinPaqueteCampoProducto")}</Label>
+                <Select value={productoId} onValueChange={setProductoId}>
+                  <SelectTrigger><SelectValue placeholder={t("fijarSinPaqueteElegirProducto")} /></SelectTrigger>
+                  <SelectContent>
+                    {productos.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                {faltaProducto && <p className="text-xs text-destructive">{t("fijarSinPaqueteProductoRequerido")}</p>}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={onClose} disabled={guardando}>{t("transferir.cancelar")}</Button>
+              <Button onClick={guardar} disabled={!puede || guardando}>{t("fijarSinPaqueteGuardar")}</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ————— X/Y + disponibilidad del paciente (lazy, al abrir) —————
 export function SesionesCell({
   display,
-  servicioId,
+  servicio,
   pacienteId,
   centro,
 }: {
   display: string;
-  servicioId?: string;
+  servicio?: Servicio;
   pacienteId?: string;
   centro?: string;
 }) {
   const t = useTranslations("frontdesk");
   const { can } = useCan();
   const puedeCorregir = can("frontdesk.disponibilidad.editar");
+  const servicioId = servicio?.id;
   const [open, setOpen] = React.useState(false);
   const [disp, setDisp] = React.useState<DisponibilidadServicio | null>(null);
   const [fallo, setFallo] = React.useState(false);
   const [corrigiendo, setCorrigiendo] = React.useState<PaqueteDisponibilidad | null>(null);
   const [transfiriendo, setTransfiriendo] = React.useState<PaqueteDisponibilidad | null>(null);
+  const [fijando, setFijando] = React.useState(false);
 
   React.useEffect(() => {
     if (!open || disp || fallo || !servicioId || !pacienteId) return;
@@ -256,7 +366,16 @@ export function SesionesCell({
         {fallo && <p className="text-sm text-destructive">{t("saldoError")}</p>}
         {disp && (
           <div className="space-y-1.5">
-            {(disp.paquetes ?? []).length === 0 && <p className="text-sm text-muted-foreground">{t("sinPaquetes")}</p>}
+            {(disp.paquetes ?? []).length === 0 && (
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm text-muted-foreground">{t("sinPaquetes")}</p>
+                {puedeCorregir && servicio?.allowSessionFixWithoutPackage && (
+                  <Button size="sm" variant="outline" className="h-7 shrink-0 text-xs" onClick={() => setFijando(true)}>
+                    {t("fijarSinPaquete")}
+                  </Button>
+                )}
+              </div>
+            )}
             {(disp.paquetes ?? []).map((p, i) => {
               const { entregadas, totales } = paqueteTotales(p);
               const leyenda = legendMultiplicadores(p.multiplicadores, (k) => (t.has(`mult.${k}`) ? t(`mult.${k}`) : k));
@@ -318,6 +437,15 @@ export function SesionesCell({
         paquete={transfiriendo}
         centro={centro}
         onClose={() => setTransfiriendo(null)}
+        onDone={recargar}
+      />
+    )}
+    {puedeCorregir && servicio?.allowSessionFixWithoutPackage && (
+      <FijarSesionesSinPaqueteDialog
+        servicio={fijando ? (servicio ?? null) : null}
+        pacienteId={pacienteId}
+        centro={centro}
+        onClose={() => setFijando(false)}
         onDone={recargar}
       />
     )}

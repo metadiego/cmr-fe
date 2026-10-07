@@ -3,7 +3,17 @@ import { apiFetch } from "./client";
 
 // A service tab (Láser, Vit C, …) with its color/icon. Drives the Servicios
 // calendar tabs/filter and event colors.
-export type Servicio = components["schemas"]["ServicioEntity"];
+//
+// `allowSessionFixWithoutPackage`/`pushesToEhrOnPresente` are hand-added: prod's
+// /api/docs-json is currently serving ServicioEntity with Spanish field names (a BE-side
+// regression — the real GET /api/v2/services response is English, verified live by curl
+// 07-oct-2026), which broke `npm run gen:api` for this entity. Drop this intersection and
+// go back to the bare `components["schemas"]["ServicioEntity"]` once the generated schema
+// has these fields again.
+export type Servicio = components["schemas"]["ServicioEntity"] & {
+  allowSessionFixWithoutPackage: boolean;
+  pushesToEhrOnPresente: boolean;
+};
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];
@@ -11,8 +21,13 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-export type CreateServicioPayload = components["schemas"]["CreateServicioDto"];
-export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"];
+// `allowSessionFixWithoutPackage` hand-added for the same reason as `Servicio` above.
+export type CreateServicioPayload = components["schemas"]["CreateServicioDto"] & {
+  allowSessionFixWithoutPackage?: boolean;
+};
+export type UpdateServicioPayload = components["schemas"]["UpdateServicioDto"] & {
+  allowSessionFixWithoutPackage?: boolean;
+};
 export type UpdateServicioPorClavePayload = components["schemas"]["UpdateServicioPorClaveDto"];
 
 // Diff por centro que devuelve la edición "Todos los centros" (BE 2026-07-30). El BE aplica los

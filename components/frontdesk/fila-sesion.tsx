@@ -220,7 +220,7 @@ export function FilaSesion({
       return (
         <SesionesCell
           display={v == null || v === "" ? "—" : String(v)}
-          servicioId={servicio?.id}
+          servicio={servicio}
           pacienteId={sesion?.patientId}
           centro={centro}
         />

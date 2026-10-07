@@ -30,7 +30,10 @@ const DEBT = {
   "app/(app)/billing/invoices/[id]/page.tsx": 2274,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,
-  "components/servicios/servicios-admin.tsx": 686,
+  // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)
+  // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
+  // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
+  "components/servicios/servicios-admin.tsx": 661,
   "components/agenda/dia-view.tsx": 623,
   "components/auditoria/auditoria-log.tsx": 642,
   "components/clientes/paciente-form-sheet.tsx": 550,

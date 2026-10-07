@@ -13,15 +13,14 @@ import {
   createServicio,
   updateServicio,
   updateServicioPorClave,
-  getGruposFacturacion,
   type Servicio,
   type CreateServicioPayload,
   type UpdateServicioPorClavePayload,
-  type GrupoFacturacion,
 } from "@/lib/api/servicios";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { payloadBulkDirty } from "@/lib/servicios/bulk-diff";
+import { Field, Toggle, GrupoSelect } from "@/components/servicios/servicio-form-fields";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useMe, isAdmin } from "@/hooks/use-me";
@@ -396,6 +395,7 @@ type FormState = {
   requiereTecnico: boolean;
   requiereEnfermera: boolean;
   badge: boolean;
+  allowSessionFixWithoutPackage: boolean;
   activo: boolean;
 };
 const EMPTY: FormState = {
@@ -408,6 +408,7 @@ const EMPTY: FormState = {
   requiereTecnico: false,
   requiereEnfermera: false,
   badge: true,
+  allowSessionFixWithoutPackage: false,
   activo: true,
 };
 
@@ -457,6 +458,7 @@ function ServicioForm({
           requiereTecnico: servicio.requiresTechnician,
           requiereEnfermera: servicio.requiresNurse,
           badge: servicio.badge,
+          allowSessionFixWithoutPackage: servicio.allowSessionFixWithoutPackage,
           activo: servicio.active,
         }
       : EMPTY;
@@ -485,6 +487,7 @@ function ServicioForm({
       requiresTechnician: form.requiereTecnico,
       requiresNurse: form.requiereEnfermera,
       badge: form.badge,
+      allowSessionFixWithoutPackage: form.allowSessionFixWithoutPackage,
     };
   }
 
@@ -614,6 +617,16 @@ function ServicioForm({
             <Toggle label={t("field.requiereTecnico")} checked={form.requiereTecnico} onChange={(v) => set("requiereTecnico", v)} />
             <Toggle label={t("field.requiereEnfermera")} checked={form.requiereEnfermera} onChange={(v) => set("requiereEnfermera", v)} />
             <Toggle label={t("field.badge")} checked={form.badge} onChange={(v) => set("badge", v)} />
+            {/* Igual que Activo: es por centro (cada fila Láser Bayamón/Caguas es su propio servicio),
+                no se edita en "aplicar a todos los centros". Handoff HANDOFF-sesiones-sin-paquete-listo.md. */}
+            {!editandoTodos && (
+              <Toggle
+                label={t("field.allowSessionFixWithoutPackage")}
+                hint={t("field.allowSessionFixWithoutPackageHint")}
+                checked={form.allowSessionFixWithoutPackage}
+                onChange={(v) => set("allowSessionFixWithoutPackage", v)}
+              />
+            )}
             {/* Activo NO se edita en multicentro (es por centro); sí en un-centro. */}
             {isEdit && !editandoTodos && <Toggle label={t("field.activo")} checked={form.activo} onChange={(v) => set("activo", v)} />}
           </div>
@@ -646,41 +659,3 @@ function ServicioForm({
   );
 }
 
-// Selector de grupo de facturación (catálogo del BE, data-driven). "" = sin grupo.
-function GrupoSelect({ value, onChange }: { value: string; onChange: (id: string) => void }) {
-  const t = useTranslations("servicios");
-  const tRoot = useTranslations();
-  const { state } = useResource<GrupoFacturacion[]>(() => getGruposFacturacion(), []);
-  const grupos = (state.kind === "ok" ? state.data : []).filter((g) => g.active !== false);
-  const NONE = "__none__";
-  return (
-    <Select value={value || NONE} onValueChange={(v) => onChange(v === NONE ? "" : v)}>
-      <SelectTrigger className="w-full"><SelectValue placeholder={t("field.grupoNone")} /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value={NONE}>{t("field.grupoNone")}</SelectItem>
-        {grupos.map((g) => (
-          <SelectItem key={g.id} value={g.id}>{tRoot(g.labelKey)}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-      {hint && <span className="text-[11px] text-muted-foreground">{hint}</span>}
-    </label>
-  );
-}
-
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div className="flex items-center justify-between rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <span className="text-sm">{label}</span>
-      <Switch checked={checked} onCheckedChange={onChange} />
-    </div>
-  );
-}
