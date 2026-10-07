@@ -49,6 +49,7 @@ import { CertificacionGastos } from "@/components/clientes/certificacion-gastos"
 import { FichaCitas, FichaTerapias, FichaFacturacion, FichaUltimaVisita } from "@/components/clientes/ficha-tabs";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
+import { OldRecordSuggestionBanner } from "@/components/clientes/old-record-suggestion-banner";
 import {
   fullName,
   initials,
@@ -267,6 +268,13 @@ function PacienteDetail({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <OldRecordSuggestionBanner
+        patientId={p.id}
+        centroId={centroId}
+        recordActual={p.medicalRecordNumber}
+        onReemplazado={onChanged}
+      />
 
       {/* Banda de avisos siempre visible (como la referencia): alertas, alergias, implantes. La ausencia
           también es información. (Se poblará con datos del BE cuando existan.) */}
