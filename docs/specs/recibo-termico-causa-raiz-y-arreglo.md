@@ -67,6 +67,23 @@ instalar software en cada equipo además de mantener la cola limpia en el servid
 infraestructura para este momento). Todo ese código se quitó del repo (commit `5558bd6`). **No reabrir
 esa puerta**: la causa real era de configuración de driver, no algo que necesitara ESC/POS a mano.
 
+## Navegador: cuál usar y un ajuste suyo (dato del dueño, verificado en papel)
+
+Con el driver ya corregido (sección anterior):
+
+- **Chrome**: funciona de una, sin tocar nada.
+- **Edge y Brave**: funcionan, pero hay que poner **"Margins" (Márgenes) en "Minimum" (Mínimo)** en el
+  diálogo de impresión — con los márgenes por defecto salía en miniatura (mismo síntoma que
+  `docs/specs/recibo-termico-sale-en-miniatura.md`, la página pide más espacio del que el papel
+  imprimible tiene y el navegador encoge todo para que quepa). Supuesto, no verificado línea por línea:
+  el margen por defecto de estos dos, sumado al contenido, se pasa del ancho real del rollo; "Minimum"
+  lo quita de en medio.
+- **Firefox**: sigue sin funcionar pase lo que pase con sus ajustes. No usar Firefox para imprimir
+  recibos hasta que alguien encuentre la causa específica de Firefox.
+
+**Tener más de un navegador a mano** (Chrome y, si falla, Edge/Brave con Márgenes en Mínimo) da
+redundancia real para el día a día — Chrome puede fallar sin motivo aparente de vez en cuando.
+
 ## Lo que queda pendiente, y es de infraestructura, no de este repo
 
 La cola vieja (`TM-T20II`, con el driver Zijiang) sigue existiendo en la Zorin. Una vez todos los
