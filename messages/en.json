@@ -1950,6 +1950,15 @@
     "sinResultadosEnCentro": "No results in {centro}",
     "pestana": {
       "ondas_choque": "Sonic"
+    },
+    "ubicacion": {
+      "titulo": "Where each patient is",
+      "vacio": "Nobody present right now.",
+      "enVitales": "Vitals",
+      "enConsultaEsperando": "Consultation — waiting",
+      "enConsulta": "In consultation",
+      "enServicioEsperando": "{servicio} — waiting",
+      "enServicio": "In {servicio}"
     }
   },
   "programarCitas": {

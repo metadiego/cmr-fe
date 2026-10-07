@@ -41,6 +41,7 @@ import { useDictado } from "@/hooks/use-dictado";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { FrontdeskSearchBar } from "@/components/frontdesk/frontdesk-search-bar";
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
+import { UbicacionEnVivoWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
@@ -522,6 +523,10 @@ export function FrontdeskBoard() {
         }
         actions={
           <>
+            <UbicacionEnVivoWidget
+              centroId={gate.centro}
+              nombreServicio={(slug) => servicios.find((s) => s.slug === slug)?.name}
+            />
             <NurseStatusButton fecha={fecha} centro={gate.centro} />
             <Input
               type="date"
