@@ -36,6 +36,18 @@ exacto (decisión del BE), pero alguna de estas sirve:
 3. Cualquier otro mecanismo que el BE prefiera — el requisito es el RESULTADO: nunca un "no se puede
    tocar este número" por falta de paquete.
 
+## Dos requisitos explícitos del dueño, agregados 07-oct-2026
+
+- **Configurable POR SERVICIO**, no un interruptor global: cada servicio decide si `fd_sesiones` se
+  puede corregir sin paquete (dato en la configuración del servicio, como ya existen otros
+  interruptores por servicio — p. ej. `pushesToEhrOnPresente` — mismo patrón, no hardcode).
+- **Aplicar TODAS las reglas ya establecidas** para una escritura sin saldo, no solo "dejar pasar":
+  - Avisar (ámbar/visible), nunca bloquear.
+  - Dejar el registro **en negativo** si corresponde, nunca rechazar la operación.
+  - **Log de quién lo hizo y cuándo** (actor + timestamp), igual que ya exige
+    `docs/specs/frontdesk-servicios-disponibilidad.md` para una entrega sin saldo.
+  - Mismo criterio exacto que ya cumple `fd_aplicadas` hoy — no una versión reducida.
+
 ## No-scope
 
 - No se pide cambiar el comportamiento de `fd_aplicadas` (ya funciona bien, verificado hoy en vivo
