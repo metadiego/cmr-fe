@@ -1,60 +1,74 @@
 # El recibo térmico: la causa raíz real (no era el navegador, ni el HTML, ni el CSS)
 
 **Estado: verificado en papel, 7-oct-2026.** Semanas peleando con el corte del recibo (se comía las
-últimas líneas, Firefox nunca abría el diálogo) no eran un problema de la página web. Lo eran de la
-cola de impresión en el servidor que comparte la Epson.
+últimas líneas, Firefox nunca abría el diálogo) no eran un problema de la página web. Era, primero, el
+driver de la cola en el servidor; y segundo, un ajuste de ese driver puesto al revés. **La solución
+final NO toca este repo** — es configuración del equipo que imprime. El FE solo abre `/print/invoice/:id`
+en una pestaña nueva y la deja imprimirse sola con `window.print()`; nada más.
 
-## Lo verificado (entrando al servidor, no adivinando)
+## Causa raíz #1 — la cola compartida tenía el driver de un CLON, no el de Epson
 
 El equipo que comparte la impresora es una **Zorin OS 18.1** (Ubuntu 24.04) por red, con la Epson
 TM-T20II conectada por USB. La cola CUPS que usa todo el mundo hoy (`TM-T20II`) tiene instalado el
 driver de una **impresora clon genérica — "Zijiang ZJ-80"** (`printer-make-and-model='Zijiang ZJ-80'`,
-filtro `rastertozj`) — no el de la Epson real. Epson **no publica un driver de Linux descargable**
-para este modelo (solo SDK de programador: JavaPOS, ePOS-Print XML, ePOS SDK para JS), así que esa
-cola nunca tuvo el driver correcto puesto.
+filtro `rastertozj`) — no el de la Epson real. Epson **no publica un driver de Linux descargable** para
+este modelo (solo SDKs de programador), así que esa cola nunca tuvo el driver correcto puesto.
 
-Ese filtro genérico **recorta el papel en blanco donde detecta que ya no hay tinta**, antes de mandarlo
-a la impresora. Por eso ningún cambio de HTML/CSS —ni milímetros, ni líneas de texto, ni una página
-en blanco forzada— podía arreglar el corte: el navegador jamás controla eso, lo decide el filtro en
-el servidor. Y por el mismo motivo, el recibo salía bien en Chrome (que compone la impresión distinto)
-y nunca bien en Firefox (que lee directamente los tamaños de papel rarísimos que ese PPD declara —
-`79.73mm`, `209.9mm`, `3275.89mm`… — visibles en su diálogo de impresión).
+Ese filtro genérico recorta/interpreta el trabajo a su manera antes de mandarlo a la impresora — por
+eso ningún cambio de HTML/CSS podía arreglarlo, y por eso Chrome y Firefox se comportaban distinto (cada
+uno compone la impresión de otra forma contra ese PPD raro).
 
-## La prueba que lo confirma
+**Se creó una cola nueva, sin filtro** (`TM-T20II-RAW`, en la Zorin) apuntando al mismo USB, para poder
+probar sin ese filtro de por medio.
 
-Se creó una cola CUPS **nueva, sin filtro** (`TM-T20II-RAW`, `-m raw`) apuntando al mismo USB, sin
-tocar la que usa producción. Se le mandó un trabajo de bytes ESC/POS reales (texto + la orden de corte
-`GS V 0` puesta a mano) directo por `lp -o raw`. **Salió completo y cortó justo donde se le dijo** —
-confirmado en papel por el dueño.
+## Causa raíz #2 — el driver real de Epson SÍ estaba instalado, pero con dos ajustes al revés
 
-## El arreglo
+El dueño ya tenía el **driver genuino de Epson para macOS** instalado (`EPSON TM-T20II` / filtro
+`rastertotmt`, en `/Library/Printers/PPDs/`) — no era necesario bajar nada nuevo. El problema eran dos
+ajustes de ESE driver, verificados leyendo su propio PPD:
 
-El FE ya tenía escrito (desde hace meses) un generador de ESC/POS puro (`lib/print/escpos.ts`) y un
-cliente de QZ Tray (`lib/print/qz.ts`) para mandar esos bytes directo a una impresora, sin pasar por el
-navegador ni por ningún driver que rasterice y adivine. Estaba **oculto** (`QZ_PRINT_UI = false`)
-porque mandar a una impresora compartida parecía impráctico. Con la cola limpia ya probada, se
-**reactivó**: `app/(app)/billing/invoices/[id]/page.tsx`, botón **Imprimir** dentro del visor → si el
-dispositivo tiene configurado el método **"qz"** con una impresora, emite la factura, arma el recibo y
-manda los bytes ESC/POS a esa cola (con su propia orden de corte, no la de nadie más); si QZ falla o no
-está configurado, cae al camino de siempre (la página dedicada que se imprime sola por el navegador).
+- **`PageSize` en `Letter`** en vez de `RP80x297` (Roll Paper 80×297mm) — así el navegador/CUPS
+  maquetaba cada recibo como una hoja carta completa.
+- **`TmtPaperReduction` (Recorte de papel) en `Off`**. Esta opción es justamente la función del driver
+  para recortar el blanco sobrante y simular un rollo de largo variable sobre una página de tamaño fijo
+  (`RP80x297` es 297mm fijos, no infinitos — el PPD declara `VariablePaperSize: True` y
+  `MaxMediaHeight` ~2m, pero el recorte automático es lo que lo hace valer). Con `Off`, cada recibo salía
+  con ~290mm de blanco de más antes del corte (de ahí el "cortó 11 pulgadas más abajo de donde debía").
 
-## Lo que falta — configuración del equipo, no código
+**Arreglo, verificado en papel:**
+```
+lpadmin -p <cola> -o PageSize=RP80x297 -o TmtPaperReduction=Bottom
+```
+Con la cola apuntando a `TM-T20II-RAW` (sin el filtro clon de por medio) y esos dos ajustes, el mismo
+mecanismo de imprimir-por-navegador que ya existía **cortó pegado al texto, sin perder nada** —
+confirmado por el dueño en vivo.
 
-**Probado como prueba de concepto en el Mac de desarrollo del dueño** (confirmado en papel: texto
-completo, corte exacto). **Los equipos de mostrador son Windows**, así que falta repetirlo ahí:
+## Qué hacer en cada equipo que imprime (Windows incluido)
 
-1. Instalar **QZ Tray** (gratis, firmado — `qz-tray-2.3.0-x86_64.exe` en `github.com/qzind/tray/releases`)
-   en cada PC Windows de mostrador que imprime recibos.
-2. Añadir ahí la impresora de red apuntando a la cola `TM-T20II-RAW` de la Zorin (Agregar impresora →
-   por dirección IP/IPP; no instalar ningún driver de Epson/genérico encima, que vuelve a filtrar).
-3. En la factura → **Opciones de impresión**: método **"QZ Tray"**, buscar impresoras y elegir
-   `TM-T20II-RAW`, columnas = 48 (80mm).
-4. Probar un recibo real. El HTML/CSS ya no interviene en el corte: ahora lo decide nuestra propia
-   orden ESC/POS.
+**Esto es configuración del sistema operativo / del driver de impresora, no del repo.** El FE no
+necesita saber nada de esto — basta con que la impresora seleccionada tenga el driver real de Epson
+bien ajustado. Para cada PC de mostrador (Windows):
+
+1. Instalar el **driver oficial de Epson para Windows** si no está ya (Advanced Printer Driver, en
+   `download-center.epson.com` o el medio que use esa PC — el genérico de Windows no sirve, igual que en
+   macOS).
+2. Apuntar esa impresora a la cola **`TM-T20II-RAW`** de la Zorin (sin filtro), no a la vieja `TM-T20II`
+   (que sigue con el driver clon puesto).
+3. En las propiedades de la impresora: tamaño de papel = **rollo 80mm**, y la opción equivalente a
+   "Paper Reduction" / recorte de papel en blanco = **encendida** (el nombre exacto varía en el driver
+   de Windows; es la misma idea que `TmtPaperReduction=Bottom` en macOS).
+4. Dejarla como impresora **por defecto** de esa PC, para que `window.print()` la use sin que nadie
+   tenga que elegirla.
+
+## Lo que se descartó, y por qué sigue descartado
+
+Se abandonó la ruta de QZ Tray + bytes ESC/POS crudos desde el FE (se probó, funcionó, pero exigía
+instalar software en cada equipo además de mantener la cola limpia en el servidor — demasiada
+infraestructura para este momento). Todo ese código se quitó del repo (commit `5558bd6`). **No reabrir
+esa puerta**: la causa real era de configuración de driver, no algo que necesitara ESC/POS a mano.
 
 ## Lo que queda pendiente, y es de infraestructura, no de este repo
 
-La cola vieja (`TM-T20II`, con el driver Zijiang) sigue existiendo en la Zorin para no romper nada
-mientras se confirma la nueva. Una vez el equipo de mostrador imprima bien por QZ de forma consistente,
-conviene retirar o corregir esa cola vieja — eso es administración del servidor, no un cambio de este
-repositorio.
+La cola vieja (`TM-T20II`, con el driver Zijiang) sigue existiendo en la Zorin. Una vez todos los
+equipos de mostrador impriman por `TM-T20II-RAW` con el driver correcto, conviene retirar o corregir esa
+cola vieja — administración del servidor, no de este repositorio.
