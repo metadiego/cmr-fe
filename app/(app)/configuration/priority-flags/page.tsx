@@ -51,7 +51,7 @@ export default function PriorityFlagsAdminPage() {
   const [editing, setEditing] = React.useState<PriorityFlagType | "new" | null>(null);
 
   return (
-    <ConfigGuard permiso="pacientes.prioridadFlags.admin">
+    <ConfigGuard permiso="pacientes.prioridad_flags.admin">
       <PageContainer>
         <PageHeader
           title={t("title")}

@@ -36,8 +36,8 @@ export function PriorityFlagsBadges({ patientId, centroId }: { patientId: string
   const t = useTranslations("patients.priorityFlags");
   const tRoot = useTranslations();
   const { can } = useCan();
-  const puedeEscribir = can("pacientes.prioridadFlags.write");
-  const puedeAdmin = can("pacientes.prioridadFlags.admin");
+  const puedeEscribir = can("pacientes.prioridad_flags.write");
+  const puedeAdmin = can("pacientes.prioridad_flags.admin");
 
   const flagsRes = useResource<PatientPriorityFlag[]>(() => getPatientPriorityFlags(patientId, centroId), [patientId, centroId]);
   const catalogRes = useResource<PriorityFlagType[]>(() => getPriorityFlagTypes(), []);
