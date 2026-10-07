@@ -4,9 +4,10 @@ import type { Recibo } from "@/lib/factura/build-recibo";
 // siendo el default y no cambia en nada. Este camino existe para cuando ese falla: manda los bytes
 // del recibo DIRECTO a la cola sin filtro del servidor (sin pasar por ningún driver de impresora ni
 // por el diálogo del navegador), así que funciona igual en cualquier navegador. Ver
-// docs/specs/recibo-termico-causa-raiz-y-arreglo.md. El hub vive en la Zorin, servicio systemd
-// `cmr-print-hub`, certificado autofirmado (aceptar el aviso UNA vez por equipo/navegador).
-const HUB_URL = "https://192.130.80.181:8943/print-raw";
+// docs/specs/recibo-termico-causa-raiz-y-arreglo.md. El hub vive en dev-server (no en la Zorin, que
+// solo tiene la impresora por USB), servicio systemd `cmr-print-hub`, y reenvía por red a la cola sin
+// filtro de la Zorin; certificado autofirmado (aceptar el aviso UNA vez por equipo/navegador).
+const HUB_URL = "https://192.130.80.172:8943/print-raw";
 
 const ESC = 0x1b;
 const GS = 0x1d;
@@ -98,7 +99,7 @@ export function reciboComoTexto(r: Recibo): Uint8Array<ArrayBuffer> {
   return Uint8Array.from(bytes);
 }
 
-// Manda los bytes al hub de la Zorin. Lanza si falla (el llamador decide el mensaje/`toast`).
+// Manda los bytes al hub de dev-server. Lanza si falla (el llamador decide el mensaje/`toast`).
 export async function imprimirPorHub(r: Recibo): Promise<void> {
   const bytes = reciboComoTexto(r);
   const res = await fetch(HUB_URL, { method: "POST", body: new Blob([bytes]) });
