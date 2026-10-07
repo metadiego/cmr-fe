@@ -24,7 +24,6 @@ import {
   type ItemOpcional,
   buscarPaciente,
   emitirFactura,
-  imprimirFactura,
   regenerarDisponibilidad,
   type RegenerarDisponibilidad,
   type FacturaConItems,
@@ -47,10 +46,6 @@ import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
-import { reciboToEscPos, type EscPosLabels } from "@/lib/print/escpos";
-import { getPrintSettings, setPrintSettings, type PrintSettings } from "@/lib/print/print-settings";
-import { qzListPrinters, qzPrintRaw } from "@/lib/print/qz";
-import { printEscPosWebUsb, usbErrorKey, webUsbSupported } from "@/lib/print/webusb";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -95,19 +90,6 @@ import {
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
-// Impresión ESC/POS por QZ Tray: REACTIVADA. Causa raíz encontrada y verificada en el servidor Linux que
-// comparte la Epson (Zorin): la cola CUPS que usa todo el mundo tenía puesto el driver de una impresora
-// CLON genérica (Zijiang ZJ-80, filtro `rastertozj`) en vez del real Epson — ese filtro recorta el papel
-// donde detecta que ya no hay tinta, por eso ningún cambio de HTML/CSS podía evitarlo: el navegador nunca
-// controla el corte, lo decide ese filtro. Epson no ofrece driver de Linux descargable para este modelo
-// (solo SDKs de programador), así que la cola rota no tiene arreglo por ese lado.
-// Se creó una cola NUEVA sin filtro ("TM-T20II-RAW", cruda) apuntando al mismo USB; una prueba con bytes
-// ESC/POS reales (texto + orden de corte GS V puesta por nosotros) salió completa y cortó bien — verificado
-// en papel. QZ Tray (instalado en el equipo que imprime) + nuestro generador ESC/POS (lib/print/escpos.ts)
-// mandan esos mismos bytes a esa cola: cero rasterizado, cero adivinar tamaño de página, el corte lo
-// decidimos nosotros. Pendiente: instalar QZ Tray en el equipo de mostrador y elegir esa cola en Opciones.
-const QZ_PRINT_UI = true;
-const USB_TEST_UI = false;
 // Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
 // pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
 const RESUMEN_PACIENTE_ENABLED = true;
@@ -125,11 +107,6 @@ export default function FacturacionPage() {
   const [usuarioOpen, setUsuarioOpen] = React.useState(false);
   // Nº de presupuesto que asigna el BE al imprimir un borrador con saldo (se reusa al reimprimir).
   const [presupuestoNum, setPresupuestoNum] = React.useState<string | null>(null);
-  // Impresión: ajustes por dispositivo (navegador vs térmica ESC/POS por QZ Tray) + diálogo de opciones.
-  const [printOpen, setPrintOpen] = React.useState(false);
-  const [printCfg, setPrintCfg] = React.useState<PrintSettings>(() => getPrintSettings());
-  const [impresoras, setImpresoras] = React.useState<string[]>([]);
-  const [buscandoImpresoras, setBuscandoImpresoras] = React.useState(false);
   const { can } = useCan();
 
   const t = useTranslations("facturacion");
@@ -228,84 +205,13 @@ export default function FacturacionPage() {
   function imprimir() {
     setReciboOpen(true);
   }
-  // Imprimir/reimprimir: dos rutas según el ajuste del DISPOSITIVO (Opciones de impresión).
-  //  - "qz": bytes ESC/POS crudos a la cola SIN FILTRO de la impresora (QZ Tray, instalado en ESTE equipo).
-  //    Es la ruta que de verdad corrige el corte: la cola normal tiene puesto el driver de un CLON genérico
-  //    (Zijiang) que recorta el papel por su cuenta — verificado leyendo la configuración del servidor que
-  //    comparte la impresora — y ningún HTML/CSS puede ganarle eso. Si QZ falla (no instalado, sin
-  //    impresora elegida, lo que sea), SIEMPRE cae a la otra ruta: nunca se queda sin imprimir.
-  //  - "navegador" (default): abre la página dedicada en una pestaña nueva, que se imprime A SÍ MISMA con
-  //    `window.print()` (el método que sí abre el diálogo en todo navegador, incluido Firefox) y se cierra
-  //    sola al terminar. `iframe.contentWindow.print()` NO se usa: es conocido por fallar en Firefox.
-  async function imprimirDesdeVisor() {
-    const cfg = getPrintSettings();
-    const abrirPaginaDedicada = () =>
-      window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
-    if (cfg.metodo !== "qz" || !cfg.impresora) {
-      abrirPaginaDedicada();
-      return;
-    }
-    try {
-      const r = await imprimirFactura(id, centro); // emite (idempotente) y trae el número/estado definitivos
-      setFactura(r.invoice);
-      const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
-      await qzPrintRaw(cfg.impresora, reciboToEscPos(reciboFinal, escposLabels, cfg.columnas));
-      toast.success(t("print.doneQz"));
-    } catch {
-      toast.warning(t("print.qzFallback"));
-      abrirPaginaDedicada();
-    }
-  }
-
-  // Etiquetas del recibo ESC/POS (la lib es pura; el texto i18n viene de aquí). Objeto plano: el React
-  // Compiler lo memoiza solo.
-  const Lr = (key: string, fallback: string) =>
-    tRoot.has(`receipt.${key}`) ? tRoot(`receipt.${key}`) : fallback;
-  const escposLabels: EscPosLabels = {
-    factura: Lr("invoice", "Factura"),
-    presupuesto: Lr("budgetDoc", "Presupuesto"),
-    devolucion: Lr("returnDoc", "Devolucion"),
-    anulada: Lr("void", "ANULADA"),
-    patientEn: Lr("patientLabelEn", "Patient or Responsible Party"),
-    patientEs: Lr("patientLabelEs", "Paciente o responsable"),
-    record: Lr("record", "Record"),
-    id: "ID",
-    subtotal: Lr("subtotal", "Subtotal"),
-    discount: Lr("discount", "Descuento"),
-    tax: Lr("tax", "Impuesto"),
-    shipping: Lr("shipping", "Envio"),
-    total: Lr("total", "Total"),
-    paid: Lr("paid", "Total pagado"),
-    balance: Lr("balance", "Balance"),
-    includes: Lr("includes", "Incluye"),
-  };
-
-  // PRUEBA: impresión directa por WebUSB (Chrome/Edge, sin instalar nada, sin diálogo). Envía el recibo
-  // actual tal cual está en pantalla. Al primer uso el navegador pide elegir la impresora (una vez).
-  async function probarUsbDirecto() {
-    try {
-      if (!webUsbSupported()) {
-        toast.error(t("print.usbUnsupported"));
-        return;
-      }
-      const bytes = reciboToEscPos(recibo, escposLabels, getPrintSettings().columnas);
-      await printEscPosWebUsb(bytes);
-      toast.success(t("print.usbDone"));
-    } catch (e) {
-      toast.error(t(usbErrorKey(e)));
-    }
-  }
-
-  // Buscar impresoras del sistema vía QZ (para el selector del diálogo de opciones).
-  async function buscarImpresoras() {
-    setBuscandoImpresoras(true);
-    try {
-      const lista = await qzListPrinters();
-      setImpresoras(lista);
-      if (lista.length === 0) toast.warning(t("print.qzNoPrinters"));
-    } finally {
-      setBuscandoImpresoras(false);
-    }
+  // Imprimir/reimprimir: SIMPLE, un solo camino, sin ajustes. Abre la página dedicada (solo el recibo,
+  // sin la app alrededor) en una pestaña nueva; esa página se imprime A SÍ MISMA con `window.print()`
+  // (abre el diálogo nativo en todo navegador, incluido Firefox) y se cierra sola al terminar. Se decidió
+  // NO perseguir la ruta ESC/POS por QZ Tray: exige instalar software en cada equipo y una cola de
+  // impresión limpia en el servidor que la comparte, fuera del alcance de este repo por ahora.
+  function imprimirDesdeVisor() {
+    window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
   }
 
   if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
@@ -403,27 +309,6 @@ export default function FacturacionPage() {
               <HugeiconsIcon icon={PrinterIcon} className="size-4" />
               {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
             </Button>
-            {/* PRUEBA (temporal): impresión USB directa por WebUSB, sin instalar nada. Solo Chrome/Edge.
-                OCULTO tras USB_TEST_UI: el código queda para el futuro. */}
-            {USB_TEST_UI && (
-              <Button variant="secondary" size="sm" className="no-print" onClick={probarUsbDirecto}>
-                {t("print.usbTest")}
-              </Button>
-            )}
-            {/* Opciones de impresión (navegador vs térmica ESC/POS por QZ Tray). OCULTO: QZ exige instalar
-                software en cada equipo → no es práctico. El código queda para el futuro; por defecto todo
-                imprime por el navegador. Poner QZ_PRINT_UI en true para volver a mostrarlo. */}
-            {QZ_PRINT_UI && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="no-print text-xs text-muted-foreground"
-                onClick={() => { setPrintCfg(getPrintSettings()); setPrintOpen(true); }}
-              >
-                {t("print.options")}
-                {printCfg.metodo === "qz" && <span className="ml-1 rounded bg-primary/10 px-1 text-[10px] text-primary">QZ</span>}
-              </Button>
-            )}
             {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
                 EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
             {estado === "emitida" && can("factura.reparar") && (
@@ -443,76 +328,6 @@ export default function FacturacionPage() {
           </>
         }
       />
-
-      {/* Opciones de impresión (por dispositivo, en localStorage). El navegador es el default; la térmica
-          por QZ Tray es opcional y con respaldo automático al navegador si falla. */}
-      <Dialog open={printOpen} onOpenChange={setPrintOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("print.title")}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 text-sm">
-            <p className="text-xs text-muted-foreground">{t("print.help")}</p>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("print.method")}</label>
-              <Select
-                value={printCfg.metodo}
-                onValueChange={(v) => setPrintCfg((c) => ({ ...c, metodo: v as PrintSettings["metodo"] }))}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="navegador">{t("print.methodBrowser")}</SelectItem>
-                  <SelectItem value="qz">{t("print.methodQz")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {printCfg.metodo === "qz" && (
-              <>
-                <div>
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <label className="text-xs font-medium text-muted-foreground">{t("print.printer")}</label>
-                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={buscarImpresoras} disabled={buscandoImpresoras}>
-                      {buscandoImpresoras ? tRoot("common.loading") : t("print.search")}
-                    </Button>
-                  </div>
-                  <Select
-                    value={printCfg.impresora ?? ""}
-                    onValueChange={(v) => setPrintCfg((c) => ({ ...c, impresora: v }))}
-                  >
-                    <SelectTrigger><SelectValue placeholder={t("print.printerPlaceholder")} /></SelectTrigger>
-                    <SelectContent>
-                      {impresoras.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                      {printCfg.impresora && !impresoras.includes(printCfg.impresora) && (
-                        <SelectItem value={printCfg.impresora}>{printCfg.impresora}</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-muted-foreground">{t("print.width")}</label>
-                  <Select
-                    value={String(printCfg.columnas)}
-                    onValueChange={(v) => setPrintCfg((c) => ({ ...c, columnas: Number(v) }))}
-                  >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="48">{t("print.width80")}</SelectItem>
-                      <SelectItem value="32">{t("print.width58")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("print.qzHint")}</p>
-              </>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setPrintOpen(false)}>{tRoot("common.cancel")}</Button>
-              <Button size="sm" onClick={() => { setPrintSettings(printCfg); setPrintOpen(false); toast.success(t("print.saved")); }}>
-                {tRoot("common.save")}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Visor del recibo (no se sale de facturación): iframe a la página dedicada (solo el recibo) + imprimir. */}
       <Dialog open={reciboOpen} onOpenChange={setReciboOpen}>
