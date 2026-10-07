@@ -77,17 +77,24 @@ impresión, sin margen que ajustar.
 
 **Verificado en papel, con un clic real en Firefox:** funciona.
 
-### Lo que vive en el servidor (Zorin, NO en este repo)
+### Lo que vive en el servidor (dev-server, NO en este repo)
 
-- `/opt/cmr-print-hub/hub.py` — servidor HTTP mínimo (stdlib de Python, sin dependencias), escucha en
-  el puerto **8943 por HTTPS** (certificado autofirmado, 825 días desde 7-oct-2026, en
-  `/opt/cmr-print-hub/hub.{crt,key}`), recibe bytes en `POST /print-raw` y los manda con
-  `lp -d TM-T20II-RAW -o raw` — la MISMA cola sin filtro de la causa raíz #1 de arriba.
-- Registrado como servicio systemd `cmr-print-hub` (`/etc/systemd/system/cmr-print-hub.service`):
-  arranca solo al prender el equipo, se reinicia solo si falla. `systemctl status cmr-print-hub` para
-  ver su estado; log en `/opt/cmr-print-hub/hub.log`.
+**Mudado de la Zorin a dev-server el 7-oct-2026** (el dueño: "el hub hay que mudarlo a un server real"),
+porque la Zorin solo sirve para tener la impresora por USB, no para alojar servicios. El hub de la
+Zorin se **detuvo y se deshabilitó** (`systemctl disable --now cmr-print-hub` en `super@192.130.80.181`)
+— no quedó duplicado.
+
+- **dev-server (192.130.80.172)**, no donde está la impresora. `/opt/cmr-print-hub/hub.py` — servidor
+  HTTP mínimo (stdlib de Python, sin dependencias), escucha en el puerto **8943 por HTTPS**
+  (certificado autofirmado, 825 días desde 7-oct-2026, en `/opt/cmr-print-hub/hub.{crt,key}`), recibe
+  bytes en `POST /print-raw` y los reenvía **por red** a la Zorin con
+  `lp -h 192.130.80.181:631 -d TM-T20II-RAW -o raw` — la MISMA cola sin filtro de la causa raíz #1 de
+  arriba, ahora alcanzada vía IPP en vez de localmente.
+- Registrado como servicio systemd `cmr-print-hub` (`/etc/systemd/system/cmr-print-hub.service`) en
+  dev-server: arranca solo al prender el equipo, se reinicia solo si falla. `systemctl status
+  cmr-print-hub` para ver su estado; log en `/opt/cmr-print-hub/hub.log`.
 - **Certificado autofirmado**: cada equipo/navegador que use el respaldo tiene que visitar
-  `https://192.130.80.181:8943/` UNA vez y aceptar el aviso de seguridad — después no vuelve a
+  `https://192.130.80.172:8943/` UNA vez y aceptar el aviso de seguridad — después no vuelve a
   preguntar. No es un certificado público (es un respaldo de LAN, no un servicio de internet).
 
 ### Lo que vive en este repo
