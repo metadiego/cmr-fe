@@ -248,11 +248,13 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         )}
       </div>
 
-      {/* LÍNEAS en blanco (no milímetros de CSS) para que el cortador no se coma el final: un <div> vacío de
-          altura fija no tiene tinta, y muchos drivers de impresora térmica RECORTAN el blanco sin tinta antes
-          de mandarlo a imprimir — por eso subir el alto (16→30→45→70mm) no cambiaba nada, el driver lo
-          descartaba igual. Líneas de texto real (con un carácter) sí cuentan como contenido. */}
-      {Array.from({ length: 14 }, (_, i) => <div key={i}>&nbsp;</div>)}
+      {/* Página EN BLANCO forzada al final: `break-before:page` obliga un salto de página real (no solo
+          espacio dentro de la misma), así el corte cae en esa página vacía y nunca en el texto de la
+          factura, sea cual sea la distancia fija del cortador. Lleva líneas con contenido (no solo altura
+          en CSS) por si algún driver recorta el blanco puro sin tinta antes de imprimir. */}
+      <div aria-hidden style={{ breakBefore: "page", pageBreakBefore: "always" }}>
+        {Array.from({ length: 10 }, (_, i) => <div key={i}>&nbsp;</div>)}
+      </div>
     </div>
   );
 }
