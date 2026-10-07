@@ -217,16 +217,17 @@ export default function FacturacionPage() {
   // cuadre) antes de imprimir; uno sin cobrar imprime igual pero avisa que no quedó emitido. Refrescamos
   // la factura con lo que devuelve el BE y, tras pintar el recibo definitivo, mandamos a imprimir.
   // Handoff HANDOFF-vitales-en-atencion-e-imprimir-emite.
-  // Abre el VISOR del recibo en un modal (no se sale de facturación). El recibo lo pinta la página dedicada
-  // dentro de un iframe; el botón del modal lo imprime/reimprime.
+  // Abre el VISOR del recibo en un modal (no se sale de facturación): el iframe es solo para VER.
   function imprimir() {
     setReciboOpen(true);
   }
+  // Imprimir/reimprimir NO usa `iframe.contentWindow.print()`: en Firefox ese método es conocido por fallar
+  // (no abre el diálogo, o imprime la página de arriba en vez del iframe) — es justo el mecanismo que
+  // reintrodujo el problema que ya habíamos resuelto. Se abre la MISMA página dedicada en una pestaña nueva,
+  // que se imprime A SÍ MISMA con `window.print()` (el método que sí funciona, comprobado) y se cierra sola
+  // al terminar. El visor queda abierto para reimprimir cuantas veces haga falta.
   function imprimirDesdeVisor() {
-    const w = reciboIframeRef.current?.contentWindow;
-    if (!w) return;
-    w.focus();
-    w.print();
+    window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
   }
 
   // Etiquetas del recibo ESC/POS (la lib es pura; el texto i18n viene de aquí). Objeto plano: el React

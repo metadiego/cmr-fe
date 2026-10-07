@@ -248,10 +248,11 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
         )}
       </div>
 
-      {/* Espacio en blanco al FINAL para que el cortador térmico avance y corte DEBAJO del texto: sin esto, el
-          corte (a distancia fija del final en la TM-T20II) se comía las últimas líneas. 70mm ≈ una pulgada más
-          de tolerancia que antes, para que el corte caiga bien por debajo del texto. */}
-      <div aria-hidden style={{ height: "70mm" }} />
+      {/* LÍNEAS en blanco (no milímetros de CSS) para que el cortador no se coma el final: un <div> vacío de
+          altura fija no tiene tinta, y muchos drivers de impresora térmica RECORTAN el blanco sin tinta antes
+          de mandarlo a imprimir — por eso subir el alto (16→30→45→70mm) no cambiaba nada, el driver lo
+          descartaba igual. Líneas de texto real (con un carácter) sí cuentan como contenido. */}
+      {Array.from({ length: 14 }, (_, i) => <div key={i}>&nbsp;</div>)}
     </div>
   );
 }

@@ -60,10 +60,22 @@ export default function PrintInvoicePage() {
   }, [id, centroParam]);
 
   // Autoimprimir cuando el recibo ya está pintado (y los estilos/imagen cargados). En modo visor (embed) NO:
-  // el usuario imprime/reimprime desde el botón del modal.
+  // ahí el usuario mira el iframe y el botón "Imprimir" del modal abre ESTA MISMA página en una pestaña
+  // nueva para que se imprima sola — ver imprimirDesdeVisor en la factura. Sin embed (pestaña propia, abierta
+  // por "Imprimir" o por reimprimir desde el visor): se autoimprime y se cierra sola al terminar, como el
+  // print.php del legado (window.close() tras window.print()).
   React.useEffect(() => {
     if (!recibo || embed) return;
-    const h = setTimeout(() => window.print(), 400);
+    const h = setTimeout(() => {
+      window.print();
+      window.onafterprint = () => {
+        try {
+          window.close();
+        } catch {
+          /* algunos navegadores no dejan cerrar una pestaña que no abrió un script; no pasa nada, queda abierta */
+        }
+      };
+    }, 400);
     return () => clearTimeout(h);
   }, [recibo, embed]);
 
