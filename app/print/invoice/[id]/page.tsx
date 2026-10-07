@@ -17,14 +17,20 @@ export default function PrintInvoicePage() {
   const id = String(params?.id ?? "");
   // `?embed=1`: va DENTRO del visor (iframe) del modal de facturación — no se auto-imprime; el botón del
   // modal manda a imprimir. Sin embed (pestaña propia) sí se auto-imprime, como el print.php del legado.
-  const embed = useSearchParams()?.get("embed") === "1";
+  const searchParams = useSearchParams();
+  const embed = searchParams?.get("embed") === "1";
+  // `centro` SIEMPRE de la URL primero: esta página no comparte estado con quien la abrió (otra pestaña o
+  // un iframe), así que depender de la cookie `cmr_active_centro` podía traer OTRO centro que el de la
+  // factura (bug real encontrado: la pantalla de facturación ya resuelve el centro por `?centro=`, pero el
+  // iframe no lo pasaba). La cookie queda de respaldo solo si no vino en la URL.
+  const centroParam = searchParams?.get("centro") || undefined;
   const [recibo, setRecibo] = React.useState<Recibo | null>(null);
   const [error, setError] = React.useState(false);
 
   React.useEffect(() => {
     if (!id) return;
     let active = true;
-    const centro = getActiveCentro() ?? undefined;
+    const centro = centroParam ?? getActiveCentro() ?? undefined;
     (async () => {
       try {
         const r = await imprimirFactura(id, centro); // emite (idempotente) y devuelve la proyección final
@@ -51,7 +57,7 @@ export default function PrintInvoicePage() {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, centroParam]);
 
   // Autoimprimir cuando el recibo ya está pintado (y los estilos/imagen cargados). En modo visor (embed) NO:
   // el usuario imprime/reimprime desde el botón del modal.
@@ -63,5 +69,13 @@ export default function PrintInvoicePage() {
 
   if (error) return <p style={{ padding: 16, fontSize: 14 }}>No se pudo cargar el recibo.</p>;
   if (!recibo) return <p style={{ padding: 16, fontSize: 14 }}>Preparando recibo…</p>;
-  return <ReciboTermico recibo={recibo} />;
+  // `#pagina-recibo`: marca que ESTA página es solo el recibo (AppShell no le pinta chrome, ver
+  // BARE_PREFIXES) para que el CSS de impresión (globals.css) deje de esconder/posicionar-absoluto — ese
+  // truco (necesario cuando el recibo vive DENTRO de la pantalla de facturación) era justo lo frágil entre
+  // navegadores. Aquí el documento completo ES el recibo, como el print.php del legado.
+  return (
+    <div id="pagina-recibo">
+      <ReciboTermico recibo={recibo} />
+    </div>
+  );
 }

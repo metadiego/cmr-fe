@@ -494,7 +494,12 @@ export default function FacturacionPage() {
           </DialogHeader>
           <iframe
             ref={reciboIframeRef}
-            src={reciboOpen ? `/print/invoice/${id}?embed=1` : "about:blank"}
+            // `centro` SIEMPRE en la URL: la página dedicada vive en su propia pestaña/iframe, sin estado
+            // compartido con esta pantalla. Sin esto caía a la cookie `cmr_active_centro` (el último centro
+            // elegido en el selector), que puede ser OTRO centro que el de esta factura — hallado auditando
+            // el bug real (no era el CSS): la pantalla principal carga por `?centro=` de la URL, pero el
+            // iframe no lo heredaba. Verificado por HTTP: facturas cruzadas entre Bayamón/Caguas.
+            src={reciboOpen ? `/print/invoice/${id}?embed=1${centro ? `&centro=${centro}` : ""}` : "about:blank"}
             title={tRoot("receipt.previewTitle")}
             className="h-[66vh] w-full bg-white"
           />

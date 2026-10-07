@@ -35,7 +35,10 @@ import { cn } from "@/lib/utils";
 // Rutas públicas/auth que se pintan SIN el shell (sin rail ni header): son pantallas
 // standalone (login, set-password, pendiente de aprobación). Antes el shell clásico las
 // envolvía con una barra superior mínima; el rail navy completo aquí sobra y estorba.
-const BARE_PREFIXES = ["/login", "/auth", "/pending"];
+// `/print` ES el documento de impresión (recibo, como el print.php del legado): con rail+header
+// alrededor, el navegador tenía que ocultarlos a la hora de imprimir (truco frágil, distinto
+// Chrome/Firefox); sin chrome que ocultar, el documento es SOLO el recibo desde el principio.
+const BARE_PREFIXES = ["/login", "/auth", "/pending", "/print"];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

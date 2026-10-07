@@ -228,6 +228,28 @@
     margin: 0;
   }
 }
+/* Página DEDICADA del recibo (/print/invoice/:id, `#pagina-recibo`): el AppShell no le pinta chrome ahí
+   (BARE_PREFIXES), así que el documento ENTERO es el recibo, como el print.php del legado — no hay nada que
+   esconder. El bloque de arriba (esconder todo + `.recibo-print` en `position:absolute`) sigue haciendo
+   falta donde el recibo vive DENTRO de una pantalla normal (preview de facturación, recibo de devolución);
+   ese truco era justo la pieza frágil que Chrome toleraba y Firefox no. Aquí se anula con una regla MÁS
+   ESPECÍFICA (el id le gana a la clase/elemento de arriba aunque ambas usen !important) y se deja fluir el
+   documento en su sitio normal — sin visibility, sin position:absolute. */
+@media print {
+  #pagina-recibo,
+  #pagina-recibo .recibo-print,
+  #pagina-recibo .recibo-print * {
+    visibility: visible !important;
+  }
+  #pagina-recibo .recibo-print {
+    position: static !important;
+    margin: 0 !important;
+  }
+  body:has(#pagina-recibo) {
+    background: #fff !important;
+    background-image: none !important;
+  }
+}
 /* Impresión del FORMATO médico de láser (HILT/MLS) en tamaño carta. Aísla `.formato-print`:
    oculta el resto y dimensiona a carta. La firma (canvas→img) y las tablas se imprimen en negro. */
 @media print {
