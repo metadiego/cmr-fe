@@ -457,6 +457,8 @@
       "scheduling_bridge_reverse_sync": "Sincronización inversa (escribir de vuelta)",
       "pacientes_sincronizacion_legado": "Sincronización con el legado",
       "pacientes_campos_obligatorios": "Campos obligatorios al dar de alta",
+      "old_record_suggestion_enabled": "Sugerir récord nuevo por inactividad",
+      "old_record_suggestion_years": "Años de inactividad para sugerirlo",
       "numeracion_facturas": "Facturas",
       "numeracion_presupuestos": "Presupuestos",
       "numeracion_record_paciente": "Récord de paciente",
@@ -770,6 +772,15 @@
       "empty": "Sin coincidencias",
       "added": "Prioridad agregada.",
       "removed": "Prioridad quitada."
+    },
+    "oldRecord": {
+      "aviso": "Este paciente no tiene una visita completa desde hace {years, plural, one {# año} other {# años}}. ¿Asignar récord nuevo?",
+      "asignar": "Asignar récord nuevo",
+      "dialogoTitulo": "Asignar récord nuevo",
+      "dialogoDesc": "El récord actual queda guardado en el historial — se puede buscar por él si alguien trae el expediente físico.",
+      "nuevoRecord": "Récord nuevo",
+      "recordActual": "Récord actual: {record}",
+      "guardado": "Récord reemplazado."
     },
     "columns": {
       "name": "Nombre",

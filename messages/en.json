@@ -457,6 +457,8 @@
       "scheduling_bridge_reverse_sync": "Reverse sync (write back)",
       "pacientes_sincronizacion_legado": "Legacy sync",
       "pacientes_campos_obligatorios": "Required fields on intake",
+      "old_record_suggestion_enabled": "Suggest a new record on inactivity",
+      "old_record_suggestion_years": "Years of inactivity before suggesting",
       "numeracion_facturas": "Invoices",
       "numeracion_presupuestos": "Quotes",
       "numeracion_record_paciente": "Patient record",
@@ -770,6 +772,15 @@
       "empty": "No matches",
       "added": "Priority added.",
       "removed": "Priority removed."
+    },
+    "oldRecord": {
+      "aviso": "This patient has had no completed visit in {years, plural, one {# year} other {# years}}. Assign a new record?",
+      "asignar": "Assign new record",
+      "dialogoTitulo": "Assign new record",
+      "dialogoDesc": "The current record is saved to history — it can be looked up later if someone brings in the physical chart.",
+      "nuevoRecord": "New record",
+      "recordActual": "Current record: {record}",
+      "guardado": "Record replaced."
     },
     "columns": {
       "name": "Name",

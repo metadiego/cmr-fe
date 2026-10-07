@@ -314,3 +314,41 @@ export interface PatientLiveLocation {
 export function getLiveLocation(centroId?: string): Promise<PatientLiveLocation[]> {
   return apiFetch<PatientLiveLocation[]>(`/patients/live-location`, {}, centroId);
 }
+
+// ─── Récord nuevo por inactividad (docs/specs/record-nuevo-por-inactividad.md del BE) ────────────
+// "Inactivo" = su última cita ATENDIDA o sesión ASISTIDA (visita completa de verdad) tiene N+ años
+// — NUNCA "nunca marcado Presente" (ver HANDOFF-paciente-nuevo-deberia-mirar-atendida). El cuadrito
+// de editar el récord YA EXISTE (CeldaEditable en Atención); esto solo añade la sugerencia + el
+// historial, y el endpoint especial que guarda el récord VIEJO al reemplazar.
+export interface OldRecordSuggestion {
+  suggested: boolean;
+  yearsInactive: number | null;
+  suggestedRecord: string | null;
+}
+export function getOldRecordSuggestion(patientId: string, centroId?: string): Promise<OldRecordSuggestion> {
+  return apiFetch<OldRecordSuggestion>(`/patients/${patientId}/old-record-suggestion`, {}, centroId);
+}
+// `newRecord` omitido = usa el sugerido por el BE. A diferencia de editar la celda Record a mano,
+// ESTE endpoint SÍ guarda el récord viejo en el historial — usar el de editar celda aquí lo perdería.
+export function replaceRecord(patientId: string, newRecord?: string, centroId?: string): Promise<Paciente> {
+  return apiFetch<Paciente>(`/patients/${patientId}/replace-record`, {
+    method: "POST",
+    body: JSON.stringify(newRecord ? { newRecord } : {}),
+  }, centroId);
+}
+export interface RecordHistoryEntry {
+  oldRecord: string;
+  newRecord: string;
+  reason: string | null;
+  createdAt: string;
+}
+export function getRecordHistory(patientId: string, centroId?: string): Promise<RecordHistoryEntry[]> {
+  return apiFetch<RecordHistoryEntry[]>(`/patients/${patientId}/record-history`, {}, centroId);
+}
+// Búsqueda por el récord VIEJO (del expediente físico): a qué paciente/récord actual corresponde
+// HOY. Para cuando recepción trae un expediente físico con un número que ya no es el vigente.
+// Verificado en vivo SOLO el caso sin match (`data: []`); el shape de un match real no se probó
+// (no había un récord viejo real a mano) — confirmar antes de construir la pantalla de búsqueda.
+export function buscarPorRecordViejo(record: string, centroId?: string): Promise<RecordHistoryEntry[]> {
+  return apiFetch<RecordHistoryEntry[]>(`/patients/record-history/by-old-record/${encodeURIComponent(record)}`, {}, centroId);
+}

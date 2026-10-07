@@ -123,6 +123,7 @@ function PanelItemRow({ item, centro, onChanged }: { item: PanelItem; centro: st
   if (item.tipo === "numeracion") return <NumeracionRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   if (item.clave === "frontdeskConsultationOrder") return <OrdenRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   if (item.clave === "camposObligatorios") return <CamposRow item={item} label={label} />;
+  if (item.tipo === "otro" && typeof item.valor === "number") return <NumeroRow item={item} label={label} centro={centro} onChanged={onChanged} />;
   return null;
 }
 
@@ -156,6 +157,57 @@ function ToggleRow({
     <div className="flex items-center justify-between gap-3">
       <Label>{label}</Label>
       <Switch checked={!!item.valor} disabled={busy} onCheckedChange={cambiar} />
+    </div>
+  );
+}
+
+// Número simple (tipo "otro", p. ej. oldRecordSuggestionYears): un input que guarda al salir del
+// campo o con Enter — mismo endpoint/método que un toggle, solo cambia qué campo manda.
+function NumeroRow({
+  item,
+  label,
+  centro,
+  onChanged,
+}: {
+  item: PanelItem;
+  label: string;
+  centro: string;
+  onChanged: () => void;
+}) {
+  const t = useTranslations("configuracion.panel");
+  const tRoot = useTranslations();
+  const [valor, setValor] = React.useState(String(item.valor));
+  const [busy, setBusy] = React.useState(false);
+
+  async function guardar() {
+    const n = Number(valor);
+    if (!Number.isFinite(n) || n === Number(item.valor)) return;
+    setBusy(true);
+    try {
+      await actualizarItemPanel(item, { [item.clave]: n }, centro);
+      toast.success(t("guardado"));
+      onChanged();
+    } catch (e) {
+      toastError(e, tRoot);
+      setValor(String(item.valor));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <Label>{label}</Label>
+      <Input
+        type="number"
+        min={0}
+        className="h-8 w-20 text-right"
+        value={valor}
+        disabled={busy}
+        onChange={(e) => setValor(e.target.value)}
+        onBlur={guardar}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      />
     </div>
   );
 }
