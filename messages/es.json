@@ -2867,6 +2867,10 @@
     "corregirUsuarioAyuda": "De este usuario salen las estadísticas de quién vende. En borrador corrige quién la creó; en emitida, quién cobró.",
     "imprimirPresupuesto": "Imprimir presupuesto",
     "presupuestoNum": "Presupuesto {num}",
+    "print": {
+      "backupHub": "Respaldo: imprimir por el hub",
+      "backupHubDone": "Enviado al hub de respaldo"
+    },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
     "descuentoUsarMonto": "¿Querías descontar ${valor}? Cambiar a $",

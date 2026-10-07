@@ -24,6 +24,7 @@ import {
   type ItemOpcional,
   buscarPaciente,
   emitirFactura,
+  imprimirFactura,
   regenerarDisponibilidad,
   type RegenerarDisponibilidad,
   type FacturaConItems,
@@ -46,6 +47,7 @@ import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
+import { imprimirPorHub } from "@/lib/print/hub";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -122,6 +124,7 @@ export default function FacturacionPage() {
   // iframe a la página dedicada /print/invoice/:id?embed=1 (solo el recibo, como el legado); imprimir ese
   // iframe manda solo el recibo al papel. Handoff: visor de recibo + reimprimir sin salir de la pantalla.
   const [reciboOpen, setReciboOpen] = React.useState(false);
+  const [busyHub, setBusyHub] = React.useState(false);
   const reciboIframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const refetch = React.useCallback(() => {
@@ -212,6 +215,24 @@ export default function FacturacionPage() {
   // impresión limpia en el servidor que la comparte, fuera del alcance de este repo por ahora.
   function imprimirDesdeVisor() {
     window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
+  }
+
+  // RESPALDO: manda el recibo directo al hub de la Zorin (bytes ESC/POS crudos, cola sin filtro), sin
+  // pasar por el navegador ni por ningún driver — funciona igual en cualquier navegador si el camino
+  // normal falla. No es el botón por defecto; es aparte. Ver docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
+  async function imprimirPorHubClick() {
+    setBusyHub(true);
+    try {
+      const r = await imprimirFactura(id, centro);
+      setFactura(r.invoice);
+      const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
+      await imprimirPorHub(reciboFinal);
+      toast.success(t("print.backupHubDone"));
+    } catch (err) {
+      toastError(err, tRoot);
+    } finally {
+      setBusyHub(false);
+    }
   }
 
   if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
@@ -346,12 +367,20 @@ export default function FacturacionPage() {
             title={tRoot("receipt.previewTitle")}
             className="h-[66vh] w-full bg-white"
           />
-          <div className="flex justify-end gap-2 border-t px-4 py-3">
-            <Button variant="outline" size="sm" onClick={() => setReciboOpen(false)}>{tRoot("common.cancel")}</Button>
-            <Button size="sm" onClick={imprimirDesdeVisor}>
-              <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-              {tRoot("receipt.print")}
+          <div className="flex items-center justify-between gap-2 border-t px-4 py-3">
+            {/* RESPALDO, aparte del botón normal: manda el recibo directo al hub de la Zorin (bytes ESC/POS,
+                sin pasar por el navegador ni por ningún driver) para cuando el camino normal falle. No
+                reemplaza nada; "Imprimir" sigue siendo el de siempre. Ver lib/print/hub.ts. */}
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={imprimirPorHubClick} disabled={busyHub}>
+              {busyHub ? tRoot("common.loading") : t("print.backupHub")}
             </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setReciboOpen(false)}>{tRoot("common.cancel")}</Button>
+              <Button size="sm" onClick={imprimirDesdeVisor}>
+                <HugeiconsIcon icon={PrinterIcon} className="size-4" />
+                {tRoot("receipt.print")}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

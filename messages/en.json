@@ -2867,6 +2867,10 @@
     "corregirUsuarioAyuda": "This user drives the who-sells stats. On a draft it fixes who created it; on an issued invoice, who charged it.",
     "imprimirPresupuesto": "Print quote",
     "presupuestoNum": "Quote {num}",
+    "print": {
+      "backupHub": "Backup: print via hub",
+      "backupHubDone": "Sent to the backup hub"
+    },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
     "descuentoUsarMonto": "Did you mean ${valor} off? Switch to $",

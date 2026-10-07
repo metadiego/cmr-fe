@@ -67,6 +67,38 @@ instalar software en cada equipo además de mantener la cola limpia en el servid
 infraestructura para este momento). Todo ese código se quitó del repo (commit `5558bd6`). **No reabrir
 esa puerta**: la causa real era de configuración de driver, no algo que necesitara ESC/POS a mano.
 
+## Respaldo: hub ESC/POS (segundo camino, aparte, no reemplaza al de arriba)
+
+El dueño propuso un camino adicional, inspirado en un sistema propio que hizo hace ~20 años con
+impresoras fiscales: en vez de depender del navegador para imprimir, el FE arma los bytes ESC/POS del
+recibo y los manda por **HTTP/HTTPS normal** (lo que cualquier navegador sabe hacer, incluido Firefox)
+a un **hub** pequeño en el servidor, que los reenvía crudos a la impresora. Sin driver, sin diálogo de
+impresión, sin margen que ajustar.
+
+**Verificado en papel, con un clic real en Firefox:** funciona.
+
+### Lo que vive en el servidor (Zorin, NO en este repo)
+
+- `/opt/cmr-print-hub/hub.py` — servidor HTTP mínimo (stdlib de Python, sin dependencias), escucha en
+  el puerto **8943 por HTTPS** (certificado autofirmado, 825 días desde 7-oct-2026, en
+  `/opt/cmr-print-hub/hub.{crt,key}`), recibe bytes en `POST /print-raw` y los manda con
+  `lp -d TM-T20II-RAW -o raw` — la MISMA cola sin filtro de la causa raíz #1 de arriba.
+- Registrado como servicio systemd `cmr-print-hub` (`/etc/systemd/system/cmr-print-hub.service`):
+  arranca solo al prender el equipo, se reinicia solo si falla. `systemctl status cmr-print-hub` para
+  ver su estado; log en `/opt/cmr-print-hub/hub.log`.
+- **Certificado autofirmado**: cada equipo/navegador que use el respaldo tiene que visitar
+  `https://192.130.80.181:8943/` UNA vez y aceptar el aviso de seguridad — después no vuelve a
+  preguntar. No es un certificado público (es un respaldo de LAN, no un servicio de internet).
+
+### Lo que vive en este repo
+
+- `lib/print/hub.ts` — arma el recibo en texto plano ESC/POS (48 columnas, mismo modelo `Recibo` que
+  pinta `<ReciboTermico>`) y lo manda al hub.
+- `app/(app)/billing/invoices/[id]/page.tsx` — botón **"Respaldo: imprimir por el hub"**, chiquito y
+  aparte, dentro del visor del recibo, junto al botón normal "Imprimir". El camino normal (navegador +
+  `window.print()`) sigue siendo el de siempre, intacto; este es solo un segundo camino para cuando el
+  primero falle.
+
 ## Navegador: cuál usar y un ajuste suyo (dato del dueño, verificado en papel)
 
 Con el driver ya corregido (sección anterior):
