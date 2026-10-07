@@ -1950,6 +1950,15 @@
     "sinResultadosEnCentro": "Sin resultados en {centro}",
     "pestana": {
       "ondas_choque": "Sónica"
+    },
+    "ubicacion": {
+      "titulo": "Dónde está cada paciente",
+      "vacio": "Nadie presente ahora mismo.",
+      "enVitales": "Vitales",
+      "enConsultaEsperando": "Consulta — esperando",
+      "enConsulta": "En consulta",
+      "enServicioEsperando": "{servicio} — esperando",
+      "enServicio": "En {servicio}"
     }
   },
   "programarCitas": {

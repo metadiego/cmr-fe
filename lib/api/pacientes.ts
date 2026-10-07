@@ -295,3 +295,22 @@ export function addPatientPriorityFlag(
 export function removePatientPriorityFlag(patientId: string, flagTypeId: string, centroId?: string): Promise<void> {
   return apiFetch<void>(`/patients/${patientId}/priority-flags/${flagTypeId}`, { method: "DELETE" }, centroId);
 }
+
+// ─── Ubicación en vivo (docs/specs/ubicacion-en-vivo-del-paciente.md del BE) ─────────────────────
+// Solo pacientes con actividad HOY sin terminar; ausencia = no sale en la lista (no hay fila "no
+// está"). La precedencia cita×sesión (quién gana si tiene las dos abiertas) ya la resuelve el BE —
+// el FE solo pinta la fila que llega. Handoff HANDOFF-ubicacion-en-vivo-del-paciente.md.
+export interface PatientLiveLocation {
+  patientId: string;
+  displayName: string;
+  location: "vitales" | "consulta" | "servicio";
+  serviceSlug: string | null;
+  status: "presente" | "triage" | "en_consulta" | "en_terapia";
+  from: string;
+  // Bonus del BE (verificado en vivo, no documentado en el handoff): mismo patrón de `patient`
+  // adjunto que ya usan las sesiones de Servicios — trae el récord sin pedirlo aparte.
+  patient?: { id: string; medicalRecordNumber: string | null; name: string | null } | null;
+}
+export function getLiveLocation(centroId?: string): Promise<PatientLiveLocation[]> {
+  return apiFetch<PatientLiveLocation[]>(`/patients/live-location`, {}, centroId);
+}

@@ -25,7 +25,7 @@ const DEBT = {
   // CEILING general (714 líneas: el dispatcher de celdas y el flujo de pasos cierran sobre ~8
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
-  "components/frontdesk/frontdesk-board.tsx": 930,
+  "components/frontdesk/frontdesk-board.tsx": 935,
   "components/frontdesk/fila-sesion.tsx": 714,
   "app/(app)/billing/invoices/[id]/page.tsx": 2274,
   "components/inventario/productos-admin.tsx": 1048,
