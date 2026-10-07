@@ -19,7 +19,14 @@ import nextTs from "eslint-config-next/typescript";
 const CEILING = 600;
 
 const DEBT = {
-  "components/frontdesk/frontdesk-board.tsx": 2458,
+  // 07-oct-2026: bajado de 2458 a 930 — FilaSesion (y los modales/celdas que solo ella usaba:
+  // historial, compras, transferir tratamiento, menú de fila, celda de sesiones/medición) se
+  // extrajeron a sus propios archivos. La fila en sí quedó demasiado grande para nacer bajo el
+  // CEILING general (714 líneas: el dispatcher de celdas y el flujo de pasos cierran sobre ~8
+  // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
+  // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
+  "components/frontdesk/frontdesk-board.tsx": 930,
+  "components/frontdesk/fila-sesion.tsx": 714,
   "app/(app)/billing/invoices/[id]/page.tsx": 2274,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,

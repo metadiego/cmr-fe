@@ -18,6 +18,7 @@ import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { useCan } from "@/hooks/use-can";
 import { Badge } from "@/components/ui/badge";
 import { CeldaEditable } from "@/components/tablero/celda-editable";
+import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import { CeldaSelect } from "@/components/tablero/celda-select";
 import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
 import { CeldaToggleIcon } from "@/components/tablero/celda-toggle-icon";
@@ -340,8 +341,9 @@ export function TableroDinamico({
     if (col.clave === "paciente") {
       const nombre = fila[col.clave] == null ? "" : String(fila[col.clave]);
       const iniciales = nombre.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+      const pacienteId = (fila as { pacienteId?: unknown }).pacienteId;
       return (
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <span
             className="grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
             style={{ backgroundColor: avatarColor(nombre) }}
@@ -349,6 +351,9 @@ export function TableroDinamico({
             {iniciales || "?"}
           </span>
           <span className="font-medium">{titleCase(nombre)}</span>
+          {/* Banderas de prioridad: se ven Y SE APLICAN aquí mismo, en Atención — pedido del dueño,
+              07-oct-2026 — nunca como si fuera un diagnóstico escondido en la ficha. */}
+          {pacienteId != null && <PriorityFlagsBadges patientId={String(pacienteId)} centroId={centroId} />}
         </div>
       );
     }
