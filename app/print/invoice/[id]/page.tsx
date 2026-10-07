@@ -26,6 +26,12 @@ export default function PrintInvoicePage() {
   const centroParam = searchParams?.get("centro") || undefined;
   const [recibo, setRecibo] = React.useState<Recibo | null>(null);
   const [error, setError] = React.useState(false);
+  // Firefox no imprime bien este recibo pase lo que pase con sus ajustes (causa aún sin encontrar; Chrome,
+  // Edge y Brave sí funcionan — Edge/Brave necesitan Márgenes=Mínimo). Se avisa y se evita el intento
+  // automático para no gastar papel a ciegas; el usuario puede imprimir manualmente si insiste. Detección
+  // simple por userAgent: el único dato fiable entre navegadores es que Firefox siempre incluye "Firefox/".
+  // Ver docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
+  const [esFirefox] = React.useState(() => typeof navigator !== "undefined" && /Firefox\//.test(navigator.userAgent));
 
   React.useEffect(() => {
     if (!id) return;
@@ -65,7 +71,7 @@ export default function PrintInvoicePage() {
   // por "Imprimir" o por reimprimir desde el visor): se autoimprime y se cierra sola al terminar, como el
   // print.php del legado (window.close() tras window.print()).
   React.useEffect(() => {
-    if (!recibo || embed) return;
+    if (!recibo || embed || esFirefox) return;
     const h = setTimeout(() => {
       window.print();
       window.onafterprint = () => {
@@ -86,8 +92,18 @@ export default function PrintInvoicePage() {
   // truco (necesario cuando el recibo vive DENTRO de la pantalla de facturación) era justo lo frágil entre
   // navegadores. Aquí el documento completo ES el recibo, como el print.php del legado.
   return (
-    <div id="pagina-recibo">
-      <ReciboTermico recibo={recibo} />
-    </div>
+    <>
+      {/* Fuera de #pagina-recibo a propósito: el CSS de impresión solo hace visible el recibo, así que esto
+          se ve en pantalla pero NO llega al papel. */}
+      {esFirefox && (
+        <p style={{ padding: 12, margin: 0, background: "#fff3cd", color: "#664d03", fontFamily: "sans-serif", fontSize: 13 }}>
+          Este navegador (Firefox) no imprime bien este recibo. Usa Chrome, Edge o Brave (Edge y Brave:
+          pon Márgenes en Mínimo en el diálogo de impresión). No se intentó imprimir automáticamente.
+        </p>
+      )}
+      <div id="pagina-recibo">
+        <ReciboTermico recibo={recibo} />
+      </div>
+    </>
   );
 }
