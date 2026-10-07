@@ -49,7 +49,7 @@ import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { reciboToEscPos, type EscPosLabels } from "@/lib/print/escpos";
 import { getPrintSettings, setPrintSettings, type PrintSettings } from "@/lib/print/print-settings";
-import { qzListPrinters } from "@/lib/print/qz";
+import { qzListPrinters, qzPrintRaw } from "@/lib/print/qz";
 import { printEscPosWebUsb, usbErrorKey, webUsbSupported } from "@/lib/print/webusb";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
@@ -95,11 +95,18 @@ import {
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
-// Impresión ESC/POS por QZ Tray: OCULTA por ahora (exige instalar QZ en cada equipo → no práctico).
-// QZ Tray / WebUSB quedan OCULTOS: con la impresora COMPARTIDA en red no hay USB local que reclamar (WebUSB
-// no la ve) ni conviene colgar la impresión esperando a QZ Tray. La cura real es imprimir texto por el
-// navegador con ancho fijo del rollo (ver reciboDocHtml + globals .recibo-print). Default "navegador" SIEMPRE.
-const QZ_PRINT_UI = false;
+// Impresión ESC/POS por QZ Tray: REACTIVADA. Causa raíz encontrada y verificada en el servidor Linux que
+// comparte la Epson (Zorin): la cola CUPS que usa todo el mundo tenía puesto el driver de una impresora
+// CLON genérica (Zijiang ZJ-80, filtro `rastertozj`) en vez del real Epson — ese filtro recorta el papel
+// donde detecta que ya no hay tinta, por eso ningún cambio de HTML/CSS podía evitarlo: el navegador nunca
+// controla el corte, lo decide ese filtro. Epson no ofrece driver de Linux descargable para este modelo
+// (solo SDKs de programador), así que la cola rota no tiene arreglo por ese lado.
+// Se creó una cola NUEVA sin filtro ("TM-T20II-RAW", cruda) apuntando al mismo USB; una prueba con bytes
+// ESC/POS reales (texto + orden de corte GS V puesta por nosotros) salió completa y cortó bien — verificado
+// en papel. QZ Tray (instalado en el equipo que imprime) + nuestro generador ESC/POS (lib/print/escpos.ts)
+// mandan esos mismos bytes a esa cola: cero rasterizado, cero adivinar tamaño de página, el corte lo
+// decidimos nosotros. Pendiente: instalar QZ Tray en el equipo de mostrador y elegir esa cola en Opciones.
+const QZ_PRINT_UI = true;
 const USB_TEST_UI = false;
 // Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
 // pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
@@ -221,13 +228,33 @@ export default function FacturacionPage() {
   function imprimir() {
     setReciboOpen(true);
   }
-  // Imprimir/reimprimir NO usa `iframe.contentWindow.print()`: en Firefox ese método es conocido por fallar
-  // (no abre el diálogo, o imprime la página de arriba en vez del iframe) — es justo el mecanismo que
-  // reintrodujo el problema que ya habíamos resuelto. Se abre la MISMA página dedicada en una pestaña nueva,
-  // que se imprime A SÍ MISMA con `window.print()` (el método que sí funciona, comprobado) y se cierra sola
-  // al terminar. El visor queda abierto para reimprimir cuantas veces haga falta.
-  function imprimirDesdeVisor() {
-    window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
+  // Imprimir/reimprimir: dos rutas según el ajuste del DISPOSITIVO (Opciones de impresión).
+  //  - "qz": bytes ESC/POS crudos a la cola SIN FILTRO de la impresora (QZ Tray, instalado en ESTE equipo).
+  //    Es la ruta que de verdad corrige el corte: la cola normal tiene puesto el driver de un CLON genérico
+  //    (Zijiang) que recorta el papel por su cuenta — verificado leyendo la configuración del servidor que
+  //    comparte la impresora — y ningún HTML/CSS puede ganarle eso. Si QZ falla (no instalado, sin
+  //    impresora elegida, lo que sea), SIEMPRE cae a la otra ruta: nunca se queda sin imprimir.
+  //  - "navegador" (default): abre la página dedicada en una pestaña nueva, que se imprime A SÍ MISMA con
+  //    `window.print()` (el método que sí abre el diálogo en todo navegador, incluido Firefox) y se cierra
+  //    sola al terminar. `iframe.contentWindow.print()` NO se usa: es conocido por fallar en Firefox.
+  async function imprimirDesdeVisor() {
+    const cfg = getPrintSettings();
+    const abrirPaginaDedicada = () =>
+      window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
+    if (cfg.metodo !== "qz" || !cfg.impresora) {
+      abrirPaginaDedicada();
+      return;
+    }
+    try {
+      const r = await imprimirFactura(id, centro); // emite (idempotente) y trae el número/estado definitivos
+      setFactura(r.invoice);
+      const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
+      await qzPrintRaw(cfg.impresora, reciboToEscPos(reciboFinal, escposLabels, cfg.columnas));
+      toast.success(t("print.doneQz"));
+    } catch {
+      toast.warning(t("print.qzFallback"));
+      abrirPaginaDedicada();
+    }
   }
 
   // Etiquetas del recibo ESC/POS (la lib es pura; el texto i18n viene de aquí). Objeto plano: el React
