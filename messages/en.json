@@ -396,6 +396,30 @@
       "cfgProductosHelp": "Drag to reorder: most used first.",
       "colArrastrar": "Drag to reorder"
     },
+    "prioridadFlags": {
+      "title": "Patient priorities",
+      "help": "Catalog of conditions/limitations (oxygen, wheelchair…) flagged on the patient's chart and shown on boards.",
+      "new": "New priority",
+      "edit": "Edit",
+      "slug": "Key",
+      "slugHint": "Unique identifier, lowercase (e.g. oxigeno). Not repeatable.",
+      "labelKey": "Text key (labelKey)",
+      "labelKeyHint": "E.g. patients.priorityFlags.oxigeno — add the translation in messages/es.json and en.json.",
+      "icon": "Icon",
+      "color": "Color",
+      "active": "Active",
+      "created": "Priority created.",
+      "updated": "Priority updated.",
+      "empty": "No priorities in the catalog yet.",
+      "colorName": {
+        "green": "Green",
+        "amber": "Amber",
+        "red": "Red",
+        "blue": "Blue",
+        "violet": "Violet",
+        "gray": "Gray"
+      }
+    },
     "panel": {
       "title": "General configuration panel",
       "help": "Everything on or off in the active center, grouped by module, at a glance.",
@@ -736,6 +760,17 @@
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
     "yearsOld": "{age} years old",
     "allCenters": "All centers",
+    "priorityFlags": {
+      "oxigeno": "Oxygen",
+      "sillaRuedas": "Wheelchair",
+      "limitacionAuditiva": "Hearing limitation",
+      "limitacionVisual": "Vision limitation",
+      "add": "Priority",
+      "manage": "Flag priorities",
+      "empty": "No matches",
+      "added": "Priority added.",
+      "removed": "Priority removed."
+    },
     "columns": {
       "name": "Name",
       "docId": "ID",

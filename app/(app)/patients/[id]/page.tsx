@@ -48,6 +48,7 @@ import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { CertificacionGastos } from "@/components/clientes/certificacion-gastos";
 import { FichaCitas, FichaTerapias, FichaFacturacion, FichaUltimaVisita } from "@/components/clientes/ficha-tabs";
 import { FichaCambioProtocolo } from "@/components/clientes/ficha-cambio-protocolo";
+import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 import {
   fullName,
   initials,
@@ -202,6 +203,7 @@ function PacienteDetail({
                     {t("yearsOld", { age })}
                   </span>
                 )}
+                <PriorityFlagsBadges patientId={p.id} centroId={centroId} />
               </span>
             }
             actions={
