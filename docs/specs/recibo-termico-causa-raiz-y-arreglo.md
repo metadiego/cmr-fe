@@ -40,10 +40,16 @@ está configurado, cae al camino de siempre (la página dedicada que se imprime 
 
 ## Lo que falta — configuración del equipo, no código
 
-1. Instalar **QZ Tray** (gratis, firmado) en la computadora de mostrador que imprime los recibos.
-2. En la factura → **Opciones de impresión**: método **"QZ Tray"**, buscar impresoras y elegir la cola
-   `TM-T20II-RAW` (aparece compartida desde la Zorin, igual que la de hoy), columnas = 48 (80mm).
-3. Probar un recibo real. El HTML/CSS ya no interviene en el corte: ahora lo decide nuestra propia
+**Probado como prueba de concepto en el Mac de desarrollo del dueño** (confirmado en papel: texto
+completo, corte exacto). **Los equipos de mostrador son Windows**, así que falta repetirlo ahí:
+
+1. Instalar **QZ Tray** (gratis, firmado — `qz-tray-2.3.0-x86_64.exe` en `github.com/qzind/tray/releases`)
+   en cada PC Windows de mostrador que imprime recibos.
+2. Añadir ahí la impresora de red apuntando a la cola `TM-T20II-RAW` de la Zorin (Agregar impresora →
+   por dirección IP/IPP; no instalar ningún driver de Epson/genérico encima, que vuelve a filtrar).
+3. En la factura → **Opciones de impresión**: método **"QZ Tray"**, buscar impresoras y elegir
+   `TM-T20II-RAW`, columnas = 48 (80mm).
+4. Probar un recibo real. El HTML/CSS ya no interviene en el corte: ahora lo decide nuestra propia
    orden ESC/POS.
 
 ## Lo que queda pendiente, y es de infraestructura, no de este repo
