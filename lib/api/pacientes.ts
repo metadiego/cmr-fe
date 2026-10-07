@@ -245,3 +245,53 @@ export function actualizarSerieRecord(
     body: JSON.stringify(payload),
   }, centroId);
 }
+
+// ─── Banderas de prioridad (docs/specs/alertas-de-prioridad-del-paciente.md del BE) ──────────────
+// Tipos locales hasta `gen:api` (endpoints nuevos, 06-oct-2026). Catálogo GLOBAL (no por centro);
+// las banderas en sí son por paciente (tenant-scoped). `icon`/`color` son claves libres que define
+// el FE (ver lib/patients/priority-flags.ts) — el BE solo las guarda y las devuelve tal cual.
+export interface PriorityFlagType {
+  id: string;
+  slug: string;
+  labelKey: string;
+  icon: string | null;
+  color: string | null;
+  active: boolean;
+}
+export type CreatePriorityFlagTypePayload = { slug: string; labelKey: string; icon?: string; color?: string };
+export type UpdatePriorityFlagTypePayload = Partial<Pick<PriorityFlagType, "labelKey" | "icon" | "color" | "active">>;
+
+export function getPriorityFlagTypes(): Promise<PriorityFlagType[]> {
+  return apiFetch<PriorityFlagType[]>(`/patients/priority-flag-types`);
+}
+export function createPriorityFlagType(payload: CreatePriorityFlagTypePayload): Promise<PriorityFlagType> {
+  return apiFetch<PriorityFlagType>(`/patients/priority-flag-types`, { method: "POST", body: JSON.stringify(payload) });
+}
+export function updatePriorityFlagType(id: string, payload: UpdatePriorityFlagTypePayload): Promise<PriorityFlagType> {
+  return apiFetch<PriorityFlagType>(`/patients/priority-flag-types/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+}
+
+// Banderas YA resueltas contra el catálogo (listas para pintar: labelKey/icon/color propios).
+export interface PatientPriorityFlag {
+  slug: string;
+  labelKey: string;
+  icon: string | null;
+  color: string | null;
+  note?: string | null;
+}
+export function getPatientPriorityFlags(patientId: string, centroId?: string): Promise<PatientPriorityFlag[]> {
+  return apiFetch<PatientPriorityFlag[]>(`/patients/${patientId}/priority-flags`, {}, centroId);
+}
+// Idempotente (el BE no duplica si ya la tiene). `flagTypeId` es el id del CATÁLOGO, no el slug.
+export function addPatientPriorityFlag(
+  patientId: string,
+  flagTypeId: string,
+  note?: string,
+  centroId?: string,
+): Promise<unknown> {
+  return apiFetch(`/patients/${patientId}/priority-flags`, { method: "POST", body: JSON.stringify({ flagTypeId, note }) }, centroId);
+}
+// 204; no falla si el paciente ya no tenía esa bandera.
+export function removePatientPriorityFlag(patientId: string, flagTypeId: string, centroId?: string): Promise<void> {
+  return apiFetch<void>(`/patients/${patientId}/priority-flags/${flagTypeId}`, { method: "DELETE" }, centroId);
+}

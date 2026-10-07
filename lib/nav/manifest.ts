@@ -103,6 +103,11 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "ehr-integration", route: "/configuration/ehr-integration", group: "configuration", order: 12 },
   // clave real del BE confirmada en cmr-be/src/scripts/menu-items.ts: "config-panel".
   { clave: "config-panel", route: "/configuration/panel", group: "configuration", order: 13 },
+  // clave INVENTADA del lado FE: el BE (06-oct-2026) todavía no sembró una fila de menú para esta
+  // pantalla nueva — se llega hoy por el enlace "Catálogo" dentro del propio selector de banderas
+  // de prioridad (components/clientes/priority-flags-badges.tsx), no por el menú lateral. Cuando el
+  // BE siembre `menu_items` para esto, confirmar la clave real aquí (handoff pendiente a BE).
+  { clave: "config-prioridad-flags", route: "/configuration/priority-flags", group: "configuration", order: 13.5 },
   // "resources" sigue siendo su propio renglón del menú (clave real del catálogo del BE — quitarla
   // de aquí sin tocar la fila en el BE la manda a un bucket huérfano, no la borra). Ahora TAMBIÉN
   // vive como pestaña de "cupos" (/scheduling/slots), así que las dos rutas llevan a la misma

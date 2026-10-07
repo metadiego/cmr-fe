@@ -396,6 +396,30 @@
       "cfgProductosHelp": "Arrastra para ordenar: lo más usado primero.",
       "colArrastrar": "Arrastra para reordenar"
     },
+    "prioridadFlags": {
+      "title": "Prioridades del paciente",
+      "help": "Catálogo de condiciones/limitaciones (oxígeno, silla de ruedas…) que se marcan en la ficha del paciente y se ven en los tableros.",
+      "new": "Nueva prioridad",
+      "edit": "Editar",
+      "slug": "Clave",
+      "slugHint": "Identificador único, en minúsculas (ej. oxigeno). No se repite.",
+      "labelKey": "Clave de texto (labelKey)",
+      "labelKeyHint": "Ej. patients.priorityFlags.oxigeno — agrega la traducción en messages/es.json y en.json.",
+      "icon": "Ícono",
+      "color": "Color",
+      "active": "Activa",
+      "created": "Prioridad creada.",
+      "updated": "Prioridad actualizada.",
+      "empty": "Sin prioridades en el catálogo todavía.",
+      "colorName": {
+        "green": "Verde",
+        "amber": "Ámbar",
+        "red": "Rojo",
+        "blue": "Azul",
+        "violet": "Violeta",
+        "gray": "Gris"
+      }
+    },
     "panel": {
       "title": "Panel de configuración general",
       "help": "Todo lo que está prendido o apagado en el centro activo, agrupado por módulo, de un vistazo.",
@@ -736,6 +760,17 @@
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
     "yearsOld": "{age} años",
     "allCenters": "Todos los centros",
+    "priorityFlags": {
+      "oxigeno": "Oxígeno",
+      "sillaRuedas": "Silla de ruedas",
+      "limitacionAuditiva": "Limitación auditiva",
+      "limitacionVisual": "Limitación visual",
+      "add": "Prioridad",
+      "manage": "Marcar prioridades",
+      "empty": "Sin coincidencias",
+      "added": "Prioridad agregada.",
+      "removed": "Prioridad quitada."
+    },
     "columns": {
       "name": "Nombre",
       "docId": "ID",
