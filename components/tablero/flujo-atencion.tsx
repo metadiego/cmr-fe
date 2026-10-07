@@ -14,8 +14,9 @@ import { isEhrEnabled, getEhrReadiness, type EhrReadinessField } from "@/lib/api
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
-import { PostAccionHost } from "@/components/tablero/post-accion";
-import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
+
+export type PostAccionCtx = { fila: CitaFila; accion: string; render: Record<string, unknown> | null };
+export type EhrGateCtx = { pacienteId: string; faltantes: EhrReadinessField[]; onCompleted: () => void };
 
 function fmtHora(v: unknown): string | null {
   if (v == null || v === "") return null;
@@ -42,6 +43,8 @@ export function FlujoAtencion({
   estados,
   centroId,
   onSaved,
+  onPostAccion,
+  onEhrGate,
 }: {
   tablero: string;
   fila: CitaFila;
@@ -50,16 +53,17 @@ export function FlujoAtencion({
   estados: EstadoLite[];
   centroId?: string;
   onSaved?: () => void;
+  // El modal de post-acción ("Nueva cita" al marcar asistido) y el candado del EHR se renderizan
+  // en el PADRE (no aquí), a propósito: este componente vive por FILA, y la fila que acaba de
+  // avanzar (p. ej. a "atendida") puede quedar FUERA del filtro de KPI activo en el próximo refetch
+  // — eso desmonta FlujoAtencion y, con él, cualquier modal que viviera en su estado local, antes de
+  // que la persona pudiera usarlo ("se abre y se cierra solo"). El padre sobrevive al filtrado.
+  onPostAccion: (ctx: PostAccionCtx) => void;
+  onEhrGate: (ctx: EhrGateCtx) => void;
 }) {
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState<string | null>(null);
   const [opt, setOpt] = React.useState<Record<string, boolean>>({});
-  // Modal de post-acción (p.ej. "Nueva cita" al marcar asistido). La clave y la
-  // config salen de `columna.render` (dato), enrutadas por PostAccionHost.
-  const [postAccion, setPostAccion] = React.useState<{ accion: string; render: Record<string, unknown> | null } | null>(null);
-  // Enganche EHR: al marcar PRESENTE, si el centro tiene el interruptor encendido y al paciente le faltan
-  // datos, se bloquea con un modal hasta completarlos. Guarda la etapa pendiente para reanudarla al guardar.
-  const [ehrGate, setEhrGate] = React.useState<{ col: ColumnaEfectiva; action: string; faltantes: EhrReadinessField[] } | null>(null);
 
   const ordenOf = (clave: string | null) => estados.find((e) => e.clave === clave)?.orden ?? 0;
   const fwdSlug = (col: ColumnaEfectiva) =>
@@ -104,7 +108,7 @@ export function FlujoAtencion({
       if (!checked) {
         const r = col.render as Record<string, unknown> | null;
         const pa = r?.postAccion as string | undefined;
-        if (pa) setPostAccion({ accion: pa, render: r });
+        if (pa) onPostAccion({ fila, accion: pa, render: r });
       }
     } catch (err) {
       setOpt((o) => {
@@ -118,8 +122,12 @@ export function FlujoAtencion({
       // queda presente sin completar. Al guardar, onCompleted reanuda la transición.
       if (err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS") {
         const faltantes = (err.data?.faltantes as EhrReadinessField[] | undefined) ?? [];
-        if (faltantes.length) {
-          setEhrGate({ col, action, faltantes });
+        if (faltantes.length && fila.pacienteId) {
+          onEhrGate({
+            pacienteId: String(fila.pacienteId),
+            faltantes,
+            onCompleted: () => void runAccion(col, false, action),
+          });
           return;
         }
       }
@@ -141,7 +149,11 @@ export function FlujoAtencion({
           // Solo pacientes NUEVOS bloquean: a uno de seguimiento ya se le pidieron estos datos en
           // persona antes, así que Presente sigue su curso aunque `listo` sea false.
           if (r.nuevo && !r.listo && r.faltantes?.length) {
-            setEhrGate({ col, action, faltantes: r.faltantes });
+            onEhrGate({
+              pacienteId,
+              faltantes: r.faltantes,
+              onCompleted: () => void runAccion(col, false, action),
+            });
             return; // bloquea hasta completar los datos
           }
         }
@@ -153,7 +165,6 @@ export function FlujoAtencion({
   }
 
   return (
-    <>
     <div className="flex items-center justify-center gap-1">
       {orderedCols.map((col, i) => {
         const { checked, disabled, action } = resolved(col);
@@ -207,30 +218,5 @@ export function FlujoAtencion({
         );
       })}
     </div>
-    {ehrGate && fila.pacienteId && (
-      <EhrReadinessModal
-        pacienteId={String(fila.pacienteId)}
-        faltantes={ehrGate.faltantes}
-        centroId={centroId}
-        onCancel={() => setEhrGate(null)}
-        onCompleted={() => {
-          const g = ehrGate;
-          setEhrGate(null);
-          void runAccion(g.col, false, g.action);
-        }}
-      />
-    )}
-    {postAccion && (
-      <PostAccionHost
-        postAccion={postAccion.accion}
-        render={postAccion.render}
-        tablero={tablero}
-        fila={fila}
-        centroId={centroId}
-        onClose={() => setPostAccion(null)}
-        onSaved={onSaved}
-      />
-    )}
-    </>
   );
 }
