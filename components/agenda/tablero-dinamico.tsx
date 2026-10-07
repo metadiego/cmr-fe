@@ -22,7 +22,9 @@ import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges
 import { CeldaSelect } from "@/components/tablero/celda-select";
 import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
 import { CeldaToggleIcon } from "@/components/tablero/celda-toggle-icon";
-import { FlujoAtencion } from "@/components/tablero/flujo-atencion";
+import { FlujoAtencion, type PostAccionCtx, type EhrGateCtx } from "@/components/tablero/flujo-atencion";
+import { PostAccionHost } from "@/components/tablero/post-accion";
+import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
@@ -336,6 +338,13 @@ export function TableroDinamico({
   const cols = useVisibleColumns(columnas);
   const rowPad = density === "compacto" ? "py-1" : "py-2";
 
+  // Modal de post-acción ("Nueva cita" al marcar asistido) y candado del EHR: viven AQUÍ, no dentro
+  // de FlujoAtencion (por fila) — la fila que acaba de avanzar puede quedar fuera del filtro de KPI
+  // activo en el próximo refetch, lo que desmontaría un modal guardado en su estado local antes de
+  // que la persona pudiera usarlo. Handoff HANDOFF-modal-proxima-cita-se-cierra-solo.md.
+  const [postAccion, setPostAccion] = React.useState<PostAccionCtx | null>(null);
+  const [ehrGate, setEhrGate] = React.useState<EhrGateCtx | null>(null);
+
   function renderCell(col: ColumnaEfectiva, fila: CitaFila) {
     // Paciente: avatar de iniciales + nombre (como el mockup).
     if (col.clave === "paciente") {
@@ -454,6 +463,7 @@ export function TableroDinamico({
   }
 
   return (
+    <>
     <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <table className="w-full text-sm">
         <thead className="bg-muted/40 text-xs text-muted-foreground">
@@ -503,6 +513,8 @@ export function TableroDinamico({
                         estados={estados ?? []}
                         centroId={centroId}
                         onSaved={onRefresh}
+                        onPostAccion={setPostAccion}
+                        onEhrGate={setEhrGate}
                       />
                     </td>
                   ) : (
@@ -521,5 +533,30 @@ export function TableroDinamico({
         </tbody>
       </table>
     </div>
+    {ehrGate && (
+      <EhrReadinessModal
+        pacienteId={ehrGate.pacienteId}
+        faltantes={ehrGate.faltantes}
+        centroId={centroId}
+        onCancel={() => setEhrGate(null)}
+        onCompleted={() => {
+          const g = ehrGate;
+          setEhrGate(null);
+          g.onCompleted();
+        }}
+      />
+    )}
+    {postAccion && (
+      <PostAccionHost
+        postAccion={postAccion.accion}
+        render={postAccion.render}
+        tablero={tablero ?? ""}
+        fila={postAccion.fila}
+        centroId={centroId}
+        onClose={() => setPostAccion(null)}
+        onSaved={onRefresh}
+      />
+    )}
+    </>
   );
 }
