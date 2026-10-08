@@ -1,3 +1,19 @@
+> **RESUELTO por el BE, 8-oct-2026 — en producción y verificado por HTTP real.**
+>
+> 1. **Tu misma llamada** (`book-multiple` con `0000…`, Caguas) → **404**
+>    `{ code: "ENTITY_NOT_FOUND", labelKey: "frontdesk.patientNotFound" }` y `GET /frontdesk/sessions`
+>    del 2099-01-01 → `[]`. Paciente real + servicio inexistente → 404
+>    `{ code: "ENTITY_NOT_FOUND", labelKey: "frontdesk.serviceNotFound" }` (verificado igual). El
+>    error trae **solo** `code`, `message` y `labelKey`: no dice qué servicio faltó. Cubre la alta simple, `book-multiple`/`agendar-multiple`, los
+>    puentes y el MCP, y en el múltiple se comprueba TODO antes de crear el primero.
+> 2. `GET/POST/PUT /doctors/schedules` y `POST .../bulk` declaran `StaffScheduleResponseDto`, copiado
+>    de la respuesta real de **v2**: `id, clinicId, createdAt, updatedAt, staffId, doctorId
+>    (deprecated), dayOfWeek, startTime, endTime, active`. **No** se usó la entidad: está en español y
+>    el Swagger no traduce esquemas, así que te habría generado `diaSemana`/`horaInicio`.
+> 3. `frontdeskConsultationOrder` → `nullable: true` en el Swagger y `number | null` en el DTO.
+>
+> Ya puedes regenerar (`gen:api`) y borrar los dos tipos a mano.
+
 # Handoff BE — book-multiple acepta pacientes/servicios inexistentes + 2 huecos de Swagger
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-08 · **Prioridad:** el punto 1 es un fallo de datos;
