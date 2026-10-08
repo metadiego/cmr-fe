@@ -137,6 +137,24 @@ imprimiría en Caguas.
 - **Guardar los colores del centro** ahora mezcla sobre una lectura FRESCA del servidor, para no
   borrar la impresora guardada por su propio botón.
 
+**Windows + detección + certificado a la vista (8-oct-2026):** los equipos que comparten la impresora en
+las oficinas son **Windows**, que no habla IPP/CUPS. El hub ahora acepta `protocol=smb` y manda los
+bytes con `smbclient //host/recurso -c "print -"` (el spooler de Windows los recibe RAW). Si el
+recurso pide usuario/contraseña, la cuenta va EN EL HUB (`/opt/cmr-print-hub/smb-credentials/<ip>`,
+archivo de autenticación de smbclient, permisos 700) — nunca en la app. `GET /discover?host=` detecta
+el sistema por puerto abierto (631 → Linux/Mac, 445 → Windows) y lista las impresoras compartidas.
+En la pantalla: indicador "este navegador llega / no llega al hub" con el enlace para abrir el hub y
+aceptar el certificado + "Comprobar"; botón **Detectar** junto a la IP que llena puerto y protocolo y
+muestra las impresoras para elegir con un clic; ayuda de dónde sale cada dato en Windows y Linux/Mac.
+
+- **Verificado (HTTPS contra el hub):** detección de la Zorin → linux-mac, 631, `[TM-T20II,
+  TM-T20II-RAW]`; de esta Mac → linux-mac, `[Epson_TM-T20II]`; 7 equipos con 445 abierto en la LAN →
+  windows (3 sin impresoras compartidas, 3 piden login: `NT_STATUS_ACCESS_DENIED`/`LOGON_FAILURE`);
+  destino fuera de red → 400; protocolo inválido → 400.
+- **NO verificado todavía:** imprimir de verdad por SMB a una impresora compartida desde Windows —
+  en la LAN de pruebas no hay ningún Windows compartiendo una impresora. Pendiente de la primera
+  prueba real en una oficina.
+
 **Ejemplo con un solo hub:** Caguas → url `https://192.130.80.172:8943/print-raw`, IP
 `192.130.80.181`, puerto `631`, cola `TM-T20II-RAW`. Bayamón → la MISMA url, con la IP/cola del equipo
 que comparte su impresora de consulta.
