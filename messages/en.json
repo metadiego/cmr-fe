@@ -3868,7 +3868,7 @@
     "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
     "centroVacio": "No centers available for your user.",
     "hubLabel": "Backup print hub (ESC/POS)",
-    "hubHint": "One hub serves every office: what makes each center print on ITS own paper is the printer below. Incomplete = the backup button shows an error instead of printing elsewhere.",
+    "hubHint": "One hub serves every office. Requirement: the machine the printer is plugged into by USB must SHARE it (Windows, Linux or Mac, any of them); that is how the hub reaches it. What makes each center print on ITS own paper is the printer below; if it is incomplete, the backup button shows an error instead of printing elsewhere.",
     "hubPlaceholder": "https://192.130.80.172:8943/print-raw",
     "hubSave": "Save printer",
     "hubSaved": "Hub printer saved for this center.",

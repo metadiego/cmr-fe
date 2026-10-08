@@ -3868,7 +3868,7 @@
     "overrideRemoveConfirm": "¿Desactivar «{nombre}»? Todos volverán a la apariencia que les toque.",
     "centroVacio": "No hay centros disponibles para tu usuario.",
     "hubLabel": "Hub de respaldo para imprimir (ESC/POS)",
-    "hubHint": "Un solo hub sirve a todas las oficinas: lo que hace que cada centro imprima en SU papel es la impresora de abajo. Incompleto = el botón de respaldo da error en vez de imprimir en otro sitio.",
+    "hubHint": "Un solo hub sirve a todas las oficinas. Requisito: el equipo que tiene la impresora conectada por USB debe COMPARTIRLA (Windows, Linux o Mac, da igual); el hub le llega por esa vía. Lo que hace que cada centro imprima en SU papel es la impresora de abajo; si está incompleta, el botón de respaldo da error en vez de imprimir en otro sitio.",
     "hubPlaceholder": "https://192.130.80.172:8943/print-raw",
     "hubSave": "Guardar impresora",
     "hubSaved": "Impresora del hub guardada para este centro.",
