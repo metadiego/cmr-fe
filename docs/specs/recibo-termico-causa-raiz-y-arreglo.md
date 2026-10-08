@@ -100,11 +100,31 @@ Zorin se **detuvo y se deshabilitó** (`systemctl disable --now cmr-print-hub` e
 ### Lo que vive en este repo
 
 - `lib/print/hub.ts` — arma el recibo en texto plano ESC/POS (48 columnas, mismo modelo `Recibo` que
-  pinta `<ReciboTermico>`) y lo manda al hub.
+  pinta `<ReciboTermico>`) y lo manda al hub. **No trae ninguna URL fija** — recibe la URL ya resuelta
+  por el llamador y lanza de una vez si viene vacía, para nunca mandar en silencio al hub de otro centro.
 - `app/(app)/billing/invoices/[id]/page.tsx` — botón **"Respaldo: imprimir por el hub"**, chiquito y
   aparte, dentro del visor del recibo, junto al botón normal "Imprimir". El camino normal (navegador +
   `window.print()`) sigue siendo el de siempre, intacto; este es solo un segundo camino para cuando el
   primero falle.
+
+### Multi-centro: cada oficina tiene su propio hub, configurable (8-oct-2026)
+
+Con más de una oficina (Bayamón y Caguas, misma estructura: 3 equipos / 2 impresoras cada una — 2
+exclusivas por USB directo + 1 compartida de consulta), una sola URL fija habría mandado TODOS los
+recibos de respaldo a la MISMA impresora física sin importar desde qué centro se imprimiera — el "caso
+Tokio" que señaló el dueño: una oficina nueva en Tokio usando el hub imprimiría en Caguas.
+
+**Arreglo:** `lib/theme/config.ts` → `ThemeConfig.impresionHub?.url`, una clave más del mismo sobre
+libre de config por capas (#51) que ya usa `colorPorCentro`/`recibo.anchoMm` — **cada centro guarda la
+suya en su propia capa `centro`**, editable sin tocar código desde **Configuración → Apariencia
+corporativa** (sección "Por centro", campo nuevo "Hub de respaldo para imprimir"). Pensado para mudar
+de LAN a nube (p. ej. GCP) sin ningún deploy: solo se edita el campo.
+
+El botón de respaldo en la factura resuelve el centro DUEÑO de esa factura (`?centro=` de la URL o,
+si falta, el `clinicId` de la propia factura — nunca el centro activo de otra pestaña), lee
+`impresionHub.url` de la capa de ESE centro, y si no hay ninguno configurado falla con un mensaje
+claro en vez de adivinar. Hoy solo Caguas tiene URL configurada (la del dev-server de pruebas,
+`https://192.130.80.172:8943/print-raw`); Bayamón queda sin hub hasta que se instale uno ahí.
 
 ## Navegador: cuál usar y un ajuste suyo (dato del dueño, verificado en papel)
 
