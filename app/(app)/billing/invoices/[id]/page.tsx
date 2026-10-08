@@ -131,6 +131,20 @@ export default function FacturacionPage() {
   // iframe manda solo el recibo al papel. Handoff: visor de recibo + reimprimir sin salir de la pantalla.
   const [reciboOpen, setReciboOpen] = React.useState(false);
   const [busyHub, setBusyHub] = React.useState(false);
+  // Backup hub destination of the center that owns this invoice, resolved when the print modal opens.
+  // null = not configured (or not resolved yet) → the backup button is not shown at all.
+  const [hubRequestUrl, setHubRequestUrl] = React.useState<string | null>(null);
+  const invoiceCenter = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
+  React.useEffect(() => {
+    if (!reciboOpen || !invoiceCenter) return;
+    let active = true;
+    getMyPreferences(invoiceCenter)
+      .then((prefs) => active && setHubRequestUrl(buildHubRequestUrl(prefs.layers.center?.printHub)))
+      .catch(() => active && setHubRequestUrl(null));
+    return () => {
+      active = false;
+    };
+  }, [reciboOpen, invoiceCenter]);
   const reciboIframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const refetch = React.useCallback(() => {
@@ -226,21 +240,12 @@ export default function FacturacionPage() {
   // Backup print: raw ESC/POS through the print hub, for when the normal browser path fails. The
   // destination printer is the one configured for the center that OWNS this invoice (`?centro=` or,
   // failing that, the invoice's own clinicId — same fallback as the rest of this screen), read from
-  // that center's `printHub` preferences. Incomplete config → clear error, never another printer.
+  // that center's `printHub` preferences. The button only exists when that config is complete.
   async function printViaHubClick() {
-    const invoiceCenter = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
-    if (!invoiceCenter) {
-      toast.error(t("print.backupHubNoCenter"));
-      return;
-    }
+    const requestUrl = hubRequestUrl;
+    if (!requestUrl) return;
     setBusyHub(true);
     try {
-      const prefs = await getMyPreferences(invoiceCenter);
-      const requestUrl = buildHubRequestUrl(prefs.layers.center?.printHub);
-      if (!requestUrl) {
-        toast.error(t("print.backupHubNotConfigured"));
-        return;
-      }
       const r = await imprimirFactura(id, centro);
       setFactura(r.invoice);
       const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
@@ -390,9 +395,13 @@ export default function FacturacionPage() {
             {/* RESPALDO, aparte del botón normal: manda el recibo directo al hub de la Zorin (bytes ESC/POS,
                 sin pasar por el navegador ni por ningún driver) para cuando el camino normal falle. No
                 reemplaza nada; "Imprimir" sigue siendo el de siempre. Ver lib/print/hub.ts. */}
+            {hubRequestUrl ? (
             <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={printViaHubClick} disabled={busyHub}>
               {busyHub ? tRoot("common.loading") : t("print.backupHub")}
             </Button>
+            ) : (
+              <span />
+            )}
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setReciboOpen(false)}>{tRoot("common.cancel")}</Button>
               <Button size="sm" onClick={imprimirDesdeVisor}>

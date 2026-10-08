@@ -2879,9 +2879,7 @@
     "presupuestoNum": "Presupuesto {num}",
     "print": {
       "backupHub": "Respaldo: imprimir por el hub",
-      "backupHubDone": "Enviado al hub de respaldo",
-      "backupHubNoCenter": "Elige un centro para esta factura antes de usar el hub de respaldo",
-      "backupHubNotConfigured": "Este centro no tiene completa la impresora del hub (URL, IP, puerto y cola) en Configuración → Apariencia corporativa"
+      "backupHubDone": "Enviado al hub de respaldo"
     },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",

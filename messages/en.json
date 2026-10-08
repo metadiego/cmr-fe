@@ -2879,9 +2879,7 @@
     "presupuestoNum": "Quote {num}",
     "print": {
       "backupHub": "Backup: print via hub",
-      "backupHubDone": "Sent to the backup hub",
-      "backupHubNoCenter": "Pick a center for this invoice before using the backup hub",
-      "backupHubNotConfigured": "This center's hub printer is incomplete (URL, IP, port and queue) in Configuration → Corporate appearance"
+      "backupHubDone": "Sent to the backup hub"
     },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
