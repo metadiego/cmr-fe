@@ -2878,7 +2878,9 @@
     "presupuestoNum": "Presupuesto {num}",
     "print": {
       "backupHub": "Respaldo: imprimir por el hub",
-      "backupHubDone": "Enviado al hub de respaldo"
+      "backupHubDone": "Enviado al hub de respaldo",
+      "backupHubSinCentro": "Elige un centro para esta factura antes de usar el hub de respaldo",
+      "backupHubSinConfigurar": "Este centro todavía no tiene un hub de respaldo configurado"
     },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
@@ -3863,6 +3865,11 @@
     "noAccess": "No tienes acceso a la apariencia corporativa. Tu apariencia personal se cambia desde tu avatar.",
     "overrideRemoveConfirm": "¿Desactivar «{nombre}»? Todos volverán a la apariencia que les toque.",
     "centroVacio": "No hay centros disponibles para tu usuario.",
+    "hubLabel": "Hub de respaldo para imprimir (ESC/POS)",
+    "hubHint": "La URL propia de este centro para la impresora térmica de respaldo (lib/print/hub.ts). Déjalo vacío si este centro todavía no tiene su hub — el botón mostrará un error claro en vez de imprimir en otro centro.",
+    "hubPlaceholder": "https://host:puerto/print-raw",
+    "hubSave": "Guardar URL del hub",
+    "hubSaved": "URL del hub de respaldo guardada para este centro.",
     "lockLabel": "Bloquear estos colores para todo el centro",
     "lockHint": "Nadie de este centro podrá personalizar su propio color mientras esté activo."
   },

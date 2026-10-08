@@ -2878,7 +2878,9 @@
     "presupuestoNum": "Quote {num}",
     "print": {
       "backupHub": "Backup: print via hub",
-      "backupHubDone": "Sent to the backup hub"
+      "backupHubDone": "Sent to the backup hub",
+      "backupHubSinCentro": "Pick a center for this invoice before using the backup hub",
+      "backupHubSinConfigurar": "This center has no backup print hub configured yet"
     },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
@@ -3863,6 +3865,11 @@
     "noAccess": "You do not have access to the corporate appearance. Your personal look is set from your avatar.",
     "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
     "centroVacio": "No centers available for your user.",
+    "hubLabel": "Backup print hub (ESC/POS)",
+    "hubHint": "This center's own URL for the backup receipt printer (lib/print/hub.ts). Leave empty if this center has no backup hub yet — the button will show a clear error instead of printing at another center.",
+    "hubPlaceholder": "https://host:port/print-raw",
+    "hubSave": "Save hub URL",
+    "hubSaved": "Backup hub URL saved for this center.",
     "lockLabel": "Lock these colors for the whole center",
     "lockHint": "No one at this center will be able to personalize their own color while this is on."
   },

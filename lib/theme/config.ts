@@ -58,6 +58,16 @@ export interface ThemeConfig {
    */
   recibo?: { anchoMm?: number };
   /**
+   * Hub ESC/POS de respaldo (lib/print/hub.ts) para la impresora COMPARTIDA de este centro — NO
+   * existe un valor del sistema ni uno global: cada centro tiene su propia impresora física, así que
+   * cada uno guarda su propia URL en su capa `centro`. Sin esta clave (o vacía) el botón de respaldo
+   * debe fallar con un error claro, NUNCA mandar el trabajo al hub de otro centro — ese es justo el
+   * caso que esto evita (un centro imprimiendo en el papel de otro). Pensado para cambiar de LAN a
+   * nube (p. ej. GCP) sin tocar código: solo se edita este valor. Ver
+   * docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
+   */
+  impresionHub?: { url?: string };
+  /**
    * Idioma de la interfaz elegido por la persona (capa `usuario`). El BE lo resuelve por
    * precedencia y lo devuelve ya resuelto en /auth/me (`idioma`) + la lista elegible
    * (`idiomasDisponibles`). Vive en el mismo blob de config que la apariencia, así que al

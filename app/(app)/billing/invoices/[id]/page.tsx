@@ -48,6 +48,7 @@ import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { imprimirPorHub } from "@/lib/print/hub";
+import { getCentroPreferences } from "@/lib/api/preferences";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -217,16 +218,32 @@ export default function FacturacionPage() {
     window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
   }
 
-  // RESPALDO: manda el recibo directo al hub de la Zorin (bytes ESC/POS crudos, cola sin filtro), sin
-  // pasar por el navegador ni por ningún driver — funciona igual en cualquier navegador si el camino
-  // normal falla. No es el botón por defecto; es aparte. Ver docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
+  // RESPALDO: manda el recibo directo al hub del CENTRO DUEÑO de esta factura (bytes ESC/POS crudos,
+  // cola sin filtro), sin pasar por el navegador ni por ningún driver — funciona igual en cualquier
+  // navegador si el camino normal falla. No es el botón por defecto; es aparte. La URL del hub NO está
+  // fija en el código: cada centro guarda la suya en su capa de preferences (`impresionHub.url`), para
+  // que mandar un trabajo desde Caguas nunca termine saliendo en la impresora de Bayamón (o de
+  // cualquier otra oficina futura). Mismo fallback de centro que el resto de la pantalla: `centro` de
+  // la URL o, si falta, el `clinicId` de la propia factura — nunca adivina "el centro activo" de otra
+  // pestaña. Ver docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
   async function imprimirPorHubClick() {
+    const centroFactura = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
+    if (!centroFactura) {
+      toast.error(t("print.backupHubSinCentro"));
+      return;
+    }
     setBusyHub(true);
     try {
+      const prefsCentro = await getCentroPreferences(centroFactura);
+      const hubUrl = prefsCentro.impresionHub?.url;
+      if (!hubUrl) {
+        toast.error(t("print.backupHubSinConfigurar"));
+        return;
+      }
       const r = await imprimirFactura(id, centro);
       setFactura(r.invoice);
       const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
-      await imprimirPorHub(reciboFinal);
+      await imprimirPorHub(reciboFinal, hubUrl);
       toast.success(t("print.backupHubDone"));
     } catch (err) {
       toastError(err, tRoot);
