@@ -2880,7 +2880,17 @@
     "print": {
       "backupHub": "Respaldo: imprimir por el hub",
       "backupHubDone": "Enviado al hub de respaldo",
-      "backupHubDoneFallback": "Enviado por el hub de respaldo {hub} (el principal no respondió)"
+      "backupHubDoneFallback": "Enviado por el hub de respaldo {hub} (el principal no respondió)",
+      "backupHubChecking": "Comprobando el hub…",
+      "backupHubDown": "Hub de impresión caído o sin certificado aceptado en este equipo.",
+      "backupHubRetry": "Reintentar",
+      "backupHubOpen": "Abrir hub",
+      "backupHubCertHint": "Ábrelo y acepta el aviso de seguridad si es la primera vez en este equipo; luego Reintentar.",
+      "backupPrinter": {
+        "disabled": "Impresora apagada o desconectada.",
+        "missing": "La impresora configurada no existe en ese equipo.",
+        "unreachable": "El equipo de la impresora no responde."
+      }
     },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",

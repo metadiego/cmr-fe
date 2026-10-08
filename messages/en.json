@@ -2880,7 +2880,17 @@
     "print": {
       "backupHub": "Backup: print via hub",
       "backupHubDone": "Sent to the backup hub",
-      "backupHubDoneFallback": "Sent through backup hub {hub} (the main one did not answer)"
+      "backupHubDoneFallback": "Sent through backup hub {hub} (the main one did not answer)",
+      "backupHubChecking": "Checking the hub…",
+      "backupHubDown": "Print hub down, or its certificate not accepted on this machine.",
+      "backupHubRetry": "Retry",
+      "backupHubOpen": "Open hub",
+      "backupHubCertHint": "Open it and accept the security warning if it is the first time on this machine; then Retry.",
+      "backupPrinter": {
+        "disabled": "Printer off or unplugged.",
+        "missing": "The configured printer does not exist on that machine.",
+        "unreachable": "The printer's machine is not answering."
+      }
     },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",

@@ -79,3 +79,11 @@ export function buildHubDiscoverUrl(url: string | undefined | null, host: string
   u.searchParams.set("host", h);
   return u.toString();
 }
+
+// The hub's health check for the same destination: GET /status with the request's own query
+// (protocol, host, port, queue). Answers whether the hub is up and whether THAT printer is ready.
+export function hubStatusUrl(requestUrl: string): string {
+  const u = new URL(requestUrl);
+  u.pathname = "/status";
+  return u.toString();
+}

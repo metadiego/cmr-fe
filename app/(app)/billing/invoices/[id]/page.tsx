@@ -44,12 +44,9 @@ import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
 import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-panel";
-import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
-import { sendToHubs } from "@/lib/print/hub";
-import { buildHubRequestUrls } from "@/lib/print/hub-target";
-import { getPrintHubForPrinting } from "@/lib/api/print-hub";
+import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
 import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
 import { loadLogoRaster } from "@/lib/print/load-logo";
@@ -130,21 +127,7 @@ export default function FacturacionPage() {
   // iframe a la página dedicada /print/invoice/:id?embed=1 (solo el recibo, como el legado); imprimir ese
   // iframe manda solo el recibo al papel. Handoff: visor de recibo + reimprimir sin salir de la pantalla.
   const [reciboOpen, setReciboOpen] = React.useState(false);
-  const [busyHub, setBusyHub] = React.useState(false);
-  // Backup hubs of the center that owns this invoice (in order), resolved when the print modal opens.
-  // Empty = not configured / disabled (or not resolved yet) → the backup button is not shown at all.
-  const [hubRequestUrls, setHubRequestUrls] = React.useState<string[]>([]);
   const invoiceCenter = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
-  React.useEffect(() => {
-    if (!reciboOpen || !invoiceCenter) return;
-    let active = true;
-    getPrintHubForPrinting(invoiceCenter)
-      .then((hub) => active && setHubRequestUrls(buildHubRequestUrls(hub)))
-      .catch(() => active && setHubRequestUrls([]));
-    return () => {
-      active = false;
-    };
-  }, [reciboOpen, invoiceCenter]);
   const reciboIframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const refetch = React.useCallback(() => {
@@ -237,27 +220,14 @@ export default function FacturacionPage() {
     window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
   }
 
-  // Backup print: raw ESC/POS through the print hub, for when the normal browser path fails. The
-  // destination printer is the one configured for the center that OWNS this invoice (`?centro=` or,
-  // failing that, the invoice's own clinicId — same fallback as the rest of this screen), read from
-  // that center's /me/print-hub. Its hubs are tried in order (central, then e.g. the printer's own
-  // machine), so that machine keeps printing if the central hub is down. The button only exists when
-  // the center has a usable configuration.
-  async function printViaHubClick() {
-    if (hubRequestUrls.length === 0) return;
-    setBusyHub(true);
-    try {
-      const r = await imprimirFactura(id, centro);
-      setFactura(r.invoice);
-      const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
-      const logo = await loadLogoRaster(reciboFinal.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
-      const i = await sendToHubs(hubRequestUrls, receiptToEscPos(reciboFinal, buildReceiptText(tReceipt, tRoot), logo));
-      toast.success(i === 0 ? t("print.backupHubDone") : t("print.backupHubDoneFallback", { hub: new URL(hubRequestUrls[i]).host }));
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusyHub(false);
-    }
+  // ESC/POS bytes of this receipt for the backup print button (it marks the invoice printed first,
+  // like the normal path). Which hub/printer and whether they are up is the button's business.
+  async function buildBackupReceiptBytes(): Promise<Uint8Array> {
+    const r = await imprimirFactura(id, centro);
+    setFactura(r.invoice);
+    const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
+    const logo = await loadLogoRaster(reciboFinal.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
+    return receiptToEscPos(reciboFinal, buildReceiptText(tReceipt, tRoot), logo);
   }
 
   if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
@@ -393,16 +363,8 @@ export default function FacturacionPage() {
             className="h-[66vh] w-full bg-white"
           />
           <div className="flex items-center justify-between gap-2 border-t px-4 py-3">
-            {/* RESPALDO, aparte del botón normal: manda el recibo directo al hub de la Zorin (bytes ESC/POS,
-                sin pasar por el navegador ni por ningún driver) para cuando el camino normal falle. No
-                reemplaza nada; "Imprimir" sigue siendo el de siempre. Ver lib/print/hub.ts. */}
-            {hubRequestUrls.length > 0 ? (
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={printViaHubClick} disabled={busyHub}>
-              {busyHub ? tRoot("common.loading") : t("print.backupHub")}
-            </Button>
-            ) : (
-              <span />
-            )}
+            {/* Backup path, apart from the normal "Print": raw ESC/POS through the print hub. */}
+            {reciboOpen ? <BackupPrintButton centerId={invoiceCenter} buildBytes={buildBackupReceiptBytes} /> : <span />}
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setReciboOpen(false)}>{tRoot("common.cancel")}</Button>
               <Button size="sm" onClick={imprimirDesdeVisor}>

@@ -27,7 +27,9 @@ const DEBT = {
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
   "components/frontdesk/frontdesk-board.tsx": 935,
   "components/frontdesk/fila-sesion.tsx": 714,
-  "app/(app)/billing/invoices/[id]/page.tsx": 2274,
+  // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
+  // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
+  "app/(app)/billing/invoices/[id]/page.tsx": 2050,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)

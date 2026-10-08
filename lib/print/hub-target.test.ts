@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildHubDiscoverUrl, buildHubRequestUrl, buildHubRequestUrls, hubOrigin } from "./hub-target.ts";
+import { buildHubDiscoverUrl, buildHubRequestUrl, buildHubRequestUrls, hubOrigin, hubStatusUrl } from "./hub-target.ts";
 
 const CENTRAL = "https://192.130.80.172:8943/print-raw";
 const LOCAL = "http://localhost:8943/print-raw";
@@ -74,4 +74,12 @@ test("discover url: hub origin + /discover?host=", () => {
 
 test("port may come as a string (form input) and is accepted", () => {
   assert.equal(new URL(buildHubRequestUrl(CENTRAL, { ...dest, printerPort: "631" })!).searchParams.get("port"), "631");
+});
+
+
+test("status url: same hub and destination, path /status", () => {
+  const req = buildHubRequestUrl(CENTRAL, dest)!;
+  const u = new URL(hubStatusUrl(req));
+  assert.equal(u.origin + u.pathname, "https://192.130.80.172:8943/status");
+  assert.equal(u.search, new URL(req).search);
 });

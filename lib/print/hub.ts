@@ -43,3 +43,36 @@ export async function sendToHubs(
   }
   throw new Error(failures.join(" · ") || "no hub configured");
 }
+
+// What the hub says about the destination printer (GET /status).
+export type PrinterState = "ready" | "disabled" | "missing" | "unreachable" | "unknown";
+export type HubHealth =
+  | { kind: "ready"; hub: number }
+  | { kind: "printerDown"; hub: number; state: Exclude<PrinterState, "ready" | "unknown">; detail: string }
+  | { kind: "hubDown" };
+
+async function fetchHubStatus(statusUrl: string): Promise<{ printer: PrinterState; detail?: string }> {
+  const res = await fetch(statusUrl, { cache: "no-store", signal: AbortSignal.timeout(6000) });
+  if (!res.ok) throw new Error(`hub ${res.status}`);
+  return res.json();
+}
+
+// Asks the hubs IN ORDER (the same order printing uses); the first one that answers decides. "unknown"
+// (e.g. a Windows share that needs a login to inspect) does not block printing: only a known-bad state
+// does. No hub answering = hub down (or, from a browser, its certificate not accepted yet).
+export async function checkHubs(
+  statusUrls: string[],
+  get: (url: string) => Promise<{ printer: PrinterState; detail?: string }> = fetchHubStatus,
+): Promise<HubHealth> {
+  for (let i = 0; i < statusUrls.length; i++) {
+    let s: { printer: PrinterState; detail?: string };
+    try {
+      s = await get(statusUrls[i]);
+    } catch {
+      continue;
+    }
+    if (s.printer === "ready" || s.printer === "unknown") return { kind: "ready", hub: i };
+    return { kind: "printerDown", hub: i, state: s.printer, detail: s.detail ?? "" };
+  }
+  return { kind: "hubDown" };
+}
