@@ -8,6 +8,12 @@ El dueño tuvo que **recargar** Facturación general para ver lo que se acababa 
 escucha el bus único `GET /api/v2/tablero/stream` en la lista de facturas, filtrando `entity: "factura"`
 y refrescando la lista y el total del rango con cada evento (desplegado; badge «En vivo»).
 
+**Aplica por igual a las dos listas: Facturación general (`/billing/invoices`) y Facturación de
+consultas (`/billing/consultations`).** Son el mismo componente (`FacturasListView`, `contexto`
+general|consulta) sobre el mismo `GET /invoices/board`, así que ya escuchan los dos el mismo bus. El
+evento no necesita decir de qué lista es: cada una se refresca con sus propios filtros. Lo que se pide
+abajo vale para facturas de venta y de consulta sin distinción.
+
 ## Lo que el BE emite hoy (leído en el código, `cmr-be` main del 8-oct)
 
 - `facturacion.service.ts` → `publicarFactura(factura, 'emitida')`: **solo al emitir**.
