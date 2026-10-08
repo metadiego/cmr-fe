@@ -5,26 +5,14 @@ import { useTranslations } from "next-intl";
 
 import type { Recibo } from "@/lib/factura/build-recibo";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
-import { formatFechaSolo } from "@/lib/format/fecha";
-
-const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
-
-// Local, print-safe date formatting (dd/mm/yyyy + hh:mm) — matches the legacy
-// receipt. Falls back to the raw string if unparseable.
-function fmtFecha(iso: string): { fecha: string; hora: string } {
-  if (!iso) return { fecha: "—", hora: "" };
-  // Fecha SOLO-DÍA (p. ej. la devolución "2026-07-18"): formatear sin corrimiento de zona y sin hora
-  // (new Date("YYYY-MM-DD") sería UTC y en PR retrocede un día). Ver lib/format/fecha.
-  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return { fecha: formatFechaSolo(iso), hora: "" };
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return { fecha: iso, hora: "" };
-  const p = (n: number) => String(n).padStart(2, "0");
-  return {
-    // PR usa formato US: MM/DD/YYYY (no DD/MM).
-    fecha: `${p(d.getMonth() + 1)}/${p(d.getDate())}/${d.getFullYear()}`,
-    hora: `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,
-  };
-}
+import {
+  hasMultipliers,
+  multipliersText,
+  receiptDateParts,
+  receiptFooter,
+  receiptMoney as money,
+  receiptTitleKey,
+} from "@/lib/factura/receipt-format";
 
 function Dashed() {
   return <div className="my-1 border-t border-dashed border-black" />;
@@ -47,7 +35,8 @@ function Line({
   );
 }
 
-// Presentational thermal receipt. Pure: receives a Recibo, renders paper.
+// Presentational thermal receipt. Pure: receives a Recibo, renders paper. Its ESC/POS twin for the
+// print hub is lib/print/receipt-escpos.ts — same blocks, same order: change both together.
 // On screen it shows as a paper preview; print CSS (globals.css, `.recibo-print`)
 // isolates it and sizes @page to the IMPRINTABLE width (`--recibo-ancho`, default 72mm — el ancho
 // imprimible del rollo, NO 80mm que es el del papel). No fijamos un ancho en px/mm aquí: un solo
@@ -55,13 +44,12 @@ function Line({
 export function ReciboTermico({ recibo }: { recibo: Recibo }) {
   const t = useTranslations("receipt");
   const tRoot = useTranslations();
-  const { fecha, hora } = fmtFecha(recibo.fecha);
+  const { fecha, hora } = receiptDateParts(recibo.fecha);
   // Label de un multiplicador (fac.col.<clave>), data-driven; fallback a la clave.
   const multLabel = (k: string) => (tRoot.has(`fac.col.${k}`) ? tRoot(`fac.col.${k}`) : k);
-  const multTexto = (m: Record<string, number>) =>
-    Object.entries(m).map(([k, v]) => `${v} ${multLabel(k)}`).join(" × ");
+  const multTexto = (m: Record<string, number>) => multipliersText(m, multLabel);
   // Terapias con multiplicadores → leyenda al pie (una por línea).
-  const conMultiplicadores = recibo.items.filter((it) => it.multiplicadores && Object.keys(it.multiplicadores).length);
+  const conMultiplicadores = recibo.items.filter(hasMultipliers);
   const emp = recibo.empresa;
 
   return (
@@ -107,11 +95,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       <div className="flex justify-between font-bold">
         <span>
           {/* Presupuesto (borrador no emitido), devolución o factura. Handoff imprimir-presupuesto. */}
-          {recibo.tipoDocumento === "devolucion"
-            ? t("returnDoc")
-            : recibo.tipoDocumento === "presupuesto"
-              ? t("budgetDoc")
-              : t("invoice")}{" "}
+          {t(receiptTitleKey(recibo))}{" "}
           #{recibo.numeroDisplay}
         </span>
         <span className="font-normal">{fecha}</span>
@@ -139,7 +123,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
           <div className="flex justify-between gap-2">
             <span>
               {it.cantidad}
-              {it.multiplicadores && Object.keys(it.multiplicadores).length ? ` (${multTexto(it.multiplicadores)})` : ""}
+              {hasMultipliers(it) ? ` (${multTexto(it.multiplicadores!)})` : ""}
               {" "}x {money(it.precioUnitario)}
               {it.descuento > 0 ? ` − ${money(it.descuento)}` : ""}
             </span>
@@ -237,7 +221,7 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       <div className="text-center">
         <div>{t("thanks")}</div>
         {(() => {
-          const pie = recibo.estado === "borrador" ? (emp?.quoteFooter ?? null) : (emp?.invoiceFooter ?? null);
+          const pie = receiptFooter(recibo);
           return pie ? <div className="mt-0.5 whitespace-pre-line">{pie}</div> : null;
         })()}
         {emp?.website && <div className="mt-0.5">{emp.website}</div>}

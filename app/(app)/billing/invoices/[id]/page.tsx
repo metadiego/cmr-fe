@@ -47,9 +47,11 @@ import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
-import { receiptToEscPos, sendToHub } from "@/lib/print/hub";
+import { sendToHub } from "@/lib/print/hub";
 import { buildHubRequestUrl } from "@/lib/print/hub-target";
-import { receiptLabels } from "@/lib/print/receipt-labels";
+import { buildReceiptText } from "@/lib/print/receipt-labels";
+import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
+import { loadLogoRaster } from "@/lib/print/load-logo";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
@@ -242,7 +244,8 @@ export default function FacturacionPage() {
       const r = await imprimirFactura(id, centro);
       setFactura(r.invoice);
       const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
-      await sendToHub(requestUrl, receiptToEscPos(reciboFinal, receiptLabels(tReceipt)));
+      const logo = await loadLogoRaster(reciboFinal.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
+      await sendToHub(requestUrl, receiptToEscPos(reciboFinal, buildReceiptText(tReceipt, tRoot), logo));
       toast.success(t("print.backupHubDone"));
     } catch (err) {
       toastError(err, tRoot);

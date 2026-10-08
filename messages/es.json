@@ -2667,7 +2667,6 @@
     "includes": "Incluye",
     "protocolVisits": "Protocolo de {n} visitas",
     "budgetDoc": "PRESUPUESTO",
-    "backupFooter": "RESPALDO - vía hub ESC/POS",
     "hubTestTitle": "PRUEBA DEL HUB"
   },
   "facturacion": {
