@@ -8,6 +8,7 @@ import { useMe } from "@/hooks/use-me";
 import { getMyCentrosOperativos, type Centro } from "@/lib/api/centers";
 import { getMyPreferences } from "@/lib/api/preferences";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
+import { urlAfterCenterSwitch } from "@/lib/navigation/after-center-switch";
 import { apiErrorMessage } from "@/lib/api/errors";
 import {
   Select,
@@ -63,8 +64,12 @@ export function CenterSelector() {
 
   function onChange(id: string) {
     setActiveCentro(id);
-    // Full reload so all in-flight components refetch under the new tenant.
-    window.location.reload();
+    // Full page load so everything refetches under the new tenant — but not always in place: a record
+    // of the previous center goes back to its list, and a `?centro=` is re-pinned (see the helper).
+    const { pathname, search } = window.location;
+    const next = urlAfterCenterSwitch(pathname, search, id);
+    if (next === pathname + search) window.location.reload();
+    else window.location.assign(next);
   }
 
   return (
