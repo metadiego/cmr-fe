@@ -12,8 +12,11 @@
 > Bayamón: `enabled: false` (su config estaba a medias: solo el puerto). La fila de admin trae además
 > `id`, `clinicId`, `createdAt`, `updatedAt`, `updatedBy`.
 >
-> **Validación verificada**: cola `mala;cola` → 400 `labelKey: printHub.invalidQueue`. Los errores
-> traen además `fallos: [{ labelKey, campo }]` con TODOS los problemas de una vez. Otras claves:
+> **Validación verificada por HTTP** (8-oct 16:51, tras un segundo despliegue: el primero perdía la
+> lista por el camino): URL `pepe` + cola `mala;cola` → 400
+> `{ code: "PRINT_HUB_CONFIGURACION_INVALIDA", labelKey: "printHub.invalidUrl", fallos: [
+> { labelKey: "printHub.invalidUrl", campo: "hubUrls" }, { labelKey: "printHub.invalidQueue", campo: "printerQueue" } ] }`
+> — `labelKey` es el primero, `fallos` trae TODOS. La configuración de Caguas no se tocó. Otras claves:
 > `printHub.invalidUrl`, `printHub.invalidProtocol`, `printHub.invalidPort`, `printHub.notFound`.
 >
 > **MCP**: `print_hub_list`, `print_hub_get`, `print_hub_set`, `print_hub_delete`.

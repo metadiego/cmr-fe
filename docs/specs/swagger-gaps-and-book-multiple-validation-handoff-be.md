@@ -1,10 +1,11 @@
 > **RESUELTO por el BE, 8-oct-2026 — en producción y verificado por HTTP real.**
 >
 > 1. **Tu misma llamada** (`book-multiple` con `0000…`, Caguas) → **404**
->    `{ code: "ENTITY_NOT_FOUND", labelKey: "frontdesk.patientNotFound" }` y `GET /frontdesk/sessions`
->    del 2099-01-01 → `[]`. Paciente real + servicio inexistente → 404
->    `{ code: "ENTITY_NOT_FOUND", labelKey: "frontdesk.serviceNotFound" }` (verificado igual). El
->    error trae **solo** `code`, `message` y `labelKey`: no dice qué servicio faltó. Cubre la alta simple, `book-multiple`/`agendar-multiple`, los
+>    `{ code: "FRONTDESK_PACIENTE_NO_EXISTE", labelKey: "frontdesk.patientNotFound", pacienteId }` y
+>    `GET /frontdesk/sessions` del 2099-01-01 → `[]`. Paciente real + servicio inexistente → 404
+>    `{ code: "FRONTDESK_SERVICIO_NO_EXISTE", labelKey: "frontdesk.serviceNotFound", servicioIds: [ … ] }`
+>    con **los que faltan** (verificado por HTTP tras un segundo despliegue el 8-oct 16:51; ojo: esas
+>    claves del error llegan así, `pacienteId`/`servicioIds`, también en v2). Cubre la alta simple, `book-multiple`/`agendar-multiple`, los
 >    puentes y el MCP, y en el múltiple se comprueba TODO antes de crear el primero.
 > 2. `GET/POST/PUT /doctors/schedules` y `POST .../bulk` declaran `StaffScheduleResponseDto`, copiado
 >    de la respuesta real de **v2**: `id, clinicId, createdAt, updatedAt, staffId, doctorId
