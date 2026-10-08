@@ -16,7 +16,8 @@ import {
 } from "@/lib/api/preferences";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import type { ThemeConfig } from "@/lib/theme/config";
-import { mezclarSoloTema, type SobreDeCapa } from "@/lib/theme/mezclar-capa";
+import { mezclarSoloTema } from "@/lib/theme/mezclar-capa";
+import { PrintHubSettings } from "@/components/configuracion/print-hub-settings";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -77,10 +78,6 @@ export default function AparienciaCorporativaPage() {
   // como no se puede leer el valor real de hoy, guardar solo un cambio de color desbloquearía por
   // accidente un centro que estaba bloqueado (el PUT ignora `bloqueado` ausente, no lo toca).
   const [bloqueadoTocado, setBloqueadoTocado] = React.useState(false);
-  // Hub ESC/POS de respaldo (lib/print/hub.ts): clave propia del sobre libre, aparte de `mezclarSoloTema`
-  // (que solo toca colors/radius/background/logo) — guarda sola para no depender del botón de tema.
-  const [hubUrl, setHubUrl] = React.useState("");
-  const [guardandoHub, setGuardandoHub] = React.useState(false);
 
   // --- OVERRIDES ---
   const [overrides, setOverrides] = React.useState<Override[]>([]);
@@ -117,7 +114,6 @@ export default function AparienciaCorporativaPage() {
         setCentro({ kind: "ok", value: c });
         setBloqueadoCentro(false);
         setBloqueadoTocado(false);
-        setHubUrl(c.impresionHub?.url ?? "");
       })
       .catch((e) => active && setCentro({ kind: "fail", message: apiErrorMessage(e) }));
     return () => {
@@ -144,9 +140,11 @@ export default function AparienciaCorporativaPage() {
     if (centro.kind !== "ok" || !centroId) return;
     setGuardandoCentro(true);
     try {
+      // Merge onto a FRESH read, not the copy loaded when the center was picked: other keys of the
+      // same envelope (e.g. printHub, saved by its own button) may have changed since.
       await updateCentroPreferences(
         centroId,
-        mezclarSoloTema(originalCentro.current, centro.value),
+        mezclarSoloTema(await getCentroPreferences(centroId), centro.value),
         bloqueadoTocado ? bloqueadoCentro : undefined,
       );
       setBloqueadoTocado(false);
@@ -155,27 +153,6 @@ export default function AparienciaCorporativaPage() {
       toast.error(apiErrorMessage(e));
     } finally {
       setGuardandoCentro(false);
-    }
-  }
-
-  // Guarda SOLO `impresionHub.url` en la capa centro — lee fresco y mezcla, igual que setMyLanguage/
-  // setMyTheme, para no pisar el tema ni el resto del sobre con lo que haya quedado en el editor.
-  async function guardarHub() {
-    if (!centroId) return;
-    setGuardandoHub(true);
-    try {
-      const actual = await getCentroPreferences(centroId);
-      const url = hubUrl.trim();
-      const editado: SobreDeCapa = { ...actual };
-      if (url) editado.impresionHub = { url };
-      else delete editado.impresionHub;
-      await updateCentroPreferences(centroId, editado);
-      originalCentro.current = editado;
-      toast.success(t("hubSaved"));
-    } catch (e) {
-      toast.error(apiErrorMessage(e));
-    } finally {
-      setGuardandoHub(false);
     }
   }
 
@@ -325,24 +302,12 @@ export default function AparienciaCorporativaPage() {
                   {guardandoCentro ? t("saving") : t("saveCentro")}
                 </Button>
 
-                <div className="mt-6 space-y-2 border-t pt-4">
-                  <Label htmlFor="ap-hub-url">{t("hubLabel")}</Label>
-                  <p className="text-xs text-muted-foreground">{t("hubHint")}</p>
-                  <Input
-                    id="ap-hub-url"
-                    value={hubUrl}
-                    onChange={(e) => setHubUrl(e.target.value)}
-                    placeholder={t("hubPlaceholder")}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={guardarHub}
-                    disabled={guardandoHub || !centroId}
-                  >
-                    {guardandoHub ? t("saving") : t("hubSave")}
-                  </Button>
-                </div>
+                <PrintHubSettings
+                  key={centroId}
+                  centerId={centroId}
+                  centerName={centros.find((c) => c.id === centroId)?.name ?? ""}
+                  initial={centro.value.printHub}
+                />
               </>
             )}
           </section>

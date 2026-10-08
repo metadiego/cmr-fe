@@ -107,24 +107,44 @@ Zorin se **detuvo y se deshabilitó** (`systemctl disable --now cmr-print-hub` e
   `window.print()`) sigue siendo el de siempre, intacto; este es solo un segundo camino para cuando el
   primero falle.
 
-### Multi-centro: cada oficina tiene su propio hub, configurable (8-oct-2026)
+### Multi-centro: UN solo hub, cada centro con SU impresora (8-oct-2026)
 
 Con más de una oficina (Bayamón y Caguas, misma estructura: 3 equipos / 2 impresoras cada una — 2
-exclusivas por USB directo + 1 compartida de consulta), una sola URL fija habría mandado TODOS los
-recibos de respaldo a la MISMA impresora física sin importar desde qué centro se imprimiera — el "caso
-Tokio" que señaló el dueño: una oficina nueva en Tokio usando el hub imprimiría en Caguas.
+exclusivas por USB directo + 1 compartida de consulta) y un **único hub** (hoy en dev-server, mañana
+posiblemente en GCP), lo que decide en qué papel sale cada recibo NO puede ser el hub: tiene que ser el
+**centro**. Si el hub tuviera la impresora fija, una oficina nueva ("Tokio", el ejemplo del dueño)
+imprimiría en Caguas.
 
-**Arreglo:** `lib/theme/config.ts` → `ThemeConfig.impresionHub?.url`, una clave más del mismo sobre
-libre de config por capas (#51) que ya usa `colorPorCentro`/`recibo.anchoMm` — **cada centro guarda la
-suya en su propia capa `centro`**, editable sin tocar código desde **Configuración → Apariencia
-corporativa** (sección "Por centro", campo nuevo "Hub de respaldo para imprimir"). Pensado para mudar
-de LAN a nube (p. ej. GCP) sin ningún deploy: solo se edita el campo.
+**Cómo quedó:**
 
-El botón de respaldo en la factura resuelve el centro DUEÑO de esa factura (`?centro=` de la URL o,
-si falta, el `clinicId` de la propia factura — nunca el centro activo de otra pestaña), lee
-`impresionHub.url` de la capa de ESE centro, y si no hay ninguno configurado falla con un mensaje
-claro en vez de adivinar. Hoy solo Caguas tiene URL configurada (la del dev-server de pruebas,
-`https://192.130.80.172:8943/print-raw`); Bayamón queda sin hub hasta que se instale uno ahí.
+- **Hub** (`/opt/cmr-print-hub/hub.py` en dev-server): cada `POST /print-raw?host=&port=&queue=` dice
+  a qué impresora va. Sin los tres → 400. Cola validada con regex (sin inyección; además `lp` se llama
+  con lista de argumentos, sin shell). El destino tiene que estar dentro de `HUB_ALLOWED_NETWORKS`
+  (CIDRs en el unit de systemd, hoy `192.130.80.0/24`) para que el hub no sirva de relay hacia
+  cualquier sitio. Verificado por HTTPS: sin destino → 400, `8.8.8.8` → 400, cola `a;rm` → 400,
+  Caguas real (`192.130.80.181:631/TM-T20II-RAW`) → 200 y salió en papel.
+- **Configuración por centro** (`ThemeConfig.printHub` = `{ url, printerHost, printerPort,
+  printerQueue }`, capa `centro` de preferences — mismo sobre libre de #51, sin cambio de BE). Se
+  edita en **Configuración → Apariencia corporativa → Por centro → "Hub de respaldo para imprimir"**,
+  con botón **"Imprimir prueba"** que manda un ticket corto a esa impresora para comprobar los datos
+  en el momento (`components/configuracion/print-hub-settings.tsx`).
+- **FE**: `lib/print/hub-target.ts` → `buildHubRequestUrl()` arma la URL completa o devuelve `null`
+  si falta cualquier pieza (tests en `lib/print/hub-target.test.ts`). El botón de respaldo de la
+  factura lee la capa `center` del centro DUEÑO de la factura vía `GET /me/preferences` con
+  `X-Tenant-ID` de ese centro (no `GET /preferences/center/:id`, que exige `preferences.read` y una
+  cajera no lo tiene), y si la config está incompleta muestra un error claro — nunca imprime en otro
+  lado. Las etiquetas impresas salen del namespace i18n `receipt` (las mismas del recibo en pantalla).
+- **Guardar los colores del centro** ahora mezcla sobre una lectura FRESCA del servidor, para no
+  borrar la impresora guardada por su propio botón.
+
+**Ejemplo con un solo hub:** Caguas → url `https://192.130.80.172:8943/print-raw`, IP
+`192.130.80.181`, puerto `631`, cola `TM-T20II-RAW`. Bayamón → la MISMA url, con la IP/cola del equipo
+que comparte su impresora de consulta.
+
+**Límite conocido (para cuando se mude a GCP):** el hub reenvía a la impresora por IPP; desde la nube
+no se alcanzan IPs de la red local de cada oficina. Para GCP hará falta que cada oficina exponga su cola
+(túnel/VPN) o un agente local que recoja los trabajos del hub. La config por centro ya está lista para
+eso: solo cambiarían los valores.
 
 ## Navegador: cuál usar y un ajuste suyo (dato del dueño, verificado en papel)
 

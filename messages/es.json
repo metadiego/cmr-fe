@@ -2666,7 +2666,9 @@
     "thanks": "¡Gracias por su visita!",
     "includes": "Incluye",
     "protocolVisits": "Protocolo de {n} visitas",
-    "budgetDoc": "PRESUPUESTO"
+    "budgetDoc": "PRESUPUESTO",
+    "backupFooter": "RESPALDO - vía hub ESC/POS",
+    "hubTestTitle": "PRUEBA DEL HUB"
   },
   "facturacion": {
     "title": "Facturar consulta",
@@ -2879,8 +2881,8 @@
     "print": {
       "backupHub": "Respaldo: imprimir por el hub",
       "backupHubDone": "Enviado al hub de respaldo",
-      "backupHubSinCentro": "Elige un centro para esta factura antes de usar el hub de respaldo",
-      "backupHubSinConfigurar": "Este centro todavía no tiene un hub de respaldo configurado"
+      "backupHubNoCenter": "Elige un centro para esta factura antes de usar el hub de respaldo",
+      "backupHubNotConfigured": "Este centro no tiene completa la impresora del hub (URL, IP, puerto y cola) en Configuración → Apariencia corporativa"
     },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
@@ -3866,12 +3868,21 @@
     "overrideRemoveConfirm": "¿Desactivar «{nombre}»? Todos volverán a la apariencia que les toque.",
     "centroVacio": "No hay centros disponibles para tu usuario.",
     "hubLabel": "Hub de respaldo para imprimir (ESC/POS)",
-    "hubHint": "La URL propia de este centro para la impresora térmica de respaldo (lib/print/hub.ts). Déjalo vacío si este centro todavía no tiene su hub — el botón mostrará un error claro en vez de imprimir en otro centro.",
-    "hubPlaceholder": "https://host:puerto/print-raw",
-    "hubSave": "Guardar URL del hub",
-    "hubSaved": "URL del hub de respaldo guardada para este centro.",
+    "hubHint": "Un solo hub sirve a todas las oficinas: lo que hace que cada centro imprima en SU papel es la impresora de abajo. Incompleto = el botón de respaldo da error en vez de imprimir en otro sitio.",
+    "hubPlaceholder": "https://192.130.80.172:8943/print-raw",
+    "hubSave": "Guardar impresora",
+    "hubSaved": "Impresora del hub guardada para este centro.",
     "lockLabel": "Bloquear estos colores para todo el centro",
-    "lockHint": "Nadie de este centro podrá personalizar su propio color mientras esté activo."
+    "lockHint": "Nadie de este centro podrá personalizar su propio color mientras esté activo.",
+    "hubUrl": "URL del hub",
+    "printerHost": "IP de la impresora (equipo que la comparte)",
+    "printerHostPlaceholder": "192.130.80.181",
+    "printerPort": "Puerto",
+    "printerQueue": "Cola de impresión",
+    "printerQueuePlaceholder": "TM-T20II-RAW",
+    "hubTest": "Imprimir prueba",
+    "hubTestSent": "Prueba enviada: revisa el papel de este centro.",
+    "hubIncomplete": "Completa URL, IP, puerto y cola para probar."
   },
   "numeracion": {
     "title": "Numeración de documentos",

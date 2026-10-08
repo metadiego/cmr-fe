@@ -47,8 +47,10 @@ import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-
 import { toast } from "sonner";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
-import { imprimirPorHub } from "@/lib/print/hub";
-import { getCentroPreferences } from "@/lib/api/preferences";
+import { receiptToEscPos, sendToHub } from "@/lib/print/hub";
+import { buildHubRequestUrl } from "@/lib/print/hub-target";
+import { receiptLabels } from "@/lib/print/receipt-labels";
+import { getMyPreferences } from "@/lib/api/preferences";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -114,6 +116,7 @@ export default function FacturacionPage() {
 
   const t = useTranslations("facturacion");
   const tRoot = useTranslations();
+  const tReceipt = useTranslations("receipt");
 
   const [factura, setFactura] = React.useState<FacturaConItems | null>(null);
   const [paciente, setPaciente] = React.useState<Paciente | null>(null);
@@ -218,32 +221,28 @@ export default function FacturacionPage() {
     window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
   }
 
-  // RESPALDO: manda el recibo directo al hub del CENTRO DUEÑO de esta factura (bytes ESC/POS crudos,
-  // cola sin filtro), sin pasar por el navegador ni por ningún driver — funciona igual en cualquier
-  // navegador si el camino normal falla. No es el botón por defecto; es aparte. La URL del hub NO está
-  // fija en el código: cada centro guarda la suya en su capa de preferences (`impresionHub.url`), para
-  // que mandar un trabajo desde Caguas nunca termine saliendo en la impresora de Bayamón (o de
-  // cualquier otra oficina futura). Mismo fallback de centro que el resto de la pantalla: `centro` de
-  // la URL o, si falta, el `clinicId` de la propia factura — nunca adivina "el centro activo" de otra
-  // pestaña. Ver docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
-  async function imprimirPorHubClick() {
-    const centroFactura = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
-    if (!centroFactura) {
-      toast.error(t("print.backupHubSinCentro"));
+  // Backup print: raw ESC/POS through the print hub, for when the normal browser path fails. The
+  // destination printer is the one configured for the center that OWNS this invoice (`?centro=` or,
+  // failing that, the invoice's own clinicId — same fallback as the rest of this screen), read from
+  // that center's `printHub` preferences. Incomplete config → clear error, never another printer.
+  async function printViaHubClick() {
+    const invoiceCenter = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
+    if (!invoiceCenter) {
+      toast.error(t("print.backupHubNoCenter"));
       return;
     }
     setBusyHub(true);
     try {
-      const prefsCentro = await getCentroPreferences(centroFactura);
-      const hubUrl = prefsCentro.impresionHub?.url;
-      if (!hubUrl) {
-        toast.error(t("print.backupHubSinConfigurar"));
+      const prefs = await getMyPreferences(invoiceCenter);
+      const requestUrl = buildHubRequestUrl(prefs.layers.center?.printHub);
+      if (!requestUrl) {
+        toast.error(t("print.backupHubNotConfigured"));
         return;
       }
       const r = await imprimirFactura(id, centro);
       setFactura(r.invoice);
       const reciboFinal = buildRecibo(r.invoice, diasCatalogo, clavePorFormaId, r.quoteNumber ?? presupuestoNum);
-      await imprimirPorHub(reciboFinal, hubUrl);
+      await sendToHub(requestUrl, receiptToEscPos(reciboFinal, receiptLabels(tReceipt)));
       toast.success(t("print.backupHubDone"));
     } catch (err) {
       toastError(err, tRoot);
@@ -388,7 +387,7 @@ export default function FacturacionPage() {
             {/* RESPALDO, aparte del botón normal: manda el recibo directo al hub de la Zorin (bytes ESC/POS,
                 sin pasar por el navegador ni por ningún driver) para cuando el camino normal falle. No
                 reemplaza nada; "Imprimir" sigue siendo el de siempre. Ver lib/print/hub.ts. */}
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={imprimirPorHubClick} disabled={busyHub}>
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={printViaHubClick} disabled={busyHub}>
               {busyHub ? tRoot("common.loading") : t("print.backupHub")}
             </Button>
             <div className="flex gap-2">

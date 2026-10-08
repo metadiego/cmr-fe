@@ -40,9 +40,13 @@ export function getPublicPreferences(): Promise<PublicPreferences> {
   return apiFetch<PublicPreferences>("/preferences/public");
 }
 
-// Authenticated: effective + the individual layers (for the future personalization UI).
-export function getMyPreferences(): Promise<MyPreferences> {
-  return apiFetch<MyPreferences>("/me/preferences");
+// Authenticated: effective + the individual layers (for the future personalization UI). `centroId`
+// (optional) resolves the `center` layer of THAT center via X-Tenant-ID instead of the active one —
+// needs no admin permission, unlike GET /preferences/center/:id.
+export function getMyPreferences(centroId?: string): Promise<MyPreferences> {
+  return apiFetch<MyPreferences>("/me/preferences", {
+    headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
+  });
 }
 
 // The user's own personalization layer. PUT returns the saved config blob.

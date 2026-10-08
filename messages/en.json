@@ -2666,7 +2666,9 @@
     "thanks": "Thanks for your visit!",
     "includes": "Includes",
     "protocolVisits": "{n}-visit protocol",
-    "budgetDoc": "QUOTE"
+    "budgetDoc": "QUOTE",
+    "backupFooter": "BACKUP - via ESC/POS hub",
+    "hubTestTitle": "HUB TEST"
   },
   "facturacion": {
     "title": "Bill consultation",
@@ -2879,8 +2881,8 @@
     "print": {
       "backupHub": "Backup: print via hub",
       "backupHubDone": "Sent to the backup hub",
-      "backupHubSinCentro": "Pick a center for this invoice before using the backup hub",
-      "backupHubSinConfigurar": "This center has no backup print hub configured yet"
+      "backupHubNoCenter": "Pick a center for this invoice before using the backup hub",
+      "backupHubNotConfigured": "This center's hub printer is incomplete (URL, IP, port and queue) in Configuration → Corporate appearance"
     },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
@@ -3866,12 +3868,21 @@
     "overrideRemoveConfirm": "Deactivate “{nombre}”? Everyone goes back to whatever look applies to them.",
     "centroVacio": "No centers available for your user.",
     "hubLabel": "Backup print hub (ESC/POS)",
-    "hubHint": "This center's own URL for the backup receipt printer (lib/print/hub.ts). Leave empty if this center has no backup hub yet — the button will show a clear error instead of printing at another center.",
-    "hubPlaceholder": "https://host:port/print-raw",
-    "hubSave": "Save hub URL",
-    "hubSaved": "Backup hub URL saved for this center.",
+    "hubHint": "One hub serves every office: what makes each center print on ITS own paper is the printer below. Incomplete = the backup button shows an error instead of printing elsewhere.",
+    "hubPlaceholder": "https://192.130.80.172:8943/print-raw",
+    "hubSave": "Save printer",
+    "hubSaved": "Hub printer saved for this center.",
     "lockLabel": "Lock these colors for the whole center",
-    "lockHint": "No one at this center will be able to personalize their own color while this is on."
+    "lockHint": "No one at this center will be able to personalize their own color while this is on.",
+    "hubUrl": "Hub URL",
+    "printerHost": "Printer IP (machine that shares it)",
+    "printerHostPlaceholder": "192.130.80.181",
+    "printerPort": "Port",
+    "printerQueue": "Print queue",
+    "printerQueuePlaceholder": "TM-T20II-RAW",
+    "hubTest": "Print test",
+    "hubTestSent": "Test sent: check this center's paper.",
+    "hubIncomplete": "Fill in URL, IP, port and queue to test."
   },
   "numeracion": {
     "title": "Document numbering",
