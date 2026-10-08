@@ -2888,6 +2888,8 @@
       "backupHubRetry": "Retry",
       "backupHubOpen": "Open hub",
       "backupHubCertHint": "Open it and accept the security warning if it is the first time on this machine; then Retry.",
+      "backupHubFallbackNote": "Using the backup hub: the main one ({hub}) is not answering from this machine, or its certificate has not been accepted. The backup may not detect a powered-off printer.",
+      "backupHubOpenMain": "Open main hub",
       "backupPrinter": {
         "disabled": "Printer paused on its machine.",
         "disconnected": "Printer off or unplugged.",

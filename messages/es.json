@@ -2888,6 +2888,8 @@
       "backupHubRetry": "Reintentar",
       "backupHubOpen": "Abrir hub",
       "backupHubCertHint": "Ábrelo y acepta el aviso de seguridad si es la primera vez en este equipo; luego Reintentar.",
+      "backupHubFallbackNote": "Usando el hub de respaldo: el principal ({hub}) no responde desde este equipo o falta aceptar su certificado. El respaldo puede no detectar si la impresora está apagada.",
+      "backupHubOpenMain": "Abrir hub principal",
       "backupPrinter": {
         "disabled": "Impresora en pausa en su equipo.",
         "disconnected": "Impresora apagada o desconectada.",
