@@ -29,7 +29,9 @@ const DEBT = {
   "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
-  "app/(app)/billing/invoices/[id]/page.tsx": 2050,
+  // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to
+  // components/facturacion/regenerar-disponibilidad-dialog.tsx, which also made room for Reopen.
+  "app/(app)/billing/invoices/[id]/page.tsx": 1966,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)

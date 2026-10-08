@@ -33,6 +33,10 @@ export interface Centro {
   // servicio agendado para hoy nace ya «presente». Por par (servicio,fecha); «hoy» lo decide el BE con la
   // zona del centro. Default FALSE (al revés que los otros dos). BE PR #382. Handoff el-tercer-interruptor-de-auto-presente.
   autoPresentSameDayBooking?: boolean | null;
+  // Reopen an issued invoice to correct it (same number): on/off and how many days back (null = no
+  // limit, 0 = same day only). Handoff reabrir-factura-handoff-fe.
+  invoiceReopenEnabled?: components["schemas"]["CentroEntity"]["invoiceReopenEnabled"] | null;
+  invoiceReopenWindowDays?: components["schemas"]["CentroEntity"]["invoiceReopenWindowDays"];
 }
 
 // PUT /centers/:id/tax-details — patch parcial (todos opcionales). La dirección

@@ -3399,7 +3399,13 @@
       "pieFacturaHint": "Multiline. Shows at the bottom of the receipt."
     },
     "autopresenteMismoDiaLabel": "Booking for today marks Present",
-    "autopresenteMismoDiaHelp": "Scheduling is done with the patient present: a service booked for today enters as Present. Booking for another day never does."
+    "autopresenteMismoDiaHelp": "Scheduling is done with the patient present: a service booked for today enters as Present. Booking for another day never does.",
+    "reopenTitle": "Reopen issued invoices",
+    "reopenLabel": "Allow reopening",
+    "reopenHelp": "An issued invoice goes back to draft with its same number to correct it (price, lines, payments, date).",
+    "reopenWindow": "Time limit in days",
+    "reopenWindowHint": "Empty = no limit · 0 = same day only",
+    "reopenWindowPlaceholder": "No limit"
   },
   "devoluciones": {
     "title": "Returns",
@@ -4538,5 +4544,46 @@
     "invalidProtocol": "The protocol must be ipp (Linux/Mac) or smb (Windows).",
     "invalidPort": "The port must be a number between 1 and 65535.",
     "notFound": "This center has no backup print hub configured."
+  },
+  "invoiceReopen": {
+    "action": "Reopen",
+    "hint": "Back to draft with its same number, to correct it",
+    "title": "Reopen the invoice",
+    "description": "It goes back to draft with its same number. Stock is returned and payments are kept; correct it and issue it again.",
+    "reasonLabel": "Reason (required)",
+    "reasonPlaceholder": "E.g. exonerated by mistake, the patient pays 10 dollars",
+    "confirm": "Reopen",
+    "done": "Invoice reopened: correct it and issue it again.",
+    "historyTitle": "Reopenings ({count})",
+    "reasonShort": "Reason",
+    "changes": "What changed",
+    "changesSoFar": "What changed so far",
+    "noChanges": "No changes.",
+    "issueDate": "Issue date",
+    "dateOutOfRange": "That date does not fit the number sequence: it must be between {from} and {to}.",
+    "change": {
+      "date": "Date: {before} → {after}",
+      "total": "Total: {before} → {after}",
+      "discount": "Discount: {before} → {after}",
+      "exemptOn": "Marked exempt",
+      "exemptOff": "No longer exempt",
+      "lineAdded": "Added {description} ({quantity}) · {total}",
+      "lineRemoved": "Removed {description} ({quantity}) · {total}",
+      "lineChanged": "{description}: {before} → {after}",
+      "paymentAdded": "Payment added: {method} {amount}",
+      "paymentRemoved": "Payment removed: {method} {amount}"
+    }
+  },
+  "invoice": {
+    "notFound": "The invoice does not exist.",
+    "reopen": {
+      "disabled": "This center does not allow reopening invoices.",
+      "notEmitted": "Only an issued invoice can be reopened (not a draft, a voided one or one with returns).",
+      "outOfWindow": "The center's time limit to reopen it has passed.",
+      "sessionsUsed": "A session of its packages has already been delivered.",
+      "cashClosed": "That day's cash count is already closed: correcting it changes it.",
+      "reasonRequired": "Write the reason to reopen.",
+      "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
+    }
   }
 }

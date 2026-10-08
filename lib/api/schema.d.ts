@@ -9513,6 +9513,462 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturas/{id}/reabrir/comprobar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/reabrir/comprobar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_check[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/reopen/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/reopen/check`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_check[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/reabrir/comprobar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/reabrir/comprobar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_check[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/reopen/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/reopen/check`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_check[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/reabrir/comprobar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing. */
+        get: operations["InvoiceReopeningController_check[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/reopen/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing. */
+        get: operations["InvoiceReopeningController_check[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/reabrir/comprobar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing. */
+        get: operations["InvoiceReopeningController_check[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/reopen/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Si la factura se puede reabrir, y si no, TODAS las razones. No cambia nada. / Whether the invoice can be reopened, and every reason why not. Changes nothing. */
+        get: operations["InvoiceReopeningController_check[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/reabrir`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_reopen[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/reopen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_reopen[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/reabrir`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_reopen[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/reopen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceReopeningController_reopen[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number. */
+        post: operations["InvoiceReopeningController_reopen[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number. */
+        post: operations["InvoiceReopeningController_reopen[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/reabrir": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number. */
+        post: operations["InvoiceReopeningController_reopen[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reabre una factura emitida: vuelve a borrador con su número, repone el inventario y anula los paquetes sin uso; los pagos se conservan. / Reopens an issued invoice: back to draft keeping its number. */
+        post: operations["InvoiceReopeningController_reopen[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/reaperturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/reaperturas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/reopenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/reopenings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/reaperturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/reaperturas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_list[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/reopenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/reopenings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InvoiceReopeningController_list[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/reaperturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued. */
+        get: operations["InvoiceReopeningController_list[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/reopenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued. */
+        get: operations["InvoiceReopeningController_list[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/reaperturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued. */
+        get: operations["InvoiceReopeningController_list[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/reopenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de reaperturas de la factura, con la foto de cómo estaba emitida. / Reopenings of the invoice, with a snapshot of how it was issued. */
+        get: operations["InvoiceReopeningController_list[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/facturacion/devoluciones": {
         parameters: {
             query?: never;
@@ -47426,6 +47882,8 @@ export interface components {
             autoAssignRecordOnArrival: boolean;
             oldRecordSuggestionEnabled: boolean;
             oldRecordSuggestionYears: number;
+            invoiceReopenEnabled: boolean;
+            invoiceReopenWindowDays: number | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -47488,6 +47946,10 @@ export interface components {
             oldRecordSuggestionEnabled: boolean;
             /** @description Años de inactividad a partir de los cuales se sugiere récord nuevo. Default 2. */
             oldRecordSuggestionYears: number;
+            /** @description true (default) = una factura emitida se puede REABRIR para corregirla (vuelve a borrador con su número), dentro de la ventana de anulación, sin cuadre cerrado y sin sesiones usadas. / Whether issued invoices can be reopened to be corrected. */
+            invoiceReopenEnabled: boolean;
+            /** @description Días después de su fecha en que una factura todavía se puede reabrir. Null (default) = sin límite; 0 = solo el mismo día. / Days after its date an invoice can still be reopened; null = no limit. */
+            invoiceReopenWindowDays: number | null;
         };
         UpdateDatosFiscalesDto: {
             /** @description Atención: true (default) = la cita que se abre desde el MOSTRADOR para un paciente de SEGUIMIENTO nace ya en presente y empuja el registro de llegada al EHR, sin que nadie pulse Presente. Al paciente NUEVO no le aplica: a él se le piden sus datos antes. */
@@ -47504,6 +47966,10 @@ export interface components {
             oldRecordSuggestionEnabled?: boolean;
             /** @description Años de inactividad a partir de los cuales se sugiere récord nuevo. Default 2. */
             oldRecordSuggestionYears?: number;
+            /** @description true = una factura emitida se puede REABRIR para corregirla (vuelve a borrador con su número). / Whether issued invoices can be reopened to be corrected. */
+            invoiceReopenEnabled?: boolean;
+            /** @description Días después de su fecha en que una factura todavía se puede reabrir. Null = sin límite; 0 = solo el mismo día. / Days after its date an invoice can still be reopened; null = no limit. */
+            invoiceReopenWindowDays?: number | null;
             legalName?: string;
             tradeName?: string;
             taxRegistration?: string;
@@ -48126,6 +48592,50 @@ export interface components {
             visible?: boolean;
             render?: Record<string, never>;
             active?: boolean;
+        };
+        InvoiceReopenReasonDto: {
+            /**
+             * @description Clave i18n de la razón. / i18n key of the reason.
+             * @enum {string}
+             */
+            labelKey: "invoice.reopen.disabled" | "invoice.reopen.notEmitted" | "invoice.reopen.outOfWindow" | "invoice.reopen.cashClosed" | "invoice.reopen.sessionsUsed";
+        };
+        InvoiceReopenCheckDto: {
+            /** @description Si se puede reabrir ahora. / Whether it can be reopened now. */
+            canReopen: boolean;
+            /** @description TODAS las razones por las que no, vacío si se puede. / EVERY reason why not; empty if it can. */
+            reasons: components["schemas"]["InvoiceReopenReasonDto"][];
+        };
+        ReopenInvoiceDto: {
+            /**
+             * @description Por qué se reabre (obligatorio). En /api/v2 se envía como `reason`. / Why it is reopened (required). Sent as `reason` in /api/v2.
+             * @example Se exoneró por error: el paciente paga 10 dólares
+             */
+            reason: string;
+        };
+        InvoiceReopeningDto: {
+            /** Format: uuid */
+            id: string;
+            clinicId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: uuid */
+            invoiceId: string;
+            /** @description Número que tenía, y que conserva al re-emitirse. / Number it had, kept when re-issued. */
+            invoiceNumber: string | null;
+            /**
+             * Format: uuid
+             * @description Quién la reabrió. / Who reopened it.
+             */
+            reopenedBy: string | null;
+            /** @description Por qué. / Why. */
+            reason: string;
+            /** @description La factura tal como estaba emitida (cabecera y líneas). Frente a la re-emitida dice qué cambió. / The invoice exactly as issued. */
+            snapshot: {
+                [key: string]: unknown;
+            };
         };
         SecuenciaDevolucionEntity: {
             series: string;
@@ -49587,7 +50097,7 @@ export interface components {
             type: "servicio" | "base" | "compuesto" | "unico";
             isInventoryItem: boolean;
             /** @enum {string} */
-            deductionMode: "a_la_entrega" | "a_la_venta" | "no_descarga";
+            deductionMode: "a_la_venta" | "a_la_entrega" | "no_descarga";
             soldBySession: boolean;
             minimumSessions: number | null;
             sessionOptions: number[] | null;
@@ -50282,7 +50792,7 @@ export interface components {
             /** @enum {string} */
             status: "borrador" | "activa" | "reemplazada";
             /** @enum {string} */
-            event: "a_la_entrega" | "a_la_venta" | "por_sesion";
+            event: "a_la_venta" | "a_la_entrega" | "por_sesion";
             /** @enum {string} */
             type: "receta" | "directa" | "conversion" | "dosis_vial";
             baseUnitId: string | null;
@@ -65351,6 +65861,526 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ColumnaFacturacionEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_check[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopenCheckDto"];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_reopen[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReopenInvoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InvoiceReopeningController_list[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
+                };
+            };
+        };
+    };
+    "InvoiceReopeningController_list[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceReopeningDto"][];
                 };
             };
         };

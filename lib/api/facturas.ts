@@ -412,9 +412,9 @@ export function setEnvio(facturaId: string, monto: number, centroId?: string): P
   return apiFetch<FacturaConItems>(`/invoices/${facturaId}/shipping`, { method: "PUT", body: JSON.stringify({ amount: monto }) }, centroId);
 }
 
-// Emitir (cierra el borrador). Sin body.
-export function emitirFactura(facturaId: string, centroId?: string): Promise<FacturaConItems> {
-  return apiFetch<FacturaConItems>(`/invoices/${facturaId}/issue`, { method: "POST" }, centroId);
+// Issue the draft. `date` (backwards only) moves a REOPENED invoice; see components/facturacion/issue-button.
+export function emitirFactura(facturaId: string, centroId?: string, date?: string): Promise<FacturaConItems> {
+  return apiFetch<FacturaConItems>(`/invoices/${facturaId}/issue`, { method: "POST", ...(date && { body: JSON.stringify({ date }) }) }, centroId);
 }
 
 // Imprimir = EMITIR si procede (BE, desplegado). Un borrador SALDADO se emite (número/fecha definitivos,

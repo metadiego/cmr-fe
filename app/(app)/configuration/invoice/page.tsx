@@ -76,6 +76,8 @@ type FormState = {
   autoPresenteMismoDia: boolean;
   frontdeskMuestraConsulta: boolean;
   frontdeskOrdenConsulta: string;
+  reopenEnabled: boolean;
+  reopenWindowDays: string;
 };
 
 function seed(c: Centro): FormState {
@@ -98,6 +100,9 @@ function seed(c: Centro): FormState {
     // lo tocó); orden vacío = "al final".
     frontdeskMuestraConsulta: c.frontdeskShowsConsultation ?? true,
     frontdeskOrdenConsulta: c.frontdeskConsultationOrder != null ? String(c.frontdeskConsultationOrder) : "",
+    // Reopen an issued invoice to correct it (same number). BE defaults: on, no time limit (null).
+    reopenEnabled: c.invoiceReopenEnabled ?? true,
+    reopenWindowDays: c.invoiceReopenWindowDays != null ? String(c.invoiceReopenWindowDays) : "",
   };
 }
 
@@ -129,6 +134,8 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
       autoPresentSameDayBooking: form.autoPresenteMismoDia,
       frontdeskShowsConsultation: form.frontdeskMuestraConsulta,
       frontdeskConsultationOrder: form.frontdeskOrdenConsulta.trim() === "" ? null : Number(form.frontdeskOrdenConsulta),
+      invoiceReopenEnabled: form.reopenEnabled,
+      invoiceReopenWindowDays: form.reopenWindowDays.trim() === "" ? null : Number(form.reopenWindowDays),
     };
     try {
       await updateDatosFiscales(centro.id, payload);
@@ -228,6 +235,36 @@ function FiscalForm({ centro, onSaved }: { centro: Centro; onSaved: () => void }
                 disabled={!canWrite}
                 onChange={(e) => setForm((p) => ({ ...p, frontdeskOrdenConsulta: e.target.value }))}
                 placeholder={t("consultaTabOrdenPlaceholder")}
+                className="max-w-[10rem]"
+              />
+            </Field>
+          )}
+        </section>
+
+        {/* Reopen an issued invoice (handoff reabrir-factura-handoff-fe) */}
+        <section className="space-y-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-5">
+          <h2 className="text-sm font-semibold">{t("reopenTitle")}</h2>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5">
+              <span className="text-sm font-medium">{t("reopenLabel")}</span>
+              <p className="text-xs text-muted-foreground">{t("reopenHelp")}</p>
+            </div>
+            <Switch
+              checked={form.reopenEnabled}
+              disabled={!canWrite}
+              onCheckedChange={(v) => setForm((p) => ({ ...p, reopenEnabled: v }))}
+            />
+          </div>
+          {form.reopenEnabled && (
+            <Field label={t("reopenWindow")} hint={t("reopenWindowHint")}>
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={form.reopenWindowDays}
+                disabled={!canWrite}
+                onChange={(e) => setForm((p) => ({ ...p, reopenWindowDays: e.target.value }))}
+                placeholder={t("reopenWindowPlaceholder")}
                 className="max-w-[10rem]"
               />
             </Field>

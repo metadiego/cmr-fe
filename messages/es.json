@@ -3399,7 +3399,13 @@
       "pieFacturaHint": "Multilínea. Aparece al final del recibo."
     },
     "autopresenteMismoDiaLabel": "Agendar para hoy marca Presente",
-    "autopresenteMismoDiaHelp": "Programar Citas se usa con el paciente delante: un servicio agendado para hoy entra ya como Presente. Agendar para otro día nunca."
+    "autopresenteMismoDiaHelp": "Programar Citas se usa con el paciente delante: un servicio agendado para hoy entra ya como Presente. Agendar para otro día nunca.",
+    "reopenTitle": "Reabrir facturas emitidas",
+    "reopenLabel": "Permitir reabrir",
+    "reopenHelp": "Una factura emitida vuelve a borrador con su mismo número para corregirla (precio, líneas, pagos, fecha).",
+    "reopenWindow": "Plazo en días",
+    "reopenWindowHint": "Vacío = sin límite · 0 = solo el mismo día",
+    "reopenWindowPlaceholder": "Sin límite"
   },
   "devoluciones": {
     "title": "Devoluciones",
@@ -4538,5 +4544,46 @@
     "invalidProtocol": "El protocolo debe ser ipp (Linux/Mac) o smb (Windows).",
     "invalidPort": "El puerto debe ser un número entre 1 y 65535.",
     "notFound": "Este centro no tiene configurado un hub de impresión de respaldo."
+  },
+  "invoiceReopen": {
+    "action": "Reabrir",
+    "hint": "Vuelve a borrador con su mismo número para corregirla",
+    "title": "Reabrir la factura",
+    "description": "Vuelve a borrador con su mismo número. Se repone el inventario y se conservan los pagos; al terminar la corriges y la vuelves a emitir.",
+    "reasonLabel": "Motivo (obligatorio)",
+    "reasonPlaceholder": "Ej.: se exoneró por error y el paciente paga 10 dólares",
+    "confirm": "Reabrir",
+    "done": "Factura reabierta: corrígela y vuelve a emitirla.",
+    "historyTitle": "Reaperturas ({count})",
+    "reasonShort": "Motivo",
+    "changes": "Qué cambió",
+    "changesSoFar": "Qué cambió hasta ahora",
+    "noChanges": "Sin cambios.",
+    "issueDate": "Fecha de emisión",
+    "dateOutOfRange": "Esa fecha no cabe en la secuencia de números: tiene que estar entre {from} y {to}.",
+    "change": {
+      "date": "Fecha: {before} → {after}",
+      "total": "Total: {before} → {after}",
+      "discount": "Descuento: {before} → {after}",
+      "exemptOn": "Se marcó exenta",
+      "exemptOff": "Dejó de estar exenta",
+      "lineAdded": "Se agregó {description} ({quantity}) · {total}",
+      "lineRemoved": "Se quitó {description} ({quantity}) · {total}",
+      "lineChanged": "{description}: {before} → {after}",
+      "paymentAdded": "Pago agregado: {method} {amount}",
+      "paymentRemoved": "Pago quitado: {method} {amount}"
+    }
+  },
+  "invoice": {
+    "notFound": "La factura no existe.",
+    "reopen": {
+      "disabled": "Este centro no permite reabrir facturas.",
+      "notEmitted": "Solo se reabre una factura emitida (no un borrador, una anulada ni una con devoluciones).",
+      "outOfWindow": "Ya pasó el plazo del centro para reabrirla.",
+      "sessionsUsed": "Ya se entregó alguna sesión de sus paquetes.",
+      "cashClosed": "El cuadre de caja de ese día ya está cerrado: corregirla lo altera.",
+      "reasonRequired": "Escribe el motivo para reabrir.",
+      "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
+    }
   }
 }

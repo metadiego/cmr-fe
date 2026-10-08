@@ -23,10 +23,7 @@ import {
   personalizarKit,
   type ItemOpcional,
   buscarPaciente,
-  emitirFactura,
   imprimirFactura,
-  regenerarDisponibilidad,
-  type RegenerarDisponibilidad,
   type FacturaConItems,
   type FacturaItem,
   type Producto,
@@ -47,6 +44,9 @@ import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
+import { RegenerarDisponibilidadDialog } from "@/components/facturacion/regenerar-disponibilidad-dialog";
+import { ReopenInvoiceButton, InvoiceReopenings } from "@/components/facturacion/invoice-reopen";
+import { IssueButton } from "@/components/facturacion/issue-button";
 import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
 import { loadLogoRaster } from "@/lib/print/load-logo";
@@ -72,7 +72,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   DataTable,
   TableEmpty,
@@ -325,6 +325,8 @@ export default function FacturacionPage() {
               <HugeiconsIcon icon={PrinterIcon} className="size-4" />
               {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
             </Button>
+            {/* Reopen to correct (back to draft, same number): the BE says whether it can. */}
+            {estado === "emitida" && can("factura.reopen") && <ReopenInvoiceButton invoiceId={id} centerId={invoiceCenter} onReopened={() => refetch()} />}
             {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
                 EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
             {estado === "emitida" && can("factura.reparar") && (
@@ -444,6 +446,8 @@ export default function FacturacionPage() {
         busy={busy}
         run={run}
       />
+
+      <InvoiceReopenings invoiceId={id} centerId={invoiceCenter} invoice={factura} />
 
       {/* Vista previa del recibo térmico 80mm (el print CSS lo aísla al imprimir). */}
       <Card>
@@ -829,13 +833,14 @@ function Editor({
                 → saldo 0 → habilitado de un clic. Con saldo pendiente, deshabilitado y con el importe que
                 falta a la vista (no hay que pulsarlo para enterarse). El BE es la autoridad: si igual llega
                 sin saldar responde 400 FACTURA_NO_SALDADA y se muestra su mensaje (toastError). */}
-            <Button
-              className="w-full"
+            <IssueButton
+              invoice={factura}
+              invoiceId={id}
+              centro={centro}
+              run={run}
               disabled={busy || serverItems.length === 0 || saldo > 0.005}
-              onClick={() => run(() => emitirFactura(id, centro))}
-            >
-              {saldo > 0.005 ? t("emitFaltaCobrar", { monto: money(saldo) }) : t("emit")}
-            </Button>
+              label={saldo > 0.005 ? t("emitFaltaCobrar", { monto: money(saldo) }) : t("emit")}
+            />
           </div>
         ) : (
           <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} />
@@ -879,95 +884,6 @@ function Editor({
         />
       )}
     </div>
-  );
-}
-
-// Confirmación + resultado EN PALABRAS de "Regenerar disponibilidad". Fase 1: explica qué hace y pide
-// confirmar (acción deliberada y peligrosa). Fase 2: traduce la respuesta del BE a lenguaje humano
-// (añadidas / nada faltaba / sugerencias de config), nunca JSON. Idempotente → repetir es inofensivo.
-function RegenerarDisponibilidadDialog({
-  open,
-  onOpenChange,
-  facturaId,
-  centro,
-  onDone,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  facturaId: string;
-  centro?: string;
-  onDone?: () => void | Promise<unknown>;
-}) {
-  const t = useTranslations("facturacion");
-  const tc = useTranslations("common");
-  const tRoot = useTranslations();
-  const [busy, setBusy] = React.useState(false);
-  const [res, setRes] = React.useState<RegenerarDisponibilidad | null>(null);
-
-  function handleOpenChange(next: boolean) {
-    if (!next) { setRes(null); setBusy(false); }
-    onOpenChange(next);
-  }
-  async function run() {
-    setBusy(true);
-    try {
-      const r = await regenerarDisponibilidad(facturaId, centro);
-      setRes(r);
-      await onDone?.();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader><DialogTitle>{t("regen.titulo")}</DialogTitle></DialogHeader>
-        {res === null ? (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">{t("regen.explica")}</p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => handleOpenChange(false)}>{tc("cancel")}</Button>
-              <Button onClick={run} disabled={busy}>{busy ? t("regen.ejecutando") : t("regen.confirmar")}</Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3 text-sm">
-            {res.creados > 0 ? (
-              <Alert variant="success">
-                <AlertTitle>{t("regen.creados", { n: res.creados })}</AlertTitle>
-                <AlertDescription>
-                  <ul className="list-disc pl-5">
-                    {res.detalle.map((d, i) => (
-                      <li key={i}>{t("regen.linea", { sesiones: d.sessions ?? 0, sku: d.sku ?? "—" })}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <p className="rounded-md border bg-muted/40 px-3 py-2 text-muted-foreground">{t("regen.nada")}</p>
-            )}
-            {!!res.sugerencias?.length && (
-              <Alert variant="warning">
-                <AlertTitle>{t("regen.sugerenciasTitulo")}</AlertTitle>
-                <AlertDescription>
-                  <ul className="list-disc pl-5">
-                    {res.sugerencias.map((s, i) => (
-                      <li key={i}>{t("regen.sugerencia", { sku: s.sku ?? "—" })}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
-            <div className="flex justify-end">
-              <Button onClick={() => handleOpenChange(false)}>{t("regen.listo")}</Button>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
   );
 }
 
