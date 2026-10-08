@@ -62,6 +62,7 @@ import {
 } from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
+import { LiveBadge } from "@/components/live-badge";
 
 // ————————————————————————————————————————————————————————————————————————————
 // Frontdesk del día (F4): tabs por servicio (data-driven /servicios) + KPIs-filtro + tabla dinámica
@@ -512,13 +513,7 @@ export function FrontdeskBoard() {
         title={t("title")}
         count={
           live && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
-              </span>
-              {t("live")}
-            </span>
+            <LiveBadge label={t("live")} />
           )
         }
         actions={

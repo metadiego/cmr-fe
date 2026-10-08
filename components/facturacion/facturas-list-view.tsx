@@ -10,6 +10,8 @@ import { getOpciones, type Opcion } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
+import { useCitaStream } from "@/hooks/use-cita-stream";
+import { LiveBadge } from "@/components/live-badge";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -91,7 +93,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   }, [q, estado, desde, hasta, router]);
 
   const gate = useCentroGate();
-  const { state, reload } = useResource<FacturaTablero>(
+  const { state, reload, refresh } = useResource<FacturaTablero>(
     () =>
       gate.centro
         ? getFacturasTablero({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
@@ -109,6 +111,20 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
     [q, estado, desde, hasta, gate.centro, contexto],
   );
   const resumen = resumenRes.state.kind === "ok" ? resumenRes.state.data : null;
+
+  // Live: the BE publishes invoice events (issued, paid, …) on the center's single SSE bus. Any of them
+  // refreshes the list and its range total in place; the hook also refetches on tab focus and polls
+  // while the stream is down.
+  const { refresh: refreshResumen } = resumenRes;
+  const { live } = useCitaStream({
+    centroId: gate.centro ?? null,
+    enabled: !!gate.centro,
+    entidad: "factura",
+    onInvalidate: () => {
+      refresh();
+      refreshResumen();
+    },
+  });
 
   const tablero = state.kind === "ok" ? state.data : null;
   const columnas = (tablero?.columns ?? []).filter((c) => c.clave !== "fac_acciones");
@@ -167,6 +183,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
         title={esConsulta ? t("titleConsulta") : t("title")}
         actions={
           <>
+            {live && <LiveBadge label={t("live")} />}
             <Button variant="outline" size="sm" asChild>
               <Link href={devolucionesHref}>{t("devoluciones")}</Link>
             </Button>

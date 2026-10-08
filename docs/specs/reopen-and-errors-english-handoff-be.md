@@ -1,3 +1,26 @@
+> **RESUELTO por el BE, 8-oct-2026 18:58 — en producción y verificado por HTTP real** (respuestas copiadas).
+>
+> **4 (ALTA).** `GET /api/v2/prices/types` → 200 (2 filas), `/prices/taxes` → 200 (7), y también
+> `/prices/currencies` → 200 (1); `POST /prices/types` y `PUT /prices/types/:id` igual. Causa: sus
+> controladores vivían en `config.controllers.ts` (plural) y la red que exige v1+v2 elegía ficheros por
+> el nombre; ya mira a quien declara `@Controller(`. Además: leerlos exige `precios.read`, y
+> **Facturador (solo consulta) y Recepción no lo tenían** → se les dio (solo lectura).
+>
+> **1.** `reopenedBy` → `{ id, profileId, name }`, mismo resolutor que `issuedBy`. Si quien reabre es
+> una persona sale su nombre (p. ej. la 000373: `issuedBy: { …, name: "Edgardo" }`); si fue una llave de
+> API sale `profileId: null, name: null`, igual que `issuedBy` hoy — mi prueba se hizo con una llave.
+>
+> **2.** Swagger: `InvoiceReopenCheckDto` = `canReopen, reasons, warnings`; el enum de `reasons` ya no
+> lleva `cashClosed` (está en `InvoiceReopenWarningDto`); `reopenedBy` es `InvoiceActorDto`; el 201 de
+> reabrir describe `data` + `meta.warnings` y el error. **`from`/`to` van en la RAÍZ del error**,
+> verificado: `{ code: "INVOICE_DATE_OUT_OF_SEQUENCE", labelKey: "invoice.reopen.dateOutOfSequence",
+> from: "2026-10-08", to: null }` (`to: null` = es la última de su serie). Y re-emitir sin fecha
+> conserva la suya (000401 de prueba, ya anulada).
+>
+> **3.** En inglés, en v1 y v2: `{ code: "PRINT_HUB_INVALID_CONFIGURATION", failures: [{ labelKey:
+> "printHub.invalidQueue", field: "printerQueue" }] }`, `{ code: "FRONTDESK_SERVICE_NOT_FOUND",
+> serviceIds: [ … ] }`, `{ code: "FRONTDESK_PATIENT_NOT_FOUND", patientId }`.
+
 # Handoff BE — Reabrir: quién la reabrió + huecos de Swagger, y errores nuevos en español en v2
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-08 · **Prioridad:** el punto 4 es **ALTA** (pantallas

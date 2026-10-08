@@ -192,7 +192,7 @@ export function InvoiceReopenings({ invoiceId, centerId, invoice }: HistoryProps
       <CardContent>
         <ol className="space-y-4">
           {rows.map((r, i) => {
-            const by = typeof r.reopenedBy === "object" && r.reopenedBy ? r.reopenedBy.name : null;
+            const by = r.reopenedBy?.name;
             return (
               <li key={r.id} className="border-l-2 border-warning-foreground/40 pl-3">
                 <p className="text-sm">

@@ -2165,7 +2165,8 @@
       "cobradas": "charged",
       "pagina": "Page",
       "rango": "Range"
-    }
+    },
+    "live": "Live"
   },
   "inventario": {
     "prov": {
@@ -4572,7 +4573,9 @@
       "lineChanged": "{description}: {before} → {after}",
       "paymentAdded": "Payment added: {method} {amount}",
       "paymentRemoved": "Payment removed: {method} {amount}"
-    }
+    },
+    "dateOutOfRangeFrom": "That date does not fit the number sequence: it must be on or after {from}.",
+    "dateOutOfRangeTo": "That date does not fit the number sequence: it must be on or before {to}."
   },
   "invoice": {
     "notFound": "The invoice does not exist.",

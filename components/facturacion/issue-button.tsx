@@ -31,6 +31,7 @@ function today(): string {
 // neighbouring numbers and, if not, answers with the range that does — shown as is.
 export function IssueButton({ invoice, invoiceId, centro, disabled, label, run }: Props) {
   const t = useTranslations("invoiceReopen");
+  const tRoot = useTranslations();
   const format = useFormatter();
   const reopened = invoice.number != null && invoice.number !== "";
   const ownDate = String(invoice.date ?? "").slice(0, 10);
@@ -47,7 +48,14 @@ export function IssueButton({ invoice, invoiceId, centro, disabled, label, run }
         await emitirFactura(invoiceId, centro, reopened && date && date !== ownDate ? date : undefined);
       } catch (err) {
         if (err instanceof ApiError && err.code === "INVOICE_DATE_OUT_OF_SEQUENCE") {
-          toast.error(t("dateOutOfRange", { from: day(err.data?.from), to: day(err.data?.to) }));
+          // `to: null` = last of its series (only a lower bound); `from: null` = first of it.
+          const { from, to } = (err.data ?? {}) as { from?: string | null; to?: string | null };
+          toast.error(
+            from && to ? t("dateOutOfRange", { from: day(from), to: day(to) })
+            : from ? t("dateOutOfRangeFrom", { from: day(from) })
+            : to ? t("dateOutOfRangeTo", { to: day(to) })
+            : tRoot("invoice.reopen.dateOutOfSequence"),
+          );
           return;
         }
         throw err;

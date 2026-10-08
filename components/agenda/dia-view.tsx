@@ -39,6 +39,7 @@ import { CitaModal } from "@/components/agenda/cita-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { LiveBadge } from "@/components/live-badge";
 
 // Día ± delta, en UTC (la fecha de la agenda es un DÍA, no un instante). Para las flechas prev/next.
 function shiftDay(iso: string, delta: number): string {
@@ -159,13 +160,7 @@ export function DiaView({ fecha }: { fecha: string }) {
               <Button variant="outline" size="icon" className="size-8" aria-label={t("nextDay")} onClick={() => router.push(`/scheduling/appointments/${shiftDay(fecha, 1)}`)}>›</Button>
             </div>
             {live && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
-                </span>
-                {t("dia.live")}
-              </span>
+              <LiveBadge label={t("dia.live")} />
             )}
             {/* Toggle de vista (por dispositivo). La clásica es el default e intacta. */}
             <div className="inline-flex rounded-md border p-0.5 text-xs">

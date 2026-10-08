@@ -39,6 +39,7 @@ import { readDensity, type Density } from "@/hooks/use-board-prefs";
 import { coincide } from "@/lib/frontdesk/search";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
+import { LiveBadge } from "@/components/live-badge";
 
 function todayISO(): string {
   const d = new Date();
@@ -188,13 +189,7 @@ export function GenericBoard({
         actions={
           <>
             {live && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success-foreground">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success-foreground opacity-75" />
-                  <span className="relative inline-flex size-2 rounded-full bg-success-foreground" />
-                </span>
-                {t("live")}
-              </span>
+              <LiveBadge label={t("live")} className="bg-success/10" />
             )}
             <Input type="date" className="h-9 w-40" value={fecha} onChange={(e) => setFecha(e.target.value)} />
             {centros.length > 1 && (

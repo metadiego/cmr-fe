@@ -25,7 +25,7 @@ const DEBT = {
   // CEILING general (714 líneas: el dispatcher de celdas y el flujo de pasos cierran sobre ~8
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
-  "components/frontdesk/frontdesk-board.tsx": 935,
+  "components/frontdesk/frontdesk-board.tsx": 930, // 08-oct-2026: 935 → 930, live badge shared (components/live-badge.tsx)
   "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
@@ -38,7 +38,6 @@ const DEBT = {
   // se extrajeron a components/servicios/servicio-form-fields.tsx para hacerle lugar al toggle de
   // allowSessionFixWithoutPackage sin tocar el ceiling. Ver HANDOFF-sesiones-sin-paquete-listo.md.
   "components/servicios/servicios-admin.tsx": 661,
-  "components/agenda/dia-view.tsx": 623,
   "components/auditoria/auditoria-log.tsx": 642,
   "components/clientes/paciente-form-sheet.tsx": 550,
 };

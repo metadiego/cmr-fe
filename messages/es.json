@@ -2165,7 +2165,8 @@
       "cobradas": "cobradas",
       "pagina": "Página",
       "rango": "Rango"
-    }
+    },
+    "live": "En vivo"
   },
   "inventario": {
     "prov": {
@@ -4572,7 +4573,9 @@
       "lineChanged": "{description}: {before} → {after}",
       "paymentAdded": "Pago agregado: {method} {amount}",
       "paymentRemoved": "Pago quitado: {method} {amount}"
-    }
+    },
+    "dateOutOfRangeFrom": "Esa fecha no cabe en la secuencia de números: tiene que ser desde el {from} en adelante.",
+    "dateOutOfRangeTo": "Esa fecha no cabe en la secuencia de números: tiene que ser hasta el {to}."
   },
   "invoice": {
     "notFound": "La factura no existe.",

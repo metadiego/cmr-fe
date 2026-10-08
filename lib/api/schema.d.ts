@@ -10482,13 +10482,69 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/tipos`, que devuelve lo mismo con los nombres en inglés.
          */
-        get: operations["TiposPrecioController_list_v1"];
+        get: operations["TiposPrecioController_list[0]_v1"];
         put?: never;
         /**
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/tipos`, que devuelve lo mismo con los nombres en inglés.
          */
-        post: operations["TiposPrecioController_create_v1"];
+        post: operations["TiposPrecioController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prices/types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/types`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["TiposPrecioController_list[1]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/types`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["TiposPrecioController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/precios/tipos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TiposPrecioController_list[2]_v2"];
+        put?: never;
+        post: operations["TiposPrecioController_create[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/prices/types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TiposPrecioController_list[3]_v2"];
+        put?: never;
+        post: operations["TiposPrecioController_create[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10507,13 +10563,69 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/tipos/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
-        put: operations["TiposPrecioController_update_v1"];
+        put: operations["TiposPrecioController_update[0]_v1"];
         post?: never;
         /**
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/tipos/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
-        delete: operations["TiposPrecioController_remove_v1"];
+        delete: operations["TiposPrecioController_remove[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prices/types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/types/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["TiposPrecioController_update[1]_v1"];
+        post?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/types/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["TiposPrecioController_remove[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/precios/tipos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TiposPrecioController_update[2]_v2"];
+        post?: never;
+        delete: operations["TiposPrecioController_remove[2]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/prices/types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["TiposPrecioController_update[3]_v2"];
+        post?: never;
+        delete: operations["TiposPrecioController_remove[3]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -10530,13 +10642,69 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/monedas`, que devuelve lo mismo con los nombres en inglés.
          */
-        get: operations["MonedasController_list_v1"];
+        get: operations["MonedasController_list[0]_v1"];
         put?: never;
         /**
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/monedas`, que devuelve lo mismo con los nombres en inglés.
          */
-        post: operations["MonedasController_create_v1"];
+        post: operations["MonedasController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prices/currencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/currencies`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["MonedasController_list[1]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/currencies`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["MonedasController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/precios/monedas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MonedasController_list[2]_v2"];
+        put?: never;
+        post: operations["MonedasController_create[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/prices/currencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["MonedasController_list[3]_v2"];
+        put?: never;
+        post: operations["MonedasController_create[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10555,13 +10723,69 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/monedas/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
-        put: operations["MonedasController_update_v1"];
+        put: operations["MonedasController_update[0]_v1"];
         post?: never;
         /**
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/monedas/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
-        delete: operations["MonedasController_remove_v1"];
+        delete: operations["MonedasController_remove[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prices/currencies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/currencies/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["MonedasController_update[1]_v1"];
+        post?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/currencies/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["MonedasController_remove[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/precios/monedas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["MonedasController_update[2]_v2"];
+        post?: never;
+        delete: operations["MonedasController_remove[2]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/prices/currencies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["MonedasController_update[3]_v2"];
+        post?: never;
+        delete: operations["MonedasController_remove[3]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -10578,13 +10802,69 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/impuestos`, que devuelve lo mismo con los nombres en inglés.
          */
-        get: operations["ImpuestosController_list_v1"];
+        get: operations["ImpuestosController_list[0]_v1"];
         put?: never;
         /**
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/impuestos`, que devuelve lo mismo con los nombres en inglés.
          */
-        post: operations["ImpuestosController_create_v1"];
+        post: operations["ImpuestosController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prices/taxes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/taxes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["ImpuestosController_list[1]_v1"];
+        put?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/taxes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["ImpuestosController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/precios/impuestos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ImpuestosController_list[2]_v2"];
+        put?: never;
+        post: operations["ImpuestosController_create[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/prices/taxes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ImpuestosController_list[3]_v2"];
+        put?: never;
+        post: operations["ImpuestosController_create[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10603,13 +10883,69 @@ export interface paths {
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/impuestos/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
-        put: operations["ImpuestosController_update_v1"];
+        put: operations["ImpuestosController_update[0]_v1"];
         post?: never;
         /**
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/precios/impuestos/{id}`, que devuelve lo mismo con los nombres en inglés.
          */
-        delete: operations["ImpuestosController_remove_v1"];
+        delete: operations["ImpuestosController_remove[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prices/taxes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/taxes/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["ImpuestosController_update[1]_v1"];
+        post?: never;
+        /**
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/prices/taxes/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["ImpuestosController_remove[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/precios/impuestos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ImpuestosController_update[2]_v2"];
+        post?: never;
+        delete: operations["ImpuestosController_remove[2]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/prices/taxes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ImpuestosController_update[3]_v2"];
+        post?: never;
+        delete: operations["ImpuestosController_remove[3]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -48598,13 +48934,22 @@ export interface components {
              * @description Clave i18n de la razón. / i18n key of the reason.
              * @enum {string}
              */
-            labelKey: "invoice.reopen.disabled" | "invoice.reopen.notEmitted" | "invoice.reopen.outOfWindow" | "invoice.reopen.cashClosed" | "invoice.reopen.sessionsUsed";
+            labelKey: "invoice.reopen.disabled" | "invoice.reopen.notEmitted" | "invoice.reopen.outOfWindow" | "invoice.reopen.sessionsUsed";
+        };
+        InvoiceReopenWarningDto: {
+            /**
+             * @description Clave i18n del aviso: no bloquea, pero quien reabre tiene que verlo. / i18n key of a warning: it does not block.
+             * @enum {string}
+             */
+            labelKey: "invoice.reopen.cashClosed";
         };
         InvoiceReopenCheckDto: {
             /** @description Si se puede reabrir ahora. / Whether it can be reopened now. */
             canReopen: boolean;
             /** @description TODAS las razones por las que no, vacío si se puede. / EVERY reason why not; empty if it can. */
             reasons: components["schemas"]["InvoiceReopenReasonDto"][];
+            /** @description Lo que reabrir alterará, sin impedirlo (p. ej. un cuadre de caja ya cerrado). / What it will alter, without stopping it. */
+            warnings: components["schemas"]["InvoiceReopenWarningDto"][];
         };
         ReopenInvoiceDto: {
             /**
@@ -48612,6 +48957,17 @@ export interface components {
              * @example Se exoneró por error: el paciente paga 10 dólares
              */
             reason: string;
+        };
+        InvoiceActorDto: {
+            /** @description Id sellado (el de la sesión). / Stamped id (the session one). */
+            id: string;
+            /**
+             * Format: uuid
+             * @description Id del perfil. / Profile id.
+             */
+            profileId: string | null;
+            /** @description Nombre para mostrar. / Display name. */
+            name: string | null;
         };
         InvoiceReopeningDto: {
             /** Format: uuid */
@@ -48625,11 +48981,8 @@ export interface components {
             invoiceId: string;
             /** @description Número que tenía, y que conserva al re-emitirse. / Number it had, kept when re-issued. */
             invoiceNumber: string | null;
-            /**
-             * Format: uuid
-             * @description Quién la reabrió. / Who reopened it.
-             */
-            reopenedBy: string | null;
+            /** @description Quién la reabrió. / Who reopened it. */
+            reopenedBy: components["schemas"]["InvoiceActorDto"] | null;
             /** @description Por qué. / Why. */
             reason: string;
             /** @description La factura tal como estaba emitida (cabecera y líneas). Frente a la re-emitida dice qué cambió. / The invoice exactly as issued. */
@@ -66048,6 +66401,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66071,6 +66425,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66094,6 +66449,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66117,6 +66473,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66140,6 +66497,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66163,6 +66521,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66186,6 +66545,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -66209,6 +66569,7 @@ export interface operations {
             };
         };
         responses: {
+            /** @description `data` = la factura en borrador, con la MISMA forma que GET /invoices/:id. Los avisos (p. ej. `invoice.reopen.cashClosed`) van en `meta.warnings`. Si no se puede: 400 con `code: INVOICE_REOPEN_NOT_ALLOWED`, `labelKey` (la primera razón) y `reasons` (todas) en la raíz del error. / `data` is the draft invoice (same shape as GET /invoices/:id); warnings in `meta.warnings`. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -67193,7 +67554,7 @@ export interface operations {
             };
         };
     };
-    TiposPrecioController_list_v1: {
+    "TiposPrecioController_list[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67210,7 +67571,7 @@ export interface operations {
             };
         };
     };
-    TiposPrecioController_create_v1: {
+    "TiposPrecioController_create[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67231,7 +67592,121 @@ export interface operations {
             };
         };
     };
-    TiposPrecioController_update_v1: {
+    "TiposPrecioController_list[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTipoPrecioDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_list[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_create[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTipoPrecioDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_list[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_create[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTipoPrecioDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_update[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67254,7 +67729,7 @@ export interface operations {
             };
         };
     };
-    TiposPrecioController_remove_v1: {
+    "TiposPrecioController_remove[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67273,7 +67748,133 @@ export interface operations {
             };
         };
     };
-    MonedasController_list_v1: {
+    "TiposPrecioController_update[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTipoPrecioDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_remove[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_update[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTipoPrecioDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_remove[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_update[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTipoPrecioDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "TiposPrecioController_remove[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_list[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67290,7 +67891,7 @@ export interface operations {
             };
         };
     };
-    MonedasController_create_v1: {
+    "MonedasController_create[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67311,7 +67912,121 @@ export interface operations {
             };
         };
     };
-    MonedasController_update_v1: {
+    "MonedasController_list[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMonedaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_list[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_create[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMonedaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_list[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_create[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMonedaDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_update[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67334,7 +68049,7 @@ export interface operations {
             };
         };
     };
-    MonedasController_remove_v1: {
+    "MonedasController_remove[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67353,7 +68068,133 @@ export interface operations {
             };
         };
     };
-    ImpuestosController_list_v1: {
+    "MonedasController_update[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMonedaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_remove[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_update[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMonedaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_remove[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_update[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMonedaDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MonedasController_remove[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_list[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67370,7 +68211,7 @@ export interface operations {
             };
         };
     };
-    ImpuestosController_create_v1: {
+    "ImpuestosController_create[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67391,7 +68232,121 @@ export interface operations {
             };
         };
     };
-    ImpuestosController_update_v1: {
+    "ImpuestosController_list[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateImpuestoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_list[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_create[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateImpuestoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_list[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_create[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateImpuestoDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_update[0]_v1": {
         parameters: {
             query?: never;
             header?: never;
@@ -67414,7 +68369,133 @@ export interface operations {
             };
         };
     };
-    ImpuestosController_remove_v1: {
+    "ImpuestosController_remove[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_update[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateImpuestoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_remove[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_update[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateImpuestoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_remove[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_update[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateImpuestoDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "ImpuestosController_remove[3]_v2": {
         parameters: {
             query?: never;
             header?: never;
