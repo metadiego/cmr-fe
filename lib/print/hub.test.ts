@@ -67,3 +67,13 @@ test("health: no hub answers → hubDown", async () => {
   assert.deepEqual(await checkHubs(["a", "b"], async () => { throw new Error("down"); }), { kind: "hubDown" });
   assert.deepEqual(await checkHubs([], async () => ({ printer: "ready" })), { kind: "hubDown" });
 });
+
+test("checkHubs: the local hub's 'disconnected' (USB printer off or unplugged) disables the button", async () => {
+  const h = await checkHubs(["a"], async () => ({ printer: "disconnected", detail: "TM-T20II is not on the USB bus" }));
+  assert.deepEqual(h, { kind: "printerDown", hub: 0, state: "disconnected", detail: "TM-T20II is not on the USB bus" });
+});
+
+test("checkHubs: a state this build does not know does not lock the button", async () => {
+  const h = await checkHubs(["a"], async () => ({ printer: "warming-up" as never }));
+  assert.deepEqual(h, { kind: "ready", hub: 0 });
+});

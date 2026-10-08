@@ -2889,7 +2889,8 @@
       "backupHubOpen": "Abrir hub",
       "backupHubCertHint": "Ábrelo y acepta el aviso de seguridad si es la primera vez en este equipo; luego Reintentar.",
       "backupPrinter": {
-        "disabled": "Impresora apagada o desconectada.",
+        "disabled": "Impresora en pausa en su equipo.",
+        "disconnected": "Impresora apagada o desconectada.",
         "missing": "La impresora configurada no existe en ese equipo.",
         "unreachable": "El equipo de la impresora no responde."
       }

@@ -152,8 +152,12 @@ Cinco minutos, sin tocar servidores ni VPN. La configuración del centro ya est�
 **Lo que no se puede verificar hoy:** todo lo de Windows (fases 3 y la parte Windows de la 2). Se
 entrega construido y con tests unitarios, pero **no se da por terminado** hasta probarlo en un Windows.
 
-## 11. Preguntas abiertas para el dueño
+## 11. Decisiones del dueño (2026-10-08)
 
-1. ¿Dónde se crea el repo `cmr-print-hub` (misma organización que `cmr-fe`)?
-2. ¿Hay un PC Windows de la oficina (o una VM) disponible para las pruebas de la fase 3?
-3. ¿El hub central `.172` se retira al terminar o se queda como segundo en la lista?
+1. **Repo:** `htdocs/cmr-print-hub`, al lado de `cmr-fe`, en GitHub `larciles/cmr-print-hub` (privado).
+2. **Windows de pruebas:** solo el servidor `192.130.80.2`, que es **producción local**. Ahí el agente
+   se ejecuta **a mano, solo para probar**: nada de `install`, nada de servicio ni arranque automático,
+   y se cierra al terminar.
+3. **Hub central `.172`:** queda **segundo en la lista, solo para emergencias**. El primero es siempre
+   el agente local; el central solo entra si el local no responde, y la cajera no lo ve (solo el aviso
+   "impreso por el hub de respaldo" cuando ocurre).

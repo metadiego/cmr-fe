@@ -45,10 +45,13 @@ export async function sendToHubs(
 }
 
 // What the hub says about the destination printer (GET /status).
-export type PrinterState = "ready" | "disabled" | "missing" | "unreachable" | "unknown";
+// "disconnected" comes from the local hub (cmr-print-hub), which sees a USB printer drop off the bus.
+export type PrinterState = "ready" | "disabled" | "missing" | "unreachable" | "disconnected" | "unknown";
+type DownState = Exclude<PrinterState, "ready" | "unknown">;
+const DOWN_STATES: readonly string[] = ["disabled", "missing", "unreachable", "disconnected"] satisfies DownState[];
 export type HubHealth =
   | { kind: "ready"; hub: number }
-  | { kind: "printerDown"; hub: number; state: Exclude<PrinterState, "ready" | "unknown">; detail: string }
+  | { kind: "printerDown"; hub: number; state: DownState; detail: string }
   | { kind: "hubDown" };
 
 async function fetchHubStatus(statusUrl: string): Promise<{ printer: PrinterState; detail?: string }> {
@@ -59,7 +62,7 @@ async function fetchHubStatus(statusUrl: string): Promise<{ printer: PrinterStat
 
 // Asks the hubs IN ORDER (the same order printing uses); the first one that answers decides. "unknown"
 // (e.g. a Windows share that needs a login to inspect) does not block printing: only a known-bad state
-// does. No hub answering = hub down (or, from a browser, its certificate not accepted yet).
+// does — and so does a state this build does not know (a newer hub must not lock the button). No hub answering = hub down (or, from a browser, its certificate not accepted yet).
 export async function checkHubs(
   statusUrls: string[],
   get: (url: string) => Promise<{ printer: PrinterState; detail?: string }> = fetchHubStatus,
@@ -71,8 +74,8 @@ export async function checkHubs(
     } catch {
       continue;
     }
-    if (s.printer === "ready" || s.printer === "unknown") return { kind: "ready", hub: i };
-    return { kind: "printerDown", hub: i, state: s.printer, detail: s.detail ?? "" };
+    if (!DOWN_STATES.includes(s.printer)) return { kind: "ready", hub: i };
+    return { kind: "printerDown", hub: i, state: s.printer as DownState, detail: s.detail ?? "" };
   }
   return { kind: "hubDown" };
 }
