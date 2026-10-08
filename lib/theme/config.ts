@@ -1,6 +1,5 @@
 // lib/theme/config.ts
 import { deriveBrandVars } from "./brand";
-import type { PrintHubTarget } from "../print/hub-target.ts";
 // The token vocabulary the FE owns. The BE stores theme config as a free JSONB
 // blob (config por capas #51) and resolves the EFFECTIVE config by precedence
 // (override → user → center → system); the FE just paints `effective` by mapping
@@ -58,13 +57,6 @@ export interface ThemeConfig {
    * escribe como `--recibo-ancho` y `@page`/`.recibo-print` lo usan. Handoff recibo-termico-sale-en-miniatura.
    */
   recibo?: { anchoMm?: number };
-  /**
-   * Backup ESC/POS print hub for this center (lib/print/hub.ts). One hub can serve every office; what
-   * keeps each office on its own paper is the printer stored here per center (host, port, queue). Set
-   * only on the `centro` layer. Incomplete → the backup button refuses with a clear error, never
-   * prints elsewhere. See docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
-   */
-  printHub?: PrintHubTarget;
   /**
    * Idioma de la interfaz elegido por la persona (capa `usuario`). El BE lo resuelve por
    * precedencia y lo devuelve ya resuelto en /auth/me (`idioma`) + la lista elegible

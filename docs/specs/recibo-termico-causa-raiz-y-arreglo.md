@@ -155,6 +155,16 @@ muestra las impresoras para elegir con un clic; ayuda de dónde sale cada dato e
   en la LAN de pruebas no hay ningún Windows compartiendo una impresora. Pendiente de la primera
   prueba real en una oficina.
 
+**Configuración con endpoint propio (8-oct-2026, tarde):** el BE publicó `center_print_hubs` +
+`/api/v2/print-hubs` (admin, `print-hub.read|update|delete`) + `GET /api/v2/me/print-hub` (quien
+imprime, por `X-Tenant-ID`, sin permiso de admin) + MCP `print_hub_*`, y sacó `printHub` del sobre de
+preferencias (handoff `docs/specs/print-hub-config-handoff-be.md`). El FE ya no usa preferences:
+`lib/api/print-hub.ts`; la pantalla tiene interruptor **Activado**, **lista ordenada de hubs**
+(agregar/subir/bajar/quitar, estado de conexión y enlace del certificado por cada uno) y **Quitar
+configuración**; el botón de la factura prueba los hubs **en orden** (`sendToHubs`) — así la PC que
+tiene la impresora sigue imprimiendo por su hub local si el central se cae — y avisa cuando imprimió
+por uno de respaldo.
+
 **Ejemplo con un solo hub:** Caguas → url `https://192.130.80.172:8943/print-raw`, IP
 `192.130.80.181`, puerto `631`, cola `TM-T20II-RAW`. Bayamón → la MISMA url, con la IP/cola del equipo
 que comparte su impresora de consulta.

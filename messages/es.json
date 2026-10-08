@@ -2879,7 +2879,8 @@
     "presupuestoNum": "Presupuesto {num}",
     "print": {
       "backupHub": "Respaldo: imprimir por el hub",
-      "backupHubDone": "Enviado al hub de respaldo"
+      "backupHubDone": "Enviado al hub de respaldo",
+      "backupHubDoneFallback": "Enviado por el hub de respaldo {hub} (el principal no respondió)"
     },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
@@ -3871,15 +3872,13 @@
     "hubSaved": "Impresora del hub guardada para este centro.",
     "lockLabel": "Bloquear estos colores para todo el centro",
     "lockHint": "Nadie de este centro podrá personalizar su propio color mientras esté activo.",
-    "hubUrl": "URL del hub",
     "printerHost": "IP del equipo que comparte la impresora",
     "printerHostPlaceholder": "192.130.80.181",
     "printerPort": "Puerto",
     "printerQueue": "Cola de impresión",
     "printerQueuePlaceholder": "TM-T20II-RAW",
     "hubTest": "Imprimir prueba",
-    "hubTestSent": "Prueba enviada: revisa el papel de este centro.",
-    "hubIncomplete": "Completa URL del hub, IP, puerto y cola para probar.",
+    "hubIncomplete": "Completa al menos un hub, la IP, el puerto y la cola para probar.",
     "hubLinkOk": "Conectado con el hub desde este navegador.",
     "hubLinkChecking": "Comprobando conexión con el hub…",
     "hubLinkFail": "Este navegador no llega al hub.",
@@ -3897,7 +3896,20 @@
     "printerShare": "Nombre del recurso compartido",
     "printerHelpLinuxMac": "Linux/Mac: el puerto casi siempre es 631. La cola es el nombre de la impresora en ese equipo (comando lpstat -p). Para tickets usa una cola SIN driver (crudo/raw).",
     "printerHelpWindows": "Windows: el puerto casi siempre es 445. El nombre es el de «Compartir esta impresora» en Propiedades de la impresora → pestaña Compartir.",
-    "hubTesting": "Enviando…"
+    "hubTesting": "Enviando…",
+    "hubEnabled": "Activado",
+    "hubLoadFail": "No se pudo leer la configuración del hub de este centro.",
+    "hubUrls": "Hubs, en orden",
+    "hubUrlsHelp": "Se prueban de arriba abajo y se usa el primero que responde. Pon primero el hub central; si quieres que la PC que tiene la impresora siga imprimiendo cuando el central se caiga, agrega después el hub instalado en esa PC (http://localhost:8943/print-raw).",
+    "hubLocalPlaceholder": "http://localhost:8943/print-raw",
+    "hubAddUrl": "+ Agregar hub",
+    "hubMoveUp": "Subir",
+    "hubMoveDown": "Bajar",
+    "hubRemoveUrl": "Quitar este hub",
+    "hubTestSentVia": "Prueba enviada por {hub}: revisa el papel de este centro.",
+    "hubRemove": "Quitar configuración",
+    "hubRemoveConfirm": "¿Quitar la configuración del hub de {center}? Su botón de respaldo dejará de aparecer.",
+    "hubRemoved": "Configuración del hub quitada."
   },
   "numeracion": {
     "title": "Numeración de documentos",
@@ -4504,5 +4516,12 @@
     "resource": "Recurso",
     "usedOf": "{used}/{available} puestos-hora",
     "cap": "cap {n}"
+  },
+  "printHub": {
+    "invalidQueue": "La cola o el recurso compartido tiene caracteres no permitidos (solo letras, números, espacio y _ . - $).",
+    "invalidUrl": "Alguna URL de hub no es válida: debe ser completa, como https://host:puerto/print-raw.",
+    "invalidProtocol": "El protocolo debe ser ipp (Linux/Mac) o smb (Windows).",
+    "invalidPort": "El puerto debe ser un número entre 1 y 65535.",
+    "notFound": "Este centro no tiene configurado un hub de impresión de respaldo."
   }
 }

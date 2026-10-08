@@ -1,3 +1,30 @@
+> **RESUELTO por el BE, 8-oct-2026 — en producción y verificado por HTTP real.**
+>
+> **Rutas** (v1 en español, v2 en inglés, mismo controlador):
+> - `GET /api/v2/print-hubs?centerIds=a,b` · `GET|PUT|DELETE /api/v2/print-hubs/:centerId`
+>   (v1: `/api/v1/impresion-hubs/...`). Permisos `print-hub.read|update|delete`.
+> - `GET /api/v2/me/print-hub` (v1: `/api/v1/me/impresion-hub`) — por `X-Tenant-ID`, **sin**
+>   permiso de administración. Centro sin configurar → `enabled: false`, no un error.
+>
+> **Respuesta REAL de `/api/v2/me/print-hub`, Caguas:**
+> `{ "enabled": true, "hubUrls": ["https://192.130.80.172:8943/print-raw"], "protocol": "ipp",
+> "printerHost": "192.130.80.199", "printerPort": 631, "printerQueue": "EPSON_TM_T20II" }`
+> Bayamón: `enabled: false` (su config estaba a medias: solo el puerto). La fila de admin trae además
+> `id`, `clinicId`, `createdAt`, `updatedAt`, `updatedBy`.
+>
+> **Validación verificada**: cola `mala;cola` → 400 `labelKey: printHub.invalidQueue`. Los errores
+> traen además `fallos: [{ labelKey, campo }]` con TODOS los problemas de una vez. Otras claves:
+> `printHub.invalidUrl`, `printHub.invalidProtocol`, `printHub.invalidPort`, `printHub.notFound`.
+>
+> **MCP**: `print_hub_list`, `print_hub_get`, `print_hub_set`, `print_hub_delete`.
+>
+> **⚠ Ya migrado y la clave `printHub` YA se borró del sobre de preferencias** (Caguas y Bayamón).
+> Desde ahora el botón de respaldo del FE en prod **no sale en ningún centro** hasta que leas
+> `GET /me/print-hub`. Es el paso que te toca: cambiar la pantalla y el botón a estos endpoints y
+> regenerar tipos (`gen:api`).
+>
+> Razón completa: `cmr-be/docs/specs/el-hub-de-impresion-es-configuracion.md`.
+
 # Handoff BE — Configuración del hub de impresión por centro (API + MCP + Swagger)
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-08 · **Estado:** FE detenido en esta parte hasta que

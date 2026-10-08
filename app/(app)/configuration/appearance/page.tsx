@@ -140,8 +140,8 @@ export default function AparienciaCorporativaPage() {
     if (centro.kind !== "ok" || !centroId) return;
     setGuardandoCentro(true);
     try {
-      // Merge onto a FRESH read, not the copy loaded when the center was picked: other keys of the
-      // same envelope (e.g. printHub, saved by its own button) may have changed since.
+      // Merge onto a FRESH read, not the copy loaded when the center was picked: business keys of the
+      // same envelope may have been changed by someone else since.
       await updateCentroPreferences(
         centroId,
         mezclarSoloTema(await getCentroPreferences(centroId), centro.value),
@@ -306,7 +306,6 @@ export default function AparienciaCorporativaPage() {
                   key={centroId}
                   centerId={centroId}
                   centerName={centros.find((c) => c.id === centroId)?.name ?? ""}
-                  initial={centro.value.printHub}
                 />
               </>
             )}

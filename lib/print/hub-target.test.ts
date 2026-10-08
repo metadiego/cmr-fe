@@ -1,76 +1,77 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildHubDiscoverUrl, buildHubRequestUrl, hubOrigin } from "./hub-target.ts";
+import { buildHubDiscoverUrl, buildHubRequestUrl, buildHubRequestUrls, hubOrigin } from "./hub-target.ts";
 
-const full = {
-  url: "https://192.130.80.172:8943/print-raw",
-  printerHost: "192.130.80.181",
-  printerPort: 631,
-  printerQueue: "TM-T20II-RAW",
-};
+const CENTRAL = "https://192.130.80.172:8943/print-raw";
+const LOCAL = "http://localhost:8943/print-raw";
+const dest = { protocol: "ipp", printerHost: "192.130.80.181", printerPort: 631, printerQueue: "TM-T20II-RAW" };
+const config = { enabled: true, hubUrls: [CENTRAL, LOCAL], ...dest };
 
-test("full target: hub url carries the printer as query params", () => {
-  const u = new URL(buildHubRequestUrl(full)!);
+test("one hub: the hub url carries the printer as query params", () => {
+  const u = new URL(buildHubRequestUrl(CENTRAL, dest)!);
   assert.equal(u.origin + u.pathname, "https://192.130.80.172:8943/print-raw");
+  assert.equal(u.searchParams.get("protocol"), "ipp");
   assert.equal(u.searchParams.get("host"), "192.130.80.181");
   assert.equal(u.searchParams.get("port"), "631");
   assert.equal(u.searchParams.get("queue"), "TM-T20II-RAW");
-  assert.equal(u.searchParams.get("protocol"), "ipp");
 });
 
-test("same hub, different printer per center: each URL points at its own printer", () => {
-  const caguas = buildHubRequestUrl(full)!;
-  const bayamon = buildHubRequestUrl({ ...full, printerHost: "192.130.81.20", printerQueue: "BAY-CONSULTA" })!;
-  assert.notEqual(caguas, bayamon);
-  assert.equal(new URL(bayamon).searchParams.get("host"), "192.130.81.20");
+test("several hubs: same printer, tried in the stored order (central, then local)", () => {
+  const urls = buildHubRequestUrls(config);
+  assert.equal(urls.length, 2);
+  assert.ok(urls[0].startsWith("https://192.130.80.172:8943/print-raw?"));
+  assert.ok(urls[1].startsWith("http://localhost:8943/print-raw?"));
+  assert.equal(new URL(urls[0]).search, new URL(urls[1]).search);
 });
 
-test("missing any piece returns null (never guess a printer)", () => {
-  assert.equal(buildHubRequestUrl(undefined), null);
-  assert.equal(buildHubRequestUrl(null), null);
-  assert.equal(buildHubRequestUrl({ ...full, url: "" }), null);
-  assert.equal(buildHubRequestUrl({ ...full, printerHost: "  " }), null);
-  assert.equal(buildHubRequestUrl({ ...full, printerPort: "" }), null);
-  assert.equal(buildHubRequestUrl({ ...full, printerQueue: undefined }), null);
+test("disabled, no hubs or incomplete printer → nothing to try (button hidden)", () => {
+  assert.deepEqual(buildHubRequestUrls({ ...config, enabled: false }), []);
+  assert.deepEqual(buildHubRequestUrls({ ...config, hubUrls: [] }), []);
+  assert.deepEqual(buildHubRequestUrls({ ...config, printerHost: null }), []);
+  assert.deepEqual(buildHubRequestUrls({ ...config, printerQueue: "  " }), []);
+  assert.deepEqual(buildHubRequestUrls(null), []);
 });
 
-test("port as string is accepted; non-numeric port is rejected", () => {
-  assert.ok(buildHubRequestUrl({ ...full, printerPort: "631" }));
-  assert.equal(buildHubRequestUrl({ ...full, printerPort: "63a" }), null);
+test("an invalid hub url is skipped, the valid ones stay in order", () => {
+  assert.deepEqual(buildHubRequestUrls({ ...config, hubUrls: ["nope", LOCAL] }).length, 1);
 });
 
-test("invalid or non-http hub url is rejected", () => {
-  assert.equal(buildHubRequestUrl({ ...full, url: "not a url" }), null);
-  assert.equal(buildHubRequestUrl({ ...full, url: "ftp://x/print-raw" }), null);
-});
-
-test("values are trimmed and encoded", () => {
-  const u = new URL(buildHubRequestUrl({ ...full, printerHost: " 192.130.80.181 ", printerQueue: "A B" })!);
-  assert.equal(u.searchParams.get("host"), "192.130.80.181");
-  assert.equal(u.searchParams.get("queue"), "A B");
+test("missing any piece of a single hub returns null (never guess a printer)", () => {
+  assert.equal(buildHubRequestUrl("", dest), null);
+  assert.equal(buildHubRequestUrl(CENTRAL, { ...dest, printerPort: "" }), null);
+  assert.equal(buildHubRequestUrl(CENTRAL, { ...dest, printerPort: "63a" }), null);
+  assert.equal(buildHubRequestUrl("ftp://x/print-raw", dest), null);
+  assert.equal(buildHubRequestUrl(CENTRAL, { ...dest, protocol: "ftp" }), null);
 });
 
 test("windows target travels as protocol smb with its share name", () => {
-  const u = new URL(buildHubRequestUrl({ ...full, protocol: "smb", printerPort: 445, printerQueue: "EPSON-CONSULTA" })!);
+  const u = new URL(buildHubRequestUrl(CENTRAL, { ...dest, protocol: "smb", printerPort: 445, printerQueue: "EPSON-CONSULTA" })!);
   assert.equal(u.searchParams.get("protocol"), "smb");
   assert.equal(u.searchParams.get("port"), "445");
   assert.equal(u.searchParams.get("queue"), "EPSON-CONSULTA");
 });
 
-test("unknown protocol is rejected", () => {
-  assert.equal(buildHubRequestUrl({ ...full, protocol: "ftp" as never }), null);
+test("values are trimmed and encoded; empty protocol means ipp", () => {
+  const u = new URL(buildHubRequestUrl(CENTRAL, { ...dest, protocol: "", printerHost: " 192.130.80.181 ", printerQueue: "A B" })!);
+  assert.equal(u.searchParams.get("protocol"), "ipp");
+  assert.equal(u.searchParams.get("host"), "192.130.80.181");
+  assert.equal(u.searchParams.get("queue"), "A B");
 });
 
 test("hubOrigin: scheme+host+port only, null when invalid", () => {
-  assert.equal(hubOrigin("https://192.130.80.172:8943/print-raw"), "https://192.130.80.172:8943");
+  assert.equal(hubOrigin(CENTRAL), "https://192.130.80.172:8943");
   assert.equal(hubOrigin(""), null);
   assert.equal(hubOrigin("nope"), null);
 });
 
 test("discover url: hub origin + /discover?host=", () => {
-  const u = new URL(buildHubDiscoverUrl("https://192.130.80.172:8943/print-raw", " 192.130.80.181 ")!);
+  const u = new URL(buildHubDiscoverUrl(CENTRAL, " 192.130.80.181 ")!);
   assert.equal(u.origin + u.pathname, "https://192.130.80.172:8943/discover");
   assert.equal(u.searchParams.get("host"), "192.130.80.181");
-  assert.equal(buildHubDiscoverUrl("https://192.130.80.172:8943/print-raw", ""), null);
+  assert.equal(buildHubDiscoverUrl(CENTRAL, ""), null);
   assert.equal(buildHubDiscoverUrl("", "192.130.80.181"), null);
+});
+
+test("port may come as a string (form input) and is accepted", () => {
+  assert.equal(new URL(buildHubRequestUrl(CENTRAL, { ...dest, printerPort: "631" })!).searchParams.get("port"), "631");
 });

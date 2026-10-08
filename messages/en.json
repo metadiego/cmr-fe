@@ -2879,7 +2879,8 @@
     "presupuestoNum": "Quote {num}",
     "print": {
       "backupHub": "Backup: print via hub",
-      "backupHubDone": "Sent to the backup hub"
+      "backupHubDone": "Sent to the backup hub",
+      "backupHubDoneFallback": "Sent through backup hub {hub} (the main one did not answer)"
     },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
@@ -3871,15 +3872,13 @@
     "hubSaved": "Hub printer saved for this center.",
     "lockLabel": "Lock these colors for the whole center",
     "lockHint": "No one at this center will be able to personalize their own color while this is on.",
-    "hubUrl": "Hub URL",
     "printerHost": "IP of the machine sharing the printer",
     "printerHostPlaceholder": "192.130.80.181",
     "printerPort": "Port",
     "printerQueue": "Print queue",
     "printerQueuePlaceholder": "TM-T20II-RAW",
     "hubTest": "Print test",
-    "hubTestSent": "Test sent: check this center's paper.",
-    "hubIncomplete": "Fill in hub URL, IP, port and queue to test.",
+    "hubIncomplete": "Fill in at least one hub, the IP, port and queue to test.",
     "hubLinkOk": "This browser can reach the hub.",
     "hubLinkChecking": "Checking the connection to the hub…",
     "hubLinkFail": "This browser cannot reach the hub.",
@@ -3897,7 +3896,20 @@
     "printerShare": "Share name",
     "printerHelpLinuxMac": "Linux/Mac: the port is almost always 631. The queue is the printer's name on that machine (lpstat -p). For receipts use a queue WITHOUT a driver (raw).",
     "printerHelpWindows": "Windows: the port is almost always 445. The name is the one under “Share this printer” in Printer properties → Sharing tab.",
-    "hubTesting": "Sending…"
+    "hubTesting": "Sending…",
+    "hubEnabled": "Enabled",
+    "hubLoadFail": "Could not read this center's hub configuration.",
+    "hubUrls": "Hubs, in order",
+    "hubUrlsHelp": "Tried top to bottom; the first one that answers is used. Put the central hub first; to keep the machine that owns the printer printing when the central one is down, add the hub installed on that machine after it (http://localhost:8943/print-raw).",
+    "hubLocalPlaceholder": "http://localhost:8943/print-raw",
+    "hubAddUrl": "+ Add hub",
+    "hubMoveUp": "Move up",
+    "hubMoveDown": "Move down",
+    "hubRemoveUrl": "Remove this hub",
+    "hubTestSentVia": "Test sent through {hub}: check this center's paper.",
+    "hubRemove": "Remove configuration",
+    "hubRemoveConfirm": "Remove the hub configuration of {center}? Its backup button will stop showing.",
+    "hubRemoved": "Hub configuration removed."
   },
   "numeracion": {
     "title": "Document numbering",
@@ -4504,5 +4516,12 @@
     "resource": "Resource",
     "usedOf": "{used}/{available} station-hours",
     "cap": "cap {n}"
+  },
+  "printHub": {
+    "invalidQueue": "The queue or share name has characters that are not allowed (only letters, digits, space and _ . - $).",
+    "invalidUrl": "A hub URL is not valid: it must be complete, like https://host:port/print-raw.",
+    "invalidProtocol": "The protocol must be ipp (Linux/Mac) or smb (Windows).",
+    "invalidPort": "The port must be a number between 1 and 65535.",
+    "notFound": "This center has no backup print hub configured."
   }
 }

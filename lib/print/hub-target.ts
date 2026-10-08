@@ -1,16 +1,18 @@
-// Where a center's backup print jobs go: ONE shared hub (url) relays each job to the printer named
-// here. Stored per center in its preferences layer (`printHub`), so two offices can share the same
-// hub and still print each on its own paper.
-//   protocol "ipp" → the printer is shared from Linux/macOS (CUPS, usually port 631)
-//   protocol "smb" → the printer is shared from Windows (usually port 445); queue = share name
+// Where a center's backup print jobs go (BE: /print-hubs, one row per center). `hubUrls` is an ORDERED
+// list — the central hub first, then e.g. a small hub on the machine the printer is plugged into — and
+// the FE tries them in turn, so that machine keeps printing if the central hub is down. Every hub
+// relays to the same printer: `protocol` + host + port + queue.
+//   protocol "ipp" → printer shared from Linux/macOS (CUPS, usually port 631)
+//   protocol "smb" → printer shared from Windows (usually port 445); queue = share name
 export type PrintHubProtocol = "ipp" | "smb";
 
-export interface PrintHubTarget {
-  url?: string;
-  protocol?: PrintHubProtocol;
-  printerHost?: string;
-  printerPort?: number | string;
-  printerQueue?: string;
+export interface PrintHubConfig {
+  enabled: boolean;
+  hubUrls: string[];
+  protocol: PrintHubProtocol | string;
+  printerHost: string | null;
+  printerPort: number | string | null;
+  printerQueue: string | null;
 }
 
 export const DEFAULT_PORTS: Record<PrintHubProtocol, number> = { ipp: 631, smb: 445 };
@@ -25,7 +27,7 @@ export interface HubDiscovery {
   error: string | null;
 }
 
-function parseHubUrl(url: string | undefined): URL | null {
+function parseHubUrl(url: string | undefined | null): URL | null {
   const raw = url?.trim();
   if (!raw) return null;
   try {
@@ -36,20 +38,22 @@ function parseHubUrl(url: string | undefined): URL | null {
   }
 }
 
-// Origin of the hub (scheme://host:port) — what the browser has to trust once (self-signed cert).
-export function hubOrigin(url: string | undefined): string | null {
+// Origin of a hub (scheme://host:port) — what the browser has to trust once (self-signed cert).
+export function hubOrigin(url: string | undefined | null): string | null {
   return parseHubUrl(url)?.origin ?? null;
 }
 
-// Returns the full request URL for the hub, or null when anything is missing — the caller must then
-// refuse to print rather than guess a destination (a guess is how one office prints at another).
-// A missing protocol means "ipp", the hub's own default (configs saved before protocol existed).
-export function buildHubRequestUrl(target: PrintHubTarget | null | undefined): string | null {
-  const base = parseHubUrl(target?.url);
-  const protocol = target?.protocol ?? "ipp";
-  const host = target?.printerHost?.trim();
-  const port = String(target?.printerPort ?? "").trim();
-  const queue = target?.printerQueue?.trim();
+// Request URL for ONE hub, or null when the hub URL or the destination printer is incomplete — the
+// caller must then refuse rather than guess a printer (a guess is how one office prints at another).
+export function buildHubRequestUrl(
+  hubUrl: string | undefined | null,
+  dest: Pick<PrintHubConfig, "protocol" | "printerHost" | "printerPort" | "printerQueue">,
+): string | null {
+  const base = parseHubUrl(hubUrl);
+  const protocol = dest.protocol || "ipp";
+  const host = dest.printerHost?.trim();
+  const port = String(dest.printerPort ?? "").trim();
+  const queue = dest.printerQueue?.trim();
   if (!base || !host || !port || !queue) return null;
   if (!Object.hasOwn(DEFAULT_PORTS, protocol) || !/^\d+$/.test(port)) return null;
   base.searchParams.set("protocol", protocol);
@@ -59,8 +63,15 @@ export function buildHubRequestUrl(target: PrintHubTarget | null | undefined): s
   return base.toString();
 }
 
-// URL to ask the hub which system a machine runs and which printers it shares.
-export function buildHubDiscoverUrl(url: string | undefined, host: string | undefined): string | null {
+// Request URLs to try, IN ORDER. Empty when the center has no usable backup: disabled, no valid hub,
+// or the printer incomplete — the backup button is not shown then.
+export function buildHubRequestUrls(config: PrintHubConfig | null | undefined): string[] {
+  if (!config?.enabled) return [];
+  return (config.hubUrls ?? []).map((u) => buildHubRequestUrl(u, config)).filter((u): u is string => !!u);
+}
+
+// URL to ask a hub which system a machine runs and which printers it shares.
+export function buildHubDiscoverUrl(url: string | undefined | null, host: string | undefined | null): string | null {
   const origin = hubOrigin(url);
   const h = host?.trim();
   if (!origin || !h) return null;
