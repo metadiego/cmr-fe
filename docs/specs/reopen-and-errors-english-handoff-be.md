@@ -1,7 +1,7 @@
 # Handoff BE — Reabrir: quién la reabrió + huecos de Swagger, y errores nuevos en español en v2
 
-**De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-08 · **Prioridad:** media (el FE ya funciona; esto
-completa la pantalla y cumple la regla de todo en inglés).
+**De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-08 · **Prioridad:** el punto 4 es **ALTA** (pantallas
+rotas en producción); el resto media.
 
 El FE de Reabrir ya está en producción (commit `1c31980`): botón con `reopen/check`, modal con motivo y
 avisos, re-emitir con otra fecha y la tarjeta «Reaperturas» con qué cambió.
@@ -39,6 +39,28 @@ Copiado de los handoffs que corregiste hoy (verificado por HTTP por el BE):
 La regla del proyecto es inglés para todo lo que se publica en v2 (`CLAUDE.md`, «Everything is written
 in ENGLISH»). El FE hoy solo usa `labelKey` de esos errores, así que el cambio no rompe nada; cuando
 salga, el FE empieza a enseñar **todos** los fallos del hub (`failures`) y **qué servicios** faltan.
+
+## 4. ALTA — tipos de precio e impuestos no existen en `/api/v2` (404 en producción)
+
+Visto en el navegador real sobre `cmr-fe-gamma` (factura de Bayamón, 8-oct 18:38) y comprobado por HTTP
+con el mismo token y `X-Tenant-ID` de Bayamón:
+
+| Ruta | Respuesta |
+|---|---|
+| `GET /api/v2/prices/types` | **404** `Cannot GET` |
+| `GET /api/v2/prices/taxes` | **404** `Cannot GET` |
+| `GET /api/v2/precios/tipos`, `/api/v2/precios/impuestos` | 404 |
+| `GET /api/v1/precios/tipos`, `/api/v1/precios/impuestos` | **200** |
+
+El Swagger tampoco las publica en v2 (solo `/api/v1/precios/impuestos`). El FE las llama en v2 desde la
+pantalla de la factura (listas de precio e impuestos de cada línea), la venta general, Derivar precios
+y Listas de precio (`lib/api/precios.ts`: `listTiposPrecio`, `listImpuestos`, `createTipoPrecio`,
+`updateTipoPrecio`).
+
+**Pedido:** publicar en v2 `GET/POST /prices/types`, `PUT /prices/types/:id` y `GET /prices/taxes`
+(los nombres que el FE ya usa), en inglés como el resto de v2. El FE **no** las mueve al carril v1
+(regla 6 de `cmr-fe/CLAUDE.md`: ese carril es solo para `/auditoria/*` y `/me/centros-donde-puedo`);
+si preferís otros nombres, decidlo aquí y el FE los cambia el mismo día.
 
 ## Verificación que pide el FE
 
