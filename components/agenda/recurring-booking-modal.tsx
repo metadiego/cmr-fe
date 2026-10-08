@@ -184,10 +184,10 @@ export function RecurringBookingModal({
     let booked = 0;
     let failedGroups = 0;
     const allWarnings: ApiWarning[] = [];
-    for (const [groupTime, fechas] of byTime) {
+    for (const [groupTime, dates] of byTime) {
       try {
-        const { warnings } = await agendarMultiple({ patientId, serviceId, fechas, time: groupTime }, centro);
-        booked += fechas.length;
+        const { warnings } = await agendarMultiple({ patientId, serviceId, dates, time: groupTime }, centro);
+        booked += dates.length;
         allWarnings.push(...warnings);
       } catch (err) {
         failedGroups++;

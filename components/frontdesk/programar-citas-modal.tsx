@@ -219,7 +219,7 @@ export function ProgramarCitasModal({
       const hora = horaSel || undefined; // opcional; el BE descuenta el cupo de esa franja (no bloquea)
       // UNA sola llamada agenda el CRUCE completo: cada servicio marcado en cada fecha.
       const { data, warnings } = await agendarVariosServicios(
-        { patientId: pacienteId, serviceIds: [...servicioIds], fechas: fechasEff, time: hora },
+        { patientId: pacienteId, serviceIds: [...servicioIds], dates: fechasEff, time: hora },
         centro,
       );
       const creadas = Array.isArray(data.creadas) ? data.creadas.length : 0;

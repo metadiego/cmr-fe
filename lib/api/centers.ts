@@ -37,13 +37,11 @@ export interface Centro {
 
 // PUT /centers/:id/tax-details — patch parcial (todos opcionales). La dirección
 // se ENVÍA como `taxAddress` (el GET la lee como `address`). RBAC centro.fiscal.write.
-// Los dos campos de Consulta se añaden A MANO (mismo motivo que en `Centro` arriba): el schema
-// generado todavía no los trae, pero el PUT los acepta tal cual — mismo endpoint que ya usa
-// `frontdeskAutoPresent`, que SÍ está en el DTO generado y confirma el patrón.
-export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"] & {
-  frontdeskShowsConsultation?: boolean;
+// `frontdeskConsultationOrder: null` means "Consultation tab last" and the BE accepts it (IsOptional +
+// applied when !== undefined), but its Swagger declares the field as a plain number — widened here until
+// the BE marks it nullable (docs/specs/swagger-gaps-and-book-multiple-validation-handoff-be.md).
+export type DatosFiscalesPayload = Omit<components["schemas"]["UpdateDatosFiscalesDto"], "frontdeskConsultationOrder"> & {
   frontdeskConsultationOrder?: number | null;
-  autoPresentSameDayBooking?: boolean; // nace del mismo PUT (schema generado aún no lo trae). PR #382.
 };
 
 export function updateDatosFiscales(

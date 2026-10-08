@@ -12,7 +12,7 @@
     "test": "node --test --experimental-strip-types \"lib/**/*.test.ts\"",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "gen:api": "openapi-typescript \"${CMR_OPENAPI_URL:-http://localhost:3001/api/docs-json}\" -o lib/api/schema.d.ts"
+    "gen:api": "openapi-typescript \"${CMR_OPENAPI_URL:-http://localhost:3001/api/docs-json}\" --default-non-nullable false -o lib/api/schema.d.ts && node scripts/englishify-schema.mjs"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.2.0",

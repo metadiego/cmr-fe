@@ -189,7 +189,7 @@ export function TherapyDayScheduler({
     setSubmitting(true);
     try {
       const { data, warnings } = await agendarVariosServicios(
-        { patientId: paciente.id, serviceIds: [...sel], fechas: [date], time: time || undefined },
+        { patientId: paciente.id, serviceIds: [...sel], dates: [date], time: time || undefined },
         centro,
       );
       const creadas = Array.isArray(data.creadas) ? data.creadas.length : 0;

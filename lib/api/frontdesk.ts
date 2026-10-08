@@ -108,16 +108,14 @@ export async function agendarMultiple(
 }
 
 // Agenda VARIOS servicios en VARIAS fechas (el cruce completo) para un paciente, en UNA sola llamada
-// (POST /frontdesk/sessions/book-multiple). OJO: `servicioIds` y `fechas` van en ESPAÑOL — NO están en el
-// mapa api-ingles (verificado en prod 2026-09-17: `serviceIds` responde 400 "should not exist"). Ver hueco
-// en docs/specs/api-v2-huecos-handoff-be.md. Devuelve `creadas` (las sesiones nuevas) y `omitidas` (cuántos
+// (POST /frontdesk/sessions/book-multiple), en inglés: `serviceIds` y `dates` (el BE mapeó `fechas→dates`
+// el 2026-09-17, commit 3334d3b; la v2 aún acepta `fechas`, verificado 2026-10-08). Devuelve `creadas` (las sesiones nuevas) y `omitidas` (cuántos
 // pares ya existían: idempotente), + avisos de cupo (meta.warnings) y de disponibilidad excedida por
 // servicio (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
 export async function agendarVariosServicios(
-  // `serviceIds` (inglés) ya lo acepta la v2 (hueco cerrado, verificado 2026-09-17). `fechas` sigue en
-  // español (no está en el mapa). Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
-  payload: { patientId: string; serviceIds: string[]; fechas: string[]; time?: string },
+  // Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
+  payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string },
   centroId?: string,
 ): Promise<ConWarnings<BookMultipleResult>> {
   const env = await apiFetchEnvelope<BookMultipleResult>(`/frontdesk/sessions/book-multiple`, {

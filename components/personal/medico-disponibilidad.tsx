@@ -88,7 +88,7 @@ function Horarios({ doctorId, centro }: { doctorId: string; centro?: string }) {
     try {
       await Promise.all(
         [...nuevo.dias].map((dow) =>
-          createHorario({ doctorId, dayOfWeek: dow, startTime: nuevo.inicio, endTime: nuevo.fin }, centro),
+          createHorario({ staffId: doctorId, dayOfWeek: dow, startTime: nuevo.inicio, endTime: nuevo.fin }, centro),
         ),
       );
       setNuevo(null);

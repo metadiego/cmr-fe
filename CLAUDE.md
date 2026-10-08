@@ -59,8 +59,13 @@ npm run lint         # eslint — BLOCKS in CI
 npm run typecheck    # tsc --noEmit
 npm test             # node --test (see the warning below)
 npm run format       # prettier
-npm run gen:api      # regenerates lib/api/schema.d.ts from the backend's OpenAPI
+npm run gen:api      # regenerates lib/api/schema.d.ts from the backend's OpenAPI, then englishifies it
 ```
+
+`gen:api` runs `openapi-typescript --default-non-nullable false` and then `scripts/englishify-schema.mjs`.
+The flag matters: without it, an optional BE field that has a `default` (e.g. `alcance` on services)
+is generated as REQUIRED and tsc reports drift that does not exist. Point it at prod with
+`CMR_OPENAPI_URL=https://api.centrodemedicinaregenerativa.com/api/docs-json`.
 
 **Vercel owns deployment**, not GitHub Actions. `.github/workflows/ci.yml` is only the gate:
 typecheck → lint → tests → build, on every PR and every push to `main`.

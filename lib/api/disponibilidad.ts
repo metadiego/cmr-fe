@@ -3,7 +3,22 @@ import { apiFetch } from "./client";
 
 // Doctor working hours (per-doctor, or global when medicoId is null) and
 // holidays — used to compute bookable slots and grey out unavailable days.
-export type HorarioMedico = components["schemas"]["HorarioMedicoEntity"];
+// The BE (2026-09-22, a5914ad) made schedules generic to any staff (`staff_schedules`) and its Swagger
+// declares NO response schema for GET /doctors/schedules, so this shape is written by hand from the live
+// response (verified 2026-10-08): `staffId` is the field; `doctorId` is still echoed for compatibility.
+// Asked the BE to publish it (docs/specs/swagger-gaps-and-book-multiple-validation-handoff-be.md).
+export type HorarioMedico = {
+  id: string;
+  clinicId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  staffId: string;
+  doctorId: string | null;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  active: boolean;
+};
 export type Festivo = components["schemas"]["FestivoEntity"];
 
 function asArray<T>(res: unknown): T[] {
@@ -29,7 +44,7 @@ export async function getFestivos(anio: number): Promise<Festivo[]> {
 
 // ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).
 // El día libre semanal NO es un campo: es NO tener horario ese día. Handoff agenda-dias-bloqueados-por-medico.
-export type CreateHorarioPayload = components["schemas"]["CreateHorarioMedicoDto"];
+export type CreateHorarioPayload = components["schemas"]["CreateStaffScheduleDto"];
 export function createHorario(payload: CreateHorarioPayload, centroId?: string): Promise<HorarioMedico> {
   return apiFetch<HorarioMedico>(`/doctors/schedules`, { method: "POST", body: JSON.stringify(payload) }, centroId);
 }
