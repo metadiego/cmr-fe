@@ -47498,8 +47498,8 @@ export interface components {
             autoAssignRecordOnArrival?: boolean;
             /** @description Frontdesk: true (default) = la CONSULTA médica se ve como una pestaña más junto a los servicios. Configurable por centro. */
             frontdeskShowsConsultation?: boolean;
-            /** @description Dónde va la pestaña de Consulta entre las de servicio. Null/no enviado = al final. */
-            frontdeskConsultationOrder?: number;
+            /** @description Dónde va la pestaña de Consulta entre las de servicio. Null/no enviado = al final. / Where the Consulta tab goes among the service tabs; null = last. */
+            frontdeskConsultationOrder?: number | null;
             /** @description true (default) = sugiere récord nuevo cuando la última visita atendida del paciente tiene oldRecordSuggestionYears años o más. Nunca cambia el récord solo. Configurable por centro. */
             oldRecordSuggestionEnabled?: boolean;
             /** @description Años de inactividad a partir de los cuales se sugiere récord nuevo. Default 2. */
@@ -50918,6 +50918,44 @@ export interface components {
             vitalsAt?: string;
             checkedInAt?: string;
             checkedOutAt?: string;
+        };
+        StaffScheduleResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Centro del horario. / Center this schedule belongs to. */
+            clinicId: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /**
+             * Format: uuid
+             * @description Persona del personal a la que pertenece el horario (médico, técnico, enfermera…). / Staff member this schedule belongs to.
+             */
+            staffId: string | null;
+            /**
+             * Format: uuid
+             * @deprecated
+             * @description Alias de staffId, de cuando los horarios eran solo de médicos. Usar staffId. / Alias of staffId; use staffId.
+             */
+            doctorId: string | null;
+            /**
+             * @description Día de la semana, 0 = domingo. / Day of week, 0 = Sunday.
+             * @example 1
+             */
+            dayOfWeek: number;
+            /**
+             * @description Hora de inicio HH:mm. / Start time HH:mm.
+             * @example 08:00
+             */
+            startTime: string;
+            /**
+             * @description Hora de fin HH:mm. / End time HH:mm.
+             * @example 17:00
+             */
+            endTime: string;
+            /** @description Si el horario está vigente. / Whether the schedule is active. */
+            active: boolean;
         };
         CreateStaffScheduleDto: {
             /** Format: uuid */
@@ -100078,7 +100116,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100096,12 +100134,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100127,7 +100165,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100145,12 +100183,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100176,7 +100214,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100194,12 +100232,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100225,7 +100263,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100243,12 +100281,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100266,12 +100304,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100289,12 +100327,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100312,12 +100350,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100335,12 +100373,12 @@ export interface operations {
             };
         };
         responses: {
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"][];
                 };
             };
         };
@@ -100365,7 +100403,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100409,7 +100447,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100453,7 +100491,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };
@@ -100497,7 +100535,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StaffScheduleResponseDto"];
                 };
             };
         };

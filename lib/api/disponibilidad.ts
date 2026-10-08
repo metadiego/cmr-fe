@@ -3,22 +3,7 @@ import { apiFetch } from "./client";
 
 // Doctor working hours (per-doctor, or global when medicoId is null) and
 // holidays — used to compute bookable slots and grey out unavailable days.
-// The BE (2026-09-22, a5914ad) made schedules generic to any staff (`staff_schedules`) and its Swagger
-// declares NO response schema for GET /doctors/schedules, so this shape is written by hand from the live
-// response (verified 2026-10-08): `staffId` is the field; `doctorId` is still echoed for compatibility.
-// Asked the BE to publish it (docs/specs/swagger-gaps-and-book-multiple-validation-handoff-be.md).
-export type HorarioMedico = {
-  id: string;
-  clinicId: string | null;
-  createdAt: string;
-  updatedAt: string;
-  staffId: string;
-  doctorId: string | null;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  active: boolean;
-};
+export type HorarioMedico = components["schemas"]["StaffScheduleResponseDto"];
 export type Festivo = components["schemas"]["FestivoEntity"];
 
 function asArray<T>(res: unknown): T[] {

@@ -37,12 +37,7 @@ export interface Centro {
 
 // PUT /centers/:id/tax-details — patch parcial (todos opcionales). La dirección
 // se ENVÍA como `taxAddress` (el GET la lee como `address`). RBAC centro.fiscal.write.
-// `frontdeskConsultationOrder: null` means "Consultation tab last" and the BE accepts it (IsOptional +
-// applied when !== undefined), but its Swagger declares the field as a plain number — widened here until
-// the BE marks it nullable (docs/specs/swagger-gaps-and-book-multiple-validation-handoff-be.md).
-export type DatosFiscalesPayload = Omit<components["schemas"]["UpdateDatosFiscalesDto"], "frontdeskConsultationOrder"> & {
-  frontdeskConsultationOrder?: number | null;
-};
+export type DatosFiscalesPayload = components["schemas"]["UpdateDatosFiscalesDto"];
 
 export function updateDatosFiscales(
   centroId: string,

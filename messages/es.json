@@ -1979,7 +1979,9 @@
       "enConsulta": "En consulta",
       "enServicioEsperando": "{servicio} — esperando",
       "enServicio": "En {servicio}"
-    }
+    },
+    "patientNotFound": "Ese paciente no existe en este centro.",
+    "serviceNotFound": "Algún servicio elegido no existe en este centro."
   },
   "programarCitas": {
     "title": "Programar citas",
