@@ -23,8 +23,12 @@ Ficha corta para ubicarse en un minuto. El detalle está en el runbook del hub:
   (Windows), por SMB, recurso `EPSON TM-T20II Receipt5`, usuario de impresión `cmrprint` guardado en
   el hub desde la app. Verificado en el registro del hub: login guardado 11:42 y un recibo de
   7592 bytes enviado a la caja 11:49.
-- La impresora de la mesa de pruebas (Epson en la Mac `.199`, cola `EPSON_TM_T20II`, IPP) sigue
-  disponible para pruebas.
+- Desde el 9-oct el centro tiene **varias impresoras** (Configuración → Apariencia corporativa →
+  «Impresoras de este centro»); cada equipo elige la suya en el recibo («Imprime en»).
+  Caguas: **«Principal»** = caja `.100`; **«lab-test»** = Epson de la Mac de pruebas `.199` (IPP,
+  `EPSON_TM_T20II`), solo para pruebas.
+- **Pendiente:** la impresora real de **Facturación** de Caguas (crear `cmrprint` en ese equipo,
+  compartir la impresora, IP) cuando su usuaria dé una ventana de tiempo.
 
 ## Lo de todos los días
 
