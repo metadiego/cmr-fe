@@ -161,7 +161,7 @@ export function AjusteModal({
 
   const sinAlmacen = !objetivo.almacenId
   const puedeGuardar = porViales
-    ? !guardando && !sinAlmacen && payloadViales !== null
+    ? !guardando && !sinAlmacen && payloadViales !== null && notas.trim() !== ""
     : !guardando &&
       !sinAlmacen &&
       notas.trim() !== "" &&
@@ -175,7 +175,10 @@ export function AjusteModal({
     if (porViales) {
       if (!payloadViales) return setGuardando(false)
       try {
-        const r = await contarExistencias(payloadViales, centro)
+        const r = await contarExistencias(
+          { ...payloadViales, notes: notas.trim() },
+          centro
+        )
         toast.success(
           r.difference === 0
             ? t("sinDiferencia")
@@ -385,21 +388,17 @@ export function AjusteModal({
                 {t("vialesSinVista")}
               </p>
             )}
-            {!porViales && (
-              <div className="space-y-2">
-                <Label htmlFor="aj-notas">{t("notas")}</Label>
-                <Textarea
-                  id="aj-notas"
-                  value={notas}
-                  onChange={(e) => setNotas(e.target.value)}
-                  placeholder={t("notasPlaceholder")}
-                  rows={2}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t("notasAyuda")}
-                </p>
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="aj-notas">{t("notas")}</Label>
+              <Textarea
+                id="aj-notas"
+                value={notas}
+                onChange={(e) => setNotas(e.target.value)}
+                placeholder={t("notasPlaceholder")}
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground">{t("notasAyuda")}</p>
+            </div>
           </div>
         )}
 

@@ -51503,11 +51503,53 @@ export interface components {
             countedQuantity?: number;
             /** @description Envases cerrados por presentación (p. ej. 16 viales de 60 mg y 10 de 62.5 mg). Se convierten solos a la medida base. / Closed packages per presentation, converted to the base measure. */
             containers?: components["schemas"]["EnvaseContadoDto"][];
+            /**
+             * @description Por qué del conteo; encabeza la nota del ajuste que genera. / Reason of the count; it heads the note of the adjustment it generates.
+             * @example Conteo mensual; 2 viales rotos
+             */
+            notes?: string;
             /** Format: uuid */
             productId: string;
             /** Format: uuid */
             warehouseId: string;
             effectiveDate?: string;
+        };
+        CountBreakdownLineDto: {
+            /** Format: uuid */
+            presentationId: string;
+            /** @example Vial 60 mg / 3 mL */
+            presentation: string;
+            /**
+             * @description Closed packages counted.
+             * @example 16
+             */
+            containers: number;
+            /**
+             * @description Those packages in the product base measure.
+             * @example 960
+             */
+            inBaseMeasure: number;
+        };
+        PhysicalCountResponseDto: {
+            /**
+             * @description Counted, in the product base measure.
+             * @example 1585
+             */
+            contado: number;
+            /**
+             * @description What the system held before the count.
+             * @example 1585
+             */
+            sistema: number;
+            /**
+             * @description contado − sistema; 0 = no adjustment was made.
+             * @example 0
+             */
+            difference: number;
+            /** @description The adjustment movement generated when there is a difference. */
+            ajuste?: Record<string, never>;
+            /** @description Only when the count came in packages (`containers`). */
+            breakdown?: components["schemas"]["CountBreakdownLineDto"][];
         };
         ReglaDescargaEntity: {
             productId: string;
@@ -91837,7 +91879,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91860,7 +91902,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91883,7 +91925,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91906,7 +91948,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91929,7 +91971,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91952,7 +91994,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91975,7 +92017,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
@@ -91998,7 +92040,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PhysicalCountResponseDto"];
                 };
             };
         };
