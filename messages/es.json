@@ -2896,7 +2896,8 @@
         "disconnected": "Impresora apagada o desconectada.",
         "missing": "La impresora configurada no existe en ese equipo.",
         "unreachable": "El equipo de la impresora no responde."
-      }
+      },
+      "backupPrinterOn": "Imprime en"
     },
     "noMatches": "No hay nada con ese texto",
     "descuentoPctPasa100": "Un porcentaje no pasa de 100 (escribiste {valor}).",
@@ -3946,7 +3947,20 @@
     "loginRejected": "La caja rechazó ese usuario o contraseña. Revísalos en la caja.",
     "loginForbidden": "El hub no aceptó tu sesión: {detail}",
     "loginError": "No se pudo hablar con el hub: {detail}",
-    "loginNoSession": "Tu sesión expiró: vuelve a entrar a la app."
+    "loginNoSession": "Tu sesión expiró: vuelve a entrar a la app.",
+    "printersTitle": "Impresoras de este centro",
+    "printersHelp": "Una por puesto (p. ej. Recepción, Facturación). Cada equipo elige la suya una vez en el recibo («Imprime en») y se recuerda en ese navegador.",
+    "printersEmpty": "Todavía no hay impresoras. Añade la primera.",
+    "printerAdd": "Añadir impresora",
+    "printerName": "Nombre",
+    "printerNamePlaceholder": "Recepción, Facturación…",
+    "printerSave": "Guardar impresora",
+    "printerCreate": "Crear impresora",
+    "printerRemove": "Quitar impresora",
+    "printerDiscard": "Descartar",
+    "printerSaved": "Impresora «{name}» guardada.",
+    "printerRemoved": "Impresora «{name}» quitada.",
+    "printerRemoveConfirm": "¿Quitar la impresora «{name}»? Los equipos que la usaban pasarán a la primera de la lista."
   },
   "numeracion": {
     "title": "Numeración de documentos",
@@ -4564,7 +4578,10 @@
     "invalidUrl": "Alguna URL de hub no es válida: debe ser completa, como https://host:puerto/print-raw.",
     "invalidProtocol": "El protocolo debe ser ipp (Linux/Mac) o smb (Windows).",
     "invalidPort": "El puerto debe ser un número entre 1 y 65535.",
-    "notFound": "Este centro no tiene configurado un hub de impresión de respaldo."
+    "notFound": "Este centro no tiene configurado un hub de impresión de respaldo.",
+    "printerNameRequired": "Ponle un nombre a la impresora.",
+    "duplicatePrinterName": "Ya hay una impresora con ese nombre en este centro.",
+    "printerNotFound": "Esa impresora ya no existe."
   },
   "invoiceReopen": {
     "action": "Reabrir",

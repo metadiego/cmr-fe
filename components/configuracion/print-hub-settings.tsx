@@ -6,19 +6,10 @@ import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon } from "@hugeicons/core-free-icons";
 
-import { deletePrintHub, getPrintHub, setPrintHub } from "@/lib/api/print-hub";
+import { deletePrintHub, getPrintHub, setPrintHub, type CenterPrinter } from "@/lib/api/print-hub";
 import { apiErrorLabel } from "@/lib/api/errors";
-import {
-  DEFAULT_PORTS,
-  buildHubDiscoverUrl,
-  buildHubRequestUrl,
-  buildHubRequestUrls,
-  hubOrigin,
-  type HubDiscovery,
-  type PrintHubProtocol,
-} from "@/lib/print/hub-target";
-import { sendToHubs, testTicketToEscPos } from "@/lib/print/hub";
-import { PrintHubLogin } from "@/components/configuracion/print-hub-login";
+import { hubOrigin } from "@/lib/print/hub-target";
+import { PrintHubPrinterCard } from "@/components/configuracion/print-hub-printer-card";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,17 +23,12 @@ interface Props {
 }
 
 type Link = "checking" | "ok" | "fail";
-type Discovery = { kind: "idle" } | { kind: "busy" } | { kind: "done"; value: HubDiscovery } | { kind: "fail"; message: string };
 interface Form {
   enabled: boolean;
   hubUrls: string[];
-  protocol: PrintHubProtocol;
-  printerHost: string;
-  printerPort: string;
-  printerQueue: string;
 }
 
-const EMPTY: Form = { enabled: true, hubUrls: [""], protocol: "ipp", printerHost: "", printerPort: String(DEFAULT_PORTS.ipp), printerQueue: "" };
+const EMPTY: Form = { enabled: true, hubUrls: [""] };
 
 // Is this browser able to reach the hub? With a self-signed certificate "no" almost always means it has
 // not been accepted on this machine yet. The hub answers GET / with CORS.
@@ -52,13 +38,12 @@ const probe = (url: string): Promise<Link> => {
 };
 
 // Per-center backup print configuration (BE /print-hubs). The screen does on sight what used to be
-// manual: an ordered list of hubs (central first, then e.g. one on the printer's own machine so it keeps
-// printing if the central one is down), whether this browser reaches each one plus the link to accept
-// its certificate, Detect on the printer machine's IP, and a test print through the same cascade the
-// invoice uses. Mount with key={centerId}.
+// manual: the center's hubs in order (the branch server first, the emergency one after), whether this
+// browser reaches each one plus the link to accept its certificate, and the center's LIST of receipt
+// printers (Reception, Billing…), each with Detect, the Windows PC's login and a test print. Each
+// machine then picks its printer in the receipt modal. Mount with key={centerId}.
 export function PrintHubSettings({ centerId, centerName }: Props) {
   const t = useTranslations("aparienciaCorporativa");
-  const tReceipt = useTranslations("receipt");
   const tRoot = useTranslations();
   const { can } = useCan();
   const canRead = can("print-hub.read") || can("*");
@@ -69,8 +54,9 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
   const [exists, setExists] = React.useState(false);
   const [form, setForm] = React.useState<Form>(EMPTY);
   const [links, setLinks] = React.useState<Record<string, Link>>({});
-  const [discovery, setDiscovery] = React.useState<Discovery>({ kind: "idle" });
-  const [busy, setBusy] = React.useState<"save" | "test" | "delete" | null>(null);
+  const [printers, setPrinters] = React.useState<CenterPrinter[]>([]);
+  const [drafts, setDrafts] = React.useState<number[]>([]);
+  const [busy, setBusy] = React.useState<"save" | "delete" | null>(null);
 
   React.useEffect(() => {
     if (!canRead) return;
@@ -80,14 +66,8 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
         if (!active) return;
         setExists(!!h);
         if (h) {
-          setForm({
-            enabled: h.enabled,
-            hubUrls: h.hubUrls.length ? h.hubUrls : [""],
-            protocol: (h.protocol as PrintHubProtocol) || "ipp",
-            printerHost: h.printerHost ?? "",
-            printerPort: String(h.printerPort ?? DEFAULT_PORTS.ipp),
-            printerQueue: h.printerQueue ?? "",
-          });
+          setForm({ enabled: h.enabled, hubUrls: h.hubUrls.length ? h.hubUrls : [""] });
+          setPrinters(h.printers ?? []);
         }
         setLoad("ok");
       })
@@ -116,8 +96,6 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
 
   if (!canRead) return null;
 
-  const setField = (k: "printerHost" | "printerPort" | "printerQueue") => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
   const setHub = (i: number, v: string) => setForm((f) => ({ ...f, hubUrls: f.hubUrls.map((u, j) => (j === i ? v : u)) }));
   const moveHub = (i: number, d: -1 | 1) =>
     setForm((f) => {
@@ -128,61 +106,16 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
   const removeHub = (i: number) => setForm((f) => ({ ...f, hubUrls: f.hubUrls.filter((_, j) => j !== i) }));
 
   const cleanHubs = form.hubUrls.map((u) => u.trim()).filter(Boolean);
-  const requestUrls = buildHubRequestUrls({ ...form, hubUrls: cleanHubs, enabled: true });
   const discoverHub = cleanHubs.find((u) => links[u] === "ok") ?? cleanHubs[0];
-
-  async function detect() {
-    const url = buildHubDiscoverUrl(discoverHub, form.printerHost);
-    if (!url) return;
-    setDiscovery({ kind: "busy" });
-    try {
-      const res = await fetch(url, { cache: "no-store" });
-      const value = (await res.json()) as HubDiscovery & { error?: string };
-      if (!res.ok) throw new Error(value.error ?? `hub ${res.status}`);
-      setDiscovery({ kind: "done", value });
-      if (value.protocol && value.port) {
-        const protocol = value.protocol;
-        setForm((f) => ({
-          ...f,
-          protocol,
-          printerPort: String(value.port),
-          printerQueue: value.printers.includes(f.printerQueue) ? f.printerQueue : value.printers.length === 1 ? value.printers[0] : f.printerQueue,
-        }));
-      }
-    } catch (e) {
-      setDiscovery({ kind: "fail", message: e instanceof Error ? e.message : String(e) });
-    }
-  }
 
   async function save() {
     setBusy("save");
     try {
-      await setPrintHub(centerId, {
-        enabled: form.enabled,
-        hubUrls: cleanHubs,
-        protocol: form.protocol,
-        printerHost: form.printerHost.trim() || undefined,
-        printerPort: form.printerPort.trim() ? Number(form.printerPort) : undefined,
-        printerQueue: form.printerQueue.trim() || undefined,
-      });
+      await setPrintHub(centerId, { enabled: form.enabled, hubUrls: cleanHubs, protocol: printers[0]?.protocol ?? "ipp" });
       setExists(true);
       toast.success(t("hubSaved"));
     } catch (e) {
       toast.error(apiErrorLabel(e, tRoot));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function test() {
-    if (requestUrls.length === 0) return toast.error(t("hubIncomplete"));
-    setBusy("test");
-    try {
-      const stamp = new Date().toISOString().slice(0, 19).replace("T", " ");
-      const i = await sendToHubs(requestUrls, testTicketToEscPos([tReceipt("hubTestTitle"), centerName, form.printerQueue, stamp]));
-      toast.success(t("hubTestSentVia", { hub: new URL(requestUrls[i]).host }));
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(null);
     }
@@ -195,7 +128,7 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
       await deletePrintHub(centerId);
       setExists(false);
       setForm(EMPTY);
-      setDiscovery({ kind: "idle" });
+      setPrinters([]);
       toast.success(t("hubRemoved"));
     } catch (e) {
       toast.error(apiErrorLabel(e, tRoot));
@@ -204,7 +137,6 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
     }
   }
 
-  const found = discovery.kind === "done" ? discovery.value : null;
 
   return (
     <div className="mt-6 space-y-4 border-t pt-4">
@@ -268,84 +200,66 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
             </Button>
           </div>
 
-          {/* 2. Machine that shares the printer → detect */}
-          <div className="space-y-1.5">
-            <Label htmlFor="ph-host">{t("printerHost")}</Label>
-            <div className="flex gap-2">
-              <Input id="ph-host" value={form.printerHost} onChange={setField("printerHost")} placeholder={t("printerHostPlaceholder")} />
-              <Button type="button" variant="outline" onClick={detect} disabled={discovery.kind === "busy" || !buildHubDiscoverUrl(discoverHub, form.printerHost)}>
-                {discovery.kind === "busy" ? t("hubDetecting") : t("hubDetect")}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">{t("printerHostHelp")}</p>
-            {discovery.kind === "fail" && <p className="text-xs text-destructive">{discovery.message}</p>}
-            {found && (
-              <div className="space-y-2 rounded-md border bg-muted/40 px-3 py-2 text-xs">
-                <p>
-                  <span className="font-medium">
-                    {found.system === "windows" ? t("hubSystemWindows") : found.system === "linux-mac" ? t("hubSystemLinuxMac") : t("hubSystemNone")}
-                  </span>
-                  {found.port ? ` · ${t("printerPort")} ${found.port}` : ""}
-                </p>
-                {found.printers.length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {found.printers.map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, printerQueue: p }))}
-                        className={cn("rounded-full border px-2.5 py-0.5", form.printerQueue === p ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-accent")}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                  </div>
-                ) : found.needsLogin ? null : (
-                  <p className="text-muted-foreground">{found.system ? t("hubNoSharedPrinters") : found.error}</p>
-                )}
-                {/* Windows PC: its login is handed to the hub from here (stored only on the hub). */}
-                {found.system === "windows" && canEdit && (
-                  <PrintHubLogin
-                    key={`${found.host}-${!!found.needsLogin}`}
-                    hubUrl={discoverHub}
-                    host={found.host}
-                    centerId={centerId}
-                    required={!!found.needsLogin}
-                    onSaved={(printers) => setDiscovery({ kind: "done", value: { ...found, printers, needsLogin: false, error: null } })}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 3. Port + queue, filled by Detect, still editable */}
-          <div className="grid gap-3 sm:grid-cols-[8rem_1fr]">
-            <div className="space-y-1.5">
-              <Label htmlFor="ph-port">{t("printerPort")}</Label>
-              <Input id="ph-port" inputMode="numeric" value={form.printerPort} onChange={setField("printerPort")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="ph-queue">{form.protocol === "smb" ? t("printerShare") : t("printerQueue")}</Label>
-              <Input id="ph-queue" value={form.printerQueue} onChange={setField("printerQueue")} placeholder={t("printerQueuePlaceholder")} />
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">{form.protocol === "smb" ? t("printerHelpWindows") : t("printerHelpLinuxMac")}</p>
         </fieldset>
       )}
 
       {load === "ok" && (
         <div className="flex flex-wrap gap-2">
           {canEdit && (
-            <Button size="sm" onClick={save} disabled={busy !== null || (form.enabled && !buildHubRequestUrl(cleanHubs[0], form))}>
+            <Button size="sm" onClick={save} disabled={busy !== null || cleanHubs.length === 0}>
               {busy === "save" ? t("saving") : t("hubSave")}
             </Button>
           )}
-          <Button size="sm" variant="outline" onClick={test} disabled={busy !== null || requestUrls.length === 0}>
-            {busy === "test" ? t("hubTesting") : t("hubTest")}
-          </Button>
           {canDelete && exists && (
             <Button size="sm" variant="ghost" className="text-destructive" onClick={remove} disabled={busy !== null}>
               {busy === "delete" ? t("saving") : t("hubRemove")}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* 2. The center's printers; each machine picks one in the receipt modal. */}
+      {load === "ok" && exists && (
+        <div className="space-y-3 border-t pt-4">
+          <div>
+            <h4 className="text-sm font-medium">{t("printersTitle")}</h4>
+            <p className="text-xs text-muted-foreground">{t("printersHelp")}</p>
+          </div>
+          {printers.map((p) => (
+            <PrintHubPrinterCard
+              key={p.id}
+              centerId={centerId}
+              centerName={centerName}
+              printer={p}
+              hubUrls={cleanHubs}
+              discoverHub={discoverHub}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onSaved={(saved) => setPrinters((list) => list.map((x) => (x.id === saved.id ? saved : x)))}
+              onDeleted={() => setPrinters((list) => list.filter((x) => x.id !== p.id))}
+            />
+          ))}
+          {drafts.map((d) => (
+            <PrintHubPrinterCard
+              key={`draft-${d}`}
+              centerId={centerId}
+              centerName={centerName}
+              printer={null}
+              hubUrls={cleanHubs}
+              discoverHub={discoverHub}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onSaved={(saved) => {
+                setPrinters((list) => [...list, saved]);
+                setDrafts((ds) => ds.filter((x) => x !== d));
+              }}
+              onDeleted={() => setDrafts((ds) => ds.filter((x) => x !== d))}
+            />
+          ))}
+          {printers.length === 0 && drafts.length === 0 && <p className="text-sm text-muted-foreground">{t("printersEmpty")}</p>}
+          {canEdit && (
+            <Button type="button" variant="outline" size="sm" onClick={() => setDrafts((ds) => [...ds, Date.now()])}>
+              {t("printerAdd")}
             </Button>
           )}
         </div>

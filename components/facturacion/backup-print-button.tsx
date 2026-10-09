@@ -4,8 +4,9 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { getPrintHubForPrinting } from "@/lib/api/print-hub";
+import { getPrintHubForPrinting, type PrintHubForPrinting } from "@/lib/api/print-hub";
 import { buildHubRequestUrls, hubOrigin, hubStatusUrl } from "@/lib/print/hub-target";
+import { pickPrinter, readPrinterChoice, savePrinterChoice } from "@/lib/print/printer-choice";
 import { checkHubs, sendToHubs, type HubHealth } from "@/lib/print/hub";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,8 @@ type Health = { kind: "checking" } | HubHealth;
 export function BackupPrintButton({ centerId, buildBytes }: Props) {
   const t = useTranslations("facturacion.print");
   const tRoot = useTranslations();
-  const [requestUrls, setRequestUrls] = React.useState<string[]>([]);
+  const [hub, setHub] = React.useState<PrintHubForPrinting | null>(null);
+  const [printerId, setPrinterId] = React.useState<string | null>(null);
   const [health, setHealth] = React.useState<Health>({ kind: "checking" });
   const [busy, setBusy] = React.useState(false);
   const [round, setRound] = React.useState(0);
@@ -36,12 +38,25 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
     if (!centerId) return;
     let active = true;
     getPrintHubForPrinting(centerId)
-      .then((hub) => active && setRequestUrls(buildHubRequestUrls(hub)))
-      .catch(() => active && setRequestUrls([]));
+      .then((h) => {
+        if (!active) return;
+        setHub(h);
+        setPrinterId(pickPrinter(h.printers ?? [], readPrinterChoice(centerId))?.id ?? null);
+      })
+      .catch(() => active && setHub(null));
     return () => {
       active = false;
     };
   }, [centerId]);
+
+  // The center's printers; this machine prints on the one it chose (remembered in this browser).
+  const printers = hub?.enabled ? (hub.printers ?? []) : [];
+  const printer = pickPrinter(printers, printerId);
+  const requestUrls = React.useMemo(
+    () => (hub && printer ? buildHubRequestUrls({ enabled: hub.enabled, hubUrls: hub.hubUrls, ...printer }) : []),
+    [hub, printer],
+  );
+  const urlsKey = requestUrls.join("\n");
 
   React.useEffect(() => {
     if (requestUrls.length === 0) return;
@@ -50,9 +65,17 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
     return () => {
       active = false;
     };
-  }, [requestUrls, round]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- urlsKey is requestUrls' identity
+  }, [urlsKey, round]);
 
   if (requestUrls.length === 0) return <span />;
+
+  function choose(id: string) {
+    if (!centerId) return;
+    savePrinterChoice(centerId, id);
+    setPrinterId(id);
+    setHealth({ kind: "checking" });
+  }
 
   function retry() {
     setHealth({ kind: "checking" });
@@ -86,6 +109,23 @@ export function BackupPrintButton({ centerId, buildBytes }: Props) {
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-0.5">
+      {printers.length > 1 && printer && (
+        <label className="flex items-center gap-1.5 px-3 text-[11px] text-muted-foreground">
+          {t("backupPrinterOn")}
+          <select
+            value={printer.id}
+            onChange={(e) => choose(e.target.value)}
+            className="rounded border bg-background px-1 py-0.5 text-[11px] text-foreground"
+            aria-label={t("backupPrinterOn")}
+          >
+            {printers.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <Button
         variant="ghost"
         size="sm"

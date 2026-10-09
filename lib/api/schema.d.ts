@@ -47785,7 +47785,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Configuración del hub de respaldo de los centros pedidos. / Backup print hub configuration for the requested centers.
+         * Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47806,7 +47806,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Configuración del hub de respaldo de los centros pedidos. / Backup print hub configuration for the requested centers.
+         * Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only).
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47826,7 +47826,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Configuración del hub de respaldo de los centros pedidos. / Backup print hub configuration for the requested centers. */
+        /** Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only). */
         get: operations["PrintHubController_list[2]_v2"];
         put?: never;
         post?: never;
@@ -47843,11 +47843,363 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Configuración del hub de respaldo de los centros pedidos. / Backup print hub configuration for the requested centers. */
+        /** Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only). */
         get: operations["PrintHubController_list[3]_v2"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[0]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[1]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[2]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[3]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[4]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[5]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[6]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[7]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[0]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[1]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[2]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[2]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[3]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[3]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[4]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[4]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[5]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[5]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[6]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[6]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[7]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[7]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -47861,7 +48213,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Configuración del hub de respaldo de un centro. / Backup print hub configuration for one center.
+         * Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47892,7 +48244,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Configuración del hub de respaldo de un centro. / Backup print hub configuration for one center.
+         * Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -47922,7 +48274,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Configuración del hub de respaldo de un centro. / Backup print hub configuration for one center. */
+        /** Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers. */
         get: operations["PrintHubController_get[2]_v2"];
         /** Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration. */
         put: operations["PrintHubController_set[2]_v2"];
@@ -47941,7 +48293,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Configuración del hub de respaldo de un centro. / Backup print hub configuration for one center. */
+        /** Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers. */
         get: operations["PrintHubController_get[3]_v2"];
         /** Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration. */
         put: operations["PrintHubController_set[3]_v2"];
@@ -53189,6 +53541,136 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        PrinterResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Center that owns it. */
+            clinicId: string;
+            /** @example Facturación */
+            name: string;
+            /** @enum {string} */
+            protocol: "ipp" | "smb";
+            printerHost: string | null;
+            /** @example 445 */
+            printerPort: number;
+            /** @example EPSON TM-T20II Receipt5 */
+            printerQueue: string;
+            /** @example 0 */
+            sortOrder: number;
+            /** @example true */
+            active: boolean;
+            /** Format: uuid */
+            updatedBy: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreatePrinterDto: {
+            /**
+             * @description Nombre con el que cada equipo la elige; único por centro. / Name each machine picks it by; unique per center.
+             * @example Facturación
+             */
+            name: string;
+            /**
+             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS) o 'smb' (compartida desde Windows). / How the hub reaches the printer.
+             * @example smb
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /**
+             * @description IP o nombre del equipo que la tiene conectada y compartida. / IP or hostname of the machine sharing it.
+             * @example 192.130.80.100
+             */
+            printerHost: string;
+            /**
+             * @description Puerto; si falta, 631 (ipp) o 445 (smb). / Port; defaults to 631 (ipp) or 445 (smb).
+             * @example 445
+             */
+            printerPort?: number;
+            /**
+             * @description Cola de CUPS (ipp) o recurso compartido de Windows (smb), con la misma regla que el hub. / CUPS queue or Windows share name, validated like the hub does.
+             * @example EPSON TM-T20II Receipt5
+             */
+            printerQueue: string;
+            /**
+             * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
+             * @example 1
+             */
+            sortOrder?: number;
+            /**
+             * @description Si se ofrece al imprimir (default true). / Whether it is offered when printing (default true).
+             * @example true
+             */
+            active?: boolean;
+        };
+        UpdatePrinterDto: {
+            /**
+             * @description Nombre con el que cada equipo la elige; único por centro. / Name each machine picks it by; unique per center.
+             * @example Facturación
+             */
+            name?: string;
+            /**
+             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS) o 'smb' (compartida desde Windows). / How the hub reaches the printer.
+             * @example smb
+             * @enum {string}
+             */
+            protocol?: "ipp" | "smb";
+            /**
+             * @description IP o nombre del equipo que la tiene conectada y compartida. / IP or hostname of the machine sharing it.
+             * @example 192.130.80.100
+             */
+            printerHost?: string;
+            /**
+             * @description Puerto; si falta, 631 (ipp) o 445 (smb). / Port; defaults to 631 (ipp) or 445 (smb).
+             * @example 445
+             */
+            printerPort?: number;
+            /**
+             * @description Cola de CUPS (ipp) o recurso compartido de Windows (smb), con la misma regla que el hub. / CUPS queue or Windows share name, validated like the hub does.
+             * @example EPSON TM-T20II Receipt5
+             */
+            printerQueue?: string;
+            /**
+             * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
+             * @example 1
+             */
+            sortOrder?: number;
+            /**
+             * @description Si se ofrece al imprimir (default true). / Whether it is offered when printing (default true).
+             * @example true
+             */
+            active?: boolean;
+        };
+        PrinterDeletedResponseDto: {
+            /** @example true */
+            deleted: boolean;
+        };
+        PrintHubResponseDto: {
+            /** Format: uuid */
+            id: string;
+            clinicId: string;
+            enabled: boolean;
+            hubUrls: string[];
+            printers: components["schemas"]["PrinterResponseDto"][];
+            /**
+             * @description Transitional.
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /** @description Transitional. */
+            printerHost: string | null;
+            /** @description Transitional. */
+            printerPort: number | null;
+            /** @description Transitional. */
+            printerQueue: string | null;
+            /** Format: uuid */
+            updatedBy: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         SetPrintHubDto: {
             /**
              * @description Si se ofrece el botón de impresión de respaldo para las facturas de este centro. / Whether the backup print button is offered for this center.
@@ -53224,6 +53706,35 @@ export interface components {
              * @example TM-T20II-RAW
              */
             printerQueue?: string;
+        };
+        PrinterForPrintingDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Recepción */
+            name: string;
+            /** @enum {string} */
+            protocol: "ipp" | "smb";
+            printerHost: string | null;
+            /** @example 445 */
+            printerPort: number;
+            /** @example EPSON TM-T20II Receipt5 */
+            printerQueue: string;
+        };
+        MyPrintHubResponseDto: {
+            enabled: boolean;
+            hubUrls: string[];
+            printers: components["schemas"]["PrinterForPrintingDto"][];
+            /**
+             * @description Transitional: first active printer.
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /** @description Transitional. */
+            printerHost: string | null;
+            /** @description Transitional. */
+            printerPort: number | null;
+            /** @description Transitional. */
+            printerQueue: string | null;
         };
         CreateApiKeyDto: {
             name: string;
@@ -122319,6 +122830,758 @@ export interface operations {
             };
         };
     };
+    "PrintHubController_listPrinters[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
     "PrintHubController_get[0]_v1": {
         parameters: {
             query?: never;
@@ -122335,7 +123598,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
                 };
             };
         };
@@ -122400,7 +123663,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
                 };
             };
         };
@@ -122465,7 +123728,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
                 };
             };
         };
@@ -122530,7 +123793,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
                 };
             };
         };
@@ -122593,7 +123856,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
                 };
             };
         };
@@ -122612,7 +123875,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
                 };
             };
         };
@@ -122631,7 +123894,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
                 };
             };
         };
@@ -122650,7 +123913,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
                 };
             };
         };

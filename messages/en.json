@@ -2896,7 +2896,8 @@
         "disconnected": "Printer off or unplugged.",
         "missing": "The configured printer does not exist on that machine.",
         "unreachable": "The printer's machine is not answering."
-      }
+      },
+      "backupPrinterOn": "Prints on"
     },
     "noMatches": "Nothing matches that text",
     "descuentoPctPasa100": "A percentage can't exceed 100 (you typed {valor}).",
@@ -3946,7 +3947,20 @@
     "loginRejected": "The PC rejected that user or password. Check them on the PC.",
     "loginForbidden": "The hub did not accept your session: {detail}",
     "loginError": "Could not reach the hub: {detail}",
-    "loginNoSession": "Your session expired: sign in to the app again."
+    "loginNoSession": "Your session expired: sign in to the app again.",
+    "printersTitle": "Printers of this center",
+    "printersHelp": "One per station (e.g. Reception, Billing). Each machine picks its own once on the receipt («Prints on») and it is remembered in that browser.",
+    "printersEmpty": "No printers yet. Add the first one.",
+    "printerAdd": "Add printer",
+    "printerName": "Name",
+    "printerNamePlaceholder": "Reception, Billing…",
+    "printerSave": "Save printer",
+    "printerCreate": "Create printer",
+    "printerRemove": "Remove printer",
+    "printerDiscard": "Discard",
+    "printerSaved": "Printer «{name}» saved.",
+    "printerRemoved": "Printer «{name}» removed.",
+    "printerRemoveConfirm": "Remove printer «{name}»? Machines that used it will move to the first one in the list."
   },
   "numeracion": {
     "title": "Document numbering",
@@ -4564,7 +4578,10 @@
     "invalidUrl": "A hub URL is not valid: it must be complete, like https://host:port/print-raw.",
     "invalidProtocol": "The protocol must be ipp (Linux/Mac) or smb (Windows).",
     "invalidPort": "The port must be a number between 1 and 65535.",
-    "notFound": "This center has no backup print hub configured."
+    "notFound": "This center has no backup print hub configured.",
+    "printerNameRequired": "Give the printer a name.",
+    "duplicatePrinterName": "There is already a printer with that name in this center.",
+    "printerNotFound": "That printer no longer exists."
   },
   "invoiceReopen": {
     "action": "Reopen",
