@@ -1,20 +1,30 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import * as React from "react"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 import {
   ajustarExistencias,
   listMotivosMovimiento,
+  listPresentaciones,
+  listUnidades,
   type MotivoMovimiento,
-} from "@/lib/api/inventario";
-import { apiErrorMessage } from "@/lib/api/errors";
-import { ajusteDesdeConteo, deltaDelConteo } from "@/lib/inventario/ajuste";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/lib/api/inventario"
+import { contarExistencias } from "@/lib/api/inventory-count"
+import { apiErrorLabel } from "@/lib/api/errors"
+import { ajusteDesdeConteo, deltaDelConteo } from "@/lib/inventario/ajuste"
+import {
+  conteoPayload,
+  presentacionesContables,
+  totalEnBase,
+  type PresentacionContable,
+} from "@/lib/inventario/conteo-viales"
+import { ConteoViales } from "@/components/inventario/conteo-viales"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -22,14 +32,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 
 // AJUSTE DE EXISTENCIAS. Dos formas de decir lo mismo, y la gente usa la segunda:
 //   · «entra/sale N» (rotura, merma, vencimiento) → cantidad + signo
@@ -39,14 +49,16 @@ import {
 // base, aparece solo. See cmr-be/docs/specs/ajuste-de-inventario-handoff-fe.md
 
 export interface AjusteObjetivo {
-  productoId: string;
-  nombre: string;
-  almacenId: string | null;
-  almacenNombre?: string | null;
-  stockActual: number;
+  productoId: string
+  nombre: string
+  almacenId: string | null
+  almacenNombre?: string | null
+  stockActual: number
+  /** Clave de la unidad del stock (mg, ml…): rotula «Abierto (mg)» y decide si se puede previsualizar. */
+  unidad?: string | null
 }
 
-type Modo = "movimiento" | "conteo";
+type Modo = "movimiento" | "conteo"
 
 export function AjusteModal({
   objetivo,
@@ -54,80 +66,138 @@ export function AjusteModal({
   onClose,
   onHecho,
 }: {
-  objetivo: AjusteObjetivo;
-  centro?: string | null;
-  onClose: () => void;
-  onHecho: () => void;
+  objetivo: AjusteObjetivo
+  centro?: string | null
+  onClose: () => void
+  onHecho: () => void
 }) {
-  const t = useTranslations("inventarioAjuste");
-  const [motivos, setMotivos] = React.useState<MotivoMovimiento[]>([]);
-  const [modo, setModo] = React.useState<Modo>("movimiento");
-  const [motivo, setMotivo] = React.useState("");
-  const [cantidad, setCantidad] = React.useState("");
-  const [signo, setSigno] = React.useState<"positivo" | "negativo">("negativo");
-  const [contado, setContado] = React.useState("");
-  const [notas, setNotas] = React.useState("");
-  const [guardando, setGuardando] = React.useState(false);
+  const t = useTranslations("inventarioAjuste")
+  const tRoot = useTranslations()
+  const [motivos, setMotivos] = React.useState<MotivoMovimiento[]>([])
+  const [modo, setModo] = React.useState<Modo>("movimiento")
+  const [motivo, setMotivo] = React.useState("")
+  const [cantidad, setCantidad] = React.useState("")
+  const [signo, setSigno] = React.useState<"positivo" | "negativo">("negativo")
+  const [contado, setContado] = React.useState("")
+  const [notas, setNotas] = React.useState("")
+  const [guardando, setGuardando] = React.useState(false)
+  // Count by vials: the product's presentations with content, and the id of the stock unit (to know
+  // whether the vial content can be added up here). Without such presentations the count is as before.
+  const [viales, setViales] = React.useState<PresentacionContable[]>([])
+  const [unidadBaseId, setUnidadBaseId] = React.useState<string | null>(null)
+  const [cerrados, setCerrados] = React.useState<Record<string, string>>({})
+  const [abiertos, setAbiertos] = React.useState("")
 
   React.useEffect(() => {
-    let vivo = true;
+    let vivo = true
+    Promise.all([
+      listPresentaciones(objetivo.productoId, centro ?? undefined),
+      listUnidades(),
+    ])
+      .then(([ps, us]) => {
+        if (!vivo) return
+        setViales(presentacionesContables(ps))
+        const clave = objetivo.unidad?.toLowerCase()
+        setUnidadBaseId(
+          us.find((u) => u.slug.toLowerCase() === clave)?.id ?? null
+        )
+      })
+      .catch(() => vivo && setViales([]))
+    return () => {
+      vivo = false
+    }
+  }, [objetivo.productoId, objetivo.unidad, centro])
+  const porViales = modo === "conteo" && viales.length > 0
+  const totalViales = porViales
+    ? totalEnBase(viales, cerrados, abiertos, unidadBaseId)
+    : null
+  const payloadViales =
+    porViales && objetivo.almacenId
+      ? conteoPayload({
+          productId: objetivo.productoId,
+          warehouseId: objetivo.almacenId,
+          presentaciones: viales,
+          cerrados,
+          abiertos,
+        })
+      : null
+
+  React.useEffect(() => {
+    let vivo = true
     listMotivosMovimiento(centro)
       .then((ms) => {
-        if (!vivo) return;
-        const activos = ms.filter((m) => m.active !== false);
-        setMotivos(activos);
+        if (!vivo) return
+        const activos = ms.filter((m) => m.active !== false)
+        setMotivos(activos)
       })
-      .catch(() => setMotivos([]));
+      .catch(() => setMotivos([]))
     return () => {
-      vivo = false;
-    };
-  }, [centro]);
+      vivo = false
+    }
+  }, [centro])
 
   // El conteo físico tiene su propio motivo en el catálogo: no se elige a mano.
   const motivosVisibles = React.useMemo(
     () => motivos.filter((m) => m.slug !== "conteo_fisico"),
-    [motivos],
-  );
+    [motivos]
+  )
 
-  const nContado = Number(contado);
+  const nContado = Number(contado)
   const deltaConteo =
     modo === "conteo" && contado.trim() !== "" && Number.isFinite(nContado)
       ? deltaDelConteo(objetivo.stockActual, nContado)
-      : null;
+      : null
 
-  const nCantidad = Number(cantidad);
-  const resultante =
-    modo === "conteo"
+  const nCantidad = Number(cantidad)
+  const resultante = porViales
+    ? (totalViales ?? objetivo.stockActual)
+    : modo === "conteo"
       ? Number.isFinite(nContado)
         ? nContado
         : objetivo.stockActual
       : Number.isFinite(nCantidad) && cantidad.trim() !== ""
         ? objetivo.stockActual + (signo === "negativo" ? -nCantidad : nCantidad)
-        : objetivo.stockActual;
+        : objetivo.stockActual
 
-  const sinAlmacen = !objetivo.almacenId;
-  const puedeGuardar =
-    !guardando &&
-    !sinAlmacen &&
-    notas.trim() !== "" &&
-    (modo === "conteo"
-      ? deltaConteo !== null
-      : motivo !== "" && Number.isFinite(nCantidad) && nCantidad > 0);
+  const sinAlmacen = !objetivo.almacenId
+  const puedeGuardar = porViales
+    ? !guardando && !sinAlmacen && payloadViales !== null
+    : !guardando &&
+      !sinAlmacen &&
+      notas.trim() !== "" &&
+      (modo === "conteo"
+        ? deltaConteo !== null
+        : motivo !== "" && Number.isFinite(nCantidad) && nCantidad > 0)
 
   async function guardar() {
-    if (!objetivo.almacenId) return;
-    setGuardando(true);
+    if (!objetivo.almacenId) return
+    setGuardando(true)
+    if (porViales) {
+      if (!payloadViales) return setGuardando(false)
+      try {
+        const r = await contarExistencias(payloadViales, centro)
+        toast.success(
+          r.difference === 0
+            ? t("sinDiferencia")
+            : t("vialesAjustado", { contado: r.contado, sistema: r.sistema })
+        )
+        onHecho()
+        onClose()
+      } catch (e) {
+        toast.error(apiErrorLabel(e, tRoot))
+        setGuardando(false)
+      }
+      return
+    }
     try {
-      let payload:
-        | {
-            productId: string;
-            warehouseId: string;
-            quantity: number;
-            sign: "positivo" | "negativo";
-            reason: string;
-            notes: string;
-          }
-        | null;
+      let payload: {
+        productId: string
+        warehouseId: string
+        quantity: number
+        sign: "positivo" | "negativo"
+        reason: string
+        notes: string
+      } | null
       if (modo === "conteo") {
         const c = ajusteDesdeConteo({
           productoId: objetivo.productoId,
@@ -135,7 +205,7 @@ export function AjusteModal({
           stockActual: objetivo.stockActual,
           contado: nContado,
           notas: notas.trim(),
-        });
+        })
         payload = c
           ? {
               productId: c.productoId,
@@ -145,7 +215,7 @@ export function AjusteModal({
               reason: c.motivo,
               notes: c.notas,
             }
-          : null;
+          : null
       } else {
         payload = {
           productId: objetivo.productoId,
@@ -154,21 +224,21 @@ export function AjusteModal({
           sign: signo,
           reason: motivo,
           notes: notas.trim(),
-        };
+        }
       }
       if (!payload) {
         // Contó lo mismo que dice el sistema: no hay nada que ajustar y no se manda un cero.
-        toast.info(t("sinDiferencia"));
-        setGuardando(false);
-        return;
+        toast.info(t("sinDiferencia"))
+        setGuardando(false)
+        return
       }
-      await ajustarExistencias(payload, centro);
-      toast.success(t("hecho"));
-      onHecho();
-      onClose();
+      await ajustarExistencias(payload, centro)
+      toast.success(t("hecho"))
+      onHecho()
+      onClose()
     } catch (e) {
-      toast.error(apiErrorMessage(e));
-      setGuardando(false);
+      toast.error(apiErrorLabel(e, tRoot))
+      setGuardando(false)
     }
   }
 
@@ -192,9 +262,13 @@ export function AjusteModal({
             {/* Qué está pasando, en una línea: de cuánto a cuánto. */}
             <div className="flex items-baseline gap-3 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
               <span className="text-muted-foreground">{t("stockActual")}</span>
-              <span className="font-mono font-semibold">{objetivo.stockActual}</span>
+              <span className="font-mono font-semibold">
+                {objetivo.stockActual}
+              </span>
               <span className="text-muted-foreground">→</span>
-              <span className="font-mono font-semibold text-primary">{resultante}</span>
+              <span className="font-mono font-semibold text-primary">
+                {resultante}
+              </span>
             </div>
 
             <div className="flex gap-2">
@@ -216,7 +290,16 @@ export function AjusteModal({
               </Button>
             </div>
 
-            {modo === "conteo" ? (
+            {porViales ? (
+              <ConteoViales
+                presentaciones={viales}
+                cerrados={cerrados}
+                abiertos={abiertos}
+                unidad={objetivo.unidad}
+                onCerrado={(id, v) => setCerrados((c) => ({ ...c, [id]: v }))}
+                onAbiertos={setAbiertos}
+              />
+            ) : modo === "conteo" ? (
               <div className="space-y-2">
                 <Label htmlFor="aj-contado">{t("contado")}</Label>
                 <Input
@@ -226,7 +309,10 @@ export function AjusteModal({
                   min={0}
                   inputMode="decimal"
                   value={contado}
-                  onChange={(e) => { const v = e.target.value; setContado(v.trim() !== "" && Number(v) < 0 ? "0" : v); }}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setContado(v.trim() !== "" && Number(v) < 0 ? "0" : v)
+                  }}
                   placeholder={String(objetivo.stockActual)}
                 />
                 <p className="text-xs text-muted-foreground">
@@ -294,17 +380,26 @@ export function AjusteModal({
               </>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="aj-notas">{t("notas")}</Label>
-              <Textarea
-                id="aj-notas"
-                value={notas}
-                onChange={(e) => setNotas(e.target.value)}
-                placeholder={t("notasPlaceholder")}
-                rows={2}
-              />
-              <p className="text-xs text-muted-foreground">{t("notasAyuda")}</p>
-            </div>
+            {porViales && totalViales === null && payloadViales && (
+              <p className="text-xs text-muted-foreground">
+                {t("vialesSinVista")}
+              </p>
+            )}
+            {!porViales && (
+              <div className="space-y-2">
+                <Label htmlFor="aj-notas">{t("notas")}</Label>
+                <Textarea
+                  id="aj-notas"
+                  value={notas}
+                  onChange={(e) => setNotas(e.target.value)}
+                  placeholder={t("notasPlaceholder")}
+                  rows={2}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("notasAyuda")}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -318,5 +413,5 @@ export function AjusteModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

@@ -4011,7 +4011,12 @@
     "guardar": "Adjust",
     "guardando": "Adjusting…",
     "cancelar": "Cancel",
-    "hecho": "Stock adjusted."
+    "hecho": "Stock adjusted.",
+    "vialesAyuda": "Count the closed vials of each presentation and what is left in the open ones; the system converts it to the stock measure.",
+    "vialesCerrados": "Closed vials of {presentacion}",
+    "vialesAbiertos": "Open ({unidad})",
+    "vialesSinVista": "Some vial content is in another measure: the total is worked out on saving.",
+    "vialesAjustado": "Counted {contado}, the system had {sistema}: adjusted."
   },
   "inventarioViales": {
     "titulo": "Vials",

@@ -261,6 +261,7 @@ export default function StockPage() {
                                 almacenId: r.warehouseId ?? null,
                                 almacenNombre: r.almacenNombre ?? null,
                                 stockActual: Number(r.quantity) || 0,
+                                unidad: r.unidadClave ?? null,
                               });
                             }}
                           >

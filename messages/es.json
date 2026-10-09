@@ -4011,7 +4011,12 @@
     "guardar": "Ajustar",
     "guardando": "Ajustando…",
     "cancelar": "Cancelar",
-    "hecho": "Existencias ajustadas."
+    "hecho": "Existencias ajustadas.",
+    "vialesAyuda": "Cuenta los viales cerrados de cada presentación y lo que queda en los abiertos; el sistema lo pasa a la medida del stock.",
+    "vialesCerrados": "Viales cerrados de {presentacion}",
+    "vialesAbiertos": "Abiertos ({unidad})",
+    "vialesSinVista": "El contenido de algún vial está en otra medida: el total se calcula al guardar.",
+    "vialesAjustado": "Contado {contado}, el sistema tenía {sistema}: quedó ajustado."
   },
   "inventarioViales": {
     "titulo": "Viales",

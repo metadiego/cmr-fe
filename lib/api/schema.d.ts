@@ -51131,12 +51131,30 @@ export interface components {
             ruleVersion?: number;
             notes?: string;
         };
+        EnvaseContadoDto: {
+            /**
+             * Format: uuid
+             * @description Presentación contada (p. ej. «Vial 60 mg / 3 mL»). / Counted presentation.
+             */
+            presentationId: string;
+            /**
+             * @description Cuántos envases cerrados de esa presentación. / How many closed packages.
+             * @example 16
+             */
+            quantity: number;
+        };
         ConteoFisicoDto: {
+            /**
+             * @description Cantidad en la medida base del producto. Con `envases`, lo que queda en los abiertos (se suma). / Amount in the product base measure; with `envases`, what is left in open packages.
+             * @example 30
+             */
+            countedQuantity?: number;
+            /** @description Envases cerrados por presentación (p. ej. 16 viales de 60 mg y 10 de 62.5 mg). Se convierten solos a la medida base. / Closed packages per presentation, converted to the base measure. */
+            containers?: components["schemas"]["EnvaseContadoDto"][];
             /** Format: uuid */
             productId: string;
             /** Format: uuid */
             warehouseId: string;
-            cantidadContada: number;
             effectiveDate?: string;
         };
         ReglaDescargaEntity: {
@@ -52546,7 +52564,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sessionId: string;
             /** @enum {string} */
-            type: "datos" | "asistido" | "presente" | "en_terapia" | "cancelada" | "autopresente" | "creada" | "reparada" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete";
+            type: "datos" | "asistido" | "presente" | "en_terapia" | "cancelada" | "autopresente" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete";
             actorId: string | null;
             reason: string | null;
             payload: Record<string, never> | null;
@@ -91307,7 +91325,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91328,7 +91348,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91349,7 +91371,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91370,7 +91394,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91391,7 +91417,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91412,7 +91440,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91433,7 +91463,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -91454,7 +91486,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
