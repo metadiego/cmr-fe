@@ -21,6 +21,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -197,7 +198,7 @@ export function FestivosConfig({ year }: { year: number }) {
       <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3">
         <div className="space-y-1">
           <label className="block text-xs text-muted-foreground">{t("festivos.date")}</label>
-          <Input type="date" className="h-9 w-40" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <DatePicker className="h-9 w-40" value={fecha} onChange={setFecha} />
         </div>
         <div className="min-w-48 flex-1 space-y-1">
           <label className="block text-xs text-muted-foreground">{t("festivos.name")}</label>

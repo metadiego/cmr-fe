@@ -19,6 +19,7 @@ import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -171,7 +172,7 @@ export function RecibirCompra() {
               <Input value={numeroFactura} onChange={(e) => setNumeroFactura(e.target.value)} placeholder="F-000" />
             </Row>
             <Row label={t("field.fecha")}>
-              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <DatePicker value={fecha} onChange={setFecha} />
             </Row>
           </div>
           <Row label={t("field.notas")}>
@@ -195,7 +196,7 @@ export function RecibirCompra() {
             <Input className="sm:col-span-2" inputMode="decimal" value={cantidad} onChange={(e) => setCantidad(e.target.value)} placeholder={t("field.cantidadBase")} />
             <Input className="sm:col-span-2" inputMode="decimal" value={costo} onChange={(e) => setCosto(e.target.value)} placeholder={t("field.costoBase")} />
             <Input className="sm:col-span-1" value={lote} onChange={(e) => setLote(e.target.value)} placeholder={t("field.lote")} />
-            <Input className="sm:col-span-2" type="date" value={venc} onChange={(e) => setVenc(e.target.value)} title={t("field.vencimiento")} />
+            <DatePicker className="sm:col-span-2" value={venc} onChange={setVenc} title={t("field.vencimiento")} placeholder={t("field.vencimiento")} clearable />
             <div className="sm:col-span-12 flex justify-end">
               <Button size="sm" variant="secondary" onClick={agregarLinea} disabled={!puedeAgregar}>
                 <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("agregar")}

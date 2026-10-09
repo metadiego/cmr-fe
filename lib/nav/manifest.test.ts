@@ -113,14 +113,24 @@ test("groupForClave / orderForClave resolve known claves", () => {
   assert.equal(typeof orderForClave("facturacion"), "number");
 });
 
+test("patients sit in Services: patient center, patients, nursing panel first", () => {
+  for (const c of ["frontdesk", "clientes", "panel-enfermeria", "servicios", "cambio-de-protocolo"]) {
+    assert.equal(groupForClave(c), "services", c);
+  }
+  assert.deepEqual(
+    ["frontdesk", "clientes", "panel-enfermeria"].map(orderForClave),
+    [1, 2, 3],
+  );
+});
+
 test("unknown clave has no group and sorts last", () => {
   assert.equal(groupForClave("operaciones"), undefined);
   assert.equal(orderForClave("operaciones"), Number.MAX_SAFE_INTEGER);
 });
 
-test("NAV_GROUPS is the 9-group taxonomy in order", () => {
+test("NAV_GROUPS is the 8-group taxonomy in order", () => {
   assert.deepEqual(
     NAV_GROUPS.map((g) => g.key),
-    ["scheduling", "patients", "services", "billing", "reports", "inventory", "communications", "admin", "configuration"],
+    ["scheduling", "services", "billing", "reports", "inventory", "communications", "admin", "configuration"],
   );
 });

@@ -8,7 +8,7 @@ import { emitirFactura, type FacturaConItems } from "@/lib/api/facturas";
 import { ApiError } from "@/lib/api/types";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 
 interface Props {
@@ -68,7 +68,7 @@ export function IssueButton({ invoice, invoiceId, centro, disabled, label, run }
       {reopened && (
         <div className="space-y-1">
           <Label htmlFor="issue-date" className="text-xs text-muted-foreground">{t("issueDate")}</Label>
-          <Input id="issue-date" type="date" value={date} max={today()} onChange={(e) => setDate(e.target.value)} />
+          <DatePicker id="issue-date" value={date} max={today()} onChange={setDate} />
         </div>
       )}
       <Button className="w-full" disabled={disabled || (reopened && !date)} onClick={issue}>

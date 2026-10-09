@@ -26,11 +26,11 @@ import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { useFrontdeskTab } from "@/hooks/use-frontdesk-default-tab";
 import { ServiciosTabs } from "@/components/frontdesk/servicios-tabs";
 import { GenericBoard } from "@/components/tablero/generic-board";
-import { ACCION_ICON, HANDLERS_FE, todayISO, fmtHora, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
+import { HANDLERS_FE, todayISO, fmtHora, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
 import { FilaSesion } from "@/components/frontdesk/fila-sesion";
 import { PRESENTES_DEFAULTS } from "@/lib/presentes-prefs";
 import { getDefinicion, getOpciones, getTableros, type TableroDefinicion, type Opcion, type AccionTablero, type TableroRegistro } from "@/lib/api/tablero";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
 import { useResource } from "@/hooks/use-resource";
@@ -40,12 +40,10 @@ import { useCan } from "@/hooks/use-can";
 import { useDictado } from "@/hooks/use-dictado";
 import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
 import { FrontdeskSearchBar } from "@/components/frontdesk/frontdesk-search-bar";
-import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
 import { UbicacionEnVivoWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget";
+import { FrontdeskToolbar } from "@/components/frontdesk/frontdesk-toolbar";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -53,13 +51,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 import { LiveBadge } from "@/components/live-badge";
@@ -77,7 +68,6 @@ export function FrontdeskBoard() {
   const { can } = useCan();
   const gate = useCentroGate();
   const router = useRouter();
-  const pathname = usePathname();
 
   // Acciones enchufables (hooks) del tablero servicios (data-driven, tableros.acciones). Se pintan en
   // el slot toolbar SOLO las de handler que el FE sabe ejecutar (HANDLERS_FE) → enchufar/quitar por dato.
@@ -96,8 +86,8 @@ export function FrontdeskBoard() {
   }, [regRes.state, can]);
   function dispatchAccion(a: AccionTablero) {
     if (a.handler === "abrir_citas_servicio") {
-      // Abre la vista de Citas de Servicio (consultar/crear) y le pasa el origen para "Volver".
-      router.push(`/scheduling/appointments?tab=servicios&volver=${encodeURIComponent(pathname)}`);
+      // Opens the Citas de Servicio tab (browse/create).
+      router.push("/scheduling/appointments?tab=servicios");
     }
   }
   // Acción DEFAULT del FE: "Citas de servicio" siempre disponible en el riel aunque el BE aún no la
@@ -506,6 +496,7 @@ export function FrontdeskBoard() {
   }, [board, estadoFila, ocultarCanceladas, estadoFiltro]);
 
   const cargando = boardRes.state.kind === "loading" || defRes.state.kind === "loading";
+  const gateListo = !gate.cargando && !gate.sinCentro && !gate.necesitaPicker;
 
   return (
     <PageContainer>
@@ -516,70 +507,58 @@ export function FrontdeskBoard() {
             <LiveBadge label={t("live")} />
           )
         }
-        actions={
-          <>
-            <UbicacionEnVivoWidget
-              centroId={gate.centro}
-              nombreServicio={(slug) => servicios.find((s) => s.slug === slug)?.name}
-            />
-            <NurseStatusButton fecha={fecha} centro={gate.centro} />
-            <Input
-              type="date"
-              className="h-9 w-40"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-              aria-label={t("fecha")}
-            />
-            {puedeRango && (
-              <Input
-                type="date"
-                className="h-9 w-40"
-                value={hasta}
-                min={fecha}
-                onChange={(e) => setHasta(e.target.value)}
-                aria-label={t("hasta")}
-                title={t("rangoHint")}
-              />
-            )}
-            {gate.puedeCambiar && gate.centro && (
-              <Select value={gate.centro} onValueChange={gate.pick}>
-                <SelectTrigger className="h-9 w-44"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {gate.centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {/* RIEL de acciones enchufables (hooks): los botones se declaran por dato (tableros.acciones)
-                y se deslizan uno al lado del otro por `orden`; scrollea si hay muchos. El FE solo pinta
-                las de handler conocido (HANDLERS_FE). Enchufar/quitar = editar el registro (PUT /tableros). */}
-            {accionesEfectivas.length > 0 && (
-              <div className="flex min-w-0 items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {accionesEfectivas.map((a) => {
-                  const label = tRoot.has(a.labelKey) ? tRoot(a.labelKey) : a.clave;
-                  const icon = ACCION_ICON[a.icon ?? ""];
-                  return (
-                    <Button
-                      key={a.clave}
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 gap-1.5"
-                      onClick={() => dispatchAccion(a)}
-                    >
-                      {icon && <HugeiconsIcon icon={icon} className="size-4" />}
-                      {label}
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
-            {can("citas.create") && (
-              <Button size="sm" onClick={() => setProgramar({ open: true, servicioId: servicioActivo?.id })}>
-                {t("citar")}
-              </Button>
-            )}
-          </>
+      />
+
+      {/* Layout by view hierarchy: title → service tabs → ONE toolbar row (search + filters | actions). */}
+      {gateListo && (
+        <ServiciosTabs
+          vacioPaciente={!!(!isConsulta && pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0)}
+          serviciosVisibles={serviciosVisibles}
+          tabEfectivo={tabEfectivo}
+          onPick={(slug) => { setTab(slug); setEstadoFiltro(""); }}
+          presentesPorClave={presentesPorClave}
+          presentesPrefs={presentesPrefs}
+          presentesMax={presentesMax}
+          extraTab={consultaTab ? { slug: consultaTab.slug, label: tRoot.has(consultaTab.labelKey) ? tRoot(consultaTab.labelKey) : consultaTab.name, color: consultaTab.color } : null}
+        />
+      )}
+
+      <FrontdeskToolbar
+        search={gateListo && (
+          /* SINGLE search box: name/record/phone → patient dropdown; picking one narrows the tabs to THEIR services. */
+          <FrontdeskSearchBar
+            pacienteFiltro={pacienteFiltro}
+            nombre={filtroPacienteNombre}
+            q={q}
+            onQ={setQ}
+            mostrarLista={qDeb.trim().length >= 2}
+            estado={busqPaciente.state}
+            resultados={resultadosPaciente}
+            centroNombre={gate.centroNombre}
+            dictado={dictado}
+            onPick={(p) => { setPacienteFiltro(p); setQ(""); }}
+            onClear={() => { setPacienteFiltro(null); setQ(""); }}
+          />
+        )}
+        fecha={fecha}
+        onFecha={setFecha}
+        hasta={hasta}
+        onHasta={setHasta}
+        puedeRango={puedeRango}
+        centro={gate.centro}
+        centros={gate.centros}
+        puedeCambiarCentro={gate.puedeCambiar}
+        onCentro={gate.pick}
+        ocultarCanceladas={ocultarCanceladas}
+        onOcultarCanceladas={setOcultarCanceladas}
+        acciones={accionesEfectivas}
+        onAccion={dispatchAccion}
+        onCitar={can("citas.create") ? () => setProgramar({ open: true, servicioId: servicioActivo?.id }) : undefined}
+        status={
+          <UbicacionEnVivoWidget
+            centroId={gate.centro}
+            nombreServicio={(slug) => servicios.find((s) => s.slug === slug)?.name}
+          />
         }
       />
 
@@ -591,35 +570,6 @@ export function FrontdeskBoard() {
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {/* Caja de búsqueda ÚNICA: nombre/record/teléfono → desplegable de pacientes; elegir uno filtra
-              las pestañas a SUS servicios del día. Reemplaza las DOS cajas que confundían. */}
-          <FrontdeskSearchBar
-            pacienteFiltro={pacienteFiltro}
-            nombre={filtroPacienteNombre}
-            q={q}
-            onQ={setQ}
-            mostrarLista={qDeb.trim().length >= 2}
-            estado={busqPaciente.state}
-            resultados={resultadosPaciente}
-            centroNombre={gate.centroNombre}
-            dictado={dictado}
-            ocultarCanceladas={ocultarCanceladas}
-            onOcultarCanceladas={setOcultarCanceladas}
-            onPick={(p) => { setPacienteFiltro(p); setQ(""); }}
-            onClear={() => { setPacienteFiltro(null); setQ(""); }}
-          />
-
-          <ServiciosTabs
-            vacioPaciente={!!(!isConsulta && pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0)}
-            serviciosVisibles={serviciosVisibles}
-            tabEfectivo={tabEfectivo}
-            onPick={(slug) => { setTab(slug); setEstadoFiltro(""); }}
-            presentesPorClave={presentesPorClave}
-            presentesPrefs={presentesPrefs}
-            presentesMax={presentesMax}
-            extraTab={consultaTab ? { slug: consultaTab.slug, label: tRoot.has(consultaTab.labelKey) ? tRoot(consultaTab.labelKey) : consultaTab.name, color: consultaTab.color } : null}
-          />
-
           {isConsulta ? (
             /* "Volver" al facturar se autodetecta de la URL. El buscador de arriba ("Viendo: X") también filtra este tablero. */
             <GenericBoard tablero="atencion" initialEstado={consultaInitialEstado} pacienteFiltro={pacienteFiltro ? { id: pacienteFiltro.id, nombre: filtroPacienteNombre } : null} q={q} />

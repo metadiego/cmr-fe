@@ -13,8 +13,10 @@ import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
+import { Campo, HORA_CLS, LogoFormato } from "@/components/frontdesk/formato-parts";
 
 // CSS autocontenido para la ventana de impresión (el documento NO hereda Tailwind ahí). Incluye las
 // utilidades que usa el documento + tablas/tamaño carta. Un formato es un PAPEL: no puede depender de
@@ -51,6 +53,7 @@ img{max-width:100%;max-height:38px;object-fit:contain}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 /* Cada región/tabla no se parte entre páginas si cabe */
 section, .region { break-inside: avoid; }
+/* Hora entrada/salida (TimePicker): only the time text on a dashed line, no button chrome. */ .formato-hora{border:0;border-bottom:1px dashed #000;background:none;font:inherit;color:inherit;padding:0 2px} .formato-hora svg{display:none}
 /* Formatos GENÉRICOS (rejillas en blanco para llenar a mano): filas ALTAS y aireadas, que llenen la hoja
    (no amontonadas arriba). No aplica a las tablas densas de láser (HILT/MLS). */
 .formato-grid td { height: 46px; padding: 8px 8px; vertical-align: top; }
@@ -312,8 +315,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
           <Campo label={t("nTerapias")}><span className="font-semibold tabular-nums">{nTerapias || "—"}</span></Campo>
           <Campo label={t("tecnico")}><span>{header.tecnico || "—"}</span></Campo>
           <Campo label={t("proximaCita")}><span>{header.proximaCita || "—"}</span></Campo>
-          <Campo label={t("horaEntrada")}><input type="time" step={60} className="border-b border-dashed bg-transparent outline-none" value={horaIn} onChange={(e) => setHoraIn(e.target.value)} /></Campo>
-          <Campo label={t("horaSalida")}><input type="time" step={60} className="border-b border-dashed bg-transparent outline-none" value={horaOut} onChange={(e) => setHoraOut(e.target.value)} /></Campo>
+          <Campo label={t("horaEntrada")}><TimePicker step={1} className={HORA_CLS} value={horaIn} onChange={setHoraIn} /></Campo>
+          <Campo label={t("horaSalida")}><TimePicker step={1} className={HORA_CLS} value={horaOut} onChange={setHoraOut} /></Campo>
           <Campo label={t("escalaDolor")}><input type="number" min={0} max={10} className="w-16 border-b border-dashed bg-transparent outline-none" value={dolor} onChange={(e) => setDolor(e.target.value)} /></Campo>
         </div>
 
@@ -338,34 +341,6 @@ function PieFormato({ pie }: { pie?: FormatoPie }) {
   const txt = `${pie.prefix ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
   if (!txt.trim()) return null;
   return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
-}
-
-// Logo del membrete, compartido por los tres formatos (campos, rejilla, láser HILT/MLS). Data-driven:
-// `logoUrl` del centro (membrete.logoUrl); si viene null (caso de hoy), el asset por defecto del legacy.
-// Altura FIJA (nunca ancho 100%) para no mover el layout; en rejillas apretadas se pasa 32px (el reporte
-// manda, el logo cede). `maxHeight` inline pisa el `img{max-height}` del CSS de impresión. Decorativo (alt
-// vacío) y eager porque se imprime. Contrato: HANDOFF-logo-en-formatos.
-function LogoFormato({ logoUrl, size = 42, className }: { logoUrl?: string | null; size?: number; className?: string }) {
-  const src = logoUrl || "/img/logo_cmr.png";
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt=""
-      loading="eager"
-      style={{ height: size, maxHeight: size, width: "auto" }}
-      className={"object-contain " + (className ?? "")}
-    />
-  );
-}
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="shrink-0 font-medium">{label}:</span>
-      <span className="min-w-0 flex-1">{children}</span>
-    </div>
-  );
 }
 
 type TFn = (k: string, v?: Record<string, string | number>) => string;

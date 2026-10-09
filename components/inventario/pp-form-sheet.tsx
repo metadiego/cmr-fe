@@ -15,6 +15,7 @@ import {
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -266,18 +267,10 @@ export function PPFormSheet({
 
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("field.vigenciaDesde")}>
-              <Input
-                type="date"
-                value={form.validFrom}
-                onChange={(e) => set("validFrom", e.target.value)}
-              />
+              <DatePicker value={form.validFrom} onChange={(v) => set("validFrom", v)} clearable />
             </Field>
             <Field label={t("field.vigenciaHasta")}>
-              <Input
-                type="date"
-                value={form.validUntil}
-                onChange={(e) => set("validUntil", e.target.value)}
-              />
+              <DatePicker value={form.validUntil} onChange={(v) => set("validUntil", v)} clearable />
             </Field>
           </div>
 

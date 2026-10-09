@@ -23,6 +23,8 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import {
   Select,
   SelectContent,
@@ -140,24 +142,8 @@ export function CuposConfig() {
 
   return (
     <div className="space-y-5">
-      {/* Scope: center / all centers */}
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-sm text-muted-foreground">{t("cupos.center")}</span>
-        <Select value={scopeSel} onValueChange={pickScope}>
-          <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {centros.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
-            {canGlobal && <SelectItem value={GLOBAL}>{t("cupos.allCenters")}</SelectItem>}
-          </SelectContent>
-        </Select>
-        {scope === "global" && (
-          <span className="text-xs text-muted-foreground">{t("cupos.globalHint")}</span>
-        )}
-      </div>
-
-      {/* Mode: recurring weekday / one-off date */}
+      {/* One toolbar row: mode (recurring weekday / one-off date) and its day picker on the left,
+          the center scope on the right. */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-md border p-0.5">
           {(["weekday", "fecha"] as const).map((m) => (
@@ -187,9 +173,22 @@ export function CuposConfig() {
             ))}
           </div>
         ) : (
-          <Input type="date" className="h-9 w-44" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <DatePicker className="h-9 w-44" value={fecha} onChange={setFecha} />
         )}
+
+        <Select value={scopeSel} onValueChange={pickScope}>
+          <SelectTrigger className="ml-auto w-56" aria-label={t("cupos.center")}><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {centros.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            ))}
+            {canGlobal && <SelectItem value={GLOBAL}>{t("cupos.allCenters")}</SelectItem>}
+          </SelectContent>
+        </Select>
       </div>
+      {scope === "global" && (
+        <p className="text-sm text-muted-foreground">{t("cupos.globalHint")}</p>
+      )}
 
       {/* Contextual explainer */}
       {mode === "weekday" && daySel === DEFAULT_DAY && (
@@ -451,7 +450,7 @@ function CuposGrid({
       )}
 
       <div className="flex flex-wrap items-center gap-2">
-        <Input type="time" step={60} className="h-9 w-32" value={newHora} onChange={(e) => setNewHora(e.target.value)} />
+        <TimePicker className="h-9 w-32" value={newHora} onChange={setNewHora} />
         <Button type="button" variant="outline" size="sm" onClick={addRow} disabled={!newHora}>
           <HugeiconsIcon icon={Add01Icon} className="size-4" />
           {t("cupos.addHour")}

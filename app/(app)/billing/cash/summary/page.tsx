@@ -9,7 +9,7 @@ import { PrinterIcon } from "@hugeicons/core-free-icons";
 import { getReporteDia, type ReporteDia } from "@/lib/api/caja";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Cuadre general: ventas del día por DIVISIÓN (General = productos+suero+láser; Consulta) desglosadas por
@@ -105,7 +105,7 @@ export default function CuadreGeneralPage() {
           <div className="flex items-end gap-2 no-print">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t("fecha")}</span>
-              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="h-9 w-[160px]" />
+              <DatePicker value={fecha} onChange={setFecha} className="h-9 w-[160px]" />
             </label>
             <Button className="h-9" onClick={() => setQuery(fecha)}>{t("buscar")}</Button>
             <Button variant="outline" size="sm" className="h-9" onClick={() => window.print()} disabled={state.kind !== "ok"}>

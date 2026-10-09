@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/lib/env";
+import { HOME_ROUTE } from "@/lib/home-route";
 
 // Next 16 renamed `middleware` to `proxy`. Refreshes the Supabase session cookie
 // AND gates access: every route is auth-by-default except the public allowlist —
@@ -9,7 +10,7 @@ import { env } from "@/lib/env";
 // the session is established client-side (URL hash / PKCE code), so there's no
 // server cookie yet — gating it would bounce them to /login before they can set
 // their password.
-const PUBLIC_PATHS = new Set(["/", "/login", "/auth/set-password"]);
+const PUBLIC_PATHS = new Set(["/login", "/auth/set-password"]);
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -50,11 +51,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already signed in and landing on /login → al INICIO (página de casa). /dashboard decide si saltar a
-  // una pantalla SOLO cuando la persona la eligió. Handoff al-entrar-cada-uno-a-su-trabajo.
+  // Already signed in and landing on /login → straight home.
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = HOME_ROUTE;
     return NextResponse.redirect(url);
   }
 

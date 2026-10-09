@@ -15,7 +15,7 @@ import {
 import { listPersonal, getStaff, type Personal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
-import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
+import { useCentroPantalla, type CentroPantalla } from "@/hooks/use-centro-pantalla";
 import { ConfigGuard } from "@/components/configuracion/config-guard";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { ServiceResourcesEditor } from "@/components/configuracion/service-resources-editor";
@@ -35,38 +35,48 @@ import { PageHeader } from "@/components/ui/page";
 // nada quemado — sin esta pantalla el cuadro volvería a vivir en un script. DELETE = DESACTIVA (regla del
 // dueño): la UI dice «Desactivar», nunca «Eliminar». Handoff HANDOFF-FE-agenda-de-terapias.
 //
-// `embedded`: motor DISTINTO al de citas médicas (cupo fijo vs. cuartos+personal real) pero misma
-// PANTALLA — el dueño no quiere brincar de /scheduling/slots a /configuration/resources para ver
-// las dos disponibilidades. `AgendaConfig` la monta como una pestaña más (27-sep-2026); el título/
-// selector de centro de la página estándalone se omite porque ya los pone el contenedor padre.
-export function ResourcesConfig({ embedded = false }: { embedded?: boolean } = {}) {
+// Standalone page (/configuration/resources). The scheduling config hub (`AgendaConfig`) does not
+// mount this: it shows the two sections as top-level tabs of its own via `ResourcesSection`, so the
+// screen has ONE row of tabs instead of tabs nested inside a tab.
+export function ResourcesConfig() {
   const t = useTranslations("resources");
   const estado = useCentroPantalla("resources.read", "resources.config");
-  const body = (
-    <>
-      {!embedded && (
-        <PageHeader title={t("title")} description={t("description")} actions={<CentroPantallaSelector estado={estado} />} />
-      )}
-      {embedded && <CentroPantallaSelector estado={estado} />}
-      {estado.cargando ? null : estado.centroActivo ? (
-        <Tabs defaultValue="recursos">
-          <TabsList className="mb-4">
-            <TabsTrigger value="recursos">{t("tabResources")}</TabsTrigger>
-            <TabsTrigger value="consumo">{t("tabConsumo")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="recursos">
-            <ResourcesList centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
-          </TabsContent>
-          <TabsContent value="consumo">
-            <ServiceResourcesEditor centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>
-      )}
-    </>
+  return (
+    <ConfigGuard permiso="resources.read">
+      <PageHeader title={t("title")} description={t("description")} actions={<CentroPantallaSelector estado={estado} />} />
+      <Tabs defaultValue="resources">
+        <TabsList className="mb-4">
+          <TabsTrigger value="resources">{t("tabResources")}</TabsTrigger>
+          <TabsTrigger value="consumption">{t("tabConsumo")}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="resources">
+          <ResourcesSection estado={estado} section="resources" />
+        </TabsContent>
+        <TabsContent value="consumption">
+          <ResourcesSection estado={estado} section="consumption" />
+        </TabsContent>
+      </Tabs>
+    </ConfigGuard>
   );
-  return <ConfigGuard permiso="resources.read">{body}</ConfigGuard>;
+}
+
+// One section of resource configuration for the centre picked in `estado`: the resource list, or
+// how much of each resource every service consumes. The caller owns the centre selector and the guard.
+export function ResourcesSection({
+  estado,
+  section,
+}: {
+  estado: CentroPantalla;
+  section: "resources" | "consumption";
+}) {
+  const t = useTranslations("resources");
+  if (estado.cargando) return null;
+  if (!estado.centroActivo) return <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>;
+  return section === "resources" ? (
+    <ResourcesList centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+  ) : (
+    <ServiceResourcesEditor centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
+  );
 }
 
 function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {

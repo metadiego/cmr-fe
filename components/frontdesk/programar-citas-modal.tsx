@@ -22,6 +22,7 @@ import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -335,13 +336,7 @@ export function ProgramarCitasModal({
           <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("fechas")}</span>
             <div className="flex items-center gap-2">
-              <Input
-                type="date"
-                value={nuevaFecha}
-                onChange={(e) => setNuevaFecha(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addFecha(); } }}
-                className="h-9 w-44"
-              />
+              <DatePicker value={nuevaFecha} onChange={setNuevaFecha} clearable className="w-44" />
               <Button type="button" variant="outline" size="sm" className="gap-1" disabled={!nuevaFecha} onClick={addFecha}>
                 <HugeiconsIcon icon={Add01Icon} className="size-4" />
                 {t("agregarFecha")}

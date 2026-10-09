@@ -30,6 +30,9 @@ export interface MyPreferences {
   // Tema RESUELTO por el BE (igual que el idioma): "claro" por defecto; gana la elección del usuario en
   // cualquier máquina; un valor raro cae en "claro". El FE lo aplica al arrancar. Handoff be-el-tema-arranca-en-claro.
   tema?: string;
+  // The same value if the v2 API translates the key to English. Read through
+  // lib/theme/app-theme.ts, never directly.
+  theme?: string;
   temasDisponibles?: string[];
   idioma?: string;
   idiomasDisponibles?: string[];

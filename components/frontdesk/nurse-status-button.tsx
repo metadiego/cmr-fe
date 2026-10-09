@@ -87,7 +87,7 @@ export function NurseStatusButton({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="relative gap-1.5">
+        <Button variant="outline" className="relative gap-1.5">
           <HugeiconsIcon icon={StethoscopeIcon} className="size-4" />
           {t("nurseTitle")}
           {count > 0 && (

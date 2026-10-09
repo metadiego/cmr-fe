@@ -7,6 +7,7 @@ import { getCertificacionGastos, type CertificacionGastos as Cert } from "@/lib/
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -108,11 +109,11 @@ export function CertificacionGastos({ pacienteId, centro }: { pacienteId: string
       <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <div className="space-y-1">
           <Label htmlFor="cg-desde">{t("from")}</Label>
-          <Input id="cg-desde" type="date" value={desde} onChange={(e) => setRango((r) => ({ ...r, desde: e.target.value }))} className="w-40" />
+          <DatePicker id="cg-desde" value={desde} onChange={(v) => setRango((r) => ({ ...r, desde: v }))} className="w-40" />
         </div>
         <div className="space-y-1">
           <Label htmlFor="cg-hasta">{t("to")}</Label>
-          <Input id="cg-hasta" type="date" value={hasta} onChange={(e) => setRango((r) => ({ ...r, hasta: e.target.value }))} className="w-40" />
+          <DatePicker id="cg-hasta" value={hasta} onChange={(v) => setRango((r) => ({ ...r, hasta: v }))} className="w-40" />
         </div>
         <div className="space-y-1">
           <Label>{t("treatment")}</Label>

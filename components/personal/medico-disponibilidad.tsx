@@ -21,6 +21,8 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -127,9 +129,9 @@ function Horarios({ doctorId, centro }: { doctorId: string; centro?: string }) {
                   {puedeConfig && nuevo?.dow === d && (
                     <div className="mt-1 space-y-2">
                       <div className="flex items-center gap-1.5">
-                        <Input type="time" step={60} value={nuevo.inicio} onChange={(e) => setNuevo({ ...nuevo, inicio: e.target.value })} className="h-8 w-28" aria-label={t("start")} />
+                        <TimePicker value={nuevo.inicio} onChange={(v) => setNuevo({ ...nuevo, inicio: v })} className="h-8 w-28" aria-label={t("start")} />
                         <span className="text-muted-foreground">–</span>
-                        <Input type="time" step={60} value={nuevo.fin} onChange={(e) => setNuevo({ ...nuevo, fin: e.target.value })} className="h-8 w-28" aria-label={t("end")} />
+                        <TimePicker value={nuevo.fin} onChange={(v) => setNuevo({ ...nuevo, fin: v })} className="h-8 w-28" aria-label={t("end")} />
                         <Button type="button" size="sm" className="h-8" disabled={!nuevo.inicio || !nuevo.fin || nuevo.dias.size === 0 || busy} onClick={agregar}>{t("add")}</Button>
                         <Button type="button" size="sm" variant="ghost" className="h-8" onClick={() => setNuevo(null)}>{t("cancel")}</Button>
                       </div>
@@ -214,11 +216,11 @@ function Ausencias({ doctorId, centro }: { doctorId: string; centro?: string }) 
             </div>
             <div className="space-y-1">
               <Label htmlFor="ab-from">{t("from")}</Label>
-              <Input id="ab-from" type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} className="h-8 w-40" />
+              <DatePicker id="ab-from" value={form.startDate} onChange={(v) => setForm({ ...form, startDate: v })} className="h-8 w-40" />
             </div>
             <div className="space-y-1">
               <Label htmlFor="ab-to">{t("to")}</Label>
-              <Input id="ab-to" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} className="h-8 w-40" aria-invalid={rangoInvalido || undefined} />
+              <DatePicker id="ab-to" value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} className="h-8 w-40" aria-invalid={rangoInvalido || undefined} />
             </div>
           </div>
           <div className="space-y-1">
@@ -278,7 +280,7 @@ function ProximaFecha({ doctorId, centro }: { doctorId: string; centro?: string 
       <div className="flex flex-wrap items-end gap-2">
         <div className="space-y-1">
           <Label htmlFor="nd-date">{t("date")}</Label>
-          <Input id="nd-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 w-40" />
+          <DatePicker id="nd-date" value={date} onChange={setDate} className="h-8 w-40" />
         </div>
         <Button type="button" size="sm" className="h-8" disabled={!date || busy} onClick={probar}>{t("check")}</Button>
       </div>

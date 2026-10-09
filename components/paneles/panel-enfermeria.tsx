@@ -19,6 +19,7 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Button } from "@/components/ui/button";
 
 const CLAVE = "enfermeria";
 
@@ -131,19 +132,20 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={tRoot(def?.panel.labelKey ?? "panel.enfermeria")}
-        actions={
-          <>
-            <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
-            {!alarma.armado.current && (
-              <button type="button" onClick={alarma.armar} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium" title={t("activarSonido")}>
-                <HugeiconsIcon icon={VolumeHighIcon} className="size-4" /> {t("activarSonido")}
-              </button>
-            )}
-          </>
-        }
-      />
+      <PageHeader title={tRoot(def?.panel.labelKey ?? "panel.enfermeria")} />
+
+      {/* Toolbar: no filters on this kiosk; live status + the sound activation sit on the right. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <span className={"inline-block size-2.5 rounded-full " + (live ? "bg-success-foreground" : "bg-muted-foreground/40")} title={live ? "live" : "off"} />
+          {!alarma.armado.current && (
+            <Button variant="outline" onClick={alarma.armar} title={t("activarSonido")}>
+              <HugeiconsIcon icon={VolumeHighIcon} data-icon="inline-start" />
+              {t("activarSonido")}
+            </Button>
+          )}
+        </div>
+      </div>
 
       {/* Secciones + muro de tarjetas por enfermera */}
       {defRes.state.kind === "loading" && <p className="text-muted-foreground">…</p>}

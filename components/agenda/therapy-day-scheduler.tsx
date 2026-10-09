@@ -32,6 +32,7 @@ import { ExistingSessionsBadge } from "@/components/agenda/existing-sessions-bad
 import { RecurringBookingModal } from "@/components/agenda/recurring-booking-modal";
 import { AddTherapySelect } from "@/components/agenda/add-therapy-select";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -424,14 +425,9 @@ export function TherapyDayScheduler({
                 </div>
               )}
             </div>
-            <label className="text-sm">
-              <span className="mr-2 text-muted-foreground">{t("date")}</span>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => changeDate(e.target.value)}
-                className="inline-block h-9 w-auto"
-              />
+            <label className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">{t("date")}</span>
+              <DatePicker value={date} onChange={changeDate} className="w-auto" />
             </label>
           </div>
 

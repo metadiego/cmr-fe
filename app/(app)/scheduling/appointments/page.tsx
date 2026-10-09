@@ -1,46 +1,58 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { Settings02Icon } from "@hugeicons/core-free-icons";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicasCalendar } from "@/components/agenda/medicas-calendar";
 import { ServiciosCalendar } from "@/components/agenda/servicios-calendar";
 import { PageContainer } from "@/components/ui/page";
+import { Can } from "@/components/kit/can";
 
 // Agenda: two calendars over the same shell — medical appointments (citas, with
 // time) and service sessions (frontdesk, by day). `?tab=servicios` deep-links
-// the services tab. `?volver=<ruta>` muestra un botón "Volver" al origen de la
-// llamada (p. ej. el tablero del frontdesk); sin rutas bespoke.
+// the services tab.
+// The active tab is driven by the URL (not kept as local state), so a deep link always opens the tab it
+// names and switching tabs updates the URL; reload and Back then land on the same tab. There is no
+// in-page "back" link: the sidebar and the browser's Back already cover it.
+// Scheduling configuration (slots, resources, holidays) is reached from the settings button on the
+// tab row, not from the sidebar: it is configuration OF this screen, so it lives with it.
 export default function CitasPage() {
   const t = useTranslations("agenda");
-  const tc = useTranslations("common");
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
-  const tab = params.get("tab");
-  const volver = params.get("volver");
+  const tab = params.get("tab") === "servicios" ? "servicios" : "medicas";
+
+  function selectTab(next: string) {
+    const q = new URLSearchParams(params.toString());
+    if (next === "servicios") q.set("tab", next);
+    else q.delete("tab");
+    const qs = q.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   return (
     <PageContainer>
-      {volver && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-3 gap-1.5"
-          onClick={() => router.push(volver)}
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {tc("back")}
-        </Button>
-      )}
-      <Tabs defaultValue={tab === "servicios" ? "servicios" : "medicas"}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="medicas">{t("tabMedicas")}</TabsTrigger>
-          <TabsTrigger value="servicios">{t("tabServicios")}</TabsTrigger>
-        </TabsList>
+      <Tabs value={tab} onValueChange={selectTab}>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <TabsList>
+            <TabsTrigger value="medicas">{t("tabMedicas")}</TabsTrigger>
+            <TabsTrigger value="servicios">{t("tabServicios")}</TabsTrigger>
+          </TabsList>
+          <Can permiso="citas.config">
+            <Button variant="outline" asChild>
+              <Link href="/scheduling/slots">
+                <HugeiconsIcon icon={Settings02Icon} strokeWidth={2} data-icon="inline-start" />
+                {t("settings")}
+              </Link>
+            </Button>
+          </Can>
+        </div>
         <TabsContent value="medicas">
           <MedicasCalendar />
         </TabsContent>

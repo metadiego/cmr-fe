@@ -33,6 +33,7 @@ import { useResource } from "@/hooks/use-resource";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
@@ -337,12 +338,11 @@ export function PacienteFormSheet({
                 </Select>
               </Field>
               <Field label={t("fechaNacimiento")} required={req("fechaNacimiento")}>
-                <Input
-                  type="date"
+                <DatePicker
                   value={form.fechaNacimiento}
-                  max={todayPR()}
-                  aria-invalid={errFields.has("fechaNacimiento") || !fechaNacimientoValida || undefined}
-                  onChange={(e) => set("fechaNacimiento", e.target.value)} />
+                  max={todayPR()} onChange={(v) => set("fechaNacimiento", v)}
+                  clearable={!req("fechaNacimiento")}
+                  aria-invalid={errFields.has("fechaNacimiento") || !fechaNacimientoValida || undefined} />
                 {!fechaNacimientoValida && <p className="text-xs text-destructive">{t("fechaNacimientoFutura")}</p>}
               </Field>
               <Field label={t("nacionalidad")} required={req("nacionalidad")}>

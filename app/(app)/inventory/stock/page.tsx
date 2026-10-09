@@ -14,6 +14,7 @@ import {
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -188,11 +189,10 @@ export default function StockPage() {
         {/* Existencia a una fecha pasada (para cuadrar el día). Vacío = hoy. */}
         <label className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           <span>{t("asOf")}</span>
-          <Input
-            type="date"
+          <DatePicker
             value={asOf}
             max={new Date().toISOString().slice(0, 10)}
-            onChange={(e) => { setAsOf(e.target.value); resetPage(); }}
+            onChange={(v) => { setAsOf(v); resetPage(); }}
             className="h-9 w-40"
             aria-label={t("asOf")}
           />

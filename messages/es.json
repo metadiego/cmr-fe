@@ -501,6 +501,7 @@
     "tabMedicas": "Citas Médicas",
     "tabServicios": "Citas de Servicio",
     "today": "Hoy",
+    "settings": "Configuración",
     "dia": {
       "allCenters": "Todos los centros",
       "summary": "{total} citas · {atendidas} atendidas · {noShow} no-show",
@@ -747,6 +748,7 @@
   },
   "patients": {
     "title": "Pacientes",
+    "total": "{count, plural, one {# paciente} other {# pacientes}}",
     "backToCall": "Volver a la llamada",
     "searchPlaceholder": "Buscar por nombre o ID…",
     "active": "Activo",
@@ -1038,7 +1040,7 @@
     "ehrIntegration": "Enganche con el EHR",
     "resources": "Recursos",
     "center": "Centro",
-    "clientes": "Clientes",
+    "clientes": "Pacientes",
     "citas": "Citas",
     "alertas": "Alertas",
     "atencion": "Atención",
@@ -1049,7 +1051,7 @@
     "caja": "Caja",
     "consultas": "Consultas",
     "facturacion": "Facturación",
-    "frontdesk": "Frontdesk",
+    "frontdesk": "Centro de Pacientes",
     "en_desarrollo": "En desarrollo",
     "por_desarrollar": "Por desarrollar",
     "menuEditor": "Editor del menú",
@@ -1061,7 +1063,7 @@
       "inventario": "Inventario",
       "configuracion": "Configuración",
       "monitoreo": "Monitoreo",
-      "scheduling": "Agenda",
+      "scheduling": "Control de Citas",
       "patients": "Pacientes",
       "services": "Servicios",
       "billing": "Facturación",
@@ -1135,7 +1137,7 @@
     "configNumeracion": "Numeración",
     "inventario_viales": "Viales",
     "planificacionCompras": "Planificación de compras",
-    "calendario": "Calendario",
+    "calendario": "Ausencias de personal",
     "recepcionFactura": "Recibir desde factura",
     "configuracion_datos_paciente": "Datos obligatorios del paciente",
     "collapseNav": "Plegar menú",
@@ -1533,14 +1535,6 @@
       }
     }
   },
-  "landing": {
-    "badge": "Centro de Medicina Regenerativa",
-    "title": "Gestión clínica, simple y moderna",
-    "subtitle": "Pacientes, citas y expedientes en un solo lugar. Una base shadcn/ui lista para construir el sistema CMR.",
-    "signIn": "Iniciar sesión",
-    "viewComponents": "Ver componentes",
-    "themeHint": "Presiona <kbd>d</kbd> para cambiar el tema"
-  },
   "login": {
     "title": "Iniciar sesión",
     "subtitle": "Centro de Medicina Regenerativa",
@@ -1550,7 +1544,6 @@
     "emailPlaceholder": "tu@correo.com",
     "signingIn": "Entrando…",
     "signIn": "Entrar",
-    "backHome": "← Volver al inicio",
     "errorEmptyCredentials": "Ingresa email y contraseña.",
     "forgot": "¿Olvidaste tu contraseña?",
     "forgotTitle": "Recuperar contraseña",
@@ -1742,7 +1735,7 @@
     }
   },
   "frontdesk": {
-    "title": "Frontdesk",
+    "title": "Centro de Pacientes",
     "live": "En vivo",
     "fecha": "Fecha",
     "citar": "Citar",
@@ -3377,7 +3370,7 @@
     "saved": "Datos fiscales guardados",
     "noPermiso": "No tienes permiso para editar (centro.fiscal.write).",
     "preview": "Vista previa",
-    "autopresenteTitle": "Frontdesk",
+    "autopresenteTitle": "Centro de Pacientes",
     "autopresenteLabel": "Auto-presente al pagar",
     "autopresenteHelp": "Cuando una factura queda saldada el mismo día (incluida cortesía a total 0), cada línea de servicio entra sola al frontdesk marcada presente.",
     "consultaTabTitle": "Pestaña Consulta",
@@ -4154,7 +4147,8 @@
       "semana": "Semana",
       "dia": "Día",
       "agenda": "Agenda"
-    }
+    },
+    "pageTitle": "Ausencias de personal"
   },
   "recepcionFactura": {
     "title": "Recibir desde factura",
@@ -4625,5 +4619,14 @@
       "reasonRequired": "Escribe el motivo para reabrir.",
       "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
     }
+  },
+  "picker": {
+    "pickDate": "Elegir fecha",
+    "pickTime": "Elegir hora",
+    "today": "Hoy",
+    "clear": "Borrar",
+    "hour": "Hora",
+    "minute": "Min",
+    "period": "AM/PM"
   }
 }

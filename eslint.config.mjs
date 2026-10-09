@@ -25,7 +25,8 @@ const DEBT = {
   // CEILING general (714 líneas: el dispatcher de celdas y el flujo de pasos cierran sobre ~8
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
-  "components/frontdesk/frontdesk-board.tsx": 930, // 08-oct-2026: 935 → 930, live badge shared (components/live-badge.tsx)
+  // 09-oct-2026: 930 → 880 — the header/toolbar row moved to components/frontdesk/frontdesk-toolbar.tsx.
+  "components/frontdesk/frontdesk-board.tsx": 880, // 08-oct-2026: 935 → 930, live badge shared (components/live-badge.tsx)
   "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.

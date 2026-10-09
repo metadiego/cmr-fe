@@ -17,7 +17,7 @@ import { toastError } from "@/lib/api/errors"
 import { useResource } from "@/hooks/use-resource"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { DatePicker } from "@/components/ui/date-picker"
 import { Label } from "@/components/ui/label"
 import {
   Dialog,
@@ -238,11 +238,7 @@ export function ProfileCentrosDialog({
             {tipo === "temporal" && (
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>{t("vigenteHasta")}</Label>
-                <Input
-                  type="date"
-                  value={hasta}
-                  onChange={(e) => setHasta(e.target.value)}
-                />
+                <DatePicker value={hasta} onChange={setHasta} clearable />
               </div>
             )}
           </div>

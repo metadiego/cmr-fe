@@ -19,6 +19,7 @@ import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -298,10 +299,10 @@ export function InviteDialog({
                   </label>
                   {temporal && (
                     <Field label={t("vigenteHasta")}>
-                      <Input
-                        type="date"
+                      <DatePicker
                         value={vigenteHasta}
-                        onChange={(e) => setVigenteHasta(e.target.value)}
+                        onChange={setVigenteHasta}
+                        clearable
                       />
                     </Field>
                   )}

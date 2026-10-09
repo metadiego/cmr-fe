@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { reagendarSesion, type Sesion } from "@/lib/api/frontdesk";
 import { toastError } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 
 // Pintado bajo la mini-tarjeta de un servicio en TherapyDayScheduler cuando el paciente YA tiene sesiones
 // pendientes de ese servicio: hace visible el doble-agendado (el caso real que motivó esto — una técnica
@@ -56,10 +56,9 @@ export function ExistingSessionsBadge({
           </span>
           {editing === s.id ? (
             <span className="flex items-center gap-1">
-              <Input
-                type="date"
+              <DatePicker
                 value={nuevaFecha}
-                onChange={(e) => setNuevaFecha(e.target.value)}
+                onChange={setNuevaFecha}
                 className="h-6 w-32 px-1 py-0 text-[11px]"
               />
               <button

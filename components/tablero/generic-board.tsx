@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import {
   getTableros,
@@ -21,9 +21,9 @@ import { useResource } from "@/hooks/use-resource";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { cn } from "@/lib/utils";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Segmented, SegmentedButton } from "@/components/ui/segmented";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -40,6 +40,9 @@ import { coincide } from "@/lib/frontdesk/search";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { LiveBadge } from "@/components/live-badge";
+
+// Radix Tabs need a non-empty value; "" (no sub-type filter) maps to this sentinel.
+const ALL_TAB = "__all__";
 
 function todayISO(): string {
   const d = new Date();
@@ -184,43 +187,47 @@ export function GenericBoard({
 
   return (
     <PageContainer>
-      <PageHeader
-        title={registro ? tRoot(registro.labelKey) : tablero}
-        actions={
-          <>
-            {live && (
-              <LiveBadge label={t("live")} className="bg-success/10" />
-            )}
-            <Input type="date" className="h-9 w-40" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            {centros.length > 1 && (
-              <Select value={centroId} onValueChange={setPicked}>
-                <SelectTrigger className="h-9 w-48"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {centros.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {registro?.entity === "cita" && can("citas.create") && centroId && (
-              <Button size="sm" onClick={() => setAdding(true)}>{t("addCita")}</Button>
-            )}
-          </>
-        }
-      />
+      <PageHeader title={registro ? tRoot(registro.labelKey) : tablero} />
 
       {subTipos.length > 0 && (
-        <Segmented>
-          <SegmentedButton active={subTipo === ""} onClick={() => setSubTipo("")}>
-            {t("all")}
-          </SegmentedButton>
-          {subTipos.map((s) => (
-            <SegmentedButton key={s.slug} active={subTipo === s.slug} onClick={() => setSubTipo(s.slug)}>
-              {tRoot(s.labelKey)}
-            </SegmentedButton>
-          ))}
-        </Segmented>
+        <Tabs value={subTipo || ALL_TAB} onValueChange={(v) => setSubTipo(v === ALL_TAB ? "" : v)}>
+          <TabsList>
+            <TabsTrigger value={ALL_TAB}>{t("all")}</TabsTrigger>
+            {subTipos.map((s) => (
+              <TabsTrigger key={s.slug} value={s.slug}>
+                {tRoot(s.labelKey)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       )}
+
+      {/* Toolbar: filters that narrow the board (date, center) on the left; live status + the primary
+          create action on the right (the action is the rightmost control). */}
+      <div className="flex flex-wrap items-center gap-2">
+        <DatePicker className="w-40" value={fecha} onChange={setFecha} />
+        {centros.length > 1 && (
+          <Select value={centroId} onValueChange={setPicked}>
+            <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {centros.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {live && (
+            <LiveBadge label={t("live")} className="bg-success/10" />
+          )}
+          {registro?.entity === "cita" && can("citas.create") && centroId && (
+            <Button onClick={() => setAdding(true)}>
+              <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+              {t("addCita")}
+            </Button>
+          )}
+        </div>
+      </div>
 
       {(defRes.state.kind === "loading" || filasRes.state.kind === "loading") && (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>

@@ -16,7 +16,7 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
@@ -228,8 +228,8 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                 {ESTADOS.map((e) => <SelectItem key={e} value={e}>{t(`estado.${e}`)}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} aria-label={t("from")} className="h-8 w-[150px]" />
-            <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label={t("to")} className="h-8 w-[150px]" />
+            <DatePicker value={desde} onChange={setDesde} aria-label={t("from")} className="h-8 w-[150px]" clearable />
+            <DatePicker value={hasta} onChange={setHasta} aria-label={t("to")} className="h-8 w-[150px]" clearable />
             {rangoEsHoy ? (
               // Se ve que está filtrando por hoy + atajo para ampliar a todas las fechas (no lista corta muda).
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">

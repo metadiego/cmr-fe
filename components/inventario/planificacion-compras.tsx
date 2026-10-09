@@ -20,6 +20,7 @@ import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -222,7 +223,7 @@ export function PlanificacionCompras() {
         <Campo label={t("param.meses")}><Input className="w-20" inputMode="numeric" value={meses} onChange={(e) => setMeses(e.target.value)} /></Campo>
         <Campo label={t("param.criterio1")}><Input className="w-20" inputMode="decimal" value={c1} onChange={(e) => setC1(e.target.value)} /></Campo>
         <Campo label={t("param.criterio2")}><Input className="w-20" inputMode="decimal" value={c2} onChange={(e) => setC2(e.target.value)} /></Campo>
-        <Campo label={t("param.desde")}><Input className="w-[150px]" type="date" value={desde} onChange={(e) => setDesde(e.target.value)} /></Campo>
+        <Campo label={t("param.desde")}><DatePicker className="w-[150px]" value={desde} onChange={setDesde} clearable /></Campo>
         <Button onClick={aplicar} disabled={res.state.kind === "loading"}>{t("aplicar")}</Button>
         <span className="text-xs text-muted-foreground">{t("paramHint")}</span>
       </div>

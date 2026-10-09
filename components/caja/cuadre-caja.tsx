@@ -37,6 +37,7 @@ import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -112,12 +113,11 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
         <Label htmlFor="caja-fecha" className="text-sm text-muted-foreground">
           {t("date")}
         </Label>
-        <Input
+        <DatePicker
           id="caja-fecha"
-          type="date"
           value={fecha}
           max={hoy}
-          onChange={(e) => setFecha(e.target.value || hoy)}
+          onChange={(v) => setFecha(v || hoy)}
           className="h-9 w-40"
         />
       </div>

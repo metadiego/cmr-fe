@@ -13,11 +13,11 @@
 //   3. Cada destino se mete en el bucket de su `groupForClave`. Un clave que el
 //      manifiesto NO conoce (tableros dinámicos, ítems futuros del BE) cae en un
 //      bucket sintético por su `parentClave` del BE, etiquetado con el label del
-//      grupo del BE — así nada se pierde; esos grupos van DESPUÉS de los 9 fijos.
+//      grupo del BE — así nada se pierde; esos grupos van DESPUÉS de los 8 fijos.
 //   4. Se emiten los grupos FE en el orden de NAV_GROUPS (solo los no vacíos),
 //      seguidos de los buckets de fallback.
 
-import { NAV_GROUPS, groupForClave, orderForClave } from "./manifest.ts";
+import { NAV_GROUPS, groupForClave, orderForClave, routeForClave } from "./manifest.ts";
 
 export type NavMenuTipo = "item" | "grupo" | "separador";
 
@@ -40,6 +40,11 @@ export type NavNode = NavMenuItem & { children: NavNode[] };
 // dashboard es un volcado de diagnóstico solo-admin.
 const NOT_SURFACED = new Set(["home", "dashboard"]);
 
+// Screens that are never sidebar leaves, matched by RESOLVED route so that any catalogue row pointing
+// at them is hidden, whatever its clave, its custom label or its legacy BE path. Scheduling
+// configuration (/scheduling/slots) is opened only from the settings button on the Citas screen.
+const NOT_SURFACED_ROUTES = new Set(["/scheduling/slots", "/citas/agenda/cupos"]);
+
 export function buildNavGroups(
   items: NavMenuItem[],
   can: (permiso: string) => boolean,
@@ -54,7 +59,8 @@ export function buildNavGroups(
       i.type !== "separador" &&
       !!i.path &&
       i.path !== "#" &&
-      !NOT_SURFACED.has(i.slug),
+      !NOT_SURFACED.has(i.slug) &&
+      !NOT_SURFACED_ROUTES.has(routeForClave(i.slug, i.path)),
   );
 
   // Filas contenedoras del catálogo del BE (para etiquetar los buckets de fallback):
