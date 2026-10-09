@@ -18,6 +18,7 @@ import {
   type PrintHubProtocol,
 } from "@/lib/print/hub-target";
 import { sendToHubs, testTicketToEscPos } from "@/lib/print/hub";
+import { PrintHubLogin } from "@/components/configuracion/print-hub-login";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -299,10 +300,19 @@ export function PrintHubSettings({ centerId, centerName }: Props) {
                       </button>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-muted-foreground">
-                    {found.error && /ACCESS_DENIED|LOGON_FAILURE/.test(found.error) ? t("hubNeedsWindowsLogin") : found.system ? t("hubNoSharedPrinters") : found.error}
-                  </p>
+                ) : found.needsLogin ? null : (
+                  <p className="text-muted-foreground">{found.system ? t("hubNoSharedPrinters") : found.error}</p>
+                )}
+                {/* Windows PC: its login is handed to the hub from here (stored only on the hub). */}
+                {found.system === "windows" && canEdit && (
+                  <PrintHubLogin
+                    key={`${found.host}-${!!found.needsLogin}`}
+                    hubUrl={discoverHub}
+                    host={found.host}
+                    centerId={centerId}
+                    required={!!found.needsLogin}
+                    onSaved={(printers) => setDiscovery({ kind: "done", value: { ...found, printers, needsLogin: false, error: null } })}
+                  />
                 )}
               </div>
             )}

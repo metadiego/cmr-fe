@@ -25,6 +25,8 @@ export interface HubDiscovery {
   port: number | null;
   printers: string[];
   error: string | null;
+  // The PC (Windows) refused the hub: it needs a login of that PC, handed over with POST /credentials.
+  needsLogin?: boolean;
 }
 
 function parseHubUrl(url: string | undefined | null): URL | null {
@@ -76,6 +78,16 @@ export function buildHubDiscoverUrl(url: string | undefined | null, host: string
   const h = host?.trim();
   if (!origin || !h) return null;
   const u = new URL("/discover", origin);
+  u.searchParams.set("host", h);
+  return u.toString();
+}
+
+// Where to hand the hub the login of a printer machine (POST/DELETE /credentials?host=).
+export function buildHubCredentialsUrl(url: string | undefined | null, host: string | undefined | null): string | null {
+  const origin = hubOrigin(url);
+  const h = host?.trim();
+  if (!origin || !h) return null;
+  const u = new URL("/credentials", origin);
   u.searchParams.set("host", h);
   return u.toString();
 }
