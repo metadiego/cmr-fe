@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -91,7 +90,6 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     [q, estado, desde, hasta, gate.centro, contexto],
   );
   const rows = state.kind === "ok" ? state.data.items : [];
-  const facturasHref = esConsulta ? "/billing/consultations" : "/billing/invoices";
   const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
 
   const [anular, setAnular] = React.useState<Devolucion | null>(null);
@@ -116,10 +114,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
 
   return (
     <PageContainer>
-      <PageHeader
-        title={esConsulta ? t("titleConsulta") : t("title")}
-        actions={<Button variant="outline" size="sm" asChild><Link href={facturasHref}>{t("verFacturas")}</Link></Button>}
-      />
+      <PageHeader title={esConsulta ? t("titleConsulta") : t("title")} />
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>

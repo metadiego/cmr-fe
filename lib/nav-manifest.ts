@@ -33,18 +33,17 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/billing/invoices", labelKey: "nav.facturacion" },
   { path: "/billing/invoices/new", labelKey: "nav.facturacion_general" },
   { path: "/configuration/billing-groups", labelKey: "nav.gruposFacturacion" },
-  { path: "/billing/returns", labelKey: "nav.devoluciones" },
   { path: "/reports/supply-consumption", labelKey: "nav.consumoInsumos" },
   { path: "/reports/sales-by-group", labelKey: "nav.ventasPorGrupo" },
   { path: "/reports/sales-by-user", labelKey: "nav.ventasPorUsuario" },
   { path: "/billing/consultations", labelKey: "nav.facturacionConsultas" },
-  { path: "/billing/consultations/returns", labelKey: "nav.devolucionesConsultas" },
   // Estadísticas (el BE ya siembra el ítem en /me/menu; aquí para dedup/manifiesto)
   { path: "/reports/services", labelKey: "nav.estadisticas_servicios" },
   { path: "/reports/daily", labelKey: "nav.estadisticas_diarias" },
-  // Cuadre de caja — destinos SEPARADOS por división (no mezclar). Tienen UI → "En desarrollo".
-  { path: "/billing/cash/consultation", labelKey: "nav.cajaConsultas" },
-  { path: "/billing/cash/general", labelKey: "nav.cajaGeneral" },
+  // Devoluciones y Cuadre de caja (general/consulta) NO se registran aquí: ya no son páginas
+  // standalone, son pestañas dentro de Facturación/Consultas (ver lib/nav/nav-groups.ts
+  // NOT_SURFACED_ROUTES) — ofrecerlas como sugerencia del editor de menú llevaría a una página
+  // que ya no existe.
   { path: "/billing/cash/summary", labelKey: "nav.cuadreGeneral" },
   // Inventario → Inventory (route-reorg Phase 1)
   { path: "/inventory", labelKey: "nav.inventario" },

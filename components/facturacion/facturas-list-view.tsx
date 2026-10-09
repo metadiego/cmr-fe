@@ -165,7 +165,6 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const labelExentas = esConsulta ? t("totales.cortesias") : t("totales.cienDescuento");
   // ¿Página == rango? (sin resumen aún, o mismo conteo) → un solo total.
   const totalUnico = !resumen || paginaCount === resumen.total;
-  const devolucionesHref = esConsulta ? "/billing/consultations/returns" : "/billing/returns";
   const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
 
   function cell(clave: string, value: unknown) {
@@ -184,9 +183,6 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
         actions={
           <>
             {live && <LiveBadge label={t("live")} />}
-            <Button variant="outline" size="sm" asChild>
-              <Link href={devolucionesHref}>{t("devoluciones")}</Link>
-            </Button>
             {!esConsulta && (
               <>
                 <Button variant="outline" size="sm" asChild>

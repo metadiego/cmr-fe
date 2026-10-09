@@ -2148,7 +2148,6 @@
     "nuevaVenta": "New sale",
     "empty": "No invoices",
     "ver": "View",
-    "devoluciones": "Returns",
     "colNum": "Line no.",
     "totales": {
       "facturas": "{n} invoices",
@@ -2160,6 +2159,11 @@
       "rango": "Range"
     },
     "live": "Live"
+  },
+  "facturacionTabs": {
+    "facturas": "Invoices",
+    "devoluciones": "Returns",
+    "caja": "Cash count"
   },
   "inventario": {
     "prov": {
@@ -3405,7 +3409,6 @@
   "devoluciones": {
     "title": "Returns",
     "titleConsulta": "Consultation returns",
-    "verFacturas": "View invoices",
     "searchPlaceholder": "Search by invoice #",
     "allStates": "All statuses",
     "from": "From",

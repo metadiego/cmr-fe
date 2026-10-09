@@ -2148,7 +2148,6 @@
     "nuevaVenta": "Nueva venta",
     "empty": "Sin facturas",
     "ver": "Ver",
-    "devoluciones": "Devoluciones",
     "colNum": "Nº de línea",
     "totales": {
       "facturas": "{n} facturas",
@@ -2160,6 +2159,11 @@
       "rango": "Rango"
     },
     "live": "En vivo"
+  },
+  "facturacionTabs": {
+    "facturas": "Facturas",
+    "devoluciones": "Devoluciones",
+    "caja": "Cuadre de caja"
   },
   "inventario": {
     "prov": {
@@ -3405,7 +3409,6 @@
   "devoluciones": {
     "title": "Devoluciones",
     "titleConsulta": "Devoluciones de consultas",
-    "verFacturas": "Ver facturas",
     "searchPlaceholder": "Buscar por nº de factura",
     "allStates": "Todos los estados",
     "from": "Desde",

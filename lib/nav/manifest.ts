@@ -62,6 +62,12 @@ export const NAV_MANIFEST: NavEntry[] = [
   // Billing
   { clave: "facturacion", route: "/billing/invoices", group: "billing", order: 1 },
   { clave: "consultas", route: "/billing/consultations", group: "billing", order: 2 },
+  // Devoluciones/Cuadre de caja (general y consulta) NO son páginas standalone desde 09-oct-2026 —
+  // son pestañas dentro de Facturación/Consultas (components/facturacion/facturacion-con-tabs.tsx).
+  // Estas 4 filas siguen acá a propósito, apuntando a su ruta de siempre: así, si el catálogo del BE
+  // todavía trae una de estas claves, `routeForClave` resuelve algo predecible y
+  // `lib/nav/nav-groups.ts` (NOT_SURFACED_ROUTES) la reconoce y la oculta del menú. No borrar estas
+  // filas sin también quitarlas de NOT_SURFACED_ROUTES.
   { clave: "facturacion-devoluciones", route: "/billing/returns", group: "billing", order: 4 },
   { clave: "consultas-devoluciones", route: "/billing/consultations/returns", group: "billing", order: 5 },
   { clave: "caja-consulta", route: "/billing/cash/consultation", group: "billing", order: 6 },
