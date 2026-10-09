@@ -258,8 +258,10 @@ export default function StockPage() {
                               setAjusteDe({
                                 productoId: r.productId,
                                 nombre: r.name ?? r.sku ?? "—",
-                                almacenId: r.warehouseId ?? null,
-                                almacenNombre: r.almacenNombre ?? null,
+                                // The summary rows do not carry their warehouse (verified 2026-10-09, even
+                                // filtered by one): when the list IS filtered, every row is of that warehouse.
+                                almacenId: r.warehouseId ?? (almacenValido || null),
+                                almacenNombre: r.almacenNombre ?? almacenes.find((a) => a.id === almacenValido)?.name ?? null,
                                 stockActual: Number(r.quantity) || 0,
                                 unidad: r.unidadClave ?? null,
                               });
