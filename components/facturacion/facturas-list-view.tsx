@@ -184,14 +184,9 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
           <>
             {live && <LiveBadge label={t("live")} />}
             {!esConsulta && (
-              <>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/reports/supply-consumption">{t("consumoInsumos")}</Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link href={`/billing/invoices/new?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
-                </Button>
-              </>
+              <Button size="sm" asChild>
+                <Link href={`/billing/invoices/new?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
+              </Button>
             )}
           </>
         }

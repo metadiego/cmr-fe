@@ -11,7 +11,6 @@ import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { PageContainer, PageHeader } from "@/components/ui/page";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const nf = new Intl.NumberFormat("en-US");
@@ -47,7 +46,12 @@ th.r,td.r,.text-right{text-align:right}
 .ingreso{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;border-top:2px solid #111;padding-top:9px;font-weight:700;font-size:15px}
 `;
 
-export default function EstadisticasDiariasPage() {
+// Cierre diario del gerente: una tarjeta por CENTRO permitido (no por el centro activo de la
+// pantalla — un gerente/admin con varios centros las ve todas apiladas), independiente de
+// Facturación general/consulta (suma ambas divisiones). Vive como pestaña de Facturación general
+// (components/facturacion/facturacion-con-tabs.tsx) desde 09-oct-2026, extraído de lo que era
+// app/(app)/reports/daily/page.tsx.
+export function EstadisticasDiariasView() {
   const t = useTranslations("estadisticasDiarias");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
@@ -128,22 +132,19 @@ export default function EstadisticasDiariasPage() {
   }
 
   return (
-    <PageContainer>
-      <PageHeader
-        title={t("title")}
-        description={t("help")}
-        actions={
-          <>
-            <Button variant="outline" size="sm" onClick={imprimir} disabled={!cards.length}><HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}</Button>
-            <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
-            <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
-            <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
-          </>
-        }
-      />
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="max-w-prose text-sm text-muted-foreground">{t("help")}</p>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button variant="outline" size="sm" onClick={imprimir} disabled={!cards.length}><HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}</Button>
+          <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
+          <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
+          <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
+        </div>
+      </div>
 
       {/* Rango + Generar */}
-      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
+      <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
           <DatePicker value={desde} onChange={setDesde} className="h-9 w-[160px]" />
@@ -171,7 +172,7 @@ export default function EstadisticasDiariasPage() {
           </div>
         </>
       )}
-    </PageContainer>
+    </div>
   );
 }
 

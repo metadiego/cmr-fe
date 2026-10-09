@@ -53,6 +53,9 @@ const NOT_SURFACED_ROUTES = new Set([
   "/billing/consultations/returns",
   "/billing/cash/general",
   "/billing/cash/consultation",
+  // Estadísticas diarias: vive SOLO como pestaña de Facturación general (owner, 09-oct-2026) — nunca
+  // un ítem de Reportes aparte.
+  "/reports/daily",
 ]);
 
 export function buildNavGroups(

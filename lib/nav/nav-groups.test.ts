@@ -80,7 +80,7 @@ test("hides any row that leads to scheduling configuration, whatever its clave o
   assert.deepEqual(leaves, ["citas"]);
 });
 
-test("hides devoluciones/cuadre de caja: they're tabs inside Facturación/Consultas now", () => {
+test("hides devoluciones/cuadre de caja/estadísticas diarias: they're tabs inside Facturación now", () => {
   const items: NavMenuItem[] = [
     { slug: "facturacion", labelKey: "nav.facturacion", path: "/billing/invoices", parentSlug: "g-facturacion" },
     { slug: "consultas", labelKey: "nav.consultas", path: "/billing/consultations", parentSlug: "g-facturacion" },
@@ -88,6 +88,7 @@ test("hides devoluciones/cuadre de caja: they're tabs inside Facturación/Consul
     { slug: "consultas-devoluciones", labelKey: "x", path: "/billing/consultations/returns", parentSlug: "g-facturacion" },
     { slug: "caja-general", labelKey: "x", path: "/billing/cash/general", parentSlug: "g-facturacion" },
     { slug: "caja-consulta", labelKey: "x", path: "/billing/cash/consultation", parentSlug: "g-facturacion" },
+    { slug: "estadisticas-diarias", labelKey: "x", path: "/reports/daily", parentSlug: "g-reportes" },
   ];
   const groups = buildNavGroups(items, () => true);
   const leaves = groups.flatMap((g) => g.children.map((c) => c.slug));

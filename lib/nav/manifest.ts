@@ -74,11 +74,13 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "caja-general", route: "/billing/cash/general", group: "billing", order: 7 },
   // Reports
   { clave: "estadisticas-servicios", route: "/reports/services", group: "reports", order: 1 },
+  // Estadísticas diarias NO es una página standalone desde 09-oct-2026 — es una pestaña de
+  // Facturación general (components/reportes/estadisticas-diarias-view.tsx). Esta fila sigue acá
+  // a propósito: resuelve la ruta de siempre para que NOT_SURFACED_ROUTES (lib/nav/nav-groups.ts)
+  // la reconozca y la oculte del menú aunque el catálogo del BE todavía la traiga.
   { clave: "estadisticas-diarias", route: "/reports/daily", group: "reports", order: 2 },
-  { clave: "consumo-insumos", route: "/reports/supply-consumption", group: "reports", order: 3 },
   { clave: "ventas-por-grupo", route: "/reports/sales-by-group", group: "reports", order: 4 },
   { clave: "ventas-por-usuario", route: "/reports/sales-by-user", group: "reports", order: 5 },
-  { clave: "cuadre-general", route: "/billing/cash/summary", group: "reports", order: 6 },
   // Inventory
   { clave: "inventario-index", route: "/inventory", group: "inventory", order: 1 },
   { clave: "inventario-existencias", route: "/inventory/stock", group: "inventory", order: 2 },
@@ -90,6 +92,10 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "inventario-transferencias", route: "/inventory/transfers", group: "inventory", order: 8 },
   { clave: "inventario-viales", route: "/inventory/vials", group: "inventory", order: 9 },
   { clave: "precios", route: "/inventory/prices", group: "inventory", order: 10 },
+  // Movido de Facturación/Reportes a Inventario (owner, 09-oct-2026): es cuánto insumo se consumió,
+  // dato de inventario, no de facturación. También se quita el botón de Facturación (ver
+  // facturas-list-view.tsx) que apuntaba acá.
+  { clave: "consumo-insumos", route: "/reports/supply-consumption", group: "inventory", order: 11 },
   // Communications
   { clave: "comunicaciones", route: "/communications", group: "communications", order: 1 },
   // Admin (top-level, decision #1)
@@ -124,6 +130,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   // vive como pestaña de "cupos" (/scheduling/slots), así que las dos rutas llevan a la misma
   // pantalla en la práctica; no se toca el menú en producción sin verificarlo primero.
   { clave: "resources", route: "/configuration/resources", group: "configuration", order: 14 },
+  // Movido de Reportes a Configuración (owner, 09-oct-2026).
+  { clave: "cuadre-general", route: "/billing/cash/summary", group: "configuration", order: 15 },
   // Loose roots — carried for resolver completeness; NOT surfaced as domain leaves
   // (buildNavGroups filters them out). home = the logo link; dashboard = admin diagnostic.
   { clave: "home", route: "/", group: "configuration", order: 98 },

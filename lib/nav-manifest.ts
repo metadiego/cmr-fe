@@ -39,9 +39,8 @@ export const NAV_MANIFEST: NavRoute[] = [
   { path: "/billing/consultations", labelKey: "nav.facturacionConsultas" },
   // Estadísticas (el BE ya siembra el ítem en /me/menu; aquí para dedup/manifiesto)
   { path: "/reports/services", labelKey: "nav.estadisticas_servicios" },
-  { path: "/reports/daily", labelKey: "nav.estadisticas_diarias" },
-  // Devoluciones y Cuadre de caja (general/consulta) NO se registran aquí: ya no son páginas
-  // standalone, son pestañas dentro de Facturación/Consultas (ver lib/nav/nav-groups.ts
+  // Devoluciones, Cuadre de caja (general/consulta) y Estadísticas diarias NO se registran aquí: ya
+  // no son páginas standalone, son pestañas dentro de Facturación/Consultas (ver lib/nav/nav-groups.ts
   // NOT_SURFACED_ROUTES) — ofrecerlas como sugerencia del editor de menú llevaría a una página
   // que ya no existe.
   { path: "/billing/cash/summary", labelKey: "nav.cuadreGeneral" },

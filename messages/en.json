@@ -1037,6 +1037,7 @@
     "search": "Search",
     "searchPlaceholder": "Search…",
     "admin": "Admin",
+    "personalYAccesos": "Users",
     "ehrIntegration": "EHR integration",
     "resources": "Resources",
     "center": "Center",
@@ -2144,7 +2145,6 @@
       "devuelta_parcial": "Partially returned",
       "devuelta_total": "Fully returned"
     },
-    "consumoInsumos": "Supply consumption",
     "nuevaVenta": "New sale",
     "empty": "No invoices",
     "ver": "View",
@@ -2163,7 +2163,8 @@
   "facturacionTabs": {
     "facturas": "Invoices",
     "devoluciones": "Returns",
-    "caja": "Cash count"
+    "caja": "Cash count",
+    "estadisticas": "Statistics"
   },
   "inventario": {
     "prov": {

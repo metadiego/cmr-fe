@@ -1037,6 +1037,7 @@
     "search": "Buscar",
     "searchPlaceholder": "Buscar…",
     "admin": "Administración",
+    "personalYAccesos": "Usuarios",
     "ehrIntegration": "Enganche con el EHR",
     "resources": "Recursos",
     "center": "Centro",
@@ -2144,7 +2145,6 @@
       "devuelta_parcial": "Devuelta parcial",
       "devuelta_total": "Devuelta total"
     },
-    "consumoInsumos": "Consumo de insumos",
     "nuevaVenta": "Nueva venta",
     "empty": "Sin facturas",
     "ver": "Ver",
@@ -2163,7 +2163,8 @@
   "facturacionTabs": {
     "facturas": "Facturas",
     "devoluciones": "Devoluciones",
-    "caja": "Cuadre de caja"
+    "caja": "Cuadre de caja",
+    "estadisticas": "Estadísticas"
   },
   "inventario": {
     "prov": {
