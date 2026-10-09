@@ -19,15 +19,12 @@ Ficha corta para ubicarse en un minuto. El detalle está en el runbook del hub:
 ## Cómo está Caguas ahora
 
 - Hubs: `https://192.130.80.2:8943/print-raw` y, de emergencia, `https://192.130.80.172:8943/print-raw`.
-- Impresora: la **de la mesa de pruebas** — Epson TM-T20II en la Mac `192.130.80.199`, cola
-  `EPSON_TM_T20II`, por IPP. Verificado: ticket impreso desde el servidor.
-- **Próximo cambio:** la caja `192.130.80.100` (Windows), impresora compartida como
-  `EPSON TM-T20II Receipt5` (foto en `.personal/PHOTO-2026-10-09-10-30-49.jpg`).
-  **Lista para usarse (9-oct, verificado con ticket impreso por el servicio):** la caja tiene el
-  usuario local `cmrprint` y su credencial está en el servidor
-  (`C:\ProgramData\cmr-print-hub\smb-credentials\192.130.80.100`). Para cambiar a ella: en la app,
-  impresora = `192.130.80.100`, **Detectar**, cola `EPSON TM-T20II Receipt5`. Cada caja Windows nueva
-  necesita lo mismo: runbook §3.1.
+- Impresora (desde el 9-oct 11:44, puesta por el dueño desde la app): la **caja `192.130.80.100`**
+  (Windows), por SMB, recurso `EPSON TM-T20II Receipt5`, usuario de impresión `cmrprint` guardado en
+  el hub desde la app. Verificado en el registro del hub: login guardado 11:42 y un recibo de
+  7592 bytes enviado a la caja 11:49.
+- La impresora de la mesa de pruebas (Epson en la Mac `.199`, cola `EPSON_TM_T20II`, IPP) sigue
+  disponible para pruebas.
 
 ## Lo de todos los días
 
