@@ -62,7 +62,6 @@ export const NAV_MANIFEST: NavEntry[] = [
   // Billing
   { clave: "facturacion", route: "/billing/invoices", group: "billing", order: 1 },
   { clave: "consultas", route: "/billing/consultations", group: "billing", order: 2 },
-  { clave: "grupos-facturacion", route: "/billing/groups", group: "billing", order: 3 },
   { clave: "facturacion-devoluciones", route: "/billing/returns", group: "billing", order: 4 },
   { clave: "consultas-devoluciones", route: "/billing/consultations/returns", group: "billing", order: 5 },
   { clave: "caja-consulta", route: "/billing/cash/consultation", group: "billing", order: 6 },
@@ -93,6 +92,11 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "configuracion-tableros", route: "/configuration/boards", group: "configuration", order: 1 },
   { clave: "configuracion-modulos", route: "/configuration/board-modules", group: "configuration", order: 2 },
   { clave: "servicios-config", route: "/configuration/services", group: "configuration", order: 3 },
+  // Movido de Facturación a Configuración (pedido del dueño, 09-oct-2026): define cómo se agrupan
+  // los productos-dosis para facturar (membresía + división), un ajuste de catálogo/setup, no una
+  // operación de facturación del día a día. Al lado de "Servicios" porque cada servicio ancla su
+  // grupo desde ahí (components/servicios/servicio-form-fields.tsx → GrupoSelect).
+  { clave: "grupos-facturacion", route: "/configuration/billing-groups", group: "configuration", order: 3.5 },
   { clave: "config-factura", route: "/configuration/invoice", group: "configuration", order: 4 },
   { clave: "config-requeridos", route: "/configuration/required-fields", group: "configuration", order: 5 },
   { clave: "config-datos-paciente", route: "/configuration/patient-fields", group: "configuration", order: 6 },
