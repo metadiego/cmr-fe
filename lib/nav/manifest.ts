@@ -73,6 +73,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "consumo-insumos", route: "/reports/supply-consumption", group: "reports", order: 3 },
   { clave: "ventas-por-grupo", route: "/reports/sales-by-group", group: "reports", order: 4 },
   { clave: "ventas-por-usuario", route: "/reports/sales-by-user", group: "reports", order: 5 },
+  { clave: "cuadre-general", route: "/billing/cash/summary", group: "reports", order: 6 },
   // Inventory
   { clave: "inventario-index", route: "/inventory", group: "inventory", order: 1 },
   { clave: "inventario-existencias", route: "/inventory/stock", group: "inventory", order: 2 },
