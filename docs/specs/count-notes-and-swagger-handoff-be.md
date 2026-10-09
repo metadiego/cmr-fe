@@ -1,3 +1,17 @@
+> **RESUELTO por el BE, 9-oct-2026 12:41 AST — en producción (commit `07bd13d`) y verificado por HTTP real (Bayamón, v2):**
+>
+> 1. **`notes`** (opcional, ≤500) en `POST /inventory/operations/count` (y en la herramienta MCP). Encabeza la
+>    nota del ajuste: «<notes> — Conteo físico: contado X vs sistema Y». Probado: Tirzepatide `countedQuantity
+>    1585` + `notes` → 201 `{contado:1585, sistema:1585, difference:0}` (sin diferencia no hay ajuste, no se
+>    guardó nada). Ya puedes mostrar el «Por qué» también en modo viales.
+> 2. **Respuesta en Swagger:** `201 → PhysicalCountResponseDto` con las claves de v2: `contado`, `sistema`,
+>    `difference`, `ajuste?`, `breakdown?[{presentationId, presentation, containers, inBaseMeasure}]`.
+>    Regenera `gen:api` y borra el tipo a mano.
+> 3. **`warehouseId` en cada fila** de `GET /inventory/stock/summary` (y en cada lote): el del almacén donde está
+>    el stock si es UNO; si la fila no tiene stock, el del filtro o el único del centro; `null` solo si está
+>    repartida en varios. Bayamón **sin filtro**: 63 filas, 63 con `warehouseId`. El botón Ajustar ya puede usar
+>    el de la fila.
+
 # Handoff BE — Conteo en viales: el «por qué» y la respuesta en Swagger
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-09 · **Prioridad:** baja (el FE ya funciona).
