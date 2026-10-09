@@ -51,7 +51,7 @@ test("seeded claves resolve to their FE route", () => {
     ["comunicaciones", "/communications"],
     ["facturacion", "/billing/invoices"],
     ["consultas", "/billing/consultations"],
-    ["grupos-facturacion", "/billing/groups"],
+    ["grupos-facturacion", "/configuration/billing-groups"],
     ["facturacion-devoluciones", "/billing/returns"],
     ["consultas-devoluciones", "/billing/consultations/returns"],
     ["consumo-insumos", "/reports/supply-consumption"],

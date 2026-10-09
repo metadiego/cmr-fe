@@ -32,7 +32,7 @@ export const NAV_MANIFEST: NavRoute[] = [
   // Facturación → Billing (route-reorg Phase 1)
   { path: "/billing/invoices", labelKey: "nav.facturacion" },
   { path: "/billing/invoices/new", labelKey: "nav.facturacion_general" },
-  { path: "/billing/groups", labelKey: "nav.gruposFacturacion" },
+  { path: "/configuration/billing-groups", labelKey: "nav.gruposFacturacion" },
   { path: "/billing/returns", labelKey: "nav.devoluciones" },
   { path: "/reports/supply-consumption", labelKey: "nav.consumoInsumos" },
   { path: "/reports/sales-by-group", labelKey: "nav.ventasPorGrupo" },
