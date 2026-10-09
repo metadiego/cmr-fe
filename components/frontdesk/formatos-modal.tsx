@@ -274,7 +274,9 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   const printRef = React.useRef<HTMLDivElement>(null);
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
-  if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
+  // Say WHY (e.g. FORBIDDEN: the user's role lacks the permission), not just that it failed.
+  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{t("formatoError")} — {res.state.message}</p>;
+  if (res.state.kind !== "ok") return null;
   const data = res.state.data;
 
   return (
@@ -456,7 +458,9 @@ function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: st
   const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
   const printRef = React.useRef<HTMLDivElement>(null);
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
-  if (res.state.kind !== "ok") return <p className="text-sm text-destructive">{t("formatoError")}</p>;
+  // Say WHY (e.g. FORBIDDEN: the user's role lacks the permission), not just that it failed.
+  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{t("formatoError")} — {res.state.message}</p>;
+  if (res.state.kind !== "ok") return null;
   const d = res.state.data;
   const cols = d.columns ?? [];
   const filas = d.rows ?? [];
