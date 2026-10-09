@@ -1,6 +1,7 @@
-import { FacturasListView } from "@/components/facturacion/facturas-list-view";
+import { FacturacionConTabs } from "@/components/facturacion/facturacion-con-tabs";
 
-// Facturación GENERAL (productos/servicios). Reusa el componente de lista con contexto=general.
+// Facturación GENERAL (productos/servicios): Facturas / Devoluciones / Cuadre de caja, como pestañas
+// de la misma división (ver facturacion-con-tabs.tsx).
 export default function FacturasGeneralListPage() {
-  return <FacturasListView contexto="general" />;
+  return <FacturacionConTabs contexto="general" />;
 }

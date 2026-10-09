@@ -43,7 +43,17 @@ const NOT_SURFACED = new Set(["home", "dashboard"]);
 // Screens that are never sidebar leaves, matched by RESOLVED route so that any catalogue row pointing
 // at them is hidden, whatever its clave, its custom label or its legacy BE path. Scheduling
 // configuration (/scheduling/slots) is opened only from the settings button on the Citas screen.
-const NOT_SURFACED_ROUTES = new Set(["/scheduling/slots", "/citas/agenda/cupos"]);
+// Devoluciones/Cuadre de caja (general y consulta) son ahora pestañas DENTRO de Facturación/Consultas
+// (owner, 09-oct-2026) — las páginas standalone se borraron; esta lista existe para que, si el
+// catálogo del BE todavía trae una fila para una de estas claves, no reaparezcan solas en el menú.
+const NOT_SURFACED_ROUTES = new Set([
+  "/scheduling/slots",
+  "/citas/agenda/cupos",
+  "/billing/returns",
+  "/billing/consultations/returns",
+  "/billing/cash/general",
+  "/billing/cash/consultation",
+]);
 
 export function buildNavGroups(
   items: NavMenuItem[],
