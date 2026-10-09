@@ -19,7 +19,6 @@ import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
-import { usePacienteMap } from "@/lib/agenda/use-paciente-map";
 import { monthMatrix, toISO, colorDeEvento } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,16 +93,17 @@ export function MedicasCalendar() {
     return () => clearInterval(id);
   }, [reload]);
 
-  const pacientes = usePacienteMap(citas.map((c) => c.patientId));
   const tipoById = React.useMemo(() => new Map(tipos.map((x) => [x.id, x])), [tipos]);
   const medById = React.useMemo(() => new Map(medicos.map((m) => [m.id, m])), [medicos]);
   const citaById = React.useMemo(() => new Map(citas.map((c) => [c.id, c])), [citas]);
 
+  // GET /appointments ya trae `patient.name` embebido en cada fila — no hace falta resolverlo
+  // aparte (ver docs/specs/pacientes-bulk-por-ids-handoff-be.md: pedirlo por paciente, uno por
+  // uno, disparaba cientos de llamadas y producción respondía 429 en un mes concurrido).
   const eventsByDate = React.useMemo(() => {
     const map = new Map<string, AgendaEvent[]>();
     for (const c of citas) {
-      const p = pacientes[c.patientId];
-      const label = p ? (p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ")) : "…";
+      const label = c.patient?.name || "…";
       const color = colorDeEvento(
         null,
         tipoById.get(c.appointmentTypeId)?.color,
@@ -114,7 +114,7 @@ export function MedicasCalendar() {
       map.set(c.date, arr);
     }
     return map;
-  }, [citas, pacientes, tipoById, medById]);
+  }, [citas, tipoById, medById]);
 
   function shiftMonth(delta: number) {
     const d = new Date(year, month0 + delta, 1);

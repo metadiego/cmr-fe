@@ -3,7 +3,15 @@ import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
 import type { Paginated } from "./types";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
-export type Cita = components["schemas"]["CitaEntity"];
+//
+// `patient`/`doctorName` are hand-added: GET /appointments embeds them on every row (verified
+// live against prod, 09-oct-2026 — 100/100 rows carried patient.name), but the BE's Swagger
+// doesn't document /appointments' response shape yet, so gen:api never picks them up. Drop this
+// intersection once the Swagger gap closes and CitaEntity declares them itself.
+export type Cita = components["schemas"]["CitaEntity"] & {
+  patient?: { id: string; name: string; medicalRecordNumber?: string | null } | null;
+  doctorName?: string | null;
+};
 export type CreateCitaPayload = components["schemas"]["CreateCitaDto"];
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
 export type EstadoCita = Cita["status"];
