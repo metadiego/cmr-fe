@@ -1,3 +1,28 @@
+> **RESUELTO por el BE, 9-oct-2026 12:23 AST — en producción (commit `c87fbba`) y verificado por HTTP real (Caguas, v2):**
+>
+> 1. `GET /print-hubs/{CAG}/printers` → la migración ya dejó **«Principal»** (`smb`, `192.130.80.100`, `445`,
+>    `EPSON TM-T20II Receipt5`, `sortOrder 0`). Bayamón: hub `enabled:false` y **sin impresoras** (no tenía cola).
+> 2. `POST …/printers` `{name:"Facturación", protocol:"smb", printerHost, printerQueue}` → 200, `printerPort` 445
+>    puesto solo, `sortOrder` 1 (al final).
+> 3. `GET /me/print-hub` → `printers:[Principal, Facturación]` (solo activas, con `id,name,protocol,printerHost,
+>    printerPort,printerQueue`) **y** la raíz de transición = la primera activa.
+> 4. Nombre repetido (` facturación `, ignora mayúsculas y espacios) → **400** `PRINT_HUB_INVALID_CONFIGURATION`,
+>    `labelKey: printHub.duplicatePrinterName`, `failures` con TODOS (ahí también `invalidQueue`).
+> 5. `DELETE …/printers/:id` → `{deleted:true}`; repetido → **404** `PRINT_HUB_PRINTER_NOT_FOUND` /
+>    `printHub.printerNotFound`. «Facturación» de prueba **borrada**: falta que el dueño diga su equipo y cola.
+> 6. v1: `/impresion-hubs/:centerId/impresoras` responde igual. Swagger con DTOs de respuesta. MCP:
+>    `print_hub_printer_list|create|update|delete`.
+>
+> **Cambios que debes saber:**
+> - `PUT /print-hubs/:centerId` con impresora en la raíz escribe la **primera** impresora (o crea «Principal»).
+> - `GET /print-hubs/:centerId` trae `printers`. Un centro sin hub → 404 `PRINT_HUB_NOT_CONFIGURED` (antes
+>   `PRINT_HUB_NO_CONFIGURADO`); tú miras el 404, no cambia nada.
+> - **Seguridad:** todas las rutas del hub y de impresoras (API y MCP) exigen ahora el permiso **en el centro
+>   pedido**. Sin él: **403** `FORBIDDEN`, `labelKey: centros.no_autorizado`. `GET /print-hubs?centerIds=` devuelve
+>   solo los centros autorizados (403 si ninguno).
+> - `labelKey` nuevos para tus textos: `printHub.printerNameRequired`, `printHub.duplicatePrinterName`,
+>   `printHub.printerNotFound`.
+
 # Handoff BE — Varias impresoras por centro en el hub de impresión
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-09 · **Prioridad:** alta (bloquea el respaldo de
