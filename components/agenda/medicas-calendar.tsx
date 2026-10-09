@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { sentenceCase } from "@/lib/format/text";
 import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon } from "@hugeicons/core-free-icons";
+import { Add01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import {
   listCitasRango,
@@ -39,6 +40,7 @@ const ALL = "__all__";
 // Medical appointments calendar (doctor + hora/horaFin). Call-center scheduling.
 export function MedicasCalendar() {
   const t = useTranslations("agenda");
+  const tCommon = useTranslations("common");
   const format = useFormatter();
   const router = useRouter();
   const now = new Date();
@@ -130,7 +132,10 @@ export function MedicasCalendar() {
   // Date.UTC plus the `monthYear` format (which pins UTC) keeps the month from sliding:
   // the previous `new Date(year, month0, 1)` was LOCAL midnight, which on a browser east
   // of the meridian lands in the PREVIOUS month once rendered in clinic time.
-  const monthLabel = format.dateTime(new Date(Date.UTC(year, month0, 1, 12)), "monthYear");
+  // Sentence case: only the first letter is raised ("Octubre de 2026"). A CSS `capitalize` would
+  // raise every word and print "Octubre De 2026".
+  const monthRaw = format.dateTime(new Date(Date.UTC(year, month0, 1, 12)), "monthYear");
+  const monthLabel = sentenceCase(monthRaw);
   const weekdays = [0, 1, 2, 3, 4, 5, 6].map((i) => t(`dow.${i}`));
 
   const patientResults = useResource(
@@ -144,29 +149,37 @@ export function MedicasCalendar() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_18rem]">
       <div className="space-y-4">
+        {/* One toolbar row, same shape on both tabs so switching tabs does not move controls.
+            LEFT: navigation (prev/next/today + the month shown), then the filters that narrow it.
+            RIGHT (ml-auto): actions, the primary create action rightmost. */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => shiftMonth(-1)} aria-label="prev">‹</Button>
-          <Button variant="outline" size="icon" onClick={() => shiftMonth(1)} aria-label="next">›</Button>
-          <h2 className="ml-1 text-xl font-semibold capitalize">{monthLabel}</h2>
-          <Button variant="ghost" size="sm" onClick={goToday}>{t("today")}</Button>
+          <Button variant="outline" size="icon" onClick={() => shiftMonth(-1)} aria-label={tCommon("prev")}>
+            <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => shiftMonth(1)} aria-label={tCommon("next")}>
+            <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
+          </Button>
+          <Button variant="outline" onClick={goToday}>{t("today")}</Button>
+          {/* Fixed min width: a short month name must not pull the filters left of where a long one puts them. */}
+          <h2 className="min-w-52 px-1 text-xl font-semibold whitespace-nowrap">{monthLabel}</h2>
+          {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
+          <CentroPantallaSelector estado={centro} />
+          <Select value={medicoEfectivo} onValueChange={setMedico}>
+            <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{t("allDoctors")}</SelectItem>
+              {medicos.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {[m.name, m.lastName].filter(Boolean).join(" ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="ml-auto flex items-center gap-2">
-            {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
-            <CentroPantallaSelector estado={centro} />
-            <Select value={medicoEfectivo} onValueChange={setMedico}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL}>{t("allDoctors")}</SelectItem>
-                {medicos.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {[m.name, m.lastName].filter(Boolean).join(" ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             {/* «Nueva Cita» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
             {centro.puedeEscribir && (
-              <Button size="sm" onClick={() => setModal({ fecha: toISO(new Date()) })}>
-                <HugeiconsIcon icon={Add01Icon} className="size-4" />
+              <Button onClick={() => setModal({ fecha: toISO(new Date()) })}>
+                <HugeiconsIcon icon={Add01Icon} strokeWidth={2} data-icon="inline-start" />
                 {t("new")}
               </Button>
             )}

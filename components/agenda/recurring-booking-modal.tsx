@@ -14,6 +14,8 @@ import { mostrarAvisos } from "@/lib/frontdesk/avisos";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Field } from "@/components/kit/form-dialog";
@@ -221,15 +223,14 @@ export function RecurringBookingModal({
 
         <div className="grid grid-cols-2 gap-3">
           <Field label={t("recurringStartDate")}>
-            <Input
-              type="date"
+            <DatePicker
               min={floor}
               value={startDate}
-              onChange={(e) => { setStartDate(e.target.value < floor ? floor : e.target.value); setPlan(null); }}
+              onChange={(v) => { setStartDate(v < floor ? floor : v); setPlan(null); }}
             />
           </Field>
           <Field label={t("recurringTime")}>
-            <Input type="time" value={time} onChange={(e) => { setTime(e.target.value); setPlan(null); }} />
+            <TimePicker value={time} onChange={(v) => { setTime(v); setPlan(null); }} />
           </Field>
           <div className="col-span-2 space-y-1.5">
             <Field label={t("recurringWeekdays")}>

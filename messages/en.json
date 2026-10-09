@@ -501,6 +501,7 @@
     "tabMedicas": "Medical appointments",
     "tabServicios": "Service appointments",
     "today": "Today",
+    "settings": "Settings",
     "dia": {
       "allCenters": "All centers",
       "summary": "{total} appts · {atendidas} seen · {noShow} no-show",
@@ -747,6 +748,7 @@
   },
   "patients": {
     "title": "Patients",
+    "total": "{count, plural, one {# patient} other {# patients}}",
     "backToCall": "Back to the call",
     "searchPlaceholder": "Search by name or ID…",
     "active": "Active",
@@ -1038,7 +1040,7 @@
     "ehrIntegration": "EHR integration",
     "resources": "Resources",
     "center": "Center",
-    "clientes": "Clients",
+    "clientes": "Patients",
     "citas": "Appointments",
     "alertas": "Alerts",
     "atencion": "Patient care",
@@ -1049,7 +1051,7 @@
     "caja": "Cash",
     "consultas": "Consultations",
     "facturacion": "Billing",
-    "frontdesk": "Frontdesk",
+    "frontdesk": "Patient Center",
     "en_desarrollo": "In development",
     "por_desarrollar": "To be developed",
     "menuEditor": "Menu editor",
@@ -1061,7 +1063,7 @@
       "inventario": "Inventory",
       "configuracion": "Settings",
       "monitoreo": "Monitoring",
-      "scheduling": "Scheduling",
+      "scheduling": "Appointment Center",
       "patients": "Patients",
       "services": "Services",
       "billing": "Billing",
@@ -1135,7 +1137,7 @@
     "configNumeracion": "Numbering",
     "inventario_viales": "Vials",
     "planificacionCompras": "Purchase planning",
-    "calendario": "Calendar",
+    "calendario": "Staff absences",
     "recepcionFactura": "Receive from invoice",
     "configuracion_datos_paciente": "Required patient data",
     "collapseNav": "Collapse menu",
@@ -1533,14 +1535,6 @@
       }
     }
   },
-  "landing": {
-    "badge": "Regenerative Medicine Center",
-    "title": "Clinical management, simple and modern",
-    "subtitle": "Patients, appointments and records in one place. A shadcn/ui base ready to build the CMR system.",
-    "signIn": "Sign in",
-    "viewComponents": "View components",
-    "themeHint": "Press <kbd>d</kbd> to toggle the theme"
-  },
   "login": {
     "title": "Sign in",
     "subtitle": "Regenerative Medicine Center",
@@ -1550,7 +1544,6 @@
     "emailPlaceholder": "you@email.com",
     "signingIn": "Signing in…",
     "signIn": "Sign in",
-    "backHome": "← Back to home",
     "errorEmptyCredentials": "Enter your email and password.",
     "forgot": "Forgot your password?",
     "forgotTitle": "Reset password",
@@ -1742,7 +1735,7 @@
     }
   },
   "frontdesk": {
-    "title": "Frontdesk",
+    "title": "Patient Center",
     "live": "Live",
     "fecha": "Date",
     "citar": "Book",
@@ -3377,7 +3370,7 @@
     "saved": "Fiscal data saved",
     "noPermiso": "You don't have permission to edit (centro.fiscal.write).",
     "preview": "Preview",
-    "autopresenteTitle": "Frontdesk",
+    "autopresenteTitle": "Patient Center",
     "autopresenteLabel": "Auto check-in on payment",
     "autopresenteHelp": "When an invoice is settled the same day (including 100% courtesy at total 0), each service line enters the frontdesk marked present.",
     "consultaTabTitle": "Consultation tab",
@@ -4154,7 +4147,8 @@
       "semana": "Week",
       "dia": "Day",
       "agenda": "Agenda"
-    }
+    },
+    "pageTitle": "Staff absences"
   },
   "recepcionFactura": {
     "title": "Receive from invoice",
@@ -4625,5 +4619,14 @@
       "reasonRequired": "Write the reason to reopen.",
       "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
     }
+  },
+  "picker": {
+    "pickDate": "Pick a date",
+    "pickTime": "Pick a time",
+    "today": "Today",
+    "clear": "Clear",
+    "hour": "Hour",
+    "minute": "Min",
+    "period": "AM/PM"
   }
 }

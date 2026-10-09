@@ -25,7 +25,7 @@ import { useMe, isAdmin } from "@/hooks/use-me";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { Tooltip } from "@/components/ui/tooltip";
 import { DataTable, type Column } from "@/components/kit/data-table";
@@ -312,11 +312,11 @@ export function AuditoriaLog() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <div className="space-y-1">
           <Label className="text-xs">{t("desde")}</Label>
-          <Input type="date" className="h-9" value={desde} onChange={(e) => onFilter(setDesde)(e.target.value)} />
+          <DatePicker className="h-9" value={desde} onChange={onFilter(setDesde)} clearable />
         </div>
         <div className="space-y-1">
           <Label className="text-xs">{t("hasta")}</Label>
-          <Input type="date" className="h-9" value={hasta} onChange={(e) => onFilter(setHasta)(e.target.value)} />
+          <DatePicker className="h-9" value={hasta} onChange={onFilter(setHasta)} clearable />
         </div>
         <div className="space-y-1">
           <Label className="text-xs">{t("col.dominio")}</Label>

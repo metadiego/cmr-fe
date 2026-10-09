@@ -116,39 +116,39 @@ export default function ClientesPage() {
     <PageContainer>
       <PageHeader
         title={t("title")}
-        count={state.kind === "ok" ? state.data.pagination.total : undefined}
-        actions={
-          <Can permiso="pacientes.create">
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              <HugeiconsIcon icon={Add01Icon} className="size-4" />
-              {t("new")}
-            </Button>
-          </Can>
-        }
+        count={state.kind === "ok" ? t("total", { count: state.data.pagination.total }) : undefined}
       />
 
       <ListToolbar
         search={q}
         onSearchChange={onSearch}
         searchPlaceholder={t("searchPlaceholder")}
+        filters={
+          multiCentro && (
+            <Select value={scope || undefined} onValueChange={onScopeChange}>
+              <SelectTrigger className="w-[190px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {puedeCombinado && (
+                  <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
+                )}
+                {centros.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )
+        }
       >
-        {multiCentro && (
-          <Select value={scope || undefined} onValueChange={onScopeChange}>
-            <SelectTrigger size="sm" className="w-[190px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {puedeCombinado && (
-                <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
-              )}
-              {centros.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <Can permiso="pacientes.create">
+          <Button onClick={() => setCreateOpen(true)}>
+            <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+            {t("new")}
+          </Button>
+        </Can>
       </ListToolbar>
 
       <DataTable>

@@ -10,6 +10,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { HOME_ROUTE } from "@/lib/home-route";
 
 const MIN_LENGTH = 8;
 
@@ -38,7 +39,7 @@ export default function ChangePasswordPage() {
       toast.success(t("success"));
       // Hard navigation so SessionGate (in the persistent layout) refetches
       // /auth/me and sees mustChangePassword=false — avoids a redirect loop.
-      window.location.assign("/dashboard");
+      window.location.assign(HOME_ROUTE);
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setSubmitting(false);

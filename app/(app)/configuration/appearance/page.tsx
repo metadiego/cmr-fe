@@ -24,6 +24,7 @@ import { formatFechaSolo } from "@/lib/format/fecha";
 import { ThemeEditor } from "@/components/theme/theme-editor";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -329,11 +330,11 @@ export default function AparienciaCorporativaPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ov-hasta">{t("overrideUntil")}</Label>
-                <Input
+                <DatePicker
                   id="ov-hasta"
-                  type="date"
                   value={hastaOverride}
-                  onChange={(e) => setHastaOverride(e.target.value)}
+                  onChange={setHastaOverride}
+                  clearable
                 />
               </div>
               <Button

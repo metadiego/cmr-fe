@@ -20,7 +20,7 @@ import {
   textoDeCapacidad,
 } from "@/lib/inventario/viales";
 import { Frasco, PilaDeFrascos } from "@/components/inventario/frasco";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import {
@@ -151,20 +151,20 @@ export default function VialesPage() {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="v-desde">{t("desde")}</Label>
-          <Input
+          <DatePicker
             id="v-desde"
-            type="date"
             value={desde}
-            onChange={(e) => setDesde(e.target.value)}
+            onChange={setDesde}
+            clearable
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="v-hasta">{t("hasta")}</Label>
-          <Input
+          <DatePicker
             id="v-hasta"
-            type="date"
             value={hasta}
-            onChange={(e) => setHasta(e.target.value)}
+            onChange={setHasta}
+            clearable
           />
         </div>
       </div>

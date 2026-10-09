@@ -37,7 +37,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CitaModal } from "@/components/agenda/cita-modal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { LiveBadge } from "@/components/live-badge";
 
@@ -150,10 +150,9 @@ export function DiaView({ fecha }: { fecha: string }) {
                 que editar la URL a mano. La fecha vive en la ruta. Handoff bug-agenda-sin-selector-de-fecha §1. */}
             <div className="inline-flex items-center gap-1">
               <Button variant="outline" size="icon" className="size-8" aria-label={t("prevDay")} onClick={() => router.push(`/scheduling/appointments/${shiftDay(fecha, -1)}`)}>‹</Button>
-              <Input
-                type="date"
+              <DatePicker
                 value={fecha}
-                onChange={(e) => e.target.value && router.push(`/scheduling/appointments/${e.target.value}`)}
+                onChange={(v) => v && router.push(`/scheduling/appointments/${v}`)}
                 className="h-8 w-auto"
                 aria-label={t("fecha")}
               />

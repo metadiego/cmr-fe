@@ -13,6 +13,8 @@ import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -212,10 +214,10 @@ export function CitaFormSheet({
 
           <div className="grid grid-cols-2 gap-4">
             <FieldRow label={t("date")} required>
-              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <DatePicker value={fecha} onChange={setFecha} />
             </FieldRow>
             <FieldRow label={t("time")}>
-              <Input type="time" step={60} value={hora} onChange={(e) => setHora(e.target.value)} />
+              <TimePicker value={hora} onChange={setHora} />
             </FieldRow>
           </div>
 

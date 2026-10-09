@@ -14,6 +14,7 @@ import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -116,7 +117,7 @@ export function SesionModal({
           )}
 
           <Field label={t("date")} required>
-            <Input type="date" value={fecha} readOnly className="bg-muted/40" />
+            <DatePicker value={fecha} onChange={() => {}} readOnly />
           </Field>
 
           <Field label={t("patient")} required>

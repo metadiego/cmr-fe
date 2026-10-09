@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { sentenceCase } from "@/lib/format/text";
+import { useFormatter, useTranslations, useLocale } from "next-intl";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
@@ -22,9 +23,13 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { parseDayUTC } from "@/lib/format/fecha";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -44,6 +49,7 @@ const COLOR: Record<string, { chip: string; dot: string }> = {
   verde: { chip: "bg-success text-success-foreground border-success/40", dot: "bg-success-foreground" },
 };
 type Vista = "mes" | "semana" | "dia" | "agenda";
+const VISTAS: Vista[] = ["mes", "semana", "dia", "agenda"];
 
 const p2 = (n: number) => String(n).padStart(2, "0");
 const ymd = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
@@ -62,6 +68,7 @@ export function Calendario() {
   const tc = useTranslations("common");
   const tRoot = useTranslations();
   const locale = useLocale();
+  const format = useFormatter();
   const me = useMe();
 
   // Selector de centro EN la pantalla (patrón único, no en el nav): lee/escribe por permiso, sin tocar
@@ -123,11 +130,16 @@ export function Calendario() {
 
   // Título según la vista.
   const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale, o).format(d);
-  const titulo =
-    vista === "mes" ? fmt(cursor, { month: "long", year: "numeric" })
-    : vista === "semana" ? `${fmt(domingoDeLaSemana(cursor), { day: "numeric", month: "short" })} – ${fmt(addDias(domingoDeLaSemana(cursor), 6), { day: "numeric", month: "short", year: "numeric" })}`
-    : vista === "dia" ? fmt(cursor, { weekday: "long", day: "numeric", month: "long", year: "numeric" })
-    : t("proximos");
+  // Period title through the named formats (they pin UTC, so feed them the cursor's day at UTC noon),
+  // sentence-cased: "Octubre de 2026", never the CSS `capitalize` "Octubre De 2026".
+  const asDay = (d: Date) => parseDayUTC(ymd(d)) ?? d;
+  const titulo = sentenceCase(
+    vista === "mes" ? format.dateTime(asDay(cursor), "monthYear")
+    : vista === "semana" ? `${format.dateTime(asDay(domingoDeLaSemana(cursor)), "dayMonth")} – ${format.dateTime(asDay(addDias(domingoDeLaSemana(cursor), 6)), "dayMonthYear")}`
+    : vista === "dia" ? format.dateTime(asDay(cursor), "dayWeekdayLong")
+    : t("proximos"),
+    locale,
+  );
 
   function irRel(delta: number) {
     if (vista === "mes") setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + delta, 1));
@@ -142,47 +154,45 @@ export function Calendario() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={<span className="capitalize">{titulo}</span>}
-        actions={
+      <PageHeader title={t("pageTitle")} />
+
+      {/* View tabs: they switch how the same events are laid out, so they get their own row. */}
+      <Tabs value={vista} onValueChange={(v) => setVista(v as Vista)}>
+        <TabsList>
+          {VISTAS.map((v) => (
+            <TabsTrigger key={v} value={v}>{t(`vista.${v}`)}</TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      {/* Toolbar: period navigation + center filter on the left, the create action on the right. */}
+      <div className="flex flex-wrap items-center gap-2">
+        {vista !== "agenda" && (
           <>
-            {vista !== "agenda" && (
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(-1)} aria-label={t("anterior")}>
-                  <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setCursor(new Date())}>{t("hoy")}</Button>
-                <Button variant="outline" size="icon" className="size-8" onClick={() => irRel(1)} aria-label={t("siguiente")}>
-                  <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" />
-                </Button>
-              </div>
-            )}
-            {/* Selector de vista */}
-            <div className="inline-flex rounded-md border p-0.5 text-xs">
-              {(["mes", "semana", "dia", "agenda"] as Vista[]).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setVista(v)}
-                  className={cn("rounded-md px-2.5 py-1 font-medium transition-colors", vista === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
-                >
-                  {t(`vista.${v}`)}
-                </button>
-              ))}
-            </div>
-            {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
-
-            {/* Selector de centro EN la pantalla (patrón único). Solo si hay más de uno; el de la sesión preseleccionado. */}
-            <CentroPantallaSelector estado={centro} />
-
-            {puedeCrear && (
-              <Button size="sm" onClick={() => setModal({ dia: hoyStr() })}>
-                <HugeiconsIcon icon={Add01Icon} className="size-4" /> {t("nuevo")}
-              </Button>
-            )}
+            <Button variant="outline" size="icon" onClick={() => irRel(-1)} aria-label={t("anterior")}>
+              <HugeiconsIcon icon={ArrowLeft01Icon} />
+            </Button>
+            <Button variant="outline" onClick={() => setCursor(new Date())}>{t("hoy")}</Button>
+            <Button variant="outline" size="icon" onClick={() => irRel(1)} aria-label={t("siguiente")}>
+              <HugeiconsIcon icon={ArrowRight01Icon} />
+            </Button>
           </>
-        }
-      />
+        )}
+        <h2 className="px-1 text-lg font-semibold">{titulo}</h2>
+
+        {/* On-screen center selector (single pattern). Only with more than one center; the session's one preselected. */}
+        <CentroPantallaSelector estado={centro} />
+        {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
+
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {puedeCrear && (
+            <Button onClick={() => setModal({ dia: hoyStr() })}>
+              <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+              {t("nuevo")}
+            </Button>
+          )}
+        </div>
+      </div>
 
       {/* MES */}
       {vista === "mes" && (
@@ -388,14 +398,14 @@ function EventoModal({
         <div className="space-y-3 text-sm">
           <Campo label={t("field.titulo")}><Input value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={soloLectura} autoFocus /></Campo>
           <div className="grid grid-cols-2 gap-3">
-            <Campo label={t("field.dia")}><Input type="date" value={dia} onChange={(e) => setDia(e.target.value)} disabled={soloLectura} /></Campo>
-            <Campo label={t("field.diaFin")}><Input type="date" value={diaFin} onChange={(e) => setDiaFin(e.target.value)} disabled={soloLectura} /></Campo>
+            <Campo label={t("field.dia")}><DatePicker value={dia} onChange={setDia} disabled={soloLectura} /></Campo>
+            <Campo label={t("field.diaFin")}><DatePicker value={diaFin} onChange={setDiaFin} disabled={soloLectura} clearable /></Campo>
           </div>
           <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={todoDia} onChange={(e) => setTodoDia(e.target.checked)} disabled={soloLectura} />{t("field.todoDia")}</label>
           {!todoDia && (
             <div className="grid grid-cols-2 gap-3">
-              <Campo label={t("field.hora")}><Input type="time" step={60} value={hora} onChange={(e) => setHora(e.target.value)} disabled={soloLectura} /></Campo>
-              <Campo label={t("field.horaFin")}><Input type="time" step={60} value={horaFin} onChange={(e) => setHoraFin(e.target.value)} disabled={soloLectura} /></Campo>
+              <Campo label={t("field.hora")}><TimePicker clearable value={hora} onChange={setHora} disabled={soloLectura} /></Campo>
+              <Campo label={t("field.horaFin")}><TimePicker clearable value={horaFin} onChange={setHoraFin} disabled={soloLectura} /></Campo>
             </div>
           )}
           <Campo label={t("field.categoria")}>

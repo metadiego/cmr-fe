@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense, useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -95,11 +94,6 @@ function LoginForm() {
         </form>
       </div>
 
-      <p className="text-center text-xs text-muted-foreground">
-        <Link href="/" className="hover:text-foreground">
-          {t("backHome")}
-        </Link>
-      </p>
     </div>
   );
 }

@@ -26,7 +26,7 @@ import { useEstados } from "@/hooks/use-estados";
 import { Badge } from "@/components/ui/badge";
 import { addMinutes, todayISO } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -317,7 +317,7 @@ export function CitaModal({
               del tipo ese día, horas enteras, fin automática, no bloqueante. Handoff citas-hora-por-cupo. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("date")} required>
-              <Input type="date" value={fechaSel} onChange={(e) => e.target.value && setFechaSel(e.target.value)} />
+              <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} />
             </Field>
             <Field label={t("time")} required>
               <div className="mb-1.5 flex items-center justify-between gap-2">

@@ -25,6 +25,7 @@ import { LocaleSync } from "@/components/locale-sync";
 import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
 import { useHasCustomBackground } from "@/components/presentation-provider";
 import { cn } from "@/lib/utils";
+import { PageTitleInShellContext } from "@/components/ui/page";
 
 // Shell ÚNICO: rail navy (AppSidebar) + inset con header y contenido. Reemplaza el
 // esquema dual anterior (SiteHeader clásico / NavSidebar beta, alternados por
@@ -83,11 +84,15 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   };
   // Match against the FE-owned resolved route (not the BE path), so the section
   // title survives route renames (Phase 1+). Most specific (longest) route wins.
-  const active = menu
+  const activeMatch = menu
     .map((m) => ({ item: m, route: routeForClave(m.slug, m.path) }))
     .filter(({ route }) => !!route && route !== "#" && isActive(pathname, route))
-    .sort((a, b) => b.route.length - a.route.length)[0]?.item;
+    .sort((a, b) => b.route.length - a.route.length)[0];
+  const active = activeMatch?.item;
   const sectionTitle = active ? labelOf(active) : "";
+  // On the menu destination itself the top bar already names the page, so page headers hide
+  // their own title (see PageTitleInShellContext). Deeper routes keep theirs.
+  const titleInShell = !!activeMatch && pathname.replace(/\/$/, "") === activeMatch.route.replace(/\/$/, "");
 
   // Pinned = the user's deliberate choice (header toggle / Ctrl+B), same cookie-backed state
   // shadcn always had. Peeking = hovering the collapsed rail (owner's request, 2026-09-23):
@@ -117,7 +122,7 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
       <SidebarProvider open={pinnedOpen || peeking} onOpenChange={togglePinned}>
         <AppSidebar onHoverChange={setPeeking} />
         <ShellBody sectionTitle={sectionTitle} session={session} sinPerfil={sinPerfil} onCollapseRequest={collapseNow}>
-          {children}
+          <PageTitleInShellContext.Provider value={titleInShell}>{children}</PageTitleInShellContext.Provider>
         </ShellBody>
       </SidebarProvider>
     </TooltipProvider>

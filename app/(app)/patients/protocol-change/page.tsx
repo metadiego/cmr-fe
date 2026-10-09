@@ -10,7 +10,6 @@ import { PacienteSelect } from "@/components/citas/paciente-select";
 import type { Paciente } from "@/lib/api/pacientes";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { CambioProtocoloForm } from "@/components/clientes/cambio-protocolo-form";
-import { Label } from "@/components/ui/label";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Ruta suelta de «Cambio de protocolo». El dueño la movió a una pestaña de la ficha del paciente (1-oct) y
@@ -37,11 +36,13 @@ export default function CambioProtocoloPage() {
   return (
     <PageContainer>
       <PageHeader title={t("title")} description={t("help")} />
-      <div className="max-w-md">
-        <Label>{t("paciente")}</Label>
-        <PacienteSelect value={paciente} onChange={setPaciente} />
+      {/* Toolbar: the patient search is the only control that narrows the view. */}
+      <div role="search" aria-label={t("paciente")} className="flex flex-wrap items-center gap-2">
+        <div className="w-full sm:max-w-sm">
+          <PacienteSelect value={paciente} onChange={setPaciente} />
+        </div>
       </div>
-      {pacienteId && <div className="mt-6"><CambioProtocoloForm pacienteId={pacienteId} centro={centro ?? undefined} /></div>}
+      {pacienteId && <CambioProtocoloForm pacienteId={pacienteId} centro={centro ?? undefined} />}
     </PageContainer>
   );
 }

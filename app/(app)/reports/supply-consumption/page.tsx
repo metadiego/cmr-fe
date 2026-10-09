@@ -9,7 +9,7 @@ import { PrinterIcon, Download04Icon, ArrowRight01Icon } from "@hugeicons/core-f
 import { getConsumoInsumos, type ConsumoInsumo, type EstimadoFiltro } from "@/lib/api/facturacion-reportes";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -101,11 +101,11 @@ export default function ConsumoInsumosPage() {
       <div className="flex flex-wrap items-end gap-3 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4 no-print">
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
-          <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
+          <DatePicker value={desde} onChange={setDesde} className="h-9 w-[160px]" />
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("to")}</span>
-          <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-9 w-[160px]" />
+          <DatePicker value={hasta} onChange={setHasta} className="h-9 w-[160px]" />
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-muted-foreground">{t("tipo")}</span>

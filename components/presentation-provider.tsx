@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTheme } from "next-themes";
+import { appThemeFromPreferences } from "@/lib/theme/app-theme";
 
 import { useIsDark } from "@/hooks/use-is-dark";
 import { createClient } from "@/lib/supabase/client";
@@ -60,12 +61,12 @@ export function PresentationProvider({ children }: { children: React.ReactNode }
         // El tema vive en el PERFIL, no en el navegador: se aplica el que resuelve el BE (claro por
         // defecto; oscuro solo si el usuario lo eligió), IGNORANDO lo que hubiera en localStorage — eso
         // es justo lo que antes dejaba el oscuro pegado en un Chrome. Handoff be-el-tema-arranca-en-claro.
-        if (session) {
-          const tema = (res as MyPreferences)?.tema;
-          setTheme(tema === "oscuro" ? "dark" : "light");
-        }
+        if (session) setTheme(appThemeFromPreferences(res as MyPreferences));
       } catch {
-        // No preferences / not reachable → keep globals.css defaults.
+        // No preferences / not reachable → keep globals.css defaults, and fall back to LIGHT rather
+        // than whatever mode this browser last stored: the theme belongs to the profile, so an
+        // unreadable profile must not leave a stale dark mode on screen.
+        if (active) setTheme("light");
       }
     })();
 

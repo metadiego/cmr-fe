@@ -6,7 +6,7 @@
 // route-reorg to DECOUPLE the FE URL/menu structure from BE `menu_items`.
 //
 // - route:  FE-owned URL (Phase 1 made these English).
-// - group:  which of the 9 top-level menu groups it belongs to (Phase 2).
+// - group:  which of the 8 top-level menu groups it belongs to (Phase 2).
 // - order:  order within that group (Phase 2). Grouping/order are FE-owned;
 //           the BE only decides visibility/permission + per-center label.
 //
@@ -15,7 +15,7 @@
 // BE path so nothing dead-links, without asserting them as real FE routes.
 
 export type NavGroupKey =
-  | "scheduling" | "patients" | "services" | "billing" | "reports"
+  | "scheduling" | "services" | "billing" | "reports"
   | "inventory" | "communications" | "admin" | "configuration";
 
 export interface NavGroupDef {
@@ -25,17 +25,18 @@ export interface NavGroupDef {
   order: number;    // top-level display order in the rail
 }
 
-// The 9-group taxonomy (route prefix = menu group). Order = top-to-bottom.
+// The 8-group taxonomy. Order = top-to-bottom. There is no separate "patients" group: the patient
+// list lives under Services next to the front desk and nursing panel, the screens that work with it
+// day to day (owner decision, 2026-10).
 export const NAV_GROUPS: NavGroupDef[] = [
   { key: "scheduling", labelKey: "nav.grupo.scheduling", icon: "calendar", order: 1 },
-  { key: "patients", labelKey: "nav.grupo.patients", icon: "patients", order: 2 },
-  { key: "services", labelKey: "nav.grupo.services", icon: "stethoscope", order: 3 },
-  { key: "billing", labelKey: "nav.grupo.billing", icon: "invoice", order: 4 },
-  { key: "reports", labelKey: "nav.grupo.reports", icon: "chart", order: 5 },
-  { key: "inventory", labelKey: "nav.grupo.inventory", icon: "package", order: 6 },
-  { key: "communications", labelKey: "nav.grupo.communications", icon: "bell", order: 7 },
-  { key: "admin", labelKey: "nav.grupo.admin", icon: "users", order: 8 },
-  { key: "configuration", labelKey: "nav.grupo.configuration", icon: "settings", order: 9 },
+  { key: "services", labelKey: "nav.grupo.services", icon: "stethoscope", order: 2 },
+  { key: "billing", labelKey: "nav.grupo.billing", icon: "invoice", order: 3 },
+  { key: "reports", labelKey: "nav.grupo.reports", icon: "chart", order: 4 },
+  { key: "inventory", labelKey: "nav.grupo.inventory", icon: "package", order: 5 },
+  { key: "communications", labelKey: "nav.grupo.communications", icon: "bell", order: 6 },
+  { key: "admin", labelKey: "nav.grupo.admin", icon: "users", order: 7 },
+  { key: "configuration", labelKey: "nav.grupo.configuration", icon: "settings", order: 8 },
 ];
 
 export type NavEntry = {
@@ -52,13 +53,12 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "calendario", route: "/scheduling/calendar", group: "scheduling", order: 3 },
   { clave: "atencion", route: "/boards/atencion", group: "scheduling", order: 4 }, // board surfaced in scheduling
   { clave: "therapy-day", route: "/scheduling/therapy-day", group: "scheduling", order: 5 },
-  // Patients
-  { clave: "clientes", route: "/patients", group: "patients", order: 1 },
-  { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "patients", order: 2 },
-  // Services (boards + nursing)
+  // Services: Patient Center (front desk), Patients, Nursing Panel; then the services board and protocol change
   { clave: "frontdesk", route: "/boards/frontdesk", group: "services", order: 1 },
-  { clave: "servicios", route: "/boards/servicios", group: "services", order: 2 },
+  { clave: "clientes", route: "/patients", group: "services", order: 2 },
   { clave: "panel-enfermeria", route: "/services/nursing-panel", group: "services", order: 3 },
+  { clave: "servicios", route: "/boards/servicios", group: "services", order: 4 },
+  { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "services", order: 5 },
   // Billing
   { clave: "facturacion", route: "/billing/invoices", group: "billing", order: 1 },
   { clave: "consultas", route: "/billing/consultations", group: "billing", order: 2 },

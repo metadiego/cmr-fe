@@ -15,6 +15,7 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { toastError } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -143,8 +144,8 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                 {ESTADOS.map((e) => <SelectItem key={e} value={e}>{t(`estado.${e}`)}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} aria-label={t("from")} className="h-8 w-[150px]" />
-            <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} aria-label={t("to")} className="h-8 w-[150px]" />
+            <DatePicker value={desde} onChange={setDesde} aria-label={t("from")} className="h-8 w-[150px]" clearable />
+            <DatePicker value={hasta} onChange={setHasta} aria-label={t("to")} className="h-8 w-[150px]" clearable />
           </ListToolbar>
 
           <DataTable>

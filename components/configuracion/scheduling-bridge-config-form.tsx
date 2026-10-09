@@ -11,6 +11,7 @@ import { weekdayLabel, WEEKDAYS_MON_FIRST } from "@/lib/i18n/weekdays";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Switch } from "@/components/ui/switch";
 import { Field } from "@/components/kit/form-dialog";
 import {
@@ -123,10 +124,10 @@ export function SchedulingBridgeConfigForm({
           </Select>
         </Field>
         <Field label={t("workStart")}>
-          <Input type="time" step={60} value={draft.workStartTime} onChange={(e) => patch({ workStartTime: e.target.value })} disabled={!puedeEscribir} />
+          <TimePicker value={draft.workStartTime} onChange={(v) => patch({ workStartTime: v })} disabled={!puedeEscribir} />
         </Field>
         <Field label={t("workEnd")}>
-          <Input type="time" step={60} value={draft.workEndTime} onChange={(e) => patch({ workEndTime: e.target.value })} disabled={!puedeEscribir} />
+          <TimePicker value={draft.workEndTime} onChange={(v) => patch({ workEndTime: v })} disabled={!puedeEscribir} />
         </Field>
       </div>
 

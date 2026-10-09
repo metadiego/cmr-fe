@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -347,11 +347,10 @@ export function NuevaCitaModal({
                   </button>
                 );
               })}
-              <Input
-                type="date"
+              <DatePicker
                 value={fecha}
-                onChange={(e) => setFecha(e.target.value)}
-                className="h-9 w-[9.5rem]"
+                onChange={setFecha}
+                className="w-[9.5rem]"
                 min={todayISO()}
               />
             </div>

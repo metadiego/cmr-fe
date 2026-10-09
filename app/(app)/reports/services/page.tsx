@@ -11,7 +11,7 @@ import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
@@ -148,11 +148,11 @@ export default function EstadisticasServiciosPage() {
           <div className="flex flex-wrap items-end gap-3 rounded-md bg-card p-4 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10 no-print">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t("from")}</span>
-              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-9 w-[160px]" />
+              <DatePicker value={desde} onChange={setDesde} className="h-9 w-[160px]" />
             </label>
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t("to")}</span>
-              <Input type="date" value={hasta} min={desde} onChange={(e) => setHasta(e.target.value)} className="h-9 w-[160px]" />
+              <DatePicker value={hasta} min={desde} onChange={setHasta} className="h-9 w-[160px]" />
             </label>
             <Button className="h-9" onClick={() => setQuery({ desde, hasta })}>{t("generate")}</Button>
             {gate.puedeCambiar && gate.centro && gate.centros.length > 1 && (

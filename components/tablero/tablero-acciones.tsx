@@ -14,6 +14,8 @@ import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -179,9 +181,9 @@ function Field({
       {field === "motivo" ? (
         <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={2} />
       ) : field === "fecha" ? (
-        <Input type="date" value={value} onChange={(e) => onChange(e.target.value)} />
+        <DatePicker value={value} onChange={onChange} />
       ) : field === "hora" ? (
-        <Input type="time" step={60} value={value} onChange={(e) => onChange(e.target.value)} />
+        <TimePicker value={value} onChange={onChange} />
       ) : isEnfermera ? (
         <Select value={value || undefined} onValueChange={onChange}>
           <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>

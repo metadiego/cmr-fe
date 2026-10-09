@@ -10,7 +10,7 @@ import { toastError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { FormDialog, Field } from "@/components/kit/form-dialog";
 
 // Overview cards, one per visible center — GET /status returns ALL requested
@@ -153,10 +153,10 @@ function RunNowDialog({
       submitLabel={t("runNowSubmit")}
     >
       <Field label={t("from")}>
-        <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
+        <DatePicker value={desde} onChange={setDesde} />
       </Field>
       <Field label={t("to")}>
-        <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
+        <DatePicker value={hasta} onChange={setHasta} />
       </Field>
       {!rangoValido && (
         <p className="text-xs text-destructive">{t("runNowRangeInvalid", { max: MAX_DIAS })}</p>

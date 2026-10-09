@@ -59,6 +59,27 @@ test("does not surface home/dashboard as domain leaves", () => {
   assert.deepEqual(groups[0].children.map((c) => c.slug), ["facturacion"]);
 });
 
+test("does not surface cupos: it opens from the Citas settings button", () => {
+  const items: NavMenuItem[] = [
+    { slug: "citas", labelKey: "nav.citas", path: "/scheduling/appointments", parentSlug: "g-agenda" },
+    { slug: "cupos", labelKey: "nav.cupos", path: "/scheduling/slots", parentSlug: "g-agenda" },
+  ];
+  const groups = buildNavGroups(items, () => true);
+  assert.deepEqual(groups.map((g) => g.slug), ["scheduling"]);
+  assert.deepEqual(groups[0].children.map((c) => c.slug), ["citas"]);
+});
+
+test("hides any row that leads to scheduling configuration, whatever its clave or label", () => {
+  const items: NavMenuItem[] = [
+    { slug: "citas", labelKey: "nav.citas", path: "/scheduling/appointments", parentSlug: "g-agenda" },
+    { slug: "agenda-config", labelKey: "x", customLabel: "Configuración de agenda", path: "/scheduling/slots", parentSlug: "g-agenda" },
+    { slug: "cupos-legacy", labelKey: "x", path: "/citas/agenda/cupos", parentSlug: "g-agenda" },
+  ];
+  const groups = buildNavGroups(items, () => true);
+  const leaves = groups.flatMap((g) => g.children.map((c) => c.slug));
+  assert.deepEqual(leaves, ["citas"]);
+});
+
 test("unknown clave falls back to a BE-parent group (nothing lost)", () => {
   const items: NavMenuItem[] = [
     { slug: "g-monitoreo", labelKey: "nav.grupo.monitoreo", type: "grupo", path: "#" },

@@ -20,6 +20,7 @@ import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -237,7 +238,7 @@ export function RecepcionDesdeFactura() {
                     <Campo label={t("col.cantidad")}><Input inputMode="decimal" value={f.cantidad} onChange={(e) => setFila(i, { cantidad: e.target.value })} /></Campo>
                     <Campo label={t("col.costo")}><Input inputMode="decimal" value={f.costo} onChange={(e) => setFila(i, { costo: e.target.value })} /></Campo>
                     <Campo label={t("col.lote")}><Input value={f.lote} onChange={(e) => setFila(i, { lote: e.target.value })} /></Campo>
-                    <Campo label={t("col.venc")}><Input type="date" value={f.venc} onChange={(e) => setFila(i, { venc: e.target.value })} /></Campo>
+                    <Campo label={t("col.venc")}><DatePicker value={f.venc} onChange={(v) => setFila(i, { venc: v })} clearable /></Campo>
                   </div>
                 </div>
               </div>
@@ -260,7 +261,7 @@ export function RecepcionDesdeFactura() {
               <Input value={proveedores.find((p) => p.id === proveedorId)?.name ?? t("field.sinProveedor")} disabled />
             </Campo>
             <Campo label={t("field.factura")}><Input value={numeroFactura} onChange={(e) => setNumeroFactura(e.target.value)} placeholder="F-000" /></Campo>
-            <Campo label={t("field.fecha")}><Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} /></Campo>
+            <Campo label={t("field.fecha")}><DatePicker value={fecha} onChange={setFecha} /></Campo>
           </div>
           <Campo label={t("field.notas")}><Textarea value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} /></Campo>
           <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-sm">

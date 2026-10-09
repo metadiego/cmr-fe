@@ -16,6 +16,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import {
   TableBody,
@@ -269,19 +270,11 @@ function CreateOverrideDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>{t("from")}</Label>
-              <Input
-                type="date"
-                value={desde}
-                onChange={(e) => setDesde(e.target.value)}
-              />
+              <DatePicker value={desde} onChange={setDesde} clearable />
             </div>
             <div className="space-y-1.5">
               <Label>{t("to")}</Label>
-              <Input
-                type="date"
-                value={hasta}
-                onChange={(e) => setHasta(e.target.value)}
-              />
+              <DatePicker value={hasta} onChange={setHasta} clearable />
             </div>
           </div>
 

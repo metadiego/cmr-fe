@@ -10,6 +10,7 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { HOME_ROUTE } from "@/lib/home-route";
 
 const MIN_LENGTH = 8;
 
@@ -114,7 +115,7 @@ export default function SetPasswordPage() {
       if (error) throw error;
       toast.success(t("success"));
       // Hard navigation so the session is read fresh.
-      window.location.assign("/dashboard");
+      window.location.assign(HOME_ROUTE);
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setSubmitting(false);
@@ -149,7 +150,7 @@ export default function SetPasswordPage() {
       const { error: upErr } = await supabase.auth.updateUser({ password });
       if (upErr) throw upErr;
       toast.success(t("success"));
-      window.location.assign("/dashboard");
+      window.location.assign(HOME_ROUTE);
     } catch (err) {
       toast.error(apiErrorMessage(err));
       setSubmitting(false);

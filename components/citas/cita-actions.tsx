@@ -28,7 +28,8 @@ import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
 import { useEstados } from "@/hooks/use-estados";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -363,11 +364,11 @@ function RescheduleDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>{t("date")}</Label>
-              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+              <DatePicker value={fecha} onChange={setFecha} />
             </div>
             <div className="space-y-1.5">
               <Label>{t("time")}</Label>
-              <Input type="time" step={60} value={hora} onChange={(e) => setHora(e.target.value)} />
+              <TimePicker value={hora} onChange={setHora} />
             </div>
           </div>
 
