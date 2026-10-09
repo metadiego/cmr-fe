@@ -23,11 +23,11 @@ Ficha corta para ubicarse en un minuto. El detalle está en el runbook del hub:
   `EPSON_TM_T20II`, por IPP. Verificado: ticket impreso desde el servidor.
 - **Próximo cambio:** la caja `192.130.80.100` (Windows), impresora compartida como
   `EPSON TM-T20II Receipt5` (foto en `.personal/PHOTO-2026-10-09-10-30-49.jpg`).
-  **Bloqueo visto el 9-oct (por HTTP, solo lectura):** el hub (servicio como LocalSystem) no entra a
-  esa impresora — `/discover` no lista nada y `/status` dice «The specified network name is no longer
-  available». Windows avisa en esa misma pantalla: solo imprimen usuarios con usuario y contraseña de
-  ese equipo. Solución en el runbook §3: correr el servicio con un usuario que la caja acepte, o
-  permitir imprimir a «Todos» en esa impresora.
+  **Lista para usarse (9-oct, verificado con ticket impreso por el servicio):** la caja tiene el
+  usuario local `cmrprint` y su credencial está en el servidor
+  (`C:\ProgramData\cmr-print-hub\smb-credentials\192.130.80.100`). Para cambiar a ella: en la app,
+  impresora = `192.130.80.100`, **Detectar**, cola `EPSON TM-T20II Receipt5`. Cada caja Windows nueva
+  necesita lo mismo: runbook §3.1.
 
 ## Lo de todos los días
 
