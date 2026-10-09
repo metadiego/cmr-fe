@@ -187,6 +187,11 @@ Con el driver ya corregido (sección anterior):
   lo quita de en medio.
 - **Firefox**: sigue sin funcionar pase lo que pase con sus ajustes. No usar Firefox para imprimir
   recibos hasta que alguien encuentre la causa específica de Firefox.
+  **Probado y descartado el 9-oct-2026** (sugerencia encontrada en Google por el dueño): declarar el
+  rollo con `@page { size: 80mm auto; margin: 0 }` y `body { width: 80mm }` en la página del recibo, en
+  Firefox de la Mac con la Epson TM-T20II → **no funcionó**. El experimento (`?pageSize=`) se retiró.
+  En Firefox se imprime por el **hub ESC/POS** (botón «Respaldo: imprimir por el hub»), que sale mejor
+  que cualquier navegador.
 
 **Tener más de un navegador a mano** (Chrome y, si falla, Edge/Brave con Márgenes en Mínimo) da
 redundancia real para el día a día — Chrome puede fallar sin motivo aparente de vez en cuando.

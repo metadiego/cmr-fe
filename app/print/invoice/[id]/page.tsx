@@ -24,10 +24,6 @@ export default function PrintInvoicePage() {
   // factura (bug real encontrado: la pantalla de facturación ya resuelve el centro por `?centro=`, pero el
   // iframe no lo pasaba). La cookie queda de respaldo solo si no vino en la URL.
   const centroParam = searchParams?.get("centro") || undefined;
-  // EXPERIMENT (2026-10-09, Firefox): `?pageSize=80` declares the page as a continuous roll of that width
-  // (@page size: <n>mm auto). Only with the parameter, so the Chrome path that works is untouched. Remove
-  // or adopt after the test — see docs/specs/recibo-termico-causa-raiz-y-arreglo.md.
-  const pageSizeMm = Number(searchParams?.get("pageSize")) || 0;
   const [recibo, setRecibo] = React.useState<Recibo | null>(null);
   const [error, setError] = React.useState(false);
   // Firefox no imprime bien este recibo pase lo que pase con sus ajustes (causa aún sin encontrar; Chrome,
@@ -104,9 +100,6 @@ export default function PrintInvoicePage() {
           Este navegador (Firefox) no imprime bien este recibo. Usa Chrome, Edge o Brave (Edge y Brave:
           pon Márgenes en Mínimo en el diálogo de impresión). No se intentó imprimir automáticamente.
         </p>
-      )}
-      {pageSizeMm > 0 && (
-        <style>{`@media print { @page { size: ${pageSizeMm}mm auto; margin: 0; } html, body { width: ${pageSizeMm}mm; margin: 0; padding: 0; } }`}</style>
       )}
       <div id="pagina-recibo">
         <ReciboTermico recibo={recibo} />
