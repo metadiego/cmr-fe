@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { GenericBoard } from "@/components/tablero/generic-board";
 import { FrontdeskBoard } from "@/components/frontdesk/frontdesk-board";
+import { PatientDesk } from "@/components/patient-desk/patient-desk";
 
 // Ruta ÚNICA de tableros: /tablero/<clave>. El patrón de URL es innegociable; el CONTENIDO se
 // resuelve por dato (la `clave`): 'frontdesk' monta el board bespoke del frontdesk (tabs por
@@ -16,5 +17,7 @@ export default async function TableroPage({
   // 'servicios' era el alias legacy del frontdesk → consolidar en la clave canónica.
   if (clave === "servicios") redirect("/boards/frontdesk");
   if (clave === "frontdesk") return <FrontdeskBoard />;
+  // Alternative frontdesk centred on the patient (to compare with the one above; both stay for now).
+  if (clave === "patient-desk") return <PatientDesk />;
   return <GenericBoard tablero={clave} />;
 }

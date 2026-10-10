@@ -1142,7 +1142,8 @@
     "recepcionFactura": "Recibir desde factura",
     "configuracion_datos_paciente": "Datos obligatorios del paciente",
     "collapseNav": "Plegar menú",
-    "expandNav": "Desplegar menú"
+    "expandNav": "Desplegar menú",
+    "patientDesk": "Centro de Pacientes (por paciente)"
   },
   "admin": {
     "title": "Administración",
@@ -4638,5 +4639,30 @@
     "hour": "Hora",
     "minute": "Min",
     "period": "AM/PM"
+  },
+  "patientDesk": {
+    "title": "Centro de Pacientes (por paciente)",
+    "live": "En vivo",
+    "searchPlaceholder": "Buscar paciente: nombre, record o servicio…",
+    "date": "Fecha",
+    "viewLabel": "Vista",
+    "viewList": "Lista y detalle",
+    "viewTable": "Tabla",
+    "patientsCount": "{n, plural, one {# paciente} other {# pacientes}}",
+    "serviceAppointments": "Citas de servicio",
+    "book": "Citar",
+    "noMatches": "Ningún paciente coincide con la búsqueda.",
+    "empty": "No hay pacientes con servicios ni consultas este día.",
+    "patients": "Pacientes del día",
+    "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
+    "record": "Record",
+    "firstAt": "primera cita {time}",
+    "openRecord": "Ficha",
+    "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
+    "consultation": "Consulta",
+    "colPatient": "Paciente",
+    "colBooked": "Cita",
+    "colArrived": "Llegó",
+    "colToday": "Hoy"
   }
 }

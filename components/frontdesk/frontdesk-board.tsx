@@ -10,7 +10,6 @@ import {
   getPendientesEntrega,
   getAgendaPaciente,
   type PendienteEntrega,
-  type FrontdeskColumna,
   type FrontdeskFila,
   type FrontdeskTablero,
   type FrontdeskTotal,
@@ -33,6 +32,7 @@ import { getDefinicion, getOpciones, getTableros, type TableroDefinicion, type O
 import { useRouter } from "next/navigation";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
+import { flowColumns, plainColumns, renderColumns } from "@/lib/frontdesk/board-columns";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -312,47 +312,10 @@ export function FrontdeskBoard() {
   );
   const dictado = useDictado(locale, (texto) => setQ(texto));
 
-  // Toggles agrupados (render.group, p. ej. flujo_servicio) se COLAPSAN en UN solo "Flujo" en la posición
-  // del grupo — paridad con Atención; nunca se pintan además como columnas sueltas (bug del doble pintado).
-  const flujoCols = React.useMemo(
-    () =>
-      (board?.columns ?? [])
-        .filter((c) => c.tipo === "toggle" && (c.render as { group?: string } | null)?.group)
-        .sort((a, b) => a.orden - b.orden),
-    [board],
-  );
-  const columnas = React.useMemo(
-    () =>
-      (board?.columns ?? [])
-        .filter(
-          (c) =>
-            c.clave !== "fd_acciones" &&
-            !(c.tipo === "toggle" && (c.render as { group?: string } | null)?.group),
-        )
-        .sort((a, b) => a.orden - b.orden),
-    [board],
-  );
-  // Lista de render con el Flujo insertado donde estaba el grupo (o al final si no hay toggles agrupados).
-  const colsRender = React.useMemo<({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[]>(() => {
-    const out: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[] = [];
-    let puesto = false;
-    for (const c of (board?.columns ?? []).slice().sort((a, b) => a.orden - b.orden)) {
-      if (c.clave === "fd_acciones") continue;
-      if (c.tipo === "toggle" && (c.render as { group?: string } | null)?.group) {
-        if (!puesto) {
-          out.push({ kind: "flujo" });
-          puesto = true;
-        }
-        continue;
-      }
-      out.push({ kind: "col", col: c });
-    }
-    // Fallback (tableros SIN columnas toggle): flujo derivado de la definición. Si hay toggles —
-    // agrupados o sueltos — el flujo ya vive en ellos y NO se agrega columna extra (evita doble pintado).
-    const hayToggles = (board?.columns ?? []).some((c) => c.tipo === "toggle");
-    if (!puesto && !hayToggles) out.push({ kind: "flujo" });
-    return out;
-  }, [board]);
+  // Toggles agrupados → UN solo "Flujo" donde estaba el grupo (shared with the patient desk).
+  const flujoCols = React.useMemo(() => flowColumns(board?.columns ?? []), [board]);
+  const columnas = React.useMemo(() => plainColumns(board?.columns ?? []), [board]);
+  const colsRender = React.useMemo(() => renderColumns(board?.columns ?? []), [board]);
 
   // Opciones de las columnas `select` editables (p. ej. DOSIS = productos del grupo del servicio,
   // optionsSource productos_grupo PR #137). Tenant-scoped; el "tablero" de opciones = clave del servicio.

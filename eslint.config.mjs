@@ -26,7 +26,7 @@ const DEBT = {
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
   // 09-oct-2026: 930 → 880 — the header/toolbar row moved to components/frontdesk/frontdesk-toolbar.tsx.
-  "components/frontdesk/frontdesk-board.tsx": 880, // 08-oct-2026: 935 → 930, live badge shared (components/live-badge.tsx)
+  "components/frontdesk/frontdesk-board.tsx": 843, // 10-oct-2026: column layout moved to lib/frontdesk/board-columns.ts (shared with the patient desk)
   "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.

@@ -1142,7 +1142,8 @@
     "recepcionFactura": "Receive from invoice",
     "configuracion_datos_paciente": "Required patient data",
     "collapseNav": "Collapse menu",
-    "expandNav": "Expand menu"
+    "expandNav": "Expand menu",
+    "patientDesk": "Centro de Pacientes (por paciente)"
   },
   "admin": {
     "title": "Administration",
@@ -4638,5 +4639,30 @@
     "hour": "Hour",
     "minute": "Min",
     "period": "AM/PM"
+  },
+  "patientDesk": {
+    "title": "Patient Center (by patient)",
+    "live": "Live",
+    "searchPlaceholder": "Search patient: name, record or service…",
+    "date": "Date",
+    "viewLabel": "View",
+    "viewList": "List and detail",
+    "viewTable": "Table",
+    "patientsCount": "{n, plural, one {# patient} other {# patients}}",
+    "serviceAppointments": "Service appointments",
+    "book": "Book",
+    "noMatches": "No patient matches the search.",
+    "empty": "No patients with services or consultations on this day.",
+    "patients": "Patients of the day",
+    "pickPatient": "Pick a patient from the list to see their services.",
+    "record": "Record",
+    "firstAt": "first booking {time}",
+    "openRecord": "Record",
+    "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
+    "consultation": "Consultation",
+    "colPatient": "Patient",
+    "colBooked": "Booked",
+    "colArrived": "Arrived",
+    "colToday": "Today"
   }
 }
