@@ -220,7 +220,11 @@ export function SeccionInner({
       const lastRow = headerRows[headerRows.length - 1] ?? [];
       const filas = s.filas ?? [];
       const blancas = Array.from({ length: Math.max(0, s.filasEnBlanco ?? 0) });
-      const headBg = s.colorHeader ?? "#5b9bd5";
+      // Sin `colorHeader` explícito (p. ej. la tabla de dosis de GLP-1, que en el legado es blanco/negro
+      // liso, no azul), el default es gris claro con texto negro — igual que la rejilla plana. El azul de
+      // Peptide Rx/APEX RF/Empower SIEMPRE viene explícito en el payload, nunca asumido acá.
+      const headBg = s.colorHeader ?? "#f2f2f2";
+      const headFg = s.colorHeader ? "#fff" : "#000";
       const descBg = s.colorDescCol ?? undefined;
       // "Recommended Schedules" (Peptide Rx) manda `cabecera` con labels vacíos a propósito: esa tabla NO
       // lleva barra de encabezado en el papel. Si ningún label/subtitulo trae texto, no se pinta el <thead>.
@@ -232,7 +236,7 @@ export function SeccionInner({
             {hayCabecera && (
               <thead>
                 {headerRows.map((row, ri) => (
-                  <tr key={ri} style={{ background: headBg, color: "#fff" }}>
+                  <tr key={ri} style={{ background: headBg, color: headFg }}>
                     {/* Columna de casilla (órdenes Rx): cabecera vacía, solo en la última fila de cabecera. */}
                     {casillasEnFilas && <th style={{ border: BORDER, padding: "6px 8px", width: 24 }} />}
                     {row.map((col, ci) => (
