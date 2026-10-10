@@ -50,7 +50,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const GERENCIA = ["admin", "super_admin", "gerente"];
 // Default de INTERFAZ del Inicio (fondo de apertura). Acordado con el BE (PR #120): dato del FE,
 // el backend NO lo hardcodea. Configurable a futuro por centro si el negocio lo pide.
 const DEFAULT_INICIO = 50;
@@ -73,13 +72,15 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   const { can } = useCan();
 
   const me = meState.kind === "ok" ? meState.me : null;
-  const isGerencia =
-    !!me && (me.isMaster || me.roles.some((r) => GERENCIA.includes(r)));
+  // Ver el consolidado y la caja de cualquier otro cajero: permiso `caja.ver_todos` (RBAC puro, ya
+  // no una lista fija de roles) — `can()` ya resuelve `true` para master. PR #414 (cmr-be) lo
+  // concede a Administrador/Gerente/Facturación/Facturador consulta/Solo lectura al desplegar.
+  // Handoff HANDOFF-caja-ver-todos.md.
+  const isGerencia = can("caja.ver_todos");
   const canCerrar = can("caja.cerrar");
-  // Editar fechas ANTERIORES está bloqueado por defecto (seguridad). Es CONFIGURABLE por RBAC
-  // (data-driven, lo concede el admin): el permiso `caja.retroactivo` lo habilita. Por ahora la
-  // gerencia (admin/super_admin/gerente) y el master lo tienen abierto.
-  const puedeRetroactivo = isGerencia || can("caja.retroactivo");
+  // Editar fechas ANTERIORES está bloqueado por defecto (seguridad); lo habilita el permiso
+  // `caja.retroactivo` (RBAC puro, data-driven — ya no colgado de isGerencia/caja.ver_todos).
+  const puedeRetroactivo = can("caja.retroactivo");
   const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [fecha, setFecha] = React.useState(hoy);
   const [scope, setScope] = React.useState<Scope | null>(null);
