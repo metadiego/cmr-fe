@@ -119,3 +119,12 @@ export function filterPatients(list: PatientDay[], query: string): PatientDay[] 
   if (!query.trim()) return list;
   return list.filter((p) => matches([p.name, p.record, ...p.services.map((s) => s.name)], query));
 }
+
+// What the desk shows: everyone, only patients with service sessions, or only those with a consultation.
+export type PatientKind = "all" | "services" | "consultation";
+
+export function filterByKind(list: PatientDay[], kind: PatientKind): PatientDay[] {
+  if (kind === "services") return list.filter((p) => p.services.length > 0);
+  if (kind === "consultation") return list.filter((p) => p.consultationIds.length > 0);
+  return list;
+}

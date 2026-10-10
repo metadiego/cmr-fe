@@ -4656,6 +4656,12 @@
     "firstAt": "primera cita {time}",
     "openRecord": "Ficha",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
-    "consultation": "Consulta"
+    "consultation": "Consulta",
+    "kindLabel": "Mostrar",
+    "kind": {
+      "all": "Todos",
+      "services": "Servicios",
+      "consultation": "Consulta"
+    }
   }
 }

@@ -4656,6 +4656,12 @@
     "firstAt": "first booking {time}",
     "openRecord": "Record",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
-    "consultation": "Consultation"
+    "consultation": "Consultation",
+    "kindLabel": "Show",
+    "kind": {
+      "all": "All",
+      "services": "Services",
+      "consultation": "Consultation"
+    }
   }
 }

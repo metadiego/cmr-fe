@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import type { PatientDay } from "@/lib/frontdesk/patient-day";
+import type { PatientDay, PatientKind } from "@/lib/frontdesk/patient-day";
 import type { PatientDayData } from "@/hooks/use-patient-day";
 import { PatientChips, PatientDetail, type ScheduleRequest } from "@/components/patient-desk/patient-detail";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 interface Props {
   patients: PatientDay[];
   data: PatientDayData;
+  kind: PatientKind;
   date: string;
   centerId: string | undefined;
   selectedId: string | null;
@@ -20,7 +21,7 @@ interface Props {
 
 // Master/detail: the day's patients on the left, the selected one's services on the right.
 // The list scrolls on its own so the detail stays in view on a wide screen.
-export function PatientListView({ patients, data, date, centerId, selectedId, onSelect, onSchedule }: Props) {
+export function PatientListView({ patients, data, kind, date, centerId, selectedId, onSelect, onSchedule }: Props) {
   const t = useTranslations("patientDesk");
   const selected = patients.find((p) => p.patientId === selectedId) ?? null;
   return (
@@ -50,7 +51,7 @@ export function PatientListView({ patients, data, date, centerId, selectedId, on
       </ul>
       <div className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-foreground/10">
         {selected ? (
-          <PatientDetail patient={selected} data={data} date={date} centerId={centerId} onSchedule={onSchedule} />
+          <PatientDetail patient={selected} data={data} kind={kind} date={date} centerId={centerId} onSchedule={onSchedule} />
         ) : (
           <p className="py-16 text-center text-sm text-muted-foreground">{t("pickPatient")}</p>
         )}

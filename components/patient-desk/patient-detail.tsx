@@ -6,7 +6,7 @@ import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Calendar03Icon, UserIcon } from "@hugeicons/core-free-icons";
 
-import type { PatientDay } from "@/lib/frontdesk/patient-day";
+import type { PatientDay, PatientKind } from "@/lib/frontdesk/patient-day";
 import type { PatientDayData } from "@/hooks/use-patient-day";
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table";
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows";
@@ -51,7 +51,7 @@ export function PatientChips({ patient, data, compact }: { patient: PatientDay; 
 
 // Everything a patient has today: each service with its own columns and the consultation, editable in
 // place with the same cells and flow as the frontdesk board.
-export function PatientDetail({ patient, data, date, centerId, onSchedule }: { patient: PatientDay; data: PatientDayData; date: string; centerId: string | undefined; onSchedule: (r: ScheduleRequest) => void }) {
+export function PatientDetail({ patient, data, kind = "all", date, centerId, onSchedule }: { patient: PatientDay; data: PatientDayData; kind?: PatientKind; date: string; centerId: string | undefined; onSchedule: (r: ScheduleRequest) => void }) {
   const t = useTranslations("patientDesk");
   const tRoot = useTranslations();
   const consultLabel = data.consultationTab
@@ -86,7 +86,7 @@ export function PatientDetail({ patient, data, date, centerId, onSchedule }: { p
         </div>
       </div>
 
-      {patient.services.map((s) => (
+      {kind !== "consultation" && patient.services.map((s) => (
         <ServiceSessionsTable
           key={s.serviceId}
           slug={s.slug}
@@ -105,7 +105,7 @@ export function PatientDetail({ patient, data, date, centerId, onSchedule }: { p
         />
       ))}
 
-      {patient.consultationIds.length > 0 && data.consultations && (
+      {kind !== "services" && patient.consultationIds.length > 0 && data.consultations && (
         <ConsultationRows
           board={data.consultations}
           definition={data.consultationDefinition}

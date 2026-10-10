@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { filterPatients, groupByPatient, type DaySession } from "./patient-day.ts";
+import { filterByKind, filterPatients, groupByPatient, type DaySession } from "./patient-day.ts";
 
 const services = [
   { id: "s-apex", slug: "apex", name: "APEX", color: "#1d4ed8" },
@@ -59,4 +59,15 @@ test("search ignores accents and case, and also finds by record or service", () 
   assert.deepEqual(filterPatients(out, "12345").map((p) => p.patientId), ["p1"]);
   assert.deepEqual(filterPatients(out, "laser").map((p) => p.patientId), ["p2"]);
   assert.equal(filterPatients(out, "  ").length, 2);
+});
+
+test("services / consultation / all toggle: a patient with both shows in both", () => {
+  const out = groupByPatient(
+    [ses("a", "p1", "s-apex"), ses("b", "p2", "s-laser")],
+    [{ id: "c1", pacienteId: "p1", paciente: "RAMOS HUECA, LILLIAM", estado: "pendiente" }, { id: "c2", pacienteId: "p9", paciente: "PADILLA, LUIS", estado: "pendiente" }],
+    services,
+  );
+  assert.deepEqual(filterByKind(out, "services").map((p) => p.patientId).sort(), ["p1", "p2"]);
+  assert.deepEqual(filterByKind(out, "consultation").map((p) => p.patientId).sort(), ["p1", "p9"]);
+  assert.equal(filterByKind(out, "all").length, 3);
 });

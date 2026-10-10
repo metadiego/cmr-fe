@@ -6,7 +6,9 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Calendar03Icon, Search01Icon } from "@hugeicons/core-free-icons";
 
-import { filterPatients } from "@/lib/frontdesk/patient-day";
+import { filterByKind, filterPatients, type PatientKind } from "@/lib/frontdesk/patient-day";
+import { useMyFrontdeskPreference } from "@/hooks/use-frontdesk-default-tab";
+import { cn } from "@/lib/utils";
 import { usePatientDay } from "@/hooks/use-patient-day";
 import { useCentroGate as useCenterGate } from "@/hooks/use-centro-gate";
 import { useCan } from "@/hooks/use-can";
@@ -41,7 +43,13 @@ export function PatientDesk() {
   const [schedule, setSchedule] = React.useState<(ScheduleRequest & { open: boolean }) | { open: false }>({ open: false });
 
   const data = usePatientDay(gate.centro, date);
-  const patients = React.useMemo(() => filterPatients(data.patients, query), [data.patients, query]);
+  // Services / consultation / all. Starts on consultation for whoever has «lands on Consulta» in their
+  // staff record (the reception people, set per person in the staff screen — not a role list here).
+  const preference = useMyFrontdeskPreference(gate.centro);
+  const [kindPicked, setKindPicked] = React.useState<PatientKind | null>(null);
+  const kind: PatientKind =
+    kindPicked ?? (preference.state.kind === "ok" && preference.state.data?.frontdeskStartsOnConsultation ? "consultation" : "all");
+  const patients = React.useMemo(() => filterPatients(filterByKind(data.patients, kind), query), [data.patients, kind, query]);
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId) ? selectedId : (patients[0]?.patientId ?? null);
 
@@ -57,6 +65,19 @@ export function PatientDesk() {
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("searchPlaceholder")} className="pl-9" aria-label={t("searchPlaceholder")} />
         </div>
         <DatePicker className="w-40" value={date} onChange={setDate} aria-label={t("date")} />
+        <div className="inline-flex rounded-md border p-0.5" role="group" aria-label={t("kindLabel")}>
+          {(["all", "services", "consultation"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setKindPicked(k)}
+              aria-pressed={kind === k}
+              className={cn("rounded px-3 py-1 text-xs font-medium", kind === k ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+            >
+              {t(`kind.${k}`)}
+            </button>
+          ))}
+        </div>
         <span className="text-xs text-muted-foreground">{t("patientsCount", { n: patients.length })}</span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget centroId={gate.centro} nombreServicio={serviceName} />
@@ -86,7 +107,7 @@ export function PatientDesk() {
       ) : patients.length === 0 ? (
         <p className="rounded-lg bg-card px-4 py-16 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">{query ? t("noMatches") : t("empty")}</p>
       ) : (
-        <PatientListView patients={patients} data={data} date={date} centerId={gate.centro} selectedId={effectiveSelected} onSelect={setSelectedId} onSchedule={(r) => setSchedule({ open: true, ...r })} />
+        <PatientListView patients={patients} data={data} kind={kind} date={date} centerId={gate.centro} selectedId={effectiveSelected} onSelect={setSelectedId} onSchedule={(r) => setSchedule({ open: true, ...r })} />
       )}
 
       <Dialog open={schedule.open} onOpenChange={(o) => !o && setSchedule({ open: false })}>

@@ -35,12 +35,7 @@ export function useFrontdeskTab(
     },
     [pathname, router, searchParams],
   );
-  const me = useMe();
-  const myStaffId = me.kind === "ok" ? me.me.staffId : null;
-  const prefRes = useResource<PersonalConPreferenciaFrontdesk | null>(
-    () => (myStaffId ? getStaff(myStaffId, centro).catch(() => null) : Promise.resolve(null)),
-    [myStaffId, centro],
-  );
+  const prefRes = useMyFrontdeskPreference(centro);
   if (tab === "" && prefRes.state.kind === "ok" && consultaTab && prefRes.state.data?.frontdeskStartsOnConsultation) {
     setTab(consultaTab.slug);
   }
@@ -49,4 +44,16 @@ export function useFrontdeskTab(
   const consultaInitialEstado =
     prefRes.state.kind === "ok" ? prefRes.state.data?.consultationBoardInitialTab ?? null : null;
   return [tab, setTab, consultaInitialEstado];
+}
+
+// The signed-in person's frontdesk preferences (their staff record): whether they land on the
+// consultation side, and the consultation board's initial status tab. Shared by the frontdesk and the
+// patient desk.
+export function useMyFrontdeskPreference(centro: string | undefined) {
+  const me = useMe();
+  const myStaffId = me.kind === "ok" ? me.me.staffId : null;
+  return useResource<PersonalConPreferenciaFrontdesk | null>(
+    () => (myStaffId ? getStaff(myStaffId, centro).catch(() => null) : Promise.resolve(null)),
+    [myStaffId, centro],
+  );
 }
