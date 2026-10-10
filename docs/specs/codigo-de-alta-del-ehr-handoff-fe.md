@@ -1,45 +1,36 @@
-# Handoff FE — Imprimir solo el código de alta del EHR del paciente nuevo
+# Handoff FE — El código de alta del EHR se imprime SOLO, por el hub (sin pantalla)
 
-**De:** BE · **Para:** FE · **Fecha:** 2026-10-10 · **Prioridad:** alta (pedido del dueño).
-Spec BE: `cmr-be/docs/specs/codigo-de-alta-del-ehr.md`. Origen: PR del EHR `metadiego/cmr-ehr-be#52`.
+**De:** BE · **Para:** FE · **Fecha:** 2026-10-10 (rehecho a las 15:35) · **Prioridad:** alta (pedido del dueño).
+Specs BE: `cmr-be/docs/specs/codigo-de-alta-del-ehr.md` y `cmr-be/docs/specs/cola-de-impresion.md`.
 
-## Qué cambia
+> **Cambio de rumbo (dueño, 15:00):** «EHR devuelve el código, nosotros lo recibimos y lo enviamos al printer
+> sin depender del user». La página **NO** imprime el código. Verificado: el VM de producción no alcanza el
+> hub (`.2`/`.172:8943` sin conexión), así que **el hub pide** los trabajos al BE.
 
-Al marcar **presente** a un paciente que todavía no está en el EHR, el BE ahora lo da de alta con
-`POST /patients/onboard` del EHR, que devuelve un **código de alta** (8 dígitos, vence a las 6 h). El
-paciente lo canjea en el iPad para llenar su registro. **El ticket con el código se imprime solo.**
+## Lo que ya está en producción (BE, verificado por HTTP 15:34)
 
-## Contrato (evento en vivo, el mismo SSE del centro)
+- Al marcar presente a un paciente nuevo en el EHR, el BE usa `POST /patients/onboard` (EHR PR #52) y
+  **encola** el ticket del código en la impresora `claimCodePrinterId` del centro.
+- **Caguas:** `claimCodePrinterId` = **lab-test** (PUT → 200; una impresora de otro centro → 400).
+- **Llave del hub de Caguas:** API key de centro, permiso **`print-hub.process`** (no `print-jobs.process`),
+  id `da7041cc-…`, en **`cmr-fe/.personal/print-jobs-key-caguas.txt`** (una línea, ignorado por git).
+  Con ella: `GET /print-jobs/next` → **204**; `GET /ehr-integration/config` → **403** (solo sirve para la cola).
 
-```
-entidad: 'ehr-claim-code'   id: <pacienteId>   accion: 'creada'
-estado: {
-  pacienteId, ehrRecordId: 'CAG-003618',
-  claimCode: '12345678', claimExpiresAt: '2026-10-10T23:00:00.000Z',
-  claimCodePrinterId: '<center_printers.id>' | null
-}
-```
+## Contrato de la cola (lo que hace el hub)
 
-- Solo llega para pacientes **nuevos** en el EHR (uno que ya estaba no trae código).
-- **El código no se guarda en el BE** (ni tabla, ni log, ni auditoría): si no se imprime al llegar el
-  evento, se pierde. Para reimprimir, el EHR permite «Start intake» y emite otro.
+- `Authorization: Bearer <llave>`; sin `X-Tenant-ID` (la llave fija el centro).
+- `GET /api/v2/print-jobs/next` → 204, o 200 `{ id, kind, printer: { protocol, printerHost, printerPort,
+  printerQueue }, payloadBase64, expiresAt }`. Queda tomado; sin respuesta en 2 min vuelve a la cola.
+- `payloadBase64` = bytes **ESC/POS ya armados** por el BE: decodificar y enviar con el envío de siempre.
+- `POST /api/v2/print-jobs/:id/result { ok: true }` o `{ ok: false, error }`. Falla → reintento; al 3.º queda
+  `failed`. Impreso o abandonado → el BE borra el contenido.
+- `POST /api/v2/print-jobs/test { printerId }` (`print-hub.update`, sesión de admin/gerente) encola un ticket
+  de **prueba** en esa impresora: sirve para probar cola → hub → papel sin esperar a un paciente.
+- `GET /api/v2/print-jobs` (`print-hub.read`) y MCP `print_jobs_list`: historial, sin contenido.
 
-## Lo que se pide
+## Lo que queda del FE
 
-1. **Imprime solo la pantalla que marcó presente a ESE paciente** (el evento llega a todas las del
-   centro; las demás lo ignoran). Sugerencia: recordar en memoria los `pacienteId` que esta pantalla
-   marcó presente en los últimos ~2 minutos.
-2. **Dónde:** si `claimCodePrinterId` viene, esa impresora (está en `GET /me/print-hub → printers[]`
-   por `id`), por el hub de siempre; si es null, la impresora elegida en esa pantalla.
-3. **El ticket:** código grande, nombre y récord del paciente (los tienes en la sesión/cita), «Válido
-   hasta» con `claimExpiresAt` en hora de Puerto Rico, y una línea de instrucción («Escanee/ingrese este
-   código en el iPad»). Texto por `labelKey`.
-4. **Configuración:** en la pantalla de integración del EHR, un selector «Impresora del código de alta»
-   con las impresoras del centro → `PUT /ehr-integration/config { claimCodePrinterId }` (null = la de cada
-   pantalla). Un id de otro centro responde 400 `EHR_CLAIM_PRINTER_NOT_IN_CENTER`
-   (`labelKey: ehrIntegration.claimPrinterNotInCenter`). `GET /ehr-integration/config` lo devuelve.
-
-## Estado en producción
-
-Caguas: `claimCodePrinterId` = **lab-test** (ipp `192.130.80.199:631`, cola `EPSON_TM_T20II`), como pidió el
-dueño. Bayamón: sin configurar (hub apagado).
+1. Sondeo en `cmr-print-hub` (`config.json`: `printJobsApiKey`, `pollSeconds`), instalar en Caguas `.2`.
+2. Probar con `POST /print-jobs/test` en lab-test y avisar al BE con el estado del trabajo (`printed`).
+3. El selector `claimCodePrinterId` ya está (FE b3fd0b9). Opcional: un botón «Probar la cola» con el
+   endpoint de prueba y la lista de trabajos.
