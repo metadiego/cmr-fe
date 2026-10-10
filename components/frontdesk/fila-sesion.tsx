@@ -118,6 +118,7 @@ export function FilaSesion({
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.status ?? "");
   const cancelada = estadoActual === "cancelada";
+  const pacienteNombre = String(fila.paciente ?? fila.fd_paciente ?? fila.fac_paciente ?? "");
 
   // Devuelve true SOLO si la acción tuvo éxito. Así quien encadena un postAccion (p. ej. abrir "Programar
   // citas" tras Asistido) no lo dispara cuando la acción falló (sesión caducada, requerido faltante): antes
@@ -541,7 +542,7 @@ export function FilaSesion({
             // Solo tras un avance EXITOSO se dispara el postAccion (p. ej. abrir "Programar citas"); si
             // falló, ya se mostró el toast de error y NO se simula que la acción ocurrió.
             if (ok && paso.postAccion === POSTACCION_PROGRAMAR && sesion?.patientId) {
-              onProgramar({ pacienteId: sesion.patientId, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id });
+              onProgramar({ pacienteId: sesion.patientId, pacienteNombre, servicioId: servicio?.id });
             }
           });
         };
@@ -610,11 +611,7 @@ export function FilaSesion({
           onReport={(id) => { const r = reportsAcc.find((x) => x.id === id); if (r) setFormatoReport(r); }}
           accionesMenu={accionesMenu}
           onAccion={(clave) => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: clave }, centro))}
-          onProgramar={
-            sesion?.patientId
-              ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre: String(fila.paciente ?? ""), servicioId: servicio?.id })
-              : undefined
-          }
+          onProgramar={sesion?.patientId ? () => onProgramar({ pacienteId: sesion.patientId!, pacienteNombre, servicioId: servicio?.id }) : undefined}
           onCancelar={(motivo) => run(() => cancelarSesion(fila.id, motivo, centro))}
           onReparar={(payload) => run(() => repararSesion(fila.id, payload, centro))}
         />
@@ -623,7 +620,7 @@ export function FilaSesion({
             open={historialOpen}
             onOpenChange={setHistorialOpen}
             pacienteId={sesion.patientId}
-            pacienteNombre={String(fila.paciente ?? "")}
+            pacienteNombre={pacienteNombre}
             servicioId={servicio?.id}
             servicioNombre={servicio?.name}
             centro={centro}
@@ -634,7 +631,7 @@ export function FilaSesion({
             open={comprasOpen}
             onOpenChange={setComprasOpen}
             pacienteId={sesion.patientId}
-            pacienteNombre={String(fila.paciente ?? "")}
+            pacienteNombre={pacienteNombre}
             servicioId={servicio?.id}
             servicioNombre={servicio?.name}
             fecha={fecha}
@@ -648,7 +645,7 @@ export function FilaSesion({
             initialReport={formatoReport ?? undefined}
             servicioNombre={servicio.name}
             formAcciones={servicio.formActions}
-            pacienteNombre={String(fila.paciente ?? "")}
+            pacienteNombre={pacienteNombre}
             sesionNN={fila["fd_sesiones"] != null ? String(fila["fd_sesiones"]) : undefined} servicioId={servicio?.id} pacienteId={sesion?.patientId}
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
             sesionId={fila.id} fecha={fecha}
@@ -664,7 +661,7 @@ export function FilaSesion({
             seccion={notificarCfg.seccion}
             sesionId={fila.id}
             servicioNombre={servicio?.name ?? ""}
-            pacienteNombre={String(fila.paciente ?? "")}
+            pacienteNombre={pacienteNombre}
             enfermeras={optionsByCol["fd_enfermera"] ?? []}
             enfermeraActual={(() => { const raw = fila["fd_enfermera"]; const ops = optionsByCol["fd_enfermera"] ?? []; return ops.find((o) => o.value === raw || o.label === raw)?.value; })()}
             onAsignarEnfermera={(pid) => run(() => guardarCelda("fd_enfermera", pid, tRoot.has("tb.col.enfermera") ? tRoot("tb.col.enfermera") : t("enfermera")))}
