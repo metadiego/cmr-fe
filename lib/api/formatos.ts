@@ -8,7 +8,7 @@ import { apiFetch } from "./client";
 // FormatoColumna viaja SIEMPRE dentro de `columnas` (bolsa OPACA) → sus claves NO se traducen: quedan en español.
 // El BE incluye `label` (texto ya listo) además de labelKey; se PREFIERE `label` al pintar. `subtitulo`:
 // línea más chica bajo el label de la columna (Peptide Rx: "Peptides (Select one)", "Max Five (5)").
-export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null; subtitulo?: string | null };
+export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null; subtitulo?: string | null; ancho?: string | null }; // ancho: CSS width ("28%")
 // Etiqueta de firma: el BE la manda como OBJETO { label, labelKey } (no string). Se acepta también string
 // por compatibilidad. Se PREFIERE `label`. (Verificado en vivo: apex_rf firmas.lineas son objetos.)
 export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null };
@@ -45,7 +45,14 @@ export type Formato = {
 
 // Par etiqueta/valor del encabezado (layout "campos"). Viaja dentro de `campos` (bolsa OPACA) → claves en español.
 // El BE incluye `label` (texto ya listo) además de labelKey; se PREFIERE `label` al pintar.
-export type FormatoCampo = { clave: string; label?: string | null; labelKey?: string | null; valor?: string | null; origen?: string };
+export type FormatoCampo = {
+  clave: string;
+  label?: string | null;
+  labelKey?: string | null;
+  valor?: string | null;
+  origen?: string;
+  ancho?: number | null; // px of the fill-in line (layout "paginas": Name ____ Date ____ …)
+};
 // Sección del documento (dentro de `secciones`, bolsa OPACA → claves en español). El `tipo` discrimina.
 // Ampliado para salir IDÉNTICO al legacy (modelos médicos): además de texto_libre/firmas, se añaden
 // parrafo, campos intermedios, tabla_firmas (con bordes), checklist, tabla_tematica y leyenda. Formas
@@ -57,11 +64,26 @@ export type FormatoSeccion =
   | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[] }
   // Párrafo estático (p. ej. el texto legal de una constancia). `texto` puede traer "\n" entre líneas
   // (Peptide Rx: "By signing this prescription, you acknowledge that:" + 3 líneas). `titulo` opcional.
-  | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string; titulo?: string | null }
+  | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string; titulo?: string | null; tamano?: number | null; negrita?: boolean }
   // Campos intermedios (label/valor) entre el título y la tabla (PEMF/Cámara, Área, Número de serie…).
   // `titulo` es opcional (p. ej. "Composición Corporal" en glp1, "Prescriber" en tirzepatide_order_form):
   // verificado en vivo que el BE ya lo manda, pero el render lo ignoraba por completo.
-  | { clave: string; labelKey?: string | null; tipo: "campos"; campos: FormatoCampo[]; titulo?: string | null }
+  | { clave: string; labelKey?: string | null; tipo: "campos"; campos: FormatoCampo[]; titulo?: string | null; etiquetaNormal?: boolean; tamano?: number | null }
+  // Checkbox list (Mía order forms: "SUPPORTING CLINICAL BASIS"): one ☐ per item, each item may carry
+  // inline options (☐ Severe arthritis ☐ Tremor …) and a fill-in blank. `enLinea` flows the items in a
+  // row (the "clinical rationale" boxes); `intro` is a plain line under the title.
+  | {
+      clave: string;
+      labelKey?: string | null;
+      tipo: "lista_casillas";
+      titulo?: string | null;
+      intro?: string | null;
+      enLinea?: boolean;
+      tamano?: number | null;
+      items: { texto: string; opciones?: string[]; blanco?: number | null }[];
+    }
+  // Page break for layout "paginas": what follows starts a new sheet (with its own header and watermark).
+  | { clave: string; labelKey?: string | null; tipo: "salto_pagina" }
   // Tabla de firmas CON BORDES: `columnas` × `filas` (Nombre/Firma/Fecha), cabecera gris opcional.
   | { clave: string; labelKey?: string | null; tipo: "tabla_firmas"; columnas: string[]; filas: string[]; cabecera?: boolean }
   // Lista de cotejo de enfermería: bandas de sección (colspan) + casillas Sí/No/Observación.
@@ -86,6 +108,8 @@ export type FormatoSeccion =
       cabecera: FormatoColumna[][];
       filas?: FormatoFilaTematica[];
       filasEnBlanco?: number;
+      tamano?: number | null; // font px (dense landscape order forms)
+      colorBorde?: string | null; // cell borders (Mía forms use a light gray, not black)
     }
   // Pie de leyenda secundario centrado (además del f-b/).
   | { clave: string; labelKey?: string | null; tipo: "leyenda"; texto: string };
@@ -114,6 +138,14 @@ export type FormatoRenderMeta = {
   notas?: string[];
   porPagina?: number;
   subtitulo?: string | null;
+  // layout "paginas" (external order forms, e.g. Mía Compounding): sheet orientation, the form's own
+  // logo instead of the center letterhead, one watermark image per page (full sheet, index = page; the
+  // last one repeats), a small "Actualización" note bottom-left, and whether to skip the f-b/ footer.
+  orientacion?: "vertical" | "horizontal";
+  logo?: string | null;
+  marcasAgua?: string[];
+  actualizacion?: string | null;
+  ocultarPie?: boolean;
 };
 
 // Bloque por SESIÓN (láser a color multipágina). Verificado en vivo (GET /formats/terapia_laser_iv/assembly):

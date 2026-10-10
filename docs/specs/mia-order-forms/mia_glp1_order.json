@@ -1,0 +1,369 @@
+{
+  "slug": "mia_glp1_order",
+  "title": "Patient-Specific Compounded Sterile Preparation Order Form",
+  "layout": "paginas",
+  "serviceSlug": "glp1",
+  "render": {
+    "orientacion": "horizontal",
+    "logo": "/img/formatos/mia/logo-mia-compounding.png",
+    "marcasAgua": [
+      "/img/formatos/mia/wm-glp1-p1.png",
+      "/img/formatos/mia/wm-glp1-p2.png"
+    ],
+    "actualizacion": "Actualización\n(29/7/26)"
+  },
+  "campos": [
+    {
+      "clave": "name",
+      "label": "Name:",
+      "origen": "paciente.nombre",
+      "ancho": 230
+    },
+    {
+      "clave": "date",
+      "label": "Date:",
+      "origen": "fecha",
+      "ancho": 120
+    },
+    {
+      "clave": "phone",
+      "label": "Phone:",
+      "origen": "paciente.telefono",
+      "ancho": 120
+    },
+    {
+      "clave": "address",
+      "label": "Address:",
+      "origen": "",
+      "ancho": 240
+    },
+    {
+      "clave": "diagnosis",
+      "label": "Diagnosis:",
+      "origen": "",
+      "ancho": 520
+    }
+  ],
+  "secciones": [
+    {
+      "clave": "medications",
+      "tipo": "tabla_tematica",
+      "colorHeader": "#98C2B6",
+      "colorBorde": "#b8b8b8",
+      "tamano": 10,
+      "cabecera": [
+        [
+          {
+            "clave": "medication",
+            "label": "Medication",
+            "ancho": "28%"
+          },
+          {
+            "clave": "dose",
+            "label": "Dose",
+            "ancho": "28%"
+          },
+          {
+            "clave": "instructions",
+            "label": "Instructions",
+            "ancho": "30%"
+          },
+          {
+            "clave": "supply",
+            "label": "Days' supply (Select one)",
+            "ancho": "14%"
+          }
+        ]
+      ],
+      "filas": [
+        {
+          "medication": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Semaglutide 5 mg/mL / Cyanocobalamin 0.4 mg/mL (2 mL vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "0.25 mg (0.05 mL)",
+                  "0.5 mg (0.10 mL)",
+                  "1 mg (0.20 mL)",
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "instructions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously",
+                  "once weekly"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "supply": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 days",
+                  "90 days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "medication": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Tirzepatide 12.5 mg/mL / Pyridoxine HCl 10 mg/mL (5 mL vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "2.5 mg = 0.2 mL",
+                  "5 mg = 0.4 mL",
+                  "7.5 mg = 0.6 mL",
+                  "10 mg = 0.8 mL",
+                  "12.5 mg = 1 mL",
+                  "15 mg = 1.2 mL",
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "instructions": {
+            "segmentos": [
+              {
+                "texto": "Inject subcutaneously once weekly."
+              },
+              {
+                "texto": "Other: ______"
+              }
+            ]
+          },
+          "supply": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 days",
+                  "90 days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "medication": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Other medication:"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Dose: ______________"
+                ]
+              }
+            ]
+          },
+          "instructions": {
+            "segmentos": [
+              {
+                "texto": "Directions: ______________________________"
+              }
+            ]
+          },
+          "supply": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 days",
+                  "90 days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "clave": "supporting_clinical_basis",
+      "tipo": "lista_casillas",
+      "titulo": "SUPPORTING CLINICAL BASIS",
+      "tamano": 10.5,
+      "items": [
+        {
+          "texto": "Documented allergy, hypersensitivity, or clinically significant intolerance to a specific inactive ingredient in the identified commercial product."
+        },
+        {
+          "texto": "Patient requires an individualized dose or titration increment not available in the identified commercial presentation."
+        },
+        {
+          "texto": "Patient has a documented physical or functional limitation preventing use of the commercially available delivery device:",
+          "opciones": [
+            "Severe arthritis",
+            "Tremor",
+            "Visual impairment"
+          ]
+        },
+        {
+          "texto": "Motor/dexterity impairment",
+          "opciones": [
+            "Other:"
+          ],
+          "blanco": 110
+        },
+        {
+          "texto": "Patient requires a preservative-free single-dose presentation for the following documented clinical reason:",
+          "blanco": 190
+        },
+        {
+          "texto": "Patient requires a patient-specific multidose vial or alternative container-closure system for the following documented clinical reason:",
+          "blanco": 180
+        },
+        {
+          "texto": "Laboratory-confirmed cyanocobalamin deficiency requiring medically necessary parenteral replacement. Laboratory results and dates",
+          "blanco": 100
+        },
+        {
+          "texto": "Laboratory-confirmed pyridoxine deficiency requiring medically necessary replacement. Laboratory results and dates",
+          "blanco": 100
+        },
+        {
+          "texto": "The prescriber has evaluated total weekly pyridoxine exposure and potential pyridoxine-associated sensory neuropathy."
+        },
+        {
+          "texto": "Other documented patient-specific clinical justification:",
+          "blanco": 210
+        }
+      ]
+    },
+    {
+      "clave": "prescriber_safety_review",
+      "tipo": "lista_casillas",
+      "titulo": "PRESCRIBER SAFETY REVIEW",
+      "tamano": 10.5,
+      "intro": "The prescriber confirms that the following were reviewed and addressed as clinically appropriate:",
+      "items": [
+        {
+          "texto": "Personal or family history of medullary thyroid carcinoma and MEN 2."
+        },
+        {
+          "texto": "Pregnancy, planned pregnancy, and breastfeeding status."
+        },
+        {
+          "texto": "History of pancreatitis or gallbladder disease."
+        },
+        {
+          "texto": "Severe gastroparesis or other significant gastrointestinal disease."
+        },
+        {
+          "texto": "Renal function, dehydration risk, and relevant laboratory monitoring."
+        },
+        {
+          "texto": "Concurrent insulin, sulfonylurea, or other hypoglycemia-producing therapy."
+        },
+        {
+          "texto": "Concurrent GLP-1, GIP/GLP-1, or similar incretin therapy."
+        },
+        {
+          "texto": "Prior hypersensitivity to semaglutide, tirzepatide, or formulation components."
+        },
+        {
+          "texto": "Appropriateness of starting dose, frequency, and titration schedule."
+        },
+        {
+          "texto": "Patient counseling regarding dosing, measurement, storage, refrigeration, missed doses, and adverse effects."
+        }
+      ]
+    },
+    {
+      "clave": "prescriber_attestation",
+      "tipo": "parrafo",
+      "titulo": "PRESCRIBER ATTESTATION",
+      "tamano": 9.5,
+      "texto": "I certify that this prescription is issued for an individually identified patient based on my professional medical judgment and a documented patient-specific clinical need. I have evaluated the applicable FDA-approved commercial product and determined that the specific change described above produces a significant difference for this patient. I will maintain the supporting clinical justification in the patient's medical record. I assume clinical responsibility for patient selection, diagnosis, dose, route, frequency, titration, duration, monitoring, contraindication, counseling, and management of adverse events."
+    },
+    {
+      "clave": "p2",
+      "tipo": "salto_pagina"
+    },
+    {
+      "clave": "prescriber",
+      "tipo": "campos",
+      "etiquetaNormal": true,
+      "tamano": 12,
+      "campos": [
+        {
+          "clave": "prescriber_name",
+          "label": "Prescriber name (print)",
+          "origen": "",
+          "ancho": 170
+        },
+        {
+          "clave": "signature",
+          "label": "Signature",
+          "origen": "",
+          "ancho": 190
+        },
+        {
+          "clave": "license",
+          "label": "License no. #",
+          "origen": "",
+          "ancho": 150
+        },
+        {
+          "clave": "practice_address",
+          "label": "Practice address:",
+          "origen": "",
+          "ancho": 210
+        },
+        {
+          "clave": "date2",
+          "label": "Date:",
+          "origen": "",
+          "ancho": 110
+        }
+      ]
+    },
+    {
+      "clave": "disclosures",
+      "tipo": "parrafo",
+      "titulo": "REGULATORY AND PHARMACY DISCLOSURES",
+      "tamano": 10,
+      "texto": "• These preparations are compounded only pursuant to a valid prescription for an identified individual patient and are not intended for office stock, resale, redistribution, or use by another patient.\n• Compounded drug preparations are not reviewed or approved by FDA for safety, effectiveness, or quality before dispensing. This order is subject to pharmacist review, current ingredient eligibility, formulation feasibility, and applicable federal and Puerto Rico law. Submission does not guarantee that the preparation can be compounded or dispensed.\n• Farmacia Mia will verify the identity and regulatory eligibility of every active pharmaceutical ingredient. Semaglutide sodium and semaglutide acetate will not be used.\n• The addition of cyanocobalamin, pyridoxine, or another ingredient does not independently establish medical necessity or a significant difference from a commercially available product. The safety and effectiveness of the combination have not been established by FDA.\n• Any preparation administered in a prescriber's office remains labeled and dispensed exclusively for the identified individual patient and may not be used as office stock.\n• This form is intended solely for authorized prescribers and does not constitute patient-directed advertising, a representation of FDA approval, or a claim of equivalence, safety, efficacy, or clinical superiority.\n• This document may contain protected health information and must be handled confidentially."
+    },
+    {
+      "clave": "sections_index",
+      "tipo": "parrafo",
+      "tamano": 8,
+      "texto": "SUPPORTING CLINICAL BASIS\nPRESCRIBER SAFETY REVIEW\nPRESCRIBER ATTESTATION\nREGULATORY AND PHARMACY DISCLOSURES"
+    }
+  ]
+}

@@ -1,0 +1,562 @@
+{
+  "slug": "mia_peptides_order",
+  "title": "Patient-Specific Compounded Sterile Preparation Order Form",
+  "layout": "paginas",
+  "serviceSlug": "glp1",
+  "render": {
+    "orientacion": "horizontal",
+    "logo": "/img/formatos/mia/logo-mia-compounding.png",
+    "marcasAgua": [
+      "/img/formatos/mia/wm-peptides.png"
+    ],
+    "actualizacion": "Actualización\n(29/7/26)"
+  },
+  "campos": [
+    {
+      "clave": "name",
+      "label": "Name:",
+      "origen": "paciente.nombre",
+      "ancho": 230
+    },
+    {
+      "clave": "date",
+      "label": "Date:",
+      "origen": "fecha",
+      "ancho": 120
+    },
+    {
+      "clave": "phone",
+      "label": "Phone:",
+      "origen": "paciente.telefono",
+      "ancho": 120
+    },
+    {
+      "clave": "address",
+      "label": "Address:",
+      "origen": "",
+      "ancho": 240
+    },
+    {
+      "clave": "diagnosis",
+      "label": "Diagnosis:",
+      "origen": "",
+      "ancho": 520
+    }
+  ],
+  "secciones": [
+    {
+      "clave": "availability",
+      "tipo": "parrafo",
+      "tamano": 9.5,
+      "texto": "*Availability is subject to applicable federal and Puerto Rico law, the current regulatory status of each bulk drug substance, pharmacy verification, and the pharmacy's ability to lawfully compound and dispense the prescribed preparation. Submission of this form does not guarantee that the requested preparation can be compounded or dispensed."
+    },
+    {
+      "clave": "peptides",
+      "tipo": "tabla_tematica",
+      "colorHeader": "#BBBBBB",
+      "colorBorde": "#9a9a9a",
+      "tamano": 9.5,
+      "cabecera": [
+        [
+          {
+            "clave": "peptide",
+            "label": "Peptide (Select one)",
+            "ancho": "25%"
+          },
+          {
+            "clave": "dose",
+            "label": "Dose (Select one)",
+            "ancho": "27%"
+          },
+          {
+            "clave": "directions",
+            "label": "Directions (Select one)",
+            "ancho": "34%"
+          },
+          {
+            "clave": "quantity",
+            "label": "Quantity (Select one)",
+            "ancho": "14%"
+          }
+        ]
+      ],
+      "filas": [
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "BPC-157 2mg/mL(5mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "250mcg (0.125 mL)",
+                  "500mcg (0.25 mL)"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously",
+                  "daily",
+                  "twice daily"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "BPC-157 2mg/mL + TB-500 2mg/mL (5mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "0.125 mL (BPC-157 250 mcg + TB-500 250 mcg)",
+                  "0.25 mL (BPC-157 500 mcg + TB-500 500 mcg)",
+                  "Other: ______"
+                ],
+                "vertical": true
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously every evening",
+                  "daily"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Tesamorelin 2mg/mL (5mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "1mg (0.5mL)",
+                  "Other ______"
+                ]
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously every evening",
+                  "daily"
+                ]
+              },
+              {
+                "opciones": [
+                  "5 days on / 2 days off",
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "GHK-Cu 20 mg/mL (5mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "1mg (0.05mL)",
+                  "2mg (0.10mL)"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously",
+                  "daily"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "MOTS-C 10 mg/mL (2 mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "2.5mg (0.25 mL)",
+                  "5mg (0.50 mL)"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously twice weekly"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "NAD+ 200 mg/mL (5mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "50mg (0.25 mL)",
+                  "100mg (0.50 mL)"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously",
+                  "once weekly"
+                ]
+              },
+              {
+                "opciones": [
+                  "twice weekly",
+                  "three times weekly",
+                  "Other ____"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Sermorelin 2mg/mL (4.5 mL Vial)"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "100 mcg (0.05 mL)",
+                  "200 mcg (0.10 mL)",
+                  "300 mcg (0.15 mL)",
+                  "400 mcg (0.20 mL)",
+                  "500 mcg (0.25 mL)",
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Inject subcutaneously at bedtime"
+                ]
+              },
+              {
+                "opciones": [
+                  "Other: ______"
+                ]
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        },
+        {
+          "peptide": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "Other medication: ____________"
+                ]
+              }
+            ]
+          },
+          "dose": {
+            "segmentos": [
+              {
+                "texto": "Dose: ____________"
+              }
+            ]
+          },
+          "directions": {
+            "segmentos": [
+              {
+                "texto": "Sig: ______________________________"
+              }
+            ]
+          },
+          "quantity": {
+            "segmentos": [
+              {
+                "opciones": [
+                  "30 Days",
+                  "90 Days"
+                ],
+                "vertical": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "clave": "clinical_rationale",
+      "tipo": "lista_casillas",
+      "titulo": "Patient-specific clinical rationale / medical necessity:",
+      "enLinea": true,
+      "tamano": 10,
+      "items": [
+        {
+          "texto": "Ulcerative colitis"
+        },
+        {
+          "texto": "Gastrointestinal mucosal injury or impaired gastrointestinal healing"
+        },
+        {
+          "texto": "Impaired wound or tissue healing"
+        },
+        {
+          "texto": "Obesity or metabolic dysfunction"
+        },
+        {
+          "texto": "Insulin resistance"
+        },
+        {
+          "texto": "Osteoporosis or impaired bone metabolism"
+        },
+        {
+          "texto": "Other documented patient-specific clinical need:",
+          "blanco": 160
+        }
+      ]
+    },
+    {
+      "clave": "prescriber",
+      "tipo": "campos",
+      "etiquetaNormal": true,
+      "tamano": 11,
+      "campos": [
+        {
+          "clave": "prescriber_name",
+          "label": "Prescriber Name (Print)",
+          "origen": "",
+          "ancho": 150
+        },
+        {
+          "clave": "signature",
+          "label": "Signature",
+          "origen": "",
+          "ancho": 150
+        },
+        {
+          "clave": "license",
+          "label": "License #",
+          "origen": "",
+          "ancho": 100
+        },
+        {
+          "clave": "phone2",
+          "label": "Phone",
+          "origen": "",
+          "ancho": 120
+        },
+        {
+          "clave": "email",
+          "label": "Email",
+          "origen": "",
+          "ancho": 160
+        }
+      ]
+    },
+    {
+      "clave": "certifies",
+      "tipo": "parrafo",
+      "negrita": true,
+      "tamano": 10,
+      "texto": "By signing this order/prescription, the authorized professional acknowledges and certifies that:"
+    },
+    {
+      "clave": "certifications",
+      "tipo": "parrafo",
+      "tamano": 9,
+      "texto": "* These preparations are compounded by Farmacia Mía only pursuant to a valid prescription, specific to an individually identified patient, issued by an authorized professional.\n* Compounded medications are not FDA-approved and have not been evaluated by the FDA for safety, effectiveness, or quality.\n* The prescriber certifies the medical necessity of the treatment and assumes clinical responsibility for patient selection, dose, route, frequency, duration, monitoring, contraindications, patient counseling, and management of adverse events.\n* Farmacia Mía prepares compounded medications only pursuant to a valid prescription for a specific patient; it does not diagnose, prescribe, or substitute the clinical judgment of the prescriber.\n* These preparations are not intended for office stock, resale, redistribution, or use without a valid prescription for a specific patient.\n* This document is intended exclusively for authorized professionals and does not constitute patient-directed advertising, nor a claim of safety, efficacy, FDA approval, or clinical superiority.\n* Do not use in patients under 18 years of age, pregnant patients, patients planning pregnancy, or breastfeeding patients, unless clinically determined and documented by the prescriber.\n* This document may contain protected health information under HIPAA and must be handled confidentially."
+    }
+  ]
+}

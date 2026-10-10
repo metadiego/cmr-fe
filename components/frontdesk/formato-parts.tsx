@@ -47,7 +47,8 @@ section, .region { break-inside: avoid; }
 
 // Imprime un elemento en una VENTANA propia (evita el recorte del Dialog/Radix que dejaba la hoja en
 // blanco). Clona el nodo, convierte cualquier <canvas> (firma) en <img> para que sí salga impreso.
-export function imprimirFormato(el: HTMLElement | null, titulo: string) {
+// `extraCss` goes after the base sheet (e.g. the landscape, margin-less pages of layout "paginas").
+export function imprimirFormato(el: HTMLElement | null, titulo: string, extraCss = "") {
   if (!el || typeof window === "undefined") return;
   const clone = el.cloneNode(true) as HTMLElement;
   const canvasOrig = el.querySelectorAll("canvas");
@@ -61,7 +62,7 @@ export function imprimirFormato(el: HTMLElement | null, titulo: string) {
   });
   const w = window.open("", "_blank", "width=900,height=1100");
   if (!w) return; // bloqueado por popup: el usuario debe permitir ventanas emergentes
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title><style>${PRINT_CSS}</style></head><body>${clone.innerHTML}</body></html>`);
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title><style>${PRINT_CSS}${extraCss}</style></head><body>${clone.innerHTML}</body></html>`);
   w.document.close();
   w.focus();
   const go = () => { w.print(); };

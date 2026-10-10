@@ -8,6 +8,7 @@ import { SeccionInner, SesionesFormato } from "@/components/frontdesk/formato-se
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk/formato-parts";
+import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
 
 // Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
 // del BE armado (membrete/título/paciente/columnas/filas). Papel A4/Letter, tinta negra, @media print
@@ -68,6 +69,8 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // `origen: ""` (vs. un binding real como "paciente.nombre") marca un campo para LLENAR A MANO (p. ej.
   // PEMF/Cámara Energética/Cámara Hiperbárica en terapia_camener): sin esto se imprimía la etiqueta sola,
   // sin ninguna línea para escribir — verificado en vivo contra GET /formats/terapia_camener/assembly.
+  // External order forms reproduced sheet by sheet (landscape, own logo, watermark per page).
+  if (d.layout === "paginas") return <FormatoPaginado d={d} label={label} onVolver={onVolver} />;
   const campoValor = (c: { valor?: string | null; origen?: string }) =>
     !c.valor && c.origen === "" ? <span className="ml-1 inline-block min-w-[90px] border-b border-black">&nbsp;</span> : (c.valor ?? "");
   return (

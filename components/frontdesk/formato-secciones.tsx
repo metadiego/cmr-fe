@@ -40,7 +40,7 @@ const Casilla = <span style={{ display: "inline-block", width: 12, height: 12, b
 // grupos independientes en la misma celda, p. ej. "Subcutaneously/Near Injury Site" y "Daily/Twice Daily").
 function OpcionesSegmento({ opciones, vertical }: { opciones: string[]; vertical?: boolean }) {
   return (
-    <span style={{ display: "flex", flexDirection: vertical ? "column" : "row", flexWrap: "wrap", gap: vertical ? 2 : 10 }}>
+    <span style={{ display: "flex", flexDirection: vertical ? "column" : "row", flexWrap: "wrap", gap: vertical ? 2 : "2px 10px" }}>
       {opciones.map((o, i) => (
         <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
           {Casilla} {o}
@@ -122,7 +122,18 @@ export function SeccionInner({
       return (
         <>
           {s.titulo && <Titulo>{s.titulo}</Titulo>}
-          <p style={{ fontSize: 12, lineHeight: 1.6, textAlign: "justify", margin: "4px 0", whiteSpace: "pre-line" }}>{s.texto}</p>
+          <p
+            style={{
+              fontSize: s.tamano ?? 12,
+              lineHeight: s.tamano ? 1.3 : 1.6,
+              fontWeight: s.negrita ? 700 : undefined,
+              textAlign: "justify",
+              margin: "4px 0",
+              whiteSpace: "pre-line",
+            }}
+          >
+            {s.texto}
+          </p>
         </>
       );
 
@@ -132,11 +143,11 @@ export function SeccionInner({
       return (
         <>
           {s.titulo && <Titulo>{s.titulo}</Titulo>}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px", fontSize: 12 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: s.etiquetaNormal ? "6px 16px" : "8px 24px", fontSize: s.tamano ?? 12, alignItems: "flex-end" }}>
             {s.campos.map((c) => (
-              <div key={c.clave} style={{ display: "flex", gap: 6 }}>
-                <span style={{ fontWeight: 700 }}>{c.label ?? `${label(c.labelKey)}:`}</span>
-                <span style={{ borderBottom: BORDER, minWidth: 120, display: "inline-block" }}>{c.valor ?? ""}</span>
+              <div key={c.clave} style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
+                <span style={{ fontWeight: s.etiquetaNormal ? 400 : 700 }}>{c.label ?? `${label(c.labelKey)}:`}</span>
+                <span style={{ borderBottom: BORDER, minWidth: c.ancho ?? 120, display: "inline-block" }}>{c.valor ?? ""}</span>
               </div>
             ))}
           </div>
@@ -229,20 +240,27 @@ export function SeccionInner({
       // "Recommended Schedules" (Peptide Rx) manda `cabecera` con labels vacíos a propósito: esa tabla NO
       // lleva barra de encabezado en el papel. Si ningún label/subtitulo trae texto, no se pinta el <thead>.
       const hayCabecera = headerRows.some((row) => row.some((c) => (c.label ?? "").trim() !== "" || (c.subtitulo ?? "").trim() !== ""));
+      // Dense order forms (layout "paginas") ask for a smaller font and a light-gray grid.
+      const fs = s.tamano ?? 11;
+      const bd = s.colorBorde ? `1px solid ${s.colorBorde}` : BORDER;
+      const pad = s.tamano ? "4px 6px" : "6px 8px";
       return (
         <>
           {(s.titulo || s.labelKey) && <Titulo>{s.titulo ?? label(s.labelKey)}</Titulo>}
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: fs }}>
             {hayCabecera && (
               <thead>
                 {headerRows.map((row, ri) => (
                   <tr key={ri} style={{ background: headBg, color: headFg }}>
                     {/* Columna de casilla (órdenes Rx): cabecera vacía, solo en la última fila de cabecera. */}
-                    {casillasEnFilas && <th style={{ border: BORDER, padding: "6px 8px", width: 24 }} />}
+                    {casillasEnFilas && <th style={{ border: bd, padding: pad, width: 24 }} />}
                     {row.map((col, ci) => (
-                      <th key={ci} style={{ border: BORDER, padding: "6px 8px", textAlign: "left" }}>
+                      <th
+                        key={ci}
+                        style={{ border: bd, padding: pad, textAlign: "left", width: col.ancho ?? undefined, ...(s.tamano && s.colorHeader ? { fontSize: fs + 3, padding: "8px 10px" } : {}) }}
+                      >
                         {colLabel(col, label)}
-                        {col.subtitulo && <div style={{ fontStyle: "italic", fontWeight: 400, fontSize: 10 }}>{col.subtitulo}</div>}
+                        {col.subtitulo && <div style={{ fontStyle: "italic", fontWeight: 400, fontSize: fs - 1 }}>{col.subtitulo}</div>}
                       </th>
                     ))}
                   </tr>
@@ -255,7 +273,7 @@ export function SeccionInner({
                 if (f?.separador) {
                   return (
                     <tr key={`sep${ri}`}>
-                      <td colSpan={lastRow.length + (casillasEnFilas ? 1 : 0)} style={{ border: BORDER, background: GRAY_HEADER, padding: "6px 8px", fontWeight: 700 }}>
+                      <td colSpan={lastRow.length + (casillasEnFilas ? 1 : 0)} style={{ border: bd, background: GRAY_HEADER, padding: pad, fontWeight: 700 }}>
                         {f.separador}
                         {f.subtitulo && <span style={{ fontWeight: 400, marginLeft: 8 }}>{f.subtitulo}</span>}
                       </td>
@@ -264,11 +282,11 @@ export function SeccionInner({
                 }
                 return (
                   <tr key={`f${ri}`}>
-                    {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}
+                    {casillasEnFilas && <td style={{ border: bd, padding: pad, textAlign: "center" }}>{Casilla}</td>}
                     {lastRow.map((col, ci) => (
                       <td
                         key={ci}
-                        style={{ border: BORDER, padding: "6px 8px", height: 26, ...(ci === 0 && descBg ? { background: descBg, color: "#fff", fontWeight: 700 } : {}) }}
+                        style={{ border: bd, padding: pad, height: 26, ...(ci === 0 && descBg ? { background: descBg, color: "#fff", fontWeight: 700 } : {}) }}
                       >
                         <CeldaTematica valor={f?.[col.clave]} />
                       </td>
@@ -278,9 +296,9 @@ export function SeccionInner({
               })}
               {blancas.map((_, ri) => (
                 <tr key={`b${ri}`}>
-                  {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}
+                  {casillasEnFilas && <td style={{ border: bd, padding: pad, textAlign: "center" }}>{Casilla}</td>}
                   {lastRow.map((col, ci) => (
-                    <td key={ci} style={{ border: BORDER, padding: "6px 8px", height: 26, ...(ci === 0 && descBg ? { background: descBg } : {}) }} />
+                    <td key={ci} style={{ border: bd, padding: pad, height: 26, ...(ci === 0 && descBg ? { background: descBg } : {}) }} />
                   ))}
                 </tr>
               ))}
@@ -289,6 +307,43 @@ export function SeccionInner({
         </>
       );
     }
+
+    case "lista_casillas": {
+      // ☐ per item; inline options carry their own ☐; `blanco` = width (px) of a fill-in line.
+      const fs = s.tamano ?? 11;
+      const item = (it: (typeof s.items)[number], i: number) => (
+        <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, lineHeight: 1.35 }}>
+          <span style={{ marginTop: 2, flexShrink: 0, display: "inline-flex" }}>{Casilla}</span>
+          <span style={{ display: "inline-flex", flexWrap: "wrap", alignItems: "center", columnGap: 8 }}>
+            <span>{it.texto}</span>
+            {it.opciones && it.opciones.length > 0 && <OpcionesSegmento opciones={it.opciones} />}
+            {it.blanco ? <span style={{ display: "inline-block", width: it.blanco, borderBottom: BORDER, height: fs }} /> : null}
+          </span>
+        </div>
+      );
+      return (
+        <>
+          {/* Title as written (order forms mix «SUPPORTING CLINICAL BASIS» and «Patient-specific clinical rationale»). */}
+          {(s.titulo || s.labelKey) && <div style={{ fontWeight: 700, fontSize: fs + 1, marginBottom: 3 }}>{s.titulo ?? label(s.labelKey)}</div>}
+          {s.intro && <div style={{ fontSize: fs, marginLeft: 20, marginBottom: 2 }}>{s.intro}</div>}
+          <div
+            style={{
+              fontSize: fs,
+              display: "flex",
+              flexDirection: s.enLinea ? "row" : "column",
+              flexWrap: s.enLinea ? "wrap" : "nowrap",
+              gap: s.enLinea ? "2px 14px" : 1,
+            }}
+          >
+            {s.items.map(item)}
+          </div>
+        </>
+      );
+    }
+
+    case "salto_pagina":
+      // The page split happens in FormatoPaginado; on its own it draws nothing.
+      return null;
 
     case "leyenda":
       // Pie de leyenda secundario centrado (además del f-b/).
