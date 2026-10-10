@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import type { FormatoColumna, FormatoFirmaLinea, FormatoSeccion, FormatoSesion } from "@/lib/api/formatos";
+import type { FormatoCeldaTematica, FormatoColumna, FormatoFirmaLinea, FormatoSeccion, FormatoSegmento, FormatoSesion } from "@/lib/api/formatos";
 
 // Render data-driven de las secciones de un formato, para salir IDÉNTICO al legacy (modelos médicos):
 // parrafo, campos intermedios, tabla_firmas (con bordes), checklist, tabla_tematica, leyenda, además de
@@ -35,6 +35,36 @@ function colLabel(col: FormatoColumna, label: LabelFn): string {
 
 // Casilla vacía para marcar a mano (☐). Compartida por checklist y las órdenes Rx (casillasEnFilas).
 const Casilla = <span style={{ display: "inline-block", width: 12, height: 12, border: BORDER }} aria-hidden />;
+
+// Un grupo de opciones con su propia casilla c/u, dentro de una celda de tabla_tematica (Peptide Rx: varios
+// grupos independientes en la misma celda, p. ej. "Subcutaneously/Near Injury Site" y "Daily/Twice Daily").
+function OpcionesSegmento({ opciones, vertical }: { opciones: string[]; vertical?: boolean }) {
+  return (
+    <span style={{ display: "flex", flexDirection: vertical ? "column" : "row", flexWrap: "wrap", gap: vertical ? 2 : 10 }}>
+      {opciones.map((o, i) => (
+        <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
+          {Casilla} {o}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// Celda de tabla_tematica: string plano (como siempre) o segmentos (texto fijo / grupo de opciones / nota
+// en cursiva), en línea uno tras otro — acordado con BE 09-oct-2026 para Peptide Rx (New Era).
+function CeldaTematica({ valor }: { valor: FormatoCeldaTematica }) {
+  if (valor == null) return null;
+  if (typeof valor === "string") return <>{valor}</>;
+  return (
+    <span style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {valor.segmentos.map((seg: FormatoSegmento, i: number) => {
+        if ("texto" in seg) return <span key={i}>{seg.texto}</span>;
+        if ("opciones" in seg) return <OpcionesSegmento key={i} opciones={seg.opciones} vertical={seg.vertical} />;
+        return <span key={i} style={{ fontStyle: "italic", fontSize: 10 }}>{seg.nota}</span>;
+      })}
+    </span>
+  );
+}
 
 export function SeccionInner({
   s,
@@ -202,19 +232,32 @@ export function SeccionInner({
               ))}
             </thead>
             <tbody>
-              {filas.map((f, ri) => (
-                <tr key={`f${ri}`}>
-                  {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}
-                  {lastRow.map((col, ci) => (
-                    <td
-                      key={ci}
-                      style={{ border: BORDER, padding: "6px 8px", height: 26, ...(ci === 0 && descBg ? { background: descBg, color: "#fff", fontWeight: 700 } : {}) }}
-                    >
-                      {f?.[col.clave] ?? ""}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {filas.map((f, ri) => {
+                // Fila separadora de ancho completo (Peptide Rx: "Nootropics — Size (Select one)").
+                if (f?.separador) {
+                  return (
+                    <tr key={`sep${ri}`}>
+                      <td colSpan={lastRow.length + (casillasEnFilas ? 1 : 0)} style={{ border: BORDER, background: GRAY_HEADER, padding: "6px 8px", fontWeight: 700 }}>
+                        {f.separador}
+                        {f.subtitulo && <span style={{ fontWeight: 400, marginLeft: 8 }}>{f.subtitulo}</span>}
+                      </td>
+                    </tr>
+                  );
+                }
+                return (
+                  <tr key={`f${ri}`}>
+                    {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}
+                    {lastRow.map((col, ci) => (
+                      <td
+                        key={ci}
+                        style={{ border: BORDER, padding: "6px 8px", height: 26, ...(ci === 0 && descBg ? { background: descBg, color: "#fff", fontWeight: 700 } : {}) }}
+                      >
+                        <CeldaTematica valor={f?.[col.clave]} />
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
               {blancas.map((_, ri) => (
                 <tr key={`b${ri}`}>
                   {casillasEnFilas && <td style={{ border: BORDER, padding: "6px 8px", textAlign: "center" }}>{Casilla}</td>}

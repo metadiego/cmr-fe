@@ -13,6 +13,20 @@ export type FormatoColumna = { clave: string; label?: string | null; labelKey?: 
 export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null };
 export type FormatoFila = Record<string, string>; // dentro de `filas` (opaca): sus claves son claves de columna (datos)
 
+// Celda de `tabla_tematica` con varios grupos de casillas independientes dentro de la misma celda (p. ej.
+// "Peptide Rx (New Era)": una celda trae texto fijo + un grupo "Subcutaneously/Near Injury Site" + otro
+// grupo "Daily/Twice Daily", cada uno con su propia casilla). Acordado con BE 09-oct-2026 — no hay forma de
+// expresar esto con una sola casilla por fila (`casillasEnFilas`), así que una celda puede ser un string
+// plano (como siempre) o `{ segmentos }`.
+export type FormatoSegmento =
+  | { texto: string }
+  | { opciones: string[]; vertical?: boolean } // vertical: una opción por línea en vez de en fila
+  | { nota: string }; // línea en cursiva bajo las opciones (p. ej. "Men: 1-2mg / Women: 2-3mg")
+export type FormatoCeldaTematica = string | { segmentos: FormatoSegmento[] } | undefined;
+// Fila de `tabla_tematica`: normal (celdas por clave de columna) o separador de ancho completo
+// (p. ej. "Nootropics — Size (Select one)" entre dos grupos de péptidos).
+export type FormatoFilaTematica = { separador?: string; subtitulo?: string | null } & Record<string, FormatoCeldaTematica>;
+
 // Definición de un formato (lista/admin).
 export type Formato = {
   id: string;
@@ -57,7 +71,9 @@ export type FormatoSeccion =
       grupos: { titulo?: string | null; preguntas: { texto: string }[] }[];
     }
   // Tabla temática (procedimiento): cabecera de color, columna de descripción de color, filas pre-puestas.
-  // `cabecera` admite 1 o 2 filas (morpheus8 = 2). `filas` = descripciones ya puestas; `filasEnBlanco` añade vacías.
+  // `cabecera` admite 1 o 2 filas (morpheus8 = 2). `filas` = descripciones ya puestas; `filasEnBlanco` añade
+  // vacías. Las celdas pueden traer segmentos con sus propias casillas (ver FormatoCeldaTematica) y una
+  // fila puede ser un separador de ancho completo en vez de datos (Peptide Rx, "Nootropics").
   | {
       clave: string;
       labelKey?: string | null;
@@ -65,7 +81,7 @@ export type FormatoSeccion =
       colorHeader?: string | null;
       colorDescCol?: string | null;
       cabecera: FormatoColumna[][];
-      filas?: FormatoFila[];
+      filas?: FormatoFilaTematica[];
       filasEnBlanco?: number;
     }
   // Pie de leyenda secundario centrado (además del f-b/).

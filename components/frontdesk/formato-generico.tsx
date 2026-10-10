@@ -84,6 +84,21 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
           </div>
 
+          {/* Selectores de tipo (p. ej. RADIAL/FOCAL en Ondas de Choque): una casilla en blanco por opción,
+              a la izquierda, antes de los campos — se marca a mano cuál aplica. Verificado en vivo contra
+              GET /formats/terapia_ondas_choque/assembly (`render.casillas`); el tipo ya lo declaraba pero
+              nunca se pintaba. */}
+          {render.casillas && render.casillas.length > 0 && (
+            <div className="mt-2 flex flex-col gap-1 text-sm font-semibold uppercase">
+              {render.casillas.map((c) => (
+                <div key={c} className="flex items-center gap-2">
+                  <span>{c}</span>
+                  <span className="inline-block h-4 w-6 border border-black" aria-hidden />
+                </div>
+              ))}
+            </div>
+          )}
+
           {esSesiones ? (
             <>
               {/* Cabecera data-driven: el BE manda `fields` (paciente/record, y a veces fecha — p. ej.
