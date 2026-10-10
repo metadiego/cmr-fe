@@ -3,9 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Calendar03Icon, LayoutTwoColumnIcon, Search01Icon, TableIcon } from "@hugeicons/core-free-icons";
+import { Calendar03Icon, Search01Icon } from "@hugeicons/core-free-icons";
 
 import { filterPatients } from "@/lib/frontdesk/patient-day";
 import { usePatientDay } from "@/hooks/use-patient-day";
@@ -17,7 +16,6 @@ import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler";
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker";
 import { PatientListView } from "@/components/patient-desk/patient-list-view";
-import { PatientTableView } from "@/components/patient-desk/patient-table-view";
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail";
 import { LiveBadge } from "@/components/live-badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -25,33 +23,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
-
-type View = "list" | "table";
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
-// services, each with its own columns. Two layouts to compare: list + detail, or an expandable table
-// (?view=list|table). The center is the one picked in the top bar — no second selector here.
+// services, each with its own columns: the day's patients on the left, the selected one on the right
+// (the owner picked this layout over an expandable table, 10-oct-2026). The center is the one picked in
+// the top bar — no second selector here.
 export function PatientDesk() {
   const t = useTranslations("patientDesk");
   const tRoot = useTranslations();
   const { can } = useCan();
   const gate = useCenterGate();
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useSearchParams();
-  const view: View = params.get("view") === "table" ? "table" : "list";
-  const setView = (v: View) => {
-    const next = new URLSearchParams(params.toString());
-    next.set("view", v);
-    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
-  };
 
   const [date, setDate] = React.useState(todayISO());
   const [query, setQuery] = React.useState("");
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const [openIds, setOpenIds] = React.useState<Set<string>>(new Set());
   const [schedule, setSchedule] = React.useState<(ScheduleRequest & { open: boolean }) | { open: false }>({ open: false });
 
   const data = usePatientDay(gate.centro, date);
@@ -59,13 +45,6 @@ export function PatientDesk() {
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId) ? selectedId : (patients[0]?.patientId ?? null);
 
-  const toggle = (id: string) =>
-    setOpenIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
   const serviceName = (slug: string) => [...data.servicesById.values()].find((s) => s.slug === slug)?.name;
 
   return (
@@ -78,20 +57,6 @@ export function PatientDesk() {
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("searchPlaceholder")} className="pl-9" aria-label={t("searchPlaceholder")} />
         </div>
         <DatePicker className="w-40" value={date} onChange={setDate} aria-label={t("date")} />
-        <div className="inline-flex rounded-md border p-0.5" role="group" aria-label={t("viewLabel")}>
-          {(["list", "table"] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => setView(v)}
-              aria-pressed={view === v}
-              className={cn("inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium", view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
-            >
-              <HugeiconsIcon icon={v === "list" ? LayoutTwoColumnIcon : TableIcon} className="size-3.5" />
-              {t(v === "list" ? "viewList" : "viewTable")}
-            </button>
-          ))}
-        </div>
         <span className="text-xs text-muted-foreground">{t("patientsCount", { n: patients.length })}</span>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget centroId={gate.centro} nombreServicio={serviceName} />
@@ -120,10 +85,8 @@ export function PatientDesk() {
         <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
       ) : patients.length === 0 ? (
         <p className="rounded-lg bg-card px-4 py-16 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">{query ? t("noMatches") : t("empty")}</p>
-      ) : view === "list" ? (
-        <PatientListView patients={patients} data={data} date={date} centerId={gate.centro} selectedId={effectiveSelected} onSelect={setSelectedId} onSchedule={(r) => setSchedule({ open: true, ...r })} />
       ) : (
-        <PatientTableView patients={patients} data={data} date={date} centerId={gate.centro} openIds={openIds} onToggle={toggle} onSchedule={(r) => setSchedule({ open: true, ...r })} />
+        <PatientListView patients={patients} data={data} date={date} centerId={gate.centro} selectedId={effectiveSelected} onSelect={setSelectedId} onSchedule={(r) => setSchedule({ open: true, ...r })} />
       )}
 
       <Dialog open={schedule.open} onOpenChange={(o) => !o && setSchedule({ open: false })}>

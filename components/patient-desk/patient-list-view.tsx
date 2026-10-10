@@ -18,7 +18,7 @@ interface Props {
   onSchedule: (r: ScheduleRequest) => void;
 }
 
-// Option 1 — master/detail: the day's patients on the left, the selected one's services on the right.
+// Master/detail: the day's patients on the left, the selected one's services on the right.
 // The list scrolls on its own so the detail stays in view on a wide screen.
 export function PatientListView({ patients, data, date, centerId, selectedId, onSelect, onSchedule }: Props) {
   const t = useTranslations("patientDesk");

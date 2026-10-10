@@ -4645,9 +4645,6 @@
     "live": "Live",
     "searchPlaceholder": "Search patient: name, record or service…",
     "date": "Date",
-    "viewLabel": "View",
-    "viewList": "List and detail",
-    "viewTable": "Table",
     "patientsCount": "{n, plural, one {# patient} other {# patients}}",
     "serviceAppointments": "Service appointments",
     "book": "Book",
@@ -4659,10 +4656,6 @@
     "firstAt": "first booking {time}",
     "openRecord": "Record",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
-    "consultation": "Consultation",
-    "colPatient": "Patient",
-    "colBooked": "Booked",
-    "colArrived": "Arrived",
-    "colToday": "Today"
+    "consultation": "Consultation"
   }
 }

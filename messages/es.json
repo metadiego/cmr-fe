@@ -4645,9 +4645,6 @@
     "live": "En vivo",
     "searchPlaceholder": "Buscar paciente: nombre, record o servicio…",
     "date": "Fecha",
-    "viewLabel": "Vista",
-    "viewList": "Lista y detalle",
-    "viewTable": "Tabla",
     "patientsCount": "{n, plural, one {# paciente} other {# pacientes}}",
     "serviceAppointments": "Citas de servicio",
     "book": "Citar",
@@ -4659,10 +4656,6 @@
     "firstAt": "primera cita {time}",
     "openRecord": "Ficha",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
-    "consultation": "Consulta",
-    "colPatient": "Paciente",
-    "colBooked": "Cita",
-    "colArrived": "Llegó",
-    "colToday": "Hoy"
+    "consultation": "Consulta"
   }
 }
