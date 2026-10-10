@@ -90,8 +90,10 @@ export type FormatoRenderMeta = {
   porPagina?: number;
 };
 
-// Bloque por SESIÓN (láser a color multipágina). Clave `sesiones`→`sessions`. Las cajas de notas van vacías.
-export type FormatoSesion = { sesion?: string | null; fecha?: string | null; notas?: string[] };
+// Bloque por SESIÓN (láser a color multipágina). Verificado en vivo (GET /formats/terapia_laser_iv/assembly):
+// el BE ya manda estos 3 campos en INGLÉS (`session`/`date`/`notes`) — no son los nombres en español que
+// asumía esta definición antes, y por eso el número de sesión y la fecha nunca se imprimían.
+export type FormatoSesion = { session?: string | null; date?: string | null; notes?: string[] };
 
 // Documento ARMADO (print-ready) para una sesión. El `layout` es el discriminador:
 // "campos" = encabezado de pares etiqueta/valor (no rejilla); "tabla" = rejilla de columnas/filas.

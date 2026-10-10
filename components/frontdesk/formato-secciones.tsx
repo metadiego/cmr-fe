@@ -253,7 +253,7 @@ export function SesionesFormato({
   firmas?: Extract<FormatoSeccion, { tipo: "firmas" }>;
   label: LabelFn;
 }) {
-  const bloques = sessions.length > 0 ? sessions : [{ sesion: null, fecha: null }];
+  const bloques = sessions.length > 0 ? sessions : [{ session: null, date: null }];
   return (
     <div className="mt-4">
       {bloques.map((s, i) => {
@@ -261,7 +261,7 @@ export function SesionesFormato({
         return (
           <div key={i} style={{ breakInside: "avoid", pageBreakAfter: saltar ? "always" : "auto", marginBottom: 24 }}>
             <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-              SESIÓN{s.sesion ? ` ${s.sesion}` : ""}
+              SESIÓN{s.session ? ` ${s.session}` : ""}
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
               <thead>
@@ -275,7 +275,7 @@ export function SesionesFormato({
                 <tr style={{ height: 34 }}>
                   {columns.map((c) => (
                     <td key={c.clave} style={{ border: BORDER, padding: "6px 8px", verticalAlign: "top" }}>
-                      {c.clave === "fecha" ? (s.fecha ?? "") : ""}
+                      {c.clave === "fecha" ? (s.date ?? "") : ""}
                     </td>
                   ))}
                 </tr>
