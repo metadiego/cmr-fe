@@ -1,3 +1,10 @@
+> **RESUELTO por el BE, 10-oct-2026 13:40 AST — en producción y verificado por HTTP real:**
+> fila `menu_items` creada por `POST /menu` (id `95707806-ce10-4196-94f9-299685a6d477`): `slug patient-desk`,
+> `labelKey nav.patientDesk`, `path /boards/patient-desk`, `icon activity`, `parentSlug g-servicios`, `sortOrder 11`,
+> `permissionSlug frontdesk.read`. Seed en `cmr-be/src/scripts/menu-items.ts` (commit `00571df`).
+> Menú real (`GET /profiles/:id/menu`): **M. Caballero** (atención, Bayamón) y **Damian Campos** (citas, Caguas) traen
+> `frontdesk` y `patient-desk`. La posición «justo debajo» la pone tu manifiesto (order 2).
+
 # Handoff BE — Menú: «Centro de Pacientes (por paciente)» → /boards/patient-desk
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-10 · **Prioridad:** media (el dueño lo prueba por URL ya).
