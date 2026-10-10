@@ -38,7 +38,7 @@ import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { useDictado } from "@/hooks/use-dictado";
-import { ProgramarCitasModal } from "@/components/frontdesk/programar-citas-modal";
+import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler";
 import { FrontdeskSearchBar } from "@/components/frontdesk/frontdesk-search-bar";
 import { UbicacionEnVivoWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget";
 import { FrontdeskToolbar } from "@/components/frontdesk/frontdesk-toolbar";
@@ -111,8 +111,7 @@ export function FrontdeskBoard() {
   // Se ignora cuando el usuario filtra explícitamente por el KPI "Cancelada" (quiere verlas para reactivar).
   const [ocultarCanceladas, setOcultarCanceladas] = React.useState(true);
   const [q, setQ] = React.useState("");
-  // Modal "Programar citas": disparado por Citar (sin paciente) o por render.postAccion de una columna
-  // del tablero (con paciente de la sesión). Data-driven, sin hardcode del estado que lo abre.
+  // Cockpit de agendar: disparado por Citar (sin paciente) o por postAccion de una columna (con paciente).
   const [programar, setProgramar] = React.useState<{ open: boolean; pacienteId?: string; pacienteNombre?: string; servicioId?: string }>({ open: false });
 
   // Catálogos data-driven: tabs de servicios + definición del vertical (estados con color, transiciones).
@@ -716,15 +715,16 @@ export function FrontdeskBoard() {
         </div>
       )}
 
-      <ProgramarCitasModal
-        open={programar.open}
-        onOpenChange={(o) => setProgramar((p) => ({ ...p, open: o }))}
-        centro={gate.centro}
-        pacienteId={programar.pacienteId}
-        pacienteNombre={programar.pacienteNombre}
-        defaultServicioId={programar.servicioId}
-        onDone={refetch}
-      />
+      <Dialog open={programar.open} onOpenChange={(o) => setProgramar((p) => ({ ...p, open: o }))}>
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-5xl">
+          <DialogHeader><DialogTitle>{tRoot("programarCitas.title")}</DialogTitle></DialogHeader>
+          <TherapyDayScheduler
+            defaultDate={fecha} defaultServiceId={programar.servicioId} centro={gate.centro}
+            lockedPatient={programar.pacienteId ? { id: programar.pacienteId, name: programar.pacienteNombre ?? "" } : undefined}
+            onBooked={({ close }) => { refetch(); if (close) setProgramar((p) => ({ ...p, open: false })); }}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Lista de DESCUIDOS del día (§2): paciente, servicio y quién lo hizo, con los tres contadores
           arriba. Clic en una fila → filtra el tablero a ese paciente para abrir su sesión y repararla. */}

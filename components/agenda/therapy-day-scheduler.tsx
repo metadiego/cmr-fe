@@ -55,6 +55,7 @@ export function TherapyDayScheduler({
   defaultDate,
   defaultPatient,
   lockedPatient,
+  defaultServiceId,
   centro,
   onBooked,
 }: {
@@ -62,6 +63,9 @@ export function TherapyDayScheduler({
   defaultPatient?: Paciente | null;
   // Paciente FIJADO (p. ej. desde «Citar» tras Asistir): se muestra el héroe y no se pide buscar.
   lockedPatient?: PatientLite;
+  // Preselecciona una tarjeta de servicio al cargar (p. ej. el servicio activo del tablero de
+  // Frontdesk, o el de la fila que disparó «Asistido»). Se ignora si no está en el catálogo del centro.
+  defaultServiceId?: string;
   centro?: string;
   // `close: true` = el botón «agendar y cerrar»; `close: false` = «agendar y seguir» (limpia la
   // selección y se queda abierto para agregar más terapias al mismo paciente/día).
@@ -81,9 +85,12 @@ export function TherapyDayScheduler({
   const [paciente, setPaciente] = React.useState<PatientLite | null>(
     lockedPatient ?? (defaultPatient ? asLite(defaultPatient) : null),
   );
-  const [sel, setSel] = React.useState<Set<string>>(new Set());
+  // Preselección de `defaultServiceId` (Frontdesk: servicio activo del tablero, o el de la fila que
+  // disparó «Asistido»). Si el id no existe en el catálogo del centro, `chosen`/`servById` (más abajo,
+  // derivados de `servicios`) simplemente no lo muestran — no hace falta validar contra el catálogo acá.
+  const [sel, setSel] = React.useState<Set<string>>(() => (defaultServiceId ? new Set([defaultServiceId]) : new Set()));
   const [areas, setAreas] = React.useState<Record<string, number>>({});
-  const [selId, setSelId] = React.useState<string>("");
+  const [selId, setSelId] = React.useState<string>(defaultServiceId ?? "");
   const [date, setDate] = React.useState(defaultDate ?? todayPR());
   const [time, setTime] = React.useState("");
   const [dragOver, setDragOver] = React.useState<string | null>(null);
