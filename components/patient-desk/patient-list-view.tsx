@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils"
 import { usePatientsPriorityFlags } from "@/hooks/use-patients-priority-flags"
 import { PriorityFlagPill } from "@/components/clientes/priority-flags-badges"
+import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 
 interface Props {
   patients: PatientDay[]
@@ -69,8 +70,14 @@ export function PatientListView({
                 <span className="truncate text-sm font-semibold">
                   {p.name || "—"}
                 </span>
-                <span className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums">
-                  {p.earliestTime ?? ""}
+                {/* Llegada real (presente), no la hora de la cita — el dueño lo pidió 10-oct-2026: la
+                    cola se ordena por llegada, así que la lista debe mostrar eso, no la cita. La cita
+                    queda en el tooltip (misma frase que ya usa el panel de detalle). */}
+                <span
+                  className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums"
+                  title={p.presentAt && p.earliestTime ? t("firstAt", { time: p.earliestTime }) : undefined}
+                >
+                  {p.presentAt ? fmtHora(p.presentAt) : (p.earliestTime ?? "")}
                 </span>
               </div>
               <div className="mb-1 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
