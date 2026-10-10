@@ -117,8 +117,14 @@ export function SeccionInner({
       );
 
     case "parrafo":
-      // Párrafo legal estático (constancia). Justificado, con aire.
-      return <p style={{ fontSize: 12, lineHeight: 1.6, textAlign: "justify", margin: "4px 0" }}>{s.texto}</p>;
+      // Párrafo legal estático (constancia). Justificado, con aire. `titulo` opcional arriba; `texto` puede
+      // traer "\n" entre líneas (Peptide Rx: "By signing..." + 3 líneas de reconocimiento).
+      return (
+        <>
+          {s.titulo && <Titulo>{s.titulo}</Titulo>}
+          <p style={{ fontSize: 12, lineHeight: 1.6, textAlign: "justify", margin: "4px 0", whiteSpace: "pre-line" }}>{s.texto}</p>
+        </>
+      );
 
     case "campos":
       // Campos intermedios (label/valor) entre título y tabla: PEMF/Cámara, Área, Número de serie…
@@ -216,21 +222,29 @@ export function SeccionInner({
       const blancas = Array.from({ length: Math.max(0, s.filasEnBlanco ?? 0) });
       const headBg = s.colorHeader ?? "#5b9bd5";
       const descBg = s.colorDescCol ?? undefined;
+      // "Recommended Schedules" (Peptide Rx) manda `cabecera` con labels vacíos a propósito: esa tabla NO
+      // lleva barra de encabezado en el papel. Si ningún label/subtitulo trae texto, no se pinta el <thead>.
+      const hayCabecera = headerRows.some((row) => row.some((c) => (c.label ?? "").trim() !== "" || (c.subtitulo ?? "").trim() !== ""));
       return (
         <>
-          {s.labelKey && <Titulo>{label(s.labelKey)}</Titulo>}
+          {(s.titulo || s.labelKey) && <Titulo>{s.titulo ?? label(s.labelKey)}</Titulo>}
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-            <thead>
-              {headerRows.map((row, ri) => (
-                <tr key={ri} style={{ background: headBg, color: "#fff" }}>
-                  {/* Columna de casilla (órdenes Rx): cabecera vacía, solo en la última fila de cabecera. */}
-                  {casillasEnFilas && <th style={{ border: BORDER, padding: "6px 8px", width: 24 }} />}
-                  {row.map((col, ci) => (
-                    <th key={ci} style={{ border: BORDER, padding: "6px 8px", textAlign: "left" }}>{colLabel(col, label)}</th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
+            {hayCabecera && (
+              <thead>
+                {headerRows.map((row, ri) => (
+                  <tr key={ri} style={{ background: headBg, color: "#fff" }}>
+                    {/* Columna de casilla (órdenes Rx): cabecera vacía, solo en la última fila de cabecera. */}
+                    {casillasEnFilas && <th style={{ border: BORDER, padding: "6px 8px", width: 24 }} />}
+                    {row.map((col, ci) => (
+                      <th key={ci} style={{ border: BORDER, padding: "6px 8px", textAlign: "left" }}>
+                        {colLabel(col, label)}
+                        {col.subtitulo && <div style={{ fontStyle: "italic", fontWeight: 400, fontSize: 10 }}>{col.subtitulo}</div>}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+            )}
             <tbody>
               {filas.map((f, ri) => {
                 // Fila separadora de ancho completo (Peptide Rx: "Nootropics — Size (Select one)").

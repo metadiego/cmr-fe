@@ -6,8 +6,9 @@ import { apiFetch } from "./client";
 // propia (/laser/formato/:tipo). Contrato: HANDOFF-formatos-terapia (BE PR #192).
 
 // FormatoColumna viaja SIEMPRE dentro de `columnas` (bolsa OPACA) → sus claves NO se traducen: quedan en español.
-// El BE incluye `label` (texto ya listo) además de labelKey; se PREFIERE `label` al pintar.
-export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null };
+// El BE incluye `label` (texto ya listo) además de labelKey; se PREFIERE `label` al pintar. `subtitulo`:
+// línea más chica bajo el label de la columna (Peptide Rx: "Peptides (Select one)", "Max Five (5)").
+export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null; subtitulo?: string | null };
 // Etiqueta de firma: el BE la manda como OBJETO { label, labelKey } (no string). Se acepta también string
 // por compatibilidad. Se PREFIERE `label`. (Verificado en vivo: apex_rf firmas.lineas son objetos.)
 export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null };
@@ -54,8 +55,9 @@ export type FormatoSeccion =
   | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
   // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
   | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[] }
-  // Párrafo estático (p. ej. el texto legal de una constancia).
-  | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string }
+  // Párrafo estático (p. ej. el texto legal de una constancia). `texto` puede traer "\n" entre líneas
+  // (Peptide Rx: "By signing this prescription, you acknowledge that:" + 3 líneas). `titulo` opcional.
+  | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string; titulo?: string | null }
   // Campos intermedios (label/valor) entre el título y la tabla (PEMF/Cámara, Área, Número de serie…).
   // `titulo` es opcional (p. ej. "Composición Corporal" en glp1, "Prescriber" en tirzepatide_order_form):
   // verificado en vivo que el BE ya lo manda, pero el render lo ignoraba por completo.
@@ -78,6 +80,7 @@ export type FormatoSeccion =
       clave: string;
       labelKey?: string | null;
       tipo: "tabla_tematica";
+      titulo?: string | null; // p. ej. "Recommended Schedules:" (Peptide Rx; sin cabecera de columnas)
       colorHeader?: string | null;
       colorDescCol?: string | null;
       cabecera: FormatoColumna[][];
