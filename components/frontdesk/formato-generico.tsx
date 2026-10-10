@@ -121,15 +121,30 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             </div>
           ) : (
             <>
-              {/* Paciente + récord + fecha (solo rejilla; en "campos" ya van dentro de los campos). */}
-              <div className="mt-4 flex items-end justify-between border-b pb-2 text-sm">
-                <div>
-                  <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
-                  {d.patient?.medicalRecordNumber && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
-                </div>
-                <div className="tabular-nums">{d.date ?? ""}</div>
+              {/* Cabecera data-driven igual que "sesiones": se pinta `fields` tal cual venga (paciente/record,
+                  y a veces fecha) en vez de inventar qué mostrar — ver nota en el bloque "sesiones" arriba.
+                  Fallback a `d.patient`/`d.date` solo si el BE no manda `fields` (contrato viejo). */}
+              <div className="mt-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-1 border-b pb-2 text-sm">
+                {campos.length > 0 ? (
+                  campos.map((c) => (
+                    <span key={c.clave}>
+                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {c.valor ?? ""}
+                    </span>
+                  ))
+                ) : (
+                  <>
+                    <div>
+                      <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
+                      {d.patient?.medicalRecordNumber && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
+                    </div>
+                    <div className="tabular-nums">{d.date ?? ""}</div>
+                  </>
+                )}
               </div>
-              {/* Rejilla con filas en blanco (aireadas, para llenar a mano). */}
+              {/* Rejilla con filas en blanco (aireadas, para llenar a mano). `render.numerarFilas` nombra una
+                  columna que se numera "actual/total" (p. ej. "1/24") en vez de mostrar el valor crudo del BE —
+                  mismo criterio que "SESIÓN n/n" en el layout "sesiones", aplicado a una rejilla de una fila
+                  por terapia (Transcraneal: 24 filas, # TERAPIA = "1/24"…"24/24"). */}
               <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
                 <thead>
                   <tr className="bg-neutral-100 text-left">
@@ -139,7 +154,11 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 <tbody>
                   {filas.map((f, i) => (
                     <tr key={i} style={{ height: 46 }}>
-                      {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
+                      {cols.map((c) => {
+                        const crudo = f?.[c.clave] ?? "";
+                        const valor = render.numerarFilas === c.clave && crudo !== "" ? `${crudo}/${filas.length}` : crudo;
+                        return <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{valor}</td>;
+                      })}
                     </tr>
                   ))}
                 </tbody>
