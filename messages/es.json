@@ -1853,7 +1853,9 @@
         "hora": "HORA",
         "paciente": "FIRMA DEL PACIENTE",
         "tecnico": "TÉCNICO(A)"
-      }
+      },
+      "mia_glp1_order": "Orden Mía · GLP-1 (Semaglutide / Tirzepatide)",
+      "mia_peptides_order": "Orden Mía · Péptidos"
     },
     "recordLabel": "Récord",
     "triggerPoint": "Trigger point",

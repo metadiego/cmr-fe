@@ -62,6 +62,8 @@ export function FormatosModal({
   onHistorial?: () => void;
 }) {
   const t = useTranslations("frontdesk");
+  // Report labelKeys come from the BE fully qualified ("frontdesk.formato.<slug>"): look them up from the root.
+  const tRoot = useTranslations();
   const cfg = React.useMemo(() => parseAcciones(formAcciones), [formAcciones]);
   const [report, setReport] = React.useState<ReportAccion | null>(null);
   const [generado, setGenerado] = React.useState(false);
@@ -122,7 +124,7 @@ export function FormatosModal({
                     onClick={() => elegir(r)}
                     className="rounded-md border p-4 text-left transition-colors hover:border-primary hover:bg-primary/5"
                   >
-                    <div className="font-medium">{r.labelKey && t.has(r.labelKey) ? t(r.labelKey) : r.name ?? r.id}</div>
+                    <div className="font-medium">{r.labelKey && tRoot.has(r.labelKey) ? tRoot(r.labelKey) : r.name ?? r.id}</div>
                     <div className="text-xs text-muted-foreground">{t("generarFormato")}</div>
                   </button>
                 ))}
