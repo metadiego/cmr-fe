@@ -28,7 +28,12 @@
       "linking": "Enlazando…",
       "linked": "Paciente enlazado.",
       "refresh": "Actualizar"
-    }
+    },
+    "claimPrinterLabel": "Impresora del código de alta",
+    "claimPrinterHelp": "Cuando un paciente nuevo queda dado de alta en el EHR, su código se imprime solo en esta impresora, por el hub de la sucursal.",
+    "claimPrinterNone": "Este centro no tiene impresoras en el hub de impresión (Configuración → Apariencia corporativa).",
+    "claimPrinterUnset": "Sin elegir",
+    "claimPrinterNotInCenter": "Esa impresora no es de este centro."
   },
   "resources": {
     "title": "Recursos",

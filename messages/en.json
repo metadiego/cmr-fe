@@ -28,7 +28,12 @@
       "linking": "Linking…",
       "linked": "Patient linked.",
       "refresh": "Refresh"
-    }
+    },
+    "claimPrinterLabel": "Claim code printer",
+    "claimPrinterHelp": "When a new patient is onboarded in the EHR, their code prints by itself on this printer, through the branch hub.",
+    "claimPrinterNone": "This center has no printers in the print hub (Settings → Corporate look).",
+    "claimPrinterUnset": "Not set",
+    "claimPrinterNotInCenter": "Esa impresora no es de este centro."
   },
   "resources": {
     "title": "Resources",
