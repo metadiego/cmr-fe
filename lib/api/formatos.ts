@@ -43,7 +43,9 @@ export type FormatoSeccion =
   // Párrafo estático (p. ej. el texto legal de una constancia).
   | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string }
   // Campos intermedios (label/valor) entre el título y la tabla (PEMF/Cámara, Área, Número de serie…).
-  | { clave: string; labelKey?: string | null; tipo: "campos"; campos: FormatoCampo[] }
+  // `titulo` es opcional (p. ej. "Composición Corporal" en glp1, "Prescriber" en tirzepatide_order_form):
+  // verificado en vivo que el BE ya lo manda, pero el render lo ignoraba por completo.
+  | { clave: string; labelKey?: string | null; tipo: "campos"; campos: FormatoCampo[]; titulo?: string | null }
   // Tabla de firmas CON BORDES: `columnas` × `filas` (Nombre/Firma/Fecha), cabecera gris opcional.
   | { clave: string; labelKey?: string | null; tipo: "tabla_firmas"; columnas: string[]; filas: string[]; cabecera?: boolean }
   // Lista de cotejo de enfermería: bandas de sección (colspan) + casillas Sí/No/Observación.

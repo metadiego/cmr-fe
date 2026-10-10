@@ -92,15 +92,19 @@ export function SeccionInner({
 
     case "campos":
       // Campos intermedios (label/valor) entre título y tabla: PEMF/Cámara, Área, Número de serie…
+      // `titulo` (p. ej. "Composición Corporal", "Prescriber") se pinta igual que las demás secciones.
       return (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px", fontSize: 12 }}>
-          {s.campos.map((c) => (
-            <div key={c.clave} style={{ display: "flex", gap: 6 }}>
-              <span style={{ fontWeight: 700 }}>{c.label ?? `${label(c.labelKey)}:`}</span>
-              <span style={{ borderBottom: BORDER, minWidth: 120, display: "inline-block" }}>{c.valor ?? ""}</span>
-            </div>
-          ))}
-        </div>
+        <>
+          {s.titulo && <Titulo>{s.titulo}</Titulo>}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px", fontSize: 12 }}>
+            {s.campos.map((c) => (
+              <div key={c.clave} style={{ display: "flex", gap: 6 }}>
+                <span style={{ fontWeight: 700 }}>{c.label ?? `${label(c.labelKey)}:`}</span>
+                <span style={{ borderBottom: BORDER, minWidth: 120, display: "inline-block" }}>{c.valor ?? ""}</span>
+              </div>
+            ))}
+          </div>
+        </>
       );
 
     case "tabla_firmas": {
