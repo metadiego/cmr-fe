@@ -69,12 +69,22 @@ export function imprimirFormato(el: HTMLElement | null, titulo: string) {
   if (w.document.images.length) setTimeout(go, 400); else setTimeout(go, 150);
 }
 
+// "f-b/" = "format by": iniciales de quien imprimió + fecha/hora (p. ej. "f-b/ LA - 2026-10-09 21:47").
+// Todas las iniciales del nombre registrado (no solo 2 fijas) — dos personas distintas pueden compartir
+// las mismas 2 iniciales, así que se toma una por cada palabra del nombre completo. Pedido del dueño,
+// 09-oct-2026, comparando el pie contra los PDF de referencia (mostraban "LA", el FE mostraba el nombre
+// completo resuelto por el BE, p. ej. "Master").
+function iniciales(nombre: string): string {
+  return nombre.trim().split(/\s+/).map((palabra) => palabra[0] ?? "").join("").toUpperCase();
+}
+
 // Pie del legacy, compartido por TODOS los formatos (genérico + láser HILT/MLS): pequeño, a la izquierda,
-// al final de la hoja. Formato `{prefijo}{usuario||login} - {fechaHora}`. Se PREFIERE `usuario` porque el
-// BE ahora resuelve el nombre real del perfil (antes salía el uuid); `login` (authUserId) es el respaldo.
+// al final de la hoja. Formato `{prefijo}{iniciales(usuario)||login} - {fechaHora}`. Se PREFIERE `usuario`
+// porque el BE resuelve el nombre real del perfil; `login` (authUserId, un uuid) es el respaldo y NO se le
+// sacan iniciales (no tendría sentido).
 export function PieFormato({ pie }: { pie?: FormatoPie }) {
   if (!pie) return null;
-  const quien = pie.user || pie.login || "";
+  const quien = pie.user ? iniciales(pie.user) : (pie.login || "");
   const txt = `${pie.prefix ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
   if (!txt.trim()) return null;
   return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
