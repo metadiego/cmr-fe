@@ -6,7 +6,11 @@ import Link from "next/link"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Calendar03Icon, UserIcon } from "@hugeicons/core-free-icons"
 
-import type { PatientDay, PatientKind } from "@/lib/frontdesk/patient-day"
+import {
+  serviceConcluded,
+  type PatientDay,
+  type PatientKind,
+} from "@/lib/frontdesk/patient-day"
 import type { PatientDayData } from "@/hooks/use-patient-day"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
@@ -47,20 +51,28 @@ export function PatientChips({
       ? tRoot(data.consultationTab.labelKey)
       : data.consultationTab.name
     : t("consultation")
+  // A concluded service (every session attended) is painted gray.
   const chip = (
     key: string,
     color: string | null,
     name: string,
     status: string,
-    consult = false
+    consult = false,
+    concluded = false
   ) => (
     <span
       key={key}
-      className="inline-flex items-center gap-1.5 rounded-full border bg-background px-2 py-0.5 text-[11px] font-medium"
+      className={
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+        (concluded ? "bg-muted text-muted-foreground" : "bg-background")
+      }
     >
       <span
         className="size-2 rounded-full"
-        style={{ backgroundColor: color ?? "var(--muted-foreground)" }}
+        style={{
+          backgroundColor:
+            concluded || !color ? "var(--muted-foreground)" : color,
+        }}
         aria-hidden
       />
       <span className="uppercase">{name}</span>
@@ -80,7 +92,14 @@ export function PatientChips({
   return (
     <div className="flex flex-wrap gap-1.5">
       {patient.services.map((s) =>
-        chip(s.serviceId, s.color, s.name, s.statuses[0] ?? "")
+        chip(
+          s.serviceId,
+          s.color,
+          s.name,
+          s.statuses[0] ?? "",
+          false,
+          serviceConcluded(s)
+        )
       )}
       {patient.consultationIds.length > 0 &&
         chip(
@@ -173,6 +192,7 @@ export function PatientDetail({
             slug={s.slug}
             name={s.name}
             color={s.color}
+            concluded={serviceConcluded(s)}
             service={data.servicesById.get(s.serviceId)}
             board={data.boardsBySlug[s.slug]}
             definition={data.serviceDefinition}

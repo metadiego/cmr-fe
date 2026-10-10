@@ -25,11 +25,14 @@ import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamic
 import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
 import { useCan } from "@/hooks/use-can"
+import { cn } from "@/lib/utils"
 
 interface Props {
   slug: string
   name: string
   color: string | null
+  // Every session attended: the service is painted gray (still editable — nothing is locked).
+  concluded?: boolean
   service: Service | undefined
   board: ServiceBoard | undefined
   definition: BoardDefinition | null
@@ -52,6 +55,7 @@ export function ServiceSessionsTable({
   slug,
   name,
   color,
+  concluded = false,
   service,
   board,
   definition,
@@ -138,14 +142,27 @@ export function ServiceSessionsTable({
   }, [hasDose, patientId, centerId, board])
 
   return (
-    <section className="overflow-hidden rounded-lg ring-1 ring-foreground/10">
+    <section
+      className={cn(
+        "overflow-hidden rounded-lg ring-1 ring-foreground/10",
+        concluded && "bg-muted/50 grayscale"
+      )}
+    >
       <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
         <span
           className="size-2.5 rounded-full"
-          style={{ backgroundColor: color ?? "var(--muted-foreground)" }}
+          style={{
+            backgroundColor:
+              concluded || !color ? "var(--muted-foreground)" : color,
+          }}
           aria-hidden
         />
-        <h3 className="text-sm font-semibold tracking-wide uppercase">
+        <h3
+          className={cn(
+            "text-sm font-semibold tracking-wide uppercase",
+            concluded && "text-muted-foreground"
+          )}
+        >
           {name}
         </h3>
         <span className="text-xs text-muted-foreground">
