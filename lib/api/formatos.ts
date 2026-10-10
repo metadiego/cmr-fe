@@ -106,6 +106,7 @@ export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
   casillasEnFilas?: boolean;
   imagenEscalaDolor?: string | null;
+  imagenCuerpo?: string | null; // GLP-1: diagrama hombre/mujer, ruta ya resuelta por el BE según sexo del paciente
   areas?: string[];
   paginas?: number;
   tablasLadoALado?: number;

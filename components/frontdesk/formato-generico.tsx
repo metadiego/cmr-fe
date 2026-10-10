@@ -203,6 +203,14 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             );
           })}
 
+          {/* Diagrama del cuerpo (GLP-1): hombre o mujer ya resuelto por el BE según sexo del paciente.
+              Posición aproximada (después de las secciones) hasta confirmar con BE si hace falta que vaya
+              EXACTO entre Composición Corporal y Medidas Corporales (layout de 3 columnas del legado). */}
+          {render.imagenCuerpo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={render.imagenCuerpo} alt="" className="mt-6 w-full max-w-md self-center object-contain" />
+          )}
+
           {/* Escala de dolor (HILT/MLS): imagen del legacy, tal cual, antes del pie. */}
           {render.imagenEscalaDolor && (
             // eslint-disable-next-line @next/next/no-img-element
