@@ -79,6 +79,8 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa (solo logo + título). */}
             {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
             {d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
+            {/* Línea más chica arriba del título (p. ej. "Cámara Energética" sobre "CONTROL DE SESIONES"). */}
+            {render.subtitulo && <div className="text-sm font-semibold">{render.subtitulo}</div>}
             <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
           </div>
 
@@ -146,10 +148,10 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                   </>
                 )}
               </div>
-              {/* Rejilla con filas en blanco (aireadas, para llenar a mano). `render.numerarFilas` nombra una
-                  columna que se numera "actual/total" (p. ej. "1/24") en vez de mostrar el valor crudo del BE —
-                  mismo criterio que "SESIÓN n/n" en el layout "sesiones", aplicado a una rejilla de una fila
-                  por terapia (Transcraneal: 24 filas, # TERAPIA = "1/24"…"24/24"). */}
+              {/* Rejilla con filas en blanco (aireadas, para llenar a mano). El BE "hornea" el valor final de
+                  cada celda (incluido el contador de `render.numerarFilas`, p. ej. "1/24" cuando
+                  `numerarComoFraccion` aplica) — el FE pinta tal cual, nunca lo recalcula. Confirmado por BE
+                  tras un primer intento equivocado de este lado donde el FE le agregaba "/total" él mismo. */}
               <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
                 <thead>
                   <tr className="bg-neutral-100 text-left">
@@ -159,11 +161,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 <tbody>
                   {filas.map((f, i) => (
                     <tr key={i} style={{ height: 46 }}>
-                      {cols.map((c) => {
-                        const crudo = f?.[c.clave] ?? "";
-                        const valor = render.numerarFilas === c.clave && crudo !== "" ? `${crudo}/${filas.length}` : crudo;
-                        return <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{valor}</td>;
-                      })}
+                      {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
                     </tr>
                   ))}
                 </tbody>

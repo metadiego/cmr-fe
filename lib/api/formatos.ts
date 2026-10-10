@@ -78,8 +78,9 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 // - areas: filas-cabecera por área en la rejilla (HILT, las 10 áreas). paginas: nº de páginas físicas (HILT=2).
 // - tablasLadoALado: nº de tablas en paralelo (MLS=2). casillas: selectores de tipo (RADIAL/FOCAL).
 // - notas / porPagina: para `layout:"sessions"` — las 2 cajas de notas VACÍAS y cuántas sesiones por página.
-// - numerarFilas: clave de una columna de la rejilla que se numera "actual/total" (p. ej. "1/24") en vez de
-//   mostrar el valor crudo — verificado en vivo contra GET /formats/transcraneal/assembly.
+// - subtitulo: línea más chica arriba del título (p. ej. "Cámara Energética" arriba de "CONTROL DE
+//   SESIONES"). `numerarFilas`/`numerarComoFraccion` son internos del BE (quién "hornea" el contador de la
+//   rejilla): el FE nunca los lee ni recalcula — siempre pinta el valor de la fila tal cual llega.
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
   casillasEnFilas?: boolean;
@@ -90,7 +91,7 @@ export type FormatoRenderMeta = {
   casillas?: string[];
   notas?: string[];
   porPagina?: number;
-  numerarFilas?: string | null;
+  subtitulo?: string | null;
 };
 
 // Bloque por SESIÓN (láser a color multipágina). Verificado en vivo (GET /formats/terapia_laser_iv/assembly):
