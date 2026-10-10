@@ -90,9 +90,23 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                             {e.technicianName ?? "—"}
                           </div>
                         </div>
-                        <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                          {t("minutesSince", { n: e.minutes })}
-                        </span>
+                        <div className="flex shrink-0 flex-col items-end gap-0.5">
+                          <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                            {t("minutesSince", { n: e.minutes })}
+                          </span>
+                          {e.estimatedEnd ? (
+                            <span
+                              className="text-[11px] text-muted-foreground"
+                              title={
+                                e.estimateSource === "history"
+                                  ? t("estimatedEndHistoryTooltip")
+                                  : undefined
+                              }
+                            >
+                              {t("estimatedEnd", { time: fmtHora(e.estimatedEnd) })}
+                            </span>
+                          ) : null}
+                        </div>
                       </li>
                     ))}
                   </ul>

@@ -4678,6 +4678,8 @@
       "turn": "#{turn}",
       "waitMinutes": "{n} min",
       "minutesSince": "{n} min",
+      "estimatedEnd": "ends ~{time}",
+      "estimatedEndHistoryTooltip": "Estimated from the real 30-day median",
       "busyIn": "Busy in {service}",
       "free": "Free: {names}",
       "noneFree": "No one free right now",
