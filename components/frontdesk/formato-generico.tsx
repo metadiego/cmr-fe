@@ -79,11 +79,23 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
 
           {esSesiones ? (
             <>
-              {/* Paciente + récord arriba de las sesiones (igual que la rejilla; faltaba acá — el
-                  reporte salía sin nombre). Sin fecha: cada sesión trae la suya en su propia fila. */}
-              <div className="mt-4 border-b pb-2 text-sm">
-                <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
-                {d.patient?.medicalRecordNumber && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
+              {/* Cabecera data-driven: el BE manda `fields` (paciente/record, y a veces fecha — p. ej.
+                  "Nano + Láser Intravenoso" trae un 3er campo FECHA que "Vit C + Láser IV" no trae) igual
+                  que en el layout "campos", así que se pinta tal cual viene, en línea, sin inventar qué
+                  campos mostrar. Fallback a `d.patient` solo si el BE no manda `fields` (contrato viejo). */}
+              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 border-b pb-2 text-sm">
+                {campos.length > 0 ? (
+                  campos.map((c) => (
+                    <span key={c.clave}>
+                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {c.valor ?? ""}
+                    </span>
+                  ))
+                ) : (
+                  <>
+                    <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
+                    {d.patient?.medicalRecordNumber && <span className="font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
+                  </>
+                )}
               </div>
               {/* Láser a color por sesión (multipágina): bloques por sesión con paginación. */}
               <SesionesFormato
