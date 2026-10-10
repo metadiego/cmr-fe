@@ -11,6 +11,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import { CentroPicker } from "@/components/facturacion/centro-picker";
 
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 const nf = new Intl.NumberFormat("en-US");
@@ -46,11 +47,13 @@ th.r,td.r,.text-right{text-align:right}
 .ingreso{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;border-top:2px solid #111;padding-top:9px;font-weight:700;font-size:15px}
 `;
 
-// Cierre diario del gerente: una tarjeta por CENTRO permitido (no por el centro activo de la
-// pantalla — un gerente/admin con varios centros las ve todas apiladas), independiente de
-// Facturación general/consulta (suma ambas divisiones). Vive como pestaña de Facturación general
-// (components/facturacion/facturacion-con-tabs.tsx) desde 09-oct-2026, extraído de lo que era
-// app/(app)/reports/daily/page.tsx.
+// Cierre diario del gerente: UNA sola tarjeta, la del centro activo de la pantalla (mismo patrón
+// que Facturas/Devoluciones/Cuadre de caja — useCentroGate + CentroPicker si hace falta elegir),
+// independiente de Facturación general/consulta (suma ambas divisiones). Vive como pestaña de
+// Facturación general (components/facturacion/facturacion-con-tabs.tsx) desde 09-oct-2026,
+// extraído de lo que era app/(app)/reports/daily/page.tsx. Antes apilaba una tarjeta por cada
+// centro permitido; se corrigió a pedido del dueño (09-oct-2026) para que sea consistente con las
+// otras pestañas.
 export function EstadisticasDiariasView() {
   const t = useTranslations("estadisticasDiarias");
   const tc = useTranslations("common");
@@ -63,49 +66,30 @@ export function EstadisticasDiariasView() {
   const [hasta, setHasta] = React.useState(hoy);
   const [query, setQuery] = React.useState({ desde: hoy, hasta: hoy });
 
-  const centros = gate.centros;
-  const centrosKey = centros.map((c) => c.id).join(",");
-  // Una tarjeta por centro que el usuario puede ver (gerente = 1; admin supervisor = varias, apiladas).
-  const res = useResource<{ centroId: string; centroNombre: string; data: EstadisticasDiarias }[]>(
-    () =>
-      centros.length
-        ? Promise.all(
-            centros.map((c) =>
-              getEstadisticasDiarias(query.desde, query.hasta || undefined, c.id).then((data) => ({
-                centroId: c.id,
-                centroNombre: c.name,
-                data,
-              })),
-            ),
-          )
-        : Promise.resolve([]),
-    [query.desde, query.hasta, centrosKey],
+  const res = useResource<EstadisticasDiarias | null>(
+    () => (gate.centro ? getEstadisticasDiarias(query.desde, query.hasta || undefined, gate.centro) : Promise.resolve(null)),
+    [query.desde, query.hasta, gate.centro],
   );
-  const cards = React.useMemo(() => (res.state.kind === "ok" ? res.state.data : []), [res.state]);
+  const data = res.state.kind === "ok" ? res.state.data : null;
   const cargando = res.state.kind === "loading";
 
   const rangoLabel = query.hasta && query.hasta !== query.desde ? `${fmtFecha(query.desde)} – ${fmtFecha(query.hasta)}` : fmtFecha(query.desde);
 
   // Reporte en TEXTO PLANO (para WhatsApp/Correo/Copiar): se lee en el móvil sin abrir nada.
   const texto = React.useMemo(() => {
-    if (!cards.length) return "";
-    return cards
-      .map((c) => {
-        const d = c.data;
-        const vacio = d.medicalCare.total === 0 && d.services.length === 0 && !d.grossRevenue;
-        const lineas = [`C.M.R. — ${c.centroNombre}    ${rangoLabel}`, ""];
-        if (vacio) { lineas.push(t("sinActividad")); return lineas.join("\n"); }
-        lineas.push(`${t("atencionMedica")}   N: ${d.medicalCare.newCount}   S: ${d.medicalCare.followUpCount}   ${t("total")} ${d.medicalCare.total}`, "");
-        if (d.services.length) {
-          lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
-          d.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
-          lineas.push("");
-        }
-        lineas.push(`${t("ingresoBruto")}   ${money.format(d.grossRevenue ?? 0)}`);
-        return lineas.join("\n");
-      })
-      .join("\n\n————————————\n\n");
-  }, [cards, rangoLabel, t]);
+    if (!data) return "";
+    const vacio = data.medicalCare.total === 0 && data.services.length === 0 && !data.grossRevenue;
+    const lineas = [`C.M.R. — ${gate.centroNombre}    ${rangoLabel}`, ""];
+    if (vacio) { lineas.push(t("sinActividad")); return lineas.join("\n"); }
+    lineas.push(`${t("atencionMedica")}   N: ${data.medicalCare.newCount}   S: ${data.medicalCare.followUpCount}   ${t("total")} ${data.medicalCare.total}`, "");
+    if (data.services.length) {
+      lineas.push(`${t("servicios")}   (${t("col.aplicados")} / ${t("col.vendidos")})`);
+      data.services.forEach((s) => lineas.push(`  ${s.name}: ${s.applied} / ${s.sold}`));
+      lineas.push("");
+    }
+    lineas.push(`${t("ingresoBruto")}   ${money.format(data.grossRevenue ?? 0)}`);
+    return lineas.join("\n");
+  }, [data, gate.centroNombre, rangoLabel, t]);
 
   function imprimir() {
     const el = printRef.current;
@@ -136,7 +120,7 @@ export function EstadisticasDiariasView() {
       <div className="flex items-start justify-between gap-3">
         <p className="max-w-prose text-sm text-muted-foreground">{t("help")}</p>
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" onClick={imprimir} disabled={!cards.length}><HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}</Button>
+          <Button variant="outline" size="sm" onClick={imprimir} disabled={!data}><HugeiconsIcon icon={PrinterIcon} className="size-4" /> {tc("print")}</Button>
           <Button variant="outline" size="sm" onClick={whatsapp} disabled={!texto}><HugeiconsIcon icon={WhatsappIcon} className="size-4" /> {t("whatsapp")}</Button>
           <Button variant="outline" size="sm" onClick={correo} disabled={!texto}><HugeiconsIcon icon={Mail01Icon} className="size-4" /> {t("correo")}</Button>
           <Button variant="outline" size="sm" onClick={copiar} disabled={!texto}><HugeiconsIcon icon={Copy01Icon} className="size-4" /> {t("copiar")}</Button>
@@ -160,16 +144,20 @@ export function EstadisticasDiariasView() {
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
+      ) : gate.necesitaPicker ? (
+        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
           {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
           {res.state.kind === "fail" && (
             <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{tc("error")}</p>
           )}
-          {/* Región imprimible: una tarjeta por centro, apiladas. */}
-          <div ref={printRef} className="mx-auto max-w-3xl space-y-6">
-            {cards.map((c) => <DiariaCard key={c.centroId} centro={c.centroNombre} fecha={rangoLabel} data={c.data} t={t} />)}
-          </div>
+          {/* Región imprimible: una sola tarjeta, la del centro activo. */}
+          {data && (
+            <div ref={printRef} className="mx-auto max-w-3xl">
+              <DiariaCard centro={gate.centroNombre} fecha={rangoLabel} data={data} t={t} />
+            </div>
+          )}
         </>
       )}
     </div>

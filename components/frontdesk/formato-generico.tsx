@@ -36,10 +36,10 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
   // Láser a color por sesión (multipágina): bloques por sesión con paginación; las firmas se pintan DENTRO
   // de cada bloque (no al final), así que se sacan de las secciones normales.
-  // "sessions"/"sesiones": verificado en vivo que /formats/terapia_vitamina_c_laser_iv/assembly manda
-  // `layout:"sesiones"` (sin traducir, a diferencia de lo que asumía el comentario viejo de `lib/api/formatos.ts`
-  // sobre "se dice igual") — sin este fallback, el multipágina por sesión nunca se activaba.
-  const esSesiones = d.layout === "sessions" || d.layout === "sesiones";
+  // "sesiones" es el valor real (enum en español por convención del proyecto, igual que "campos"/"tabla"
+  // — confirmado por BE, no es un bug de traducción); "sessions" queda como fallback por si el contrato
+  // cambiara. Sin esto, el multipágina por sesión nunca se activaba.
+  const esSesiones = d.layout === "sesiones" || d.layout === "sessions";
   const firmasSesion = esSesiones
     ? secciones.find((s): s is Extract<FormatoSeccion, { tipo: "firmas" }> => s.tipo === "firmas")
     : undefined;
@@ -78,15 +78,23 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
           </div>
 
           {esSesiones ? (
-            /* Láser a color por sesión (multipágina): bloques por sesión con paginación. */
-            <SesionesFormato
-              columns={cols}
-              sessions={d.sessions ?? []}
-              notas={render.notas ?? []}
-              porPagina={d.porPagina ?? render.porPagina ?? 2}
-              firmas={firmasSesion}
-              label={label}
-            />
+            <>
+              {/* Paciente + récord arriba de las sesiones (igual que la rejilla; faltaba acá — el
+                  reporte salía sin nombre). Sin fecha: cada sesión trae la suya en su propia fila. */}
+              <div className="mt-4 border-b pb-2 text-sm">
+                <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
+                {d.patient?.medicalRecordNumber && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
+              </div>
+              {/* Láser a color por sesión (multipágina): bloques por sesión con paginación. */}
+              <SesionesFormato
+                columns={cols}
+                sessions={d.sessions ?? []}
+                notas={render.notas ?? []}
+                porPagina={d.porPagina ?? render.porPagina ?? 2}
+                firmas={firmasSesion}
+                label={label}
+              />
+            </>
           ) : esCampos ? (
             /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
                valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
