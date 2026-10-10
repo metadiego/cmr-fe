@@ -7,10 +7,11 @@ import { apiFetch } from "./client";
 // que el paciente está ahora mismo — se pinta "ocupado en X" y NO cuenta como esperando esa terapia.
 //
 // El BE no manda `record` plano (lo que se había asumido del borrador de spec antes de que el
-// endpoint existiera): manda `patientName`/`medicalRecordNumber` sueltos y, además, un `patient`
-// anidado con el nombre ya en formato "Apellidos, Nombre" (igual al resto de la app). Se usa el
-// anidado cuando está, y el plano como respaldo — confirmado así SOLO para `waiting`; `inTherapy`
-// no se ha visto con nadie en terapia todavía, así que se trata igual por las dudas, sin asumir.
+// endpoint existiera): manda `patientName`/`medicalRecordNumber` sueltos (de la cola misma) MÁS un
+// `patient` anidado con el nombre ya en formato "Apellidos, Nombre" — lo agrega un interceptor
+// global a cualquier objeto con `patientId` (regla del dueño 29-sep: "el paciente viaja con su
+// récord"), así que está garantizado tanto en `waiting` como en `inTherapy`. Confirmado por BE
+// 10-oct-2026 — se usa el anidado para mostrar, consistente con el resto de la app.
 export type QueuePatientRef = {
   id: string;
   medicalRecordNumber: string | null;
@@ -22,7 +23,7 @@ export type QueueWaitingEntry = {
   patientId: string;
   patientName: string;
   medicalRecordNumber: string | null;
-  patient?: QueuePatientRef;
+  patient: QueuePatientRef;
   turn: number;
   arrivedAt: string; // ISO — primera llegada a ESTA terapia (ver el-turno-por-terapia.ts del BE)
   waitMinutes: number;
@@ -34,7 +35,7 @@ export type QueueInTherapyEntry = {
   patientId: string;
   patientName: string;
   medicalRecordNumber: string | null;
-  patient?: QueuePatientRef;
+  patient: QueuePatientRef;
   technicianId: string | null;
   technicianName: string | null;
   since: string; // ISO

@@ -8,14 +8,15 @@ import type {
   QueueWaitingEntry,
 } from "@/lib/api/frontdesk-queue";
 
-// El BE manda el nombre "Apellidos, Nombre" anidado en `patient.name` (verificado por HTTP para
-// `waiting`); si no viene (p. ej. `inTherapy`, sin confirmar todavía), cae al `patientName` plano.
+// El BE manda el nombre "Apellidos, Nombre" anidado en `patient.name`, garantizado por un
+// interceptor global en cualquier objeto con `patientId` — confirmado por BE para `waiting` e
+// `inTherapy` por igual (10-oct-2026).
 export function queueEntryDisplayName(e: QueueWaitingEntry | QueueInTherapyEntry): string {
-  return e.patient?.name ?? e.patientName;
+  return e.patient.name;
 }
 
 export function queueEntryRecord(e: QueueWaitingEntry | QueueInTherapyEntry): string | null {
-  return e.patient?.medicalRecordNumber ?? e.medicalRecordNumber;
+  return e.patient.medicalRecordNumber;
 }
 
 export type PatientTurn = {

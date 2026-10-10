@@ -3,8 +3,9 @@ import assert from "node:assert/strict"
 import { earliestFreeWaitByPatient, queueEntryDisplayName, queueEntryRecord, queuePhase, turnsByPatient } from "./therapy-queue.ts"
 import type { FrontdeskQueue } from "@/lib/api/frontdesk-queue"
 
-// Forma verificada por HTTP contra prod 10-oct-2026 (GET /frontdesk/queue): `patientName` plano +
-// `medicalRecordNumber` suelto, más `patient` anidado con el nombre "Apellidos, Nombre".
+// Forma verificada por HTTP contra prod 10-oct-2026 (GET /frontdesk/queue) y confirmada por BE:
+// `patientName`/`medicalRecordNumber` sueltos, más `patient` anidado (garantizado por un
+// interceptor global) con el nombre "Apellidos, Nombre" — igual en `waiting` que en `inTherapy`.
 const queue: FrontdeskQueue = {
   date: "2026-10-10",
   totals: { waiting: 2, inTherapy: 1 },
@@ -34,7 +35,7 @@ const queue: FrontdeskQueue = {
       skillsConfigured: true,
       waiting: [],
       inTherapy: [
-        { sessionId: "sc", patientId: "p2", patientName: "B DOS", medicalRecordNumber: "2", technicianId: "t1", technicianName: "Luis", since: "2026-10-10T09:05:00Z", minutes: 10 },
+        { sessionId: "sc", patientId: "p2", patientName: "B DOS", medicalRecordNumber: "2", patient: { id: "p2", medicalRecordNumber: "2", name: "DOS, B" }, technicianId: "t1", technicianName: "Luis", since: "2026-10-10T09:05:00Z", minutes: 10 },
       ],
     },
   ],
@@ -61,9 +62,9 @@ test("earliestFreeWaitByPatient: keeps the OLDEST free arrival across several pe
     totals: { waiting: 1, inTherapy: 0 },
     services: [
       { serviceId: "s-laser", key: "laser", name: "Láser", color: null, icon: null, inTherapy: [], free: [], skillsConfigured: true,
-        waiting: [{ sessionId: "sa", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", turn: 1, arrivedAt: "2026-10-10T09:10:00Z", waitMinutes: 10, busyIn: null }] },
+        waiting: [{ sessionId: "sa", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:10:00Z", waitMinutes: 10, busyIn: null }] },
       { serviceId: "s-apex", key: "apex", name: "APEX", color: null, icon: null, inTherapy: [], free: [], skillsConfigured: true,
-        waiting: [{ sessionId: "sb", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", turn: 1, arrivedAt: "2026-10-10T09:00:00Z", waitMinutes: 20, busyIn: null }] },
+        waiting: [{ sessionId: "sb", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:00:00Z", waitMinutes: 20, busyIn: null }] },
     ],
   }
   assert.equal(earliestFreeWaitByPatient(twoWaits).get("p1"), "2026-10-10T09:00:00Z")
@@ -77,15 +78,15 @@ test("queuePhase: waiting free, not in therapy anywhere", () => {
   assert.equal(queuePhase("p1", queue), "waiting")
 })
 
-test("queueEntryDisplayName/Record: prefers the nested `patient` (confirmed shape for waiting)", () => {
+test("queueEntryDisplayName/Record: reads the nested `patient`, waiting entry", () => {
   const w = queue.services[0].waiting[0]
   assert.equal(queueEntryDisplayName(w), "UNO, A")
   assert.equal(queueEntryRecord(w), "1")
 })
 
-test("queueEntryDisplayName/Record: falls back to the flat fields when `patient` is absent (inTherapy, unconfirmed)", () => {
+test("queueEntryDisplayName/Record: reads the nested `patient`, inTherapy entry", () => {
   const e = queue.services[1].inTherapy[0]
-  assert.equal(queueEntryDisplayName(e), "B DOS")
+  assert.equal(queueEntryDisplayName(e), "DOS, B")
   assert.equal(queueEntryRecord(e), "2")
 })
 

@@ -27,7 +27,8 @@ function serviceName(queue: FrontdeskQueue, serviceId: string): string {
 // Franja de pastillas por terapia ("N en sala · M en terapia") del tablero cola-por-terapia (BE
 // PR #420/#421): cada una abre un panel lateral con quién espera (orden real de llegada), quién
 // está en terapia, y quién está libre para tomarla ahora. Oculta en la vista "Consulta" (acuerdo
-// con BE 10-oct-2026, §2.1.3 del spec): esa vista no tiene terapias que colear.
+// con BE 10-oct-2026, §2.1.3 del spec): esa vista no tiene terapias que colear. Verificado en
+// navegador real contra Bayamón (10-oct-2026, commit dd31008).
 export function TherapyQueueStrip({ centerId, date }: Props) {
   const t = useTranslations("patientDesk.queue")
   const { queue } = useTherapyQueue(centerId, date)
