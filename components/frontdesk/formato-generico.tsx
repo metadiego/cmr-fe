@@ -43,7 +43,19 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const firmasSesion = esSesiones
     ? secciones.find((s): s is Extract<FormatoSeccion, { tipo: "firmas" }> => s.tipo === "firmas")
     : undefined;
-  const seccionesVisibles = esSesiones ? secciones.filter((s) => s.tipo !== "firmas") : secciones;
+  // GLP-1: cuando viene `render.imagenCuerpo` Y están las dos secciones (claves fijas, confirmadas por BE),
+  // "composicion_corporal" y "medidas_corporales" se sacan del flujo normal para pintarlas en 3 columnas
+  // junto al diagrama (composición | imagen | medidas), igual que el legado. Si falta cualquiera de las 3
+  // piezas, NINGUNA se saca del flujo normal (se apilan como siempre) — nunca perder datos por un layout
+  // a medias.
+  const seccionComposicionCand = secciones.find((s) => s.clave === "composicion_corporal");
+  const seccionMedidasCand = secciones.find((s) => s.clave === "medidas_corporales");
+  const tresColumnas = !!(render.imagenCuerpo && seccionComposicionCand && seccionMedidasCand);
+  const seccionComposicion = tresColumnas ? seccionComposicionCand : undefined;
+  const seccionMedidas = tresColumnas ? seccionMedidasCand : undefined;
+  const seccionesVisibles = (esSesiones ? secciones.filter((s) => s.tipo !== "firmas") : secciones).filter(
+    (s) => s !== seccionComposicion && s !== seccionMedidas,
+  );
   // Etiqueta por labelKey: traducción si existe; si no, el ÚLTIMO segmento en MAYÚSCULAS (nunca la clave
   // cruda en el papel). Handoff §"Claves i18n": el FE solo traduce; si falta, cae al segmento.
   // Defensivo: `key` debe ser string. El BE a veces manda etiquetas como OBJETO (p. ej. firmas.lineas =
@@ -203,12 +215,21 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             );
           })}
 
-          {/* Diagrama del cuerpo (GLP-1): hombre o mujer ya resuelto por el BE según sexo del paciente.
-              Posición aproximada (después de las secciones) hasta confirmar con BE si hace falta que vaya
-              EXACTO entre Composición Corporal y Medidas Corporales (layout de 3 columnas del legado). */}
-          {render.imagenCuerpo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={render.imagenCuerpo} alt="" className="mt-6 w-full max-w-md self-center object-contain" />
+          {/* Diagrama del cuerpo (GLP-1): hombre o mujer ya resuelto por el BE según sexo del paciente, en 3
+              columnas junto a Composición Corporal / Medidas Corporales — igual que el legado. Si vinieran
+              las claves pero no el diagrama (o viceversa), se cae a apilado para no perder datos. */}
+          {tresColumnas && seccionComposicion && seccionMedidas && render.imagenCuerpo ? (
+            <div className="mt-6 flex flex-wrap items-start justify-center gap-6">
+              <div className="min-w-[200px] flex-1"><SeccionInner s={seccionComposicion} label={label} /></div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={render.imagenCuerpo} alt="" className="w-full max-w-[220px] shrink-0 object-contain" />
+              <div className="min-w-[200px] flex-1"><SeccionInner s={seccionMedidas} label={label} /></div>
+            </div>
+          ) : (
+            render.imagenCuerpo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={render.imagenCuerpo} alt="" className="mt-6 w-full max-w-md self-center object-contain" />
+            )
           )}
 
           {/* Escala de dolor (HILT/MLS): imagen del legacy, tal cual, antes del pie. */}
