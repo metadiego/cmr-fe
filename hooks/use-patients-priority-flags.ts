@@ -3,7 +3,7 @@
 import * as React from "react"
 
 import {
-  getPatientPriorityFlags,
+  getPatientsPriorityFlags,
   type PatientPriorityFlag,
 } from "@/lib/api/pacientes"
 
@@ -13,9 +13,8 @@ export interface PatientsPriorityFlags {
 }
 
 // The priority flags of every patient in a list, so they can be seen without opening each one.
-// One call per patient: the API has no bulk read yet (asked in
-// docs/specs/priority-flags-bulk-handoff-be.md) — when it lands, only this hook changes.
-// A failed read leaves that patient without flags rather than breaking the list.
+// One bulk read for the whole list (docs/specs/priority-flags-bulk-handoff-be.md); a change reloads
+// just that patient. A failed read leaves the flags as they were rather than breaking the list.
 export function usePatientsPriorityFlags(
   patientIds: string[],
   centerId: string | undefined
@@ -27,21 +26,17 @@ export function usePatientsPriorityFlags(
 
   const load = React.useCallback(
     (ids: string[], isCurrent: () => boolean) => {
-      Promise.all(
-        ids.map((id) =>
-          getPatientPriorityFlags(id, centerId).then(
-            (f) => [id, f] as const,
-            () => [id, [] as PatientPriorityFlag[]] as const
-          )
-        )
-      ).then((pairs) => {
-        if (!isCurrent()) return
-        setByPatient((prev) => {
-          const next = new Map(prev)
-          for (const [id, flags] of pairs) next.set(id, flags)
-          return next
-        })
-      })
+      getPatientsPriorityFlags(ids, centerId).then(
+        (rows) => {
+          if (!isCurrent()) return
+          setByPatient((prev) => {
+            const next = new Map(prev)
+            for (const r of rows) next.set(r.patientId, r.flags)
+            return next
+          })
+        },
+        () => {}
+      )
     },
     [centerId]
   )
