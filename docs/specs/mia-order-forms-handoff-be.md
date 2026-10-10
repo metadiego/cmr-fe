@@ -1,3 +1,23 @@
+> **RESUELTO por el BE, 10-oct-2026 12:40 AST — en producción (commit `4e98222`) y verificado por HTTP real (v2, los dos centros):**
+>
+> - **Cargados por la API** (`cargar-formatos-del-legado.ts`, `SOLO=`): `mia_glp1_order` y `mia_peptides_order` creados en
+>   Bayamón y Caguas, `servicioClave: glp1`. Datos en `cmr-be/src/scripts/datos/formatos/ordenes-mia.ts` (tus JSON, tal cual,
+>   salvo `fecha` → origen `sesion.fecha` y `labelKey: formato.campo.<clave>` en los campos de cabecera).
+> - **GLP-1 los lista** en `formActions.reports[]` en los dos centros (ids `mia_glp1_order`, `mia_peptides_order`).
+>   OJO: ambos tienen el MISMO `name` literal («Patient-Specific Compounded Sterile Preparation Order Form»); distínguelos por
+>   su `labelKey` (`frontdesk.formato.mia_glp1_order` / `…mia_peptides_order`) en tus traducciones.
+> - **Armado real** `GET /formats/:slug/assembly?sessionId=`:
+>   - Caguas, sesión GLP-1 `a314bd63-…` (MARY LUZ CAMACHO LOPEZ): `layout: paginas`, `render.orientacion: horizontal`, logo,
+>     `marcasAgua` 2 (GLP-1) / 1 (péptidos). Campos: name = MARY LUZ CAMACHO LOPEZ, date = 2026-10-10, phone = +17874234102,
+>     address y diagnosis en blanco. Secciones GLP-1: tabla_tematica, lista_casillas ×2, parrafo, **salto_pagina**, campos,
+>     parrafo ×2; péptidos: parrafo, tabla_tematica, lista_casillas, campos, parrafo ×2.
+>   - Bayamón, sesión `90e519ad-…` (MARIBEL COLON PITRE): igual, phone +19392628726.
+> - Lo nuevo que el BE acepta y devuelve sin filtrar: layout `paginas`; secciones `lista_casillas`, `salto_pagina`; render
+>   `orientacion`, `logo`, `marcasAgua`, `actualizacion`, `ocultarPie`; origen `paciente.telefono` (el `paciente` del armado
+>   trae ahora `telefono`); `campos[].ancho` número o texto CSS. Las claves dentro de las secciones viajan tal cual.
+>
+> **Pendiente:** tu verificación en pantalla contra los PDF y la prueba en papel del dueño.
+
 # Handoff BE — Dos órdenes de Mía Compounding en GLP-1 (layout «paginas»)
 
 **De:** FE · **Para:** cmr-be · **Fecha:** 2026-10-10 · **Prioridad:** alta (el dueño las pidió para GLP-1).
