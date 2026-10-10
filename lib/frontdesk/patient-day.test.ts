@@ -231,3 +231,34 @@ test("patients with every service attended sink to the bottom, keeping their ord
     ["p5", "p3", "p1", "p2", "p4"]
   )
 })
+
+test("a consultation in a terminal status no longer keeps the patient up; one cancelled or a no-show alone does not sink them", () => {
+  const terminal = (x: string) =>
+    ["atendida", "no_show", "cancelada", "reprogramada"].includes(x)
+  const day = (estado: string, sessions: DaySession[] = []) =>
+    groupByPatient(
+      sessions,
+      [{ id: "c1", pacienteId: "p1", paciente: "A", record: "1", estado }],
+      services,
+      terminal
+    )[0]
+  assert.equal(patientConcluded(day("en_consulta"), terminal), false)
+  assert.equal(patientConcluded(day("atendida"), terminal), true)
+  assert.equal(patientConcluded(day("no_show"), terminal), false)
+  assert.equal(
+    patientConcluded(
+      day("no_show", [ses("a", "p1", "s-apex", { status: "asistido" })]),
+      terminal
+    ),
+    true
+  )
+  assert.equal(
+    patientConcluded(
+      day("atendida", [ses("a", "p1", "s-apex", { status: "presente" })]),
+      terminal
+    ),
+    false
+  )
+  // Without the board's catalog no consultation counts as finished.
+  assert.equal(patientConcluded(day("atendida")), false)
+})

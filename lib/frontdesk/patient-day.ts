@@ -63,7 +63,8 @@ const minIso = (a: string | null, b: string | null | undefined) =>
 export function groupByPatient(
   sessions: DaySession[],
   consultations: DayConsultation[],
-  services: DayService[]
+  services: DayService[],
+  isConsultationTerminal: IsTerminal = noneTerminal
 ): PatientDay[] {
   const svc = new Map(services.map((s) => [s.id, s]))
   const map = new Map<string, PatientDay>()
@@ -133,7 +134,7 @@ export function groupByPatient(
       (a, b) => (order.get(a.serviceId) ?? 99) - (order.get(b.serviceId) ?? 99)
     )
 
-  return sortPatients([...map.values()])
+  return sortPatients([...map.values()], isConsultationTerminal)
 }
 
 // A service is concluded when every session of it is attended ('asistido'); cancelled sessions are
@@ -143,26 +144,46 @@ export function serviceConcluded(s: PatientService): boolean {
   return live.length > 0 && live.every((x) => x === "asistido")
 }
 
-// A patient is done for the day when ALL their services are concluded. A consultation keeps them
-// open: its board has its own statuses and none is marked as final yet.
-export function patientConcluded(p: PatientDay): boolean {
+// Terminal consultation statuses that mean the patient was NOT seen (left, cancelled). Terminal comes
+// from the board's status catalog (isTerminal); these two only tell "finished" from "never seen".
+const CONSULTATION_NOT_SEEN = new Set(["cancelada", "no_show"])
+
+// Which consultation statuses are final, from the consultation board's definition. Empty = none known,
+// so every consultation counts as still open.
+export type IsTerminal = (status: string) => boolean
+const noneTerminal: IsTerminal = () => false
+
+// A patient is done for the day when nothing is still open — every service session attended or
+// cancelled, every consultation in a terminal status — and something was actually attended (a session,
+// or a consultation that ended without being cancelled or a no-show).
+export function patientConcluded(
+  p: PatientDay,
+  isTerminal: IsTerminal = noneTerminal
+): boolean {
+  const sessions = p.services.flatMap((s) => s.statuses)
+  if (sessions.some((x) => x !== "asistido" && x !== "cancelada")) return false
+  if (p.consultationStatuses.some((x) => !isTerminal(x))) return false
   return (
-    p.services.length > 0 &&
-    p.consultationIds.length === 0 &&
-    p.services.every(serviceConcluded)
+    sessions.includes("asistido") ||
+    p.consultationStatuses.some((x) => !CONSULTATION_NOT_SEEN.has(x))
   )
 }
 
 // Rank in the list: still in progress, then done for the day (sunk to the bottom, owner 10-oct-2026),
 // then fully cancelled days.
-const rank = (p: PatientDay) =>
-  p.allCancelled ? 2 : patientConcluded(p) ? 1 : 0
+const rank = (p: PatientDay, isTerminal: IsTerminal) =>
+  p.allCancelled ? 2 : patientConcluded(p, isTerminal) ? 1 : 0
 
 // Who is here first (by arrival), then who is booked earliest, then by name — within each rank, so
 // patients that sink keep among themselves the order they had.
-export function sortPatients(list: PatientDay[]): PatientDay[] {
+export function sortPatients(
+  list: PatientDay[],
+  isTerminal: IsTerminal = noneTerminal
+): PatientDay[] {
   return list.slice().sort((a, b) => {
-    if (rank(a) !== rank(b)) return rank(a) - rank(b)
+    const ra = rank(a, isTerminal)
+    const rb = rank(b, isTerminal)
+    if (ra !== rb) return ra - rb
     if (a.presentAt && b.presentAt)
       return a.presentAt.localeCompare(b.presentAt)
     if (a.presentAt || b.presentAt) return a.presentAt ? -1 : 1
