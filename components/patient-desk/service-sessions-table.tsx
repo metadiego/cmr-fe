@@ -12,6 +12,9 @@ import {
 import type { Servicio as Service } from "@/lib/api/servicios";
 import { getOpciones as getColumnOptions, type Opcion as Option, type TableroDefinicion as BoardDefinition } from "@/lib/api/tablero";
 import { flowColumns, renderColumns } from "@/lib/frontdesk/board-columns";
+import { blockColumns, notifyColumn } from "@/lib/frontdesk/patient-columns";
+import type { ColumnaEfectiva as PlacedColumn, CitaFila as BoardRow } from "@/lib/api/agenda-dia";
+import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamico";
 import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion";
 import { useCan } from "@/hooks/use-can";
@@ -40,7 +43,9 @@ export function ServiceSessionsTable({ slug, name, color, service, board, defini
   const tFrontdesk = useTranslations("frontdesk");
   const { can } = useCan();
   const columns = React.useMemo(() => board?.columns ?? [], [board]);
-  const render = React.useMemo(() => renderColumns(columns), [columns]);
+  // Name and record are the detail's title already; the notify bell goes to this block's title.
+  const render = React.useMemo(() => renderColumns(blockColumns(columns)), [columns]);
+  const notify = React.useMemo(() => notifyColumn(columns), [columns]);
   const flow = React.useMemo(() => flowColumns(columns), [columns]);
 
   const statuses = React.useMemo(() => definition?.statuses ?? [], [definition]);
@@ -87,6 +92,13 @@ export function ServiceSessionsTable({ slug, name, color, service, board, defini
         <span className="size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
         <h3 className="text-sm font-semibold uppercase tracking-wide">{name}</h3>
         <span className="text-xs text-muted-foreground">{t("sessionsCount", { n: rows.length })}</span>
+        {notify && (
+          <span className="ml-auto flex items-center gap-1">
+            {rows.map((row) => (
+              <NotifyBell key={row.id} col={notify as unknown as PlacedColumn} fila={row as BoardRow} tablero={slug} centroId={centerId} optionsByCol={options} onRefresh={onChanged} />
+            ))}
+          </span>
+        )}
       </header>
       {!board ? (
         <p className="px-3 py-4 text-sm text-muted-foreground">{tRoot("common.loading")}</p>

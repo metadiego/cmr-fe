@@ -164,7 +164,7 @@ export function Cell({ col, value }: { col: ColumnaEfectiva; value: unknown }) {
 // Celda de NOTIFICAR (campana) reusable: abre el modal del panel (mismo que Frontdesk) y, opcional,
 // asigna la enfermera reusando la columna `fd_enfermera` (editarCelda) — el BE resuelve el binding a la
 // entidad del tablero (cita en Atención, sesión en un servicio). Se activa por render.kind === "notificar".
-function NotificarCell({
+export function NotificarCell({
   col,
   fila,
   tablero,

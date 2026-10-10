@@ -11,6 +11,7 @@ import type { PatientDayData } from "@/hooks/use-patient-day";
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table";
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows";
 import { Button } from "@/components/ui/button";
+import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
 
 export type ScheduleRequest = { pacienteId: string; pacienteNombre?: string; servicioId?: string };
 
@@ -60,7 +61,12 @@ export function PatientDetail({ patient, data, date, centerId, onSchedule }: { p
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">{patient.name || "—"}</h2>
+          {/* The patient's priority flags (oxygen, wheelchair…), seen and set here — they used to sit in
+              the name cell of every service row. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="truncate text-lg font-semibold">{patient.name || "—"}</h2>
+            <PriorityFlagsBadges patientId={patient.patientId} centroId={centerId} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {patient.record ? `${t("record")} #${patient.record}` : ""}
             {patient.earliestTime ? ` · ${t("firstAt", { time: patient.earliestTime })}` : ""}

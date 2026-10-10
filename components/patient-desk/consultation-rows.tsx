@@ -4,7 +4,8 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getOpciones as getColumnOptions, type Opcion as Option, type Tablero as BoardRows, type TableroDefinicion as BoardDefinition } from "@/lib/api/tablero";
-import { TableroDinamico as BoardTable } from "@/components/agenda/tablero-dinamico";
+import { NotificarCell as NotifyBell, TableroDinamico as BoardTable } from "@/components/agenda/tablero-dinamico";
+import { blockColumns, notifyColumn } from "@/lib/frontdesk/patient-columns";
 import { AccionesModal as RowActions, type AccionItem as ActionItem } from "@/components/tablero/acciones-modal";
 
 interface Props {
@@ -24,6 +25,9 @@ export function ConsultationRows({ board, definition, rowIds, color, label, cent
   const t = useTranslations("patientDesk");
   const ids = React.useMemo(() => new Set(rowIds), [rowIds]);
   const rows = React.useMemo(() => board.rows.filter((r) => ids.has(r.id)), [board, ids]);
+  // Name and record are the detail's title already; the notify bell goes to this block's title.
+  const columns = React.useMemo(() => blockColumns(board.columns), [board]);
+  const notify = React.useMemo(() => notifyColumn(board.columns), [board]);
 
   const [options, setOptions] = React.useState<Record<string, Option[]>>({});
   React.useEffect(() => {
@@ -46,10 +50,17 @@ export function ConsultationRows({ board, definition, rowIds, color, label, cent
         <span className="size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
         <h3 className="text-sm font-semibold uppercase tracking-wide">{label}</h3>
         <span className="text-xs text-muted-foreground">{t("sessionsCount", { n: rows.length })}</span>
+        {notify && (
+          <span className="ml-auto flex items-center gap-1">
+            {rows.map((row) => (
+              <NotifyBell key={row.id} col={notify} fila={row} tablero="atencion" centroId={centerId} optionsByCol={options} onRefresh={onChanged} />
+            ))}
+          </span>
+        )}
       </header>
       <div className="overflow-x-auto">
         <BoardTable
-          columnas={board.columns}
+          columnas={columns}
           filas={rows}
           tablero="atencion"
           centroId={centerId}
