@@ -22,6 +22,7 @@ import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
+import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
 import { LiveBadge } from "@/components/live-badge"
 import { PageContainer, PageHeader } from "@/components/ui/page"
@@ -154,6 +155,12 @@ export function PatientDesk() {
           )}
         </div>
       </div>
+
+      {kind !== "consultation" && (
+        <div className="mb-4">
+          <TherapyQueueStrip centerId={gate.centro} date={date} />
+        </div>
+      )}
 
       {gate.cargando ? (
         <p className="text-sm text-muted-foreground">

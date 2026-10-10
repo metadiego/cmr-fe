@@ -2,7 +2,21 @@
 // de patient-day.ts a propósito (acuerdo con BE 10-oct-2026): función nueva con sus pruebas, en vez de
 // reescribir `sortPatients` en el mismo sitio — se integra ahí cuando el endpoint esté desplegado.
 
-import type { FrontdeskQueue } from "@/lib/api/frontdesk-queue";
+import type {
+  FrontdeskQueue,
+  QueueInTherapyEntry,
+  QueueWaitingEntry,
+} from "@/lib/api/frontdesk-queue";
+
+// El BE manda el nombre "Apellidos, Nombre" anidado en `patient.name` (verificado por HTTP para
+// `waiting`); si no viene (p. ej. `inTherapy`, sin confirmar todavía), cae al `patientName` plano.
+export function queueEntryDisplayName(e: QueueWaitingEntry | QueueInTherapyEntry): string {
+  return e.patient?.name ?? e.patientName;
+}
+
+export function queueEntryRecord(e: QueueWaitingEntry | QueueInTherapyEntry): string | null {
+  return e.patient?.medicalRecordNumber ?? e.medicalRecordNumber;
+}
 
 export type PatientTurn = {
   serviceId: string;

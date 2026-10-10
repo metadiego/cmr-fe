@@ -1,15 +1,28 @@
 import { apiFetch } from "./client";
 
-// La cola por terapia (BE handoff HANDOFF-cola-por-terapia.md, pendiente de desplegar a la fecha de
-// este archivo — 10-oct-2026). Por servicio: quién espera (ordenado por llegada, con turno y minutos
-// de espera) y quién está en terapia ahora. `busyIn` en una entrada de `waiting` es el serviceId de
-// la terapia en la que el paciente está ahora mismo — se pinta "ocupado en X" y NO cuenta como
-// esperando esa terapia (ya tiene su lugar reservado, solo no se le puede llamar todavía).
+// La cola por terapia (GET /frontdesk/queue, BE PR #420 + #421, verificado por HTTP en prod 10-oct-2026
+// — ver docs/specs/cola-por-terapia-contrato-verificado.md). Por servicio: quién espera (ordenado por
+// llegada, con turno y minutos de espera), quién está en terapia ahora, y quién está LIBRE para
+// tomarlo (`free`, PR #421). `busyIn` en una entrada de `waiting` es el serviceId de la terapia en la
+// que el paciente está ahora mismo — se pinta "ocupado en X" y NO cuenta como esperando esa terapia.
+//
+// El BE no manda `record` plano (lo que se había asumido del borrador de spec antes de que el
+// endpoint existiera): manda `patientName`/`medicalRecordNumber` sueltos y, además, un `patient`
+// anidado con el nombre ya en formato "Apellidos, Nombre" (igual al resto de la app). Se usa el
+// anidado cuando está, y el plano como respaldo — confirmado así SOLO para `waiting`; `inTherapy`
+// no se ha visto con nadie en terapia todavía, así que se trata igual por las dudas, sin asumir.
+export type QueuePatientRef = {
+  id: string;
+  medicalRecordNumber: string | null;
+  name: string;
+};
+
 export type QueueWaitingEntry = {
   sessionId: string;
   patientId: string;
   patientName: string;
-  record: string | null;
+  medicalRecordNumber: string | null;
+  patient?: QueuePatientRef;
   turn: number;
   arrivedAt: string; // ISO — primera llegada a ESTA terapia (ver el-turno-por-terapia.ts del BE)
   waitMinutes: number;
@@ -20,11 +33,24 @@ export type QueueInTherapyEntry = {
   sessionId: string;
   patientId: string;
   patientName: string;
-  record: string | null;
+  medicalRecordNumber: string | null;
+  patient?: QueuePatientRef;
   technicianId: string | null;
   technicianName: string | null;
   since: string; // ISO
   minutes: number;
+  // Slice 3 del BE (PR #422, en CI 10-oct-2026, aún no desplegado): fin estimado de esta terapia.
+  // "history" = mediana real de 30 días (la UI debe marcarlo como aproximado); "resource" = calculado
+  // de la configuración del recurso. null en cualquiera de los dos: no mostrar nada.
+  estimatedEnd?: string | null;
+  estimateSource?: "resource" | "history" | null;
+};
+
+// Técnico/enfermero LIBRE para esta terapia ahora mismo (PR #421), el menos cargado primero.
+export type QueueFreeStaff = {
+  staffId: string;
+  name: string;
+  load: number; // pacientes que atiende ahora mismo
 };
 
 export type QueueService = {
@@ -33,6 +59,8 @@ export type QueueService = {
   name: string;
   color: string | null;
   icon: string | null;
+  free: QueueFreeStaff[];
+  skillsConfigured: boolean; // false: nadie tiene esta terapia configurada como capacidad propia
   waiting: QueueWaitingEntry[];
   inTherapy: QueueInTherapyEntry[];
 };

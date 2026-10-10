@@ -4667,6 +4667,22 @@
       "all": "All",
       "services": "Services",
       "consultation": "Consultation"
+    },
+    "queue": {
+      "pillLabel": "{waiting} waiting · {inTherapy} in therapy",
+      "panelTitle": "{service} queue",
+      "panelDescription": "Arrival order, who is in therapy now, and who is free to take them.",
+      "empty": "No one waiting or in therapy right now.",
+      "sectionWaiting": "Waiting",
+      "sectionInTherapy": "In therapy",
+      "turn": "#{turn}",
+      "waitMinutes": "{n} min",
+      "minutesSince": "{n} min",
+      "busyIn": "Busy in {service}",
+      "free": "Free: {names}",
+      "noneFree": "No one free right now",
+      "skillsNotConfigured": "No one is set up for this therapy — go to Staff → capabilities",
+      "chipFull": "{service} {turn} · {min} min"
     }
   }
 }

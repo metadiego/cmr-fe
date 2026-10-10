@@ -4667,6 +4667,22 @@
       "all": "Todos",
       "services": "Servicios",
       "consultation": "Consulta"
+    },
+    "queue": {
+      "pillLabel": "{waiting} en sala · {inTherapy} en terapia",
+      "panelTitle": "Cola de {service}",
+      "panelDescription": "Orden de llegada, quién está en terapia ahora y quién está libre para tomarla.",
+      "empty": "Nadie esperando ni en terapia ahora.",
+      "sectionWaiting": "Esperando",
+      "sectionInTherapy": "En terapia",
+      "turn": "#{turn}",
+      "waitMinutes": "{n} min",
+      "minutesSince": "{n} min",
+      "busyIn": "Ocupado en {service}",
+      "free": "Libres: {names}",
+      "noneFree": "Nadie libre ahora",
+      "skillsNotConfigured": "Nadie tiene esta terapia configurada — ve a Personal → capacidades",
+      "chipFull": "{service} {turn} · {min} min"
     }
   }
 }
