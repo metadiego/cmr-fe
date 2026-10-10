@@ -1826,6 +1826,7 @@
     "formatosTitle": "{servicio} formats",
     "generarFormato": "Generate format",
     "sinFormatos": "No formats configured for this service.",
+    "enviarTecnico": "Include technician name on the format ({nombre})",
     "colSesion": "Session",
     "colAreas": "Areas",
     "volver": "Back",

@@ -4,85 +4,19 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
-import { getFormatoArmado, type FormatoArmado, type FormatoPie, type FormatoSeccion } from "@/lib/api/formatos";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
-import { SeccionInner, SesionesFormato } from "@/components/frontdesk/formato-secciones";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { TimePicker } from "@/components/ui/time-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SignaturePad } from "@/components/frontdesk/signature-pad";
-import { Campo, HORA_CLS, LogoFormato } from "@/components/frontdesk/formato-parts";
-
-// CSS autocontenido para la ventana de impresión (el documento NO hereda Tailwind ahí). Incluye las
-// utilidades que usa el documento + tablas/tamaño carta. Un formato es un PAPEL: no puede depender de
-// estilos externos ni de que el otro lado tenga el diccionario.
-const PRINT_CSS = `
-*{box-sizing:border-box}
-@page{size:letter;margin:9mm}
-html,body{height:100%}
-body{font-family:system-ui,-apple-system,Arial,sans-serif;color:#000;background:#fff;margin:0;font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.no-print{display:none!important}
-/* El documento LLENA la hoja (no amontonado arriba): columna flex de altura completa; la zona marcada
-   .formato-grow (p. ej. OBSERVACIONES, o un espaciador) crece para empujar firmas/pie al fondo. */
-.formato-doc{display:flex;flex-direction:column;min-height:100vh}
-.formato-grow{flex:1 1 auto}
-/* Campos (layout "campos"): aireados, una línea por campo con buen espacio. */
-.formato-campos{display:flex;flex-direction:column;gap:16px;font-size:13px;margin-top:16px}
-.formato-campos .campo{display:flex;gap:8px}
-h2{font-size:15px;margin:0}
-table{width:100%;border-collapse:collapse;font-size:9.5px;margin-top:3px}
-th,td{border:1px solid #999;padding:1.5px 5px;text-align:left;vertical-align:top;line-height:1.2}
-img{max-width:100%;max-height:38px;object-fit:contain}
-.text-center{text-align:center}.text-right{text-align:right}
-.font-bold{font-weight:700}.font-semibold{font-weight:600}.font-medium{font-weight:500}
-.uppercase{text-transform:uppercase}.tracking-wide{letter-spacing:.04em}
-.text-lg{font-size:15px}.text-base{font-size:13px}.text-sm{font-size:12px}.text-xs{font-size:10px}
-.flex{display:flex}.items-end{align-items:flex-end}.items-start{align-items:flex-start}
-.justify-between{justify-content:space-between}.gap-3{gap:10px}.gap-4{gap:12px}
-.border-b{border-bottom:1px solid #000}.pb-2{padding-bottom:4px}.pb-3{padding-bottom:5px}.pt-2{padding-top:3px}.pt-3{padding-top:4px}
-.mt-1{margin-top:3px}.mt-2{margin-top:5px}.mt-3{margin-top:6px}.mb-1{margin-bottom:2px}.mb-2{margin-bottom:4px}
-.ml-2{margin-left:8px}.ml-3{margin-left:12px}
-.tabular-nums{font-variant-numeric:tabular-nums}
-.bg-neutral-100{background:#f2f2f2}.text-neutral-500{color:#666}
-.space-y-2>*+*{margin-top:5px}.space-y-3>*+*{margin-top:6px}.space-y-4>*+*{margin-top:8px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-/* Cada región/tabla no se parte entre páginas si cabe */
-section, .region { break-inside: avoid; }
-/* Hora entrada/salida (TimePicker): only the time text on a dashed line, no button chrome. */ .formato-hora{border:0;border-bottom:1px dashed #000;background:none;font:inherit;color:inherit;padding:0 2px} .formato-hora svg{display:none}
-/* Formatos GENÉRICOS (rejillas en blanco para llenar a mano): filas ALTAS y aireadas, que llenen la hoja
-   (no amontonadas arriba). No aplica a las tablas densas de láser (HILT/MLS). */
-.formato-grid td { height: 46px; padding: 8px 8px; vertical-align: top; }
-.formato-grid th { padding: 5px 8px; }
-`;
-
-// Imprime un elemento en una VENTANA propia (evita el recorte del Dialog/Radix que dejaba la hoja en
-// blanco). Clona el nodo, convierte cualquier <canvas> (firma) en <img> para que sí salga impreso.
-function imprimirFormato(el: HTMLElement | null, titulo: string) {
-  if (!el || typeof window === "undefined") return;
-  const clone = el.cloneNode(true) as HTMLElement;
-  const canvasOrig = el.querySelectorAll("canvas");
-  const canvasClone = clone.querySelectorAll("canvas");
-  canvasOrig.forEach((c, i) => {
-    try {
-      const img = document.createElement("img");
-      img.src = (c as HTMLCanvasElement).toDataURL("image/png");
-      canvasClone[i]?.replaceWith(img);
-    } catch { /* canvas vacío/tainted: se omite */ }
-  });
-  const w = window.open("", "_blank", "width=900,height=1100");
-  if (!w) return; // bloqueado por popup: el usuario debe permitir ventanas emergentes
-  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${titulo}</title><style>${PRINT_CSS}</style></head><body>${clone.innerHTML}</body></html>`);
-  w.document.close();
-  w.focus();
-  const go = () => { w.print(); };
-  // Espera a que carguen imágenes (logo/firma) antes de imprimir.
-  if (w.document.images.length) setTimeout(go, 400); else setTimeout(go, 150);
-}
+import { Campo, HORA_CLS, LogoFormato, imprimirFormato, PieFormato } from "@/components/frontdesk/formato-parts";
+import { GenericFormatoRender } from "@/components/frontdesk/formato-generico";
 
 // Modal ESTÁNDAR de acciones/formatos por servicio (data-driven desde servicio.formAcciones).
 // Lista los `reports` (HILT/MLS…) y `additional_actions` (Historial). Al elegir un report:
@@ -133,6 +67,8 @@ export function FormatosModal({
   const [generado, setGenerado] = React.useState(false);
   const [sesion, setSesion] = React.useState<string>("");
   const [areasOverride, setAreasOverride] = React.useState<string | null>(null); // null = usar el de la disponibilidad
+  // Enviar el técnico (ya conocido) al impreso, o dejarlo en blanco para llenar a mano como el papel.
+  const [enviarTecnico, setEnviarTecnico] = React.useState(true);
 
   // Disponibilidad del paciente para ESTE servicio: de aquí salen ÁREAS y DÍAS por formato (MLS/HILT). La
   // factura NO es la fuente — un cambio de protocolo no la genera, solo mueve la disponibilidad. El paquete
@@ -231,6 +167,12 @@ export function FormatosModal({
                 <Input id="fmt-areas" type="number" min={1} value={areas} onChange={(e) => setAreasOverride(e.target.value)} />
               </div>
             </div>
+            {tecnicoNombre && (
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox checked={enviarTecnico} onCheckedChange={(v) => setEnviarTecnico(v === true)} />
+                {t("enviarTecnico", { nombre: tecnicoNombre })}
+              </label>
+            )}
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setReport(null)}>{t("volver")}</Button>
               <Button onClick={() => setGenerado(true)}>{t("generar")}</Button>
@@ -248,7 +190,7 @@ export function FormatosModal({
               record: record ?? "",
               sesion: sesion || (sesionNN ?? ""),
               areas: Number(areas) || 0,
-              tecnico: tecnicoNombre ?? "",
+              tecnico: enviarTecnico ? (tecnicoNombre ?? "") : "",
               proximaCita: proximaCita ?? "",
               fecha: fecha ?? "",
             }}
@@ -356,17 +298,6 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
   );
 }
 
-// Pie del legacy, compartido por TODOS los formatos (genérico + láser HILT/MLS): pequeño, a la izquierda,
-// al final de la hoja. Formato `{prefijo}{usuario||login} - {fechaHora}`. Se PREFIERE `usuario` porque el
-// BE ahora resuelve el nombre real del perfil (antes salía el uuid); `login` (authUserId) es el respaldo.
-function PieFormato({ pie }: { pie?: FormatoPie }) {
-  if (!pie) return null;
-  const quien = pie.user || pie.login || "";
-  const txt = `${pie.prefix ?? ""}${quien}${pie.fechaHora ? ` - ${pie.fechaHora}` : ""}`;
-  if (!txt.trim()) return null;
-  return <div className="mt-4 text-left text-[10px] text-neutral-500">{txt}</div>;
-}
-
 type TFn = (k: string, v?: Record<string, string | number>) => string;
 
 function HiltTabla({ secciones, t }: { secciones: { region: string; filas: LaserParametro[] }[]; t: TFn }) {
@@ -445,155 +376,6 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
     <div className="grid gap-4 sm:grid-cols-2">
       {col(izquierda, t("ladoIzquierdo"))}
       {col(derecha, t("ladoDerecho"))}
-    </div>
-  );
-}
-
-// Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
-// del BE armado (membrete/título/paciente/columnas/filas). Papel A4/Letter, tinta negra, @media print
-// via .formato-print. Los encabezados se traducen por labelKey; el `titulo` va tal cual (es del documento).
-function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { clave: string; sesionId?: string; centro?: string; onVolver: () => void }) {
-  const t = useTranslations("frontdesk");
-  const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
-  const printRef = React.useRef<HTMLDivElement>(null);
-  if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
-  // Say WHY (e.g. FORBIDDEN: the user's role lacks the permission), not just that it failed.
-  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{t("formatoError")} — {res.state.message}</p>;
-  if (res.state.kind !== "ok") return null;
-  const d = res.state.data;
-  const cols = d.columns ?? [];
-  const filas = d.rows ?? [];
-  const campos = d.fields ?? [];
-  const secciones = d.sections ?? [];
-  // ¿Hay un área de OBSERVACIONES (texto_libre) que pueda crecer para llenar la hoja? Si no, se usa un
-  // espaciador flexible para que firmas/pie caigan al fondo y el reporte no quede amontonado arriba.
-  // ¿Hay una caja de OBSERVACIONES que CREZCA? (la de "lineas" no crece). Si no, va un espaciador flexible.
-  const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre" && s.estilo !== "lineas");
-  // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
-  // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
-  const esCampos = (d.layout ?? (cols.length ? "tabla" : "campos")) === "campos";
-  // Metadatos declarativos del papel (bolsa `render`). ocultarEmpresa puede venir aquí o en letterhead.
-  const render = d.render ?? {};
-  const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
-  // Láser a color por sesión (multipágina): bloques por sesión con paginación; las firmas se pintan DENTRO
-  // de cada bloque (no al final), así que se sacan de las secciones normales.
-  const esSesiones = d.layout === "sessions";
-  const firmasSesion = esSesiones
-    ? secciones.find((s): s is Extract<FormatoSeccion, { tipo: "firmas" }> => s.tipo === "firmas")
-    : undefined;
-  const seccionesVisibles = esSesiones ? secciones.filter((s) => s.tipo !== "firmas") : secciones;
-  // Etiqueta por labelKey: traducción si existe; si no, el ÚLTIMO segmento en MAYÚSCULAS (nunca la clave
-  // cruda en el papel). Handoff §"Claves i18n": el FE solo traduce; si falta, cae al segmento.
-  // Defensivo: `key` debe ser string. El BE a veces manda etiquetas como OBJETO (p. ej. firmas.lineas =
-  // { label, labelKey }); si llegara algo que no es string, NO se rompe la pantalla — se cae al fallback.
-  const label = (key?: string | null, fallback?: string) => {
-    if (typeof key === "string" && key && t.has(key)) return t(key);
-    const seg = (typeof key === "string" ? key : "").split(".").pop() ?? "";
-    return (fallback ?? seg.replace(/_/g, " ")).toUpperCase();
-  };
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between no-print">
-        <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
-        <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.title || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
-      </div>
-      {/* .formato-doc = columna flex que LLENA la hoja (min-height:100vh en impresión): la zona de
-          OBSERVACIONES (o un espaciador si no hay) crece y empuja firmas/pie al fondo → nada amontonado
-          arriba. Norma repetida del dueño: los reportes ocupan toda la página con aire. */}
-      <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
-        <div className="formato-doc flex min-h-[70vh] flex-col">
-          {/* Membrete: el bloque de títulos (empresa / centro / título) queda CENTRADO e intacto; el logo va
-              ARRIBA-IZQUIERDA en posición absoluta para no empujar ni una línea (regla dura del handoff:
-              si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
-          <div className="relative text-center">
-            <div className="absolute left-0 top-0">
-              <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
-            </div>
-            {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa (solo logo + título). */}
-            {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
-            {d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
-            <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
-          </div>
-
-          {esSesiones ? (
-            /* Láser a color por sesión (multipágina): bloques por sesión con paginación. */
-            <SesionesFormato
-              columns={cols}
-              sessions={d.sessions ?? []}
-              notas={render.notas ?? []}
-              porPagina={d.porPagina ?? render.porPagina ?? 2}
-              firmas={firmasSesion}
-              label={label}
-            />
-          ) : esCampos ? (
-            /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
-               valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
-            <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
-              {campos.map((c) => (
-                <div key={c.clave} className="campo flex gap-2">
-                  {/* Se PREFIERE el `label` que manda el BE (ya con dos puntos); si no, se traduce el labelKey. */}
-                  <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>
-                  <span>{c.valor ?? ""}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <>
-              {/* Paciente + récord + fecha (solo rejilla; en "campos" ya van dentro de los campos). */}
-              <div className="mt-4 flex items-end justify-between border-b pb-2 text-sm">
-                <div>
-                  <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
-                  {d.patient?.medicalRecordNumber && <span className="ml-3 font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
-                </div>
-                <div className="tabular-nums">{d.date ?? ""}</div>
-              </div>
-              {/* Rejilla con filas en blanco (aireadas, para llenar a mano). */}
-              <table className="formato-grid mt-3 w-full border-collapse text-[11px]">
-                <thead>
-                  <tr className="bg-neutral-100 text-left">
-                    {cols.map((c) => <th key={c.clave} className="border border-neutral-300 px-2 py-1.5 font-semibold">{c.label ?? label(c.labelKey, c.clave)}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filas.map((f, i) => (
-                    <tr key={i} style={{ height: 46 }}>
-                      {cols.map((c) => <td key={c.clave} className="border border-neutral-300 px-2 pt-2 align-top">{f?.[c.clave] ?? ""}</td>)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          )}
-
-          {/* Si NO hay área de observaciones que crezca, un espaciador flexible empuja firmas/pie al fondo. */}
-          {!tieneTextoLibre && <div className="formato-grow" aria-hidden style={{ flex: "1 1 auto", minHeight: "24px" }} />}
-
-          {/* Secciones (observaciones / firmas / párrafo / tabla de firmas / checklist / tabla temática /
-              leyenda), en cualquier layout. El render de cada tipo vive en formato-secciones.tsx (data-driven,
-              idéntico al legacy). Solo OBSERVACIONES (texto_libre caja) crece para llenar la hoja. */}
-          {seccionesVisibles.map((s, i) => {
-            const crece = s.tipo === "texto_libre" && s.estilo !== "lineas";
-            return (
-              <div
-                key={s.clave ?? `sec-${i}`}
-                className={"region mt-6" + (crece ? " formato-grow" : "")}
-                style={crece ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
-              >
-                <SeccionInner s={s} label={label} casillasEnFilas={render.casillasEnFilas} />
-              </div>
-            );
-          })}
-
-          {/* Escala de dolor (HILT/MLS): imagen del legacy, tal cual, antes del pie. */}
-          {render.imagenEscalaDolor && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={render.imagenEscalaDolor} alt="" className="mt-6 w-full max-w-2xl self-center object-contain" />
-          )}
-
-          {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
-          <PieFormato pie={d.footer} />
-        </div>
-      </div>
     </div>
   );
 }
