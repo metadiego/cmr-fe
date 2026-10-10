@@ -53,6 +53,11 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
     const seg = (typeof key === "string" ? key : "").split(".").pop() ?? "";
     return (fallback ?? seg.replace(/_/g, " ")).toUpperCase();
   };
+  // `origen: ""` (vs. un binding real como "paciente.nombre") marca un campo para LLENAR A MANO (p. ej.
+  // PEMF/Cámara Energética/Cámara Hiperbárica en terapia_camener): sin esto se imprimía la etiqueta sola,
+  // sin ninguna línea para escribir — verificado en vivo contra GET /formats/terapia_camener/assembly.
+  const campoValor = (c: { valor?: string | null; origen?: string }) =>
+    !c.valor && c.origen === "" ? <span className="ml-1 inline-block min-w-[90px] border-b border-black">&nbsp;</span> : (c.valor ?? "");
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
@@ -87,7 +92,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 {campos.length > 0 ? (
                   campos.map((c) => (
                     <span key={c.clave}>
-                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {c.valor ?? ""}
+                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {campoValor(c)}
                     </span>
                   ))
                 ) : (
@@ -115,7 +120,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 <div key={c.clave} className="campo flex gap-2">
                   {/* Se PREFIERE el `label` que manda el BE (ya con dos puntos); si no, se traduce el labelKey. */}
                   <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>
-                  <span>{c.valor ?? ""}</span>
+                  <span>{campoValor(c)}</span>
                 </div>
               ))}
             </div>
@@ -128,7 +133,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 {campos.length > 0 ? (
                   campos.map((c) => (
                     <span key={c.clave}>
-                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {c.valor ?? ""}
+                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {campoValor(c)}
                     </span>
                   ))
                 ) : (
