@@ -100,6 +100,7 @@ export function FormatosModal({
   tecnicoNombre,
   proximaCita,
   sesionId,
+  fecha,
   initialReport,
   centro,
   onHistorial,
@@ -112,6 +113,8 @@ export function FormatosModal({
   record?: string | null;
   // Sesión como "n/n" (p. ej. "1/12") de la fila (fd_sesiones): se muestra tal cual, no un número suelto.
   sesionNN?: string | null;
+  // Fecha de la CITA/sesión (YYYY-MM-DD, la del tablero) — no la de hoy, el formato se reimprime.
+  fecha?: string;
   // Para leer las ÁREAS y DÍAS por FORMATO (MLS/HILT) de la DISPONIBILIDAD, no de la factura: un cambio de
   // protocolo no genera factura, solo mueve la disponibilidad, así que es la fuente de verdad. Handoff
   // el-modal-de-laser-ya-no-pide-lo-que-sabemos.
@@ -160,9 +163,8 @@ export function FormatosModal({
   const areasAuto = pkg?.multiplicadores?.areas;
   // Áreas DERIVADAS de la disponibilidad (editable: override manual tiene precedencia). Si el paquete NO trae
   // áreas (p. ej. tras un cambio de protocolo a una terapia sin áreas), se deja VACÍO — nunca un 1 inventado
-  // (regla del BE: la respuesta del handoff). nTerapias con áreas vacías cae a "—".
+  // (regla del BE: la respuesta del handoff).
   const areas = areasOverride ?? (areasAuto != null ? String(areasAuto) : "");
-  const diasActual = Number(pkg?.multiplicadores?.days ?? pkg?.multiplicadores?.dias ?? 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -246,9 +248,9 @@ export function FormatosModal({
               record: record ?? "",
               sesion: sesion || (sesionNN ?? ""),
               areas: Number(areas) || 0,
-              dias: diasActual,
               tecnico: tecnicoNombre ?? "",
               proximaCita: proximaCita ?? "",
+              fecha: fecha ?? "",
             }}
             onVolver={() => setGenerado(false)}
           />
@@ -263,17 +265,16 @@ export function FormatosModal({
   );
 }
 
-type Header = { paciente: string; record: string; sesion: string; areas: number; dias: number; tecnico: string; proximaCita: string };
+type Header = { paciente: string; record: string; sesion: string; areas: number; tecnico: string; proximaCita: string; fecha: string };
 
 function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; centro?: string; header: Header; onVolver: () => void }) {
   const t = useTranslations("frontdesk");
   const res = useResource<Formato>(() => getFormato(tipo, centro), [tipo, centro]);
-  const [triggerPoint, setTriggerPoint] = React.useState("");
+  const [triggerSi, setTriggerSi] = React.useState("");
+  const [triggerNo, setTriggerNo] = React.useState("");
+  const [ctd, setCtd] = React.useState("");
   const [horaIn, setHoraIn] = React.useState("");
   const [horaOut, setHoraOut] = React.useState("");
-  const [dolor, setDolor] = React.useState("");
-  // Número de terapias = días × áreas (lo que cobra el láser y dice el pie de la factura: «12 días en 4 áreas»).
-  const nTerapias = header.dias * header.areas;
   const printRef = React.useRef<HTMLDivElement>(null);
 
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
@@ -301,7 +302,8 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
             </div>
           </div>
           <div className="text-right text-xs">
-            <div>{formatFechaSolo(new Date().toISOString().slice(0, 10))}</div>
+            {/* header.fecha = fecha de la cita, no la de hoy; sin ella (caller viejo), hoy es el fallback. */}
+            <div>{formatFechaSolo(header.fecha || new Date().toISOString().slice(0, 10))}</div>
             <div>{t("colSesion")}: {header.sesion} · {t("colAreas")}: {header.areas}</div>
           </div>
         </div>
@@ -309,20 +311,42 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
         {tipo === "hilt" && data.type === "hilt" && <HiltTabla secciones={data.sections} t={t} />}
         {tipo === "mls" && data.type === "mls" && <MlsTabla izquierda={data.izquierda} derecha={data.derecha} t={t} />}
 
-        {/* Footer clínico */}
+        {/* Footer clínico: Trigger Point (Sí/No) solo HILT, CTD solo MLS — formato homologado. */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t pt-3 text-xs">
-          <Campo label={t("triggerPoint")}><input className="w-full border-b border-dashed bg-transparent outline-none" value={triggerPoint} onChange={(e) => setTriggerPoint(e.target.value)} /></Campo>
-          <Campo label={t("nTerapias")}><span className="font-semibold tabular-nums">{nTerapias || "—"}</span></Campo>
+          {tipo === "hilt" ? (
+            <Campo label={t("triggerPoint")}>
+              <span className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  {t("triggerPointSi")}:
+                  <input className="w-16 border-b border-dashed bg-transparent outline-none" value={triggerSi} onChange={(e) => setTriggerSi(e.target.value)} />
+                </span>
+                <span className="flex items-center gap-1">
+                  {t("triggerPointNo")}:
+                  <input className="w-16 border-b border-dashed bg-transparent outline-none" value={triggerNo} onChange={(e) => setTriggerNo(e.target.value)} />
+                </span>
+              </span>
+            </Campo>
+          ) : (
+            <Campo label={t("ctd")}><input className="w-full border-b border-dashed bg-transparent outline-none" value={ctd} onChange={(e) => setCtd(e.target.value)} /></Campo>
+          )}
+          {/* Nº terapias = la "sesión/total" del tablero (p. ej. "4/12"), no días × áreas. */}
+          <Campo label={t("nTerapias")}><span className="font-semibold tabular-nums">{header.sesion || "—"}</span></Campo>
           <Campo label={t("tecnico")}><span>{header.tecnico || "—"}</span></Campo>
           <Campo label={t("proximaCita")}><span>{header.proximaCita || "—"}</span></Campo>
           <Campo label={t("horaEntrada")}><TimePicker step={1} className={HORA_CLS} value={horaIn} onChange={setHoraIn} /></Campo>
           <Campo label={t("horaSalida")}><TimePicker step={1} className={HORA_CLS} value={horaOut} onChange={setHoraOut} /></Campo>
-          <Campo label={t("escalaDolor")}><input type="number" min={0} max={10} className="w-16 border-b border-dashed bg-transparent outline-none" value={dolor} onChange={(e) => setDolor(e.target.value)} /></Campo>
         </div>
 
         {/* Firma del paciente */}
         <div className="pt-2">
           <SignaturePad height={110} />
+        </div>
+
+        {/* Escala de dolor: la misma gráfica del formato homologado, no un campo numérico aparte. El
+            `img` global de PRINT_CSS la limita a 38px (pensado para el logo); el inline style la anula. */}
+        <div className="pt-2 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element -- clonado a una ventana de impresión aparte (ver imprimirFormato); next/image no sobrevive ese clon. */}
+          <img src="/img/pain_measurement_scale.png" alt={t("escalaDolorAlt")} style={{ maxHeight: 140, maxWidth: "100%", margin: "0 auto" }} />
         </div>
 
         {/* Pie del legacy (BE PR #201): mismo componente que el genérico. */}
@@ -372,7 +396,7 @@ function HiltTabla({ secciones, t }: { secciones: { region: string; filas: Laser
               <tbody>
                 {s.filas.map((f) => (
                   <tr key={f.id} className="border-b border-neutral-200">
-                    <td className="px-2 py-1">{f.pathology}</td>
+                    <td className="px-2 py-1">{f.pathology ?? f.patologia}</td>
                     <td className="px-2 py-1 text-center tabular-nums">{f.stp1Mjcm ?? "—"}</td>
                     <td className="px-2 py-1 text-center tabular-nums">{f.stp1Hz ?? "—"}</td>
                     <td className="px-2 py-1 text-center tabular-nums">{f.stp2Mjcm ?? "—"}</td>
@@ -407,7 +431,7 @@ function MlsTabla({ izquierda, derecha, t }: { izquierda: LaserParametro[]; dere
         <tbody>
           {filas.map((f) => (
             <tr key={f.id} className="border-b border-neutral-200">
-              <td className="px-2 py-1">{f.pathology}</td>
+              <td className="px-2 py-1">{f.pathology ?? f.patologia}</td>
               <td className="px-2 py-1 tabular-nums">{f.frequency ?? "—"}</td>
               <td className="px-2 py-1 tabular-nums">{f.duration ?? "—"}</td>
               <td className="px-2 py-1 tabular-nums">{f.intensity ?? "—"}</td>

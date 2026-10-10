@@ -9,9 +9,17 @@ import type { FormatoPie } from "./formatos";
 export type LaserTipo = "hilt" | "mls";
 
 // Una fila del catálogo. HILT usa stp*/energy; MLS usa frequency/duration/intensity.
+//
+// `patologia` (hand-added): GET /laser/format/hilt devuelve esta fila SIN traducir — a diferencia
+// de MLS (que sí llega como `pathology`), HILT llega con `patologia`/`frecuencia`/`tiempo`/
+// `intensidad` en español. Verificado en vivo contra prod, 09-oct-2026: cada fila HILT no tenía
+// NINGÚN `pathology`, por eso el nombre de la patología salía en blanco en el formato impreso.
+// El render (HiltTabla/MlsTabla) lee `pathology ?? patologia`. Arreglo real: que el BE traduzca
+// HILT igual que ya traduce MLS; quitar este campo cuando eso pase.
 export interface LaserParametro {
   id: string;
   pathology: string;
+  patologia?: string | null;
   type: LaserTipo;
   area: string;
   sortOrder: number;

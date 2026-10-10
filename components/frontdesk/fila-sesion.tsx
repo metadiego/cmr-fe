@@ -651,7 +651,7 @@ export function FilaSesion({
             pacienteNombre={String(fila.paciente ?? "")}
             sesionNN={fila["fd_sesiones"] != null ? String(fila["fd_sesiones"]) : undefined} servicioId={servicio?.id} pacienteId={sesion?.patientId}
             record={fila.fd_record != null ? String(fila.fd_record) : undefined}
-            sesionId={fila.id}
+            sesionId={fila.id} fecha={fecha}
             centro={centro}
             onHistorial={() => setHistorialOpen(true)}
           />
