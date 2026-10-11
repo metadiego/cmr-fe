@@ -4689,6 +4689,7 @@
       "call": "Call",
       "uncall": "Undo",
       "pickTechnician": "Pick technician",
+      "busyLoad": "busy · {n}",
       "calledLabel": "Called · {technician} · {time}",
       "busyIn": "Busy in {service}",
       "free": "Free: {names}",

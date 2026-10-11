@@ -67,6 +67,17 @@ export type QueueSuggestion = {
   staffName: string;
 };
 
+// TODO el personal de turno capaz de esta terapia (PR #425, desplegado y verificado 10-oct-2026),
+// libres primero — a diferencia de `free` (solo los libres), este SÍ permite llamar a alguien
+// ocupado a propósito cuando nadie está libre (lo que `free`+`suggestions` no dejaban hacer desde
+// la UI). `available` es la fuente de verdad de si puede tomar el paciente ahora.
+export type QueueOnShiftStaff = {
+  staffId: string;
+  name: string;
+  load: number;
+  available: boolean;
+};
+
 export type QueueService = {
   serviceId: string;
   key: string; // clave corta para el chip compacto de la lista (p. ej. "laser")
@@ -74,6 +85,7 @@ export type QueueService = {
   color: string | null;
   icon: string | null;
   free: QueueFreeStaff[];
+  onShift: QueueOnShiftStaff[];
   skillsConfigured: boolean; // false: nadie tiene esta terapia configurada como capacidad propia
   suggestions: QueueSuggestion[];
   waiting: QueueWaitingEntry[];

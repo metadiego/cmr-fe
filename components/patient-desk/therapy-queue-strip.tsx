@@ -163,12 +163,23 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                       const suggestion = active.suggestions.find(
                         (s) => s.sessionId === e.sessionId
                       )
+                      // Todo el personal de turno (PR #425): libres primero, luego ocupados (con su
+                      // carga) — a diferencia de `free`, esto SÍ deja llamar a alguien ocupado a
+                      // propósito cuando nadie está libre, que es justo el hueco que BE cerró.
+                      const onShiftSorted = [...active.onShift].sort((a, b) =>
+                        a.available === b.available ? a.load - b.load : a.available ? -1 : 1
+                      )
                       const options = suggestion
                         ? [
-                            { staffId: suggestion.staffId, name: suggestion.staffName },
-                            ...active.free.filter((f) => f.staffId !== suggestion.staffId),
+                            onShiftSorted.find((s) => s.staffId === suggestion.staffId) ?? {
+                              staffId: suggestion.staffId,
+                              name: suggestion.staffName,
+                              load: 0,
+                              available: true,
+                            },
+                            ...onShiftSorted.filter((s) => s.staffId !== suggestion.staffId),
                           ]
-                        : active.free
+                        : onShiftSorted
                       const chosen = picked[e.sessionId] || options[0]?.staffId
                       return (
                         <li
@@ -226,7 +237,14 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                                   <SelectContent>
                                     {options.map((o) => (
                                       <SelectItem key={o.staffId} value={o.staffId}>
-                                        {o.name}
+                                        <span
+                                          className={
+                                            !o.available ? "text-muted-foreground" : undefined
+                                          }
+                                        >
+                                          {o.name}
+                                          {!o.available ? ` · ${t("busyLoad", { n: o.load })}` : ""}
+                                        </span>
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
