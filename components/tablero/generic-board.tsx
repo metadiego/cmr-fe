@@ -40,6 +40,7 @@ import { coincide } from "@/lib/frontdesk/search";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { LiveBadge } from "@/components/live-badge";
+import { KpiTilesSkeleton } from "@/components/agenda/tablero-dinamico-skeleton";
 
 // Radix Tabs need a non-empty value; "" (no sub-type filter) maps to this sentinel.
 const ALL_TAB = "__all__";
@@ -164,6 +165,11 @@ export function GenericBoard({
     [tablero, fecha, centroId, subTipo],
   );
   const data = filasRes.state.kind === "ok" ? filasRes.state.data : null;
+  // While the centre list is still loading there is no centroId yet and the fetcher above resolves an
+  // empty board: that is still loading, never "0 rows". Live (SSE) refetches go through refresh() and
+  // never come back here.
+  const loading =
+    centrosRes.state.kind === "loading" || defRes.state.kind === "loading" || filasRes.state.kind === "loading";
 
   const { live } = useCitaStream({
     centroId,
@@ -187,7 +193,17 @@ export function GenericBoard({
 
   return (
     <PageContainer>
-      <PageHeader title={registro ? tRoot(registro.labelKey) : tablero} />
+      <PageHeader
+        title={
+          registro ? (
+            tRoot(registro.labelKey)
+          ) : regRes.state.kind === "loading" ? (
+            <span aria-hidden className="inline-block h-7 w-48 animate-pulse rounded-md bg-foreground/[0.07] align-middle" />
+          ) : (
+            tablero
+          )
+        }
+      />
 
       {subTipos.length > 0 && (
         <Tabs value={subTipo || ALL_TAB} onValueChange={(v) => setSubTipo(v === ALL_TAB ? "" : v)}>
@@ -229,8 +245,11 @@ export function GenericBoard({
         </div>
       </div>
 
-      {(defRes.state.kind === "loading" || filasRes.state.kind === "loading") && (
-        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+      {loading && filasRes.state.kind !== "fail" && (
+        <>
+          <KpiTilesSkeleton allLabel={t("all")} />
+          <TableroDinamico columnas={def?.columns ?? []} filas={[]} loading density={density} />
+        </>
       )}
       {filasRes.state.kind === "fail" && (
         <Alert variant="destructive">
@@ -238,7 +257,7 @@ export function GenericBoard({
         </Alert>
       )}
 
-      {data && def && (() => {
+      {!loading && data && def && (() => {
         // 1º el tab de subtipo (Nueva/Seguimiento) acota el set; los KPI de estado se cuentan sobre ese set.
         const base = subTipo
           ? data.rows.filter((f) => String((f as { subtipo?: unknown }).subtipo ?? "") === subTipo)

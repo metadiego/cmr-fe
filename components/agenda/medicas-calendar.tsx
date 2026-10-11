@@ -30,7 +30,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Can } from "@/components/kit/can";
-import { MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
+import { ControlSkeleton } from "@/components/kit/skeletons";
+import { LegendSkeleton, MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
 import { CitaModal } from "@/components/agenda/cita-modal";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 
@@ -76,7 +77,7 @@ export function MedicasCalendar() {
   // estado — lo prohíbe el React Compiler): así no se filtra por un médico de otro centro.
   const medicoEfectivo = medico === ALL || medicos.some((m) => m.id === medico) ? medico : ALL;
 
-  const { state, reload } = useResource<Cita[]>(
+  const { state, refresh } = useResource<Cita[]>(
     () =>
       listCitasRango({
         from: desde,
@@ -89,9 +90,9 @@ export function MedicasCalendar() {
   const citas = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
   React.useEffect(() => {
-    const id = setInterval(reload, 20000);
+    const id = setInterval(refresh, 20000);
     return () => clearInterval(id);
-  }, [reload]);
+  }, [refresh]);
 
   const tipoById = React.useMemo(() => new Map(tipos.map((x) => [x.id, x])), [tipos]);
   const medById = React.useMemo(() => new Map(medicos.map((m) => [m.id, m])), [medicos]);
@@ -164,6 +165,10 @@ export function MedicasCalendar() {
           <h2 className="min-w-52 px-1 text-xl font-semibold whitespace-nowrap">{monthLabel}</h2>
           {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
           <CentroPantallaSelector estado={centro} />
+          {/* The doctor list hangs off the centre, so a centre change shows the placeholder again. */}
+          {medicosRes.state.kind === "loading" ? (
+            <ControlSkeleton className="w-52" />
+          ) : (
           <Select value={medicoEfectivo} onValueChange={setMedico}>
             <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -175,6 +180,7 @@ export function MedicasCalendar() {
               ))}
             </SelectContent>
           </Select>
+          )}
           <div className="ml-auto flex items-center gap-2">
             {/* «Nueva Cita» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
             {centro.puedeEscribir && (
@@ -196,6 +202,7 @@ export function MedicasCalendar() {
             month0={month0}
             weekdays={weekdays}
             eventsByDate={eventsByDate}
+            loading={state.kind === "loading"}
             festivos={festivos}
             onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}`)}
             onEventClick={(id) => {
@@ -244,6 +251,9 @@ export function MedicasCalendar() {
 
         <section>
           <h2 className="mb-2 text-sm font-semibold">{t("typeLegend")}</h2>
+          {tiposRes.state.kind === "loading" ? (
+            <LegendSkeleton />
+          ) : (
           <ul className="space-y-1.5">
             {tipos.map((x) => (
               <li key={x.id} className="flex items-center gap-2 text-sm">
@@ -252,6 +262,7 @@ export function MedicasCalendar() {
               </li>
             ))}
           </ul>
+          )}
         </section>
       </aside>
 
@@ -266,7 +277,7 @@ export function MedicasCalendar() {
           medicos={medicos}
           canal="callcenter"
           onOpenChange={(o) => !o && setModal(null)}
-          onSaved={reload}
+          onSaved={refresh}
         />
       )}
       <PacienteFormSheet open={newPatientOpen} onOpenChange={setNewPatientOpen} onSaved={() => setNewPatientOpen(false)} />

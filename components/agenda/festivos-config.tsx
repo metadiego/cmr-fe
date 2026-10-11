@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RawRowsSkeleton } from "@/components/kit/skeletons";
 
 const GLOBAL = "__global__";
 const SCOPE_KEY = "cmr_agenda_config_scope"; // shared with cupos config
@@ -77,6 +78,11 @@ export function FestivosConfig({ year }: { year: number }) {
   const festivos = (festivosRes.state.kind === "ok" ? festivosRes.state.data : [])
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date));
+  // A centre scope with no id yet means the centre list is still loading (the fetcher resolves [] for
+  // it): that counts as loading, never as "no holidays".
+  const loading =
+    festivosRes.state.kind === "loading" ||
+    (scope === "centro" && !centroId && centrosRes.state.kind === "loading");
 
   // New-holiday form.
   const [fecha, setFecha] = React.useState("");
@@ -98,7 +104,7 @@ export function FestivosConfig({ year }: { year: number }) {
       setNombre("");
       setRecurrente(false);
       setBloquea(true);
-      festivosRes.reload();
+      festivosRes.refresh();
     } catch (err) {
       toastError(err, t);
     } finally {
@@ -109,7 +115,7 @@ export function FestivosConfig({ year }: { year: number }) {
   async function toggleBloquea(f: Festivo) {
     try {
       await updateFestivo(f.id, { blocksSchedule: !f.blocksSchedule, scope }, centroId);
-      festivosRes.reload();
+      festivosRes.refresh();
     } catch (err) {
       toastError(err, t);
     }
@@ -118,7 +124,7 @@ export function FestivosConfig({ year }: { year: number }) {
   async function remove(f: Festivo) {
     try {
       await deleteFestivo(f.id, { scope, centroId });
-      festivosRes.reload();
+      festivosRes.refresh();
     } catch (err) {
       toastError(err, t);
     }
@@ -151,12 +157,15 @@ export function FestivosConfig({ year }: { year: number }) {
             </tr>
           </thead>
           <tbody>
-            {festivosRes.state.kind === "loading" && (
-              <tr>
-                <td colSpan={4} className="px-3 py-4 text-center text-muted-foreground">{tc("loading")}</td>
-              </tr>
+            {loading && (
+              <RawRowsSkeleton
+                columns={["short", "long", "dot", "short"]}
+                rows={5}
+                rowClassName="border-t"
+                cellClassName="px-3 py-1.5"
+              />
             )}
-            {festivosRes.state.kind === "ok" && festivos.length === 0 && (
+            {!loading && festivosRes.state.kind === "ok" && festivos.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-3 py-4 text-center text-muted-foreground">{t("festivos.empty")}</td>
               </tr>

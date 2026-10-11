@@ -23,6 +23,8 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { PillsSkeleton } from "@/components/kit/skeletons";
+import { AgendaSkeleton, DiaRowsSkeleton, LegendDotsSkeleton } from "@/components/calendario/calendario-skeleton";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -116,6 +118,8 @@ export function Calendario() {
   const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta, fetchCentroId), [desde, hasta, fetchCentroId]);
   const catsRes = useResource<CalendarioCategoria[]>(() => getCategorias());
   const eventos = eventosRes.state.kind === "ok" ? eventosRes.state.data : [];
+  // First load or a range/centre change: the cells show placeholder pills, never an empty grid.
+  const cargandoEventos = eventosRes.state.kind === "loading";
   const cats = catsRes.state.kind === "ok" ? catsRes.state.data : [];
   const catPorId = new Map(cats.map((c) => [c.id, c]));
   const catLabel = (c?: CalendarioCategoria) =>
@@ -196,11 +200,12 @@ export function Calendario() {
 
       {/* MES */}
       {vista === "mes" && (
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
+        <div aria-busy={cargandoEventos || undefined} className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
+          {cargandoEventos && <span className="sr-only">{tc("loading")}</span>}
           {diasSemanaLbl.map((d, i) => (
             <div key={i} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{d}</div>
           ))}
-          {celdasMes.map((cel) => {
+          {celdasMes.map((cel, idx) => {
             const ds = ymd(cel);
             const delMes = cel.getMonth() === cursor.getMonth();
             const evs = eventosDe(ds);
@@ -208,10 +213,12 @@ export function Calendario() {
               <button key={ds} type="button" onClick={() => puedeCrear && setModal({ dia: ds })}
                 className={cn("min-h-[104px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", !delMes && "bg-muted/20 text-muted-foreground")}>
                 <div className={cn("mb-1 inline-flex size-6 items-center justify-center rounded-full text-xs font-medium", ds === hoyStr() && "bg-primary text-primary-foreground")}>{cel.getDate()}</div>
+                {cargandoEventos ? (delMes && <PillsSkeleton seed={idx} />) : (
                 <div className="space-y-0.5">
                   {evs.slice(0, 4).map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
                   {evs.length > 4 && <div className="px-1 text-[10px] text-muted-foreground">+{evs.length - 4}</div>}
                 </div>
+                )}
               </button>
             );
           })}
@@ -220,22 +227,25 @@ export function Calendario() {
 
       {/* SEMANA */}
       {vista === "semana" && (
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
+        <div aria-busy={cargandoEventos || undefined} className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
+          {cargandoEventos && <span className="sr-only">{tc("loading")}</span>}
           {celdasSemana.map((cel) => (
             <div key={ymd(cel)} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {fmt(cel, { weekday: "short" })} {cel.getDate()}
             </div>
           ))}
-          {celdasSemana.map((cel) => {
+          {celdasSemana.map((cel, idx) => {
             const ds = ymd(cel);
             const evs = eventosDe(ds);
             return (
               <button key={ds} type="button" onClick={() => puedeCrear && setModal({ dia: ds })}
                 className={cn("min-h-[420px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", ds === hoyStr() && "ring-1 ring-inset ring-primary/40")}>
+                {cargandoEventos ? <PillsSkeleton seed={idx} max={4} /> : (
                 <div className="space-y-1">
                   {evs.map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
                   {evs.length === 0 && <span className="text-[10px] text-muted-foreground">—</span>}
                 </div>
+                )}
               </button>
             );
           })}
@@ -246,7 +256,9 @@ export function Calendario() {
       {vista === "dia" && (
         <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
           <div className="divide-y">
-            {eventosDe(ymd(cursor)).length === 0 ? (
+            {cargandoEventos ? (
+              <DiaRowsSkeleton />
+            ) : eventosDe(ymd(cursor)).length === 0 ? (
               <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t("sinEventos")}</p>
             ) : (
               eventosDe(ymd(cursor)).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)
@@ -258,7 +270,7 @@ export function Calendario() {
       {/* AGENDA (próximos) */}
       {vista === "agenda" && (
         <div className="space-y-4">
-          {(() => {
+          {cargandoEventos ? <AgendaSkeleton /> : (() => {
             const dias = [...new Set(eventos.map((e) => e.day))].sort();
             if (dias.length === 0) return <p className="rounded-md bg-card px-4 py-10 text-center text-sm text-muted-foreground ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">{t("sinProximos")}</p>;
             return dias.map((d) => (
@@ -274,8 +286,9 @@ export function Calendario() {
       )}
 
       {/* Leyenda */}
-      {cats.length > 0 && (
+      {(catsRes.state.kind === "loading" || cats.length > 0) && (
         <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+          {catsRes.state.kind === "loading" && <LegendDotsSkeleton />}
           {cats.map((c) => (
             <span key={c.id} className="inline-flex items-center gap-1.5"><span className={cn("size-2.5 rounded-full", (COLOR[c.color] || COLOR.gris).dot)} />{catLabel(c)}</span>
           ))}
@@ -291,7 +304,7 @@ export function Calendario() {
           puedeBorrar={modal.evento ? puedeTocar(modal.evento) : false}
           centroIdCrear={centroIdCrear}
           onClose={() => setModal(null)}
-          onSaved={() => { setModal(null); eventosRes.reload(); }}
+          onSaved={() => { setModal(null); eventosRes.refresh(); }}
           {...modalCommon}
         />
       )}

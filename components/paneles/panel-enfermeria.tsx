@@ -20,6 +20,8 @@ import { useCan } from "@/hooks/use-can";
 import { colorForName } from "@/lib/frontdesk/color";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/kit/skeletons";
 
 const CLAVE = "enfermeria";
 
@@ -81,8 +83,9 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
   // Los contadores del día YA vienen en la definición → sin llamada aparte (dedup). En cada evento
   // SSE se recarga la definición (trae contadores frescos) + las notificaciones pendientes.
+  // Silent refresh: a live event must not drop the wall back to its skeleton.
   const refetch = React.useCallback(() => {
-    defRes.reload();
+    defRes.refresh();
     getPanelNotificaciones(CLAVE, centro).then(setNotifs).catch(() => {});
   }, [defRes, centro]);
   // Carga inicial (una vez montado, patrón sin setState-en-render).
@@ -148,7 +151,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
       </div>
 
       {/* Secciones + muro de tarjetas por enfermera */}
-      {defRes.state.kind === "loading" && <p className="text-muted-foreground">…</p>}
+      {defRes.state.kind === "loading" && <PanelSkeleton />}
       {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
       <div className="space-y-5">
         {secciones.map((s) => (
@@ -259,5 +262,38 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
         );
       })()}
     </PageContainer>
+  );
+}
+
+// Loading wall: two sections (colour square + title) with the same staff-card grid and card box as the
+// loaded panel (dot + name + count pill, status chip).
+function PanelSkeleton() {
+  return (
+    <LoadingRegion className="space-y-5">
+      {[0, 1].map((sec) => (
+        <section key={sec}>
+          <div className="mb-3 flex items-center gap-2">
+            <Skeleton className="size-4 rounded" />
+            <div className="flex h-7 items-center">
+              <Skeleton className="h-5 w-40" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="flex flex-col gap-2 rounded-md bg-card px-4 py-3.5 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <Skeleton className="size-2.5 shrink-0 rounded-full" />
+                    <Skeleton className={"h-4 " + ["w-24", "w-28", "w-20", "w-32", "w-24"][i]} />
+                  </div>
+                  <Skeleton className="size-7 shrink-0 rounded-full" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </LoadingRegion>
   );
 }

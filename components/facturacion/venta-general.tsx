@@ -18,6 +18,8 @@ import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/kit/skeletons";
 import {
   Select,
   SelectContent,
@@ -32,7 +34,6 @@ import {
 // y el editor lo hereda por ?centro=). 1 centro → auto. Consultas usará el mismo picker luego.
 export function VentaGeneral() {
   const t = useTranslations("facturacion.general");
-  const tc = useTranslations("common");
   const router = useRouter();
   const gate = useCentroGate();
 
@@ -44,7 +45,7 @@ export function VentaGeneral() {
       <PageHeader title={t("title")} description={t("help")} />
 
       {gate.cargando ? (
-        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+        <FinderSkeleton />
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{t("sinCentro")}</p>
       ) : gate.necesitaPicker ? (
@@ -182,7 +183,7 @@ function Finder({
         </div>
       ) : (
         <div className="mb-4 max-h-80 overflow-y-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-          {loading && <p className="px-3 py-4 text-center text-sm text-muted-foreground">{t("searching")}</p>}
+          {loading && <ResultRowsSkeleton />}
           {!loading && term.length < 2 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("hint")}</p>}
           {!loading && term.length >= 2 && shown.length === 0 && <p className="px-3 py-8 text-center text-sm text-muted-foreground">{t("noResults")}</p>}
           {shown.map((p) => (
@@ -206,6 +207,9 @@ function Finder({
       )}
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
+        {listasRes.state.kind === "loading" && <SelectFieldSkeleton label={t("lista")} />}
+        {medicosRes.state.kind === "loading" && <SelectFieldSkeleton label={t("medico")} />}
+        {mediosRes.state.kind === "loading" && <SelectFieldSkeleton label={t("referencia")} />}
         {listas.length > 0 && (
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("lista")}</span>
@@ -275,5 +279,62 @@ function Finder({
         {creating ? t("creando") : t("iniciar")}
       </Button>
     </>
+  );
+}
+
+// Loading placeholders (docs/specs/2026-10-10-skeletons-de-carga.md): same boxes as the finder.
+
+/** A catalog-fed select (price list, doctor, referral) while its options load: real label, h-9 bar. */
+function SelectFieldSkeleton({ label }: { label: string }) {
+  return (
+    <LoadingRegion className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <Skeleton className="h-9 w-full" />
+    </LoadingRegion>
+  );
+}
+
+/** Patient search results while the search runs (name + record line per row). */
+function ResultRowsSkeleton() {
+  return (
+    <LoadingRegion>
+      {["w-44", "w-36", "w-52"].map((w, i) => (
+        <div key={i} className="flex flex-col gap-1.5 px-3 py-2.5">
+          <Skeleton className={"h-4 " + w} />
+          <Skeleton className="h-3 w-28" />
+        </div>
+      ))}
+    </LoadingRegion>
+  );
+}
+
+/** The finder before the center gate resolves: center bar, search box, results box, fields, CTA. */
+function FinderSkeleton() {
+  return (
+    <LoadingRegion>
+      <div className="mb-4 flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
+        <span className="flex h-5 items-center gap-2">
+          <Skeleton className="size-4" />
+          <Skeleton className="h-4 w-40" />
+        </span>
+      </div>
+      <Skeleton className="mb-3 h-9 w-full" />
+      <div className="mb-4 rounded-md bg-card px-3 py-8 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <Skeleton className="mx-auto h-4 w-56" />
+      </div>
+      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex flex-col gap-1.5">
+            <span className="flex h-4 items-center"><Skeleton className="h-3 w-20" /></span>
+            <Skeleton className="h-9 w-full" />
+          </div>
+        ))}
+      </div>
+      <div className="mb-4 flex items-center justify-between rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <span className="flex h-5 items-center"><Skeleton className="h-4 w-36" /></span>
+        <Skeleton className="h-3 w-12" />
+      </div>
+      <Skeleton className="h-9 w-full" />
+    </LoadingRegion>
   );
 }

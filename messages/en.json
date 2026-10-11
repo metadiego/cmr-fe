@@ -3369,6 +3369,7 @@
       "estado": "Status",
       "total": "Total",
       "medio": "Referral",
+      "usuario": "User",
       "acciones": "Actions"
     }
   },

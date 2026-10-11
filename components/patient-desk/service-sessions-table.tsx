@@ -18,6 +18,8 @@ import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamic
 import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion";
 import { useCan } from "@/hooks/use-can";
+import { ServiceTableSkeleton } from "@/components/patient-desk/patient-desk-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   slug: string;
@@ -91,7 +93,7 @@ export function ServiceSessionsTable({ slug, name, color, service, board, defini
       <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
         <span className="size-2.5 rounded-full" style={{ backgroundColor: color ?? "var(--muted-foreground)" }} aria-hidden />
         <h3 className="text-sm font-semibold uppercase tracking-wide">{name}</h3>
-        <span className="text-xs text-muted-foreground">{t("sessionsCount", { n: rows.length })}</span>
+        {board ? <span className="text-xs text-muted-foreground">{t("sessionsCount", { n: rows.length })}</span> : <Skeleton aria-hidden className="h-3 w-16" />}
         {notify && (
           <span className="ml-auto flex items-center gap-1">
             {rows.map((row) => (
@@ -101,7 +103,7 @@ export function ServiceSessionsTable({ slug, name, color, service, board, defini
         )}
       </header>
       {!board ? (
-        <p className="px-3 py-4 text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+        <ServiceTableSkeleton rows={Math.max(1, sessionIds.length)} />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

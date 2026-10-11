@@ -21,6 +21,7 @@ import { toastError } from "@/lib/api/errors";
 import { weekdayLabel, WEEKDAYS_MON_FIRST } from "@/lib/i18n/weekdays";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { CuposGridSkeleton } from "@/components/agenda/cupos-grid-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -66,7 +67,6 @@ function sig(cupos: Cupo[]): string {
 // `citas.config.global`.
 export function CuposConfig() {
   const t = useTranslations("agenda");
-  const tc = useTranslations("common");
   const locale = useLocale();
   const { can } = useCan();
   const canGlobal = can("citas.config.global");
@@ -203,7 +203,10 @@ export function CuposConfig() {
         <p className="text-sm text-muted-foreground">{t("cupos.pickDate")}</p>
       )}
 
-      {loading && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
+      {/* The grid's frame while its data loads (not in date mode before a date is picked: no grid then). */}
+      {loading && (mode !== "fecha" || !!fecha) && (
+        <CuposGridSkeleton tipos={tiposRes.state.kind === "ok" ? tipos : null} />
+      )}
 
       {gridReady && (
         <CuposGrid
@@ -213,8 +216,9 @@ export function CuposConfig() {
           inherited={inheritedView}
           tipos={tipos}
           onSaved={() => {
-            cuposRes.reload();
-            globalRes.reload();
+            // Silent: the grid stays until the saved data lands and its key remounts it.
+            cuposRes.refresh();
+            globalRes.refresh();
           }}
         />
       )}

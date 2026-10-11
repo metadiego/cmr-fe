@@ -16,6 +16,8 @@ import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/kit/skeletons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -87,7 +89,8 @@ export function ComoSeCobra({
   label: (labelKey: string, fallback: string) => string;
 }) {
   const t = useTranslations("gruposFacturacion");
-  const { state, reload } = useResource<ColumnaFacturacion[]>(
+  // Saves refetch silently (refresh): the fields stay on screen instead of dropping back to the skeleton.
+  const { state, refresh } = useResource<ColumnaFacturacion[]>(
     () => getColumnasDeGrupo(grupo.slug),
     [grupo.slug],
   );
@@ -105,7 +108,7 @@ export function ComoSeCobra({
       await actualizarColumnaFacturacion(col.id, {
         role: multiplica ? "multiplicador" : "informativo",
       });
-      reload();
+      refresh();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     }
@@ -117,7 +120,7 @@ export function ComoSeCobra({
     try {
       await actualizarColumnaFacturacion(col.id, { labelKey: nuevo });
       toast.success(t("fieldUpdated"));
-      reload();
+      refresh();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     }
@@ -130,7 +133,7 @@ export function ComoSeCobra({
     try {
       await actualizarColumnaFacturacion(col.id, { active: false });
       toast.success(t("fieldRemoved"));
-      reload();
+      refresh();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     }
@@ -172,7 +175,7 @@ export function ComoSeCobra({
       }
       toast.success(t("copyDone", { n: ok, origen: origenLabel }));
       setCopyFrom("");
-      reload();
+      refresh();
     } catch (err) {
       toast.error(apiErrorMessage(err));
     } finally {
@@ -180,9 +183,7 @@ export function ComoSeCobra({
     }
   }
 
-  if (state.kind === "loading") {
-    return <p className="p-4 text-sm text-muted-foreground">…</p>;
-  }
+  if (state.kind === "loading") return <ComoSeCobraSkeleton />;
   if (state.kind === "fail") {
     return <p className="p-4 text-sm text-destructive">{state.message}</p>;
   }
@@ -272,11 +273,51 @@ export function ComoSeCobra({
           onClose={() => setCreating(false)}
           onCreated={() => {
             setCreating(false);
-            reload();
+            refresh();
           }}
         />
       )}
     </div>
+  );
+}
+
+// First load of a group's fields (docs/specs/2026-10-10-skeletons-de-carga.md): copy-from bar, two
+// field cards, the add button and the factory chips, in the loaded boxes.
+const PANEL = "rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-3";
+function ComoSeCobraSkeleton() {
+  const t = useTranslations("gruposFacturacion");
+  return (
+    <LoadingRegion className="space-y-4">
+      <div className={cn("flex flex-wrap items-center gap-2", PANEL)}>
+        <Skeleton className="h-9 w-60" />
+        <Skeleton className="h-8 w-28" />
+      </div>
+      <div className="space-y-2">
+        {[0, 1].map((i) => (
+          <div key={i} className={cn("space-y-3", PANEL)}>
+            <div className="flex items-center justify-between gap-3">
+              <Skeleton className="h-9 w-full max-w-xs" />
+              <Skeleton className="h-8 w-24" />
+            </div>
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-[18px] w-8 rounded-full" />
+              <Skeleton className="h-4 w-56" />
+            </div>
+            <Skeleton className="h-3 w-72 max-w-full" />
+          </div>
+        ))}
+      </div>
+      <Skeleton className="h-8 w-32" />
+      <div className={PANEL}>
+        <p className="mb-2 text-xs font-medium text-muted-foreground">{t("fabricaTitle")}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {["w-16", "w-20", "w-14"].map((w) => (
+            <Skeleton key={w} className={cn("h-6 rounded-full", w)} />
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">{t("fabricaHelp")}</p>
+      </div>
+    </LoadingRegion>
   );
 }
 

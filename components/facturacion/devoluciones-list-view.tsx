@@ -18,12 +18,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import {
-  DataTable,
-  TableEmpty,
-  TableError,
-  TableLoading,
-} from "@/components/ui/data-table";
+import { DataTable, TableEmpty, TableError } from "@/components/ui/data-table";
+import { TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
 import {
   TableBody,
   TableCell,
@@ -60,6 +56,8 @@ import {
 const ALL = "__all__";
 const ESTADOS = ["activa", "anulada"];
 const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
+// devolución, fecha, tipo, monto, estado, motivo, acciones — one loading bar per column.
+const LOADING_SHAPES: CellShape[] = ["short", "short", "text", "short", "badge", "long", "button"];
 
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("devoluciones.estado");
@@ -82,7 +80,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
   const [hasta, setHasta] = React.useState("");
 
   const gate = useCentroGate();
-  const { state, reload } = useResource<Paginated<Devolucion>>(
+  const { state, refresh } = useResource<Paginated<Devolucion>>(
     () =>
       gate.centro
         ? listDevoluciones({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
@@ -90,6 +88,8 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     [q, estado, desde, hasta, gate.centro, contexto],
   );
   const rows = state.kind === "ok" ? state.data.items : [];
+  // The centre gate resolving counts as loading too: until then the placeholder fetch reads as empty.
+  const loading = gate.cargando || state.kind === "loading";
   const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
 
   const [anular, setAnular] = React.useState<Devolucion | null>(null);
@@ -104,7 +104,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
       toast.success(t("anuladaOk"));
       setAnular(null);
       setMotivo("");
-      reload();
+      refresh();
     } catch (err) {
       toastError(err, tRoot);
     } finally {
@@ -116,9 +116,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     <PageContainer>
       <PageHeader title={esConsulta ? t("titleConsulta") : t("title")} />
 
-      {gate.cargando ? (
-        <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
-      ) : gate.sinCentro ? (
+      {gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
@@ -156,10 +154,10 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
               </TableRow>
             </TableHeader>
             <TableBody>
-              {state.kind === "loading" && <TableLoading colSpan={7}>{tRoot("common.loading")}</TableLoading>}
-              {state.kind === "fail" && <TableError colSpan={7}>{tRoot("common.error")}</TableError>}
-              {state.kind === "ok" && rows.length === 0 && <TableEmpty colSpan={7}>{t("empty")}</TableEmpty>}
-              {rows.map((d) => (
+              {loading && <TableRowsSkeleton columns={LOADING_SHAPES} />}
+              {!loading && state.kind === "fail" && <TableError colSpan={7}>{tRoot("common.error")}</TableError>}
+              {!loading && state.kind === "ok" && rows.length === 0 && <TableEmpty colSpan={7}>{t("empty")}</TableEmpty>}
+              {!loading && rows.map((d) => (
                 <TableRow key={d.id}>
                   <TableCell>
                     <span className="block font-mono font-medium tabular-nums">{d.displayNumber ?? "—"}</span>

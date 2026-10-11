@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
 
 // One column of a DataTable. `cell` renders the value for a row; `align` and
 // `className` style both the header and cells.
@@ -24,6 +25,8 @@ export interface Column<T> {
   cell: (row: T, index: number) => React.ReactNode; // index = posición 0-based dentro de la página
   align?: "left" | "right" | "center";
   className?: string;
+  /** What the column holds, so its loading bar looks like the loaded cell (default "text"). */
+  loadingShape?: CellShape;
 }
 
 type Pagination = NonNullable<ApiMeta["pagination"]>;
@@ -50,10 +53,10 @@ export function DataTable<T>({
   onReload?: () => void;
   onRowClick?: (row: T) => void;
   pagination?: { meta: Pagination; onPageChange: (page: number) => void };
+  /** `loading` is kept for callers; the skeleton announces the shared common.loading. */
   labels?: { loading?: string; empty?: string; retry?: string };
 }) {
   const t = useTranslations("common");
-  const loadingLabel = labels?.loading ?? t("loading");
   const emptyLabel = labels?.empty ?? t("empty");
   const retryLabel = labels?.retry ?? t("retry");
 
@@ -64,8 +67,24 @@ export function DataTable<T>({
         ? "text-center"
         : undefined;
 
+  // The real headers render at once; skeleton rows stand in for the body (shapes from `loadingShape`).
   if (state.kind === "loading") {
-    return <p className="text-sm text-muted-foreground">{loadingLabel}</p>;
+    return (
+      <DataTableFrame>
+        <TableHeader>
+          <TableRow>
+            {columns.map((col) => (
+              <TableHead key={col.key} className={cn(alignClass(col.align), col.className)}>
+                {col.header}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRowsSkeleton columns={columns.map((col) => col.loadingShape ?? "text")} rows={6} />
+        </TableBody>
+      </DataTableFrame>
+    );
   }
 
   if (state.kind === "fail") {

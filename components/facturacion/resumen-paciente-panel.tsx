@@ -11,6 +11,7 @@ import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // «Lo que suma el paciente hoy»: panel PLEGABLE (cerrado por defecto) dentro de la factura, para cobrar
 // varias facturas del mismo paciente sin calculadora. La SUMA la hace el BE (por `neto`, ya sin lo
@@ -61,9 +62,7 @@ export function ResumenPacientePanel({
 
       {open && (
         <div className="border-t px-2 pb-2">
-          {res.state.kind === "loading" && (
-            <p className="px-2 py-3 text-sm text-muted-foreground">{tRoot("common.loading")}</p>
-          )}
+          {res.state.kind === "loading" && <ResumenRowsSkeleton />}
           {res.state.kind === "fail" && (
             <p className="m-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {res.state.message}
@@ -188,5 +187,47 @@ export function ResumenPacientePanel({
         </div>
       )}
     </div>
+  );
+}
+
+// The summary table while it loads (docs/specs/2026-10-10-skeletons-de-carga.md): real headers and
+// footer label, bars per column (reference + status chip, concept, amount, open link).
+function ResumenRowsSkeleton() {
+  const t = useTranslations("resumenPaciente");
+  const tc = useTranslations("common");
+  return (
+    <table className="w-full text-sm" aria-busy="true">
+      <thead className="text-[11px] uppercase tracking-wide text-muted-foreground">
+        <tr className="text-left">
+          <th className="px-2 py-1.5 font-semibold">{t("col.referencia")}</th>
+          <th className="px-2 py-1.5 font-semibold">{t("col.concepto")}</th>
+          <th className="px-2 py-1.5 text-right font-semibold">{t("col.importe")}</th>
+          <th className="px-2 py-1.5" />
+        </tr>
+      </thead>
+      <tbody className="divide-y">
+        {["w-32", "w-24"].map((w, r) => (
+          <tr key={r}>
+            <td className="px-2 py-1.5">
+              {r === 0 && <span className="sr-only">{tc("loading")}</span>}
+              <div aria-hidden className="flex h-5 items-center gap-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-14 rounded-full" />
+              </div>
+            </td>
+            <td className="px-2 py-1.5"><Skeleton aria-hidden className={"h-4 " + w} /></td>
+            <td className="px-2 py-1.5"><Skeleton aria-hidden className="ml-auto h-4 w-14" /></td>
+            <td className="px-2 py-1.5"><Skeleton aria-hidden className="ml-auto h-3 w-10" /></td>
+          </tr>
+        ))}
+      </tbody>
+      <tfoot className="border-t-2">
+        <tr className="font-semibold">
+          <td className="px-2 py-2" colSpan={2}>{t("totalGeneral")}</td>
+          <td className="px-2 py-2"><Skeleton aria-hidden className="ml-auto h-4 w-16" /></td>
+          <td />
+        </tr>
+      </tfoot>
+    </table>
   );
 }

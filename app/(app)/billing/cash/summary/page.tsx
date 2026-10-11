@@ -6,11 +6,14 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon } from "@hugeicons/core-free-icons";
 
+import { cn } from "@/lib/utils";
 import { getReporteDia, type ReporteDia } from "@/lib/api/caja";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/kit/skeletons";
 
 // Cuadre general: ventas del día por DIVISIÓN (General = productos+suero+láser; Consulta) desglosadas por
 // forma de pago, más un TOTAL GENERAL que las suma. Todo sale del reporte del día del BE (una llamada por
@@ -21,6 +24,9 @@ function isoDay(d: Date) {
 }
 const money = (v: number) =>
   new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(v ?? 0));
+
+// Card methods shown while loading, besides cash (a usual day: a few cards + one other method).
+const LOADING_METHODS = 3;
 
 type Metodo = { key: string; label: string; monto: number };
 type Desglose = { efectivo: number; tarjetas: Metodo[]; otros: Metodo[]; totalTarjetas: number; total: number };
@@ -115,7 +121,21 @@ export default function CuadreGeneralPage() {
         }
       />
 
-      {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
+      {/* Same cards, real headings and total labels; only the method rows and figures are bars. */}
+      {state.kind === "loading" && (
+        <LoadingRegion className="flex flex-col gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <CuadreCard title={t("general")} tono="general" d={null} totalLabel={t("totalDivision", { division: t("general") })} t={t} />
+            <CuadreCard title={t("consulta")} tono="consulta" d={null} totalLabel={t("totalDivision", { division: t("consulta") })} t={t} />
+          </div>
+          <div className="max-w-xl">
+            <CuadreCard title={t("totalGeneral")} tono="total" d={null} totalLabel={t("totalGeneralRow")} t={t} destacado />
+          </div>
+          <div className="max-w-xl">
+            <WhoBilled cajeros={null} total={0} activeUsuarioId={usuarioId} onPick={setUsuarioId} t={t} />
+          </div>
+        </LoadingRegion>
+      )}
       {state.kind === "fail" && (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>
       )}
@@ -158,7 +178,8 @@ function CuadreCard({
 }: {
   title: string;
   tono: "general" | "consulta" | "total";
-  d: Desglose;
+  /** null while loading: the method rows and figures render as bars. */
+  d: Desglose | null;
   totalLabel: string;
   t: ReturnType<typeof useTranslations>;
   destacado?: boolean;
@@ -170,12 +191,28 @@ function CuadreCard({
         ? "bg-emerald-500/90 text-white"
         : "bg-teal-500/90 text-white";
   const body = tono === "total" ? "bg-primary/90 text-primary-foreground" : tono === "general" ? "bg-emerald-500/15" : "bg-teal-500/15";
+  const rowText = tono === "total" ? "text-white" : "";
+  // On the primary-filled total card the default bar would vanish; lighten it instead.
+  const bar = tono === "total" ? "bg-primary-foreground/25" : undefined;
+  if (!d)
+    return (
+      <div className="overflow-hidden rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <div className={"px-4 py-2.5 text-center text-sm font-bold uppercase tracking-wide " + head}>{title}</div>
+        <div className={body}>
+          <Row label={t("efectivo")} value={null} bar={bar} className={rowText} />
+          {Array.from({ length: LOADING_METHODS }, (_, i) => (
+            <Row key={i} label={null} value={null} bar={bar} className={rowText} />
+          ))}
+          <Row label={t("totalTarjetas")} value={null} bar={bar} className={rowText} strong />
+          <Row label={totalLabel} value={null} bar={bar} className={rowText} strong grande />
+        </div>
+      </div>
+    );
   const filas: Metodo[] = [
     { key: "__efectivo__", label: t("efectivo"), monto: d.efectivo },
     ...d.tarjetas,
     ...d.otros,
   ];
-  const rowText = tono === "total" ? "text-white" : "";
   return (
     <div className="overflow-hidden rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className={"px-4 py-2.5 text-center text-sm font-bold uppercase tracking-wide " + head}>{title}</div>
@@ -199,19 +236,29 @@ function WhoBilled({
   onPick,
   t,
 }: {
-  cajeros: Array<{ usuarioId: string | null; nombre: string | null; total: number }>;
+  /** null while loading: placeholder rows and a bar for the Σ. */
+  cajeros: Array<{ usuarioId: string | null; nombre: string | null; total: number }> | null;
   total: number;
   activeUsuarioId: string | null;
   onPick: (usuarioId: string | null) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const suma = cajeros.reduce((s, c) => s + Number(c.total ?? 0), 0);
+  const suma = (cajeros ?? []).reduce((s, c) => s + Number(c.total ?? 0), 0);
   // Aviso honesto si la Σ por cajero NO da el total del día: es defecto del BE, no se maquilla.
-  const descuadre = Math.abs(suma - total) > 0.005;
+  const descuadre = cajeros !== null && Math.abs(suma - total) > 0.005;
   return (
     <div className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="bg-muted/60 px-4 py-2.5 text-sm font-bold uppercase tracking-wide">{t("who.title")}</div>
-      {cajeros.length === 0 ? (
+      {cajeros === null ? (
+        <div className="divide-y">
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="flex items-center justify-between gap-3 px-4 py-2">
+              <Skeleton className={"my-0.5 h-4 " + (i % 2 ? "w-32" : "w-40")} />
+              <Skeleton className="my-0.5 h-4 w-16" />
+            </div>
+          ))}
+        </div>
+      ) : cajeros.length === 0 ? (
         <p className="px-4 py-3 text-sm text-muted-foreground">{t("who.empty")}</p>
       ) : (
         <div className="divide-y">
@@ -234,7 +281,7 @@ function WhoBilled({
       )}
       <div className="flex items-center justify-between gap-3 border-t px-4 py-2.5 text-sm font-bold">
         <span>{t("who.total")}</span>
-        <span className="tabular-nums">{money(suma)}</span>
+        {cajeros === null ? <Skeleton className="my-0.5 h-4 w-20" /> : <span className="tabular-nums">{money(suma)}</span>}
       </div>
       {descuadre && (
         <p className="border-t bg-destructive/10 px-4 py-2 text-xs font-medium text-destructive">
@@ -245,11 +292,20 @@ function WhoBilled({
   );
 }
 
-function Row({ label, value, className, strong, grande }: { label: string; value: string; className?: string; strong?: boolean; grande?: boolean }) {
+// `label`/`value` null = a loading bar in its place, sized to the text it stands for (`bar` recolours it).
+function Row({ label, value, className, strong, grande, bar }: { label: string | null; value: string | null; className?: string; strong?: boolean; grande?: boolean; bar?: string }) {
   return (
     <div className={"flex items-center justify-between gap-3 border-b border-black/5 px-4 py-2 last:border-0 " + (className ?? "")}>
-      <span className={strong ? "text-sm font-bold" : "text-sm font-medium"}>{label}</span>
-      <span className={"tabular-nums " + (grande ? "text-base font-bold" : strong ? "text-sm font-bold" : "text-sm")}>{value}</span>
+      {label === null ? (
+        <Skeleton className={cn("my-0.5 h-4 w-24", bar)} />
+      ) : (
+        <span className={strong ? "text-sm font-bold" : "text-sm font-medium"}>{label}</span>
+      )}
+      {value === null ? (
+        <Skeleton className={cn(grande ? "my-0.5 h-5 w-20" : "my-0.5 h-4 w-16", bar)} />
+      ) : (
+        <span className={"tabular-nums " + (grande ? "text-base font-bold" : strong ? "text-sm font-bold" : "text-sm")}>{value}</span>
+      )}
     </div>
   );
 }

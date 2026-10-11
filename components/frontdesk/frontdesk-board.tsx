@@ -42,15 +42,11 @@ import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler";
 import { FrontdeskSearchBar } from "@/components/frontdesk/frontdesk-search-bar";
 import { UbicacionEnVivoWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget";
 import { FrontdeskToolbar } from "@/components/frontdesk/frontdesk-toolbar";
+import { BoardRowsSkeleton, BoardSkeleton, BoardTable, KPI_TILE, KpiTilesSkeleton, ServiceTabsSkeleton } from "@/components/frontdesk/frontdesk-skeleton";
+import { ControlSkeleton } from "@/components/kit/skeletons";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 import { LiveBadge } from "@/components/live-badge";
@@ -62,7 +58,6 @@ import { LiveBadge } from "@/components/live-badge";
 // ————————————————————————————————————————————————————————————————————————————
 export function FrontdeskBoard() {
   const t = useTranslations("frontdesk");
-  const tc = useTranslations("common");
   const tRoot = useTranslations();
   const locale = useLocale();
   const { can } = useCan();
@@ -315,7 +310,10 @@ export function FrontdeskBoard() {
   // Toggles agrupados → UN solo "Flujo" donde estaba el grupo (shared with the patient desk).
   const flujoCols = React.useMemo(() => flowColumns(board?.columns ?? []), [board]);
   const columnas = React.useMemo(() => plainColumns(board?.columns ?? []), [board]);
-  const colsRender = React.useMemo(() => renderColumns(board?.columns ?? []), [board]);
+  // Last loaded columns of this tab: a date/range reload keeps the real headers over the skeleton rows.
+  const [lastCols, setLastCols] = React.useState<{ tab: string; cols: FrontdeskTablero["columns"] } | null>(null);
+  if (board && lastCols?.cols !== board.columns) setLastCols({ tab: tabEfectivo, cols: board.columns });
+  const colsRender = React.useMemo(() => renderColumns(board?.columns ?? (lastCols?.tab === tabEfectivo ? lastCols.cols : [])), [board, lastCols, tabEfectivo]);
 
   // Opciones de las columnas `select` editables (p. ej. DOSIS = productos del grupo del servicio,
   // optionsSource productos_grupo PR #137). Tenant-scoped; el "tablero" de opciones = clave del servicio.
@@ -457,8 +455,10 @@ export function FrontdeskBoard() {
     return { counts, total: filas.length - ocultas };
   }, [board, estadoFila, ocultarCanceladas, estadoFiltro]);
 
-  const cargando = boardRes.state.kind === "loading" || defRes.state.kind === "loading";
+  // Until the tabs (services + Consulta) and the board resolve, KPIs/rows would read "0"/empty: skeleton instead.
+  const cargando = [servRes, tabsRes, boardRes, defRes].some((r) => r.state.kind === "loading");
   const gateListo = !gate.cargando && !gate.sinCentro && !gate.necesitaPicker;
+  const tabsCargando = gate.cargando || (gateListo && [servRes, tabsRes, presentesRes].some((r) => r.state.kind === "loading"));
 
   return (
     <PageContainer>
@@ -472,7 +472,7 @@ export function FrontdeskBoard() {
       />
 
       {/* Layout by view hierarchy: title → service tabs → ONE toolbar row (search + filters | actions). */}
-      {gateListo && (
+      {tabsCargando ? <ServiceTabsSkeleton /> : gateListo && (
         <ServiciosTabs
           vacioPaciente={!!(!isConsulta && pacienteFiltro && filtroSlugs && serviciosMostrados.length === 0)}
           serviciosVisibles={serviciosVisibles}
@@ -486,7 +486,7 @@ export function FrontdeskBoard() {
       )}
 
       <FrontdeskToolbar
-        search={gateListo && (
+        search={gate.cargando ? <ControlSkeleton className="w-full sm:max-w-sm" /> : gateListo && (
           /* SINGLE search box: name/record/phone → patient dropdown; picking one narrows the tabs to THEIR services. */
           <FrontdeskSearchBar
             pacienteFiltro={pacienteFiltro}
@@ -525,7 +525,7 @@ export function FrontdeskBoard() {
       />
 
       {gate.cargando ? (
-        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+        <BoardSkeleton />
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
@@ -538,7 +538,7 @@ export function FrontdeskBoard() {
           ) : (
           <>
           {/* KPIs = filtros */}
-          <div className="mb-4 flex flex-wrap gap-2">
+          {cargando ? <KpiTilesSkeleton /> : <div className="mb-4 flex flex-wrap gap-2">
             <KpiTile
               label={t("todos")}
               count={kpis.total}
@@ -557,7 +557,7 @@ export function FrontdeskBoard() {
                   onClick={() => setEstadoFiltro(estadoFiltro === e.slug ? "" : e.slug)}
                 />
               ))}
-          </div>
+          </div>}
 
           {/* Contador de DESCUIDOS del día (§2): siempre visible (0 = día limpio), abre la lista. */}
           {puedeAvisos && avisos && (
@@ -589,72 +589,46 @@ export function FrontdeskBoard() {
             <TotalesDia totales={board.totals} servicio={servicioActivo?.name} />
           )}
 
-          {cargando && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
           {boardRes.state.kind === "fail" && (
             <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {boardRes.state.message}
             </p>
           )}
 
-          {board && !cargando && (
-            <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/60">
-                  <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                    {colsRender.map((item, i) =>
-                      item.kind === "flujo" ? (
-                        // Clic en Flujo → orden natural por presente (turno).
-                        <th key={`flujo-${i}`} className="px-3 py-2 font-semibold">
-                          <button type="button" onClick={() => setSort(null)} className="inline-flex items-center gap-1 hover:text-foreground" title={t("ordenarTurno")}>
-                            {t("flujo")}{!sort && <span aria-hidden>•</span>}
-                          </button>
-                        </th>
-                      ) : (
-                        <th key={item.col.clave} className="px-3 py-2 font-semibold">
-                          <button type="button" onClick={() => toggleSort(item.col.clave)} className="inline-flex items-center gap-1 hover:text-foreground">
-                            {item.col.label ?? tRoot(((item.col.render as { labelKey?: string } | null)?.labelKey) ?? item.col.labelKey)}
-                            {sort?.col === item.col.clave && <span aria-hidden>{sort.dir === "asc" ? "▲" : "▼"}</span>}
-                          </button>
-                        </th>
-                      ),
-                    )}
-                    <th className="px-3 py-2 text-right font-semibold">{tRoot("fd.col.acciones")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {ordenadas.length === 0 && (
-                    <tr>
-                      <td colSpan={colsRender.length + 1} className="px-3 py-10 text-center text-muted-foreground">
-                        {t("sinFilas")}
-                      </td>
-                    </tr>
-                  )}
-                  {ordenadas.map((f) => (
-                    <FilaSesion
-                      key={f.id}
-                      fila={f}
-                      sesion={sesiones.get(f.id)}
-                      colsRender={colsRender}
-                      flujoCols={flujoCols}
-                      flujo={flujo.map((e) => ({ clave: e.slug, labelKey: e.labelKey, color: e.color }))}
-                      transiciones={def?.transitions ?? []}
-                      estadoDe={estadoDe}
-                      servicio={servicioActivo}
-                      tablero={tabEfectivo}
-                      fecha={fecha}
-                      optionsByCol={optionsByCol}
-                      saldoDosis={saldoByPaciente[String(sesiones.get(f.id)?.patientId ?? "")] ?? []}
-                      centro={gate.centro}
-                      sinSaldo={sinSaldoIds.has(f.id)}
-                      canReparar={can("frontdesk.reparar")}
-                      estados={estados.map((e) => ({ clave: e.slug, label: tRoot(e.labelKey) }))}
-                      onChanged={refetch}
-                      onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          {(cargando || board) && (
+            <BoardTable colsRender={colsRender} sort={sort} onSort={toggleSort} onNaturalSort={() => setSort(null)}>
+              {cargando && <BoardRowsSkeleton colsRender={colsRender} />}
+              {!cargando && ordenadas.length === 0 && (
+                <tr>
+                  <td colSpan={colsRender.length + 1} className="px-3 py-10 text-center text-muted-foreground">
+                    {t("sinFilas")}
+                  </td>
+                </tr>
+              )}
+              {!cargando && ordenadas.map((f) => (
+                <FilaSesion
+                  key={f.id}
+                  fila={f}
+                  sesion={sesiones.get(f.id)}
+                  colsRender={colsRender}
+                  flujoCols={flujoCols}
+                  flujo={flujo.map((e) => ({ clave: e.slug, labelKey: e.labelKey, color: e.color }))}
+                  transiciones={def?.transitions ?? []}
+                  estadoDe={estadoDe}
+                  servicio={servicioActivo}
+                  tablero={tabEfectivo}
+                  fecha={fecha}
+                  optionsByCol={optionsByCol}
+                  saldoDosis={saldoByPaciente[String(sesiones.get(f.id)?.patientId ?? "")] ?? []}
+                  centro={gate.centro}
+                  sinSaldo={sinSaldoIds.has(f.id)}
+                  canReparar={can("frontdesk.reparar")}
+                  estados={estados.map((e) => ({ clave: e.slug, label: tRoot(e.labelKey) }))}
+                  onChanged={refetch}
+                  onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
+                />
+              ))}
+            </BoardTable>
           )}
           </>
           )}
@@ -826,7 +800,7 @@ function KpiTile({
       type="button"
       onClick={onClick}
       className={
-        "group flex min-w-24 flex-col items-start gap-1 rounded-md bg-card px-4 py-3 text-left shadow-sm shadow-[rgba(16,32,64,0.06)] transition-colors " +
+        KPI_TILE +
         (active
           ? "bg-primary/[0.04] ring-2 ring-primary/50"
           : "ring-1 ring-foreground/10 hover:ring-foreground/20")

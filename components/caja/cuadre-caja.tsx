@@ -36,6 +36,7 @@ import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { FacturasPendientes } from "@/components/caja/facturas-pendientes";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
+import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -66,7 +67,6 @@ function scopeUsuarioId(s: Scope): string | null | undefined {
 // por el gate de centro; RBAC cosmético para cerrar. See docs/specs/2026-07-20-cuadre-caja-design.md.
 export function CuadreCaja({ division }: { division: CajaDivision }) {
   const t = useTranslations("caja");
-  const tc = useTranslations("common");
   const gate = useCentroGate();
   const meState = useMe();
   const { can } = useCan();
@@ -86,21 +86,15 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   const [scope, setScope] = React.useState<Scope | null>(null);
   const effScope: Scope = scope ?? (isGerencia ? "consolidated" : "self");
 
-  if (gate.cargando || meState.kind === "loading") {
-    return (
-      <Shell division={division}>
-        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
-      </Shell>
-    );
-  }
-  if (gate.sinCentro) {
+  const loadingGate = gate.cargando || meState.kind === "loading";
+  if (!loadingGate && gate.sinCentro) {
     return (
       <Shell division={division}>
         <p className="text-sm text-muted-foreground">{t("sinCentro")}</p>
       </Shell>
     );
   }
-  if (gate.necesitaPicker) {
+  if (!loadingGate && gate.necesitaPicker) {
     return (
       <Shell division={division}>
         <CentroPicker centros={gate.centros} onPick={gate.pick} />
@@ -123,20 +117,26 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
         />
       </div>
 
-      <Loader
-        key={`${division}:${effScope}:${gate.centro}:${fecha}`}
-        division={division}
-        fecha={fecha}
-        esHoy={fecha === hoy}
-        scope={effScope}
-        setScope={setScope}
-        isGerencia={isGerencia}
-        puedeRetroactivo={puedeRetroactivo}
-        meId={me?.id ?? null}
-        canCerrar={canCerrar}
-        centro={gate.centro}
-        centroNombre={gate.centroNombre}
-      />
+      {/* While the centre gate / profile resolve, the date row is already real and the editor area
+          shows its skeleton. Permissions arrive with the profile, so until then it is the cashier layout. */}
+      {loadingGate ? (
+        <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={effScope === "consolidated"} />
+      ) : (
+        <Loader
+          key={`${division}:${effScope}:${gate.centro}:${fecha}`}
+          division={division}
+          fecha={fecha}
+          esHoy={fecha === hoy}
+          scope={effScope}
+          setScope={setScope}
+          isGerencia={isGerencia}
+          puedeRetroactivo={puedeRetroactivo}
+          meId={me?.id ?? null}
+          canCerrar={canCerrar}
+          centro={gate.centro}
+          centroNombre={gate.centroNombre}
+        />
+      )}
     </Shell>
   );
 }
@@ -187,7 +187,6 @@ type LoaderProps = {
 // concreto prellena su cuadre (conteo/inicio); para el CONSOLIDADO trae TODOS los cuadres para unir
 // (sumar) el efectivo contado y el fondo de cada cajero.
 function Loader(props: LoaderProps) {
-  const tc = useTranslations("common");
   const { division, fecha, scope, isGerencia } = props;
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
@@ -221,7 +220,7 @@ function Loader(props: LoaderProps) {
   }, []);
 
   if (bundle.state.kind === "loading")
-    return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
+    return <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={esConsolidado} />;
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
@@ -237,7 +236,8 @@ function Loader(props: LoaderProps) {
       cuadres={cuadres}
       cajeros={cajeros}
       grupos={grupos}
-      onReload={bundle.reload}
+      // Silent after closing: the closed cuadre replaces the open one in place, no skeleton flash.
+      onReload={bundle.refresh}
     />
   );
 }

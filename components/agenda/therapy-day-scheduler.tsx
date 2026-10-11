@@ -35,6 +35,8 @@ import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PlanSummarySkeleton, SlotGridSkeleton } from "@/components/agenda/therapy-day-skeleton";
 
 // COCKPIT PARTIDO — la pieza que ve el mostrador al citar terapias (aprobado por el dueño 26-sep, sobre su
 // visión del 24). IZQUIERDA: paciente + récord (héroe) y las terapias del día como mini-tarjetas de color con
@@ -224,6 +226,12 @@ export function TherapyDayScheduler({
   }
 
   const cap = avail?.resource?.capacity ?? 0;
+  const dragHint = (
+    <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <HugeiconsIcon icon={DragDropIcon} className="size-3.5" />
+      {t("dragHint")}
+    </p>
+  );
 
   return (
     <div className="space-y-4">
@@ -425,6 +433,7 @@ export function TherapyDayScheduler({
                 )}
                 {selEff ? t("hoursFor", { service: servById.get(selEff)?.name ?? "" }) : t("pickCard")}
               </div>
+              {selEff && availRes.state.kind === "loading" && <Skeleton aria-hidden className="mt-0.5 h-4 w-40" />}
               {avail?.configured && (
                 <div className="mt-0.5 text-xs text-muted-foreground">
                   {t("minutes", { n: avail.minutes })}
@@ -441,7 +450,7 @@ export function TherapyDayScheduler({
           {!selEff ? (
             <p className="py-10 text-center text-sm text-muted-foreground">{t("pickCard")}</p>
           ) : availRes.state.kind === "loading" ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+            <SlotGridSkeleton hint={dragHint} />
           ) : availRes.state.kind === "fail" ? (
             <p className="text-sm text-destructive">{availRes.state.message}</p>
           ) : avail && !avail.configured ? (
@@ -450,10 +459,7 @@ export function TherapyDayScheduler({
             </p>
           ) : avail ? (
             <>
-              <p className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <HugeiconsIcon icon={DragDropIcon} className="size-3.5" />
-                {t("dragHint")}
-              </p>
+              {dragHint}
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
                 {avail.slots.map((sl) => {
                   const active = time === sl.time;
@@ -524,7 +530,7 @@ export function TherapyDayScheduler({
           {!time ? (
             <p className="text-muted-foreground">{t("noHour")}</p>
           ) : planRes.state.kind === "loading" ? (
-            <p className="text-muted-foreground">{tRoot("common.loading")}</p>
+            <PlanSummarySkeleton />
           ) : plan ? (
             <>
               <div className="flex flex-wrap items-center gap-2">

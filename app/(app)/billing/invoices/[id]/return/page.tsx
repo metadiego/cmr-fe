@@ -29,6 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { Bar } from "@/components/facturacion/invoice-detail-skeleton";
+import { ReturnFormSkeleton, ReturnSummarySkeleton } from "@/components/facturacion/invoice-return-skeleton";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -65,7 +67,6 @@ export default function DevolverFacturaPage() {
   const centro = useSearchParams().get("centro") ?? undefined;
   const t = useTranslations("facturacionList.actions");
   const tf = useTranslations("facturacion");
-  const tc = useTranslations("common");
   const tRoot = useTranslations();
 
   const { state: facturaState, reload: recargarFactura } = useResource<FacturaConItems>(() => getFactura(id, centro), [id, centro]);
@@ -77,6 +78,7 @@ export default function DevolverFacturaPage() {
   const backHref = `/billing/invoices/${id}${centro ? `?centro=${centro}` : ""}`;
   const pac = factura?.patient;
   const pacNombre = pac ? (pac.displayName || [pac.firstName, pac.lastName].filter(Boolean).join(" ")) : "";
+  const loading = facturaState.kind === "loading";
 
   return (
     <PageContainer>
@@ -86,11 +88,11 @@ export default function DevolverFacturaPage() {
         title={
           <>
             <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{t("returnTitle")}</span>
-            {pacNombre || t("returnTitle")}
+            {loading ? <span className="flex h-8 items-center"><Bar className="h-6 w-56" /></span> : pacNombre || t("returnTitle")}
           </>
         }
         count={
-          factura?.number != null && (
+          loading ? <Bar className="h-7 w-20" /> : factura?.number != null && (
             <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
               {factura.series ? `${factura.series}-` : "F"}{String(factura.number)}
             </span>
@@ -98,14 +100,15 @@ export default function DevolverFacturaPage() {
         }
       />
       {/* Resumen de la factura (referencia): subtotal, descuento (%/$), impuesto (detalle al click), total */}
+      {loading && <ReturnSummarySkeleton />}
       {factura && (
         <div className="rounded-md ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] bg-gradient-to-br from-primary/10 to-transparent px-5 py-4">
           <ResumenFactura factura={factura} />
         </div>
       )}
 
-      {facturaState.kind === "loading" ? (
-        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
+      {loading ? (
+        <ReturnFormSkeleton />
       ) : facturaState.kind === "fail" ? (
         <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-destructive">

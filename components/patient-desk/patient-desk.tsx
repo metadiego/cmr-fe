@@ -18,11 +18,13 @@ import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button";
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler";
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker";
 import { PatientListView } from "@/components/patient-desk/patient-list-view";
+import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton";
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail";
 import { LiveBadge } from "@/components/live-badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -53,6 +55,8 @@ export function PatientDesk() {
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId) ? selectedId : (patients[0]?.patientId ?? null);
 
+  // First load (or a new date/center): skeleton instead of a "0 patients" count and an empty list.
+  const loadingDay = gate.cargando || (!!gate.centro && data.loading && data.patients.length === 0);
   const serviceName = (slug: string) => [...data.servicesById.values()].find((s) => s.slug === slug)?.name;
 
   return (
@@ -78,7 +82,11 @@ export function PatientDesk() {
             </button>
           ))}
         </div>
-        <span className="text-xs text-muted-foreground">{t("patientsCount", { n: patients.length })}</span>
+        {loadingDay ? (
+          <Skeleton aria-hidden className="h-3 w-20" />
+        ) : (
+          <span className="text-xs text-muted-foreground">{t("patientsCount", { n: patients.length })}</span>
+        )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget centroId={gate.centro} nombreServicio={serviceName} />
           <NurseStatusButton centro={gate.centro} fecha={date} onChanged={data.refresh} />
@@ -95,15 +103,15 @@ export function PatientDesk() {
       </div>
 
       {gate.cargando ? (
-        <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+        <PatientDeskSkeleton />
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
         <div className="max-w-xl"><CenterPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : data.error ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{data.error}</p>
-      ) : data.loading && data.patients.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
+      ) : loadingDay ? (
+        <PatientDeskSkeleton />
       ) : patients.length === 0 ? (
         <p className="rounded-lg bg-card px-4 py-16 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">{query ? t("noMatches") : t("empty")}</p>
       ) : (
