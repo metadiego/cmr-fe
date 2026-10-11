@@ -3,8 +3,9 @@
 import * as React from "react"
 import { useTranslations } from "next-intl"
 import Link from "next/link"
+import { toast } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Calendar03Icon, UserIcon } from "@hugeicons/core-free-icons"
+import { Calendar03Icon, Tick02Icon, UserIcon } from "@hugeicons/core-free-icons"
 
 import {
   serviceConcluded,
@@ -12,6 +13,9 @@ import {
   type PatientKind,
 } from "@/lib/frontdesk/patient-day"
 import type { PatientDayData } from "@/hooks/use-patient-day"
+import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
+import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
+import { toastError } from "@/lib/api/errors"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
 import { Button } from "@/components/ui/button"
@@ -139,6 +143,39 @@ export function PatientDetail({
       ? tRoot(data.consultationTab.labelKey)
       : data.consultationTab.name
     : t("consultation")
+  const [presenceBusy, setPresenceBusy] = React.useState(false)
+
+  // UNA llegada por paciente al día, no por terapia (BE PR #424, 10-oct-2026): reemplaza el "Presente"
+  // que antes vivía en cada fila de servicio (ver pasosOcultos en ServiceSessionsTable). `failed` trae
+  // terapias que no pudieron marcarse por su propia regla — las demás quedan marcadas igual, por eso
+  // es un aviso, no un error que bloquee.
+  async function handlePresent() {
+    setPresenceBusy(true)
+    try {
+      const res = await presentPatient(patient.patientId, date, centerId)
+      if (res.failed.length > 0) {
+        toast.warning(res.failed.map((f) => f.reason).join(" · "))
+      }
+      data.refresh()
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setPresenceBusy(false)
+    }
+  }
+
+  async function handleUndoPresent() {
+    setPresenceBusy(true)
+    try {
+      await undoPresentPatient(patient.patientId, centerId)
+      data.refresh()
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setPresenceBusy(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -163,7 +200,30 @@ export function PatientDetail({
               : ""}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {patient.services.length > 0 &&
+            (patient.presentAt ? (
+              <div className="flex items-center gap-1 rounded-md border bg-muted/40 py-1 pr-1 pl-2.5 text-sm">
+                <span className="text-muted-foreground">
+                  {t("arrivedAt", { time: fmtHora(patient.presentAt) })}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  disabled={presenceBusy}
+                  onClick={handleUndoPresent}
+                >
+                  {t("undoPresent")}
+                </Button>
+              </div>
+            ) : (
+              <Button size="sm" disabled={presenceBusy} onClick={handlePresent}>
+                <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+                {t("markPresent")}
+              </Button>
+            ))}
           <Button variant="outline" size="sm" asChild>
             <Link href={`/patients/${patient.patientId}`}>
               <HugeiconsIcon icon={UserIcon} className="size-4" />

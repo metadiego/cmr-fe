@@ -117,3 +117,30 @@ export function callQueueSession(
 export function uncallQueueSession(sessionId: string, centroId?: string): Promise<unknown> {
   return apiFetch(`/frontdesk/sessions/${sessionId}/uncall`, { method: "POST" }, centroId);
 }
+
+// UNA sola llegada por paciente al día, no por terapia (PR #424, desplegado y verificado por BE
+// 10-oct-2026 — regla del dueño: "el récord 103057 tiene Vit C + Intravenoso y se marcó presente dos
+// veces"). Marca todas las terapias PENDIENTES del día con la misma transición de cada sesión; las que
+// fallen su propia regla van en `failed` con su motivo, sin bloquear a las demás.
+export type PresentPatientResult = {
+  date: string;
+  arrivedAt: string;
+  marked: { sessionId: string; serviceId: string }[];
+  failed: { sessionId: string; serviceId: string; reason: string }[];
+};
+
+export function presentPatient(
+  patientId: string,
+  date?: string,
+  centroId?: string,
+): Promise<PresentPatientResult> {
+  return apiFetch<PresentPatientResult>(
+    `/frontdesk/patients/${patientId}/present`,
+    { method: "POST", body: JSON.stringify(date ? { date } : {}) },
+    centroId,
+  );
+}
+
+export function undoPresentPatient(patientId: string, centroId?: string): Promise<unknown> {
+  return apiFetch(`/frontdesk/patients/${patientId}/undo-present`, { method: "POST" }, centroId);
+}

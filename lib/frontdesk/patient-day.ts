@@ -111,9 +111,13 @@ export function groupByPatient(
     }
     ps.sessionIds.push(s.id)
     ps.statuses.push(text(s.status))
-    if (s.status !== "cancelada") p.allCancelled = false
+    const cancelled = s.status === "cancelada"
+    if (!cancelled) p.allCancelled = false
     p.earliestTime = minIso(p.earliestTime, s.time ? s.time.slice(0, 5) : null)
-    p.presentAt = minIso(p.presentAt, s.presentAt)
+    // A cancelled session keeps its OWN presentAt stamp (history), but it must not make the PATIENT
+    // look arrived forever — found live 10-oct-2026 while building the header's "Presente": cancel a
+    // walk-in session and its leftover presentAt kept outranking a genuinely pending one.
+    if (!cancelled) p.presentAt = minIso(p.presentAt, s.presentAt)
   }
 
   for (const c of consultations) {
@@ -123,8 +127,9 @@ export function groupByPatient(
     p.consultationIds.push(c.id)
     const status = text(c.estado)
     p.consultationStatuses.push(status)
-    if (status !== "cancelada") p.allCancelled = false
-    p.presentAt = minIso(p.presentAt, text(c.presente) || null)
+    const cancelled = status === "cancelada"
+    if (!cancelled) p.allCancelled = false
+    if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
   }
 
   // Services in the configured order (the order of `services`), not in arrival order.

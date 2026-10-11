@@ -93,6 +93,11 @@ export function ServiceSessionsTable({
       .filter((s) => transitions.has(s.slug) && STAMP_FIELD[s.slug])
       .map((s) => ({ clave: s.slug, labelKey: s.labelKey, color: s.color }))
   }, [definition, statuses])
+  // "Presente" ya no se marca por terapia aquí: es una sola llegada por paciente, en la cabecera
+  // (regla del dueño, 10-oct-2026 — ver BE PR #424). Se oculta el paso SIN sacarlo de `steps`: la
+  // posición en el flujo (pendiente→presente→en_terapia→asistido) sigue intacta para que `FilaSesion`
+  // ubique el estado actual — solo deja de pintarse como un pill más en la fila.
+  const pasosOcultos = React.useMemo(() => new Set(["presente"]), [])
 
   const ids = React.useMemo(() => new Set(sessionIds), [sessionIds])
   const rows = React.useMemo(
@@ -225,6 +230,7 @@ export function ServiceSessionsTable({
                   colsRender={render}
                   flujoCols={flow}
                   flujo={steps}
+                  pasosOcultos={pasosOcultos}
                   transiciones={definition?.transitions ?? []}
                   estadoDe={statusOf}
                   servicio={service}

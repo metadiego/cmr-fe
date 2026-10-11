@@ -262,3 +262,27 @@ test("a consultation in a terminal status no longer keeps the patient up; one ca
   // Without the board's catalog no consultation counts as finished.
   assert.equal(patientConcluded(day("atendida")), false)
 })
+
+test("a cancelled session's leftover presentAt does not make the patient look arrived (found live 10-oct-2026)", () => {
+  const [p] = groupByPatient(
+    [
+      ses("a", "p1", "s-apex", { status: "cancelada", presentAt: "2026-10-10T20:56:00Z" }),
+      ses("b", "p1", "s-laser", { status: "pendiente", presentAt: null }),
+    ],
+    [],
+    services
+  )
+  assert.equal(p.presentAt, null)
+})
+
+test("but a GENUINE presentAt on a non-cancelled session still counts, even next to a cancelled one", () => {
+  const [p] = groupByPatient(
+    [
+      ses("a", "p1", "s-apex", { status: "cancelada", presentAt: "2026-10-10T20:56:00Z" }),
+      ses("b", "p1", "s-laser", { status: "presente", presentAt: "2026-10-10T21:10:00Z" }),
+    ],
+    [],
+    services
+  )
+  assert.equal(p.presentAt, "2026-10-10T21:10:00Z")
+})
