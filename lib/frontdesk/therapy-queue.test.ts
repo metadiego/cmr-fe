@@ -18,10 +18,11 @@ const queue: FrontdeskQueue = {
       icon: null,
       free: [{ staffId: "t1", name: "Luis", load: 0 }],
       skillsConfigured: true,
+      suggestions: [],
       waiting: [
-        { sessionId: "sa", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:00:00Z", waitMinutes: 20, busyIn: null },
+        { sessionId: "sa", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:00:00Z", waitMinutes: 20, busyIn: null, calledAt: null, technicianId: null, technicianName: null },
         // p2 está "ocupado en" otra terapia: tiene su puesto en Láser pero no está libre.
-        { sessionId: "sb", patientId: "p2", patientName: "B DOS", medicalRecordNumber: "2", patient: { id: "p2", medicalRecordNumber: "2", name: "DOS, B" }, turn: 2, arrivedAt: "2026-10-10T09:05:00Z", waitMinutes: 15, busyIn: "s-apex" },
+        { sessionId: "sb", patientId: "p2", patientName: "B DOS", medicalRecordNumber: "2", patient: { id: "p2", medicalRecordNumber: "2", name: "DOS, B" }, turn: 2, arrivedAt: "2026-10-10T09:05:00Z", waitMinutes: 15, busyIn: "s-apex", calledAt: null, technicianId: null, technicianName: null },
       ],
       inTherapy: [],
     },
@@ -33,9 +34,10 @@ const queue: FrontdeskQueue = {
       icon: null,
       free: [],
       skillsConfigured: true,
+      suggestions: [],
       waiting: [],
       inTherapy: [
-        { sessionId: "sc", patientId: "p2", patientName: "B DOS", medicalRecordNumber: "2", patient: { id: "p2", medicalRecordNumber: "2", name: "DOS, B" }, technicianId: "t1", technicianName: "Luis", since: "2026-10-10T09:05:00Z", minutes: 10 },
+        { sessionId: "sc", patientId: "p2", patientName: "B DOS", medicalRecordNumber: "2", patient: { id: "p2", medicalRecordNumber: "2", name: "DOS, B" }, technicianId: "t1", technicianName: "Luis", since: "2026-10-10T09:05:00Z", minutes: 10, estimatedEnd: null, estimateSource: null },
       ],
     },
   ],
@@ -61,10 +63,10 @@ test("earliestFreeWaitByPatient: keeps the OLDEST free arrival across several pe
     date: "2026-10-10",
     totals: { waiting: 1, inTherapy: 0 },
     services: [
-      { serviceId: "s-laser", key: "laser", name: "Láser", color: null, icon: null, inTherapy: [], free: [], skillsConfigured: true,
-        waiting: [{ sessionId: "sa", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:10:00Z", waitMinutes: 10, busyIn: null }] },
-      { serviceId: "s-apex", key: "apex", name: "APEX", color: null, icon: null, inTherapy: [], free: [], skillsConfigured: true,
-        waiting: [{ sessionId: "sb", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:00:00Z", waitMinutes: 20, busyIn: null }] },
+      { serviceId: "s-laser", key: "laser", name: "Láser", color: null, icon: null, inTherapy: [], free: [], skillsConfigured: true, suggestions: [],
+        waiting: [{ sessionId: "sa", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:10:00Z", waitMinutes: 10, busyIn: null, calledAt: null, technicianId: null, technicianName: null }] },
+      { serviceId: "s-apex", key: "apex", name: "APEX", color: null, icon: null, inTherapy: [], free: [], skillsConfigured: true, suggestions: [],
+        waiting: [{ sessionId: "sb", patientId: "p1", patientName: "A UNO", medicalRecordNumber: "1", patient: { id: "p1", medicalRecordNumber: "1", name: "UNO, A" }, turn: 1, arrivedAt: "2026-10-10T09:00:00Z", waitMinutes: 20, busyIn: null, calledAt: null, technicianId: null, technicianName: null }] },
     ],
   }
   assert.equal(earliestFreeWaitByPatient(twoWaits).get("p1"), "2026-10-10T09:00:00Z")

@@ -1744,6 +1744,9 @@
   "frontdesk": {
     "title": "Patient Center",
     "live": "Live",
+    "queue": {
+      "nobody_free": "No one is free for this therapy right now — pick a technician even if busy, or try again shortly."
+    },
     "fecha": "Date",
     "citar": "Book",
     "todosTab": "All",
@@ -4680,6 +4683,10 @@
       "minutesSince": "{n} min",
       "estimatedEnd": "ends ~{time}",
       "estimatedEndHistoryTooltip": "Estimated from the real 30-day median",
+      "call": "Call",
+      "uncall": "Undo",
+      "pickTechnician": "Pick technician",
+      "calledLabel": "Called · {technician} · {time}",
       "busyIn": "Busy in {service}",
       "free": "Free: {names}",
       "noneFree": "No one free right now",

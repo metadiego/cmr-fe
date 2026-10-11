@@ -4,9 +4,22 @@ import * as React from "react"
 import { useTranslations } from "next-intl"
 
 import { useTherapyQueue } from "@/hooks/use-therapy-queue"
-import type { FrontdeskQueue } from "@/lib/api/frontdesk-queue"
+import {
+  callQueueSession,
+  uncallQueueSession,
+  type FrontdeskQueue,
+} from "@/lib/api/frontdesk-queue"
 import { queueEntryDisplayName, queueEntryRecord } from "@/lib/frontdesk/therapy-queue"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
+import { toastError } from "@/lib/api/errors"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Sheet,
   SheetContent,
@@ -31,8 +44,36 @@ function serviceName(queue: FrontdeskQueue, serviceId: string): string {
 // navegador real contra Bayamón (10-oct-2026, commit dd31008).
 export function TherapyQueueStrip({ centerId, date }: Props) {
   const t = useTranslations("patientDesk.queue")
-  const { queue } = useTherapyQueue(centerId, date)
+  const tRoot = useTranslations()
+  const { queue, refresh } = useTherapyQueue(centerId, date)
   const [openServiceId, setOpenServiceId] = React.useState<string | null>(null)
+  // sessionId → técnico elegido en el desplegable (vacío: usar el sugerido del BE).
+  const [picked, setPicked] = React.useState<Record<string, string>>({})
+  const [busy, setBusy] = React.useState<string | null>(null)
+
+  async function handleCall(sessionId: string, technicianId?: string) {
+    setBusy(sessionId)
+    try {
+      await callQueueSession(sessionId, technicianId, centerId)
+      refresh()
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function handleUncall(sessionId: string) {
+    setBusy(sessionId)
+    try {
+      await uncallQueueSession(sessionId, centerId)
+      refresh()
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setBusy(null)
+    }
+  }
 
   if (!queue) return null
   const visible = queue.services.filter((s) => s.waiting.length + s.inTherapy.length > 0)
@@ -118,24 +159,93 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                     {t("sectionWaiting")}
                   </h3>
                   <ul className="space-y-1.5">
-                    {active.waiting.map((e) => (
-                      <li
-                        key={e.sessionId}
-                        className="flex items-center justify-between rounded-md px-3 py-2 text-sm ring-1 ring-foreground/10"
-                      >
-                        <div className="min-w-0">
-                          <div className="truncate font-medium">{queueEntryDisplayName(e)}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {queueEntryRecord(e) ? `#${queueEntryRecord(e)} · ` : ""}
-                            {t("turn", { turn: e.turn })}
-                            {e.busyIn ? ` · ${t("busyIn", { service: serviceName(queue, e.busyIn) })}` : ""}
+                    {active.waiting.map((e, idx) => {
+                      const suggestion = active.suggestions.find(
+                        (s) => s.sessionId === e.sessionId
+                      )
+                      const options = suggestion
+                        ? [
+                            { staffId: suggestion.staffId, name: suggestion.staffName },
+                            ...active.free.filter((f) => f.staffId !== suggestion.staffId),
+                          ]
+                        : active.free
+                      const chosen = picked[e.sessionId] || options[0]?.staffId
+                      return (
+                        <li
+                          key={e.sessionId}
+                          className="rounded-md px-3 py-2 text-sm ring-1 ring-foreground/10"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="min-w-0">
+                              <div className="truncate font-medium">
+                                {queueEntryDisplayName(e)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {queueEntryRecord(e) ? `#${queueEntryRecord(e)} · ` : ""}
+                                {t("turn", { turn: e.turn })}
+                                {e.busyIn
+                                  ? ` · ${t("busyIn", { service: serviceName(queue, e.busyIn) })}`
+                                  : ""}
+                              </div>
+                            </div>
+                            <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+                              {fmtHora(e.arrivedAt)}
+                            </span>
                           </div>
-                        </div>
-                        <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                          {fmtHora(e.arrivedAt)}
-                        </span>
-                      </li>
-                    ))}
+                          {e.calledAt ? (
+                            <div className="mt-2 flex items-center justify-between rounded-md bg-primary/5 px-2 py-1.5 text-xs">
+                              <span>
+                                {t("calledLabel", {
+                                  technician: e.technicianName ?? "—",
+                                  time: fmtHora(e.calledAt),
+                                })}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                disabled={busy === e.sessionId}
+                                onClick={() => handleUncall(e.sessionId)}
+                              >
+                                {t("uncall")}
+                              </Button>
+                            </div>
+                          ) : idx === 0 ? (
+                            <div className="mt-2 flex items-center gap-1.5">
+                              {options.length > 0 ? (
+                                <Select
+                                  value={chosen}
+                                  onValueChange={(v) =>
+                                    setPicked((p) => ({ ...p, [e.sessionId]: v }))
+                                  }
+                                >
+                                  <SelectTrigger size="sm" className="h-7 flex-1 text-xs">
+                                    <SelectValue placeholder={t("pickTechnician")} />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {options.map((o) => (
+                                      <SelectItem key={o.staffId} value={o.staffId}>
+                                        {o.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : null}
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="h-7 px-2.5 text-xs"
+                                disabled={busy === e.sessionId}
+                                onClick={() => handleCall(e.sessionId, chosen)}
+                              >
+                                {t("call")}
+                              </Button>
+                            </div>
+                          ) : null}
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
               ) : null}

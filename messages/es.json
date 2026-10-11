@@ -1744,6 +1744,9 @@
   "frontdesk": {
     "title": "Centro de Pacientes",
     "live": "En vivo",
+    "queue": {
+      "nobody_free": "Nadie está libre para esta terapia ahora — elige un técnico aunque esté ocupado, o inténtalo de nuevo en un momento."
+    },
     "fecha": "Fecha",
     "citar": "Citar",
     "todosTab": "Todos",
@@ -4680,6 +4683,10 @@
       "minutesSince": "{n} min",
       "estimatedEnd": "termina ~{time}",
       "estimatedEndHistoryTooltip": "Estimado según la mediana real de los últimos 30 días",
+      "call": "Llamar",
+      "uncall": "Deshacer",
+      "pickTechnician": "Elegir técnico",
+      "calledLabel": "Llamado · {technician} · {time}",
       "busyIn": "Ocupado en {service}",
       "free": "Libres: {names}",
       "noneFree": "Nadie libre ahora",
