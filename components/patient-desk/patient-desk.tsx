@@ -4,11 +4,14 @@ import * as React from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Calendar03Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import { ArrowDown01Icon, Calendar03Icon, Search01Icon } from "@hugeicons/core-free-icons"
 
 import {
+  filterByConsultationSubtype,
   filterByKind,
+  filterByService,
   filterPatients,
+  servicesOfTheDay,
   type PatientKind,
 } from "@/lib/frontdesk/patient-day"
 import { useMyFrontdeskPreference } from "@/hooks/use-frontdesk-default-tab"
@@ -35,6 +38,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+const SUB_FILTER_ALL = "__all__"
 
 // Patient desk — the frontdesk turned around (alternative to /boards/frontdesk, which stays as is):
 // the day's patients first, services and consultation together; pick one to see and work all their
@@ -65,10 +77,36 @@ export function PatientDesk() {
     preference.state.data?.frontdeskStartsOnConsultation
       ? "consultation"
       : "all")
-  const patients = React.useMemo(
-    () => filterPatients(filterByKind(data.patients, kind), query),
-    [data.patients, kind, query]
+  // Sub-filter WITHIN the active kind: one service ("Servicios") or one subtype ("Consulta") — both
+  // data-driven (servicesOfTheDay / the board's own subtype catalog), never a hardcoded list. Cleared
+  // whenever the kind itself changes, so the little arrow never carries a stale, invisible filter.
+  const [serviceFilter, setServiceFilter] = React.useState<string | null>(null)
+  const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
+    string | null
+  >(null)
+  const pickKind = (k: PatientKind) => {
+    setKindPicked(k)
+    setServiceFilter(null)
+    setConsultSubtypeFilter(null)
+  }
+  const servicesToday = React.useMemo(
+    () => servicesOfTheDay(data.patients),
+    [data.patients]
   )
+  const consultSubtypes = React.useMemo(
+    () =>
+      [...(data.consultationDefinition?.subtypes ?? [])].sort(
+        (a, b) => a.sortOrder - b.sortOrder
+      ),
+    [data.consultationDefinition]
+  )
+  const patients = React.useMemo(() => {
+    let list = filterByKind(data.patients, kind)
+    if (kind === "services") list = filterByService(list, serviceFilter)
+    if (kind === "consultation")
+      list = filterByConsultationSubtype(list, consultSubtypeFilter)
+    return filterPatients(list, query)
+  }, [data.patients, kind, serviceFilter, consultSubtypeFilter, query])
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
@@ -113,7 +151,7 @@ export function PatientDesk() {
             <button
               key={k}
               type="button"
-              onClick={() => setKindPicked(k)}
+              onClick={() => pickKind(k)}
               aria-pressed={kind === k}
               className={cn(
                 "rounded px-3 py-1 text-xs font-medium",
@@ -126,6 +164,72 @@ export function PatientDesk() {
             </button>
           ))}
         </div>
+        {kind === "services" || kind === "consultation" ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant={
+                  (kind === "services" && serviceFilter) ||
+                  (kind === "consultation" && consultSubtypeFilter)
+                    ? "default"
+                    : "outline"
+                }
+                size="icon"
+                className="size-7"
+                aria-label={
+                  kind === "services" ? t("filterByService") : t("filterByType")
+                }
+              >
+                <HugeiconsIcon icon={ArrowDown01Icon} className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {kind === "services" ? (
+                <DropdownMenuRadioGroup
+                  value={serviceFilter ?? SUB_FILTER_ALL}
+                  onValueChange={(v) =>
+                    setServiceFilter(v === SUB_FILTER_ALL ? null : v)
+                  }
+                >
+                  <DropdownMenuRadioItem value={SUB_FILTER_ALL}>
+                    {t("allServices")}
+                  </DropdownMenuRadioItem>
+                  {servicesToday.map((s) => (
+                    <DropdownMenuRadioItem key={s.serviceId} value={s.serviceId}>
+                      <span className="flex items-center gap-1.5">
+                        <span
+                          className="size-2 rounded-full"
+                          style={{
+                            backgroundColor: s.color ?? "var(--muted-foreground)",
+                          }}
+                          aria-hidden
+                        />
+                        {s.name}
+                      </span>
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              ) : (
+                <DropdownMenuRadioGroup
+                  value={consultSubtypeFilter ?? SUB_FILTER_ALL}
+                  onValueChange={(v) =>
+                    setConsultSubtypeFilter(v === SUB_FILTER_ALL ? null : v)
+                  }
+                >
+                  <DropdownMenuRadioItem value={SUB_FILTER_ALL}>
+                    {t("allTypes")}
+                  </DropdownMenuRadioItem>
+                  {consultSubtypes.map((s) => (
+                    <DropdownMenuRadioItem key={s.id} value={s.slug}>
+                      {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
         <span className="text-xs text-muted-foreground">
           {t("patientsCount", { n: patients.length })}
         </span>

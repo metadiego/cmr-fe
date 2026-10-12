@@ -4669,6 +4669,10 @@
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "consultation": "Consultation",
     "kindLabel": "Show",
+    "filterByService": "Filter by service",
+    "filterByType": "Filter by type",
+    "allServices": "All services",
+    "allTypes": "All types",
     "kind": {
       "all": "All",
       "services": "Services",

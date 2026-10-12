@@ -1,10 +1,13 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 import {
+  filterByConsultationSubtype,
   filterByKind,
+  filterByService,
   filterPatients,
   groupByPatient,
   patientConcluded,
+  servicesOfTheDay,
   serviceConcluded,
   type DaySession,
 } from "./patient-day.ts"
@@ -285,4 +288,50 @@ test("but a GENUINE presentAt on a non-cancelled session still counts, even next
     services
   )
   assert.equal(p.presentAt, "2026-10-10T21:10:00Z")
+})
+
+test("filterByService: only patients with that exact service today; null clears it", () => {
+  const list = groupByPatient(
+    [ses("a", "p1", "s-apex"), ses("b", "p2", "s-laser")],
+    [],
+    services
+  )
+  assert.deepEqual(
+    filterByService(list, "s-apex").map((p) => p.patientId),
+    ["p1"]
+  )
+  assert.equal(filterByService(list, null).length, 2)
+  assert.equal(filterByService(list, "s-unknown").length, 0)
+})
+
+test("filterByConsultationSubtype: only patients with that subtype today; null clears it", () => {
+  const list = groupByPatient(
+    [],
+    [
+      { id: "c1", pacienteId: "p1", paciente: "A", record: "1", estado: "en_consulta", subtipo: "nueva" },
+      { id: "c2", pacienteId: "p2", paciente: "B", record: "2", estado: "en_consulta", subtipo: "seguimiento" },
+    ],
+    services
+  )
+  assert.deepEqual(
+    filterByConsultationSubtype(list, "nueva").map((p) => p.patientId),
+    ["p1"]
+  )
+  assert.equal(filterByConsultationSubtype(list, null).length, 2)
+})
+
+test("servicesOfTheDay: only services someone actually has today, first-seen order, no duplicates", () => {
+  const list = groupByPatient(
+    [
+      ses("a", "p1", "s-laser"),
+      ses("b", "p2", "s-apex"),
+      ses("c", "p2", "s-laser"),
+    ],
+    [],
+    services
+  )
+  assert.deepEqual(
+    servicesOfTheDay(list).map((s) => s.serviceId),
+    ["s-laser", "s-apex"]
+  )
 })

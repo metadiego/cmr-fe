@@ -25,6 +25,7 @@ export interface DayConsultation {
   record?: unknown
   estado?: unknown
   presente?: unknown
+  subtipo?: unknown // board's subtype catalog (e.g. nueva/seguimiento) — data-driven, see SubTipo
 }
 
 export interface DayService {
@@ -50,6 +51,7 @@ export interface PatientDay {
   services: PatientService[]
   consultationIds: string[]
   consultationStatuses: string[]
+  consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
   earliestTime: string | null // HH:MM of the first booking of the day
   presentAt: string | null // first arrival stamp (any service or the consultation)
   allCancelled: boolean
@@ -78,6 +80,7 @@ export function groupByPatient(
         services: [],
         consultationIds: [],
         consultationStatuses: [],
+        consultationSubtypes: [],
         earliestTime: null,
         presentAt: null,
         allCancelled: true,
@@ -127,6 +130,7 @@ export function groupByPatient(
     p.consultationIds.push(c.id)
     const status = text(c.estado)
     p.consultationStatuses.push(status)
+    p.consultationSubtypes.push(text(c.subtipo))
     const cancelled = status === "cancelada"
     if (!cancelled) p.allCancelled = false
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
@@ -221,4 +225,41 @@ export function filterByKind(
   if (kind === "consultation")
     return list.filter((p) => p.consultationIds.length > 0)
   return list
+}
+
+// Narrows "Servicios" to ONE service (data-driven: whichever services the day's patients actually
+// have — see servicesOfTheDay). `null` clears it.
+export function filterByService(
+  list: PatientDay[],
+  serviceId: string | null
+): PatientDay[] {
+  if (!serviceId) return list
+  return list.filter((p) => p.services.some((s) => s.serviceId === serviceId))
+}
+
+// Narrows "Consulta" to one subtype (e.g. nueva/seguimiento — the board's own catalog, see
+// TableroDefinicion.subtypes). `null` clears it.
+export function filterByConsultationSubtype(
+  list: PatientDay[],
+  subtype: string | null
+): PatientDay[] {
+  if (!subtype) return list
+  return list.filter((p) => p.consultationSubtypes.includes(subtype))
+}
+
+// The services actually present today, in first-seen order, for the "Servicios" sub-filter — never
+// a static catalog: a service nobody has today does not clutter the dropdown.
+export function servicesOfTheDay(
+  list: PatientDay[]
+): { serviceId: string; name: string; color: string | null }[] {
+  const out: { serviceId: string; name: string; color: string | null }[] = []
+  const seen = new Set<string>()
+  for (const p of list) {
+    for (const s of p.services) {
+      if (seen.has(s.serviceId)) continue
+      seen.add(s.serviceId)
+      out.push({ serviceId: s.serviceId, name: s.name, color: s.color })
+    }
+  }
+  return out
 }
