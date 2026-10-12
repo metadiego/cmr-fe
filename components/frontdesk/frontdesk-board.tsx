@@ -32,7 +32,7 @@ import { getDefinicion, getOpciones, getTableros, type TableroDefinicion, type O
 import { useRouter } from "next/navigation";
 import { buscarPaciente, type PacienteBusqueda } from "@/lib/api/facturas";
 import { coincide } from "@/lib/frontdesk/search";
-import { flowColumns, plainColumns, renderColumns } from "@/lib/frontdesk/board-columns";
+import { flowColumns, plainColumns, renderColumns, sortBoardRowsNatural } from "@/lib/frontdesk/board-columns";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useCitaStream } from "@/hooks/use-cita-stream";
@@ -414,22 +414,21 @@ export function FrontdeskBoard() {
       : conVisibilidad;
   }, [board, columnas, q, pacienteFiltroId, pacienteIds, sesiones, estadoFiltro, ocultarCanceladas, estadoFila]);
 
-  // Orden del board. Natural (sort=null): por PRESENTE (hora de llegada) asc = orden de TURNO; los que
-  // aún no están presentes van al final. Clic en un encabezado ordena por esa columna (asc/desc). Clic en
+  // Orden del board. Natural (sort=null): aquí AHORA (presente/en_terapia) por llegada, pendiente por
+  // su hora, asistido por cuándo TERMINÓ, cancelada al final — ver sortBoardRowsNatural (handoff
+  // orden-de-fila-del-tablero-12-oct). Clic en un encabezado ordena por esa columna (asc/desc). Clic en
   // el encabezado del Flujo vuelve al orden natural. Todo del lado del cliente sobre la página cargada.
   const [sort, setSort] = React.useState<{ col: string; dir: "asc" | "desc" } | null>(null);
   const ordenadas = React.useMemo(() => {
-    const arr = [...visibles];
     if (!sort) {
-      arr.sort((a, b) => {
-        const pa = a["presente"] as string | undefined, pb = b["presente"] as string | undefined;
-        if (pa && pb) return String(pa).localeCompare(String(pb));
-        if (pa) return -1;
-        if (pb) return 1;
-        return 0;
+      return sortBoardRowsNatural(visibles, {
+        estadoOf: estadoFila,
+        presenteOf: (f) => f["presente"] as string | undefined,
+        asistidoOf: (f) => f["asistido"] as string | undefined,
+        scheduledTimeOf: (f) => sesiones.get(f.id)?.time ?? null,
       });
-      return arr;
     }
+    const arr = [...visibles];
     const s = sort.dir === "asc" ? 1 : -1;
     arr.sort((a, b) => {
       const va = a[sort.col] ?? "", vb = b[sort.col] ?? "";
@@ -439,7 +438,7 @@ export function FrontdeskBoard() {
       return cmp * s;
     });
     return arr;
-  }, [visibles, sort]);
+  }, [visibles, sort, estadoFila, sesiones]);
   const toggleSort = (col: string) =>
     setSort((prev) => (prev?.col === col ? (prev.dir === "asc" ? { col, dir: "desc" } : null) : { col, dir: "asc" }));
 
