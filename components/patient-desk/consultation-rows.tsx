@@ -13,7 +13,7 @@ import {
   NotificarCell as NotifyBell,
   TableroDinamico as BoardTable,
 } from "@/components/agenda/tablero-dinamico"
-import { blockColumns, notifyColumn } from "@/lib/frontdesk/patient-columns"
+import { blockColumns, hidePresente, notifyColumn } from "@/lib/frontdesk/patient-columns"
 import {
   AccionesModal as RowActions,
   type AccionItem as ActionItem,
@@ -47,8 +47,12 @@ export function ConsultationRows({
     () => board.rows.filter((r) => ids.has(r.id)),
     [board, ids]
   )
-  // Name and record are the detail's title already; the notify bell goes to this block's title.
-  const columns = React.useMemo(() => blockColumns(board.columns), [board])
+  // Name and record are the detail's title already; the notify bell goes to this block's title. The
+  // consultation's own "presente" pill is also dropped: one arrival per patient, from the header.
+  const columns = React.useMemo(
+    () => hidePresente(blockColumns(board.columns)),
+    [board]
+  )
   const notify = React.useMemo(() => notifyColumn(board.columns), [board])
 
   const [options, setOptions] = React.useState<Record<string, Option[]>>({})

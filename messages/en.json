@@ -4672,7 +4672,6 @@
     "markPresent": "Present",
     "arrivedAt": "Arrived {time}",
     "undoPresent": "Undo",
-    "presentConsultFailed": "Couldn't mark the consultation present — check it in Atención",
     "openRecord": "Record",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "consultation": "Consultation",

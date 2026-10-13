@@ -16,7 +16,8 @@ import type { PatientDayData } from "@/hooks/use-patient-day"
 import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
 import { ejecutarAccion } from "@/lib/api/tablero"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
-import { toastError } from "@/lib/api/errors"
+import { apiErrorLabel, toastError } from "@/lib/api/errors"
+import { ApiError } from "@/lib/api/types"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
 import { Button } from "@/components/ui/button"
@@ -175,8 +176,23 @@ export function PatientDetail({
             ejecutarAccion({ boardSlug: "atencion", entityId: id, action: "presente" }, centerId)
           )
         )
-        if (results.some((r) => r.status === "rejected")) {
-          warnings.push(t("presentConsultFailed"))
+        // El motivo real (p. ej. "faltan datos obligatorios del paciente...", PACIENTE_DATOS_REQUERIDOS
+        // de un paciente nuevo, con sus campos exactos) importa más que un genérico — es justo lo que
+        // el personal necesita para resolverlo en Atención, sin adivinar por qué no se pudo. El modal
+        // que PIDE esos datos en el momento vive en flujo-atencion.tsx (su propia fila); aquí solo se
+        // avisa — abrir ese mismo modal desde el header queda para si hace falta más adelante.
+        for (const r of results) {
+          if (r.status !== "rejected") continue
+          const err = r.reason
+          const faltantes =
+            err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS"
+              ? (err.data?.faltantes as string[] | undefined)
+              : undefined
+          warnings.push(
+            faltantes?.length
+              ? `${apiErrorLabel(err, tRoot)}: ${faltantes.join(", ")}`
+              : apiErrorLabel(err, tRoot)
+          )
         }
       }
       if (warnings.length > 0) toast.warning(warnings.join(" · "))
@@ -240,7 +256,10 @@ export function PatientDetail({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {patient.services.length > 0 &&
+          {/* Un único botón para servicios Y consulta, indistinto de cuál tenga el paciente (13-oct-2026):
+              antes solo aparecía con servicios, dejando a quien SOLO tiene consulta sin forma de llegar
+              aquí salvo por su propia fila — justo la fila que acabamos de ocultar. */}
+          {(patient.services.length > 0 || patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
               <div className="flex items-center gap-1 rounded-md border bg-muted/40 py-1 pr-1 pl-2.5 text-sm">
                 <span className="text-muted-foreground">

@@ -19,3 +19,13 @@ export function blockColumns<C extends ColumnLike>(cols: C[]): C[] {
 export function notifyColumn<C extends ColumnLike>(cols: C[]): C | undefined {
   return cols.find(isNotifyColumn);
 }
+
+// "Presente" moved to the patient header (one arrival per patient, not per entity — 13-oct-2026,
+// record 15612): the consultation's own flow column is dropped entirely here, unlike the services'
+// `pasosOcultos` (FilaSesion positions its flow by array INDEX, so presente has to stay in the array
+// to keep "en_terapia"/"asistido" at the right slot). The consultation's FlujoAtencion has no such
+// dependency — resolveToggle (lib/tablero/toggle-hora.ts) reads each column's OWN target state vs.
+// the row's real estado, never a sibling's position — so simply filtering the column out is safe.
+export function hidePresente<C extends ColumnLike>(cols: C[]): C[] {
+  return cols.filter((c) => c.clave !== "presente");
+}

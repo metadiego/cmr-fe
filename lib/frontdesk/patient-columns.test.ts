@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { blockColumns, notifyColumn } from "./patient-columns.ts";
+import { blockColumns, hidePresente, notifyColumn } from "./patient-columns.ts";
 
 const cols = [
   { clave: "fd_paciente" },
@@ -21,4 +21,22 @@ test("the consultation board's own keys too", () => {
 test("the notify column is found by its render kind, whatever its key", () => {
   assert.equal(notifyColumn(cols)?.clave, "fd_notificar");
   assert.equal(notifyColumn([{ clave: "x" }]), undefined);
+});
+
+test("hidePresente drops only the consultation's own presente column, keeps the rest in order", () => {
+  const atencionCols = [
+    { clave: "medico" },
+    { clave: "presente" },
+    { clave: "en_consulta" },
+    { clave: "asistido" },
+  ];
+  assert.deepEqual(hidePresente(atencionCols).map((c) => c.clave), [
+    "medico",
+    "en_consulta",
+    "asistido",
+  ]);
+});
+
+test("hidePresente is a no-op when there is no presente column", () => {
+  assert.deepEqual(hidePresente(cols).map((c) => c.clave), cols.map((c) => c.clave));
 });
