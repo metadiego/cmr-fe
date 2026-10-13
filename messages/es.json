@@ -4672,6 +4672,7 @@
     "markPresent": "Presente",
     "arrivedAt": "Llegó {time}",
     "undoPresent": "Deshacer",
+    "presentConsultFailed": "La consulta no se pudo marcar presente — revísala en Atención",
     "openRecord": "Ficha",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "consultation": "Consulta",

@@ -14,6 +14,7 @@ import {
 } from "@/lib/frontdesk/patient-day"
 import type { PatientDayData } from "@/hooks/use-patient-day"
 import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
+import { ejecutarAccion } from "@/lib/api/tablero"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { toastError } from "@/lib/api/errors"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
@@ -26,6 +27,11 @@ export type ScheduleRequest = {
   pacienteNombre?: string
   servicioId?: string
 }
+
+// Estados de la consulta donde "presente" todavía aplica (board atencion: programada/confirmada ->
+// presente). Ni "presente" en sí (ya está) ni nada más adelante (triage/en_consulta/atendida) ni
+// terminal (cancelada/no_show/reprogramada) — evita reabrir algo que ya avanzó.
+const CONSULT_PENDING_STATUSES = new Set(["programada", "confirmada"])
 
 // The chips that summarise a patient's day: one per service (its color + the status of its sessions)
 // and one for the consultation. Shared by the list and the table views.
@@ -149,13 +155,31 @@ export function PatientDetail({
   // que antes vivía en cada fila de servicio (ver pasosOcultos en ServiceSessionsTable). `failed` trae
   // terapias que no pudieron marcarse por su propia regla — las demás quedan marcadas igual, por eso
   // es un aviso, no un error que bloquee.
+  //
+  // El MISMO botón también marca presente la consulta, si tiene una pendiente (programada/confirmada):
+  // el dueño no quiere marcar presente dos veces al mismo paciente por tener servicio Y consulta el
+  // mismo día (caso real, record 15612, 13-oct-2026). La consulta usa su propio board (`atencion`),
+  // así que es la MISMA acción `ejecutarAccion` que ya dispara cada pill de su flujo — nada nuevo del
+  // lado del BE, solo disparada desde aquí también.
   async function handlePresent() {
     setPresenceBusy(true)
     try {
       const res = await presentPatient(patient.patientId, date, centerId)
-      if (res.failed.length > 0) {
-        toast.warning(res.failed.map((f) => f.reason).join(" · "))
+      const warnings = res.failed.map((f) => f.reason)
+      const pendingConsultIds = patient.consultationIds.filter((_, i) =>
+        CONSULT_PENDING_STATUSES.has(patient.consultationStatuses[i])
+      )
+      if (pendingConsultIds.length > 0) {
+        const results = await Promise.allSettled(
+          pendingConsultIds.map((id) =>
+            ejecutarAccion({ boardSlug: "atencion", entityId: id, action: "presente" }, centerId)
+          )
+        )
+        if (results.some((r) => r.status === "rejected")) {
+          warnings.push(t("presentConsultFailed"))
+        }
       }
+      if (warnings.length > 0) toast.warning(warnings.join(" · "))
       data.refresh()
     } catch (err) {
       toastError(err, tRoot)
@@ -168,6 +192,21 @@ export function PatientDetail({
     setPresenceBusy(true)
     try {
       await undoPresentPatient(patient.patientId, centerId)
+      // Simétrico: solo la consulta que el present de arriba pudo haber marcado (sigue en "presente"
+      // exacto) — nunca una que ya avanzó a triage/en_consulta/atendida por su cuenta.
+      const presentConsultIds = patient.consultationIds.filter(
+        (_, i) => patient.consultationStatuses[i] === "presente"
+      )
+      if (presentConsultIds.length > 0) {
+        await Promise.allSettled(
+          presentConsultIds.map((id) =>
+            ejecutarAccion(
+              { boardSlug: "atencion", entityId: id, action: "volver_confirmada" },
+              centerId
+            )
+          )
+        )
+      }
       data.refresh()
     } catch (err) {
       toastError(err, tRoot)
