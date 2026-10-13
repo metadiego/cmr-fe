@@ -4700,6 +4700,8 @@
       "noneFree": "No one free right now",
       "skillsNotConfigured": "No one is set up for this therapy — go to Staff → capabilities",
       "chipFull": "{service} {turn} · {min} min"
-    }
+    },
+    "bookService": "Book a service",
+    "bookConsultation": "Book a consultation"
   }
 }

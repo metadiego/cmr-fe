@@ -4700,6 +4700,8 @@
       "noneFree": "Nadie libre ahora",
       "skillsNotConfigured": "Nadie tiene esta terapia configurada — ve a Personal → capacidades",
       "chipFull": "{service} {turn} · {min} min"
-    }
+    },
+    "bookService": "Citar servicio",
+    "bookConsultation": "Citar consulta"
   }
 }

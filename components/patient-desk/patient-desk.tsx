@@ -4,7 +4,11 @@ import * as React from "react"
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon, Calendar03Icon, Search01Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowDown01Icon,
+  Calendar03Icon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons"
 
 import {
   filterByConsultationSubtype,
@@ -23,6 +27,7 @@ import { todayISO } from "@/components/frontdesk/frontdesk-board.helpers"
 import { UbicacionEnVivoWidget as LiveLocationWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget"
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
+import { AgregarCitaModal as AddConsultationModal } from "@/components/tablero/agregar-cita-modal"
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
@@ -41,6 +46,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
@@ -65,6 +71,7 @@ export function PatientDesk() {
   const [schedule, setSchedule] = React.useState<
     (ScheduleRequest & { open: boolean }) | { open: false }
   >({ open: false })
+  const [addingConsultation, setAddingConsultation] = React.useState(false)
 
   const data = usePatientDay(gate.centro, date)
   // Services / consultation / all. Starts on consultation for whoever has «lands on Consulta» in their
@@ -196,12 +203,16 @@ export function PatientDesk() {
                     {t("allServices")}
                   </DropdownMenuRadioItem>
                   {servicesToday.map((s) => (
-                    <DropdownMenuRadioItem key={s.serviceId} value={s.serviceId}>
+                    <DropdownMenuRadioItem
+                      key={s.serviceId}
+                      value={s.serviceId}
+                    >
                       <span className="flex items-center gap-1.5">
                         <span
                           className="size-2 rounded-full"
                           style={{
-                            backgroundColor: s.color ?? "var(--muted-foreground)",
+                            backgroundColor:
+                              s.color ?? "var(--muted-foreground)",
                           }}
                           aria-hidden
                         />
@@ -249,15 +260,53 @@ export function PatientDesk() {
               {t("serviceAppointments")}
             </Link>
           </Button>
-          {can("citas.create") && (
-            <Button
-              size="sm"
-              onClick={() => setSchedule({ open: true, pacienteId: "" })}
-            >
-              <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-              {t("book")}
-            </Button>
-          )}
+          {/* «Citar» follows the toggle: Servicios books therapies (the filtered service preselected),
+              Consulta adds a consultation to today's board, Todos asks which. */}
+          {can("citas.create") &&
+            (kind === "all" ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm">
+                    <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+                    {t("book")}
+                    <HugeiconsIcon
+                      icon={ArrowDown01Icon}
+                      className="size-3.5"
+                    />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onSelect={() => setSchedule({ open: true, pacienteId: "" })}
+                  >
+                    {t("bookService")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => setAddingConsultation(true)}
+                  >
+                    {t("bookConsultation")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                size="sm"
+                onClick={() =>
+                  kind === "consultation"
+                    ? setAddingConsultation(true)
+                    : setSchedule({
+                        open: true,
+                        pacienteId: "",
+                        servicioId: serviceFilter ?? undefined,
+                      })
+                }
+              >
+                <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+                {t(
+                  kind === "consultation" ? "bookConsultation" : "bookService"
+                )}
+              </Button>
+            ))}
         </div>
       </div>
 
@@ -333,6 +382,16 @@ export function PatientDesk() {
           )}
         </DialogContent>
       </Dialog>
+
+      {addingConsultation && (
+        <AddConsultationModal
+          tablero="atencion"
+          centroId={gate.centro}
+          onClose={() => setAddingConsultation(false)}
+          onSaved={data.refresh}
+          onFilterPatient={(p) => setQuery(p.nombre)}
+        />
+      )}
     </PageContainer>
   )
 }
