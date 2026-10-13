@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
   validarCita,
   crearCitaAgenda,
   actualizarCitaAgenda,
+  getCita,
   getCuposLibres,
   type Cita,
   type TipoCita,
@@ -15,6 +16,7 @@ import {
   type CuposLibres,
 } from "@/lib/api/citas";
 import type { Personal } from "@/lib/api/personal";
+import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
@@ -82,11 +84,13 @@ export function CitaModal({
   // (su diagnóstico original estaba al revés: el dato SÍ viajaba, pero desde donde no debía).
   canal?: "atencion" | "callcenter";
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  // Gets the appointment just saved (create/edit) so the caller can show it at once.
+  onSaved: (cita?: Cita) => void;
 }) {
   const t = useTranslations("agenda.modal");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const format = useFormatter();
   const isEdit = !!cita;
 
   const me = useMe();
@@ -224,6 +228,12 @@ export function CitaModal({
     (!needsCentro || !!effectiveCentro) &&
     !submitting;
 
+  async function avisarReagendo(fromId: string) {
+    const prev = await getCita(fromId).catch(() => null);
+    const d = prev?.date ? parseDayUTC(String(prev.date).slice(0, 10)) : null;
+    toast.info(d ? t("rescheduledFrom", { date: format.dateTime(d, "dayMonth") }) : t("rescheduledFromUnknown"), { duration: 10000 });
+  }
+
   async function onSubmit() {
     if (!paciente || !tipoCitaId) return;
     setSubmitting(true);
@@ -260,7 +270,7 @@ export function CitaModal({
         reason: motivo.trim() || undefined,
         notes: notas.trim() || undefined,
       };
-      const { advertencias } = isEdit
+      const { cita: saved, advertencias } = isEdit
         ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
         : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
@@ -268,7 +278,10 @@ export function CitaModal({
       for (const a of advertencias) {
         if (a.labelKey) toast.warning(tRoot(a.labelKey));
       }
-      onSaved();
+      // One live appointment per patient: the BE MOVED the existing one instead of creating a second.
+      // Say so, or it looks like nothing happened.
+      if (!isEdit && saved?.rescheduledFromId) void avisarReagendo(saved.rescheduledFromId);
+      onSaved(saved);
       onOpenChange(false);
     } catch (err) {
       toastError(err, tRoot);

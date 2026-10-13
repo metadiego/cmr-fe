@@ -525,7 +525,9 @@
       "kpiLibres": "Cupos libres",
       "filterAll": "Todas",
       "sinCitas": "No hay citas para este filtro.",
-      "pickCenter": "Elige un centro para ver la agenda de este día."
+      "pickCenter": "Elige un centro para ver la agenda de este día.",
+      "focusOnSaved": "Mostrando solo la cita recién guardada",
+      "focusClear": "Ver todas"
     },
     "cupos": {
       "title": "Configuración de agenda",
@@ -632,7 +634,9 @@
       "endAuto": "Fin automático {time}",
       "variantList": "Lista",
       "variantGrid": "Rejilla",
-      "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea)."
+      "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
+      "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
+      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha."
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",

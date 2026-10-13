@@ -525,7 +525,9 @@
       "kpiLibres": "Free slots",
       "filterAll": "All",
       "sinCitas": "No appointments for this filter.",
-      "pickCenter": "Choose a center to see this day's schedule."
+      "pickCenter": "Choose a center to see this day's schedule.",
+      "focusOnSaved": "Showing only the appointment just saved",
+      "focusClear": "Show all"
     },
     "cupos": {
       "title": "Schedule configuration",
@@ -632,7 +634,9 @@
       "endAuto": "Ends {time} (auto)",
       "variantList": "List",
       "variantGrid": "Grid",
-      "slotFullWarn": "That time is full; it books anyway (non-blocking)."
+      "slotFullWarn": "That time is full; it books anyway (non-blocking).",
+      "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
+      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date."
     },
     "fecha": "Date",
     "prevDay": "Previous day",

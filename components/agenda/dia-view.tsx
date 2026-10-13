@@ -3,6 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AppointmentFocusBanner, useAppointmentFocus } from "@/components/agenda/appointment-focus";
+import { focusAppointment } from "@/lib/agenda/focus-appointment";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, Add01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
@@ -57,6 +59,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   const format = useFormatter();
   const tc = useTranslations("common");
   const router = useRouter();
+  const { focus, focusOn, clear: clearFocus } = useAppointmentFocus((d) => `/scheduling/appointments/${d}`);
   // Vista clásica (la de siempre, DEFAULT e intacta) vs nueva (beta, reordenamiento visual). El equipo
   // puede alternar y opinar antes de decidir; se recuerda por equipo. Idea: docs/plans/agenda-dia-vista-alternativa-opcional.md
   const [vista, setVista] = React.useState<Vista>("clasica");
@@ -131,7 +134,7 @@ export function DiaView({ fecha }: { fecha: string }) {
   const fechaLabel = dia ? format.dateTime(dia, "dayWeekdayLong") : fecha;
 
   const data = state.kind === "ok" ? state.data : null;
-  const centrosData = data?.centers ?? [];
+  const centrosData = (data?.centers ?? []).map((c) => focusAppointment(c, focus));
 
   return (
     <PageContainer>
@@ -224,6 +227,7 @@ export function DiaView({ fecha }: { fecha: string }) {
       {centrosListos && (centro === null || failure?.needsCenter) && (
         <p className="rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">{t("dia.pickCenter")}</p>
       )}
+      {focus && <AppointmentFocusBanner onClear={clearFocus} />}
       {centro !== null && state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
       {state.kind === "fail" && (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -278,7 +282,10 @@ export function DiaView({ fecha }: { fecha: string }) {
           medicos={medicos}
           canal="callcenter"
           onOpenChange={(o) => !o && setModal(null)}
-          onSaved={reload}
+          onSaved={(c) => {
+            reload();
+            if (c) focusOn(c);
+          }}
         />
       )}
     </PageContainer>
