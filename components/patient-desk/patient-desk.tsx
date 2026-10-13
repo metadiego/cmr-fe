@@ -237,6 +237,7 @@ export function PatientDesk() {
           <LiveLocationWidget
             centroId={gate.centro}
             nombreServicio={serviceName}
+            iconOnly
           />
           <NurseStatusButton
             centro={gate.centro}
