@@ -527,7 +527,10 @@
       "sinCitas": "No hay citas para este filtro.",
       "pickCenter": "Elige un centro para ver la agenda de este día.",
       "focusOnSaved": "Mostrando solo la cita recién guardada",
-      "focusClear": "Ver todas"
+      "focusClear": "Ver todas",
+      "origenCallCenter": "Call center",
+      "origenApp": "App",
+      "origenCanal": "Canal: {canal}"
     },
     "cupos": {
       "title": "Configuración de agenda",

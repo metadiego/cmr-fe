@@ -527,7 +527,10 @@
       "sinCitas": "No appointments for this filter.",
       "pickCenter": "Choose a center to see this day's schedule.",
       "focusOnSaved": "Showing only the appointment just saved",
-      "focusClear": "Show all"
+      "focusClear": "Show all",
+      "origenCallCenter": "Call center",
+      "origenApp": "App",
+      "origenCanal": "Channel: {canal}"
     },
     "cupos": {
       "title": "Schedule configuration",
