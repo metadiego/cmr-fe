@@ -269,7 +269,10 @@ test("a consultation in a terminal status no longer keeps the patient up; one ca
 test("a cancelled session's leftover presentAt does not make the patient look arrived (found live 10-oct-2026)", () => {
   const [p] = groupByPatient(
     [
-      ses("a", "p1", "s-apex", { status: "cancelada", presentAt: "2026-10-10T20:56:00Z" }),
+      ses("a", "p1", "s-apex", {
+        status: "cancelada",
+        presentAt: "2026-10-10T20:56:00Z",
+      }),
       ses("b", "p1", "s-laser", { status: "pendiente", presentAt: null }),
     ],
     [],
@@ -281,8 +284,14 @@ test("a cancelled session's leftover presentAt does not make the patient look ar
 test("but a GENUINE presentAt on a non-cancelled session still counts, even next to a cancelled one", () => {
   const [p] = groupByPatient(
     [
-      ses("a", "p1", "s-apex", { status: "cancelada", presentAt: "2026-10-10T20:56:00Z" }),
-      ses("b", "p1", "s-laser", { status: "presente", presentAt: "2026-10-10T21:10:00Z" }),
+      ses("a", "p1", "s-apex", {
+        status: "cancelada",
+        presentAt: "2026-10-10T20:56:00Z",
+      }),
+      ses("b", "p1", "s-laser", {
+        status: "presente",
+        presentAt: "2026-10-10T21:10:00Z",
+      }),
     ],
     [],
     services
@@ -308,8 +317,22 @@ test("filterByConsultationSubtype: only patients with that subtype today; null c
   const list = groupByPatient(
     [],
     [
-      { id: "c1", pacienteId: "p1", paciente: "A", record: "1", estado: "en_consulta", subtipo: "nueva" },
-      { id: "c2", pacienteId: "p2", paciente: "B", record: "2", estado: "en_consulta", subtipo: "seguimiento" },
+      {
+        id: "c1",
+        pacienteId: "p1",
+        paciente: "A",
+        record: "1",
+        estado: "en_consulta",
+        subtipo: "nueva",
+      },
+      {
+        id: "c2",
+        pacienteId: "p2",
+        paciente: "B",
+        record: "2",
+        estado: "en_consulta",
+        subtipo: "seguimiento",
+      },
     ],
     services
   )
@@ -333,5 +356,26 @@ test("servicesOfTheDay: only services someone actually has today, first-seen ord
   assert.deepEqual(
     servicesOfTheDay(list).map((s) => s.serviceId),
     ["s-laser", "s-apex"]
+  )
+})
+
+test("filterByService puts the filtered service first, the rest in their configured order", () => {
+  const list = groupByPatient(
+    [ses("a", "p1", "s-apex"), ses("b", "p1", "s-laser")],
+    [],
+    [...services, { id: "s-nano", slug: "nano", name: "NANO", color: null }]
+  )
+  assert.deepEqual(
+    list[0].services.map((s) => s.slug),
+    ["apex", "laser"]
+  )
+  assert.deepEqual(
+    filterByService(list, "s-laser")[0].services.map((s) => s.slug),
+    ["laser", "apex"]
+  )
+  // The original is not mutated (the unfiltered views keep the configured order).
+  assert.deepEqual(
+    list[0].services.map((s) => s.slug),
+    ["apex", "laser"]
   )
 })

@@ -228,13 +228,23 @@ export function filterByKind(
 }
 
 // Narrows "Servicios" to ONE service (data-driven: whichever services the day's patients actually
-// have — see servicesOfTheDay). `null` clears it.
+// have — see servicesOfTheDay). `null` clears it. That service also moves FIRST in each patient's
+// services (chips and detail), so whoever works it finds it without scrolling (owner 13-oct-2026);
+// the rest keep their configured order.
 export function filterByService(
   list: PatientDay[],
   serviceId: string | null
 ): PatientDay[] {
   if (!serviceId) return list
-  return list.filter((p) => p.services.some((s) => s.serviceId === serviceId))
+  return list
+    .filter((p) => p.services.some((s) => s.serviceId === serviceId))
+    .map((p) => ({
+      ...p,
+      services: [
+        ...p.services.filter((s) => s.serviceId === serviceId),
+        ...p.services.filter((s) => s.serviceId !== serviceId),
+      ],
+    }))
 }
 
 // Narrows "Consulta" to one subtype (e.g. nueva/seguimiento — the board's own catalog, see
