@@ -4673,6 +4673,7 @@
     "markPresent": "Present",
     "arrivedAt": "Arrived {time}",
     "undoPresent": "Undo",
+    "markNewPresent": "Mark new",
     "openRecord": "Record",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "consultation": "Consultation",

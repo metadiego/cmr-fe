@@ -204,6 +204,15 @@ export function PatientDetail({
     }
   }
 
+  // Una terapia nueva puede agregársele a un paciente YA llegado (p. ej. un servicio añadido a mitad
+  // del día): el bulk endpoint marca "todo lo pendiente de HOY" cada vez que se llama, así que
+  // volver a dispararlo aquí es siempre seguro/idempotente — solo toma lo que sigue pendiente, sin
+  // tocar nada que ya avanzó. Encontrado en vivo 13-oct-2026 (record #11643): dos sesiones quedaron
+  // en "pendiente" por horas después de la llegada porque nada volvió a dispararlo.
+  const hasPendingTherapy =
+    patient.services.some((s) => s.statuses.includes("pendiente")) ||
+    patient.consultationStatuses.some((s) => CONSULT_PENDING_STATUSES.has(s))
+
   async function handleUndoPresent() {
     setPresenceBusy(true)
     try {
@@ -284,6 +293,18 @@ export function PatientDetail({
                 >
                   {t("undoPresent")}
                 </Button>
+                {hasPendingTherapy && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    disabled={presenceBusy}
+                    onClick={handlePresent}
+                  >
+                    {t("markNewPresent")}
+                  </Button>
+                )}
               </div>
             ) : (
               <Button size="sm" disabled={presenceBusy} onClick={handlePresent}>
