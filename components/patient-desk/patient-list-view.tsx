@@ -24,6 +24,7 @@ interface Props {
   selectedId: string | null
   onSelect: (id: string) => void
   onSchedule: (r: ScheduleRequest) => void
+  onScheduleConsultation: (r: ScheduleRequest) => void
 }
 
 // Master/detail: the day's patients on the left, the selected one's services on the right.
@@ -37,6 +38,7 @@ export function PatientListView({
   selectedId,
   onSelect,
   onSchedule,
+  onScheduleConsultation,
 }: Props) {
   const t = useTranslations("patientDesk")
   const tRoot = useTranslations()
@@ -105,6 +107,7 @@ export function PatientListView({
             date={date}
             centerId={centerId}
             onSchedule={onSchedule}
+            onScheduleConsultation={onScheduleConsultation}
             onFlagsChange={() => flags.reload(selected.patientId)}
           />
         ) : (

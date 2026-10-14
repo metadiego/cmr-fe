@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations, useFormatter } from "next-intl";
 
-import type { Paciente } from "@/lib/api/pacientes";
+import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { createCita, getTiposCita, type TipoCita } from "@/lib/api/citas";
 import { getOpciones, type Opcion } from "@/lib/api/tablero";
 import { ApiError } from "@/lib/api/types";
@@ -50,6 +50,7 @@ export function AgregarCitaModal({
   onClose,
   onSaved,
   onFilterPatient,
+  lockedPatient,
 }: {
   tablero: string;
   centroId?: string;
@@ -59,6 +60,10 @@ export function AgregarCitaModal({
   // modal de datos que en Presente; si el usuario lo cierra sin completar, se deja la pantalla FILTRADA en ese
   // paciente para rematarlo sin buscarlo. Handoff traer-al-dia-y-la-pestana-inicial, §2.
   onFilterPatient?: (p: { id: string; nombre: string }) => void;
+  // Paciente YA elegido (p. ej. "Citar" desde el header del patient desk, con ese paciente ya
+  // seleccionado): se precarga y el buscador no se muestra — mismo patrón que lockedPatient en
+  // TherapyDayScheduler (13-oct-2026).
+  lockedPatient?: { id: string; nombre: string };
 }) {
   const t = useTranslations("agregarCita");
   const tRoot = useTranslations();
@@ -85,6 +90,18 @@ export function AgregarCitaModal({
       active = false;
     };
   }, [tablero, centroId]);
+
+  React.useEffect(() => {
+    if (!lockedPatient) return;
+    let active = true;
+    getPaciente(lockedPatient.id, centroId)
+      .then((p) => active && onPickPaciente(p))
+      .catch((err) => active && toastError(err, tRoot));
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onPickPaciente is stable per render, re-running on it would refetch every render
+  }, [lockedPatient?.id, centroId]);
 
   // Al elegir paciente: precargar SU médico (paciente.doctorId, cuyo valor coincide con el value de la
   // opción de médico — verificado). Si no tiene, queda «sin médico» — NUNCA null. Se puede cambiar aquí.
@@ -174,7 +191,13 @@ export function AgregarCitaModal({
 
         <div className="space-y-4 px-6 py-5">
           <Field label={t("patient")}>
-            <PacienteSelect value={paciente} onChange={onPickPaciente} />
+            {lockedPatient ? (
+              <div className="rounded-md border bg-muted/40 px-3 py-2 text-sm font-medium">
+                {paciente ? nombrePaciente(paciente) : lockedPatient.nombre}
+              </div>
+            ) : (
+              <PacienteSelect value={paciente} onChange={onPickPaciente} />
+            )}
           </Field>
 
           {/* Tipo AUTOMÁTICO (sin selector): solo lectura, decidido por el récord del paciente. */}

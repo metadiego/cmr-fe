@@ -81,7 +81,9 @@ export function PatientDesk() {
   const [schedule, setSchedule] = React.useState<
     (ScheduleRequest & { open: boolean }) | { open: false }
   >({ open: false })
-  const [addingConsultation, setAddingConsultation] = React.useState(false)
+  const [addingConsultation, setAddingConsultation] = React.useState<
+    { open: true; pacienteId?: string; pacienteNombre?: string } | { open: false }
+  >({ open: false })
 
   const data = usePatientDay(gate.centro, date)
   // Services / consultation / all. Starts on consultation for whoever has «lands on Consulta» in their
@@ -320,7 +322,7 @@ export function PatientDesk() {
                     {t("bookService")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onSelect={() => setAddingConsultation(true)}
+                    onSelect={() => setAddingConsultation({ open: true })}
                   >
                     {t("bookConsultation")}
                   </DropdownMenuItem>
@@ -331,7 +333,7 @@ export function PatientDesk() {
                 size="sm"
                 onClick={() =>
                   kind === "consultation"
-                    ? setAddingConsultation(true)
+                    ? setAddingConsultation({ open: true })
                     : setSchedule({
                         open: true,
                         pacienteId: "",
@@ -388,6 +390,9 @@ export function PatientDesk() {
           selectedId={effectiveSelected}
           onSelect={setSelectedId}
           onSchedule={(r) => setSchedule({ open: true, ...r })}
+          onScheduleConsultation={(r) =>
+            setAddingConsultation({ open: true, ...r })
+          }
         />
       )}
 
@@ -421,11 +426,19 @@ export function PatientDesk() {
         </DialogContent>
       </Dialog>
 
-      {addingConsultation && (
+      {addingConsultation.open && (
         <AddConsultationModal
           tablero="atencion"
           centroId={gate.centro}
-          onClose={() => setAddingConsultation(false)}
+          lockedPatient={
+            addingConsultation.pacienteId
+              ? {
+                  id: addingConsultation.pacienteId,
+                  nombre: addingConsultation.pacienteNombre ?? "",
+                }
+              : undefined
+          }
+          onClose={() => setAddingConsultation({ open: false })}
           onSaved={data.refresh}
           onFilterPatient={(p) => setQuery(p.nombre)}
         />

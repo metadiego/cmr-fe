@@ -6,6 +6,7 @@ import Link from "next/link"
 import { toast } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
+  ArrowDown01Icon,
   Calendar03Icon,
   PencilEdit02Icon,
   Tick02Icon,
@@ -28,6 +29,12 @@ import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
 import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export type ScheduleRequest = {
   pacienteId: string
@@ -139,6 +146,7 @@ export function PatientDetail({
   date,
   centerId,
   onSchedule,
+  onScheduleConsultation,
   onFlagsChange,
 }: {
   patient: PatientDay
@@ -147,6 +155,7 @@ export function PatientDetail({
   date: string
   centerId: string | undefined
   onSchedule: (r: ScheduleRequest) => void
+  onScheduleConsultation: (r: ScheduleRequest) => void
   onFlagsChange?: () => void
 }) {
   const t = useTranslations("patientDesk")
@@ -354,18 +363,67 @@ export function PatientDetail({
                 {t("markPresent")}
               </Button>
             ))}
-          <Button
-            size="sm"
-            onClick={() =>
-              onSchedule({
-                pacienteId: patient.patientId,
-                pacienteNombre: patient.name,
-              })
-            }
-          >
-            <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
-            {t("book")}
-          </Button>
+          {/* «Citar» aquí sigue al mismo paciente, no al toggle de arriba (10-13-oct-2026): si SOLO
+              tiene servicio va directo al cupo del servicio, si SOLO tiene consulta a agregar
+              consulta, y si tiene AMBOS se pregunta — igual que el «Citar» del toolbar, pero
+              decidido por lo que este paciente realmente tiene hoy, no por el filtro Todos/
+              Servicios/Consulta que esté activo en pantalla (antes SIEMPRE abría el de servicio,
+              aun en un paciente solo-consulta). */}
+          {patient.services.length > 0 && patient.consultationIds.length > 0 ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm">
+                  <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+                  {t("book")}
+                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() =>
+                    onSchedule({
+                      pacienteId: patient.patientId,
+                      pacienteNombre: patient.name,
+                    })
+                  }
+                >
+                  {t("bookService")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() =>
+                    onScheduleConsultation({
+                      pacienteId: patient.patientId,
+                      pacienteNombre: patient.name,
+                    })
+                  }
+                >
+                  {t("bookConsultation")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() =>
+                patient.consultationIds.length > 0
+                  ? onScheduleConsultation({
+                      pacienteId: patient.patientId,
+                      pacienteNombre: patient.name,
+                    })
+                  : onSchedule({
+                      pacienteId: patient.patientId,
+                      pacienteNombre: patient.name,
+                    })
+              }
+            >
+              <HugeiconsIcon icon={Calendar03Icon} className="size-4" />
+              {t(
+                patient.consultationIds.length > 0
+                  ? "bookConsultation"
+                  : "bookService"
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
