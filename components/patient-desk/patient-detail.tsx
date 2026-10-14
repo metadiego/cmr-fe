@@ -28,6 +28,8 @@ import { apiErrorLabel, toastError } from "@/lib/api/errors"
 import { ApiError } from "@/lib/api/types"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
+import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal"
+import type { EhrReadinessField } from "@/lib/api/ehr-integration"
 import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges"
@@ -168,6 +170,12 @@ export function PatientDetail({
       : data.consultationTab.name
     : t("consultation")
   const [presenceBusy, setPresenceBusy] = React.useState(false)
+  // The consultation refused Presente for missing patient data: the same modal as the consultation
+  // board asks for them, then retries. Services are never held by this (owner, 14-oct-2026).
+  const [dataGate, setDataGate] = React.useState<{
+    faltantes: EhrReadinessField[]
+    consultIds: string[]
+  } | null>(null)
 
   // Récord: "Generar #" asigna el siguiente de la secuencia del centro (mismo botón/endpoint que
   // nueva-cita-modal.tsx cuando el paciente llega sin uno). El lápiz abre el MISMO formulario de
@@ -229,24 +237,25 @@ export function PatientDetail({
             )
           )
         )
-        // El motivo real (p. ej. "faltan datos obligatorios del paciente...", PACIENTE_DATOS_REQUERIDOS
-        // de un paciente nuevo, con sus campos exactos) importa más que un genérico — es justo lo que
-        // el personal necesita para resolverlo en Atención, sin adivinar por qué no se pudo. El modal
-        // que PIDE esos datos en el momento vive en flujo-atencion.tsx (su propia fila); aquí solo se
-        // avisa — abrir ese mismo modal desde el header queda para si hace falta más adelante.
-        for (const r of results) {
-          if (r.status !== "rejected") continue
+        // Services were already marked above and are never held back. A consultation the BE refuses for
+        // missing patient data (PACIENTE_DATOS_REQUERIDOS, fail-closed) opens the SAME modal as the
+        // consultation board — Atención has the patient in front of them — and retries on save
+        // (owner, 14-oct-2026). Any other reason is shown as it comes.
+        const needData: string[] = []
+        let faltantes: EhrReadinessField[] = []
+        results.forEach((r, i) => {
+          if (r.status !== "rejected") return
           const err = r.reason
-          const faltantes =
+          const f =
             err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS"
-              ? (err.data?.faltantes as string[] | undefined)
-              : undefined
-          warnings.push(
-            faltantes?.length
-              ? `${apiErrorLabel(err, tRoot)}: ${faltantes.join(", ")}`
-              : apiErrorLabel(err, tRoot)
-          )
-        }
+              ? ((err.data?.faltantes as EhrReadinessField[] | undefined) ?? [])
+              : []
+          if (f.length) {
+            needData.push(pendingConsultIds[i])
+            faltantes = f
+          } else warnings.push(apiErrorLabel(err, tRoot))
+        })
+        if (needData.length) setDataGate({ faltantes, consultIds: needData })
       }
       if (warnings.length > 0) toast.warning(warnings.join(" · "))
       data.refresh()
@@ -254,6 +263,23 @@ export function PatientDetail({
       toastError(err, tRoot)
     } finally {
       setPresenceBusy(false)
+    }
+  }
+
+  // After the modal saved the data: mark the consultation(s) present again.
+  async function retryConsultPresent(consultIds: string[]) {
+    setPresenceBusy(true)
+    try {
+      for (const id of consultIds)
+        await ejecutarAccion(
+          { boardSlug: "atencion", entityId: id, action: "presente" },
+          centerId
+        )
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setPresenceBusy(false)
+      data.refresh()
     }
   }
 
@@ -481,6 +507,20 @@ export function PatientDetail({
                 onChanged={data.refresh}
               />
             )
+      )}
+
+      {dataGate && (
+        <EhrReadinessModal
+          pacienteId={patient.patientId}
+          faltantes={dataGate.faltantes}
+          centroId={centerId}
+          onCancel={() => setDataGate(null)}
+          onCompleted={() => {
+            const ids = dataGate.consultIds
+            setDataGate(null)
+            void retryConsultPresent(ids)
+          }}
+        />
       )}
 
       {editingPatient && (
