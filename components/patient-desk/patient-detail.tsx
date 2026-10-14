@@ -353,8 +353,8 @@ export function PatientDetail({
             patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
               // Present = the word and the time in green, as the staff are used to (owner, 14-oct-2026).
-              <div className="flex items-center gap-1 rounded-md bg-success/15 py-1 pr-1 pl-2.5 text-sm ring-1 ring-success/40">
-                <span className="inline-flex items-center gap-1 font-semibold text-success">
+              <div className="flex items-center gap-1 rounded-md bg-success py-1 pr-1 pl-2.5 text-sm text-success-foreground">
+                <span className="inline-flex items-center gap-1 font-semibold">
                   <HugeiconsIcon icon={Tick02Icon} className="size-4" />
                   {t("presentAt", { time: fmtHora(patient.presentAt) })}
                 </span>
@@ -362,7 +362,7 @@ export function PatientDetail({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs"
+                  className="h-6 px-2 text-xs text-success-foreground hover:bg-white/20 hover:text-success-foreground"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
                 >

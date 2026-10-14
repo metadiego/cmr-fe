@@ -80,7 +80,7 @@ export function PatientListView({
                   className={cn(
                     "shrink-0 text-[11px] tabular-nums",
                     p.presentAt
-                      ? "rounded-full bg-success/15 px-1.5 font-semibold text-success"
+                      ? "rounded-full bg-success px-1.5 font-semibold text-success-foreground"
                       : "font-mono text-muted-foreground"
                   )}
                   title={
