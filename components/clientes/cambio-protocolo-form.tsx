@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ControlSkeleton, LoadingRegion } from "@/components/kit/skeletons";
 
 // Formulario de CAMBIO DE PROTOCOLO para UN paciente ya conocido (sin buscador): el médico deja sin efecto
 // sesiones pendientes y las reemplaza por otras. Pieza reutilizable montada en la pestaña de la ficha y en la
@@ -121,7 +123,7 @@ export function CambioProtocoloForm({
       setLineas([nuevaLinea()]);
       setMotivo("");
       setReintegros({});
-      pendRes.reload();
+      pendRes.refresh(); // silent: the list updates in place, no skeleton after applying
       onApplied?.();
     } catch (e) {
       toastError(e, tRoot);
@@ -135,7 +137,21 @@ export function CambioProtocoloForm({
       {/* Paso 1: qué se reemplaza */}
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">{t("paso1")}</h2>
-        {pendRes.state.kind === "loading" && <p className="text-xs text-muted-foreground">{tc("loading")}</p>}
+        {pendRes.state.kind === "loading" && (
+          <LoadingRegion>
+            <ul className="space-y-2">
+              {["w-40", "w-52", "w-36"].map((w) => (
+                <li key={w} className="flex items-start gap-2 rounded-md px-3 py-2 ring-1 ring-foreground/10">
+                  <Skeleton className="mt-0.5 size-4 shrink-0 rounded-[4px]" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex h-5 items-center"><Skeleton className={"h-3.5 " + w} /></span>
+                    <span className="flex h-4 items-center"><Skeleton className="h-3 w-28" /></span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </LoadingRegion>
+        )}
         {pendRes.state.kind === "ok" && pendientes.length === 0 && (
           <p className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-muted-foreground">{t("sinPendientes")}</p>
         )}
@@ -179,12 +195,16 @@ export function CambioProtocoloForm({
           {lineas.map((l) => (
             <div key={l.key} className="rounded-md bg-card p-2 shadow-sm shadow-[rgba(16,32,64,0.06)] ring-1 ring-foreground/10">
               <div className="flex items-center gap-2">
-                <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
-                  <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>
-                  <SelectContent>
-                    {catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                {catRes.state.kind === "loading" ? (
+                  <ControlSkeleton className="w-auto flex-1" />
+                ) : (
+                  <Select value={l.productoId} onValueChange={(v) => setLinea(l.key, { productoId: v })}>
+                    <SelectTrigger className="h-9 flex-1"><SelectValue placeholder={t("producto")} /></SelectTrigger>
+                    <SelectContent>
+                      {catalogo.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
                 {lineas.length > 1 && (
                   <button type="button" onClick={() => setLineas((ls) => ls.filter((x) => x.key !== l.key))} aria-label={tc("remove")} className="text-destructive hover:opacity-70">
                     <HugeiconsIcon icon={Delete02Icon} className="size-4" />
@@ -206,12 +226,16 @@ export function CambioProtocoloForm({
 
         <div className="space-y-1">
           <Label>{t("medico")}</Label>
-          <Select value={medicoId || undefined} onValueChange={setMedicoId}>
-            <SelectTrigger className="h-9"><SelectValue placeholder={t("medicoPlaceholder")} /></SelectTrigger>
-            <SelectContent>
-              {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {medRes.state.kind === "loading" ? (
+            <ControlSkeleton className="w-48" />
+          ) : (
+            <Select value={medicoId || undefined} onValueChange={setMedicoId}>
+              <SelectTrigger className="h-9"><SelectValue placeholder={t("medicoPlaceholder")} /></SelectTrigger>
+              <SelectContent>
+                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div className="space-y-1">
           <Label>{t("motivo")} <span className="text-destructive">*</span></Label>

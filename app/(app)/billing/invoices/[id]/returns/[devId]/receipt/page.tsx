@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { getReciboDevolucion, getFactura, getFormasPago } from "@/lib/api/facturas";
 import { buildReciboDevolucion, type Recibo } from "@/lib/factura/build-recibo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
+import { ReceiptPaperSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 import { toastError } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -51,8 +52,8 @@ export default function ReciboDevolucionPage() {
     };
   }, [id, devId, centro, tRoot]);
 
-  if (loading) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
-  if (!recibo) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("facturacion.notFound")}</p>;
+  // While loading, the real frame (back/print) stays and the paper is a skeleton of the same width.
+  if (!loading && !recibo) return <p className="mx-auto max-w-7xl px-6 py-16 text-center text-sm text-muted-foreground">{tRoot("facturacion.notFound")}</p>;
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
@@ -61,14 +62,14 @@ export default function ReciboDevolucionPage() {
           <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
           {tRoot("facturacion.back")}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => window.print()}>
+        <Button variant="outline" size="sm" disabled={loading} onClick={() => window.print()}>
           <HugeiconsIcon icon={PrinterIcon} className="size-4" />
           {tRoot("receipt.print")}
         </Button>
       </div>
       <div className="flex justify-center rounded-xl border bg-muted/30 p-6">
         <div className="shadow-lg ring-1 ring-border">
-          <ReciboTermico recibo={recibo} />
+          {recibo ? <ReciboTermico recibo={recibo} /> : <ReceiptPaperSkeleton />}
         </div>
       </div>
     </div>

@@ -26,6 +26,7 @@ import { FlujoAtencion, type PostAccionCtx, type EhrGateCtx } from "@/components
 import { PostAccionHost } from "@/components/tablero/post-accion";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
+import { BoardHeadSkeleton, BoardRowsSkeleton } from "@/components/agenda/tablero-dinamico-skeleton";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
 // labelKey, cell per column `tipo`; the "accion" column becomes CitaActions.
@@ -305,6 +306,8 @@ export function useVisibleColumns(columnas: ColumnaEfectiva[]): ColumnaEfectiva[
     .filter((c) => !c.permiso || can(c.permiso));
 }
 
+export type BoardColumnGroup = { kind: "col"; col: ColumnaEfectiva } | { kind: "flow"; group: string; cols: ColumnaEfectiva[] };
+
 export function TableroDinamico({
   columnas,
   filas,
@@ -319,6 +322,7 @@ export function TableroDinamico({
   transiciones,
   estados,
   density,
+  loading,
 }: {
   columnas: ColumnaEfectiva[];
   filas: CitaFila[];
@@ -333,6 +337,8 @@ export function TableroDinamico({
   transiciones?: Transicion[];
   estados?: { clave: string; orden: number; color?: string | null }[];
   density?: "comodo" | "compacto";
+  // Skeleton rows under the headers (placeholder headers too when `columnas` is still empty).
+  loading?: boolean;
 }) {
   const tRoot = useTranslations();
   const cols = useVisibleColumns(columnas);
@@ -453,8 +459,7 @@ export function TableroDinamico({
   // Encadenamiento CONFIGURABLE (dato): las columnas con el mismo `render.group`
   // se agrupan en una sola columna encadenada. El orden/dependencias salen de las
   // transiciones + orden de estados (en FlujoAtencion). Cero hardcode en el FE.
-  type Group = { kind: "col"; col: ColumnaEfectiva } | { kind: "flow"; group: string; cols: ColumnaEfectiva[] };
-  const groups: Group[] = [];
+  const groups: BoardColumnGroup[] = [];
   for (const col of cols) {
     const groupName = (col.render as Record<string, unknown> | null)?.group as string | undefined;
     const last = groups[groups.length - 1];
@@ -468,6 +473,7 @@ export function TableroDinamico({
       <table className="w-full text-sm">
         <thead className="bg-muted/40 text-xs text-muted-foreground">
           <tr>
+            {loading && groups.length === 0 && <BoardHeadSkeleton />}
             {groups.map((g, gi) =>
               g.kind === "flow" ? (
                 <th key={`flow-${gi}`} className="px-3 py-2 text-center font-medium whitespace-nowrap">
@@ -491,7 +497,8 @@ export function TableroDinamico({
           </tr>
         </thead>
         <tbody>
-          {filas.length === 0 && (
+          {loading && <BoardRowsSkeleton groups={groups} rowPad={rowPad} />}
+          {!loading && filas.length === 0 && (
             <tr>
               <td colSpan={groups.length} className="px-3 py-6 text-center text-muted-foreground">
                 {emptyLabel ?? "—"}

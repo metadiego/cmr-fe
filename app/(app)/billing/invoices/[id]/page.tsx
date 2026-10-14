@@ -73,10 +73,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  DataTable,
-  TableEmpty,
-} from "@/components/ui/data-table";
+import { DataTable, TableEmpty } from "@/components/ui/data-table";
 import {
   TableBody,
   TableCell,
@@ -84,12 +81,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ControlSkeleton } from "@/components/kit/skeletons";
+import { InvoiceDetailSkeleton, DialogRowsSkeleton, ProductOptionsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -230,7 +224,7 @@ export default function FacturacionPage() {
     return receiptToEscPos(reciboFinal, buildReceiptText(tReceipt, tRoot), logo);
   }
 
-  if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
+  if (loading) return <InvoiceDetailSkeleton />;
   if (!factura) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p></PageContainer>;
 
   const estado = String(factura.status ?? "");
@@ -1009,7 +1003,7 @@ function OpcionalesDialog({
           <DialogTitle>{t("opcionalesTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
-          {res.state.kind === "loading" && <p className="py-6 text-center text-sm text-muted-foreground">{tc("loading")}</p>}
+          {res.state.kind === "loading" && <DialogRowsSkeleton trailing="w-14" />}
           {res.state.kind === "ok" && opcionales.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("opcionalesEmpty")}</p>
           )}
@@ -1137,7 +1131,7 @@ function PersonalizarKitDialog({
         </DialogHeader>
 
         {cargando ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{tc("loading")}</p>
+          <DialogRowsSkeleton trailing="w-16" />
         ) : (
           <div className="space-y-3">
             {base.length === 0 && added.length === 0 && (
@@ -1324,7 +1318,7 @@ function CambiarPacienteDialog({
         <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPatientPlaceholder")} />
         <div className="max-h-80 space-y-1 overflow-y-auto">
           {term.length < 2 && <p className="py-6 text-center text-sm text-muted-foreground">{t("searchHint")}</p>}
-          {loading && <p className="py-6 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>}
+          {loading && <DialogRowsSkeleton sub trailing={null} />}
           {term.length >= 2 && !loading && shown.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">{tRoot("common.noResults")}</p>
           )}
@@ -1419,6 +1413,7 @@ function CabeceraDialog({
         <div className="space-y-4">
           <label className="flex flex-col gap-1">
             <Lbl>{t("medico")}</Lbl>
+            {medicosRes.state.kind === "loading" ? <ControlSkeleton /> : (
             <Select value={medicoId} onValueChange={setMedicoId}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1426,9 +1421,11 @@ function CabeceraDialog({
                 {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            )}
           </label>
           <label className="flex flex-col gap-1">
             <Lbl>{t("referido")}</Lbl>
+            {mediosRes.state.kind === "loading" ? <ControlSkeleton /> : (
             <Select value={medioId} onValueChange={setMedioId}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1436,6 +1433,7 @@ function CabeceraDialog({
                 {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            )}
           </label>
           <div className="space-y-2 rounded-lg border p-3">
             <Lbl>{t("tercero")}</Lbl>
@@ -1547,12 +1545,14 @@ function UsuarioDialog({
         <div className="space-y-3">
           <label className="flex flex-col gap-1.5">
             <Lbl>{t("usuarioResponsable")}</Lbl>
+            {perfilesRes.state.kind === "loading" ? <ControlSkeleton /> : (
             <Select value={sel} onValueChange={setSel}>
               <SelectTrigger><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
               <SelectContent>
                 {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            )}
           </label>
           <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("corregirUsuarioAyuda")}</p>
           <div className="flex justify-end gap-2">
@@ -1626,7 +1626,7 @@ function CatalogoCombobox({
       />
       {open && (
         <div className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-          {buscando && <p className="px-2 py-2 text-xs text-muted-foreground">…</p>}
+          {buscando && <ProductOptionsSkeleton />}
           {!buscando && resultados.length === 0 && (
             <p className="px-2 py-2 text-xs text-muted-foreground">{q ? t("noMatches") : t("selectProduct")}</p>
           )}

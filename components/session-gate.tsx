@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 
 import { useMe, isAdmin } from "@/hooks/use-me";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 const PENDING_PATH = "/pending";
 const CHANGE_PASSWORD_PATH = "/change-password";
@@ -20,7 +20,6 @@ export function SessionGate({ children }: { children: React.ReactNode }) {
   const state = useMe();
   const pathname = usePathname();
   const router = useRouter();
-  const t = useTranslations("common");
 
   const target = React.useMemo(() => {
     if (state.kind !== "ok") return null;
@@ -43,12 +42,10 @@ export function SessionGate({ children }: { children: React.ReactNode }) {
     if (target) router.replace(target);
   }, [target, router]);
 
+  // The skeleton of the page being opened, not a bare "Loading…": the page's own loading state then
+  // takes over in the same shape.
   if (state.kind === "loading" || target) {
-    return (
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      </div>
-    );
+    return <RouteSkeleton pathname={target ?? pathname} />;
   }
 
   return <>{children}</>;

@@ -16,12 +16,9 @@ import type { Paginated } from "@/lib/api/types";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DataTable,
-  TableEmpty,
-  TableError,
-  TableLoading,
-} from "@/components/ui/data-table";
+import { DataTable, TableEmpty, TableError } from "@/components/ui/data-table";
+import { ControlSkeleton, TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   TableBody,
   TableCell,
@@ -58,7 +55,7 @@ export default function ClientesPage() {
   // The user's centers (with names). Master → all; operativo → their allowed
   // ones. Drives the scope selector and resolves clinicId → name in the table.
   const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
-  const centros = centrosState.kind === "ok" ? centrosState.data : [];
+  const centros = React.useMemo(() => (centrosState.kind === "ok" ? centrosState.data : []), [centrosState]);
   const multiCentro = centros.length > 1;
   // La vista combinada (sin centro) es potestad de admin/master: el BE rechaza
   // con 409 a un no-admin sin centro (evita leer pacientes de otros centros).
@@ -111,12 +108,13 @@ export default function ClientesPage() {
   // Total table columns: index, record, name, docId, phone, email, status,
   // [centro], acciones — drives the colSpan of the loading/empty/error rows.
   const colCount = 8 + (showCentroCol ? 1 : 0);
+  const loadingShapes: CellShape[] = ["short", "short", "long", "text", "text", "long", "badge", ...(showCentroCol ? (["badge"] as const) : []), "button"];
 
   return (
     <PageContainer>
       <PageHeader
         title={t("title")}
-        count={state.kind === "ok" ? t("total", { count: state.data.pagination.total }) : undefined}
+        count={state.kind === "ok" ? t("total", { count: state.data.pagination.total }) : state.kind === "loading" ? <Skeleton aria-hidden className="inline-block h-3 w-20 align-middle" /> : undefined}
       />
 
       <ListToolbar
@@ -124,7 +122,7 @@ export default function ClientesPage() {
         onSearchChange={onSearch}
         searchPlaceholder={t("searchPlaceholder")}
         filters={
-          multiCentro && (
+          centrosState.kind === "loading" ? <ControlSkeleton className="w-[190px]" /> : multiCentro && (
             <Select value={scope || undefined} onValueChange={onScopeChange}>
               <SelectTrigger className="w-[190px]">
                 <SelectValue />
@@ -168,9 +166,7 @@ export default function ClientesPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {state.kind === "loading" && (
-            <TableLoading colSpan={colCount}>{tCommon("loading")}</TableLoading>
-          )}
+          {state.kind === "loading" && <TableRowsSkeleton columns={loadingShapes} rows={LIMIT} />}
           {state.kind === "fail" && (
             <TableError colSpan={colCount}>{state.message}</TableError>
           )}
@@ -230,6 +226,16 @@ export default function ClientesPage() {
         </TableBody>
       </DataTable>
 
+      {/* Footer kept in place while a page/search loads, so the table does not jump. */}
+      {state.kind === "loading" && (
+        <div aria-hidden className="flex items-center justify-between">
+          <Skeleton className="h-4 w-40" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-20" />
+          </div>
+        </div>
+      )}
       {state.kind === "ok" && state.data.items.length > 0 && (
         <PaginationFooter
           meta={state.data.pagination}
