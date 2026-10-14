@@ -5,7 +5,12 @@ import { useTranslations } from "next-intl"
 import Link from "next/link"
 import { toast } from "sonner"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Calendar03Icon, Tick02Icon, UserIcon } from "@hugeicons/core-free-icons"
+import {
+  Calendar03Icon,
+  PencilEdit02Icon,
+  Tick02Icon,
+  UserIcon,
+} from "@hugeicons/core-free-icons"
 
 import {
   serviceConcluded,
@@ -15,11 +20,13 @@ import {
 import type { PatientDayData } from "@/hooks/use-patient-day"
 import { presentPatient, undoPresentPatient } from "@/lib/api/frontdesk-queue"
 import { ejecutarAccion } from "@/lib/api/tablero"
+import { asignarRecord, getPaciente, type Paciente } from "@/lib/api/pacientes"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { apiErrorLabel, toastError } from "@/lib/api/errors"
 import { ApiError } from "@/lib/api/types"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
+import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges"
 
@@ -152,6 +159,39 @@ export function PatientDetail({
     : t("consultation")
   const [presenceBusy, setPresenceBusy] = React.useState(false)
 
+  // Récord: "Generar #" asigna el siguiente de la secuencia del centro (mismo botón/endpoint que
+  // nueva-cita-modal.tsx cuando el paciente llega sin uno). El lápiz abre el MISMO formulario de
+  // edición que la ficha del paciente (con su verificación de duplicados en vivo) en vez de un campo
+  // de texto aparte aquí — un solo lugar que valida y guarda el récord, no dos. 13-oct-2026.
+  const [recordBusy, setRecordBusy] = React.useState(false)
+  const [editingPatient, setEditingPatient] = React.useState<Paciente | null>(
+    null
+  )
+  async function handleGenerateRecord() {
+    setRecordBusy(true)
+    try {
+      await asignarRecord(patient.patientId, centerId)
+      data.refresh()
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setRecordBusy(false)
+    }
+  }
+  async function handleOpenEdit() {
+    setRecordBusy(true)
+    try {
+      // Carga completa ANTES de abrir: PacienteFormSheet decide crear-vs-editar por si `paciente` es
+      // null (isEdit = !!paciente) — abrirlo de una con null crearía un paciente DUPLICADO en vez de
+      // editar este.
+      setEditingPatient(await getPaciente(patient.patientId, centerId))
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setRecordBusy(false)
+    }
+  }
+
   // UNA llegada por paciente al día, no por terapia (BE PR #424, 10-oct-2026): reemplaza el "Presente"
   // que antes vivía en cada fila de servicio (ver pasosOcultos en ServiceSessionsTable). `failed` trae
   // terapias que no pudieron marcarse por su propia regla — las demás quedan marcadas igual, por eso
@@ -266,12 +306,36 @@ export function PatientDetail({
               onChange={onFlagsChange}
             />
           </div>
-          <p className="text-sm text-muted-foreground">
-            {patient.record ? `${t("record")} #${patient.record}` : ""}
+          <div className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+            {patient.record ? (
+              <span>
+                {t("record")} #{patient.record}
+              </span>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-xs"
+                disabled={recordBusy}
+                onClick={handleGenerateRecord}
+              >
+                {tRoot("nuevaCita.generateRecord")}
+              </Button>
+            )}
+            <button
+              type="button"
+              disabled={recordBusy}
+              onClick={handleOpenEdit}
+              title={tRoot("patients.form.editTitle")}
+              className="rounded p-0.5 text-muted-foreground/70 hover:bg-muted hover:text-foreground disabled:opacity-50"
+            >
+              <HugeiconsIcon icon={PencilEdit02Icon} className="size-3.5" />
+            </button>
             {patient.earliestTime
-              ? ` · ${t("firstAt", { time: patient.earliestTime })}`
+              ? `· ${t("firstAt", { time: patient.earliestTime })}`
               : ""}
-          </p>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Un único botón para servicios Y consulta, indistinto de cuál tenga el paciente (13-oct-2026):
@@ -369,6 +433,22 @@ export function PatientDetail({
             onChanged={data.refresh}
           />
         )}
+
+      {editingPatient && (
+        // Montado SOLO una vez que `editingPatient` ya tiene el paciente completo: si este Sheet
+        // viviera siempre montado con `paciente=null` al inicio, su formulario sembraría sus campos
+        // vacíos en ese primer montaje y nunca los re-sembraría al llegar los datos reales —
+        // encontrado en vivo 13-oct-2026 (abría "Editar paciente" pero con todo en blanco).
+        <PatientFormSheet
+          open
+          paciente={editingPatient}
+          onOpenChange={(o) => !o && setEditingPatient(null)}
+          onSaved={() => {
+            setEditingPatient(null)
+            data.refresh()
+          }}
+        />
+      )}
     </div>
   )
 }
