@@ -19,6 +19,7 @@ import { flowColumns, renderColumns } from "@/lib/frontdesk/board-columns"
 import {
   blockColumns,
   hideServiceStatus,
+  isSessionColumn,
   isStaffColumn,
   notifyColumn,
   staffAndFlowFirst,
@@ -212,7 +213,7 @@ export function ServiceSessionsTable({
             <thead className="bg-muted/20">
               <tr className="border-b text-left text-[11px] tracking-wide text-muted-foreground uppercase">
                 {render.map((item, i) =>
-                  // Fixed widths for the two leading columns (staff, flow) so they line up across
+                  // Fixed widths for the leading columns (staff, flow, session) so they line up across
                   // the patient's services.
                   item.kind === "flujo" ? (
                     <th
@@ -226,7 +227,8 @@ export function ServiceSessionsTable({
                       key={item.col.clave}
                       className={cn(
                         "px-3 py-2 font-semibold",
-                        isStaffColumn(item.col) && "w-60"
+                        isStaffColumn(item.col) && "w-60",
+                        isSessionColumn(item.col) && "w-28"
                       )}
                     >
                       {item.col.label ??

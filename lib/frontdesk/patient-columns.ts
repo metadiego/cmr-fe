@@ -35,14 +35,18 @@ export function hideServiceStatus<C extends ColumnLike>(cols: C[]): C[] {
 // Who performs the session (technician / nurse select) — the BE's stable keys.
 const STAFF_KEYS = new Set(["fd_tecnico", "fd_enfermera"]);
 export const isStaffColumn = (c: ColumnLike) => STAFF_KEYS.has(c.clave);
+// The session counter (e.g. 2/3), right after the flow in every service (owner, 14-oct-2026).
+export const isSessionColumn = (c: ColumnLike) => c.clave === "fd_sesiones";
 
-// Every service block starts with the same two columns — who performs it, then the flow — so they line
-// up from one service to the next whatever each board's own order (owner, 14-oct-2026). The rest keep
-// their order after them.
+// Every service block starts with the same three columns — who performs it, the flow, the session
+// counter — so they line up from one service to the next whatever each board's own order (owner,
+// 14-oct-2026). The rest keep their order after them.
 export function staffAndFlowFirst<I extends { kind: string; col?: ColumnLike }>(items: I[]): I[] {
   const staff = items.filter((i) => i.kind === "col" && i.col && isStaffColumn(i.col));
   const flow = items.filter((i) => i.kind === "flujo");
-  return [...staff, ...flow, ...items.filter((i) => !staff.includes(i) && !flow.includes(i))];
+  const session = items.filter((i) => i.kind === "col" && i.col && isSessionColumn(i.col));
+  const lead = [...staff, ...flow, ...session];
+  return [...lead, ...items.filter((i) => !lead.includes(i))];
 }
 
 export function hidePresente<C extends ColumnLike>(cols: C[]): C[] {
