@@ -352,8 +352,9 @@ export function PatientDetail({
           {(patient.services.length > 0 ||
             patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
-              // Present = the word and the time in green, as the staff are used to (owner, 14-oct-2026).
-              <div className="flex items-center gap-1 rounded-md bg-success py-1 pr-1 pl-2.5 text-sm text-success-foreground">
+              // Present = the word and the time in strong green, as the staff are used to (owner, 14-oct-2026).
+              // Not the `success` token: it is a pale tint (oklch 0.95) that barely showed.
+              <div className="flex items-center gap-1 rounded-md bg-emerald-600 py-1 pr-1 pl-2.5 text-sm text-white shadow-sm">
                 <span className="inline-flex items-center gap-1 font-semibold">
                   <HugeiconsIcon icon={Tick02Icon} className="size-4" />
                   {t("presentAt", { time: fmtHora(patient.presentAt) })}
@@ -362,7 +363,7 @@ export function PatientDetail({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs text-success-foreground hover:bg-white/20 hover:text-success-foreground"
+                  className="h-6 px-2 text-xs text-white hover:bg-white/20 hover:text-white"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
                 >
