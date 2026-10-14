@@ -352,9 +352,11 @@ export function PatientDetail({
           {(patient.services.length > 0 ||
             patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
-              <div className="flex items-center gap-1 rounded-md border bg-muted/40 py-1 pr-1 pl-2.5 text-sm">
-                <span className="text-muted-foreground">
-                  {t("arrivedAt", { time: fmtHora(patient.presentAt) })}
+              // Present = the word and the time in green, as the staff are used to (owner, 14-oct-2026).
+              <div className="flex items-center gap-1 rounded-md bg-success/15 py-1 pr-1 pl-2.5 text-sm ring-1 ring-success/40">
+                <span className="inline-flex items-center gap-1 font-semibold text-success">
+                  <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+                  {t("presentAt", { time: fmtHora(patient.presentAt) })}
                 </span>
                 <Button
                   type="button"

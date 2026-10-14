@@ -4682,7 +4682,6 @@
     "record": "Record",
     "firstAt": "first booking {time}",
     "markPresent": "Present",
-    "arrivedAt": "Arrived {time}",
     "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "consultation": "Consultation",
@@ -4721,7 +4720,8 @@
     },
     "bookService": "Book a service",
     "bookConsultation": "Book a consultation",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "presentAt": "Present {time}"
   },
   "salesPackages": {
     "title": "Sales packages",

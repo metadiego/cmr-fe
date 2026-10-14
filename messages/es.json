@@ -4682,7 +4682,6 @@
     "record": "Record",
     "firstAt": "primera cita {time}",
     "markPresent": "Presente",
-    "arrivedAt": "Llegó {time}",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "consultation": "Consulta",
@@ -4721,7 +4720,8 @@
     },
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",
-    "cancelled": "Cancelada"
+    "cancelled": "Cancelada",
+    "presentAt": "Presente {time}"
   },
   "salesPackages": {
     "title": "Paquetes de venta",
