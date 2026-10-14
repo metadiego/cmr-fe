@@ -30,6 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Owner, 14-oct-2026: the patient picker does not offer «facturar a terceros o empresa».
+const SHOW_BILL_TO_THIRD_PARTY = false;
+
 // Facturación GENERAL — punto de entrada propio (doc §5). GATE de centro (handoff picker):
 // multi-tenant → si el admin puede ver >1 centro y no hay uno válido activo, EXIGE elegir centro
 // antes del finder, y ese centro va como X-Tenant-ID en TODA la sesión de factura (finder, crear,
@@ -257,7 +260,9 @@ function Finder({
         )}
       </div>
 
-      {/* Facturar a un tercero (empresa u otra persona) */}
+      {/* Facturar a un tercero (empresa u otra persona) — hidden here by the owner (14-oct-2026); it is
+          still set from the invoice's header dialog. */}
+      {SHOW_BILL_TO_THIRD_PARTY && (
       <div className="mb-4 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <button type="button" onClick={() => setTerceroOpen((o) => !o)} className="flex w-full items-center justify-between px-3 py-2 text-sm">
           <span className="font-medium">{t("terceroTitle")}</span>
@@ -286,6 +291,7 @@ function Finder({
           </div>
         )}
       </div>
+      )}
 
       <Button className="w-full" onClick={iniciar} disabled={!sel || creating}>
         {creating ? t("creando") : t("iniciar")}
