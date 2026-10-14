@@ -760,6 +760,7 @@
   },
   "patients": {
     "title": "Patients",
+    "back": "Back",
     "total": "{count, plural, one {# patient} other {# patients}}",
     "backToCall": "Back to the call",
     "searchPlaceholder": "Search by name or ID…",

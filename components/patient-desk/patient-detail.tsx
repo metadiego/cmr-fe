@@ -238,8 +238,17 @@ export function PatientDetail({
           {/* The priority flags (oxygen, wheelchair…) show in the list, next to the record; here is only
               the menu that sets them. */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* El nombre ABRE la ficha igual que el botón "Ficha": al volver (flecha de la ficha,
+                router.back()), Next restaura este mismo patient-desk tal cual estaba — fecha, filtro,
+                búsqueda y paciente elegido — porque la navegación es del lado del cliente (Link), no
+                recarga la página (13-oct-2026). */}
             <h2 className="truncate text-lg font-semibold">
-              {patient.name || "—"}
+              <Link
+                href={`/patients/${patient.patientId}`}
+                className="hover:underline"
+              >
+                {patient.name || "—"}
+              </Link>
             </h2>
             <PriorityFlagsBadges
               patientId={patient.patientId}

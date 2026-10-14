@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -64,10 +65,19 @@ export function PatientDesk() {
   const tRoot = useTranslations()
   const { can } = useCan()
   const gate = useCenterGate()
+  const router = useRouter()
+  // Leído UNA vez al montar (lazy initializers) y re-escrito en la URL abajo — mismo patrón que
+  // FacturasListView: así "Ficha" (Link, no recarga) + el "Volver" de la ficha (router.back())
+  // restauran esta pantalla EXACTAMENTE como estaba, en vez de los valores por defecto (13-oct-2026).
+  const initialParams = useSearchParams()
 
-  const [date, setDate] = React.useState(todayISO())
-  const [query, setQuery] = React.useState("")
-  const [selectedId, setSelectedId] = React.useState<string | null>(null)
+  const [date, setDate] = React.useState(
+    () => initialParams.get("date") ?? todayISO()
+  )
+  const [query, setQuery] = React.useState(() => initialParams.get("q") ?? "")
+  const [selectedId, setSelectedId] = React.useState<string | null>(() =>
+    initialParams.get("p")
+  )
   const [schedule, setSchedule] = React.useState<
     (ScheduleRequest & { open: boolean }) | { open: false }
   >({ open: false })
@@ -77,7 +87,10 @@ export function PatientDesk() {
   // Services / consultation / all. Starts on consultation for whoever has «lands on Consulta» in their
   // staff record (the reception people, set per person in the staff screen — not a role list here).
   const preference = useMyFrontdeskPreference(gate.centro)
-  const [kindPicked, setKindPicked] = React.useState<PatientKind | null>(null)
+  const [kindPicked, setKindPicked] = React.useState<PatientKind | null>(() => {
+    const k = initialParams.get("kind")
+    return k === "all" || k === "services" || k === "consultation" ? k : null
+  })
   const kind: PatientKind =
     kindPicked ??
     (preference.state.kind === "ok" &&
@@ -87,10 +100,12 @@ export function PatientDesk() {
   // Sub-filter WITHIN the active kind: one service ("Servicios") or one subtype ("Consulta") — both
   // data-driven (servicesOfTheDay / the board's own subtype catalog), never a hardcoded list. Cleared
   // whenever the kind itself changes, so the little arrow never carries a stale, invisible filter.
-  const [serviceFilter, setServiceFilter] = React.useState<string | null>(null)
+  const [serviceFilter, setServiceFilter] = React.useState<string | null>(
+    () => initialParams.get("service")
+  )
   const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
     string | null
-  >(null)
+  >(() => initialParams.get("subtype"))
   const pickKind = (k: PatientKind) => {
     setKindPicked(k)
     setServiceFilter(null)
@@ -118,6 +133,29 @@ export function PatientDesk() {
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
     : (patients[0]?.patientId ?? null)
+
+  // Mantiene la URL al día con TODO lo que define esta vista (fecha, búsqueda, kind, sub-filtro y el
+  // paciente que se ve ahora, aunque nunca se haya clicado — effectiveSelected, no el crudo
+  // selectedId). `replace` (no `push`): cada tecleo no debe llenar el historial, solo la entrada
+  // actual queda al día para cuando "Volver" de la ficha haga router.back().
+  React.useEffect(() => {
+    const sp = new URLSearchParams()
+    sp.set("date", date)
+    if (query) sp.set("q", query)
+    if (kindPicked) sp.set("kind", kindPicked)
+    if (serviceFilter) sp.set("service", serviceFilter)
+    if (consultSubtypeFilter) sp.set("subtype", consultSubtypeFilter)
+    if (effectiveSelected) sp.set("p", effectiveSelected)
+    router.replace(`?${sp.toString()}`, { scroll: false })
+  }, [
+    date,
+    query,
+    kindPicked,
+    serviceFilter,
+    consultSubtypeFilter,
+    effectiveSelected,
+    router,
+  ])
 
   const serviceName = (slug: string) =>
     [...data.servicesById.values()].find((s) => s.slug === slug)?.name
