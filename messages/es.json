@@ -4673,8 +4673,6 @@
     "markPresent": "Presente",
     "arrivedAt": "Llegó {time}",
     "undoPresent": "Deshacer",
-    "markNewPresent": "Marcar nuevo",
-    "openRecord": "Ficha",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "consultation": "Consulta",
     "kindLabel": "Mostrar",
