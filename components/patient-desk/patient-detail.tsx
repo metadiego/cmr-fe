@@ -9,7 +9,6 @@ import {
   Calendar03Icon,
   PencilEdit02Icon,
   Tick02Icon,
-  UserIcon,
 } from "@hugeicons/core-free-icons"
 
 import {
@@ -376,12 +375,6 @@ export function PatientDetail({
                 {t("markPresent")}
               </Button>
             ))}
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/patients/${patient.patientId}`}>
-              <HugeiconsIcon icon={UserIcon} className="size-4" />
-              {t("openRecord")}
-            </Link>
-          </Button>
           <Button
             size="sm"
             onClick={() =>
