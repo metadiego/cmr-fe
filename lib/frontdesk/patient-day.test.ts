@@ -9,6 +9,7 @@ import {
   patientConcluded,
   servicesOfTheDay,
   serviceConcluded,
+  staffGroup,
   type DaySession,
 } from "./patient-day.ts"
 
@@ -378,4 +379,53 @@ test("filterByService puts the filtered service first, the rest in their configu
     list[0].services.map((s) => s.slug),
     ["apex", "laser"]
   )
+})
+
+test("filtered first, then the rest by who performs them: technician, nurse, both — configured order inside", () => {
+  const svcs = [
+    { id: "nano", slug: "nano", name: "NANO", requiresNurse: true },
+    {
+      id: "npt",
+      slug: "npt",
+      name: "NPT",
+      requiresTechnician: true,
+      requiresNurse: true,
+    },
+    { id: "vitc", slug: "vitc", name: "VIT C", requiresNurse: true },
+    { id: "laser", slug: "laser", name: "LÁSER", requiresTechnician: true },
+    { id: "pemf", slug: "pemf", name: "PEMF", requiresTechnician: true },
+    { id: "odd", slug: "odd", name: "ODD" },
+  ]
+  const list = groupByPatient(
+    ["nano", "npt", "laser", "pemf", "vitc", "odd"].map((id, i) =>
+      ses(`s${i}`, "p1", id)
+    ),
+    [],
+    svcs
+  )
+  const slugs = (sid: string) =>
+    filterByService(list, sid)[0].services.map((s) => s.slug)
+  assert.deepEqual(slugs("pemf"), [
+    "pemf",
+    "laser",
+    "nano",
+    "vitc",
+    "npt",
+    "odd",
+  ])
+  // Filtering a nurse service keeps the group order technician → nurse → both.
+  assert.deepEqual(slugs("vitc"), [
+    "vitc",
+    "laser",
+    "pemf",
+    "nano",
+    "npt",
+    "odd",
+  ])
+  // Without a filter: the configured order, untouched.
+  assert.deepEqual(
+    list[0].services.map((s) => s.slug),
+    ["nano", "npt", "vitc", "laser", "pemf", "odd"]
+  )
+  assert.equal(staffGroup(undefined), 3)
 })

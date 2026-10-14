@@ -122,6 +122,8 @@ export function usePatientDay(
         slug: tab.slug,
         name: s?.name ?? tab.name,
         color: tab.color ?? null,
+        requiresTechnician: s?.requiresTechnician,
+        requiresNurse: s?.requiresNurse,
       })
     }
     return out

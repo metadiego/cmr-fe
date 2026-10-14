@@ -33,6 +33,9 @@ export interface DayService {
   slug: string
   name: string
   color?: string | null
+  // Who performs it — the service's own flags (Configuración → Servicios), data, not code.
+  requiresTechnician?: boolean
+  requiresNurse?: boolean
 }
 
 export interface PatientService {
@@ -40,8 +43,20 @@ export interface PatientService {
   slug: string
   name: string
   color: string | null
+  staffGroup: StaffGroup
   sessionIds: string[]
   statuses: string[]
+}
+
+// Who performs a service, in the order the filtered view groups the rest: technician only, nurse
+// only, both, neither (owner, 14-oct-2026 — handoff patient-desk-orden-por-personal).
+export type StaffGroup = 0 | 1 | 2 | 3
+export function staffGroup(
+  s: Pick<DayService, "requiresTechnician" | "requiresNurse"> | undefined
+): StaffGroup {
+  const tech = !!s?.requiresTechnician
+  const nurse = !!s?.requiresNurse
+  return tech && nurse ? 2 : tech ? 0 : nurse ? 1 : 3
 }
 
 export interface PatientDay {
@@ -107,6 +122,7 @@ export function groupByPatient(
         slug: meta?.slug ?? "",
         name: meta?.name ?? "",
         color: meta?.color ?? null,
+        staffGroup: staffGroup(meta),
         sessionIds: [],
         statuses: [],
       }
@@ -230,7 +246,8 @@ export function filterByKind(
 // Narrows "Servicios" to ONE service (data-driven: whichever services the day's patients actually
 // have — see servicesOfTheDay). `null` clears it. That service also moves FIRST in each patient's
 // services (chips and detail), so whoever works it finds it without scrolling (owner 13-oct-2026);
-// the rest keep their configured order.
+// the rest follow grouped by who performs them — technician, nurse, both, neither (owner 14-oct-2026)
+// — each group in the configured order (the sort is stable and the list arrives in that order).
 export function filterByService(
   list: PatientDay[],
   serviceId: string | null
@@ -242,7 +259,9 @@ export function filterByService(
       ...p,
       services: [
         ...p.services.filter((s) => s.serviceId === serviceId),
-        ...p.services.filter((s) => s.serviceId !== serviceId),
+        ...p.services
+          .filter((s) => s.serviceId !== serviceId)
+          .sort((a, b) => a.staffGroup - b.staffGroup),
       ],
     }))
 }
