@@ -2775,7 +2775,10 @@
       "terceroEmpresa": "Company",
       "terceroPersona": "Person",
       "verLista": "View invoices",
-      "sinCentro": "You have no center assigned. Contact your admin."
+      "sinCentro": "You have no center assigned. Contact your admin.",
+      "doctorRetired": "retired",
+      "doctorOtherCenter": "other center",
+      "doctorNotListed": "not active here"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",
@@ -2943,7 +2946,8 @@
     "notes": "Notes",
     "notesPlaceholder": "Reason / notes…",
     "cancel": "Cancel",
-    "save": "Add to board"
+    "save": "Add to board",
+    "retired": "Retired"
   },
   "precios": {
     "title": "Prices",

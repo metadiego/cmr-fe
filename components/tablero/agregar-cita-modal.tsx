@@ -12,6 +12,7 @@ import { toastError } from "@/lib/api/errors";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { PacienteSelect } from "@/components/citas/paciente-select";
+import { patientDoctorOption, type PatientDoctor } from "@/lib/medicos/patient-doctor-option";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -132,13 +133,10 @@ export function AgregarCitaModal({
   // label without a matching SelectItem. Add that option by hand, marked, instead of leaving it
   // blank. `doctorName` isn't in schema.d.ts yet (BE typing gap, see
   // docs/specs/agregar-cita-medico-de-otro-centro-handoff-be.md); the cast is temporary.
-  const patientDoctorOption = React.useMemo(() => {
-    const doctorId = paciente?.doctorId;
-    if (!doctorId || medicos.some((m) => m.value === doctorId)) return null;
-    // `doctorName`/`doctorClinicName` aren't in schema.d.ts yet (BE typing gap, see handoff); cast.
-    const p = paciente as unknown as { doctorName?: string; doctorClinicName?: string };
-    return { value: String(doctorId), label: p.doctorName ?? String(doctorId), centro: p.doctorClinicName ?? "" };
-  }, [paciente, medicos]);
+  const doctorExtra = React.useMemo(
+    () => patientDoctorOption(medicos.map((m) => m.value), paciente as PatientDoctor | null, centroId),
+    [paciente, medicos, centroId],
+  );
 
   async function onGuardar() {
     if (!paciente || !tipoAuto) return;
@@ -220,13 +218,17 @@ export function AgregarCitaModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NO_MEDICO}>{t("noDoctor")}</SelectItem>
-                {patientDoctorOption && (
-                  <SelectItem value={patientDoctorOption.value}>
+                {doctorExtra && (
+                  <SelectItem value={doctorExtra.id}>
                     <span className="flex items-center gap-2">
-                      {patientDoctorOption.label}
-                      {/* Con varios centros, nombrar el centro del médico acelera la identificación. */}
+                      {doctorExtra.name}
+                      {/* Retired, or another center — naming the center speeds up identifying them. */}
                       <Badge variant="warning">
-                        {patientDoctorOption.centro ? `${t("otherCenter")} · ${patientDoctorOption.centro}` : t("otherCenter")}
+                        {doctorExtra.mark.kind === "retired"
+                          ? t("retired")
+                          : doctorExtra.mark.center
+                            ? `${t("otherCenter")} · ${doctorExtra.mark.center}`
+                            : t("otherCenter")}
                       </Badge>
                     </span>
                   </SelectItem>

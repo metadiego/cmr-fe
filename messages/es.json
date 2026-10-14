@@ -2775,7 +2775,10 @@
       "terceroEmpresa": "Empresa",
       "terceroPersona": "Persona",
       "verLista": "Ver facturas",
-      "sinCentro": "No tienes un centro asignado. Contacta al administrador."
+      "sinCentro": "No tienes un centro asignado. Contacta al administrador.",
+      "doctorRetired": "de baja",
+      "doctorOtherCenter": "otro centro",
+      "doctorNotListed": "no activo aquí"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Vacío = precio del centro (efectivo). Escribe para forzar un override.",
@@ -2943,7 +2946,8 @@
     "notes": "Observación",
     "notesPlaceholder": "Motivo / notas…",
     "cancel": "Cancelar",
-    "save": "Agregar al tablero"
+    "save": "Agregar al tablero",
+    "retired": "De baja"
   },
   "precios": {
     "title": "Precios",

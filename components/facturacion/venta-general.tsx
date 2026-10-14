@@ -14,6 +14,8 @@ import { listMedicos, listMedios, type MedicoOpcion, type MedioFacturacion } fro
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
+import { patientDoctorOption } from "@/lib/medicos/patient-doctor-option";
+import { Badge } from "@/components/ui/badge";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
@@ -105,6 +107,8 @@ function Finder({
   const listaSel = tipoPrecioId || defaultId;
   const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
+  // The patient's doctor shows even when retired or from another center (not among the active ones).
+  const doctorExtra = patientDoctorOption(medicos.map((m) => m.id), sel, centro);
   const mediosRes = useResource<MedioFacturacion[]>(() => listMedios(centro), [centro]);
   const medios = (mediosRes.state.kind === "ok" ? mediosRes.state.data : []).filter((m) => m.active !== false);
 
@@ -226,6 +230,14 @@ function Finder({
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">{t("sinMedico")}</SelectItem>
+                {doctorExtra && (
+                  <SelectItem value={doctorExtra.id}>
+                    {doctorExtra.name}
+                    <Badge variant="warning" className="ml-2">
+                      {doctorExtra.mark.kind === "retired" ? t("doctorRetired") : doctorExtra.mark.center || t("doctorOtherCenter")}
+                    </Badge>
+                  </SelectItem>
+                )}
                 {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
