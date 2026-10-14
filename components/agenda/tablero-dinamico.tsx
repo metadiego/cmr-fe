@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations, useFormatter } from "next-intl";
 
@@ -323,6 +324,7 @@ export function TableroDinamico({
   estados,
   density,
   loading,
+  leadWidths,
 }: {
   columnas: ColumnaEfectiva[];
   filas: CitaFila[];
@@ -339,6 +341,8 @@ export function TableroDinamico({
   density?: "comodo" | "compacto";
   // Skeleton rows under the headers (placeholder headers too when `columnas` is still empty).
   loading?: boolean;
+  // Fixed widths for the first column and the flow, to line up with the patient desk's service blocks.
+  leadWidths?: boolean;
 }) {
   const tRoot = useTranslations();
   const cols = useVisibleColumns(columnas);
@@ -476,11 +480,11 @@ export function TableroDinamico({
             {loading && groups.length === 0 && <BoardHeadSkeleton />}
             {groups.map((g, gi) =>
               g.kind === "flow" ? (
-                <th key={`flow-${gi}`} className="px-3 py-2 text-center font-medium whitespace-nowrap">
+                <th key={`flow-${gi}`} className={cn("px-3 py-2 text-center font-medium whitespace-nowrap", leadWidths && "w-72")}>
                   {tRoot("tableroBoard.flowTitle")}
                 </th>
               ) : (
-                <th key={g.col.clave} className="px-3 py-2 text-left font-medium whitespace-nowrap">
+                <th key={g.col.clave} className={cn("px-3 py-2 text-left font-medium whitespace-nowrap", leadWidths && gi === 0 && "w-60")}>
                   {(() => {
                     const c = colColor(g.col);
                     return (

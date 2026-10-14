@@ -49,6 +49,17 @@ export function staffAndFlowFirst<I extends { kind: string; col?: ColumnLike }>(
   return [...lead, ...items.filter((i) => !lead.includes(i))];
 }
 
+// The consultation's counterpart of staffAndFlowFirst: the doctor first, then its flow (the grouped
+// toggles, render.group), then the rest — so it lines up with the services' «técnico/enfermera · flujo»
+// (owner, 14-oct-2026). The flow stays one contiguous run, which is how the board groups it.
+export function doctorAndFlowFirst<C extends ColumnLike>(cols: C[]): C[] {
+  const isFlow = (c: C) => !!(c.render as { group?: string } | null)?.group;
+  const doctor = cols.filter((c) => c.clave === "medico");
+  const flow = cols.filter(isFlow);
+  const lead = [...doctor, ...flow];
+  return [...lead, ...cols.filter((c) => !lead.includes(c))];
+}
+
 export function hidePresente<C extends ColumnLike>(cols: C[]): C[] {
   return cols.filter((c) => c.clave !== "presente");
 }

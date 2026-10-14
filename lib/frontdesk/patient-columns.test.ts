@@ -2,6 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import {
   blockColumns,
+  doctorAndFlowFirst,
   hidePresente,
   hideServiceStatus,
   notifyColumn,
@@ -96,5 +97,20 @@ test("staff column, flow, then session first, the rest in their order — whatev
   assert.deepEqual(
     staffAndFlowFirst([col("fd_sesiones"), flow]).map((i) => i.kind),
     ["flujo", "col"]
+  )
+})
+
+test("consultation: doctor, then its flow, then the rest in order", () => {
+  const flow = (clave: string) => ({ clave, render: { group: "flujo" } })
+  const cols = [
+    { clave: "tipo" },
+    flow("en_consulta"),
+    flow("atendida"),
+    { clave: "medico" },
+    { clave: "comentarios" },
+  ]
+  assert.deepEqual(
+    doctorAndFlowFirst(cols).map((c) => c.clave),
+    ["medico", "en_consulta", "atendida", "tipo", "comentarios"]
   )
 })

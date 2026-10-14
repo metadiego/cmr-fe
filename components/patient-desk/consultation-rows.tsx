@@ -15,6 +15,7 @@ import {
 } from "@/components/agenda/tablero-dinamico"
 import {
   blockColumns,
+  doctorAndFlowFirst,
   hidePresente,
   notifyColumn,
 } from "@/lib/frontdesk/patient-columns"
@@ -54,7 +55,7 @@ export function ConsultationRows({
   // Name and record are the detail's title already; the notify bell goes to this block's title. The
   // consultation's own "presente" pill is also dropped: one arrival per patient, from the header.
   const columns = React.useMemo(
-    () => hidePresente(blockColumns(board.columns)),
+    () => doctorAndFlowFirst(hidePresente(blockColumns(board.columns))),
     [board]
   )
   const notify = React.useMemo(() => notifyColumn(board.columns), [board])
@@ -115,6 +116,7 @@ export function ConsultationRows({
       </header>
       <div className="overflow-x-auto">
         <BoardTable
+          leadWidths
           columnas={columns}
           filas={rows}
           tablero="atencion"
