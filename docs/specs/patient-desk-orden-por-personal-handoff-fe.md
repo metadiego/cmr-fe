@@ -1,3 +1,8 @@
+> **CORREGIDO por el dueño, 14-oct-2026 10:58 (FE `fb26985`):** el orden de grupos NO es fijo. Tras el
+> servicio filtrado van primero los del **mismo personal** que el filtrado (filtrar Vit C, de enfermera →
+> intravenoso y demás de enfermera, luego láser y los de técnico), después el resto en técnico → enfermera
+> → ambos → ninguno. La versión fija (técnico primero siempre, `2de48e6`) fue un malentendido.
+
 # Frontdesk nuevo — al filtrar, los demás servicios se ordenan por quién los hace
 
 **Fecha:** 2026-10-14 · **De:** BE → FE · **Pedido por:** el dueño (larciles)
