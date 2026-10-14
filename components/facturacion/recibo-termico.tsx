@@ -129,6 +129,15 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
             </span>
             <span className="shrink-0 tabular-nums">{money(it.total)}</span>
           </div>
+          {/* Sales package evidence: regular price, savings and what is paid (meta.salesPackage). */}
+          {it.paquete && (
+            <div className="pl-3 text-[0.85em]">
+              <div className="font-medium">{t("packageLine", { name: it.paquete.nombre })}</div>
+              <div className="flex justify-between gap-2"><span>{t("regularPrice")}</span><span className="tabular-nums">{money(it.paquete.precioRegular)}</span></div>
+              <div className="flex justify-between gap-2"><span>{t("savings")} ({it.paquete.ahorroPct}%)</span><span className="tabular-nums">− {money(it.paquete.ahorro)}</span></div>
+              <div className="flex justify-between gap-2 font-medium"><span>{t("packagePrice")}</span><span className="tabular-nums">{money(it.paquete.precioPaquete)}</span></div>
+            </div>
+          )}
           {/* "Incluye:" del kit (item.contenido); en compacto no viene. Indentado + fuente menor.
               El precio es de REFERENCIA (no suma al total). */}
           {it.componentes && it.componentes.length > 0 && (
@@ -173,6 +182,9 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
       <div className="mt-0.5 border-t border-black pt-0.5">
         <Line label={t("total")} value={money(recibo.total)} bold />
       </div>
+      {(recibo.ahorroPaquetes ?? 0) > 0 && (
+        <Line label={t("youSaved")} value={money(recibo.ahorroPaquetes ?? 0)} bold />
+      )}
       {recibo.montoAbonado > 0 && (
         <Line label={t("paid")} value={money(recibo.montoAbonado)} />
       )}

@@ -65,9 +65,11 @@ const ES: Record<string, string> = {
   subtotal: "SubTotal", discount: "Descuento", tax: "Impuesto", shipping: "Envío", total: "Total",
   paid: "Total pagado", balance: "Saldo", attendedBy: "Atendido por", thanks: "¡Gracias por su visita!",
   includes: "Incluye", protocolVisits: "Protocolo de {n} visitas",
+  packageLine: "Paquete {name}", regularPrice: "Precio regular", savings: "Ahorro", packagePrice: "Precio del paquete",
+  youSaved: "Usted ahorró",
 };
 const TEXT: ReceiptText = {
-  t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")),
+  t: (k, v) => (ES[k] ?? k).replace("{n}", String(v?.n ?? "")).replace("{name}", String(v?.name ?? "")),
   multiplierLabel: (k) => ({ dias: "Días", areas: "Áreas" })[k] ?? k,
   paymentLabel: (p) => (p.clave === "efectivo" ? "Efectivo" : p.formaPagoNombre),
 };
@@ -231,4 +233,26 @@ test("raster: black pixel sets the bit, transparent prints white; header carries
 test("logo size follows the preview: CSS px at 96dpi, max 18mm tall on a 203dpi head", () => {
   assert.deepEqual(logoDots(100, 50, 18), { width: 211, height: 106 });
   assert.deepEqual(logoDots(1000, 500, 18), { width: 288, height: 144 });
+});
+
+test("a package line prints regular, savings and package price; the foot, «Usted ahorró»", () => {
+  const withPackage: Recibo = {
+    ...QUOTE,
+    items: [
+      {
+        cantidad: 12, descripcion: "Láser IV", precioUnitario: 180, descuento: 720, total: 1440,
+        paquete: { nombre: "Láser IV · 12 terapias", precioRegular: 2160, ahorro: 720, ahorroPct: 33, precioPaquete: 1440 },
+      },
+    ],
+    ahorroPaquetes: 720,
+  };
+  const { lines } = decode(receiptToEscPos(withPackage, TEXT));
+  const text = lines.join("\n");
+  assert.match(text, /Paquete Láser IV · 12 terapias/);
+  assert.match(text, /Precio regular\s+\$2,160\.00|Precio regular\s+\$2160\.00/);
+  assert.match(text, /Ahorro \(33%\)/);
+  assert.match(text, /Precio del paquete/);
+  assert.match(text, /Usted ahorró/);
+  // Without packages, none of it is printed.
+  assert.doesNotMatch(decode(receiptToEscPos(QUOTE, TEXT)).lines.join("\n"), /Usted ahorró|Precio regular/);
 });

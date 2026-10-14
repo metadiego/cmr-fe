@@ -14,12 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ControlSkeleton } from "@/components/kit/skeletons";
+import { Lbl } from "@/components/facturacion/field-label";
 
 // Extracted from app/(app)/billing/invoices/[id]/page.tsx (its line ceiling only goes down).
-
-function Lbl({ children }: { children: React.ReactNode }) {
-  return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
-}
 
 // Editar la CABECERA de un borrador sin descartar (médico / referido / tercero) → PUT /facturas/:id/cabecera.
 // Reusa los mismos catálogos que el alta (listMedicos/listMedios). El paciente se cambia aparte (tiene buscador).

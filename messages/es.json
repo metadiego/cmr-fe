@@ -1156,7 +1156,8 @@
     "configuracion_datos_paciente": "Datos obligatorios del paciente",
     "collapseNav": "Plegar menú",
     "expandNav": "Desplegar menú",
-    "patientDesk": "Centro de Pacientes (por paciente)"
+    "patientDesk": "Centro de Pacientes (por paciente)",
+    "paquetesVenta": "Paquetes de venta"
   },
   "admin": {
     "title": "Administración",
@@ -2691,7 +2692,12 @@
     "includes": "Incluye",
     "protocolVisits": "Protocolo de {n} visitas",
     "budgetDoc": "PRESUPUESTO",
-    "hubTestTitle": "PRUEBA DEL HUB"
+    "hubTestTitle": "PRUEBA DEL HUB",
+    "packageLine": "Paquete {name}",
+    "regularPrice": "Precio regular",
+    "savings": "Ahorro",
+    "packagePrice": "Precio del paquete",
+    "youSaved": "Usted ahorró"
   },
   "facturacion": {
     "title": "Facturar consulta",
@@ -4716,5 +4722,59 @@
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",
     "cancelled": "Cancelada"
+  },
+  "salesPackages": {
+    "title": "Paquetes de venta",
+    "subtitle": "Sesiones a precio de paquete. El precio regular y el ahorro salen del catálogo.",
+    "showInactive": "Ver retirados",
+    "new": "Nuevo paquete",
+    "newTitle": "Nuevo paquete de venta",
+    "editTitle": "Editar paquete de venta",
+    "edit": "Editar",
+    "retire": "Retirar",
+    "reactivate": "Reactivar",
+    "retired": "Paquete retirado",
+    "reactivated": "Paquete reactivado",
+    "saved": "Paquete guardado",
+    "empty": "Este centro no tiene paquetes de venta.",
+    "active": "Activo",
+    "inactive": "Retirado",
+    "namePh": "p. ej. Láser IV · 12 terapias",
+    "productPh": "Elegir producto…",
+    "sortOrder": "Orden",
+    "regularHint": "El precio regular y el ahorro los calcula el sistema con el precio del producto en este centro; el paquete tiene que costar menos.",
+    "col": {
+      "name": "Nombre",
+      "product": "Producto",
+      "sessions": "Sesiones",
+      "regular": "Regular",
+      "package": "Paquete",
+      "savings": "Ahorro",
+      "active": "Estado"
+    },
+    "addToInvoice": "Agregar paquete",
+    "pickTitle": "Agregar un paquete a la factura",
+    "pickEmpty": "No hay paquetes activos en este centro.",
+    "added": "Paquete agregado",
+    "lockedNote": "Paquete: para cambiarlo, quítalo y agrégalo de nuevo.",
+    "evidence": "Paquete {name}",
+    "regularPrice": "Precio regular",
+    "savingsLabel": "Ahorro",
+    "packagePrice": "Precio del paquete",
+    "youSaved": "Usted ahorró"
+  },
+  "salesPackage": {
+    "nameRequired": "El nombre es obligatorio.",
+    "duplicateName": "Ya hay un paquete con ese nombre en este centro.",
+    "invalidSessions": "Las sesiones tienen que ser un número mayor que cero.",
+    "invalidPrice": "El precio del paquete no es válido.",
+    "priceNotBelowRegular": "El paquete tiene que costar menos que el precio regular.",
+    "noRegularPrice": "Ese producto no tiene precio regular en este centro.",
+    "duplicateProductSessions": "Ya hay un paquete de ese producto con esas sesiones.",
+    "productNotFound": "No se encontró el producto.",
+    "centerRequired": "Falta el centro.",
+    "notFound": "No se encontró el paquete.",
+    "inactive": "Ese paquete está retirado.",
+    "lineLocked": "Una línea de paquete no se edita: quítala y agrégala de nuevo."
   }
 }
