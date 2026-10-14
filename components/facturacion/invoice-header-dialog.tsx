@@ -41,6 +41,7 @@ export function InvoiceHeaderDialog({
   const tRoot = useTranslations();
   const f = factura as unknown as {
     doctorId?: string | null; sourceId?: string | null; doctor?: { id?: string; name?: string } | null;
+    doctorClinicId?: string | null; doctorClinicName?: string | null;
     billToName?: string | null; billToDocumentId?: string | null; billToType?: string | null;
   };
   const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
@@ -48,10 +49,12 @@ export function InvoiceHeaderDialog({
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
   const medios = mediosRes.state.kind === "ok" ? mediosRes.state.data : [];
   // The invoice's doctor shows even when no longer among the center's active doctors (handoff
-  // facturacion-general-medico-del-paciente). The invoice carries no doctor center → "not active here".
+  // facturacion-general-medico-del-paciente). The invoice carries the doctor's center at its root.
   const doctorExtra = patientDoctorOption(
     medicos.map((m) => m.id),
-    f.doctorId ? { doctorId: f.doctorId, doctorName: f.doctor?.name } : null,
+    f.doctorId
+      ? { doctorId: f.doctorId, doctorName: f.doctor?.name, doctorClinicId: f.doctorClinicId, doctorClinicName: f.doctorClinicName }
+      : null,
     centro,
   );
 
