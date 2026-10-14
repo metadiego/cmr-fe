@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import {
   validarCita,
   crearCitaAgenda,
   actualizarCitaAgenda,
+  getCita,
   getCuposLibres,
   type Cita,
   type TipoCita,
@@ -15,6 +16,7 @@ import {
   type CuposLibres,
 } from "@/lib/api/citas";
 import type { Personal } from "@/lib/api/personal";
+import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
@@ -82,11 +84,13 @@ export function CitaModal({
   // (su diagnóstico original estaba al revés: el dato SÍ viajaba, pero desde donde no debía).
   canal?: "atencion" | "callcenter";
   onOpenChange: (open: boolean) => void;
-  onSaved: () => void;
+  // Gets the appointment just saved (create/edit) so the caller can show it at once.
+  onSaved: (cita?: Cita) => void;
 }) {
   const t = useTranslations("agenda.modal");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const format = useFormatter();
   const isEdit = !!cita;
 
   const me = useMe();
@@ -158,14 +162,19 @@ export function CitaModal({
   // defecto (como antes) apagaba ese chequeo siempre y el personal de call-center, que no tiene por
   // qué saber que hay que marcar la casilla a mano, terminaba citando pacientes nuevos como si
   // fueran de seguimiento. Handoff bug-primera-vez-fuerza-medico-handoff-fe.
-  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Sale del
-  // CATÁLOGO (`esInicial`), no de una regla escrita aquí: antes una cita de HOY nacía "confirmada", y
-  // confirmada entra DIRECTA al tablero de Atención cuando todavía no se está seguro de que el paciente
-  // venga. Confirmar es una decisión del usuario. Cambiarlo mañana es marcar otro estado como inicial en
-  // el catálogo del BE, sin tocar este archivo.
-  const claveInicial = (estados.find((e) => e.isInitial)?.slug ?? "programada") as
-    | "programada"
-    | "confirmada";
+  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Call Center
+  // reserva REMOTO, sin el paciente enfrente — nace del CATÁLOGO (`esInicial`, hoy "programada") y
+  // confirmar es una decisión aparte de esa persona, cuando confirme con el paciente. Cualquier OTRO
+  // canal — Atención y "sin canal" (el propio default del BE, ver arriba) — es alguien que tiene al
+  // paciente FÍSICAMENTE presente al reservar: nace "confirmada" directo, sin paso extra que confirmar.
+  // El dueño, 13-oct-2026, caso real: una cita de HOY creada desde Control de Citas con canal Atención
+  // se perdió del tablero del día entero por quedar "programada" — antes esto trataba a los dos
+  // canales igual. Sigue siendo editable a mano (el Select de abajo), esto solo cambia el valor inicial.
+  const claveInicial = (
+    canal === "callcenter"
+      ? (estados.find((e) => e.isInitial)?.slug ?? "programada")
+      : "confirmada"
+  ) as "programada" | "confirmada";
   // El catálogo llega por red: el estado se DERIVA de su inicial hasta que el usuario elija a mano
   // (sin setState en efecto, que dispara renders en cascada / lo marca el React Compiler).
   const [estadoElegido, setEstadoElegido] = React.useState<"programada" | "confirmada" | null>(null);
@@ -224,6 +233,12 @@ export function CitaModal({
     (!needsCentro || !!effectiveCentro) &&
     !submitting;
 
+  async function avisarReagendo(fromId: string) {
+    const prev = await getCita(fromId).catch(() => null);
+    const d = prev?.date ? parseDayUTC(String(prev.date).slice(0, 10)) : null;
+    toast.info(d ? t("rescheduledFrom", { date: format.dateTime(d, "dayMonth") }) : t("rescheduledFromUnknown"), { duration: 10000 });
+  }
+
   async function onSubmit() {
     if (!paciente || !tipoCitaId) return;
     setSubmitting(true);
@@ -260,7 +275,7 @@ export function CitaModal({
         reason: motivo.trim() || undefined,
         notes: notas.trim() || undefined,
       };
-      const { advertencias } = isEdit
+      const { cita: saved, advertencias } = isEdit
         ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
         : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
@@ -268,7 +283,10 @@ export function CitaModal({
       for (const a of advertencias) {
         if (a.labelKey) toast.warning(tRoot(a.labelKey));
       }
-      onSaved();
+      // One live appointment per patient: the BE MOVED the existing one instead of creating a second.
+      // Say so, or it looks like nothing happened.
+      if (!isEdit && saved?.rescheduledFromId) void avisarReagendo(saved.rescheduledFromId);
+      onSaved(saved);
       onOpenChange(false);
     } catch (err) {
       toastError(err, tRoot);

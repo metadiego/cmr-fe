@@ -55,6 +55,7 @@ export function FilaSesion({
   colsRender,
   flujoCols,
   flujo,
+  pasosOcultos,
   transiciones,
   estadoDe,
   servicio,
@@ -74,6 +75,7 @@ export function FilaSesion({
   colsRender: ({ kind: "col"; col: FrontdeskColumna } | { kind: "flujo" })[];
   flujoCols: FrontdeskColumna[];
   flujo: { clave: string; labelKey: string; color?: string | null }[];
+  pasosOcultos?: Set<string>; // paso.estado que no se pinta (sigue en flujo para curIdx/nextPos)
   transiciones: Transicion[];
   estadoDe: (clave: string) => { labelKey: string; color?: string | null } | undefined;
   servicio?: Servicio;
@@ -528,6 +530,7 @@ export function FilaSesion({
   const flujoCell = (
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
+        if (pasosOcultos?.has(paso.estado)) return null;
         const hecho = !!paso.stamp;
         const siguiente = i === nextIdx; // accionable ahora, según el estado del BE (nunca si cancelada)
         const faltan = siguiente ? faltantesPara(paso.estado) : [];
@@ -554,7 +557,7 @@ export function FilaSesion({
         };
         return (
           <React.Fragment key={paso.key}>
-            {i > 0 && <span className="mt-3 h-px w-4 shrink-0" style={{ backgroundColor: hecho && col ? col : "var(--border)" }} aria-hidden />}
+            {i > 0 && !pasos.slice(0, i).every((p) => pasosOcultos?.has(p.estado)) && <span className="mt-3 h-px w-4 shrink-0" style={{ backgroundColor: hecho && col ? col : "var(--border)" }} aria-hidden />}
             <div className="flex min-w-16 flex-col items-center gap-1">
               {hecho ? (
                 <button

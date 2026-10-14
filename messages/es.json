@@ -28,7 +28,12 @@
       "linking": "Enlazando…",
       "linked": "Paciente enlazado.",
       "refresh": "Actualizar"
-    }
+    },
+    "claimPrinterLabel": "Impresora del código de alta",
+    "claimPrinterHelp": "Cuando un paciente nuevo queda dado de alta en el EHR, su código se imprime solo en esta impresora, por el hub de la sucursal.",
+    "claimPrinterNone": "Este centro no tiene impresoras en el hub de impresión (Configuración → Apariencia corporativa).",
+    "claimPrinterUnset": "Sin elegir",
+    "claimPrinterNotInCenter": "Esa impresora no es de este centro."
   },
   "resources": {
     "title": "Recursos",
@@ -520,7 +525,12 @@
       "kpiLibres": "Cupos libres",
       "filterAll": "Todas",
       "sinCitas": "No hay citas para este filtro.",
-      "pickCenter": "Elige un centro para ver la agenda de este día."
+      "pickCenter": "Elige un centro para ver la agenda de este día.",
+      "focusOnSaved": "Mostrando solo la cita recién guardada",
+      "focusClear": "Ver todas",
+      "origenCallCenter": "Call center",
+      "origenApp": "App",
+      "origenCanal": "Canal: {canal}"
     },
     "cupos": {
       "title": "Configuración de agenda",
@@ -627,7 +637,9 @@
       "endAuto": "Fin automático {time}",
       "variantList": "Lista",
       "variantGrid": "Rejilla",
-      "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea)."
+      "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
+      "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
+      "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha."
     },
     "fecha": "Fecha",
     "prevDay": "Día anterior",
@@ -748,6 +760,7 @@
   },
   "patients": {
     "title": "Pacientes",
+    "back": "Volver",
     "total": "{count, plural, one {# paciente} other {# pacientes}}",
     "backToCall": "Volver a la llamada",
     "searchPlaceholder": "Buscar por nombre o ID…",
@@ -1739,6 +1752,9 @@
   "frontdesk": {
     "title": "Centro de Pacientes",
     "live": "En vivo",
+    "queue": {
+      "nobody_free": "Nadie está libre para esta terapia ahora — elige un técnico aunque esté ocupado, o inténtalo de nuevo en un momento."
+    },
     "fecha": "Fecha",
     "citar": "Citar",
     "todosTab": "Todos",
@@ -4655,14 +4671,45 @@
     "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
     "record": "Record",
     "firstAt": "primera cita {time}",
-    "openRecord": "Ficha",
+    "markPresent": "Presente",
+    "arrivedAt": "Llegó {time}",
+    "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "consultation": "Consulta",
     "kindLabel": "Mostrar",
+    "filterByService": "Filtrar por servicio",
+    "filterByType": "Filtrar por tipo",
+    "allServices": "Todos los servicios",
+    "allTypes": "Todos los tipos",
     "kind": {
       "all": "Todos",
       "services": "Servicios",
       "consultation": "Consulta"
-    }
+    },
+    "queue": {
+      "pillLabel": "{waiting} en sala · {inTherapy} en terapia",
+      "panelTitle": "Cola de {service}",
+      "panelDescription": "Orden de llegada, quién está en terapia ahora y quién está libre para tomarla.",
+      "empty": "Nadie esperando ni en terapia ahora.",
+      "sectionWaiting": "Esperando",
+      "sectionInTherapy": "En terapia",
+      "turn": "#{turn}",
+      "waitMinutes": "{n} min",
+      "minutesSince": "{n} min",
+      "estimatedEnd": "termina ~{time}",
+      "estimatedEndHistoryTooltip": "Estimado según la mediana real de los últimos 30 días",
+      "call": "Llamar",
+      "uncall": "Deshacer",
+      "pickTechnician": "Elegir técnico",
+      "busyLoad": "ocupado · {n}",
+      "calledLabel": "Llamado · {technician} · {time}",
+      "busyIn": "Ocupado en {service}",
+      "free": "Libres: {names}",
+      "noneFree": "Nadie libre ahora",
+      "skillsNotConfigured": "Nadie tiene esta terapia configurada — ve a Personal → capacidades",
+      "chipFull": "{service} {turn} · {min} min"
+    },
+    "bookService": "Citar servicio",
+    "bookConsultation": "Citar consulta"
   }
 }

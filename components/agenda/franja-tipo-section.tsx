@@ -61,18 +61,43 @@ export function CeldaCita({
           onChanged={onChanged}
         />
       ) : col.tipo === "accion" ? (
-        // This view is only ever the call-center bridge day agenda — always remember the call
-        // origin so a ficha opened from here can jump straight back.
+        // The call-center day agenda — always remember the call origin so a ficha opened from here can
+        // jump straight back.
         <AccionesModal
           actions={((col.render as Record<string, unknown> | null)?.actions as AccionItem[] | undefined) ?? []}
           fila={fila}
           centroId={clinicId}
           saveOrigin
         />
+      ) : col.clave === "paciente" ? (
+        <span className="inline-flex items-center gap-1.5">
+          <Cell col={col} value={fila[col.clave]} />
+          <OrigenBadge fila={fila} />
+        </span>
       ) : (
         <Cell col={col} value={fila[col.clave]} />
       )}
     </td>
+  );
+}
+
+// Where the appointment came from, next to the patient: the call-center bridge (origenLegacy =
+// 'scheduling-server', whatever its channel — rescheduled ones keep the bridge origin) or the app.
+// The day view shows both since 13-oct-2026. Row keys stay Spanish in /api/v2 (`canal`, `origenLegacy`).
+function OrigenBadge({ fila }: { fila: CitaFila }) {
+  const t = useTranslations("agenda.dia");
+  if (!("origenLegacy" in fila)) return null;
+  const bridge = fila.origenLegacy === "scheduling-server";
+  return (
+    <span
+      title={fila.canal ? t("origenCanal", { canal: String(fila.canal) }) : undefined}
+      className={cn(
+        "rounded px-1.5 py-px text-[10px] font-medium ring-1",
+        bridge ? "bg-sky-500/10 text-sky-700 ring-sky-500/30 dark:text-sky-300" : "bg-muted text-muted-foreground ring-foreground/10",
+      )}
+    >
+      {t(bridge ? "origenCallCenter" : "origenApp")}
+    </span>
   );
 }
 

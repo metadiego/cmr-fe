@@ -74,11 +74,11 @@ export default function PacienteDetailPage() {
     <PageContainer>
       <div className="mb-6 flex flex-wrap items-center gap-4">
         <button
-          onClick={() => router.push("/patients")}
+          onClick={() => router.back()}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {t("title")}
+          {t("back")}
         </button>
         {callOrigin && (
           <button

@@ -28,7 +28,12 @@
       "linking": "Linking…",
       "linked": "Patient linked.",
       "refresh": "Refresh"
-    }
+    },
+    "claimPrinterLabel": "Claim code printer",
+    "claimPrinterHelp": "When a new patient is onboarded in the EHR, their code prints by itself on this printer, through the branch hub.",
+    "claimPrinterNone": "This center has no printers in the print hub (Settings → Corporate look).",
+    "claimPrinterUnset": "Not set",
+    "claimPrinterNotInCenter": "Esa impresora no es de este centro."
   },
   "resources": {
     "title": "Resources",
@@ -520,7 +525,12 @@
       "kpiLibres": "Free slots",
       "filterAll": "All",
       "sinCitas": "No appointments for this filter.",
-      "pickCenter": "Choose a center to see this day's schedule."
+      "pickCenter": "Choose a center to see this day's schedule.",
+      "focusOnSaved": "Showing only the appointment just saved",
+      "focusClear": "Show all",
+      "origenCallCenter": "Call center",
+      "origenApp": "App",
+      "origenCanal": "Channel: {canal}"
     },
     "cupos": {
       "title": "Schedule configuration",
@@ -627,7 +637,9 @@
       "endAuto": "Ends {time} (auto)",
       "variantList": "List",
       "variantGrid": "Grid",
-      "slotFullWarn": "That time is full; it books anyway (non-blocking)."
+      "slotFullWarn": "That time is full; it books anyway (non-blocking).",
+      "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
+      "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date."
     },
     "fecha": "Date",
     "prevDay": "Previous day",
@@ -748,6 +760,7 @@
   },
   "patients": {
     "title": "Patients",
+    "back": "Back",
     "total": "{count, plural, one {# patient} other {# patients}}",
     "backToCall": "Back to the call",
     "searchPlaceholder": "Search by name or ID…",
@@ -1739,6 +1752,9 @@
   "frontdesk": {
     "title": "Patient Center",
     "live": "Live",
+    "queue": {
+      "nobody_free": "No one is free for this therapy right now — pick a technician even if busy, or try again shortly."
+    },
     "fecha": "Date",
     "citar": "Book",
     "todosTab": "All",
@@ -4655,14 +4671,45 @@
     "pickPatient": "Pick a patient from the list to see their services.",
     "record": "Record",
     "firstAt": "first booking {time}",
-    "openRecord": "Record",
+    "markPresent": "Present",
+    "arrivedAt": "Arrived {time}",
+    "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "consultation": "Consultation",
     "kindLabel": "Show",
+    "filterByService": "Filter by service",
+    "filterByType": "Filter by type",
+    "allServices": "All services",
+    "allTypes": "All types",
     "kind": {
       "all": "All",
       "services": "Services",
       "consultation": "Consultation"
-    }
+    },
+    "queue": {
+      "pillLabel": "{waiting} waiting · {inTherapy} in therapy",
+      "panelTitle": "{service} queue",
+      "panelDescription": "Arrival order, who is in therapy now, and who is free to take them.",
+      "empty": "No one waiting or in therapy right now.",
+      "sectionWaiting": "Waiting",
+      "sectionInTherapy": "In therapy",
+      "turn": "#{turn}",
+      "waitMinutes": "{n} min",
+      "minutesSince": "{n} min",
+      "estimatedEnd": "ends ~{time}",
+      "estimatedEndHistoryTooltip": "Estimated from the real 30-day median",
+      "call": "Call",
+      "uncall": "Undo",
+      "pickTechnician": "Pick technician",
+      "busyLoad": "busy · {n}",
+      "calledLabel": "Called · {technician} · {time}",
+      "busyIn": "Busy in {service}",
+      "free": "Free: {names}",
+      "noneFree": "No one free right now",
+      "skillsNotConfigured": "No one is set up for this therapy — go to Staff → capabilities",
+      "chipFull": "{service} {turn} · {min} min"
+    },
+    "bookService": "Book a service",
+    "bookConsultation": "Book a consultation"
   }
 }
