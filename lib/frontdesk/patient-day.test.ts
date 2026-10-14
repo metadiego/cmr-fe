@@ -8,6 +8,8 @@ import {
   groupByPatient,
   patientConcluded,
   servicesOfTheDay,
+  orderSections,
+  patientSections,
   serviceCancelledOnly,
   serviceConcluded,
   staffGroup,
@@ -474,4 +476,92 @@ test("without cancelled sessions nothing changes", () => {
     services
   )
   assert.deepEqual(p.services[0].sessionIds, ["a", "b"])
+})
+
+const sectionNames = (p: ReturnType<typeof groupByPatient>[number]) =>
+  patientSections(p).map((x) =>
+    x.kind === "consultation" ? "consulta" : x.service.slug
+  )
+const svc3 = [
+  { id: "vitc", slug: "vitc", name: "VIT C" },
+  { id: "iv", slug: "iv", name: "IV" },
+  { id: "glp1", slug: "glp1", name: "GLP-1" },
+  { id: "laser", slug: "laser", name: "LÁSER" },
+]
+const terminal = (x: string) =>
+  ["atendida", "no_show", "cancelada", "reprogramada"].includes(x)
+
+test("no filter: a pending consultation goes before three attended services", () => {
+  const list = groupByPatient(
+    ["vitc", "iv", "glp1"].map((id, i) =>
+      ses(`s${i}`, "p1", id, { status: "asistido" })
+    ),
+    [
+      {
+        id: "c1",
+        pacienteId: "p1",
+        paciente: "A",
+        record: "1",
+        estado: "presente",
+      },
+    ],
+    svc3,
+    terminal
+  )
+  const [p] = orderSections(list, {
+    serviceFiltered: false,
+    isTerminal: terminal,
+  })
+  assert.deepEqual(sectionNames(p), ["consulta", "vitc", "iv", "glp1"])
+})
+
+test("no filter: pending laser first, then attended Vit C and the finished consultation in order", () => {
+  const list = groupByPatient(
+    [
+      ses("a", "p1", "vitc", { status: "asistido" }),
+      ses("b", "p1", "laser", { status: "presente" }),
+    ],
+    [
+      {
+        id: "c1",
+        pacienteId: "p1",
+        paciente: "A",
+        record: "1",
+        estado: "atendida",
+      },
+    ],
+    svc3,
+    terminal
+  )
+  const [p] = orderSections(list, {
+    serviceFiltered: false,
+    isTerminal: terminal,
+  })
+  assert.deepEqual(sectionNames(p), ["laser", "vitc", "consulta"])
+})
+
+test("with a service filter the order is exactly the filter's, pending elsewhere or not", () => {
+  const list = groupByPatient(
+    [
+      ses("a", "p1", "vitc", { status: "asistido" }),
+      ses("b", "p1", "laser", { status: "presente" }),
+    ],
+    [
+      {
+        id: "c1",
+        pacienteId: "p1",
+        paciente: "A",
+        record: "1",
+        estado: "presente",
+      },
+    ],
+    svc3,
+    terminal
+  )
+  const filtered = filterByService(list, "vitc")
+  const [p] = orderSections(filtered, {
+    serviceFiltered: true,
+    isTerminal: terminal,
+  })
+  assert.deepEqual(sectionNames(p), ["vitc", "laser", "consulta"])
 })

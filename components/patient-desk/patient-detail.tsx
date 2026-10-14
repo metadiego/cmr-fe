@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  patientSections,
   serviceCancelledOnly,
   serviceConcluded,
   type PatientDay,
@@ -116,24 +117,24 @@ export function PatientChips({
   )
   return (
     <div className="flex flex-wrap gap-1.5">
-      {patient.services.map((s) =>
-        chip(
-          s.serviceId,
-          s.color,
-          s.name,
-          s.statuses[0] ?? "",
-          false,
-          serviceConcluded(s)
-        )
+      {patientSections(patient).map((x) =>
+        x.kind === "service"
+          ? chip(
+              x.service.serviceId,
+              x.service.color,
+              x.service.name,
+              x.service.statuses[0] ?? "",
+              false,
+              serviceConcluded(x.service)
+            )
+          : chip(
+              "consult",
+              data.consultationTab?.color ?? null,
+              consultLabel,
+              patient.consultationStatuses[0] ?? "",
+              true
+            )
       )}
-      {patient.consultationIds.length > 0 &&
-        chip(
-          "consult",
-          data.consultationTab?.color ?? null,
-          consultLabel,
-          patient.consultationStatuses[0] ?? "",
-          true
-        )}
     </div>
   )
 }
@@ -436,43 +437,48 @@ export function PatientDetail({
         </div>
       </div>
 
-      {kind !== "consultation" &&
-        patient.services.map((s) => (
-          <ServiceSessionsTable
-            key={s.serviceId}
-            slug={s.slug}
-            name={s.name}
-            color={s.color}
-            concluded={serviceConcluded(s)}
-            cancelledOnly={serviceCancelledOnly(s)}
-            service={data.servicesById.get(s.serviceId)}
-            board={data.boardsBySlug[s.slug]}
-            definition={data.serviceDefinition}
-            sessionsById={data.sessionsById}
-            sessionIds={s.sessionIds}
-            patientId={patient.patientId}
-            date={date}
-            centerId={centerId}
-            onChanged={data.refresh}
-            onSchedule={(ctx) =>
-              onSchedule({ ...ctx, servicioId: ctx.servicioId ?? s.serviceId })
-            }
-          />
-        ))}
-
-      {kind !== "services" &&
-        patient.consultationIds.length > 0 &&
-        data.consultations && (
-          <ConsultationRows
-            board={data.consultations}
-            definition={data.consultationDefinition}
-            rowIds={patient.consultationIds}
-            color={data.consultationTab?.color ?? null}
-            label={consultLabel}
-            centerId={centerId}
-            onChanged={data.refresh}
-          />
-        )}
+      {/* Sections in one order (lib: patientSections) — pending first unless a service filter rules. */}
+      {patientSections(patient).map((x) =>
+        x.kind === "service"
+          ? kind !== "consultation" && (
+              <ServiceSessionsTable
+                key={x.service.serviceId}
+                slug={x.service.slug}
+                name={x.service.name}
+                color={x.service.color}
+                concluded={serviceConcluded(x.service)}
+                cancelledOnly={serviceCancelledOnly(x.service)}
+                service={data.servicesById.get(x.service.serviceId)}
+                board={data.boardsBySlug[x.service.slug]}
+                definition={data.serviceDefinition}
+                sessionsById={data.sessionsById}
+                sessionIds={x.service.sessionIds}
+                patientId={patient.patientId}
+                date={date}
+                centerId={centerId}
+                onChanged={data.refresh}
+                onSchedule={(ctx) =>
+                  onSchedule({
+                    ...ctx,
+                    servicioId: ctx.servicioId ?? x.service.serviceId,
+                  })
+                }
+              />
+            )
+          : kind !== "services" &&
+            data.consultations && (
+              <ConsultationRows
+                key="consultation"
+                board={data.consultations}
+                definition={data.consultationDefinition}
+                rowIds={patient.consultationIds}
+                color={data.consultationTab?.color ?? null}
+                label={consultLabel}
+                centerId={centerId}
+                onChanged={data.refresh}
+              />
+            )
+      )}
 
       {editingPatient && (
         // Montado SOLO una vez que `editingPatient` ya tiene el paciente completo: si este Sheet

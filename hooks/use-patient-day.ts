@@ -41,6 +41,8 @@ export interface PatientDayData {
   error: string | null
   live: boolean
   refresh: () => void
+  // Whether a consultation status is final (the board catalog's isTerminal).
+  isConsultationTerminal: (status: string) => boolean
 }
 
 // Everything the patient desk shows for one center and day: the day's sessions across ALL services
@@ -169,6 +171,10 @@ export function usePatientDay(
       ),
     [consultDefRes.state]
   )
+  const isConsultationTerminal = React.useCallback(
+    (status: string) => consultTerminal.has(status),
+    [consultTerminal]
+  )
   const patients = React.useMemo(
     () =>
       groupByPatient(
@@ -221,5 +227,6 @@ export function usePatientDay(
     error: fail && fail.kind === "fail" ? fail.message : null,
     live,
     refresh,
+    isConsultationTerminal,
   }
 }

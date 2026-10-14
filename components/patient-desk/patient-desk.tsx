@@ -16,6 +16,7 @@ import {
   filterByKind,
   filterByService,
   filterPatients,
+  orderSections,
   servicesOfTheDay,
   type PatientKind,
 } from "@/lib/frontdesk/patient-day"
@@ -129,11 +130,24 @@ export function PatientDesk() {
   )
   const patients = React.useMemo(() => {
     let list = filterByKind(data.patients, kind)
-    if (kind === "services") list = filterByService(list, serviceFilter)
+    const serviceFiltered = kind === "services" && !!serviceFilter
+    if (serviceFiltered) list = filterByService(list, serviceFilter)
     if (kind === "consultation")
       list = filterByConsultationSubtype(list, consultSubtypeFilter)
+    // Pending sections first, unless a service filter sets the order (handoff lo-pendiente-primero).
+    list = orderSections(list, {
+      serviceFiltered,
+      isTerminal: data.isConsultationTerminal,
+    })
     return filterPatients(list, query)
-  }, [data.patients, kind, serviceFilter, consultSubtypeFilter, query])
+  }, [
+    data.patients,
+    data.isConsultationTerminal,
+    kind,
+    serviceFilter,
+    consultSubtypeFilter,
+    query,
+  ])
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId

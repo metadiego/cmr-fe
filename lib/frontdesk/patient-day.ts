@@ -67,6 +67,9 @@ export interface PatientDay {
   consultationIds: string[]
   consultationStatuses: string[]
   consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
+  // The order the patient's sections (services + consultation) are drawn in, set by orderSections.
+  // Absent = the configured order (services, then the consultation).
+  sections?: PatientSection[]
   earliestTime: string | null // HH:MM of the first booking of the day
   presentAt: string | null // first arrival stamp (any service or the consultation)
   allCancelled: boolean
@@ -314,4 +317,60 @@ export function servicesOfTheDay(
     }
   }
   return out
+}
+
+// ─── Section order: what is still pending goes first (owner, 14-oct-2026) ──────────────────────────
+// «Se trabaja a favor del paciente: lo que le falta es lo importante.» Handoff
+// patient-desk-lo-pendiente-primero. One place for the order: chips and detail both read `sections`.
+
+export type PatientSection =
+  | { kind: "service"; service: PatientService }
+  | { kind: "consultation" }
+
+// Something of the service is still to do: a live session that is not attended.
+export function servicePending(s: PatientService): boolean {
+  return s.statuses.some((x) => x !== "asistido" && x !== "cancelada")
+}
+
+// The consultation is still to do while any of its statuses is not terminal (board catalog).
+export function consultationPending(
+  p: PatientDay,
+  isTerminal: IsTerminal = noneTerminal
+): boolean {
+  return p.consultationStatuses.some((x) => !isTerminal(x))
+}
+
+// The configured order: services as they come, then the consultation.
+export function defaultSections(p: PatientDay): PatientSection[] {
+  const out: PatientSection[] = p.services.map((service) => ({
+    kind: "service",
+    service,
+  }))
+  if (p.consultationIds.length > 0) out.push({ kind: "consultation" })
+  return out
+}
+
+export function patientSections(p: PatientDay): PatientSection[] {
+  return p.sections ?? defaultSections(p)
+}
+
+// Without a service filter: pending sections first, finished after, each group in the configured order.
+// With one, the filter is canonical (filterByService's order) and this does not reorder anything.
+export function orderSections(
+  list: PatientDay[],
+  opts: { serviceFiltered: boolean; isTerminal?: IsTerminal }
+): PatientDay[] {
+  if (opts.serviceFiltered) return list
+  const isTerminal = opts.isTerminal ?? noneTerminal
+  return list.map((p) => {
+    const base = defaultSections(p)
+    const pending = (x: PatientSection) =>
+      x.kind === "service"
+        ? servicePending(x.service)
+        : consultationPending(p, isTerminal)
+    return {
+      ...p,
+      sections: [...base.filter(pending), ...base.filter((x) => !pending(x))],
+    }
+  })
 }
