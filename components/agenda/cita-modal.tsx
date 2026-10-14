@@ -162,14 +162,19 @@ export function CitaModal({
   // defecto (como antes) apagaba ese chequeo siempre y el personal de call-center, que no tiene por
   // qué saber que hay que marcar la casilla a mano, terminaba citando pacientes nuevos como si
   // fueran de seguimiento. Handoff bug-primera-vez-fuerza-medico-handoff-fe.
-  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Sale del
-  // CATÁLOGO (`esInicial`), no de una regla escrita aquí: antes una cita de HOY nacía "confirmada", y
-  // confirmada entra DIRECTA al tablero de Atención cuando todavía no se está seguro de que el paciente
-  // venga. Confirmar es una decisión del usuario. Cambiarlo mañana es marcar otro estado como inicial en
-  // el catálogo del BE, sin tocar este archivo.
-  const claveInicial = (estados.find((e) => e.isInitial)?.slug ?? "programada") as
-    | "programada"
-    | "confirmada";
+  // Estado con el que NACE la cita (solo al crear; BE allowlist = programada|confirmada). Call Center
+  // reserva REMOTO, sin el paciente enfrente — nace del CATÁLOGO (`esInicial`, hoy "programada") y
+  // confirmar es una decisión aparte de esa persona, cuando confirme con el paciente. Cualquier OTRO
+  // canal — Atención y "sin canal" (el propio default del BE, ver arriba) — es alguien que tiene al
+  // paciente FÍSICAMENTE presente al reservar: nace "confirmada" directo, sin paso extra que confirmar.
+  // El dueño, 13-oct-2026, caso real: una cita de HOY creada desde Control de Citas con canal Atención
+  // se perdió del tablero del día entero por quedar "programada" — antes esto trataba a los dos
+  // canales igual. Sigue siendo editable a mano (el Select de abajo), esto solo cambia el valor inicial.
+  const claveInicial = (
+    canal === "callcenter"
+      ? (estados.find((e) => e.isInitial)?.slug ?? "programada")
+      : "confirmada"
+  ) as "programada" | "confirmada";
   // El catálogo llega por red: el estado se DERIVA de su inicial hasta que el usuario elija a mano
   // (sin setState en efecto, que dispara renders en cascada / lo marca el React Compiler).
   const [estadoElegido, setEstadoElegido] = React.useState<"programada" | "confirmada" | null>(null);
