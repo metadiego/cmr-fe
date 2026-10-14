@@ -42,6 +42,8 @@ interface Props {
   color: string | null
   // Every session attended: the service is painted gray (still editable — nothing is locked).
   concluded?: boolean
+  // Every session that day was cancelled: a discreet mark instead of operative rows.
+  cancelledOnly?: boolean
   service: Service | undefined
   board: ServiceBoard | undefined
   definition: BoardDefinition | null
@@ -65,6 +67,7 @@ export function ServiceSessionsTable({
   name,
   color,
   concluded = false,
+  cancelledOnly = false,
   service,
   board,
   definition,
@@ -162,7 +165,7 @@ export function ServiceSessionsTable({
     <section
       className={cn(
         "overflow-hidden rounded-lg ring-1 ring-foreground/10",
-        concluded && "bg-muted/50 grayscale"
+        (concluded || cancelledOnly) && "bg-muted/50 grayscale"
       )}
     >
       <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
@@ -182,9 +185,11 @@ export function ServiceSessionsTable({
         >
           {name}
         </h3>
-        {board ? (
+        {board || cancelledOnly ? (
           <span className="text-xs text-muted-foreground">
-            {t("sessionsCount", { n: rows.length })}
+            {cancelledOnly
+              ? t("cancelled")
+              : t("sessionsCount", { n: rows.length })}
           </span>
         ) : (
           <Skeleton aria-hidden className="h-3 w-16" />
@@ -205,7 +210,7 @@ export function ServiceSessionsTable({
           </span>
         )}
       </header>
-      {!board ? (
+      {cancelledOnly ? null : !board ? (
         <ServiceTableSkeleton rows={Math.max(1, sessionIds.length)} />
       ) : (
         <div className="overflow-x-auto">

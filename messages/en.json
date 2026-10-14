@@ -4710,6 +4710,7 @@
       "chipFull": "{service} {turn} · {min} min"
     },
     "bookService": "Book a service",
-    "bookConsultation": "Book a consultation"
+    "bookConsultation": "Book a consultation",
+    "cancelled": "Cancelled"
   }
 }

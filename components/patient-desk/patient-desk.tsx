@@ -84,7 +84,8 @@ export function PatientDesk() {
     (ScheduleRequest & { open: boolean }) | { open: false }
   >({ open: false })
   const [addingConsultation, setAddingConsultation] = React.useState<
-    { open: true; pacienteId?: string; pacienteNombre?: string } | { open: false }
+    | { open: true; pacienteId?: string; pacienteNombre?: string }
+    | { open: false }
   >({ open: false })
 
   const data = usePatientDay(gate.centro, date)
@@ -104,8 +105,8 @@ export function PatientDesk() {
   // Sub-filter WITHIN the active kind: one service ("Servicios") or one subtype ("Consulta") — both
   // data-driven (servicesOfTheDay / the board's own subtype catalog), never a hardcoded list. Cleared
   // whenever the kind itself changes, so the little arrow never carries a stale, invisible filter.
-  const [serviceFilter, setServiceFilter] = React.useState<string | null>(
-    () => initialParams.get("service")
+  const [serviceFilter, setServiceFilter] = React.useState<string | null>(() =>
+    initialParams.get("service")
   )
   const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
     string | null
@@ -140,7 +141,8 @@ export function PatientDesk() {
 
   // First load (or a new date/center): skeleton instead of a "0 patients" count and an empty list.
   const loadingDay =
-    gate.cargando || (!!gate.centro && data.loading && data.patients.length === 0)
+    gate.cargando ||
+    (!!gate.centro && data.loading && data.patients.length === 0)
 
   // Mantiene la URL al día con TODO lo que define esta vista (fecha, búsqueda, kind, sub-filtro y el
   // paciente que se ve ahora, aunque nunca se haya clicado — effectiveSelected, no el crudo

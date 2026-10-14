@@ -13,7 +13,11 @@ import {
   NotificarCell as NotifyBell,
   TableroDinamico as BoardTable,
 } from "@/components/agenda/tablero-dinamico"
-import { blockColumns, hidePresente, notifyColumn } from "@/lib/frontdesk/patient-columns"
+import {
+  blockColumns,
+  hidePresente,
+  notifyColumn,
+} from "@/lib/frontdesk/patient-columns"
 import {
   AccionesModal as RowActions,
   type AccionItem as ActionItem,

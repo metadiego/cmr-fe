@@ -152,6 +152,19 @@ export function groupByPatient(
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
   }
 
+  // A cancelled session is not a session (handoff patient-desk-cancelada-no-es-sesion, 14-oct-2026):
+  // when the service has a live one that day, its cancelled rows are dropped — not drawn, not counted,
+  // not in the chips. Only a service with nothing but cancelled rows keeps them, for a discreet mark.
+  for (const p of map.values())
+    for (const ps of p.services) {
+      const live = ps.statuses
+        .map((x, i) => (x === "cancelada" ? -1 : i))
+        .filter((i) => i >= 0)
+      if (live.length === 0 || live.length === ps.statuses.length) continue
+      ps.sessionIds = live.map((i) => ps.sessionIds[i])
+      ps.statuses = live.map((i) => ps.statuses[i])
+    }
+
   // Services in the configured order (the order of `services`), not in arrival order.
   const order = new Map(services.map((s, i) => [s.id, i]))
   for (const p of map.values())
@@ -164,6 +177,11 @@ export function groupByPatient(
 
 // A service is concluded when every session of it is attended ('asistido'); cancelled sessions are
 // not pending, so they do not hold it open — but at least one must have been attended.
+// Every session of the service that day was cancelled (the rows were kept only for a discreet mark).
+export function serviceCancelledOnly(s: PatientService): boolean {
+  return s.statuses.length > 0 && s.statuses.every((x) => x === "cancelada")
+}
+
 export function serviceConcluded(s: PatientService): boolean {
   const live = s.statuses.filter((x) => x !== "cancelada")
   return live.length > 0 && live.every((x) => x === "asistido")

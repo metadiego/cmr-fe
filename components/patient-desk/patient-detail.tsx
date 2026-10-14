@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  serviceCancelledOnly,
   serviceConcluded,
   type PatientDay,
   type PatientKind,
@@ -221,7 +222,10 @@ export function PatientDetail({
       if (pendingConsultIds.length > 0) {
         const results = await Promise.allSettled(
           pendingConsultIds.map((id) =>
-            ejecutarAccion({ boardSlug: "atencion", entityId: id, action: "presente" }, centerId)
+            ejecutarAccion(
+              { boardSlug: "atencion", entityId: id, action: "presente" },
+              centerId
+            )
           )
         )
         // El motivo real (p. ej. "faltan datos obligatorios del paciente...", PACIENTE_DATOS_REQUERIDOS
@@ -265,7 +269,11 @@ export function PatientDetail({
         await Promise.allSettled(
           presentConsultIds.map((id) =>
             ejecutarAccion(
-              { boardSlug: "atencion", entityId: id, action: "volver_confirmada" },
+              {
+                boardSlug: "atencion",
+                entityId: id,
+                action: "volver_confirmada",
+              },
               centerId
             )
           )
@@ -340,7 +348,8 @@ export function PatientDetail({
           {/* Un único botón para servicios Y consulta, indistinto de cuál tenga el paciente (13-oct-2026):
               antes solo aparecía con servicios, dejando a quien SOLO tiene consulta sin forma de llegar
               aquí salvo por su propia fila — justo la fila que acabamos de ocultar. */}
-          {(patient.services.length > 0 || patient.consultationIds.length > 0) &&
+          {(patient.services.length > 0 ||
+            patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
               <div className="flex items-center gap-1 rounded-md border bg-muted/40 py-1 pr-1 pl-2.5 text-sm">
                 <span className="text-muted-foreground">
@@ -435,6 +444,7 @@ export function PatientDetail({
             name={s.name}
             color={s.color}
             concluded={serviceConcluded(s)}
+            cancelledOnly={serviceCancelledOnly(s)}
             service={data.servicesById.get(s.serviceId)}
             board={data.boardsBySlug[s.slug]}
             definition={data.serviceDefinition}

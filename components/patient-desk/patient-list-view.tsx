@@ -77,7 +77,11 @@ export function PatientListView({
                     queda en el tooltip (misma frase que ya usa el panel de detalle). */}
                 <span
                   className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums"
-                  title={p.presentAt && p.earliestTime ? t("firstAt", { time: p.earliestTime }) : undefined}
+                  title={
+                    p.presentAt && p.earliestTime
+                      ? t("firstAt", { time: p.earliestTime })
+                      : undefined
+                  }
                 >
                   {p.presentAt ? fmtHora(p.presentAt) : (p.earliestTime ?? "")}
                 </span>

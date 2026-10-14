@@ -9,7 +9,10 @@ import {
   uncallQueueSession,
   type FrontdeskQueue,
 } from "@/lib/api/frontdesk-queue"
-import { queueEntryDisplayName, queueEntryRecord } from "@/lib/frontdesk/therapy-queue"
+import {
+  queueEntryDisplayName,
+  queueEntryRecord,
+} from "@/lib/frontdesk/therapy-queue"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { toastError } from "@/lib/api/errors"
 import { Button } from "@/components/ui/button"
@@ -34,7 +37,9 @@ interface Props {
 }
 
 function serviceName(queue: FrontdeskQueue, serviceId: string): string {
-  return queue.services.find((s) => s.serviceId === serviceId)?.name ?? serviceId
+  return (
+    queue.services.find((s) => s.serviceId === serviceId)?.name ?? serviceId
+  )
 }
 
 // Franja de pastillas por terapia ("N en sala · M en terapia") del tablero cola-por-terapia (BE
@@ -76,9 +81,12 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
   }
 
   if (!queue) return null
-  const visible = queue.services.filter((s) => s.waiting.length + s.inTherapy.length > 0)
+  const visible = queue.services.filter(
+    (s) => s.waiting.length + s.inTherapy.length > 0
+  )
   if (visible.length === 0) return null
-  const active = queue.services.find((s) => s.serviceId === openServiceId) ?? null
+  const active =
+    queue.services.find((s) => s.serviceId === openServiceId) ?? null
 
   return (
     <>
@@ -93,11 +101,16 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
           >
             <span
               className="h-2 w-2 shrink-0 rounded-full"
-              style={{ backgroundColor: svc.color ?? "var(--muted-foreground)" }}
+              style={{
+                backgroundColor: svc.color ?? "var(--muted-foreground)",
+              }}
             />
             <span className="max-w-[120px] truncate">{svc.name}</span>
             <span className="text-muted-foreground">
-              {t("pillLabel", { waiting: svc.waiting.length, inTherapy: svc.inTherapy.length })}
+              {t("pillLabel", {
+                waiting: svc.waiting.length,
+                inTherapy: svc.inTherapy.length,
+              })}
             </span>
           </button>
         ))}
@@ -107,7 +120,9 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
           {active ? (
             <>
               <SheetHeader>
-                <SheetTitle>{t("panelTitle", { service: active.name })}</SheetTitle>
+                <SheetTitle>
+                  {t("panelTitle", { service: active.name })}
+                </SheetTitle>
                 <SheetDescription>{t("panelDescription")}</SheetDescription>
               </SheetHeader>
               {active.waiting.length + active.inTherapy.length === 0 ? (
@@ -115,7 +130,7 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
               ) : null}
               {active.inTherapy.length > 0 ? (
                 <div>
-                  <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                  <h3 className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
                     {t("sectionInTherapy")}
                   </h3>
                   <ul className="space-y-1.5">
@@ -125,14 +140,18 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                         className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm"
                       >
                         <div className="min-w-0">
-                          <div className="truncate font-medium">{queueEntryDisplayName(e)}</div>
+                          <div className="truncate font-medium">
+                            {queueEntryDisplayName(e)}
+                          </div>
                           <div className="text-xs text-muted-foreground">
-                            {queueEntryRecord(e) ? `#${queueEntryRecord(e)} · ` : ""}
+                            {queueEntryRecord(e)
+                              ? `#${queueEntryRecord(e)} · `
+                              : ""}
                             {e.technicianName ?? "—"}
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-0.5">
-                          <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                          <span className="font-mono text-xs text-muted-foreground tabular-nums">
                             {t("minutesSince", { n: e.minutes })}
                           </span>
                           {e.estimatedEnd ? (
@@ -144,7 +163,9 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                                   : undefined
                               }
                             >
-                              {t("estimatedEnd", { time: fmtHora(e.estimatedEnd) })}
+                              {t("estimatedEnd", {
+                                time: fmtHora(e.estimatedEnd),
+                              })}
                             </span>
                           ) : null}
                         </div>
@@ -155,7 +176,7 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
               ) : null}
               {active.waiting.length > 0 ? (
                 <div>
-                  <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                  <h3 className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
                     {t("sectionWaiting")}
                   </h3>
                   <ul className="space-y-1.5">
@@ -167,17 +188,25 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                       // carga) — a diferencia de `free`, esto SÍ deja llamar a alguien ocupado a
                       // propósito cuando nadie está libre, que es justo el hueco que BE cerró.
                       const onShiftSorted = [...active.onShift].sort((a, b) =>
-                        a.available === b.available ? a.load - b.load : a.available ? -1 : 1
+                        a.available === b.available
+                          ? a.load - b.load
+                          : a.available
+                            ? -1
+                            : 1
                       )
                       const options = suggestion
                         ? [
-                            onShiftSorted.find((s) => s.staffId === suggestion.staffId) ?? {
+                            onShiftSorted.find(
+                              (s) => s.staffId === suggestion.staffId
+                            ) ?? {
                               staffId: suggestion.staffId,
                               name: suggestion.staffName,
                               load: 0,
                               available: true,
                             },
-                            ...onShiftSorted.filter((s) => s.staffId !== suggestion.staffId),
+                            ...onShiftSorted.filter(
+                              (s) => s.staffId !== suggestion.staffId
+                            ),
                           ]
                         : onShiftSorted
                       const chosen = picked[e.sessionId] || options[0]?.staffId
@@ -192,14 +221,16 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                                 {queueEntryDisplayName(e)}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {queueEntryRecord(e) ? `#${queueEntryRecord(e)} · ` : ""}
+                                {queueEntryRecord(e)
+                                  ? `#${queueEntryRecord(e)} · `
+                                  : ""}
                                 {t("turn", { turn: e.turn })}
                                 {e.busyIn
                                   ? ` · ${t("busyIn", { service: serviceName(queue, e.busyIn) })}`
                                   : ""}
                               </div>
                             </div>
-                            <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+                            <span className="shrink-0 font-mono text-xs text-muted-foreground tabular-nums">
                               {fmtHora(e.arrivedAt)}
                             </span>
                           </div>
@@ -228,22 +259,37 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                                 <Select
                                   value={chosen}
                                   onValueChange={(v) =>
-                                    setPicked((p) => ({ ...p, [e.sessionId]: v }))
+                                    setPicked((p) => ({
+                                      ...p,
+                                      [e.sessionId]: v,
+                                    }))
                                   }
                                 >
-                                  <SelectTrigger size="sm" className="h-7 flex-1 text-xs">
-                                    <SelectValue placeholder={t("pickTechnician")} />
+                                  <SelectTrigger
+                                    size="sm"
+                                    className="h-7 flex-1 text-xs"
+                                  >
+                                    <SelectValue
+                                      placeholder={t("pickTechnician")}
+                                    />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {options.map((o) => (
-                                      <SelectItem key={o.staffId} value={o.staffId}>
+                                      <SelectItem
+                                        key={o.staffId}
+                                        value={o.staffId}
+                                      >
                                         <span
                                           className={
-                                            !o.available ? "text-muted-foreground" : undefined
+                                            !o.available
+                                              ? "text-muted-foreground"
+                                              : undefined
                                           }
                                         >
                                           {o.name}
-                                          {!o.available ? ` · ${t("busyLoad", { n: o.load })}` : ""}
+                                          {!o.available
+                                            ? ` · ${t("busyLoad", { n: o.load })}`
+                                            : ""}
                                         </span>
                                       </SelectItem>
                                     ))}
@@ -271,7 +317,9 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
                 {!active.skillsConfigured
                   ? t("skillsNotConfigured")
                   : active.free.length > 0
-                    ? t("free", { names: active.free.map((f) => f.name).join(", ") })
+                    ? t("free", {
+                        names: active.free.map((f) => f.name).join(", "),
+                      })
                     : t("noneFree")}
               </div>
             </>

@@ -1,16 +1,19 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
 
-import { BoardRowsSkeleton, type BoardCellShape } from "@/components/frontdesk/frontdesk-skeleton";
-import { LoadingRegion } from "@/components/kit/skeletons";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  BoardRowsSkeleton,
+  type BoardCellShape,
+} from "@/components/frontdesk/frontdesk-skeleton"
+import { LoadingRegion } from "@/components/kit/skeletons"
+import { Skeleton } from "@/components/ui/skeleton"
 
 // Loading placeholders for the patient desk (docs/specs/2026-10-10-skeletons-de-carga.md): the same
 // master/detail grid, list card and detail card as PatientListView, filled with bars of the loaded size.
 
 // A service block without its patient's name/record columns (blockColumns): flow, status, dose, notes.
-const SERVICE_SHAPES: BoardCellShape[] = ["flow", "badge", "control", "text"];
+const SERVICE_SHAPES: BoardCellShape[] = ["flow", "badge", "control", "text"]
 
 /** A service block's table before its board arrives: header bars + one row per session. */
 export function ServiceTableSkeleton({ rows = 1 }: { rows?: number }) {
@@ -21,17 +24,27 @@ export function ServiceTableSkeleton({ rows = 1 }: { rows?: number }) {
           <tr className="border-b">
             {[...SERVICE_SHAPES, "button"].map((_, i) => (
               <th key={i} className="px-3 py-2">
-                <Skeleton aria-hidden className={"h-[16.5px] w-16" + (i === SERVICE_SHAPES.length ? " ml-auto" : "")} />
+                <Skeleton
+                  aria-hidden
+                  className={
+                    "h-[16.5px] w-16" +
+                    (i === SERVICE_SHAPES.length ? " ml-auto" : "")
+                  }
+                />
               </th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y">
-          <BoardRowsSkeleton colsRender={[]} rows={rows} fallback={SERVICE_SHAPES} />
+          <BoardRowsSkeleton
+            colsRender={[]}
+            rows={rows}
+            fallback={SERVICE_SHAPES}
+          />
         </tbody>
       </table>
     </div>
-  );
+  )
 }
 
 // One entry of the patient list (name + first time, record, service chips).
@@ -39,7 +52,9 @@ function PatientItemSkeleton({ i }: { i: number }) {
   return (
     <li className="rounded-md px-3 py-2">
       <div className="flex h-5 items-center justify-between gap-2">
-        <Skeleton className={"h-3.5 " + ["w-32", "w-40", "w-28", "w-36"][i % 4]} />
+        <Skeleton
+          className={"h-3.5 " + ["w-32", "w-40", "w-28", "w-36"][i % 4]}
+        />
         <Skeleton className="h-3 w-10" />
       </div>
       <div className="mb-1 flex h-[16.5px] items-center">
@@ -50,7 +65,7 @@ function PatientItemSkeleton({ i }: { i: number }) {
         {i % 3 !== 1 && <Skeleton className="h-[22px] w-24 rounded-full" />}
       </div>
     </li>
-  );
+  )
 }
 
 // A service block of the detail: coloured-dot header + its table.
@@ -64,7 +79,7 @@ function ServiceSectionSkeleton() {
       </header>
       <ServiceTableSkeleton />
     </section>
-  );
+  )
 }
 
 /** The whole master/detail grid while the day's patients load. */
@@ -95,5 +110,5 @@ export function PatientDeskSkeleton() {
         <ServiceSectionSkeleton />
       </div>
     </LoadingRegion>
-  );
+  )
 }

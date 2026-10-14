@@ -8,6 +8,7 @@ import {
   groupByPatient,
   patientConcluded,
   servicesOfTheDay,
+  serviceCancelledOnly,
   serviceConcluded,
   staffGroup,
   type DaySession,
@@ -437,4 +438,40 @@ test("filtered first, then the same staff as the filtered one, then technician, 
     ["nano", "npt", "vitc", "laser", "pemf", "odd"]
   )
   assert.equal(staffGroup(undefined), 3)
+})
+
+test("a cancelled session next to a live one is not a session: 1 row, «1 sesión»", () => {
+  const [p] = groupByPatient(
+    [
+      ses("x", "p1", "s-laser", { status: "cancelada" }),
+      ses("y", "p1", "s-laser", { status: "asistido" }),
+    ],
+    [],
+    services
+  )
+  assert.deepEqual(p.services[0].sessionIds, ["y"])
+  assert.deepEqual(p.services[0].statuses, ["asistido"])
+  assert.equal(serviceCancelledOnly(p.services[0]), false)
+})
+
+test("only cancelled sessions: kept for the discreet mark, no operative row", () => {
+  const [p] = groupByPatient(
+    [ses("x", "p1", "s-laser", { status: "cancelada" })],
+    [],
+    services
+  )
+  assert.equal(serviceCancelledOnly(p.services[0]), true)
+  assert.equal(p.allCancelled, true)
+})
+
+test("without cancelled sessions nothing changes", () => {
+  const [p] = groupByPatient(
+    [
+      ses("a", "p1", "s-laser"),
+      ses("b", "p1", "s-laser", { status: "presente" }),
+    ],
+    [],
+    services
+  )
+  assert.deepEqual(p.services[0].sessionIds, ["a", "b"])
 })
