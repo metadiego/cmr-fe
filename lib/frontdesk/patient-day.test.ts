@@ -381,7 +381,7 @@ test("filterByService puts the filtered service first, the rest in their configu
   )
 })
 
-test("filtered first, then the rest by who performs them: technician, nurse, both — configured order inside", () => {
+test("filtered first, then the same staff as the filtered one, then technician, nurse, both — configured order inside", () => {
   const svcs = [
     { id: "nano", slug: "nano", name: "NANO", requiresNurse: true },
     {
@@ -413,13 +413,22 @@ test("filtered first, then the rest by who performs them: technician, nurse, bot
     "npt",
     "odd",
   ])
-  // Filtering a nurse service keeps the group order technician → nurse → both.
+  // Filtering a nurse service (Vit C): the other nurse services next, then technician, both, neither.
   assert.deepEqual(slugs("vitc"), [
     "vitc",
+    "nano",
+    "laser",
+    "pemf",
+    "npt",
+    "odd",
+  ])
+  // Filtering a «both» service: other «both» first (none here), then technician, nurse, neither.
+  assert.deepEqual(slugs("npt"), [
+    "npt",
     "laser",
     "pemf",
     "nano",
-    "npt",
+    "vitc",
     "odd",
   ])
   // Without a filter: the configured order, untouched.

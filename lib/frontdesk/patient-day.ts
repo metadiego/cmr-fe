@@ -246,8 +246,9 @@ export function filterByKind(
 // Narrows "Servicios" to ONE service (data-driven: whichever services the day's patients actually
 // have — see servicesOfTheDay). `null` clears it. That service also moves FIRST in each patient's
 // services (chips and detail), so whoever works it finds it without scrolling (owner 13-oct-2026);
-// the rest follow grouped by who performs them — technician, nurse, both, neither (owner 14-oct-2026)
-// — each group in the configured order (the sort is stable and the list arrives in that order).
+// the rest follow grouped by who performs them, starting with the SAME staff as the filtered one (filter
+// Vit C, a nurse service → the other nurse services next, then technician, both, neither; owner
+// 14-oct-2026) — each group in the configured order (the sort is stable and the list arrives in it).
 export function filterByService(
   list: PatientDay[],
   serviceId: string | null
@@ -255,15 +256,19 @@ export function filterByService(
   if (!serviceId) return list
   return list
     .filter((p) => p.services.some((s) => s.serviceId === serviceId))
-    .map((p) => ({
-      ...p,
-      services: [
-        ...p.services.filter((s) => s.serviceId === serviceId),
-        ...p.services
-          .filter((s) => s.serviceId !== serviceId)
-          .sort((a, b) => a.staffGroup - b.staffGroup),
-      ],
-    }))
+    .map((p) => {
+      const same = p.services.find((s) => s.serviceId === serviceId)!.staffGroup
+      const rank = (g: StaffGroup) => (g === same ? -1 : g)
+      return {
+        ...p,
+        services: [
+          ...p.services.filter((s) => s.serviceId === serviceId),
+          ...p.services
+            .filter((s) => s.serviceId !== serviceId)
+            .sort((a, b) => rank(a.staffGroup) - rank(b.staffGroup)),
+        ],
+      }
+    })
 }
 
 // Narrows "Consulta" to one subtype (e.g. nueva/seguimiento — the board's own catalog, see
