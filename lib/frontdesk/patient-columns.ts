@@ -26,6 +26,25 @@ export function notifyColumn<C extends ColumnLike>(cols: C[]): C | undefined {
 // to keep "en_terapia"/"asistido" at the right slot). The consultation's FlujoAtencion has no such
 // dependency — resolveToggle (lib/tablero/toggle-hora.ts) reads each column's OWN target state vs.
 // the row's real estado, never a sibling's position — so simply filtering the column out is safe.
+// A service's own status column (fd_estado) only repeats what the shared arrival in the patient header
+// and the flow already say — "Presente" — so the service blocks drop it too (owner, 14-oct-2026).
+export function hideServiceStatus<C extends ColumnLike>(cols: C[]): C[] {
+  return cols.filter((c) => c.clave !== "fd_estado");
+}
+
+// Who performs the session (technician / nurse select) — the BE's stable keys.
+const STAFF_KEYS = new Set(["fd_tecnico", "fd_enfermera"]);
+export const isStaffColumn = (c: ColumnLike) => STAFF_KEYS.has(c.clave);
+
+// Every service block starts with the same two columns — who performs it, then the flow — so they line
+// up from one service to the next whatever each board's own order (owner, 14-oct-2026). The rest keep
+// their order after them.
+export function staffAndFlowFirst<I extends { kind: string; col?: ColumnLike }>(items: I[]): I[] {
+  const staff = items.filter((i) => i.kind === "col" && i.col && isStaffColumn(i.col));
+  const flow = items.filter((i) => i.kind === "flujo");
+  return [...staff, ...flow, ...items.filter((i) => !staff.includes(i) && !flow.includes(i))];
+}
+
 export function hidePresente<C extends ColumnLike>(cols: C[]): C[] {
   return cols.filter((c) => c.clave !== "presente");
 }

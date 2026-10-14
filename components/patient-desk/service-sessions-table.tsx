@@ -16,7 +16,13 @@ import {
   type TableroDefinicion as BoardDefinition,
 } from "@/lib/api/tablero"
 import { flowColumns, renderColumns } from "@/lib/frontdesk/board-columns"
-import { blockColumns, notifyColumn } from "@/lib/frontdesk/patient-columns"
+import {
+  blockColumns,
+  hideServiceStatus,
+  isStaffColumn,
+  notifyColumn,
+  staffAndFlowFirst,
+} from "@/lib/frontdesk/patient-columns"
 import type {
   ColumnaEfectiva as PlacedColumn,
   CitaFila as BoardRow,
@@ -76,7 +82,10 @@ export function ServiceSessionsTable({
   const columns = React.useMemo(() => board?.columns ?? [], [board])
   // Name and record are the detail's title already; the notify bell goes to this block's title.
   const render = React.useMemo(
-    () => renderColumns(blockColumns(columns)),
+    () =>
+      staffAndFlowFirst(
+        renderColumns(hideServiceStatus(blockColumns(columns)))
+      ),
     [columns]
   )
   const notify = React.useMemo(() => notifyColumn(columns), [columns])
@@ -203,14 +212,22 @@ export function ServiceSessionsTable({
             <thead className="bg-muted/20">
               <tr className="border-b text-left text-[11px] tracking-wide text-muted-foreground uppercase">
                 {render.map((item, i) =>
+                  // Fixed widths for the two leading columns (staff, flow) so they line up across
+                  // the patient's services.
                   item.kind === "flujo" ? (
-                    <th key={`flow-${i}`} className="px-3 py-2 font-semibold">
+                    <th
+                      key={`flow-${i}`}
+                      className="w-72 px-3 py-2 font-semibold"
+                    >
                       {tFrontdesk("flujo")}
                     </th>
                   ) : (
                     <th
                       key={item.col.clave}
-                      className="px-3 py-2 font-semibold"
+                      className={cn(
+                        "px-3 py-2 font-semibold",
+                        isStaffColumn(item.col) && "w-60"
+                      )}
                     >
                       {item.col.label ??
                         tRoot(

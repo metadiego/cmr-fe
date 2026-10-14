@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { blockColumns, hidePresente, notifyColumn } from "./patient-columns.ts";
+import { blockColumns, hidePresente, hideServiceStatus, notifyColumn, staffAndFlowFirst } from "./patient-columns.ts";
 
 const cols = [
   { clave: "fd_paciente" },
@@ -39,4 +39,19 @@ test("hidePresente drops only the consultation's own presente column, keeps the 
 
 test("hidePresente is a no-op when there is no presente column", () => {
   assert.deepEqual(hidePresente(cols).map((c) => c.clave), cols.map((c) => c.clave));
+});
+
+test("service blocks drop their own status column (fd_estado) and nothing else", () => {
+  const c = [{ clave: "fd_tecnico" }, { clave: "fd_estado" }, { clave: "fd_sesiones" }];
+  assert.deepEqual(hideServiceStatus(c).map((x) => x.clave), ["fd_tecnico", "fd_sesiones"]);
+});
+
+test("staff column then flow first, the rest in their order — whatever the board's order", () => {
+  const col = (clave: string) => ({ kind: "col" as const, col: { clave } });
+  const flow = { kind: "flujo" as const };
+  const vitc = [col("fd_cantidad"), flow, col("fd_enfermera"), col("fd_dosis")];
+  const out = staffAndFlowFirst(vitc).map((i) => (i.kind === "flujo" ? "FLOW" : i.col.clave));
+  assert.deepEqual(out, ["fd_enfermera", "FLOW", "fd_cantidad", "fd_dosis"]);
+  // A board without a staff column still starts with the flow.
+  assert.deepEqual(staffAndFlowFirst([col("fd_sesiones"), flow]).map((i) => i.kind), ["flujo", "col"]);
 });
