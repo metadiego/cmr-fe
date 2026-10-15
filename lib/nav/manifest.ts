@@ -93,6 +93,8 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "inventario-transferencias", route: "/inventory/transfers", group: "inventory", order: 8 },
   { clave: "inventario-viales", route: "/inventory/vials", group: "inventory", order: 9 },
   { clave: "precios", route: "/inventory/prices", group: "inventory", order: 10 },
+  // Sales packages per center (handoff paquetes-de-venta, 14-oct-2026). Seeded by the BE under g-inventario.
+  { clave: "paquetes-venta", route: "/inventory/sales-packages", group: "inventory", order: 11 },
   // Movido de Facturación/Reportes a Inventario (owner, 09-oct-2026): es cuánto insumo se consumió,
   // dato de inventario, no de facturación. También se quita el botón de Facturación (ver
   // facturas-list-view.tsx) que apuntaba acá.

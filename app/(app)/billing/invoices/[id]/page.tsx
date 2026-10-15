@@ -33,9 +33,7 @@ import {
 } from "@/lib/api/facturas";
 import { listComponentes, listProductos, type ProductoComponente, type Producto as ProductoInv } from "@/lib/api/inventario";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
-import { listMedicos, listMedios, type MedicoOpcion, type MedioFacturacion } from "@/lib/api/facturacion-config";
-import { listTiposPrecio, listImpuestos, listCatalogoPrecios, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
-import { listColumnasFacturacion, type ColumnaFacturacion } from "@/lib/api/facturacion-config";
+import { listTiposPrecio, listImpuestos, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
@@ -44,9 +42,15 @@ import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
 import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
+import { InvoiceHeaderDialog as CabeceraDialog } from "@/components/facturacion/invoice-header-dialog";
 import { RegenerarDisponibilidadDialog } from "@/components/facturacion/regenerar-disponibilidad-dialog";
 import { ReopenInvoiceButton, InvoiceReopenings } from "@/components/facturacion/invoice-reopen";
 import { IssueButton } from "@/components/facturacion/issue-button";
+import { AddItem } from "@/components/facturacion/invoice-add-item";
+import { Lbl } from "@/components/facturacion/field-label";
+import { AddSalesPackage, PackageEvidence, PackageSavingsRow } from "@/components/facturacion/sales-package-parts";
+import { sellSalesPackage } from "@/lib/api/sales-packages";
+import { isPackageLine } from "@/lib/factura/sales-package";
 import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
 import { loadLogoRaster } from "@/lib/print/load-logo";
@@ -73,10 +77,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  DataTable,
-  TableEmpty,
-} from "@/components/ui/data-table";
+import { DataTable, TableEmpty } from "@/components/ui/data-table";
 import {
   TableBody,
   TableCell,
@@ -84,12 +85,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ControlSkeleton } from "@/components/kit/skeletons";
+import { InvoiceDetailSkeleton, DialogRowsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
@@ -230,7 +228,7 @@ export default function FacturacionPage() {
     return receiptToEscPos(reciboFinal, buildReceiptText(tReceipt, tRoot), logo);
   }
 
-  if (loading) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p></PageContainer>;
+  if (loading) return <InvoiceDetailSkeleton />;
   if (!factura) return <PageContainer><p className="py-16 text-center text-sm text-muted-foreground">{t("notFound")}</p></PageContainer>;
 
   const estado = String(factura.status ?? "");
@@ -658,6 +656,7 @@ function Editor({
                     <TableRow key={it.id} className="bg-primary/10" style={{ borderLeft: "3px solid var(--primary)" }}>
                       <TableCell>
                         <span>{it.description ?? "—"}</span>
+                        <PackageEvidence item={it} locked={esBorrador} />
                         {esBorrador && esKit(it) && (
                           <button
                             type="button"
@@ -708,7 +707,7 @@ function Editor({
                         {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
                         {multsDe(it) ? (
                           <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
-                        ) : esBorrador ? (
+                        ) : esBorrador && !isPackageLine(it) ? (
                           <Input
                             value={String(e.quantity)}
                             onChange={(ev) => setEdit(it.id, { quantity: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
@@ -718,7 +717,7 @@ function Editor({
                         ) : <span className="tabular-nums">{n(it.quantity)}</span>}
                       </TableCell>
                       <TableCell className="text-right">
-                        {esBorrador ? (
+                        {esBorrador && !isPackageLine(it) ? (
                           <Input
                             value={String(e.unitPrice)}
                             onChange={(ev) => setEdit(it.id, { unitPrice: Math.max(0, Number(ev.target.value) || 0) })}
@@ -729,7 +728,8 @@ function Editor({
                       </TableCell>
                       {esGeneral && (
                         <TableCell className="text-center">
-                          {esBorrador ? (
+                          {/* A package line is not toggled: the toggle deletes and re-adds the line. */}
+                          {esBorrador && !isPackageLine(it) ? (
                             <button
                               type="button"
                               onClick={() => toggleGravado(it)}
@@ -775,6 +775,9 @@ function Editor({
             onAdd={(p) => run(() => agregarItem(id, p, centro))}
           />
         )}
+        {esBorrador && esGeneral && (
+          <AddSalesPackage centro={centro} disabled={busy} onPick={(pkg) => run(() => sellSalesPackage(id, pkg.id, centro))} />
+        )}
       </section>
 
       {/* Resumen + acciones */}
@@ -798,6 +801,7 @@ function Editor({
             onSet={(m) => run(() => setEnvio(id, m, centro))}
           />
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
+          <PackageSavingsRow items={serverItems} />
         </CardContent>
         </Card>
 
@@ -958,9 +962,6 @@ function EnvioRow({
   );
 }
 
-function Lbl({ children }: { children: React.ReactNode }) {
-  return <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{children}</span>;
-}
 
 // Modal de OPCIONALES de un kit: incluir/excluir componentes por línea. El BE re-precifica (base +
 // Σ incluidos) y recomputa totales; el FE solo manda la selección. Sin seedeo por effect: usamos
@@ -1009,7 +1010,7 @@ function OpcionalesDialog({
           <DialogTitle>{t("opcionalesTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
-          {res.state.kind === "loading" && <p className="py-6 text-center text-sm text-muted-foreground">{tc("loading")}</p>}
+          {res.state.kind === "loading" && <DialogRowsSkeleton trailing="w-14" />}
           {res.state.kind === "ok" && opcionales.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("opcionalesEmpty")}</p>
           )}
@@ -1137,7 +1138,7 @@ function PersonalizarKitDialog({
         </DialogHeader>
 
         {cargando ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{tc("loading")}</p>
+          <DialogRowsSkeleton trailing="w-16" />
         ) : (
           <div className="space-y-3">
             {base.length === 0 && added.length === 0 && (
@@ -1324,7 +1325,7 @@ function CambiarPacienteDialog({
         <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPatientPlaceholder")} />
         <div className="max-h-80 space-y-1 overflow-y-auto">
           {term.length < 2 && <p className="py-6 text-center text-sm text-muted-foreground">{t("searchHint")}</p>}
-          {loading && <p className="py-6 text-center text-sm text-muted-foreground">{tRoot("common.loading")}</p>}
+          {loading && <DialogRowsSkeleton sub trailing={null} />}
           {term.length >= 2 && !loading && shown.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">{tRoot("common.noResults")}</p>
           )}
@@ -1348,115 +1349,6 @@ function CambiarPacienteDialog({
               </button>
             );
           })}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// Editar la CABECERA de un borrador sin descartar (médico / referido / tercero) → PUT /facturas/:id/cabecera.
-// Reusa los mismos catálogos que el alta (listMedicos/listMedios). El paciente se cambia aparte (tiene buscador).
-const NONE = "__none__";
-function CabeceraDialog({
-  open,
-  onOpenChange,
-  centro,
-  factura,
-  onSaved,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  centro?: string;
-  factura: FacturaConItems;
-  onSaved: () => void | Promise<void>;
-}) {
-  const t = useTranslations("facturacion");
-  const tRoot = useTranslations();
-  const f = factura as unknown as {
-    doctorId?: string | null; sourceId?: string | null;
-    billToName?: string | null; billToDocumentId?: string | null; billToType?: string | null;
-  };
-  const medicosRes = useResource<MedicoOpcion[]>(() => listMedicos(centro), [centro]);
-  const mediosRes = useResource<MedioFacturacion[]>(() => listMedios(centro), [centro]);
-  const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
-  const medios = mediosRes.state.kind === "ok" ? mediosRes.state.data : [];
-
-  // Sembrado con los valores actuales de la factura (el padre remonta por `key` al abrir → initializer fresco).
-  const [medicoId, setMedicoId] = React.useState<string>(f.doctorId ?? NONE);
-  const [medioId, setMedioId] = React.useState<string>(f.sourceId ?? NONE);
-  const [terceroNombre, setTerceroNombre] = React.useState(f.billToName ?? "");
-  const [terceroDoc, setTerceroDoc] = React.useState(f.billToDocumentId ?? "");
-  const [terceroTipo, setTerceroTipo] = React.useState<"persona" | "empresa">(f.billToType === "empresa" ? "empresa" : "persona");
-  const [saving, setSaving] = React.useState(false);
-
-  async function guardar() {
-    setSaving(true);
-    const nombre = terceroNombre.trim();
-    // ausente = no aplica; aquí somos autoritativos: null = limpiar cuando el campo va vacío.
-    const payload: EditarCabeceraPayload = {
-      doctorId: medicoId === NONE ? null : medicoId,
-      sourceId: medioId === NONE ? null : medioId,
-      billToName: nombre || null,
-      billToDocumentId: nombre ? (terceroDoc.trim() || null) : null,
-      billToType: nombre ? terceroTipo : null,
-    };
-    try {
-      await editarCabeceraFactura(String(factura.id), payload, centro);
-      await onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t("editarCabeceraTitle")}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <label className="flex flex-col gap-1">
-            <Lbl>{t("medico")}</Lbl>
-            <Select value={medicoId} onValueChange={setMedicoId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>{t("sinMedico")}</SelectItem>
-                {medicos.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </label>
-          <label className="flex flex-col gap-1">
-            <Lbl>{t("referido")}</Lbl>
-            <Select value={medioId} onValueChange={setMedioId}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>{t("sinReferido")}</SelectItem>
-                {medios.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </label>
-          <div className="space-y-2 rounded-lg border p-3">
-            <Lbl>{t("tercero")}</Lbl>
-            <Input value={terceroNombre} onChange={(e) => setTerceroNombre(e.target.value)} placeholder={t("terceroNombre")} />
-            {terceroNombre.trim() && (
-              <div className="flex gap-2">
-                <Input value={terceroDoc} onChange={(e) => setTerceroDoc(e.target.value)} placeholder={t("terceroDoc")} className="flex-1" />
-                <Select value={terceroTipo} onValueChange={(v) => setTerceroTipo(v as "persona" | "empresa")}>
-                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="persona">{t("terceroPersona")}</SelectItem>
-                    <SelectItem value="empresa">{t("terceroEmpresa")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tRoot("common.cancel")}</Button>
-            <Button size="sm" onClick={guardar} disabled={saving}>{tRoot("common.save")}</Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -1547,12 +1439,14 @@ function UsuarioDialog({
         <div className="space-y-3">
           <label className="flex flex-col gap-1.5">
             <Lbl>{t("usuarioResponsable")}</Lbl>
+            {perfilesRes.state.kind === "loading" ? <ControlSkeleton /> : (
             <Select value={sel} onValueChange={setSel}>
               <SelectTrigger><SelectValue placeholder={t("elegirUsuario")} /></SelectTrigger>
               <SelectContent>
                 {perfiles.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            )}
           </label>
           <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("corregirUsuarioAyuda")}</p>
           <div className="flex justify-end gap-2">
@@ -1562,331 +1456,6 @@ function UsuarioDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-// Combobox de línea CON BÚSQUEDA server-side (SKU y nombre) — antes era un Select que solo ofrecía 100
-// artículos y no buscaba, dejando fuera lo que no cayera en esos 100 (imposible de facturar en pantalla).
-// Vacío = «lo más usado» (la carga inicial); al teclear (250 ms) busca en /precios/catalogo. Autocontenido
-// (sin cmdk/popover), como ProductoPicker. Handoff selector-de-linea-sin-buscador.
-function CatalogoCombobox({
-  catalogoInicial, selected, tipoPrecioId, tenant, disabled, onPick,
-}: {
-  catalogoInicial: Producto[];
-  selected: Producto | null;
-  tipoPrecioId?: string | null;
-  tenant?: string | null;
-  disabled?: boolean;
-  onPick: (p: Producto) => void;
-}) {
-  const t = useTranslations("facturacion");
-  const [open, setOpen] = React.useState(false);
-  const [query, setQuery] = React.useState("");
-  const [debounced, setDebounced] = React.useState("");
-  const rootRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const id = setTimeout(() => setDebounced(query), 250);
-    return () => clearTimeout(id);
-  }, [query]);
-  React.useEffect(() => {
-    if (!open) return;
-    function onDoc(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
-
-  const q = debounced.trim();
-  // Buscar por SKU y por nombre en el catálogo de precios (alcanza TODO, no solo los 100). El precio
-  // definitivo lo resuelve AddItem; aquí solo se necesita id/sku/nombre para elegir.
-  const searchRes = useResource<Producto[]>(
-    () =>
-      q.length >= 1
-        ? listCatalogoPrecios(tipoPrecioId ? { q, priceTypeId: tipoPrecioId, limit: 50 } : { q, limit: 50 }, tenant ?? undefined)
-            .then((r) => r.items.map((row) => ({ id: row.productId, name: row.name, sku: row.sku } as unknown as Producto)))
-        : Promise.resolve([]),
-    [q, tipoPrecioId, tenant],
-  );
-  const buscando = q.length >= 1 && searchRes.state.kind === "loading";
-  const resultados = q.length >= 1 ? (searchRes.state.kind === "ok" ? searchRes.state.data : []) : catalogoInicial;
-
-  const etiqueta = selected ? (selected.sku ? `${selected.sku} — ${selected.name}` : selected.name) : "";
-
-  return (
-    <div ref={rootRef} className="relative">
-      <Input
-        value={open ? query : etiqueta}
-        onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
-        onFocus={() => setOpen(true)}
-        placeholder={t("selectProduct")}
-        disabled={disabled}
-        className="h-9 w-full"
-      />
-      {open && (
-        <div className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-          {buscando && <p className="px-2 py-2 text-xs text-muted-foreground">…</p>}
-          {!buscando && resultados.length === 0 && (
-            <p className="px-2 py-2 text-xs text-muted-foreground">{q ? t("noMatches") : t("selectProduct")}</p>
-          )}
-          {!buscando && resultados.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => { onPick(p); setOpen(false); setQuery(""); setDebounced(""); }}
-              className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
-            >
-              {p.sku && <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.sku}</span>}
-              <span className="min-w-0">{p.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onAdd }: { catalogo: Producto[]; showIvu?: boolean; tipoPrecioId?: string | null; tenant?: string | null; disabled?: boolean; onAdd: (p: { productId: string; description: string; quantity: number; unitPrice?: number; taxable?: boolean; meta?: Record<string, number | string> }) => void }) {
-  const t = useTranslations("facturacion");
-  const tRoot = useTranslations();
-  const [prodId, setProdId] = React.useState("");
-  const [cant, setCant] = React.useState("1");
-  const [precio, setPrecio] = React.useState(""); // override manual (vacío = precio de la lista de la factura)
-  const [gravadoOverride, setGravadoOverride] = React.useState<boolean | null>(null); // null = default del producto
-  const [metaVals, setMetaVals] = React.useState<Record<string, string>>({}); // valores de columnas multiplicador/informativo
-  // Productos elegidos por BÚSQUEDA que no están en la carga inicial de 100 (p. ej. CMALA01): se recuerdan
-  // aquí para que toda la lógica (precio, columnas, línea) los resuelva igual. Handoff selector-de-linea-sin-buscador.
-  const [extra, setExtra] = React.useState<Producto[]>([]);
-  const resolve = (pid: string) => extra.find((p) => p.id === pid) ?? catalogo.find((p) => p.id === pid);
-  const prod = resolve(prodId);
-
-  // IVU (§2): el default nace del producto (gravado), NO fijo en ON. El cajero puede sobreescribir.
-  const gravadoEff = gravadoOverride ?? !!(prod as { taxable?: boolean } | undefined)?.taxable;
-
-  // Columnas dinámicas por producto: días/áreas/sesiones/dosis. multiplicador→total, informativo→muestra.
-  const colsRes = useResource<ColumnaFacturacion[]>(
-    () => (prodId ? listColumnasFacturacion(prodId, tenant ?? undefined) : Promise.resolve([])),
-    [prodId, tenant],
-  );
-  const capturables = (colsRes.state.kind === "ok" ? colsRes.state.data : []).filter(
-    (c) => c.role === "multiplicador" || c.role === "informativo",
-  );
-  // Opciones INLINE de un select de captura (nuevo: `render.opciones` en la propia columna; antes los
-  // select sacaban sus opciones de un catálogo). Sirve para cualquier select así declarado (p. ej. la ZONA
-  // del Protocolo Articular: rodilla|codo|cadera|hombro). Contrato: HANDOFF-zona-protocolo-articular.
-  const opcionesDe = (c: ColumnaFacturacion): { value: string; labelKey?: string }[] => {
-    const r = c.render as { opciones?: { value: string; labelKey?: string }[] } | null;
-    return Array.isArray(r?.opciones) ? r!.opciones : [];
-  };
-  const esSelectCaptura = (c: ColumnaFacturacion) => c.type === "select" && opcionesDe(c).length > 0;
-
-  // Autocálculo Dosis→Cantidad (potes/frascos): al cambiar la Dosis, Cantidad = ceil(dosis×días/unidadesPorEnvase).
-  // unidadesPorEnvase (de NTPRODUCTOS.CapsulasXUni) y diasTratamiento vienen del catálogo (BE, en prod);
-  // si faltan → cantidad manual, sin autocálculo.
-  const capsUnit = prod?.unitsPerContainer ?? null;
-  const diasTrat = prod?.treatmentDays ?? 30; // fallback si el producto no tiene el dato
-  const dosisClave = capturables.find((c) => /dosis/i.test(c.slug))?.slug ?? null;
-  const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.slug))?.slug ?? null;
-
-  // Defaults por columna (modelo del dueño): áreas = 1; días = cantidad (mismas visitas); resto vacío.
-  // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
-  const isArea = (c: string) => /[aá]rea/i.test(c);
-  const isDias = (c: string) => /d[ií]a/i.test(c) && !/dosis/i.test(c);
-  // áreas = preset del producto (areasDefault ?? 1); días = cantidad (mismas visitas). Data-driven (PR #158).
-  const areasDefault = (prod as { defaultAreas?: number | null } | undefined)?.defaultAreas ?? 1;
-  const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? cant : "");
-  const metaShown = (c: string) => metaVals[c] ?? defMeta(c);
-
-  // Flujo con Enter: cantidad → columnas (áreas, días…) → Enter en la última confirma la línea. La
-  // navegación se resuelve por DOM DENTRO del handler (marca `data-flow`), sin refs leídos en render.
-  const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) => e.target.select();
-  const onFlowKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key !== "Enter") return;
-    e.preventDefault();
-    const cont = e.currentTarget.closest("[data-addline]");
-    const inputs = cont ? Array.from(cont.querySelectorAll<HTMLInputElement>("[data-flow]")) : [];
-    const next = inputs[inputs.indexOf(e.currentTarget) + 1];
-    if (next) {
-      next.focus();
-      next.select();
-    } else {
-      add();
-    }
-  };
-
-  function onMetaChange(clave: string, value: string) {
-    const dosis = Number(value);
-    const sugerida =
-      clave === dosisClave && capsUnit && capsUnit > 0 && diasTrat > 0 && dosis > 0
-        ? Math.ceil((dosis * diasTrat) / capsUnit)
-        : null;
-    setMetaVals((m) => {
-      const next = { ...m, [clave]: value };
-      if (sugerida != null && sugeridoClave) next[sugeridoClave] = String(sugerida);
-      return next;
-    });
-    if (sugerida != null) setCant(String(sugerida)); // pre-llena Cantidad, queda editable
-  }
-
-  // PREVIEW DEL PRECIO (por lista de la factura, centro de la factura; fallback efectivo).
-  const precioRes = useResource<number | null>(
-    () => {
-      const p = resolve(prodId);
-      if (!p) return Promise.resolve(null);
-      const q = p.sku ?? p.name;
-      const opts = tipoPrecioId ? { priceTypeId: tipoPrecioId, q, limit: 50 } : { q, limit: 50 };
-      return listCatalogoPrecios(opts, tenant ?? undefined).then(async (res) => {
-        let row = res.items.find((r) => r.productId === p.id) ?? null;
-        if (!row || row.price == null) {
-          const eff = await listCatalogoPrecios({ q, limit: 50 }, tenant ?? undefined);
-          row = eff.items.find((r) => r.productId === p.id) ?? row;
-        }
-        return row?.price ?? null;
-      });
-    },
-    [prodId, tipoPrecioId, tenant],
-  );
-  const buscando = precioRes.state.kind === "loading" && !!prodId;
-  const precioLista = precioRes.state.kind === "ok" ? precioRes.state.data : null;
-  const precioMostrado = precio !== "" ? precio : precioLista != null ? String(precioLista) : "";
-  // Requeridos SIN llenar (p. ej. zona): bloquean agregar la línea → el aviso se ve ANTES de guardar.
-  const faltanRequeridos = capturables.filter((c) => c.required && String(metaShown(c.slug)).trim() === "");
-  const canAdd = !!prodId && !disabled && !buscando && faltanRequeridos.length === 0;
-
-  function pick(p: Producto) {
-    // Recordar el producto si vino de la búsqueda (no está en los 100 iniciales) → resolve() lo encuentra.
-    setExtra((prev) =>
-      prev.some((x) => x.id === p.id) || catalogo.some((x) => x.id === p.id) ? prev : [...prev, p],
-    );
-    setProdId(p.id);
-    setGravadoOverride(null); // vuelve al default del nuevo producto
-    setMetaVals({});
-    setPrecio("");
-    // Cantidad = diasTratamiento del pack (TD12→12…). Si el producto no lo trae → campo VACÍO (no 1).
-    const dt = (p as { treatmentDays?: number | null }).treatmentDays;
-    setCant(dt != null ? String(dt) : "");
-  }
-
-  function add() {
-    if (!prod) return;
-    // Solo mandamos `gravado` cuando lo SABEMOS (el producto lo trae) o el cajero lo tocó; si un producto
-    // de búsqueda no trae el dato, se OMITE y el BE aplica el default del producto (no forzar «exento»).
-    const prodGravado = (prod as { taxable?: boolean | null }).taxable;
-    const gravadoKnown = prodGravado != null || gravadoOverride != null;
-    const g = gravadoOverride ?? !!prodGravado;
-    // Enviar SIEMPRE el precioUnitario resuelto (override del cajero ?? precio del catálogo por-sesión).
-    // Si no se envía, el compuesto cae al precio-base (TD12=70) en vez del combo (50) → BE PR láser/precio.
-    const precioOverride = precio.trim() === "" ? undefined : Math.max(0, Number(precio) || 0);
-    const precioUnitarioEff = precioOverride ?? (precioLista != null ? precioLista : undefined);
-    // meta = valores de las columnas de captura (por su clave). Número para multiplicador/informativo
-    // (áreas, días…, el server calcula el total) y STRING para los select (p. ej. zona=rodilla).
-    const meta: Record<string, number | string> = {};
-    capturables.forEach((c) => {
-      const raw = metaShown(c.slug); // override del usuario o el default (áreas=1, días=cantidad)
-      if (raw == null || raw.trim() === "") return;
-      if (esSelectCaptura(c)) { meta[c.slug] = raw; return; } // valor de opción (string)
-      if (!Number.isNaN(Number(raw))) meta[c.slug] = Number(raw);
-    });
-    onAdd({
-      productId: prod.id,
-      description: prod.name,
-      quantity: Math.max(1, Math.floor(Number(cant) || 1)),
-      ...(precioUnitarioEff !== undefined ? { unitPrice: precioUnitarioEff } : {}),
-      // Solo el flag gravado (cuando se conoce): NO se manda impuestoId — el servidor resuelve el impuesto
-      // por la cascada del precio (desglose Estatal+Municipal completo). Handoff IVU compuesto.
-      ...(gravadoKnown ? { taxable: g } : {}),
-      ...(Object.keys(meta).length ? { meta } : {}),
-    });
-    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({});
-  }
-
-  return (
-    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-md border border-dashed p-3 md:flex md:flex-wrap">
-      <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
-        <Lbl>{t("addItem")}</Lbl>
-        <CatalogoCombobox
-          catalogoInicial={catalogo}
-          selected={prod ?? null}
-          tipoPrecioId={tipoPrecioId}
-          tenant={tenant}
-          disabled={disabled}
-          onPick={pick}
-        />
-      </label>
-      {/* Columnas dinámicas del producto (áreas/días/sesiones/dosis) + selects declarados (p. ej. ZONA).
-          Van ANTES de Cantidad: primero áreas y días (así se lee «áreas × días»), Cantidad después. El
-          Enter fluye producto → áreas → días → Cantidad → Agregar. Handoff descuento-… (posición). */}
-      {capturables.map((c) => {
-        const requeridoVacio = c.required && String(metaShown(c.slug)).trim() === "";
-        if (esSelectCaptura(c)) {
-          return (
-            <label key={c.slug} className="flex w-32 flex-col gap-1">
-              <Lbl>{tRoot(c.labelKey)}{c.required && <span className="text-destructive"> *</span>}</Lbl>
-              <Select value={metaShown(c.slug) || undefined} onValueChange={(v) => setMetaVals((m) => ({ ...m, [c.slug]: v }))}>
-                <SelectTrigger className={"h-9 w-full " + (requeridoVacio ? "border-destructive" : "")}>
-                  <SelectValue placeholder={t("selectPlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {opcionesDe(c).map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.labelKey && tRoot.has(o.labelKey) ? tRoot(o.labelKey) : o.value}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </label>
-          );
-        }
-        return (
-          <label key={c.slug} className="flex w-24 flex-col gap-1">
-            <Lbl>{tRoot(c.labelKey)}</Lbl>
-            <Input
-              data-flow={c.slug === sugeridoClave ? undefined : true}
-              value={metaShown(c.slug)}
-              onChange={(e) => onMetaChange(c.slug, e.target.value)}
-              onFocus={selectOnFocus}
-              onKeyDown={onFlowKey}
-              readOnly={c.slug === sugeridoClave}
-              className={"h-9 text-right tabular-nums " + (c.role === "informativo" ? "opacity-80 " : "") + (c.slug === sugeridoClave ? "bg-muted" : "")}
-              inputMode="decimal"
-              placeholder={c.role === "multiplicador" ? "×" : ""}
-            />
-          </label>
-        );
-      })}
-      {/* Cantidad DESPUÉS de áreas/días. Con dosis, ya viene pre-calculada; queda editable. */}
-      <label className="flex w-20 flex-col gap-1">
-        <Lbl>{t("qty")}</Lbl>
-        <Input
-          data-flow
-          value={cant}
-          onChange={(e) => setCant(e.target.value)}
-          onFocus={selectOnFocus}
-          onKeyDown={onFlowKey}
-          className="h-9 text-right tabular-nums"
-          inputMode="numeric"
-        />
-      </label>
-      <label className="flex w-28 flex-col gap-1">
-        <Lbl>{t("price")}</Lbl>
-        <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
-      </label>
-      {showIvu && (
-        <label className="flex flex-col gap-1">
-          <Lbl>{t("ivu")}</Lbl>
-          <button
-            type="button"
-            onClick={() => setGravadoOverride(!gravadoEff)}
-            className={"h-9 rounded-md border px-3 text-[11px] font-medium " + (gravadoEff ? "bg-info/15 text-info-foreground" : "text-muted-foreground")}
-            title={t("ivuToggleHint")}
-          >
-            {gravadoEff ? t("ivuGravado") : t("ivuExento")}
-          </button>
-        </label>
-      )}
-      <Button type="button" size="sm" className="col-span-2 h-9 md:col-span-1" disabled={!canAdd} onClick={add}>
-        {t("add")}
-      </Button>
-    </div>
   );
 }
 

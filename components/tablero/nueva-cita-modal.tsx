@@ -6,12 +6,14 @@ import { useTranslations, useFormatter } from "next-intl";
 import type { CitaFila } from "@/lib/api/agenda-dia";
 import {
   createCita,
+  getCita,
   getTiposCita,
   getVisitasRecientes,
   type TipoCita,
   type Cita,
 } from "@/lib/api/citas";
 import { getOpciones, ejecutarAccion, type Opcion } from "@/lib/api/tablero";
+import { pickDoctor } from "@/lib/tablero/pick-doctor";
 import { asignarRecord } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -113,12 +115,20 @@ export function NuevaCitaModal({
         if (seg) setTipoId(seg.id);
       })
       .catch(() => {});
-    getOpciones(tablero, "medico", centroId)
-      .then((o) => {
+    // The appointment's doctor, read FRESH (the row in hand may predate a doctor just set on the board),
+    // preselected by id; the row's own id/name are the fallback. Owner's report, 14-oct-2026.
+    Promise.all([
+      getOpciones(tablero, "medico", centroId),
+      getCita(String(fila.id)).catch(() => null),
+    ])
+      .then(([o, cita]) => {
         if (!active) return;
         setMedicos(o);
-        const cur = o.find((x) => x.label === String(fila.medico ?? ""));
-        if (cur) setMedicoId(cur.value);
+        const id = pickDoctor(o, {
+          id: cita?.doctorId ?? (fila.medico__valor as string | undefined) ?? null,
+          name: cita?.doctorName ?? String(fila.medico ?? ""),
+        });
+        if (id) setMedicoId(id);
       })
       .catch(() => {});
     if (pacienteId) {
@@ -129,7 +139,7 @@ export function NuevaCitaModal({
     return () => {
       active = false;
     };
-  }, [tablero, centroId, fila.medico, pacienteId]);
+  }, [tablero, centroId, fila.id, fila.medico, fila.medico__valor, pacienteId]);
 
   const canWrite = can("citas.create");
 

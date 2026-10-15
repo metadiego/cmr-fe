@@ -13,6 +13,8 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  patientSections,
+  serviceCancelledOnly,
   serviceConcluded,
   type PatientDay,
   type PatientKind,
@@ -26,6 +28,8 @@ import { apiErrorLabel, toastError } from "@/lib/api/errors"
 import { ApiError } from "@/lib/api/types"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
+import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal"
+import type { EhrReadinessField } from "@/lib/api/ehr-integration"
 import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges"
@@ -115,24 +119,24 @@ export function PatientChips({
   )
   return (
     <div className="flex flex-wrap gap-1.5">
-      {patient.services.map((s) =>
-        chip(
-          s.serviceId,
-          s.color,
-          s.name,
-          s.statuses[0] ?? "",
-          false,
-          serviceConcluded(s)
-        )
+      {patientSections(patient).map((x) =>
+        x.kind === "service"
+          ? chip(
+              x.service.serviceId,
+              x.service.color,
+              x.service.name,
+              x.service.statuses[0] ?? "",
+              false,
+              serviceConcluded(x.service)
+            )
+          : chip(
+              "consult",
+              data.consultationTab?.color ?? null,
+              consultLabel,
+              patient.consultationStatuses[0] ?? "",
+              true
+            )
       )}
-      {patient.consultationIds.length > 0 &&
-        chip(
-          "consult",
-          data.consultationTab?.color ?? null,
-          consultLabel,
-          patient.consultationStatuses[0] ?? "",
-          true
-        )}
     </div>
   )
 }
@@ -166,6 +170,12 @@ export function PatientDetail({
       : data.consultationTab.name
     : t("consultation")
   const [presenceBusy, setPresenceBusy] = React.useState(false)
+  // The consultation refused Presente for missing patient data: the same modal as the consultation
+  // board asks for them, then retries. Services are never held by this (owner, 14-oct-2026).
+  const [dataGate, setDataGate] = React.useState<{
+    faltantes: EhrReadinessField[]
+    consultIds: string[]
+  } | null>(null)
 
   // Récord: "Generar #" asigna el siguiente de la secuencia del centro (mismo botón/endpoint que
   // nueva-cita-modal.tsx cuando el paciente llega sin uno). El lápiz abre el MISMO formulario de
@@ -221,27 +231,31 @@ export function PatientDetail({
       if (pendingConsultIds.length > 0) {
         const results = await Promise.allSettled(
           pendingConsultIds.map((id) =>
-            ejecutarAccion({ boardSlug: "atencion", entityId: id, action: "presente" }, centerId)
+            ejecutarAccion(
+              { boardSlug: "atencion", entityId: id, action: "presente" },
+              centerId
+            )
           )
         )
-        // El motivo real (p. ej. "faltan datos obligatorios del paciente...", PACIENTE_DATOS_REQUERIDOS
-        // de un paciente nuevo, con sus campos exactos) importa más que un genérico — es justo lo que
-        // el personal necesita para resolverlo en Atención, sin adivinar por qué no se pudo. El modal
-        // que PIDE esos datos en el momento vive en flujo-atencion.tsx (su propia fila); aquí solo se
-        // avisa — abrir ese mismo modal desde el header queda para si hace falta más adelante.
-        for (const r of results) {
-          if (r.status !== "rejected") continue
+        // Services were already marked above and are never held back. A consultation the BE refuses for
+        // missing patient data (PACIENTE_DATOS_REQUERIDOS, fail-closed) opens the SAME modal as the
+        // consultation board — Atención has the patient in front of them — and retries on save
+        // (owner, 14-oct-2026). Any other reason is shown as it comes.
+        const needData: string[] = []
+        let faltantes: EhrReadinessField[] = []
+        results.forEach((r, i) => {
+          if (r.status !== "rejected") return
           const err = r.reason
-          const faltantes =
+          const f =
             err instanceof ApiError && err.code === "PACIENTE_DATOS_REQUERIDOS"
-              ? (err.data?.faltantes as string[] | undefined)
-              : undefined
-          warnings.push(
-            faltantes?.length
-              ? `${apiErrorLabel(err, tRoot)}: ${faltantes.join(", ")}`
-              : apiErrorLabel(err, tRoot)
-          )
-        }
+              ? ((err.data?.faltantes as EhrReadinessField[] | undefined) ?? [])
+              : []
+          if (f.length) {
+            needData.push(pendingConsultIds[i])
+            faltantes = f
+          } else warnings.push(apiErrorLabel(err, tRoot))
+        })
+        if (needData.length) setDataGate({ faltantes, consultIds: needData })
       }
       if (warnings.length > 0) toast.warning(warnings.join(" · "))
       data.refresh()
@@ -249,6 +263,23 @@ export function PatientDetail({
       toastError(err, tRoot)
     } finally {
       setPresenceBusy(false)
+    }
+  }
+
+  // After the modal saved the data: mark the consultation(s) present again.
+  async function retryConsultPresent(consultIds: string[]) {
+    setPresenceBusy(true)
+    try {
+      for (const id of consultIds)
+        await ejecutarAccion(
+          { boardSlug: "atencion", entityId: id, action: "presente" },
+          centerId
+        )
+    } catch (err) {
+      toastError(err, tRoot)
+    } finally {
+      setPresenceBusy(false)
+      data.refresh()
     }
   }
 
@@ -265,7 +296,11 @@ export function PatientDetail({
         await Promise.allSettled(
           presentConsultIds.map((id) =>
             ejecutarAccion(
-              { boardSlug: "atencion", entityId: id, action: "volver_confirmada" },
+              {
+                boardSlug: "atencion",
+                entityId: id,
+                action: "volver_confirmada",
+              },
               centerId
             )
           )
@@ -340,17 +375,21 @@ export function PatientDetail({
           {/* Un único botón para servicios Y consulta, indistinto de cuál tenga el paciente (13-oct-2026):
               antes solo aparecía con servicios, dejando a quien SOLO tiene consulta sin forma de llegar
               aquí salvo por su propia fila — justo la fila que acabamos de ocultar. */}
-          {(patient.services.length > 0 || patient.consultationIds.length > 0) &&
+          {(patient.services.length > 0 ||
+            patient.consultationIds.length > 0) &&
             (patient.presentAt ? (
-              <div className="flex items-center gap-1 rounded-md border bg-muted/40 py-1 pr-1 pl-2.5 text-sm">
-                <span className="text-muted-foreground">
-                  {t("arrivedAt", { time: fmtHora(patient.presentAt) })}
+              // Present = the word and the time in strong green, as the staff are used to (owner, 14-oct-2026).
+              // Not the `success` token: it is a pale tint (oklch 0.95) that barely showed.
+              <div className="flex items-center gap-1 rounded-md bg-emerald-600 py-1 pr-1 pl-2.5 text-sm text-white shadow-sm">
+                <span className="inline-flex items-center gap-1 font-semibold">
+                  <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+                  {t("presentAt", { time: fmtHora(patient.presentAt) })}
                 </span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs"
+                  className="h-6 px-2 text-xs text-white hover:bg-white/20 hover:text-white"
                   disabled={presenceBusy}
                   onClick={handleUndoPresent}
                 >
@@ -427,42 +466,62 @@ export function PatientDetail({
         </div>
       </div>
 
-      {kind !== "consultation" &&
-        patient.services.map((s) => (
-          <ServiceSessionsTable
-            key={s.serviceId}
-            slug={s.slug}
-            name={s.name}
-            color={s.color}
-            concluded={serviceConcluded(s)}
-            service={data.servicesById.get(s.serviceId)}
-            board={data.boardsBySlug[s.slug]}
-            definition={data.serviceDefinition}
-            sessionsById={data.sessionsById}
-            sessionIds={s.sessionIds}
-            patientId={patient.patientId}
-            date={date}
-            centerId={centerId}
-            onChanged={data.refresh}
-            onSchedule={(ctx) =>
-              onSchedule({ ...ctx, servicioId: ctx.servicioId ?? s.serviceId })
-            }
-          />
-        ))}
+      {/* Sections in one order (lib: patientSections) — pending first unless a service filter rules. */}
+      {patientSections(patient).map((x) =>
+        x.kind === "service"
+          ? kind !== "consultation" && (
+              <ServiceSessionsTable
+                key={x.service.serviceId}
+                slug={x.service.slug}
+                name={x.service.name}
+                color={x.service.color}
+                concluded={serviceConcluded(x.service)}
+                cancelledOnly={serviceCancelledOnly(x.service)}
+                service={data.servicesById.get(x.service.serviceId)}
+                board={data.boardsBySlug[x.service.slug]}
+                definition={data.serviceDefinition}
+                sessionsById={data.sessionsById}
+                sessionIds={x.service.sessionIds}
+                patientId={patient.patientId}
+                date={date}
+                centerId={centerId}
+                onChanged={data.refresh}
+                onSchedule={(ctx) =>
+                  onSchedule({
+                    ...ctx,
+                    servicioId: ctx.servicioId ?? x.service.serviceId,
+                  })
+                }
+              />
+            )
+          : kind !== "services" &&
+            data.consultations && (
+              <ConsultationRows
+                key="consultation"
+                board={data.consultations}
+                definition={data.consultationDefinition}
+                rowIds={patient.consultationIds}
+                color={data.consultationTab?.color ?? null}
+                label={consultLabel}
+                centerId={centerId}
+                onChanged={data.refresh}
+              />
+            )
+      )}
 
-      {kind !== "services" &&
-        patient.consultationIds.length > 0 &&
-        data.consultations && (
-          <ConsultationRows
-            board={data.consultations}
-            definition={data.consultationDefinition}
-            rowIds={patient.consultationIds}
-            color={data.consultationTab?.color ?? null}
-            label={consultLabel}
-            centerId={centerId}
-            onChanged={data.refresh}
-          />
-        )}
+      {dataGate && (
+        <EhrReadinessModal
+          pacienteId={patient.patientId}
+          faltantes={dataGate.faltantes}
+          centroId={centerId}
+          onCancel={() => setDataGate(null)}
+          onCompleted={() => {
+            const ids = dataGate.consultIds
+            setDataGate(null)
+            void retryConsultPresent(ids)
+          }}
+        />
+      )}
 
       {editingPatient && (
         // Montado SOLO una vez que `editingPatient` ya tiene el paciente completo: si este Sheet

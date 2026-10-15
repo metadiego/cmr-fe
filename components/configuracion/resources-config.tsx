@@ -30,6 +30,7 @@ import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/compon
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PageHeader } from "@/components/ui/page";
+import { TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
 
 // Configuración → Recursos: el CUELLO de la agenda de terapias (cuartos, sillas, personas). Todo por API,
 // nada quemado — sin esta pantalla el cuadro volvería a vivir en un script. DELETE = DESACTIVA (regla del
@@ -70,7 +71,9 @@ export function ResourcesSection({
   section: "resources" | "consumption";
 }) {
   const t = useTranslations("resources");
-  if (estado.cargando) return null;
+  // While the centre gate resolves, the list tab already shows its table frame (write access is not
+  // known yet, so no actions column); the consumption editor keeps its own loading.
+  if (estado.cargando) return section === "resources" ? <ResourcesTableSkeleton puedeEscribir={false} /> : null;
   if (!estado.centroActivo) return <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>;
   return section === "resources" ? (
     <ResourcesList centroId={estado.fetchCentroId} puedeEscribir={estado.puedeEscribir} />
@@ -82,7 +85,7 @@ export function ResourcesSection({
 function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEscribir: boolean }) {
   const t = useTranslations("resources");
   const tRoot = useTranslations();
-  const { state, reload } = useResource<Resource[]>(() => listResources(centroId), [centroId]);
+  const { state, refresh } = useResource<Resource[]>(() => listResources(centroId), [centroId]);
   const [editing, setEditing] = React.useState<Resource | "new" | null>(null);
   const [busyId, setBusyId] = React.useState<string | null>(null);
   const concLabel = (c: ResourceConcurrency) => t(`concurrency.${c}`);
@@ -93,7 +96,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
       if (r.active) await deactivateResource(r.id, centroId);
       else await updateResource(r.id, { active: true }, centroId);
       toast.success(r.active ? t("deactivated") : t("activated"));
-      reload();
+      refresh();
     } catch (e) {
       toastError(e, tRoot);
     } finally {
@@ -101,7 +104,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
     }
   }
 
-  if (state.kind === "loading") return <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>;
+  if (state.kind === "loading") return <ResourcesTableSkeleton puedeEscribir={puedeEscribir} />;
   if (state.kind === "fail") return <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{state.message}</p>;
 
   return (
@@ -112,19 +115,7 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
         </div>
       )}
       <DataTable>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("colName")}</TableHead>
-            <TableHead>{t("colKind")}</TableHead>
-            <TableHead className="text-right">{t("colCapacity")}</TableHead>
-            <TableHead>{t("colConcurrency")}</TableHead>
-            <TableHead>{t("colServices")}</TableHead>
-            <TableHead className="text-right">{t("colMaxMin")}</TableHead>
-            <TableHead>{t("colStaff")}</TableHead>
-            <TableHead>{t("colStatus")}</TableHead>
-            {puedeEscribir && <TableHead className="text-right">{t("colActions")}</TableHead>}
-          </TableRow>
-        </TableHeader>
+        <ResourcesTableHeader puedeEscribir={puedeEscribir} />
         <TableBody>
           {state.data.map((r) => (
             <TableRow key={r.id} className={r.active ? "" : "opacity-50"}>
@@ -175,9 +166,52 @@ function ResourcesList({ centroId, puedeEscribir }: { centroId?: string; puedeEs
           resource={editing === "new" ? null : editing}
           centroId={centroId}
           onClose={() => setEditing(null)}
-          onSaved={() => { setEditing(null); reload(); }}
+          onSaved={() => { setEditing(null); refresh(); }}
         />
       )}
+    </section>
+  );
+}
+
+// Column shapes for the loading rows, in header order (name, kind, capacity, concurrency, services,
+// max minutes, staff, status, actions).
+const SKELETON_COLUMNS: CellShape[] = ["text", "short", "short", "text", "long", "short", "text", "badge"];
+
+function ResourcesTableHeader({ puedeEscribir }: { puedeEscribir: boolean }) {
+  const t = useTranslations("resources");
+  return (
+    <TableHeader>
+      <TableRow>
+        <TableHead>{t("colName")}</TableHead>
+        <TableHead>{t("colKind")}</TableHead>
+        <TableHead className="text-right">{t("colCapacity")}</TableHead>
+        <TableHead>{t("colConcurrency")}</TableHead>
+        <TableHead>{t("colServices")}</TableHead>
+        <TableHead className="text-right">{t("colMaxMin")}</TableHead>
+        <TableHead>{t("colStaff")}</TableHead>
+        <TableHead>{t("colStatus")}</TableHead>
+        {puedeEscribir && <TableHead className="text-right">{t("colActions")}</TableHead>}
+      </TableRow>
+    </TableHeader>
+  );
+}
+
+// Same section frame as the loaded list: the add button's row (when writable), real headers, skeleton rows.
+function ResourcesTableSkeleton({ puedeEscribir }: { puedeEscribir: boolean }) {
+  const t = useTranslations("resources");
+  return (
+    <section className="space-y-4">
+      {puedeEscribir && (
+        <div className="flex justify-end">
+          <Button size="sm" disabled>{t("add")}</Button>
+        </div>
+      )}
+      <DataTable>
+        <ResourcesTableHeader puedeEscribir={puedeEscribir} />
+        <TableBody>
+          <TableRowsSkeleton columns={puedeEscribir ? [...SKELETON_COLUMNS, "button"] : SKELETON_COLUMNS} rows={6} />
+        </TableBody>
+      </DataTable>
     </section>
   );
 }

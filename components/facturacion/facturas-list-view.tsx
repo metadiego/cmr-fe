@@ -19,12 +19,10 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import {
-  DataTable,
-  TableEmpty,
-  TableError,
-  TableLoading,
-} from "@/components/ui/data-table";
+import { DataTable, TableEmpty, TableError } from "@/components/ui/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableRowsSkeleton } from "@/components/kit/skeletons";
+import { DEFAULT_INVOICE_COLUMNS, invoiceColumnShape } from "@/lib/facturacion/invoice-board-defaults";
 import {
   TableBody,
   TableCell,
@@ -93,7 +91,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   }, [q, estado, desde, hasta, router]);
 
   const gate = useCentroGate();
-  const { state, reload, refresh } = useResource<FacturaTablero>(
+  const { state, refresh } = useResource<FacturaTablero>(
     () =>
       gate.centro
         ? getFacturasTablero({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
@@ -127,7 +125,14 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   });
 
   const tablero = state.kind === "ok" ? state.data : null;
-  const columnas = (tablero?.columns ?? []).filter((c) => c.clave !== "fac_acciones");
+  // The board's columns survive a filter change: while the new range loads, the header stays put and
+  // only the body turns into skeleton rows (a centre-less placeholder fetch never counts).
+  const [knownCols, setKnownCols] = React.useState<FacturaTableroColumna[] | null>(null);
+  const freshCols = gate.centro && tablero ? tablero.columns : null;
+  if (freshCols && freshCols !== knownCols) setKnownCols(freshCols);
+  const rawCols = freshCols ?? knownCols;
+  const columnas = (rawCols ?? []).filter((c) => c.clave !== "fac_acciones");
+  const loading = gate.cargando || state.kind === "loading";
   const filas = tablero?.rows ?? [];
 
   // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select+editable con writeBinding.
@@ -150,7 +155,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   // el resto, display. stopPropagation para no navegar al detalle al usar el select.
   function renderCelda(col: FacturaTableroColumna, fila: FacturaTableroFila) {
     if (col.tipo === "select" && col.editable) {
-      return <SelectCelda col={col} fila={fila} opciones={opciones[col.clave] ?? []} centro={gate.centro} onSaved={reload} />;
+      return <SelectCelda col={col} fila={fila} opciones={opciones[col.clave] ?? []} centro={gate.centro} onSaved={refresh} />;
     }
     return cell(col.clave, fila[col.clave]);
   }
@@ -192,9 +197,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
         }
       />
 
-      {gate.cargando ? (
-        <p className="text-sm text-muted-foreground">{tRoot("common.loading")}</p>
-      ) : gate.sinCentro ? (
+      {gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
@@ -241,6 +244,12 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
           {/* Barra de totales: RANGO del servidor (meta.resumen) + PÁGINA sumada de las filas. Un solo
               total si coinciden; dos niveles si hay paginación (página ≠ rango). No resta devoluciones
               (regla contable del dueño: la devolución resta el día en que ocurre, no el mes facturado). */}
+          {loading && (
+            <div aria-hidden className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
+              <Skeleton className="my-0.5 h-4 w-20" />
+              <Skeleton className="my-0.5 h-4 w-72 max-w-full" />
+            </div>
+          )}
           {state.kind === "ok" && filas.length > 0 && (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
               {totalUnico ? (
@@ -277,23 +286,30 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
               <TableRow>
                 {/* Ordinal: nº de línea (orden en que se ven), no un dato de la factura. */}
                 <TableHead className="w-10 text-right" aria-label={t("colNum")}>#</TableHead>
-                {columnas.map((c) => (
+                {/* Before the board's first response, the standard columns' names (known in code), never bars. */}
+                {(rawCols ? columnas : DEFAULT_INVOICE_COLUMNS).map((c) => (
                   <TableHead key={c.clave}>{tRoot(c.labelKey)}</TableHead>
                 ))}
                 <TableHead className="text-right">{tRoot("fac.col.acciones")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {state.kind === "loading" && (
-                <TableLoading colSpan={columnas.length + 2}>{tRoot("common.loading")}</TableLoading>
+              {loading && (
+                <TableRowsSkeleton
+                  columns={[
+                    "short",
+                    ...(rawCols ? columnas : DEFAULT_INVOICE_COLUMNS).map((c) => invoiceColumnShape(c.clave)),
+                    "button",
+                  ]}
+                />
               )}
-              {state.kind === "fail" && (
+              {!loading && state.kind === "fail" && (
                 <TableError colSpan={columnas.length + 2}>{tRoot("common.error")}</TableError>
               )}
-              {state.kind === "ok" && filas.length === 0 && (
+              {!loading && state.kind === "ok" && filas.length === 0 && (
                 <TableEmpty colSpan={columnas.length + 2}>{rangoEsHoy ? t("emptyHoy") : t("empty")}</TableEmpty>
               )}
-              {filas.map((f, i) => (
+              {!loading && filas.map((f, i) => (
                 <TableRow key={f.id} className="cursor-pointer" onClick={() => router.push(detalleHref(f.id))}>
                   {/* Ordinal continuo (con paginación: (page-1)*limit + i + 1; hoy la lista es de una página). */}
                   <TableCell className="text-right tabular-nums text-muted-foreground">{i + 1}</TableCell>
@@ -301,7 +317,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                     <TableCell key={c.clave}>{renderCelda(c, f)}</TableCell>
                   ))}
                   <TableCell className="text-right">
-                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={gate.centro} onChanged={reload} />
+                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={gate.centro} onChanged={refresh} />
                   </TableCell>
                 </TableRow>
               ))}

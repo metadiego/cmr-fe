@@ -75,11 +75,23 @@ export function PatientListView({
                 {/* Llegada real (presente), no la hora de la cita — el dueño lo pidió 10-oct-2026: la
                     cola se ordena por llegada, así que la lista debe mostrar eso, no la cita. La cita
                     queda en el tooltip (misma frase que ya usa el panel de detalle). */}
+                {/* Present = the word and the time in green, as the staff are used to (owner, 14-oct-2026). */}
                 <span
-                  className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums"
-                  title={p.presentAt && p.earliestTime ? t("firstAt", { time: p.earliestTime }) : undefined}
+                  className={cn(
+                    "shrink-0 text-[11px] tabular-nums",
+                    p.presentAt
+                      ? "rounded-full bg-emerald-600 px-1.5 font-semibold text-white"
+                      : "font-mono text-muted-foreground"
+                  )}
+                  title={
+                    p.presentAt && p.earliestTime
+                      ? t("firstAt", { time: p.earliestTime })
+                      : undefined
+                  }
                 >
-                  {p.presentAt ? fmtHora(p.presentAt) : (p.earliestTime ?? "")}
+                  {p.presentAt
+                    ? t("presentAt", { time: fmtHora(p.presentAt) })
+                    : (p.earliestTime ?? "")}
                 </span>
               </div>
               <div className="mb-1 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">

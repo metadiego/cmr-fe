@@ -16,7 +16,14 @@ import {
   type TableroDefinicion as BoardDefinition,
 } from "@/lib/api/tablero"
 import { flowColumns, renderColumns } from "@/lib/frontdesk/board-columns"
-import { blockColumns, notifyColumn } from "@/lib/frontdesk/patient-columns"
+import {
+  blockColumns,
+  hideServiceStatus,
+  isSessionColumn,
+  isStaffColumn,
+  notifyColumn,
+  staffAndFlowFirst,
+} from "@/lib/frontdesk/patient-columns"
 import type {
   ColumnaEfectiva as PlacedColumn,
   CitaFila as BoardRow,
@@ -26,6 +33,8 @@ import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
 import { useCan } from "@/hooks/use-can"
 import { cn } from "@/lib/utils"
+import { ServiceTableSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Props {
   slug: string
@@ -33,6 +42,8 @@ interface Props {
   color: string | null
   // Every session attended: the service is painted gray (still editable — nothing is locked).
   concluded?: boolean
+  // Every session that day was cancelled: a discreet mark instead of operative rows.
+  cancelledOnly?: boolean
   service: Service | undefined
   board: ServiceBoard | undefined
   definition: BoardDefinition | null
@@ -56,6 +67,7 @@ export function ServiceSessionsTable({
   name,
   color,
   concluded = false,
+  cancelledOnly = false,
   service,
   board,
   definition,
@@ -74,7 +86,10 @@ export function ServiceSessionsTable({
   const columns = React.useMemo(() => board?.columns ?? [], [board])
   // Name and record are the detail's title already; the notify bell goes to this block's title.
   const render = React.useMemo(
-    () => renderColumns(blockColumns(columns)),
+    () =>
+      staffAndFlowFirst(
+        renderColumns(hideServiceStatus(blockColumns(columns)))
+      ),
     [columns]
   )
   const notify = React.useMemo(() => notifyColumn(columns), [columns])
@@ -150,7 +165,7 @@ export function ServiceSessionsTable({
     <section
       className={cn(
         "overflow-hidden rounded-lg ring-1 ring-foreground/10",
-        concluded && "bg-muted/50 grayscale"
+        (concluded || cancelledOnly) && "bg-muted/50 grayscale"
       )}
     >
       <header className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
@@ -170,9 +185,15 @@ export function ServiceSessionsTable({
         >
           {name}
         </h3>
-        <span className="text-xs text-muted-foreground">
-          {t("sessionsCount", { n: rows.length })}
-        </span>
+        {board || cancelledOnly ? (
+          <span className="text-xs text-muted-foreground">
+            {cancelledOnly
+              ? t("cancelled")
+              : t("sessionsCount", { n: rows.length })}
+          </span>
+        ) : (
+          <Skeleton aria-hidden className="h-3 w-16" />
+        )}
         {notify && (
           <span className="ml-auto flex items-center gap-1">
             {rows.map((row) => (
@@ -189,24 +210,31 @@ export function ServiceSessionsTable({
           </span>
         )}
       </header>
-      {!board ? (
-        <p className="px-3 py-4 text-sm text-muted-foreground">
-          {tRoot("common.loading")}
-        </p>
+      {cancelledOnly ? null : !board ? (
+        <ServiceTableSkeleton rows={Math.max(1, sessionIds.length)} />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/20">
               <tr className="border-b text-left text-[11px] tracking-wide text-muted-foreground uppercase">
                 {render.map((item, i) =>
+                  // Fixed widths for the leading columns (staff, flow, session) so they line up across
+                  // the patient's services.
                   item.kind === "flujo" ? (
-                    <th key={`flow-${i}`} className="px-3 py-2 font-semibold">
+                    <th
+                      key={`flow-${i}`}
+                      className="w-72 px-3 py-2 font-semibold"
+                    >
                       {tFrontdesk("flujo")}
                     </th>
                   ) : (
                     <th
                       key={item.col.clave}
-                      className="px-3 py-2 font-semibold"
+                      className={cn(
+                        "px-3 py-2 font-semibold",
+                        isStaffColumn(item.col) && "w-60",
+                        isSessionColumn(item.col) && "w-28"
+                      )}
                     >
                       {item.col.label ??
                         tRoot(

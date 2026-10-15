@@ -146,3 +146,29 @@ test("el paciente del recibo de devolución se compone igual que en la factura",
     buildRecibo(facturaBase).paciente.nombre,
   );
 });
+
+// Sales packages (handoff paquetes-de-venta, 14-oct-2026): the REAL line the BE returns.
+const LINEA_PAQUETE = {
+  description: "LASER INTRAVENOSO - ENDO · Láser IV · 12 terapias",
+  quantity: 12,
+  unitPrice: 180,
+  discount: 720,
+  total: 1440,
+  salesPackageId: "6d82346f",
+  meta: {
+    salesPackage: { id: "6d82346f", name: "Láser IV · 12 terapias", sessions: 12, regularUnitPrice: 180, regularPrice: 2160, packagePrice: 1440, savings: 720 },
+  },
+};
+
+test("a package line carries regular, savings and package price; the foot, «Usted ahorró»", () => {
+  const r = buildRecibo({ ...(facturaBase as object), subtotal: 2160, discount: 720, total: 1440, items: [LINEA_PAQUETE] } as never);
+  assert.deepEqual(r.items[0].paquete, { nombre: "Láser IV · 12 terapias", precioRegular: 2160, ahorro: 720, ahorroPct: 33, precioPaquete: 1440 });
+  assert.equal(r.ahorroPaquetes, 720);
+  assert.deepEqual([r.subtotal, r.descuento, r.total], [2160, 720, 1440]);
+});
+
+test("an invoice without packages changes nothing: no package, nothing saved", () => {
+  const r = buildRecibo(facturaBase as never);
+  assert.equal(r.items[0].paquete, undefined);
+  assert.equal(r.ahorroPaquetes, 0);
+});

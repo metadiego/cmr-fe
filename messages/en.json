@@ -1156,7 +1156,8 @@
     "configuracion_datos_paciente": "Required patient data",
     "collapseNav": "Collapse menu",
     "expandNav": "Expand menu",
-    "patientDesk": "Centro de Pacientes (por paciente)"
+    "patientDesk": "Centro de Pacientes (por paciente)",
+    "paquetesVenta": "Sales packages"
   },
   "admin": {
     "title": "Administration",
@@ -2691,7 +2692,12 @@
     "includes": "Includes",
     "protocolVisits": "{n}-visit protocol",
     "budgetDoc": "QUOTE",
-    "hubTestTitle": "HUB TEST"
+    "hubTestTitle": "HUB TEST",
+    "packageLine": "Package {name}",
+    "regularPrice": "Regular price",
+    "savings": "Savings",
+    "packagePrice": "Package price",
+    "youSaved": "You saved"
   },
   "facturacion": {
     "title": "Bill consultation",
@@ -2775,7 +2781,10 @@
       "terceroEmpresa": "Company",
       "terceroPersona": "Person",
       "verLista": "View invoices",
-      "sinCentro": "You have no center assigned. Contact your admin."
+      "sinCentro": "You have no center assigned. Contact your admin.",
+      "doctorRetired": "retired",
+      "doctorOtherCenter": "other center",
+      "doctorNotListed": "not active here"
     },
     "priceAuto": "auto",
     "priceAutoHint": "Empty = center price (effective). Type to override.",
@@ -2943,7 +2952,8 @@
     "notes": "Notes",
     "notesPlaceholder": "Reason / notes…",
     "cancel": "Cancel",
-    "save": "Add to board"
+    "save": "Add to board",
+    "retired": "Retired"
   },
   "precios": {
     "title": "Prices",
@@ -3385,6 +3395,7 @@
       "estado": "Status",
       "total": "Total",
       "medio": "Referral",
+      "usuario": "User",
       "acciones": "Actions"
     }
   },
@@ -4671,7 +4682,6 @@
     "record": "Record",
     "firstAt": "first booking {time}",
     "markPresent": "Present",
-    "arrivedAt": "Arrived {time}",
     "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "consultation": "Consultation",
@@ -4709,6 +4719,62 @@
       "chipFull": "{service} {turn} · {min} min"
     },
     "bookService": "Book a service",
-    "bookConsultation": "Book a consultation"
+    "bookConsultation": "Book a consultation",
+    "cancelled": "Cancelled",
+    "presentAt": "Present {time}"
+  },
+  "salesPackages": {
+    "title": "Sales packages",
+    "subtitle": "Sessions at a package price. The regular price and the savings come from the catalog.",
+    "showInactive": "Show retired",
+    "new": "New package",
+    "newTitle": "New sales package",
+    "editTitle": "Edit sales package",
+    "edit": "Edit",
+    "retire": "Retire",
+    "reactivate": "Reactivate",
+    "retired": "Package retired",
+    "reactivated": "Package reactivated",
+    "saved": "Package saved",
+    "empty": "This center has no sales packages.",
+    "active": "Active",
+    "inactive": "Retired",
+    "namePh": "e.g. IV Laser · 12 therapies",
+    "productPh": "Pick a product…",
+    "sortOrder": "Order",
+    "regularHint": "The regular price and the savings are computed from the product's price in this center; the package must cost less.",
+    "col": {
+      "name": "Name",
+      "product": "Product",
+      "sessions": "Sessions",
+      "regular": "Regular",
+      "package": "Package",
+      "savings": "Savings",
+      "active": "Status"
+    },
+    "addToInvoice": "Add package",
+    "pickTitle": "Add a package to the invoice",
+    "pickEmpty": "There are no active packages in this center.",
+    "added": "Package added",
+    "lockedNote": "Package: to change it, remove it and add it again.",
+    "evidence": "Package {name}",
+    "regularPrice": "Regular price",
+    "savingsLabel": "Savings",
+    "packagePrice": "Package price",
+    "youSaved": "You saved"
+  },
+  "salesPackage": {
+    "nameRequired": "The name is required.",
+    "duplicateName": "There is already a package with that name in this center.",
+    "invalidSessions": "Sessions must be a number greater than zero.",
+    "invalidPrice": "The package price is not valid.",
+    "priceNotBelowRegular": "The package must cost less than the regular price.",
+    "noRegularPrice": "That product has no regular price in this center.",
+    "duplicateProductSessions": "There is already a package of that product with those sessions.",
+    "productNotFound": "The product was not found.",
+    "centerRequired": "The center is missing.",
+    "notFound": "The package was not found.",
+    "inactive": "That package is retired.",
+    "lineLocked": "A package line cannot be edited: remove it and add it again."
   }
 }

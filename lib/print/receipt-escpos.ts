@@ -72,6 +72,13 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
       ` x ${money(it.precioUnitario)}` +
       (it.descuento > 0 ? ` −\u00a0${money(it.descuento)}` : ""); // the minus stays with its amount
     w.columnsRow(left, money(it.total));
+    if (it.paquete) {
+      // Sales package evidence: regular price, savings and what is paid (meta.salesPackage).
+      w.wrapped(t("packageLine", { name: it.paquete.nombre }), 3);
+      w.columnsRow(t("regularPrice"), money(it.paquete.precioRegular), 3);
+      w.columnsRow(`${t("savings")} (${it.paquete.ahorroPct}%)`, `−\u00a0${money(it.paquete.ahorro)}`, 3);
+      w.columnsRow(t("packagePrice"), money(it.paquete.precioPaquete), 3);
+    }
     if (it.componentes && it.componentes.length > 0) {
       const head = `${t("includes")}:` + (it.protocoloVisitas ? ` ${t("protocolVisits", { n: it.protocoloVisitas })}` : "");
       w.wrapped(head, 3);
@@ -99,6 +106,7 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
   if (r.envio > 0) w.columnsRow(t("shipping"), money(r.envio));
   w.solid();
   w.bold(true).columnsRow(t("total"), money(r.total)).bold(false);
+  if ((r.ahorroPaquetes ?? 0) > 0) w.bold(true).columnsRow(t("youSaved"), money(r.ahorroPaquetes ?? 0)).bold(false);
   if (r.montoAbonado > 0) w.columnsRow(t("paid"), money(r.montoAbonado));
   if (r.saldo > 0) w.bold(true).columnsRow(t("balance"), money(r.saldo)).bold(false);
 

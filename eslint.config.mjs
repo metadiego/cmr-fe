@@ -26,13 +26,13 @@ const DEBT = {
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
   // 09-oct-2026: 930 → 880 — the header/toolbar row moved to components/frontdesk/frontdesk-toolbar.tsx.
-  "components/frontdesk/frontdesk-board.tsx": 842, // 12-oct-2026: 843 → 842 — the natural row-order fix also moved to lib/frontdesk/board-columns.ts (shared with the patient desk)
+  "components/frontdesk/frontdesk-board.tsx": 816, // 10-oct-2026: column layout + loading skeleton moved to lib/frontdesk/board-columns.ts / frontdesk-skeleton.tsx (843 → 817); 12-oct-2026: the natural row-order fix also moved there (→ 816)
   "components/frontdesk/fila-sesion.tsx": 714,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
   // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to
   // components/facturacion/regenerar-disponibilidad-dialog.tsx, which also made room for Reopen.
-  "app/(app)/billing/invoices/[id]/page.tsx": 1966,
+  "app/(app)/billing/invoices/[id]/page.tsx": 1535,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)

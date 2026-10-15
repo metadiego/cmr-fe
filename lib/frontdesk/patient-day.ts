@@ -33,6 +33,9 @@ export interface DayService {
   slug: string
   name: string
   color?: string | null
+  // Who performs it — the service's own flags (Configuración → Servicios), data, not code.
+  requiresTechnician?: boolean
+  requiresNurse?: boolean
 }
 
 export interface PatientService {
@@ -40,8 +43,20 @@ export interface PatientService {
   slug: string
   name: string
   color: string | null
+  staffGroup: StaffGroup
   sessionIds: string[]
   statuses: string[]
+}
+
+// Who performs a service, in the order the filtered view groups the rest: technician only, nurse
+// only, both, neither (owner, 14-oct-2026 — handoff patient-desk-orden-por-personal).
+export type StaffGroup = 0 | 1 | 2 | 3
+export function staffGroup(
+  s: Pick<DayService, "requiresTechnician" | "requiresNurse"> | undefined
+): StaffGroup {
+  const tech = !!s?.requiresTechnician
+  const nurse = !!s?.requiresNurse
+  return tech && nurse ? 2 : tech ? 0 : nurse ? 1 : 3
 }
 
 export interface PatientDay {
@@ -52,6 +67,9 @@ export interface PatientDay {
   consultationIds: string[]
   consultationStatuses: string[]
   consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
+  // The order the patient's sections (services + consultation) are drawn in, set by orderSections.
+  // Absent = the configured order (services, then the consultation).
+  sections?: PatientSection[]
   earliestTime: string | null // HH:MM of the first booking of the day
   presentAt: string | null // first arrival stamp (any service or the consultation)
   allCancelled: boolean
@@ -107,6 +125,7 @@ export function groupByPatient(
         slug: meta?.slug ?? "",
         name: meta?.name ?? "",
         color: meta?.color ?? null,
+        staffGroup: staffGroup(meta),
         sessionIds: [],
         statuses: [],
       }
@@ -136,6 +155,19 @@ export function groupByPatient(
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
   }
 
+  // A cancelled session is not a session (handoff patient-desk-cancelada-no-es-sesion, 14-oct-2026):
+  // when the service has a live one that day, its cancelled rows are dropped — not drawn, not counted,
+  // not in the chips. Only a service with nothing but cancelled rows keeps them, for a discreet mark.
+  for (const p of map.values())
+    for (const ps of p.services) {
+      const live = ps.statuses
+        .map((x, i) => (x === "cancelada" ? -1 : i))
+        .filter((i) => i >= 0)
+      if (live.length === 0 || live.length === ps.statuses.length) continue
+      ps.sessionIds = live.map((i) => ps.sessionIds[i])
+      ps.statuses = live.map((i) => ps.statuses[i])
+    }
+
   // Services in the configured order (the order of `services`), not in arrival order.
   const order = new Map(services.map((s, i) => [s.id, i]))
   for (const p of map.values())
@@ -148,6 +180,11 @@ export function groupByPatient(
 
 // A service is concluded when every session of it is attended ('asistido'); cancelled sessions are
 // not pending, so they do not hold it open — but at least one must have been attended.
+// Every session of the service that day was cancelled (the rows were kept only for a discreet mark).
+export function serviceCancelledOnly(s: PatientService): boolean {
+  return s.statuses.length > 0 && s.statuses.every((x) => x === "cancelada")
+}
+
 export function serviceConcluded(s: PatientService): boolean {
   const live = s.statuses.filter((x) => x !== "cancelada")
   return live.length > 0 && live.every((x) => x === "asistido")
@@ -230,7 +267,9 @@ export function filterByKind(
 // Narrows "Servicios" to ONE service (data-driven: whichever services the day's patients actually
 // have — see servicesOfTheDay). `null` clears it. That service also moves FIRST in each patient's
 // services (chips and detail), so whoever works it finds it without scrolling (owner 13-oct-2026);
-// the rest keep their configured order.
+// the rest follow grouped by who performs them, starting with the SAME staff as the filtered one (filter
+// Vit C, a nurse service → the other nurse services next, then technician, both, neither; owner
+// 14-oct-2026) — each group in the configured order (the sort is stable and the list arrives in it).
 export function filterByService(
   list: PatientDay[],
   serviceId: string | null
@@ -238,13 +277,19 @@ export function filterByService(
   if (!serviceId) return list
   return list
     .filter((p) => p.services.some((s) => s.serviceId === serviceId))
-    .map((p) => ({
-      ...p,
-      services: [
-        ...p.services.filter((s) => s.serviceId === serviceId),
-        ...p.services.filter((s) => s.serviceId !== serviceId),
-      ],
-    }))
+    .map((p) => {
+      const same = p.services.find((s) => s.serviceId === serviceId)!.staffGroup
+      const rank = (g: StaffGroup) => (g === same ? -1 : g)
+      return {
+        ...p,
+        services: [
+          ...p.services.filter((s) => s.serviceId === serviceId),
+          ...p.services
+            .filter((s) => s.serviceId !== serviceId)
+            .sort((a, b) => rank(a.staffGroup) - rank(b.staffGroup)),
+        ],
+      }
+    })
 }
 
 // Narrows "Consulta" to one subtype (e.g. nueva/seguimiento — the board's own catalog, see
@@ -272,4 +317,60 @@ export function servicesOfTheDay(
     }
   }
   return out
+}
+
+// ─── Section order: what is still pending goes first (owner, 14-oct-2026) ──────────────────────────
+// «Se trabaja a favor del paciente: lo que le falta es lo importante.» Handoff
+// patient-desk-lo-pendiente-primero. One place for the order: chips and detail both read `sections`.
+
+export type PatientSection =
+  | { kind: "service"; service: PatientService }
+  | { kind: "consultation" }
+
+// Something of the service is still to do: a live session that is not attended.
+export function servicePending(s: PatientService): boolean {
+  return s.statuses.some((x) => x !== "asistido" && x !== "cancelada")
+}
+
+// The consultation is still to do while any of its statuses is not terminal (board catalog).
+export function consultationPending(
+  p: PatientDay,
+  isTerminal: IsTerminal = noneTerminal
+): boolean {
+  return p.consultationStatuses.some((x) => !isTerminal(x))
+}
+
+// The configured order: services as they come, then the consultation.
+export function defaultSections(p: PatientDay): PatientSection[] {
+  const out: PatientSection[] = p.services.map((service) => ({
+    kind: "service",
+    service,
+  }))
+  if (p.consultationIds.length > 0) out.push({ kind: "consultation" })
+  return out
+}
+
+export function patientSections(p: PatientDay): PatientSection[] {
+  return p.sections ?? defaultSections(p)
+}
+
+// Without a service filter: pending sections first, finished after, each group in the configured order.
+// With one, the filter is canonical (filterByService's order) and this does not reorder anything.
+export function orderSections(
+  list: PatientDay[],
+  opts: { serviceFiltered: boolean; isTerminal?: IsTerminal }
+): PatientDay[] {
+  if (opts.serviceFiltered) return list
+  const isTerminal = opts.isTerminal ?? noneTerminal
+  return list.map((p) => {
+    const base = defaultSections(p)
+    const pending = (x: PatientSection) =>
+      x.kind === "service"
+        ? servicePending(x.service)
+        : consultationPending(p, isTerminal)
+    return {
+      ...p,
+      sections: [...base.filter(pending), ...base.filter((x) => !pending(x))],
+    }
+  })
 }

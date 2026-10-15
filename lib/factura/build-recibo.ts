@@ -1,4 +1,5 @@
 import type { FacturaConItems, FacturaEmpresa, ReciboDevolucion } from "@/lib/api/facturas";
+import { invoiceSavings, packageEvidence, savingsPct } from "./sales-package.ts";
 
 // Fiscal/branch block, projected by the BE per sucursal (getById `empresa`). NO
 // hardcoded company data here.
@@ -21,6 +22,8 @@ export type ReciboItem = {
   protocoloVisitas?: number;
   // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
   multiplicadores?: Record<string, number>;
+  // Sales package evidence (item.meta.salesPackage, frozen by the BE): regular, savings, package price.
+  paquete?: { nombre: string; precioRegular: number; ahorro: number; ahorroPct: number; precioPaquete: number };
 };
 
 // Presentational model consumed by <ReciboTermico>. Assembled ONCE here from the
@@ -41,6 +44,7 @@ export type Recibo = {
   impuesto: number;
   impuestos: { nombre: string; tasa?: number; monto: number }[];
   envio: number; // envío/flete sumado al total DESPUÉS del impuesto (0 = sin envío → no se imprime)
+  ahorroPaquetes?: number; // «Usted ahorró»: sum of the package lines' savings (0 = none → not printed)
   total: number;
   montoAbonado: number;
   saldo: number;
@@ -51,6 +55,13 @@ export type Recibo = {
 };
 
 const num = (v: unknown) => Number(v ?? 0);
+
+function paqueteDe(it: { salesPackageId?: string | null; meta?: unknown }): ReciboItem["paquete"] | undefined {
+  const e = packageEvidence(it);
+  return e
+    ? { nombre: e.name, precioRegular: e.regularPrice, ahorro: e.savings, ahorroPct: savingsPct(e), precioPaquete: e.packagePrice }
+    : undefined;
+}
 
 // Assemble the receipt model from the BE's enriched GET /invoices/:id projection.
 // All data travels from the BE (empresa, payments, emisor, doctor, displayNumber,
@@ -96,6 +107,7 @@ export function buildRecibo(
       ...(itemComps.length ? { componentes: itemComps } : {}),
       ...(itemComps.length && visitas ? { protocoloVisitas: visitas } : {}),
       ...(multiplicadores ? { multiplicadores } : {}),
+      ...(paqueteDe(it) ? { paquete: paqueteDe(it)! } : {}),
     };
   });
   const subtotal = num(f.subtotal) || items.reduce((s, it) => s + it.total, 0);
@@ -138,6 +150,7 @@ export function buildRecibo(
     impuesto,
     impuestos,
     envio: num((f as { shipping?: number }).shipping),
+    ahorroPaquetes: invoiceSavings(f.items ?? []),
     total,
     montoAbonado,
     saldo: Math.max(0, total - montoAbonado),

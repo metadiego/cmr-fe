@@ -25,7 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Can } from "@/components/kit/can";
-import { MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
+import { ControlSkeleton } from "@/components/kit/skeletons";
+import { LegendSkeleton, MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
 import { PlanificarDiaModal } from "@/components/agenda/planificar-dia-modal";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import type { Paciente } from "@/lib/api/pacientes";
@@ -62,7 +63,7 @@ export function ServiciosCalendar() {
   );
   const festivos = festivosRes.state.kind === "ok" ? festivosRes.state.data : [];
 
-  const { state, reload } = useResource<Sesion[]>(
+  const { state, refresh } = useResource<Sesion[]>(
     () =>
       listSesionesRango({
         desde,
@@ -75,9 +76,9 @@ export function ServiciosCalendar() {
   const sesiones = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
   React.useEffect(() => {
-    const id = setInterval(reload, 20000);
+    const id = setInterval(refresh, 20000);
     return () => clearInterval(id);
-  }, [reload]);
+  }, [refresh]);
 
   const servById = React.useMemo(() => new Map(servicios.map((s) => [s.id, s])), [servicios]);
 
@@ -145,6 +146,9 @@ export function ServiciosCalendar() {
           <h2 className="min-w-52 px-1 text-xl font-semibold whitespace-nowrap">{monthLabel}</h2>
           {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
           <CentroPantallaSelector estado={centro} />
+          {serviciosRes.state.kind === "loading" ? (
+            <ControlSkeleton className="w-52" />
+          ) : (
           <Select value={servicioId} onValueChange={setServicioId}>
             <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -154,6 +158,7 @@ export function ServiciosCalendar() {
               ))}
             </SelectContent>
           </Select>
+          )}
           <div className="ml-auto flex items-center gap-2">
             {/* «Nuevo servicio» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
             {centro.puedeEscribir && (
@@ -175,6 +180,7 @@ export function ServiciosCalendar() {
             month0={month0}
             weekdays={weekdays}
             eventsByDate={eventsByDate}
+            loading={state.kind === "loading"}
             festivos={festivos}
             onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}?tab=servicios`)}
             onEventClick={() => { /* sessions are managed on the day-of board */ }}
@@ -217,6 +223,9 @@ export function ServiciosCalendar() {
 
         <section>
           <h2 className="mb-2 text-sm font-semibold">{t("serviceLegend")}</h2>
+          {serviciosRes.state.kind === "loading" ? (
+            <LegendSkeleton className="max-h-72 overflow-y-auto" />
+          ) : (
           <ul className="max-h-72 space-y-1.5 overflow-y-auto">
             {servicios.map((s) => (
               <li key={s.id} className="flex items-center gap-2 text-sm">
@@ -225,6 +234,7 @@ export function ServiciosCalendar() {
               </li>
             ))}
           </ul>
+          )}
         </section>
       </aside>
 
@@ -235,7 +245,7 @@ export function ServiciosCalendar() {
           paciente={modal.paciente}
           centro={centro.centroActivo || undefined}
           onOpenChange={(o) => !o && setModal(null)}
-          onSaved={reload}
+          onSaved={refresh}
         />
       )}
       <PacienteFormSheet open={newPatientOpen} onOpenChange={setNewPatientOpen} onSaved={() => setNewPatientOpen(false)} />

@@ -16,6 +16,7 @@ import {
   filterByKind,
   filterByService,
   filterPatients,
+  orderSections,
   servicesOfTheDay,
   type PatientKind,
 } from "@/lib/frontdesk/patient-day"
@@ -32,11 +33,13 @@ import { AgregarCitaModal as AddConsultationModal } from "@/components/tablero/a
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
 import { PatientListView } from "@/components/patient-desk/patient-list-view"
 import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip"
+import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
 import { LiveBadge } from "@/components/live-badge"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DatePicker } from "@/components/ui/date-picker"
 import {
   Dialog,
@@ -82,7 +85,8 @@ export function PatientDesk() {
     (ScheduleRequest & { open: boolean }) | { open: false }
   >({ open: false })
   const [addingConsultation, setAddingConsultation] = React.useState<
-    { open: true; pacienteId?: string; pacienteNombre?: string } | { open: false }
+    | { open: true; pacienteId?: string; pacienteNombre?: string }
+    | { open: false }
   >({ open: false })
 
   const data = usePatientDay(gate.centro, date)
@@ -102,8 +106,8 @@ export function PatientDesk() {
   // Sub-filter WITHIN the active kind: one service ("Servicios") or one subtype ("Consulta") — both
   // data-driven (servicesOfTheDay / the board's own subtype catalog), never a hardcoded list. Cleared
   // whenever the kind itself changes, so the little arrow never carries a stale, invisible filter.
-  const [serviceFilter, setServiceFilter] = React.useState<string | null>(
-    () => initialParams.get("service")
+  const [serviceFilter, setServiceFilter] = React.useState<string | null>(() =>
+    initialParams.get("service")
   )
   const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
     string | null
@@ -126,15 +130,33 @@ export function PatientDesk() {
   )
   const patients = React.useMemo(() => {
     let list = filterByKind(data.patients, kind)
-    if (kind === "services") list = filterByService(list, serviceFilter)
+    const serviceFiltered = kind === "services" && !!serviceFilter
+    if (serviceFiltered) list = filterByService(list, serviceFilter)
     if (kind === "consultation")
       list = filterByConsultationSubtype(list, consultSubtypeFilter)
+    // Pending sections first, unless a service filter sets the order (handoff lo-pendiente-primero).
+    list = orderSections(list, {
+      serviceFiltered,
+      isTerminal: data.isConsultationTerminal,
+    })
     return filterPatients(list, query)
-  }, [data.patients, kind, serviceFilter, consultSubtypeFilter, query])
+  }, [
+    data.patients,
+    data.isConsultationTerminal,
+    kind,
+    serviceFilter,
+    consultSubtypeFilter,
+    query,
+  ])
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
     : (patients[0]?.patientId ?? null)
+
+  // First load (or a new date/center): skeleton instead of a "0 patients" count and an empty list.
+  const loadingDay =
+    gate.cargando ||
+    (!!gate.centro && data.loading && data.patients.length === 0)
 
   // Mantiene la URL al día con TODO lo que define esta vista (fecha, búsqueda, kind, sub-filtro y el
   // paciente que se ve ahora, aunque nunca se haya clicado — effectiveSelected, no el crudo
@@ -281,9 +303,13 @@ export function PatientDesk() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : null}
-        <span className="text-xs text-muted-foreground">
-          {t("patientsCount", { n: patients.length })}
-        </span>
+        {loadingDay ? (
+          <Skeleton aria-hidden className="h-3 w-20" />
+        ) : (
+          <span className="text-xs text-muted-foreground">
+            {t("patientsCount", { n: patients.length })}
+          </span>
+        )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <LiveLocationWidget
             centroId={gate.centro}
@@ -357,9 +383,7 @@ export function PatientDesk() {
       )}
 
       {gate.cargando ? (
-        <p className="text-sm text-muted-foreground">
-          {tRoot("common.loading")}
-        </p>
+        <PatientDeskSkeleton />
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">
           {tRoot("facturacion.general.sinCentro")}
@@ -372,10 +396,8 @@ export function PatientDesk() {
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {data.error}
         </p>
-      ) : data.loading && data.patients.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {tRoot("common.loading")}
-        </p>
+      ) : loadingDay ? (
+        <PatientDeskSkeleton />
       ) : patients.length === 0 ? (
         <p className="rounded-lg bg-card px-4 py-16 text-center text-sm text-muted-foreground ring-1 ring-foreground/10">
           {query ? t("noMatches") : t("empty")}

@@ -10471,6 +10471,334 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facturacion/paquetes-ventas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Paquetes de venta del centro (o de `centerIds`), con precio regular, ahorro y % calculados del catálogo.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/paquetes-ventas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["SalesPackagesController_list[0]_v1"];
+        put?: never;
+        /**
+         * Crea un paquete de venta en el centro (`centerId` o el de la sesión). Su precio tiene que ser menor que el regular del catálogo.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/paquetes-ventas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SalesPackagesController_create[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/sales-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Paquetes de venta del centro (o de `centerIds`), con precio regular, ahorro y % calculados del catálogo.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/sales-packages`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["SalesPackagesController_list[1]_v1"];
+        put?: never;
+        /**
+         * Crea un paquete de venta en el centro (`centerId` o el de la sesión). Su precio tiene que ser menor que el regular del catálogo.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/sales-packages`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SalesPackagesController_create[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturacion/paquetes-ventas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Paquetes de venta del centro (o de `centerIds`), con precio regular, ahorro y % calculados del catálogo. */
+        get: operations["SalesPackagesController_list[2]_v2"];
+        put?: never;
+        /** Crea un paquete de venta en el centro (`centerId` o el de la sesión). Su precio tiene que ser menor que el regular del catálogo. */
+        post: operations["SalesPackagesController_create[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/billing/sales-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Paquetes de venta del centro (o de `centerIds`), con precio regular, ahorro y % calculados del catálogo. */
+        get: operations["SalesPackagesController_list[3]_v2"];
+        put?: never;
+        /** Crea un paquete de venta en el centro (`centerId` o el de la sesión). Su precio tiene que ser menor que el regular del catálogo. */
+        post: operations["SalesPackagesController_create[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturacion/paquetes-ventas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita un paquete (parcial); se valida entero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/paquetes-ventas/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["SalesPackagesController_update[0]_v1"];
+        post?: never;
+        /**
+         * Retira un paquete (active=false). No se borra: las facturas lo nombran.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturacion/paquetes-ventas/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["SalesPackagesController_retire[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/billing/sales-packages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita un paquete (parcial); se valida entero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/sales-packages/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["SalesPackagesController_update[1]_v1"];
+        post?: never;
+        /**
+         * Retira un paquete (active=false). No se borra: las facturas lo nombran.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/billing/sales-packages/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["SalesPackagesController_retire[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturacion/paquetes-ventas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un paquete (parcial); se valida entero. */
+        put: operations["SalesPackagesController_update[2]_v2"];
+        post?: never;
+        /** Retira un paquete (active=false). No se borra: las facturas lo nombran. */
+        delete: operations["SalesPackagesController_retire[2]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/billing/sales-packages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita un paquete (parcial); se valida entero. */
+        put: operations["SalesPackagesController_update[3]_v2"];
+        post?: never;
+        /** Retira un paquete (active=false). No se borra: las facturas lo nombran. */
+        delete: operations["SalesPackagesController_retire[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/paquetes-ventas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/paquetes-ventas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceSalesPackagesController_sell[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facturas/{id}/sales-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/facturas/{id}/sales-packages`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceSalesPackagesController_sell[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/paquetes-ventas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/paquetes-ventas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceSalesPackagesController_sell[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/{id}/sales-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/invoices/{id}/sales-packages`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["InvoiceSalesPackagesController_sell[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/paquetes-ventas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`. */
+        post: operations["InvoiceSalesPackagesController_sell[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/facturas/{id}/sales-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`. */
+        post: operations["InvoiceSalesPackagesController_sell[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/paquetes-ventas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`. */
+        post: operations["InvoiceSalesPackagesController_sell[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/invoices/{id}/sales-packages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vende un paquete en la factura: línea a precio REGULAR con el descuento del paquete, marcada con `salesPackageId` y congelada en `meta.salesPackage`. */
+        post: operations["InvoiceSalesPackagesController_sell[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/precios/tipos": {
         parameters: {
             query?: never;
@@ -13643,6 +13971,158 @@ export interface paths {
         };
         /** Ubicación en vivo de cada paciente con actividad hoy: vitales, consulta o un servicio específico. */
         get: operations["PacientesController_ubicacionesEnVivo[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/priority-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/priority-flags`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pacientes/banderas-prioridad": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes/banderas-prioridad`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/priority-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/priority-flags`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/patients/banderas-prioridad": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients/banderas-prioridad`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/priority-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200). */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/pacientes/banderas-prioridad": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200). */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/priority-flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200). */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/patients/banderas-prioridad": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Banderas de prioridad de varios pacientes (máximo 200). / Priority flags of several patients (at most 200). */
+        get: operations["PacientesController_listPriorityFlagsOfPatients[7]_v2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -19181,6 +19661,1142 @@ export interface paths {
         put?: never;
         /** Deshabilita la cuenta ya vinculada. Sin correo — un ban/unban silencioso del lado del EHR. */
         post: operations["EhrIntegrationController_staffLinkDisable_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only). */
+        get: operations["PrintHubController_list[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only). */
+        get: operations["PrintHubController_list[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[0]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[1]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[2]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impresoras de un centro, en orden. / Printers of one center, in order.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_listPrinters[3]_v1"];
+        put?: never;
+        /**
+         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintHubController_createPrinter[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[4]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[5]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/impresoras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[6]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/printers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
+        get: operations["PrintHubController_listPrinters[7]_v2"];
+        put?: never;
+        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
+        post: operations["PrintHubController_createPrinter[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[0]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[1]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[2]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[2]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edita una impresora (parcial). / Edits a printer (partial).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_updatePrinter[3]_v1"];
+        post?: never;
+        /**
+         * Quita una impresora del centro. / Removes a printer from the center.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_removePrinter[3]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[4]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[4]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[5]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[5]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/impresoras/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[6]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[6]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}/printers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Edita una impresora (parcial). / Edits a printer (partial). */
+        put: operations["PrintHubController_updatePrinter[7]_v2"];
+        post?: never;
+        /** Quita una impresora del centro. / Removes a printer from the center. */
+        delete: operations["PrintHubController_removePrinter[7]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-hubs/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_get[0]_v1"];
+        /**
+         * Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_set[0]_v1"];
+        post?: never;
+        /**
+         * Quita la configuración de un centro. / Removes one center configuration.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_remove[0]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-hubs/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintHubController_get[1]_v1"];
+        /**
+         * Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["PrintHubController_set[1]_v1"];
+        post?: never;
+        /**
+         * Quita la configuración de un centro. / Removes one center configuration.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["PrintHubController_remove[1]_v1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-hubs/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers. */
+        get: operations["PrintHubController_get[2]_v2"];
+        /** Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration. */
+        put: operations["PrintHubController_set[2]_v2"];
+        post?: never;
+        /** Quita la configuración de un centro. / Removes one center configuration. */
+        delete: operations["PrintHubController_remove[2]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-hubs/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers. */
+        get: operations["PrintHubController_get[3]_v2"];
+        /** Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration. */
+        put: operations["PrintHubController_set[3]_v2"];
+        post?: never;
+        /** Quita la configuración de un centro. / Removes one center configuration. */
+        delete: operations["PrintHubController_remove[3]_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/impresion-hub": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/me/impresion-hub`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["MiPrintHubController_mio[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/print-hub": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/me/print-hub`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["MiPrintHubController_mio[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/impresion-hub": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false. */
+        get: operations["MiPrintHubController_mio[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/me/print-hub": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false. */
+        get: operations["MiPrintHubController_mio[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos/siguiente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintJobsController_next[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos/next`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintJobsController_next[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs/siguiente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintJobsController_next[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs/next`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintJobsController_next[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none). */
+        get: operations["PrintJobsController_next[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none). */
+        get: operations["PrintJobsController_next[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs/siguiente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none). */
+        get: operations["PrintJobsController_next[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** El hub toma el siguiente ticket de su centro (204 si no hay). / The hub takes the next ticket of its center (204 if none). */
+        get: operations["PrintJobsController_next[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos/{id}/resultado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_result[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos/{id}/result`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_result[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs/{id}/resultado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_result[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs/{id}/result`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_result[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome. */
+        post: operations["PrintJobsController_result[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome. */
+        post: operations["PrintJobsController_result[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs/{id}/resultado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome. */
+        post: operations["PrintJobsController_result[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** El hub dice si imprimió. Impreso o abandonado = se borra el contenido. / The hub reports the outcome. */
+        post: operations["PrintJobsController_result[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos/prueba": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos/prueba`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_test[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos/test`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_test[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs/prueba": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs/prueba`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_test[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs/test`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["PrintJobsController_test[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos/prueba": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket. */
+        post: operations["PrintJobsController_test[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket. */
+        post: operations["PrintJobsController_test[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs/prueba": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket. */
+        post: operations["PrintJobsController_test[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Encola un ticket de PRUEBA en una impresora del centro (prueba el camino cola → hub → papel). / Queues a TEST ticket. */
+        post: operations["PrintJobsController_test[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/impresion-trabajos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-trabajos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintJobsController_list[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/print-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-jobs`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["PrintJobsController_list[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/impresion-trabajos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload. */
+        get: operations["PrintJobsController_list[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/print-jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo que se encoló y cómo fue, sin el contenido. / What was queued and how it went, without the payload. */
+        get: operations["PrintJobsController_list[3]_v2"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -38567,6 +40183,638 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/medidas-corporales/pacientes/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/pacientes/{patientId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forPatient[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/patients/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/patients/{patientId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forPatient[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/pacientes/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/pacientes/{patientId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forPatient[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/patients/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de medidas del paciente (báscula y cinta), más reciente primero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/patients/{patientId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forPatient[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/pacientes/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        get: operations["BodyMeasurementsController_forPatient[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/patients/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        get: operations["BodyMeasurementsController_forPatient[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/pacientes/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        get: operations["BodyMeasurementsController_forPatient[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/patients/{patientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de medidas del paciente (báscula y cinta), más reciente primero. */
+        get: operations["BodyMeasurementsController_forPatient[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/sesiones/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sesiones/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forSession[0]_v1"];
+        /**
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sesiones/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["BodyMeasurementsController_saveForSession[0]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sessions/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forSession[1]_v1"];
+        /**
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sessions/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["BodyMeasurementsController_saveForSession[1]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/sesiones/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sesiones/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forSession[2]_v1"];
+        /**
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sesiones/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["BodyMeasurementsController_saveForSession[2]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sessions/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_forSession[3]_v1"];
+        /**
+         * Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sessions/{sessionId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        put: operations["BodyMeasurementsController_saveForSession[3]_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/sesiones/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
+        get: operations["BodyMeasurementsController_forSession[4]_v2"];
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        put: operations["BodyMeasurementsController_saveForSession[4]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
+        get: operations["BodyMeasurementsController_forSession[5]_v2"];
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        put: operations["BodyMeasurementsController_saveForSession[5]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/sesiones/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
+        get: operations["BodyMeasurementsController_forSession[6]_v2"];
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        put: operations["BodyMeasurementsController_saveForSession[6]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/sessions/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo medido en una visita: { scale, tape }. Incluye lo que llegó ese día antes de que existiera la visita. */
+        get: operations["BodyMeasurementsController_forSession[7]_v2"];
+        /** Guarda o corrige la medida de la visita (una de báscula y una de cinta por sesión). */
+        put: operations["BodyMeasurementsController_saveForSession[7]_v2"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/bascula": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/bascula`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScale[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/scale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/scale`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScale[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/bascula": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/bascula`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScale[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/scale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/scale`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScale[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/bascula": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth. */
+        post: operations["BodyMeasurementsController_ingestScale[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/scale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth. */
+        post: operations["BodyMeasurementsController_ingestScale[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/bascula": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth. */
+        post: operations["BodyMeasurementsController_ingestScale[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/scale": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula (atajo de iOS desde Apple Health). Mismo cuerpo que el legado /api/bodyscale/fromHealth. */
+        post: operations["BodyMeasurementsController_ingestScale[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/cinta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/cinta`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestTape[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/tape": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/tape`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestTape[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/cinta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/cinta`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestTape[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/tape": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/tape`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestTape[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/cinta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }. */
+        post: operations["BodyMeasurementsController_ingestTape[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/tape": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }. */
+        post: operations["BodyMeasurementsController_ingestTape[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/cinta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }. */
+        post: operations["BodyMeasurementsController_ingestTape[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/tape": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la cinta Renpho (atajo de iOS). multipart record + csv_file, como el legado /api/renpho/upload; o JSON { record, csv }. */
+        post: operations["BodyMeasurementsController_ingestTape[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/configuracion/panel": {
         parameters: {
             query?: never;
@@ -40289,6 +42537,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/cola": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cola por terapia: en sala por orden de llegada y en terapia ahora
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/cola`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         */
+        get: operations["FrontdeskController_queue[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cola por terapia: en sala por orden de llegada y en terapia ahora
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/queue`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         */
+        get: operations["FrontdeskController_queue[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/cola": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cola por terapia: en sala por orden de llegada y en terapia ahora
+         * @description Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         */
+        get: operations["FrontdeskController_queue[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cola por terapia: en sala por orden de llegada y en terapia ahora
+         * @description Por terapia: `waiting` ordenado por la PRIMERA llegada (turno y minutos de espera; `busyIn` = la terapia en la que está ahora, si está en otra) e `inTherapy` (técnico y desde cuándo). `totals` cuenta pacientes distintos. Sin `date`, hoy en la zona del centro. `centerIds` opcional, cada uno con `frontdesk.read` allí. Se refresca con el SSE de sesiones.
+         */
+        get: operations["FrontdeskController_queue[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/agenda": {
         parameters: {
             query?: never;
@@ -41313,6 +43647,158 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/frontdesk/pacientes/{pacienteId}/presente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Presente del PACIENTE: marca todas sus terapias pendientes del día con una sola llegada
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{pacienteId}/presente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_patientPresent[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/patients/{pacienteId}/present": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Presente del PACIENTE: marca todas sus terapias pendientes del día con una sola llegada
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{pacienteId}/present`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_patientPresent[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/pacientes/{pacienteId}/presente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Presente del PACIENTE: marca todas sus terapias pendientes del día con una sola llegada */
+        post: operations["FrontdeskController_patientPresent[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/patients/{pacienteId}/present": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Presente del PACIENTE: marca todas sus terapias pendientes del día con una sola llegada */
+        post: operations["FrontdeskController_patientPresent[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/pacientes/{pacienteId}/deshacer-presente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deshacer el presente del paciente (sus terapias presentes vuelven a pendiente)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/pacientes/{pacienteId}/deshacer-presente`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_patientUndoPresent[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/patients/{pacienteId}/undo-present": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deshacer el presente del paciente (sus terapias presentes vuelven a pendiente)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/patients/{pacienteId}/undo-present`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_patientUndoPresent[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/pacientes/{pacienteId}/deshacer-presente": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deshacer el presente del paciente (sus terapias presentes vuelven a pendiente) */
+        post: operations["FrontdeskController_patientUndoPresent[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/patients/{pacienteId}/undo-present": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deshacer el presente del paciente (sus terapias presentes vuelven a pendiente) */
+        post: operations["FrontdeskController_patientUndoPresent[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/frontdesk/sesiones/{id}/presente": {
         parameters: {
             query?: never;
@@ -41379,6 +43865,158 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["FrontdeskController_presente[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sesiones/{id}/llamar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Llamar al paciente a la terapia (técnico elegido o el sugerido)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/llamar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_call[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/{id}/call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Llamar al paciente a la terapia (técnico elegido o el sugerido)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/call`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_call[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/{id}/llamar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Llamar al paciente a la terapia (técnico elegido o el sugerido) */
+        post: operations["FrontdeskController_call[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/{id}/call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Llamar al paciente a la terapia (técnico elegido o el sugerido) */
+        post: operations["FrontdeskController_call[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sesiones/{id}/deshacer-llamado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deshacer el llamado (nadie va a buscarlo)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sesiones/{id}/deshacer-llamado`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_uncall[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/frontdesk/sessions/{id}/uncall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deshacer el llamado (nadie va a buscarlo)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/frontdesk/sessions/{id}/uncall`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["FrontdeskController_uncall[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sesiones/{id}/deshacer-llamado": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deshacer el llamado (nadie va a buscarlo) */
+        post: operations["FrontdeskController_uncall[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/frontdesk/sessions/{id}/uncall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deshacer el llamado (nadie va a buscarlo) */
+        post: operations["FrontdeskController_uncall[3]_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -47577,6 +50215,98 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/scheduling-bridge/reparar-sin-confirmar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Brings the future rows that entered from the sheet BEFORE «only confirmed» in line with the sheet
+         *     today: confirms or cancels untouched citas, cancels unconfirmed untouched laser sessions, and
+         *     untags what it cancels so it re-enters when confirmed. `dryRun` (default true) only reports.
+         *     See docs/specs/scheduling-bridge-solo-confirmadas.md.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scheduling-bridge/reparar-sin-confirmar`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SchedulingBridgeController_repairUnconfirmed[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scheduling-bridge/repair-unconfirmed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Brings the future rows that entered from the sheet BEFORE «only confirmed» in line with the sheet
+         *     today: confirms or cancels untouched citas, cancels unconfirmed untouched laser sessions, and
+         *     untags what it cancels so it re-enters when confirmed. `dryRun` (default true) only reports.
+         *     See docs/specs/scheduling-bridge-solo-confirmadas.md.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/scheduling-bridge/repair-unconfirmed`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["SchedulingBridgeController_repairUnconfirmed[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scheduling-bridge/reparar-sin-confirmar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Brings the future rows that entered from the sheet BEFORE «only confirmed» in line with the sheet
+         *     today: confirms or cancels untouched citas, cancels unconfirmed untouched laser sessions, and
+         *     untags what it cancels so it re-enters when confirmed. `dryRun` (default true) only reports.
+         *     See docs/specs/scheduling-bridge-solo-confirmadas.md.
+         */
+        post: operations["SchedulingBridgeController_repairUnconfirmed[2]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/scheduling-bridge/repair-unconfirmed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Brings the future rows that entered from the sheet BEFORE «only confirmed» in line with the sheet
+         *     today: confirms or cancels untouched citas, cancels unconfirmed untouched laser sessions, and
+         *     untags what it cancels so it re-enters when confirmed. `dryRun` (default true) only reports.
+         *     See docs/specs/scheduling-bridge-solo-confirmadas.md.
+         */
+        post: operations["SchedulingBridgeController_repairUnconfirmed[3]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scheduling-bridge/config": {
         parameters: {
             query?: never;
@@ -47772,610 +50502,6 @@ export interface paths {
         put: operations["SchedulingBridgeController_updateAgentMapping_v2"];
         post?: never;
         delete: operations["SchedulingBridgeController_deleteAgentMapping_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/impresion-hubs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_list[0]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/print-hubs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_list[1]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/impresion-hubs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only). */
-        get: operations["PrintHubController_list[2]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/print-hubs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Configuración del hub de respaldo de los centros pedidos (solo los autorizados). / Backup print hub configuration for the requested centers (authorized ones only). */
-        get: operations["PrintHubController_list[3]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/impresion-hubs/{centerId}/impresoras": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Impresoras de un centro, en orden. / Printers of one center, in order.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_listPrinters[0]_v1"];
-        put?: never;
-        /**
-         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["PrintHubController_createPrinter[0]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/impresion-hubs/{centerId}/printers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Impresoras de un centro, en orden. / Printers of one center, in order.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_listPrinters[1]_v1"];
-        put?: never;
-        /**
-         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["PrintHubController_createPrinter[1]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/print-hubs/{centerId}/impresoras": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Impresoras de un centro, en orden. / Printers of one center, in order.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_listPrinters[2]_v1"];
-        put?: never;
-        /**
-         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["PrintHubController_createPrinter[2]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/print-hubs/{centerId}/printers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Impresoras de un centro, en orden. / Printers of one center, in order.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_listPrinters[3]_v1"];
-        put?: never;
-        /**
-         * Añade una impresora con nombre al centro. / Adds a named printer to the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers`, que devuelve lo mismo con los nombres en inglés.
-         */
-        post: operations["PrintHubController_createPrinter[3]_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/impresion-hubs/{centerId}/impresoras": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
-        get: operations["PrintHubController_listPrinters[4]_v2"];
-        put?: never;
-        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
-        post: operations["PrintHubController_createPrinter[4]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/impresion-hubs/{centerId}/printers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
-        get: operations["PrintHubController_listPrinters[5]_v2"];
-        put?: never;
-        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
-        post: operations["PrintHubController_createPrinter[5]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/print-hubs/{centerId}/impresoras": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
-        get: operations["PrintHubController_listPrinters[6]_v2"];
-        put?: never;
-        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
-        post: operations["PrintHubController_createPrinter[6]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/print-hubs/{centerId}/printers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Impresoras de un centro, en orden. / Printers of one center, in order. */
-        get: operations["PrintHubController_listPrinters[7]_v2"];
-        put?: never;
-        /** Añade una impresora con nombre al centro. / Adds a named printer to the center. */
-        post: operations["PrintHubController_createPrinter[7]_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/impresion-hubs/{centerId}/impresoras/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Edita una impresora (parcial). / Edits a printer (partial).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["PrintHubController_updatePrinter[0]_v1"];
-        post?: never;
-        /**
-         * Quita una impresora del centro. / Removes a printer from the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["PrintHubController_removePrinter[0]_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/impresion-hubs/{centerId}/printers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Edita una impresora (parcial). / Edits a printer (partial).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["PrintHubController_updatePrinter[1]_v1"];
-        post?: never;
-        /**
-         * Quita una impresora del centro. / Removes a printer from the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["PrintHubController_removePrinter[1]_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/print-hubs/{centerId}/impresoras/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Edita una impresora (parcial). / Edits a printer (partial).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["PrintHubController_updatePrinter[2]_v1"];
-        post?: never;
-        /**
-         * Quita una impresora del centro. / Removes a printer from the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/impresoras/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["PrintHubController_removePrinter[2]_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/print-hubs/{centerId}/printers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Edita una impresora (parcial). / Edits a printer (partial).
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["PrintHubController_updatePrinter[3]_v1"];
-        post?: never;
-        /**
-         * Quita una impresora del centro. / Removes a printer from the center.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}/printers/{id}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["PrintHubController_removePrinter[3]_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/impresion-hubs/{centerId}/impresoras/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Edita una impresora (parcial). / Edits a printer (partial). */
-        put: operations["PrintHubController_updatePrinter[4]_v2"];
-        post?: never;
-        /** Quita una impresora del centro. / Removes a printer from the center. */
-        delete: operations["PrintHubController_removePrinter[4]_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/impresion-hubs/{centerId}/printers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Edita una impresora (parcial). / Edits a printer (partial). */
-        put: operations["PrintHubController_updatePrinter[5]_v2"];
-        post?: never;
-        /** Quita una impresora del centro. / Removes a printer from the center. */
-        delete: operations["PrintHubController_removePrinter[5]_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/print-hubs/{centerId}/impresoras/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Edita una impresora (parcial). / Edits a printer (partial). */
-        put: operations["PrintHubController_updatePrinter[6]_v2"];
-        post?: never;
-        /** Quita una impresora del centro. / Removes a printer from the center. */
-        delete: operations["PrintHubController_removePrinter[6]_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/print-hubs/{centerId}/printers/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Edita una impresora (parcial). / Edits a printer (partial). */
-        put: operations["PrintHubController_updatePrinter[7]_v2"];
-        post?: never;
-        /** Quita una impresora del centro. / Removes a printer from the center. */
-        delete: operations["PrintHubController_removePrinter[7]_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/impresion-hubs/{centerId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_get[0]_v1"];
-        /**
-         * Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["PrintHubController_set[0]_v1"];
-        post?: never;
-        /**
-         * Quita la configuración de un centro. / Removes one center configuration.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/impresion-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["PrintHubController_remove[0]_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/print-hubs/{centerId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["PrintHubController_get[1]_v1"];
-        /**
-         * Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        put: operations["PrintHubController_set[1]_v1"];
-        post?: never;
-        /**
-         * Quita la configuración de un centro. / Removes one center configuration.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/print-hubs/{centerId}`, que devuelve lo mismo con los nombres en inglés.
-         */
-        delete: operations["PrintHubController_remove[1]_v1"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/impresion-hubs/{centerId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers. */
-        get: operations["PrintHubController_get[2]_v2"];
-        /** Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration. */
-        put: operations["PrintHubController_set[2]_v2"];
-        post?: never;
-        /** Quita la configuración de un centro. / Removes one center configuration. */
-        delete: operations["PrintHubController_remove[2]_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/print-hubs/{centerId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Configuración del hub de respaldo de un centro, con sus impresoras. / Backup print hub configuration for one center, with its printers. */
-        get: operations["PrintHubController_get[3]_v2"];
-        /** Crea o reemplaza la configuración de un centro. / Creates or replaces one center configuration. */
-        put: operations["PrintHubController_set[3]_v2"];
-        post?: never;
-        /** Quita la configuración de un centro. / Removes one center configuration. */
-        delete: operations["PrintHubController_remove[3]_v2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/impresion-hub": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/me/impresion-hub`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["MiPrintHubController_mio[0]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/print-hub": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false.
-         * @deprecated
-         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/me/print-hub`, que devuelve lo mismo con los nombres en inglés.
-         */
-        get: operations["MiPrintHubController_mio[1]_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/me/impresion-hub": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false. */
-        get: operations["MiPrintHubController_mio[2]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v2/me/print-hub": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** El hub de respaldo del centro de la sesión, para imprimir. Sin configurar = enabled false. / The session center backup hub, for printing. Not configured = enabled false. */
-        get: operations["MiPrintHubController_mio[3]_v2"];
-        put?: never;
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -48915,6 +51041,7 @@ export interface components {
             customization: Record<string, never> | null;
             meta: Record<string, never> | null;
             optionalItemsIncluded: string[] | null;
+            salesPackageId: string | null;
             billingGroupId: string | null;
             categoryId: string | null;
             refundedQuantity: number;
@@ -49215,7 +51342,7 @@ export interface components {
             /** @enum {string} */
             type: "numero" | "readonly" | "texto" | "select" | "calculado";
             /** @enum {string} */
-            role: "subtotal" | "accion" | "cantidad" | "descuento" | "impuesto" | "precio" | "producto" | "tarifa" | "multiplicador" | "informativo";
+            role: "cantidad" | "subtotal" | "accion" | "descuento" | "impuesto" | "precio" | "producto" | "tarifa" | "multiplicador" | "informativo";
             /**
              * @description Solo para `rol = multiplicador`: ¿este multiplicador cuenta VISITAS?
              *
@@ -49395,6 +51522,112 @@ export interface components {
              * @description Almacén al que vuelven las unidades cerradas.
              */
             warehouseId?: string;
+        };
+        SalesPackageResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Center that owns it. */
+            clinicId: string;
+            /** @example Suero Vitamina C · 12 terapias */
+            name: string;
+            /** Format: uuid */
+            productId: string;
+            /** @example 25 g Vitamina C */
+            productName: string | null;
+            /** @example 25GST */
+            productSku: string | null;
+            /** @example 12 */
+            sessions: number;
+            /** @example 1200 */
+            packagePrice: number;
+            /**
+             * @description Catalog regular price of ONE session in the center (null = none).
+             * @example 140
+             */
+            regularUnitPrice: number | null;
+            /**
+             * @description regularUnitPrice × sessions.
+             * @example 1680
+             */
+            regularPrice: number | null;
+            /**
+             * @description regularPrice − packagePrice.
+             * @example 480
+             */
+            savings: number | null;
+            /** @example 28.57 */
+            savingsPct: number | null;
+            /** @example 0 */
+            sortOrder: number;
+            /** @example true */
+            active: boolean;
+            /** Format: uuid */
+            updatedBy: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateSalesPackageDto: {
+            /** @description Centro dueño del paquete; omitido = el de la sesión. / Center that owns it; omitted = the session center. */
+            centerId?: string;
+            /**
+             * @description Nombre al vender y en la factura. / Name when selling and on the invoice.
+             * @example Suero Vitamina C · 12 terapias
+             */
+            name: string;
+            /**
+             * Format: uuid
+             * @description Producto que se vende POR SESIÓN; su precio regular del centro es el precio unitario regular. / Product sold PER SESSION.
+             */
+            productId: string;
+            /**
+             * @description Sesiones del paquete (> 0). / Sessions in the package.
+             * @example 12
+             */
+            sessions: number;
+            /**
+             * @description Lo que paga el paciente por el paquete entero, antes de impuesto; menor que el regular. / Package price before tax; below regular.
+             * @example 1200
+             */
+            packagePrice: number;
+            /** @description Posición en la lista. / Position in the list. */
+            sortOrder?: number;
+            /** @description Si se puede vender (default true). / Whether it can be sold. */
+            active?: boolean;
+        };
+        UpdateSalesPackageDto: {
+            /**
+             * @description Nombre al vender y en la factura. / Name when selling and on the invoice.
+             * @example Suero Vitamina C · 12 terapias
+             */
+            name?: string;
+            /**
+             * Format: uuid
+             * @description Producto que se vende POR SESIÓN; su precio regular del centro es el precio unitario regular. / Product sold PER SESSION.
+             */
+            productId?: string;
+            /**
+             * @description Sesiones del paquete (> 0). / Sessions in the package.
+             * @example 12
+             */
+            sessions?: number;
+            /**
+             * @description Lo que paga el paciente por el paquete entero, antes de impuesto; menor que el regular. / Package price before tax; below regular.
+             * @example 1200
+             */
+            packagePrice?: number;
+            /** @description Posición en la lista. / Position in the list. */
+            sortOrder?: number;
+            /** @description Si se puede vender (default true). / Whether it can be sold. */
+            active?: boolean;
+        };
+        SellSalesPackageDto: {
+            /**
+             * Format: uuid
+             * @description Paquete del centro de la factura. / A package of the invoice center.
+             */
+            packageId: string;
         };
         CreateTipoPrecioDto: {
             slug: string;
@@ -49658,6 +51891,12 @@ export interface components {
         ReplaceRecordDto: {
             newRecord?: string;
         };
+        PatientFlagsDto: {
+            /** Format: uuid */
+            patientId: string;
+            /** @description Las banderas activas, como GET /patients/:id/priority-flags. / Active flags. */
+            flags: Record<string, never>[];
+        };
         PriorityFlagTypeEntity: {
             slug: string;
             labelKey: string;
@@ -49750,7 +51989,7 @@ export interface components {
             /** @enum {string|null} */
             idType: "drivers_license" | "passport" | "green_card" | "state_id" | null;
             /** @enum {string|null} */
-            sex: "desconocido" | "femenino" | "masculino" | "otro" | null;
+            sex: "femenino" | "masculino" | "otro" | "desconocido" | null;
             dateOfBirth: string | null;
             phone: string | null;
             whatsapp: string | null;
@@ -49764,7 +52003,7 @@ export interface components {
             homePhone: string | null;
             officePhone: string | null;
             /** @enum {string|null} */
-            preferredPhone: "whatsapp" | "principal" | "casa" | "oficina" | null;
+            preferredPhone: "principal" | "casa" | "oficina" | "whatsapp" | null;
             cityId: string | null;
             stateId: string | null;
             countryId: string | null;
@@ -50150,7 +52389,7 @@ export interface components {
             slug: string;
             labelKey: string;
             /** @enum {string} */
-            type: "badge" | "accion" | "fecha" | "hora" | "texto" | "medicion" | "select" | "toggle" | "derivado";
+            type: "fecha" | "hora" | "badge" | "accion" | "texto" | "medicion" | "select" | "toggle" | "derivado";
             binding: string;
             editable: boolean;
             permissionSlug: string | null;
@@ -50473,6 +52712,11 @@ export interface components {
             ehrRecordId?: string;
         };
         UpdateEhrIntegrationConfigDto: {
+            /**
+             * Format: uuid
+             * @description Impresora del centro donde sale el código de alta del EHR; null = la de cada pantalla. / Center printer for the EHR claim code; null = each screen's own.
+             */
+            claimCodePrinterId?: string | null;
             /** @description Dirección del API del EHR (se le llama a <baseUrl>/api/v1/…). */
             baseUrl?: string;
             /** @description Supabase del EHR contra el que nos autenticamos. */
@@ -50503,6 +52747,246 @@ export interface components {
             /** Format: uuid */
             ehrRoleId?: string;
             fullName?: string;
+        };
+        CenterPrintHubEntity: {
+            enabled: boolean;
+            hubUrls: string[];
+            /** @enum {string} */
+            protocol: "ipp" | "smb";
+            printerHost: string | null;
+            printerPort: number | null;
+            printerQueue: string | null;
+            updatedBy: string | null;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        PrinterResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @description Center that owns it. */
+            clinicId: string;
+            /** @example Facturación */
+            name: string;
+            /** @enum {string} */
+            protocol: "ipp" | "smb";
+            printerHost: string | null;
+            /** @example 445 */
+            printerPort: number;
+            /** @example EPSON TM-T20II Receipt5 */
+            printerQueue: string;
+            /** @example 0 */
+            sortOrder: number;
+            /** @example true */
+            active: boolean;
+            /** Format: uuid */
+            updatedBy: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreatePrinterDto: {
+            /**
+             * @description Nombre con el que cada equipo la elige; único por centro. / Name each machine picks it by; unique per center.
+             * @example Facturación
+             */
+            name: string;
+            /**
+             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS) o 'smb' (compartida desde Windows). / How the hub reaches the printer.
+             * @example smb
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /**
+             * @description IP o nombre del equipo que la tiene conectada y compartida. / IP or hostname of the machine sharing it.
+             * @example 192.130.80.100
+             */
+            printerHost: string;
+            /**
+             * @description Puerto; si falta, 631 (ipp) o 445 (smb). / Port; defaults to 631 (ipp) or 445 (smb).
+             * @example 445
+             */
+            printerPort?: number;
+            /**
+             * @description Cola de CUPS (ipp) o recurso compartido de Windows (smb), con la misma regla que el hub. / CUPS queue or Windows share name, validated like the hub does.
+             * @example EPSON TM-T20II Receipt5
+             */
+            printerQueue: string;
+            /**
+             * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
+             * @example 1
+             */
+            sortOrder?: number;
+            /**
+             * @description Si se ofrece al imprimir (default true). / Whether it is offered when printing (default true).
+             * @example true
+             */
+            active?: boolean;
+        };
+        UpdatePrinterDto: {
+            /**
+             * @description Nombre con el que cada equipo la elige; único por centro. / Name each machine picks it by; unique per center.
+             * @example Facturación
+             */
+            name?: string;
+            /**
+             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS) o 'smb' (compartida desde Windows). / How the hub reaches the printer.
+             * @example smb
+             * @enum {string}
+             */
+            protocol?: "ipp" | "smb";
+            /**
+             * @description IP o nombre del equipo que la tiene conectada y compartida. / IP or hostname of the machine sharing it.
+             * @example 192.130.80.100
+             */
+            printerHost?: string;
+            /**
+             * @description Puerto; si falta, 631 (ipp) o 445 (smb). / Port; defaults to 631 (ipp) or 445 (smb).
+             * @example 445
+             */
+            printerPort?: number;
+            /**
+             * @description Cola de CUPS (ipp) o recurso compartido de Windows (smb), con la misma regla que el hub. / CUPS queue or Windows share name, validated like the hub does.
+             * @example EPSON TM-T20II Receipt5
+             */
+            printerQueue?: string;
+            /**
+             * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
+             * @example 1
+             */
+            sortOrder?: number;
+            /**
+             * @description Si se ofrece al imprimir (default true). / Whether it is offered when printing (default true).
+             * @example true
+             */
+            active?: boolean;
+        };
+        PrinterDeletedResponseDto: {
+            /** @example true */
+            deleted: boolean;
+        };
+        PrintHubResponseDto: {
+            /** Format: uuid */
+            id: string;
+            clinicId: string;
+            enabled: boolean;
+            hubUrls: string[];
+            printers: components["schemas"]["PrinterResponseDto"][];
+            /**
+             * @description Transitional.
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /** @description Transitional. */
+            printerHost: string | null;
+            /** @description Transitional. */
+            printerPort: number | null;
+            /** @description Transitional. */
+            printerQueue: string | null;
+            /** Format: uuid */
+            updatedBy: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SetPrintHubDto: {
+            /**
+             * @description Si se ofrece el botón de impresión de respaldo para las facturas de este centro. / Whether the backup print button is offered for this center.
+             * @example true
+             */
+            enabled: boolean;
+            /**
+             * @description Hubs que se intentan EN ORDEN: primero el central, después uno en la PC que tiene la impresora, para que esa PC siga imprimiendo si el central se cae. / Hubs tried IN ORDER: the central one first, then one on the machine the printer is plugged into, so it keeps printing if the central hub is down.
+             * @example [
+             *       "https://192.130.80.172:8943/print-raw",
+             *       "http://localhost:8943/print-raw"
+             *     ]
+             */
+            hubUrls: string[];
+            /**
+             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS en Linux/macOS) o 'smb' (impresora compartida desde Windows). / How the hub reaches the printer.
+             * @example ipp
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /**
+             * @description IP o nombre de la máquina que tiene la impresora conectada y compartida. / IP or hostname of the machine the printer is plugged into.
+             * @example 192.130.80.181
+             */
+            printerHost?: string;
+            /**
+             * @description Puerto del servicio de impresión de esa máquina: 631 para ipp, 445 para smb. / Port of that machine print service.
+             * @example 631
+             */
+            printerPort?: number;
+            /**
+             * @description Nombre de la cola de CUPS (ipp) o del recurso compartido de Windows (smb). / CUPS queue name (ipp) or Windows share name (smb).
+             * @example TM-T20II-RAW
+             */
+            printerQueue?: string;
+        };
+        PrinterForPrintingDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Recepción */
+            name: string;
+            /** @enum {string} */
+            protocol: "ipp" | "smb";
+            printerHost: string | null;
+            /** @example 445 */
+            printerPort: number;
+            /** @example EPSON TM-T20II Receipt5 */
+            printerQueue: string;
+        };
+        MyPrintHubResponseDto: {
+            enabled: boolean;
+            hubUrls: string[];
+            printers: components["schemas"]["PrinterForPrintingDto"][];
+            /**
+             * @description Transitional: first active printer.
+             * @enum {string}
+             */
+            protocol: "ipp" | "smb";
+            /** @description Transitional. */
+            printerHost: string | null;
+            /** @description Transitional. */
+            printerPort: number | null;
+            /** @description Transitional. */
+            printerQueue: string | null;
+        };
+        PrinterTargetDto: {
+            protocol: string;
+            printerHost: string | null;
+            printerPort: number;
+            printerQueue: string;
+        };
+        JobForTheHubDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example ehr_claim_code */
+            kind: string;
+            printer: components["schemas"]["PrinterTargetDto"];
+            /** @description ESC/POS bytes, base64: send them as they are. */
+            payloadBase64: string;
+            expiresAt: string;
+        };
+        PrintJobResultDto: {
+            /** @description true = printed. / true = printed. */
+            ok: boolean;
+            /** @description What failed (printer off, unreachable…). / What failed. */
+            error?: string;
+        };
+        PrintJobTestDto: {
+            /**
+             * Format: uuid
+             * @description Impresora del centro. / Printer of the center.
+             */
+            printerId: string;
         };
         PermisoEntity: {
             slug: string;
@@ -51157,7 +53641,7 @@ export interface components {
             supplierId: string | null;
             supplierPresentationId: string | null;
             /** @enum {string} */
-            status: "vencido" | "activo" | "recall" | "bloqueado";
+            status: "activo" | "vencido" | "recall" | "bloqueado";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -51794,7 +54278,7 @@ export interface components {
             subject: string | null;
             body: string;
             /** @enum {string} */
-            status: "lista" | "pendiente" | "enviada" | "fallida";
+            status: "pendiente" | "lista" | "enviada" | "fallida";
             providerReference: string | null;
             error: string | null;
             /** Format: date-time */
@@ -51967,7 +54451,7 @@ export interface components {
             time: string | null;
             endTime: string | null;
             /** @enum {string} */
-            status: "triage" | "programada" | "confirmada" | "presente" | "cancelada" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
+            status: "presente" | "cancelada" | "triage" | "programada" | "confirmada" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
             isFirstVisit: boolean;
             /** @enum {string} */
             channel: "atencion" | "callcenter" | "webhook" | "ia";
@@ -52000,8 +54484,11 @@ export interface components {
             updatedAt: string;
         };
         ValidarCitaDto: {
-            /** Format: uuid */
-            doctorId: string;
+            /**
+             * Format: uuid
+             * @description Optional: a cita may have no doctor, and then there is no doctor overlap to check.
+             */
+            doctorId?: string;
             date: string;
             time: string;
             endTime: string;
@@ -52576,7 +55063,7 @@ export interface components {
             supplierId: string;
             warehouseId: string;
             /** @enum {string} */
-            status: "borrador" | "cancelada" | "enviada" | "recibida";
+            status: "cancelada" | "borrador" | "enviada" | "recibida";
             total: number | null;
             notes: string | null;
             id: string;
@@ -52669,6 +55156,83 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        ScaleValuesDto: {
+            /** @description Peso en kilogramos. */
+            weightKg?: number | null;
+            /** @description Índice de masa corporal. */
+            bmi?: number | null;
+            /** @description % de grasa corporal. */
+            bodyFatPct?: number | null;
+            /** @description % de músculo esquelético. */
+            skeletalMusclePct?: number | null;
+            /** @description Masa muscular (kg). */
+            muscleMassKg?: number | null;
+            /** @description % de proteína. */
+            proteinPct?: number | null;
+            /** @description Tasa metabólica basal (kcal). */
+            bmrKcal?: number | null;
+            /** @description Grasa visceral. */
+            visceralFat?: number | null;
+            /** @description % de hidratación. */
+            hydrationPct?: number | null;
+            /** @description Masa ósea (kg). */
+            boneMassKg?: number | null;
+            /** @description Edad metabólica. */
+            metabolicAge?: number | null;
+        };
+        TapeValuesDto: {
+            neck?: number | null;
+            shoulder?: number | null;
+            leftBiceps?: number | null;
+            rightBiceps?: number | null;
+            chest?: number | null;
+            waist?: number | null;
+            abdomen?: number | null;
+            hip?: number | null;
+            leftThigh?: number | null;
+            rightThigh?: number | null;
+            leftCalf?: number | null;
+            rightCalf?: number | null;
+            waistHipRatio?: number | null;
+        };
+        SaveSessionMeasurementsDto: {
+            scale?: components["schemas"]["ScaleValuesDto"];
+            tape?: components["schemas"]["TapeValuesDto"];
+        };
+        IngestScaleDto: {
+            /**
+             * Format: uuid
+             * @description Paciente (UUID). Alternativa a record/codclien.
+             */
+            patientId?: string;
+            /** @description Número de récord del paciente. */
+            medicalRecordNumber?: string;
+            /** @description Código de cliente del legado (codclien). */
+            codclien?: string;
+            /** @description Peso en kg (obligatorio, como en el legado). */
+            weight_kg: number;
+            bmi?: number;
+            body_fat_pct?: number;
+            lean_mass_kg?: number;
+            bmr_kcal?: number;
+            /** @description Instante de la lectura (ISO-8601). Por defecto, ahora. */
+            timestamp?: string;
+            device?: string;
+            source?: string;
+        };
+        IngestTapeDto: {
+            /** @description Récord; el atajo manda "M1234" y la M se quita. */
+            medicalRecordNumber?: string;
+            /** @description Código legacy del paciente; resuelve el récord compartido por varios pacientes. */
+            codclien?: string;
+            /**
+             * Format: uuid
+             * @description Id del paciente (gana sobre record y codclien).
+             */
+            patientId?: string;
+            /** @description Contenido del CSV de Renpho (si no se sube archivo). */
+            csv?: string;
+        };
         ExportarDto: {
             resource: string;
             /** @enum {string} */
@@ -52736,6 +55300,11 @@ export interface components {
             formActions: Record<string, never> | null;
             active: boolean;
             allowSessionFixWithoutPackage: boolean;
+            receivesBodyMeasurements: boolean;
+            /** @enum {string} */
+            queueAssignmentMode: "suggest" | "auto";
+            queuePreNoticeMinutes: number;
+            queueLongWaitMinutes: number;
             pushesToEhrOnPresente: boolean;
             id: string;
             clinicId: string | null;
@@ -52759,6 +55328,11 @@ export interface components {
             requiresNurse?: boolean;
             pushesToEhrOnPresente?: boolean;
             allowSessionFixWithoutPackage?: boolean;
+            receivesBodyMeasurements?: boolean;
+            /** @enum {string} */
+            queueAssignmentMode?: "suggest" | "auto";
+            queuePreNoticeMinutes?: number;
+            queueLongWaitMinutes?: number;
             badge?: boolean;
             formActions?: Record<string, never>;
             /**
@@ -52781,6 +55355,11 @@ export interface components {
             requiresNurse?: boolean;
             pushesToEhrOnPresente?: boolean;
             allowSessionFixWithoutPackage?: boolean;
+            receivesBodyMeasurements?: boolean;
+            /** @enum {string} */
+            queueAssignmentMode?: "suggest" | "auto";
+            queuePreNoticeMinutes?: number;
+            queueLongWaitMinutes?: number;
             badge?: boolean;
             formActions?: Record<string, never> | null;
             /**
@@ -52809,6 +55388,11 @@ export interface components {
             requiresNurse?: boolean;
             pushesToEhrOnPresente?: boolean;
             allowSessionFixWithoutPackage?: boolean;
+            receivesBodyMeasurements?: boolean;
+            /** @enum {string} */
+            queueAssignmentMode?: "suggest" | "auto";
+            queuePreNoticeMinutes?: number;
+            queueLongWaitMinutes?: number;
             badge?: boolean;
             formActions?: Record<string, never>;
             /**
@@ -52858,6 +55442,7 @@ export interface components {
             icon: string | null;
             sortOrder: number;
             active: boolean;
+            countsAsAvailable: boolean;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -52890,7 +55475,7 @@ export interface components {
             date: string;
             time: string | null;
             /** @enum {string} */
-            status: "pendiente" | "asistido" | "presente" | "en_terapia" | "cancelada";
+            status: "pendiente" | "presente" | "en_terapia" | "asistido" | "cancelada";
             quantity: number;
             /** Format: date-time */
             presentAt: string | null;
@@ -52898,6 +55483,8 @@ export interface components {
             therapyStartedAt: string | null;
             /** Format: date-time */
             attendedAt: string | null;
+            /** Format: date-time */
+            calledAt: string | null;
             data: Record<string, never> | null;
             /** @enum {string} */
             source: "manual" | "autopresente" | "agendada";
@@ -52958,7 +55545,7 @@ export interface components {
         FrontdeskEventoEntity: {
             sessionId: string;
             /** @enum {string} */
-            type: "datos" | "asistido" | "presente" | "en_terapia" | "cancelada" | "autopresente" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete";
+            type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "called" | "call_undone";
             actorId: string | null;
             reason: string | null;
             payload: Record<string, never> | null;
@@ -52970,6 +55557,10 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
+        PatientPresenceDto: {
+            /** @description Día YYYY-MM-DD; omitido = hoy en la zona del centro. */
+            date?: string;
+        };
         TransicionSesionDto: {
             /** Format: uuid */
             actorId?: string;
@@ -52979,6 +55570,13 @@ export interface components {
             warehouseId?: string;
             /** Format: uuid */
             openVialId?: string;
+        };
+        CallPatientDto: {
+            /**
+             * Format: uuid
+             * @description Técnico que va a buscarlo; omitido = el libre menos cargado ahora (el sugerido).
+             */
+            technicianId?: string;
         };
         RepararSesionDto: {
             reason: string;
@@ -53256,11 +55854,13 @@ export interface components {
             label?: string;
             /** @description Texto fijo que el papel imprime siempre en ese hueco. */
             valorFijo?: string;
+            /** @description Ancho del campo en su fila: número (puntos) o texto CSS ("40%"). / Field width: a number or a CSS length. */
+            ancho?: number | string;
             /**
              * @description Origen del valor. Del paciente/sesión: paciente.nombre | paciente.record | sesion.fecha | sesion.sesiones (X/Y) | sesion.dosis (producto aplicado). De la última medición corporal: medicion.pesoKg | medicion.imc | medicion.grasaPct | medicion.masaMuscularKg | medicion.aguaPct | medicion.fecha. Cadena vacía = hueco en blanco para rellenar a mano.
              * @enum {string}
              */
-            source?: "" | "paciente.nombre" | "paciente.record" | "sesion.fecha" | "sesion.sesiones" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre";
+            source?: "" | "paciente.nombre" | "paciente.record" | "paciente.telefono" | "sesion.fecha" | "sesion.sesiones" | "sesion.dosis" | "sesion.enfermera" | "sesion.tecnico" | "usuario.nombre" | "scale.weightLbs" | "scale.weightKg" | "scale.bmi" | "scale.bodyFatPct" | "scale.skeletalMusclePct" | "scale.muscleMassKg" | "scale.proteinPct" | "scale.bmrKcal" | "scale.visceralFat" | "scale.hydrationPct" | "scale.boneMassKg" | "scale.metabolicAge" | "tape.neck" | "tape.shoulder" | "tape.leftBiceps" | "tape.rightBiceps" | "tape.chest" | "tape.waist" | "tape.abdomen" | "tape.hip" | "tape.leftThigh" | "tape.rightThigh" | "tape.leftCalf" | "tape.rightCalf" | "tape.waistHipRatio";
             slug: string;
             labelKey: string;
         };
@@ -53281,7 +55881,7 @@ export interface components {
             title: string;
             serviceSlug: string;
             /** @enum {string} */
-            layout?: "tabla" | "campos" | "sesiones";
+            layout?: "tabla" | "campos" | "sesiones" | "paginas";
             letterhead?: boolean;
             sortOrder?: number;
         };
@@ -53298,7 +55898,7 @@ export interface components {
             title?: string;
             serviceSlug?: string;
             /** @enum {string} */
-            layout?: "tabla" | "campos" | "sesiones";
+            layout?: "tabla" | "campos" | "sesiones" | "paginas";
             rows?: number;
             letterhead?: boolean;
             sortOrder?: number;
@@ -53504,6 +56104,23 @@ export interface components {
             clinicId: string;
             dates: string[];
         };
+        RepairUnconfirmedDto: {
+            /**
+             * Format: uuid
+             * @description Centro a reparar. / Center to repair.
+             */
+            clinicId: string;
+            /**
+             * @description Primer día a reparar (inclusive). / First day to repair (inclusive).
+             * @example 2026-10-11
+             */
+            fromDate: string;
+            /**
+             * @description true = solo dice qué haría, no cambia nada. / true = only reports what it would do.
+             * @default true
+             */
+            dryRun?: boolean;
+        };
         SchedulingBridgeConfigEntity: {
             enabled: boolean;
             pollIntervalSeconds: number;
@@ -53512,6 +56129,7 @@ export interface components {
             workEndTime: string;
             externalClinicCode: string | null;
             reverseSyncEnabled: boolean;
+            importsOnlyConfirmed: boolean;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -53520,6 +56138,8 @@ export interface components {
             updatedAt: string;
         };
         UpdateSchedulingBridgeConfigDto: {
+            /** @description Solo entran las citas que el call center marcó CONFIRMADAS en la hoja (médicas y servicios). Por defecto true. */
+            importsOnlyConfirmed?: boolean;
             enabled?: boolean;
             pollIntervalSeconds?: number;
             workDays?: (0 | 1 | 2 | 3 | 4 | 5 | 6)[];
@@ -53566,217 +56186,6 @@ export interface components {
             externalCode?: string;
             /** Format: uuid */
             staffId?: string;
-        };
-        CenterPrintHubEntity: {
-            enabled: boolean;
-            hubUrls: string[];
-            /** @enum {string} */
-            protocol: "ipp" | "smb";
-            printerHost: string | null;
-            printerPort: number | null;
-            printerQueue: string | null;
-            updatedBy: string | null;
-            id: string;
-            clinicId: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        PrinterResponseDto: {
-            /** Format: uuid */
-            id: string;
-            /** @description Center that owns it. */
-            clinicId: string;
-            /** @example Facturación */
-            name: string;
-            /** @enum {string} */
-            protocol: "ipp" | "smb";
-            printerHost: string | null;
-            /** @example 445 */
-            printerPort: number;
-            /** @example EPSON TM-T20II Receipt5 */
-            printerQueue: string;
-            /** @example 0 */
-            sortOrder: number;
-            /** @example true */
-            active: boolean;
-            /** Format: uuid */
-            updatedBy: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        CreatePrinterDto: {
-            /**
-             * @description Nombre con el que cada equipo la elige; único por centro. / Name each machine picks it by; unique per center.
-             * @example Facturación
-             */
-            name: string;
-            /**
-             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS) o 'smb' (compartida desde Windows). / How the hub reaches the printer.
-             * @example smb
-             * @enum {string}
-             */
-            protocol: "ipp" | "smb";
-            /**
-             * @description IP o nombre del equipo que la tiene conectada y compartida. / IP or hostname of the machine sharing it.
-             * @example 192.130.80.100
-             */
-            printerHost: string;
-            /**
-             * @description Puerto; si falta, 631 (ipp) o 445 (smb). / Port; defaults to 631 (ipp) or 445 (smb).
-             * @example 445
-             */
-            printerPort?: number;
-            /**
-             * @description Cola de CUPS (ipp) o recurso compartido de Windows (smb), con la misma regla que el hub. / CUPS queue or Windows share name, validated like the hub does.
-             * @example EPSON TM-T20II Receipt5
-             */
-            printerQueue: string;
-            /**
-             * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
-             * @example 1
-             */
-            sortOrder?: number;
-            /**
-             * @description Si se ofrece al imprimir (default true). / Whether it is offered when printing (default true).
-             * @example true
-             */
-            active?: boolean;
-        };
-        UpdatePrinterDto: {
-            /**
-             * @description Nombre con el que cada equipo la elige; único por centro. / Name each machine picks it by; unique per center.
-             * @example Facturación
-             */
-            name?: string;
-            /**
-             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS) o 'smb' (compartida desde Windows). / How the hub reaches the printer.
-             * @example smb
-             * @enum {string}
-             */
-            protocol?: "ipp" | "smb";
-            /**
-             * @description IP o nombre del equipo que la tiene conectada y compartida. / IP or hostname of the machine sharing it.
-             * @example 192.130.80.100
-             */
-            printerHost?: string;
-            /**
-             * @description Puerto; si falta, 631 (ipp) o 445 (smb). / Port; defaults to 631 (ipp) or 445 (smb).
-             * @example 445
-             */
-            printerPort?: number;
-            /**
-             * @description Cola de CUPS (ipp) o recurso compartido de Windows (smb), con la misma regla que el hub. / CUPS queue or Windows share name, validated like the hub does.
-             * @example EPSON TM-T20II Receipt5
-             */
-            printerQueue?: string;
-            /**
-             * @description Posición en la lista; si falta, al final. / Position in the list; defaults to last.
-             * @example 1
-             */
-            sortOrder?: number;
-            /**
-             * @description Si se ofrece al imprimir (default true). / Whether it is offered when printing (default true).
-             * @example true
-             */
-            active?: boolean;
-        };
-        PrinterDeletedResponseDto: {
-            /** @example true */
-            deleted: boolean;
-        };
-        PrintHubResponseDto: {
-            /** Format: uuid */
-            id: string;
-            clinicId: string;
-            enabled: boolean;
-            hubUrls: string[];
-            printers: components["schemas"]["PrinterResponseDto"][];
-            /**
-             * @description Transitional.
-             * @enum {string}
-             */
-            protocol: "ipp" | "smb";
-            /** @description Transitional. */
-            printerHost: string | null;
-            /** @description Transitional. */
-            printerPort: number | null;
-            /** @description Transitional. */
-            printerQueue: string | null;
-            /** Format: uuid */
-            updatedBy: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        SetPrintHubDto: {
-            /**
-             * @description Si se ofrece el botón de impresión de respaldo para las facturas de este centro. / Whether the backup print button is offered for this center.
-             * @example true
-             */
-            enabled: boolean;
-            /**
-             * @description Hubs que se intentan EN ORDEN: primero el central, después uno en la PC que tiene la impresora, para que esa PC siga imprimiendo si el central se cae. / Hubs tried IN ORDER: the central one first, then one on the machine the printer is plugged into, so it keeps printing if the central hub is down.
-             * @example [
-             *       "https://192.130.80.172:8943/print-raw",
-             *       "http://localhost:8943/print-raw"
-             *     ]
-             */
-            hubUrls: string[];
-            /**
-             * @description Cómo llega el hub a la impresora: 'ipp' (CUPS en Linux/macOS) o 'smb' (impresora compartida desde Windows). / How the hub reaches the printer.
-             * @example ipp
-             * @enum {string}
-             */
-            protocol: "ipp" | "smb";
-            /**
-             * @description IP o nombre de la máquina que tiene la impresora conectada y compartida. / IP or hostname of the machine the printer is plugged into.
-             * @example 192.130.80.181
-             */
-            printerHost?: string;
-            /**
-             * @description Puerto del servicio de impresión de esa máquina: 631 para ipp, 445 para smb. / Port of that machine print service.
-             * @example 631
-             */
-            printerPort?: number;
-            /**
-             * @description Nombre de la cola de CUPS (ipp) o del recurso compartido de Windows (smb). / CUPS queue name (ipp) or Windows share name (smb).
-             * @example TM-T20II-RAW
-             */
-            printerQueue?: string;
-        };
-        PrinterForPrintingDto: {
-            /** Format: uuid */
-            id: string;
-            /** @example Recepción */
-            name: string;
-            /** @enum {string} */
-            protocol: "ipp" | "smb";
-            printerHost: string | null;
-            /** @example 445 */
-            printerPort: number;
-            /** @example EPSON TM-T20II Receipt5 */
-            printerQueue: string;
-        };
-        MyPrintHubResponseDto: {
-            enabled: boolean;
-            hubUrls: string[];
-            printers: components["schemas"]["PrinterForPrintingDto"][];
-            /**
-             * @description Transitional: first active printer.
-             * @enum {string}
-             */
-            protocol: "ipp" | "smb";
-            /** @description Transitional. */
-            printerHost: string | null;
-            /** @description Transitional. */
-            printerPort: number | null;
-            /** @description Transitional. */
-            printerQueue: string | null;
         };
         CreateApiKeyDto: {
             name: string;
@@ -68125,6 +70534,578 @@ export interface operations {
             };
         };
     };
+    "SalesPackagesController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros cuyos paquetes se piden, separados por coma. Omitido: el centro de la sesión. / Centers whose packages are requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+                /** @description Incluir los retirados (default false). / Include retired packages (default false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"][];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_create[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros cuyos paquetes se piden, separados por coma. Omitido: el centro de la sesión. / Centers whose packages are requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+                /** @description Incluir los retirados (default false). / Include retired packages (default false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"][];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_create[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros cuyos paquetes se piden, separados por coma. Omitido: el centro de la sesión. / Centers whose packages are requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+                /** @description Incluir los retirados (default false). / Include retired packages (default false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"][];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_create[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros cuyos paquetes se piden, separados por coma. Omitido: el centro de la sesión. / Centers whose packages are requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+                /** @description Incluir los retirados (default false). / Include retired packages (default false). */
+                includeInactive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"][];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_create[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_update[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_retire[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_update[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_retire[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_update[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_retire[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_update[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSalesPackageDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "SalesPackagesController_retire[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesPackageResponseDto"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
+    "InvoiceSalesPackagesController_sell[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SellSalesPackageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FacturaItemEntity"];
+                };
+            };
+        };
+    };
     "TiposPrecioController_list[0]_v1": {
         parameters: {
             query?: never;
@@ -72929,6 +75910,198 @@ export interface operations {
                 };
                 content: {
                     "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
+                };
+            };
+        };
+    };
+    "PacientesController_listPriorityFlagsOfPatients[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Pacientes, separados por coma (máximo 200). / Patients, comma-separated (at most 200). */
+                patientIds: string[];
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. / Centers to resolve the permission against. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientFlagsDto"][];
                 };
             };
         };
@@ -81140,6 +84313,1822 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintHubController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_listPrinters[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"][];
+                };
+            };
+        };
+    };
+    "PrintHubController_createPrinter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_updatePrinter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePrinterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_removePrinter[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_get[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_set[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPrintHubDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                };
+            };
+        };
+    };
+    "PrintHubController_remove[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintHubController_get[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_set[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPrintHubDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                };
+            };
+        };
+    };
+    "PrintHubController_remove[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintHubController_get[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_set[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPrintHubDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                };
+            };
+        };
+    };
+    "PrintHubController_remove[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintHubController_get[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintHubController_set[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetPrintHubDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CenterPrintHubEntity"];
+                };
+            };
+        };
+    };
+    "PrintHubController_remove[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "MiPrintHubController_mio[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "MiPrintHubController_mio[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "MiPrintHubController_mio[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "MiPrintHubController_mio[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
+                };
+            };
+        };
+    };
+    "PrintJobsController_next[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_next[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobForTheHubDto"];
+                };
+            };
+            /** @description Nothing to print. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_result[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_test[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintJobTestDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_list[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_list[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_list[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "PrintJobsController_list[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -109328,6 +114317,870 @@ export interface operations {
             };
         };
     };
+    "BodyMeasurementsController_forPatient[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forPatient[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_forSession[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_saveForSession[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveSessionMeasurementsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScale[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestTape[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestTapeDto"];
+                "application/json": components["schemas"]["IngestTapeDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "ConfiguracionController_ver[0]_v1": {
         parameters: {
             query?: never;
@@ -111724,6 +117577,110 @@ export interface operations {
             };
         };
     };
+    "FrontdeskController_queue[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Día YYYY-MM-DD; omitido = hoy en la zona del centro. */
+                date?: string;
+                /** @description Solo esta terapia (id del servicio). */
+                serviceId?: string;
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_queue[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Día YYYY-MM-DD; omitido = hoy en la zona del centro. */
+                date?: string;
+                /** @description Solo esta terapia (id del servicio). */
+                serviceId?: string;
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_queue[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description Día YYYY-MM-DD; omitido = hoy en la zona del centro. */
+                date?: string;
+                /** @description Solo esta terapia (id del servicio). */
+                serviceId?: string;
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_queue[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description Día YYYY-MM-DD; omitido = hoy en la zona del centro. */
+                date?: string;
+                /** @description Solo esta terapia (id del servicio). */
+                serviceId?: string;
+                /** @description Centros contra los que resolver el permiso, separados por coma; omitido = el centro de la sesión. */
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     FrontdeskController_agendaDia_v1: {
         parameters: {
             query: {
@@ -113090,6 +119047,198 @@ export interface operations {
             };
         };
     };
+    "FrontdeskController_patientPresent[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_patientPresent[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_patientPresent[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_patientPresent[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "FrontdeskController_patientUndoPresent[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FrontdeskController_patientUndoPresent[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FrontdeskController_patientUndoPresent[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "FrontdeskController_patientUndoPresent[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PatientPresenceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "FrontdeskController_presente[0]_v1": {
         parameters: {
             query?: never;
@@ -113179,6 +119328,190 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "FrontdeskController_call[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallPatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_call[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallPatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_call[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallPatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_call[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallPatientDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_uncall[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_uncall[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_uncall[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
+            };
+        };
+    };
+    "FrontdeskController_uncall[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrontdeskSesionEntity"];
+                };
             };
         };
     };
@@ -122332,6 +128665,98 @@ export interface operations {
             };
         };
     };
+    "SchedulingBridgeController_repairUnconfirmed[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepairUnconfirmedDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "SchedulingBridgeController_repairUnconfirmed[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepairUnconfirmedDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "SchedulingBridgeController_repairUnconfirmed[2]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepairUnconfirmedDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "SchedulingBridgeController_repairUnconfirmed[3]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepairUnconfirmedDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
     SchedulingBridgeController_getConfig_v1: {
         parameters: {
             query?: {
@@ -122781,1182 +129206,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "PrintHubController_list[0]_v1": {
-        parameters: {
-            query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
-                centerIds?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_list[1]_v1": {
-        parameters: {
-            query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
-                centerIds?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_list[2]_v2": {
-        parameters: {
-            query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
-                centerIds?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_list[3]_v2": {
-        parameters: {
-            query?: {
-                /** @description Centros cuya configuración se pide, separados por coma. Omitido: el centro de la sesión. / Centers whose configuration is requested, comma-separated. Omitted: the session center. */
-                centerIds?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[2]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[2]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[3]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[3]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[4]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[4]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[5]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[5]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[6]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[6]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_listPrinters[7]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"][];
-                };
-            };
-        };
-    };
-    "PrintHubController_createPrinter[7]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[2]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[2]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[3]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[3]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[4]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[4]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[5]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[5]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[6]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[6]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_updatePrinter[7]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePrinterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_removePrinter[7]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrinterDeletedResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_get[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_set[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPrintHubDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
-                };
-            };
-        };
-    };
-    "PrintHubController_remove[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "PrintHubController_get[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_set[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPrintHubDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
-                };
-            };
-        };
-    };
-    "PrintHubController_remove[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "PrintHubController_get[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_set[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPrintHubDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
-                };
-            };
-        };
-    };
-    "PrintHubController_remove[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "PrintHubController_get[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "PrintHubController_set[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetPrintHubDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CenterPrintHubEntity"];
-                };
-            };
-        };
-    };
-    "PrintHubController_remove[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                centerId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "MiPrintHubController_mio[0]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "MiPrintHubController_mio[1]_v1": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "MiPrintHubController_mio[2]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
-                };
-            };
-        };
-    };
-    "MiPrintHubController_mio[3]_v2": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MyPrintHubResponseDto"];
-                };
             };
         };
     };
