@@ -105,16 +105,25 @@ export function MonthCalendar({
                 inMonth && <PillsSkeleton seed={idx} className="mt-1" />
               ) : countsByDate ? (
                 counts.length > 0 && (
-                  <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    {counts.map((c) => (
-                      <span
-                        key={c.tipoCitaId ?? "null"}
-                        className="text-2xl leading-none font-bold tabular-nums"
-                        style={{ color: c.color }}
-                        title={c.label}
-                      >
-                        {c.total}
-                      </span>
+                  // One big number per type, centered in the day, split by an engraved divider (a gray
+                  // line with a white edge, so it reads as a groove — owner, 16-oct-2026).
+                  <div className="flex flex-1 items-center justify-center gap-3">
+                    {counts.map((c, i) => (
+                      <React.Fragment key={c.tipoCitaId ?? "null"}>
+                        {i > 0 && (
+                          <span
+                            aria-hidden
+                            className="h-9 w-px self-center bg-foreground/20 shadow-[1px_0_0_rgba(255,255,255,0.9)] dark:shadow-[1px_0_0_rgba(255,255,255,0.08)]"
+                          />
+                        )}
+                        <span
+                          className="text-4xl leading-none font-bold tabular-nums"
+                          style={{ color: c.color }}
+                          title={c.label}
+                        >
+                          {c.total}
+                        </span>
+                      </React.Fragment>
                     ))}
                   </div>
                 )
