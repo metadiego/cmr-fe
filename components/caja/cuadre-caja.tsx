@@ -373,11 +373,18 @@ function Editor({
   async function procesarCierre() {
     setProcesando(true);
     try {
+      // `inicio` (arriba) es de PRESENTACIÓN: cuando nadie escribió un conteo todavía, se apoya en
+      // la reconciliación ya resuelta por el BE (`vivo.inicio`), que para un cuadre sin abrir es 0 —
+      // mandarlo tal cual aquí BORRABA el Inicio escrito en el input si se cerraba sin antes contar
+      // nada (bug real, encontrado por BE leyendo la fila en prod: declared_petty_cash=0 con "50"
+      // escrito en pantalla). El valor que se GUARDA es siempre el del input, tal cual está escrito,
+      // nunca cero por desmarcar Aplica (eso lo resuelve `pettyCashApplies` aparte, no borrando el
+      // número).
       const abierto = await abrirCuadre({
         division,
         userId: usuarioId,
         date: fecha,
-        declaredPettyCash: inicio,
+        declaredPettyCash: Math.max(0, Number(inicioStr) || 0),
         pettyCashApplies: aplicarInicio,
       });
       const lineas = Object.entries(conteo)
