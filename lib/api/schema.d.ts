@@ -40815,6 +40815,506 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/balanza/productos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/productos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_products[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/products`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_products[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/productos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/productos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_products[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/products`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_products[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/productos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza. */
+        get: operations["InventoryScaleController_products[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza. */
+        get: operations["InventoryScaleController_products[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/productos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza. */
+        get: operations["InventoryScaleController_products[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Productos activos por nombre o SKU (máx. 20), para el buscador de la balanza. */
+        get: operations["InventoryScaleController_products[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/presentaciones-proveedor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/presentaciones-proveedor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_presentations[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/supplier-presentations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/supplier-presentations`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_presentations[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/presentaciones-proveedor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/presentaciones-proveedor`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_presentations[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/supplier-presentations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/supplier-presentations`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_presentations[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/presentaciones-proveedor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca. */
+        get: operations["InventoryScaleController_presentations[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/supplier-presentations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca. */
+        get: operations["InventoryScaleController_presentations[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/presentaciones-proveedor": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca. */
+        get: operations["InventoryScaleController_presentations[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/supplier-presentations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Variantes físicas (presentaciones de proveedor) activas del producto, con su peso unitario medido, fabricante y marca. */
+        get: operations["InventoryScaleController_presentations[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/lecturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de lecturas del centro para una presentación de proveedor (más nuevas primero).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/lecturas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_history[0]_v1"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/lecturas`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de lecturas del centro para una presentación de proveedor (más nuevas primero).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/readings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_history[1]_v1"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/readings`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/lecturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de lecturas del centro para una presentación de proveedor (más nuevas primero).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/lecturas`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_history[2]_v1"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/lecturas`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de lecturas del centro para una presentación de proveedor (más nuevas primero).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/readings`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_history[3]_v1"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/readings`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/lecturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de lecturas del centro para una presentación de proveedor (más nuevas primero). */
+        get: operations["InventoryScaleController_history[4]_v2"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @description El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de lecturas del centro para una presentación de proveedor (más nuevas primero). */
+        get: operations["InventoryScaleController_history[5]_v2"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @description El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/lecturas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de lecturas del centro para una presentación de proveedor (más nuevas primero). */
+        get: operations["InventoryScaleController_history[6]_v2"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @description El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de lecturas del centro para una presentación de proveedor (más nuevas primero). */
+        get: operations["InventoryScaleController_history[7]_v2"];
+        put?: never;
+        /**
+         * Lote de lecturas de la balanza (máx. 500)
+         * @description El centro sale de la API key, nunca del cuerpo. Idempotente por (centro, deviceId, externalId): reenviar no duplica. Una lectura inválida se devuelve en `rejected` y no tumba el lote. Cada lectura más nueva que la vigente actualiza el peso unitario medido de la presentación.
+         */
+        post: operations["InventoryScaleController_ingest[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/configuracion/panel": {
         parameters: {
             query?: never;
@@ -52196,6 +52696,8 @@ export interface components {
             color?: string;
         };
         UpdatePersonalDto: {
+            /** @description Legacy login/code (e.g. CRIVERA). Empty string clears it. Unique per clinic. */
+            legacyCode?: string;
             /** @description Iniciales (4 letras). Si no se manda, se arman del nombre y el apellido. */
             initials?: string;
             /**
@@ -52664,7 +53166,7 @@ export interface components {
             profileId: string;
             centerId: string;
             /** @enum {string} */
-            type: "fijo" | "base" | "temporal";
+            type: "base" | "fijo" | "temporal";
             validFrom: string;
             validUntil: string | null;
             forced: boolean;
@@ -53244,7 +53746,7 @@ export interface components {
         };
         ClasificacionEntity: {
             /** @enum {string} */
-            type: "categoria" | "linea" | "subcategoria" | "familia" | "marca" | "fabricante";
+            type: "categoria" | "subcategoria" | "familia" | "marca" | "fabricante" | "linea";
             name: string;
             parentId: string | null;
             taxable: boolean | null;
@@ -53283,7 +53785,7 @@ export interface components {
             technicalName: string | null;
             referenceCost: number | null;
             /** @enum {string} */
-            type: "servicio" | "base" | "compuesto" | "unico";
+            type: "base" | "unico" | "compuesto" | "servicio";
             isInventoryItem: boolean;
             /** @enum {string} */
             deductionMode: "a_la_venta" | "a_la_entrega" | "no_descarga";
@@ -55003,6 +55505,9 @@ export interface components {
             validFrom: string | null;
             validUntil: string | null;
             active: boolean;
+            measuredUnitWeightG: number | null;
+            /** Format: date-time */
+            measuredUnitWeightAt: string | null;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -55232,6 +55737,30 @@ export interface components {
             patientId?: string;
             /** @description Contenido del CSV de Renpho (si no se sube archivo). */
             csv?: string;
+        };
+        IngestScaleReadingsDto: {
+            /** @description Identificador de la balanza (p. ej. la MAC del ESP32). */
+            deviceId: string;
+            /** @description Lecturas (máximo 500): { externalId, supplierPresentationId, unitsCounted, totalWeightG, unitWeightG?, measuredAt }. Cada una se valida por separado: una inválida vuelve en `rejected` y no tumba el lote. */
+            readings: Record<string, never>[];
+            /** @description Versión del firmware que envía (solo informativa). */
+            firmware?: string;
+        };
+        ScaleReadingEntity: {
+            supplierPresentationId: string;
+            unitWeightG: number;
+            unitsCounted: number;
+            totalWeightG: number;
+            /** Format: date-time */
+            measuredAt: string;
+            deviceId: string;
+            externalId: string;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         ExportarDto: {
             resource: string;
@@ -55949,6 +56478,7 @@ export interface components {
             /** @enum {string} */
             status: "abierto" | "cerrado";
             declaredPettyCash: number;
+            pettyCashApplies: boolean;
             countedCash: number;
             expectedCash: number;
             difference: number;
@@ -55997,6 +56527,8 @@ export interface components {
             currencyId?: string;
             /** @description Caja chica (petty) declarada. */
             declaredPettyCash?: number;
+            /** @description Whether the starting fund (Inicio) applies, i.e. is subtracted from the counted cash. Omitted on create = true; omitted on resume = unchanged. */
+            pettyCashApplies?: boolean;
         };
         ConteoLineaDto: {
             /** Format: uuid */
@@ -115178,6 +115710,686 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_products[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Nombre o SKU del producto (mínimo 2 caracteres). */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_presentations[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Producto cuyas presentaciones de proveedor (variantes físicas) se piden. */
+                productId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_history[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_history[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Presentación de proveedor cuyo historial de lecturas se pide. */
+                supplierPresentationId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleReadingEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingest[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleReadingsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

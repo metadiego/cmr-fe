@@ -287,7 +287,12 @@ function Editor({
   const [inicioStr, setInicioStr] = React.useState<string>(
     String(cuadreInicial?.declaredPettyCash ?? DEFAULT_INICIO),
   );
-  const [aplicarInicio, setAplicarInicio] = React.useState(true);
+  // Persistido por el BE (PR #438, `pettyCashApplies`): seedea del cuadre ya abierto, igual que
+  // `inicioStr` seedea de `declaredPettyCash` — así un cuadre retomado conserva lo que ya se guardó,
+  // en vez de volver siempre a "aplica" por defecto.
+  const [aplicarInicio, setAplicarInicio] = React.useState(
+    cuadreInicial?.pettyCashApplies ?? true,
+  );
   const [procesando, setProcesando] = React.useState(false);
   const [emailing, setEmailing] = React.useState(false);
 
@@ -373,6 +378,7 @@ function Editor({
         userId: usuarioId,
         date: fecha,
         declaredPettyCash: inicio,
+        pettyCashApplies: aplicarInicio,
       });
       const lineas = Object.entries(conteo)
         .filter(([, c]) => c > 0)
