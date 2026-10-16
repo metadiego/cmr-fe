@@ -286,8 +286,10 @@ function Editor({
 
   // Conteo inicial: en un cajero = su conteo; en consolidado = la UNIÓN (Σ) de todos (solo lectura).
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => ({ ...conteoInicial }));
+  // Un cuadre ABIERTO con $0 guardado es casi siempre un olvido (caso real, Caguas 15-oct-2026):
+  // mientras sigue abierto se sugiere 50; CERRADO respeta el número tal cual se cerró.
   const [inicioStr, setInicioStr] = React.useState<string>(
-    String(cuadreInicial?.declaredPettyCash ?? DEFAULT_INICIO),
+    String(cerrado ? (cuadreInicial?.declaredPettyCash ?? DEFAULT_INICIO) : cuadreInicial?.declaredPettyCash || DEFAULT_INICIO),
   );
   // Persistido por el BE (PR #438, `pettyCashApplies`): seedea del cuadre ya abierto, igual que
   // `inicioStr` seedea de `declaredPettyCash` — así un cuadre retomado conserva lo que ya se guardó,
