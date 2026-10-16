@@ -188,6 +188,9 @@
     "recurringSummary": "{booked} agendadas, {skipped} omitidas"
   },
   "citas": {
+    "calendario": {
+      "sinTipo": "Sin tipo"
+    },
     "medico_requerido": "Este tipo de cita requiere médico (salvo en primera vez).",
     "hora_fin_invalida": "La hora de fin debe ser posterior a la hora de inicio.",
     "conflicto_horario": "Ese horario choca con otra cita del médico.",

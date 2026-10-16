@@ -33949,6 +33949,174 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/citas/conteo-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/conteo-por-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_countByDay[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/citas/count-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/citas/count-by-day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_countByDay[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/conteo-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/conteo-por-dia`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_countByDay[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/count-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/appointments/count-by-day`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["CitasController_countByDay[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/conteo-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         */
+        get: operations["CitasController_countByDay[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/citas/count-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         */
+        get: operations["CitasController_countByDay[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/conteo-por-dia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         */
+        get: operations["CitasController_countByDay[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/appointments/count-by-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Month calendar: appointments per day and per appointment type (`tipoCitaId`; name and color
+         *     from `citas/tipos`). Same filters as the list, without shipping every appointment to count it.
+         */
+        get: operations["CitasController_countByDay[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/citas/estados": {
         parameters: {
             query?: never;
@@ -105751,6 +105919,206 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "CitasController_countByDay[0]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[1]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[2]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[3]_v1": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[4]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[5]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[6]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "CitasController_countByDay[7]_v2": {
+        parameters: {
+            query: {
+                from: string;
+                to: string;
+                doctorId?: string;
+                status?: "programada" | "confirmada" | "presente" | "triage" | "en_consulta" | "atendida" | "no_show" | "cancelada" | "reprogramada";
+                channel?: "atencion" | "callcenter" | "webhook" | "ia";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
             };
         };
     };

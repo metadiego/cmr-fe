@@ -107,6 +107,33 @@ export async function listCitasRango(params: {
   return acc;
 }
 
+// Una fila por (fecha × tipo de cita) con el total — nombre/color del tipo salen del catálogo
+// (`getTiposCita`), no de aquí. El Swagger del BE no documenta la forma de la respuesta todavía
+// (`Record<string, never>[]`), de ahí el tipo a mano; campos confirmados con BE (PR #440, 16-oct-2026).
+export interface ConteoPorDia {
+  date: string;
+  appointmentTypeId: string | null;
+  total: number;
+}
+
+// Month calendar (BE PR #440): un número por (día × tipo) en vez de traer CADA cita para contarla a
+// mano — reemplaza `listCitasRango` en la vista mes. Mismos filtros que la lista.
+export function countByDay(params: {
+  from: string;
+  to: string;
+  doctorId?: string;
+  status?: EstadoCita;
+  channel?: CanalCita;
+  centroId?: string;
+}): Promise<ConteoPorDia[]> {
+  const { centroId, ...filters } = params;
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(filters)) {
+    if (v) sp.set(k, String(v));
+  }
+  return apiFetch<ConteoPorDia[]>(`/appointments/count-by-day?${sp.toString()}`, {}, centroId);
+}
+
 export function getCita(id: string): Promise<Cita> {
   return apiFetch<Cita>(`/appointments/${id}`);
 }

@@ -17,6 +17,17 @@ export interface AgendaEvent {
   color: string;
 }
 
+// One big number per appointment type for a day (medical appointments month view, BE PR #440):
+// replaces listing every patient row, which truncated on a busy day. `label` is the type's name
+// (or "Sin tipo"), shown as the number's tooltip — never printed next to it, the color already says
+// which type it is (same colors as the legend).
+export interface DayTypeCount {
+  tipoCitaId: string | null;
+  total: number;
+  color: string;
+  label: string;
+}
+
 // Month grid (Sun→Sat). Days outside the month are dimmed; holidays are tinted
 // and labelled. Clicking a day opens scheduling; clicking an event edits it.
 // While `loading`, the real grid and day numbers stay and in-month cells show placeholder pills.
@@ -25,6 +36,7 @@ export function MonthCalendar({
   month0,
   weekdays,
   eventsByDate,
+  countsByDate,
   festivos,
   onDayClick,
   onEventClick,
@@ -33,10 +45,13 @@ export function MonthCalendar({
   year: number;
   month0: number;
   weekdays: string[]; // 7, Sun→Sat
-  eventsByDate: Map<string, AgendaEvent[]>;
+  // Exactly one of the two: `countsByDate` (big numbers per type) for the medical appointments
+  // month view, `eventsByDate` (per-patient rows) for everything else (e.g. services).
+  eventsByDate?: Map<string, AgendaEvent[]>;
+  countsByDate?: Map<string, DayTypeCount[]>;
   festivos: Festivo[];
   onDayClick: (iso: string) => void;
-  onEventClick: (id: string) => void;
+  onEventClick?: (id: string) => void;
   loading?: boolean;
 }) {
   const tCommon = useTranslations("common");
@@ -58,7 +73,8 @@ export function MonthCalendar({
           const iso = toISO(date);
           const inMonth = date.getMonth() === month0;
           const fest = isFestivo(festivos, iso);
-          const events = eventsByDate.get(iso) ?? [];
+          const events = eventsByDate?.get(iso) ?? [];
+          const counts = countsByDate?.get(iso) ?? [];
           return (
             <button
               key={iso}
@@ -87,6 +103,21 @@ export function MonthCalendar({
               </div>
               {loading ? (
                 inMonth && <PillsSkeleton seed={idx} className="mt-1" />
+              ) : countsByDate ? (
+                counts.length > 0 && (
+                  <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    {counts.map((c) => (
+                      <span
+                        key={c.tipoCitaId ?? "null"}
+                        className="text-2xl leading-none font-bold tabular-nums"
+                        style={{ color: c.color }}
+                        title={c.label}
+                      >
+                        {c.total}
+                      </span>
+                    ))}
+                  </div>
+                )
               ) : (
               <div className="mt-1 space-y-1">
                 {events.slice(0, 4).map((e) => (
@@ -96,12 +127,12 @@ export function MonthCalendar({
                     tabIndex={0}
                     onClick={(ev) => {
                       ev.stopPropagation();
-                      onEventClick(e.id);
+                      onEventClick?.(e.id);
                     }}
                     onKeyDown={(ev) => {
                       if (ev.key === "Enter") {
                         ev.stopPropagation();
-                        onEventClick(e.id);
+                        onEventClick?.(e.id);
                       }
                     }}
                     className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-[11px] text-white"

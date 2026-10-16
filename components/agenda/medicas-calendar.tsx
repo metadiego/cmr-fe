@@ -8,9 +8,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import {
-  listCitasRango,
+  countByDay,
   getTiposCita,
   type Cita,
+  type ConteoPorDia,
   type TipoCita,
 } from "@/lib/api/citas";
 import { getMedicos, type Personal } from "@/lib/api/personal";
@@ -19,7 +20,7 @@ import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
-import { monthMatrix, toISO, colorDeEvento } from "@/lib/agenda/calendar";
+import { monthMatrix, toISO } from "@/lib/agenda/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Can } from "@/components/kit/can";
 import { ControlSkeleton } from "@/components/kit/skeletons";
-import { LegendSkeleton, MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
+import { LegendSkeleton, MonthCalendar, type DayTypeCount } from "@/components/agenda/month-calendar";
 import { CitaModal } from "@/components/agenda/cita-modal";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 
@@ -40,6 +41,7 @@ const ALL = "__all__";
 // Medical appointments calendar (doctor + hora/horaFin). Call-center scheduling.
 export function MedicasCalendar() {
   const t = useTranslations("agenda");
+  const tRoot = useTranslations();
   const tCommon = useTranslations("common");
   const format = useFormatter();
   const router = useRouter();
@@ -77,9 +79,11 @@ export function MedicasCalendar() {
   // estado — lo prohíbe el React Compiler): así no se filtra por un médico de otro centro.
   const medicoEfectivo = medico === ALL || medicos.some((m) => m.id === medico) ? medico : ALL;
 
-  const { state, refresh } = useResource<Cita[]>(
+  // Month calendar: un número por (día × tipo), no cada cita (BE PR #440, 16-oct-2026) — antes era
+  // `listCitasRango` + contar a mano, lo que mandaba CADA cita del mes solo para sumarlas.
+  const { state, refresh } = useResource<ConteoPorDia[]>(
     () =>
-      listCitasRango({
+      countByDay({
         from: desde,
         to: hasta,
         doctorId: medicoEfectivo === ALL ? undefined : medicoEfectivo,
@@ -87,35 +91,43 @@ export function MedicasCalendar() {
       }),
     [desde, hasta, medicoEfectivo, centro.fetchCentroId],
   );
-  const citas = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
+  const conteos = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
   React.useEffect(() => {
     const id = setInterval(refresh, 20000);
     return () => clearInterval(id);
   }, [refresh]);
 
-  const tipoById = React.useMemo(() => new Map(tipos.map((x) => [x.id, x])), [tipos]);
-  const medById = React.useMemo(() => new Map(medicos.map((m) => [m.id, m])), [medicos]);
-  const citaById = React.useMemo(() => new Map(citas.map((c) => [c.id, c])), [citas]);
-
-  // GET /appointments ya trae `patient.name` embebido en cada fila — no hace falta resolverlo
-  // aparte (ver docs/specs/pacientes-bulk-por-ids-handoff-be.md: pedirlo por paciente, uno por
-  // uno, disparaba cientos de llamadas y producción respondía 429 en un mes concurrido).
-  const eventsByDate = React.useMemo(() => {
-    const map = new Map<string, AgendaEvent[]>();
-    for (const c of citas) {
-      const label = c.patient?.name || "…";
-      const color = colorDeEvento(
-        null,
-        tipoById.get(c.appointmentTypeId)?.color,
-        c.doctorId ? medById.get(c.doctorId)?.color : null,
-      );
-      const arr = map.get(c.date) ?? [];
-      arr.push({ id: c.id, hora: c.time, label, color });
-      map.set(c.date, arr);
+  // Orden del catálogo (no el de llegada de la respuesta); tipo nulo (cita sin tipo) en gris, al final.
+  const countsByDate = React.useMemo(() => {
+    const porFecha = new Map<string, Map<string | null, number>>();
+    for (const row of conteos) {
+      const porTipo = porFecha.get(row.date) ?? new Map<string | null, number>();
+      porTipo.set(row.appointmentTypeId, row.total);
+      porFecha.set(row.date, porTipo);
+    }
+    const map = new Map<string, DayTypeCount[]>();
+    for (const [fecha, porTipo] of porFecha) {
+      const list: DayTypeCount[] = tipos
+        .filter((tipo) => porTipo.has(tipo.id))
+        .map((tipo) => ({
+          tipoCitaId: tipo.id,
+          total: porTipo.get(tipo.id)!,
+          color: tipo.color,
+          label: tipo.name,
+        }));
+      if (porTipo.has(null)) {
+        list.push({
+          tipoCitaId: null,
+          total: porTipo.get(null)!,
+          color: "var(--muted-foreground)",
+          label: tRoot("citas.calendario.sinTipo"),
+        });
+      }
+      map.set(fecha, list);
     }
     return map;
-  }, [citas, tipoById, medById]);
+  }, [conteos, tipos, tRoot]);
 
   function shiftMonth(delta: number) {
     const d = new Date(year, month0 + delta, 1);
@@ -201,17 +213,13 @@ export function MedicasCalendar() {
             year={year}
             month0={month0}
             weekdays={weekdays}
-            eventsByDate={eventsByDate}
+            countsByDate={countsByDate}
             loading={state.kind === "loading"}
             festivos={festivos}
+            // Un número por tipo ya no es una cita individual que editar — clic en el día sigue
+            // llevando al día (donde sí se edita cada cita una por una; el rol `citas` llega ahí
+            // igual, handoff agenda-abrir-la-cita, sin cambios).
             onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}`)}
-            onEventClick={(id) => {
-              // Pulsar una cita abre el MISMO modal en modo edición, con las acciones del puesto
-              // (confirmar/reprogramar/cancelar/no-show). El rol `citas` no llega al tablero por menú,
-              // así que la agenda es su única puerta. Handoff agenda-abrir-la-cita.
-              const c = citaById.get(id);
-              if (c) setModal({ fecha: c.date, cita: c });
-            }}
           />
         )}
       </div>
