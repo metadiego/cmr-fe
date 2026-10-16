@@ -25,7 +25,7 @@ import {
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
-import { totalConteo, estadoCuadreVivo } from "@/lib/caja/totales";
+import { totalConteo, estadoCuadreVivo, diferenciaCaja } from "@/lib/caja/totales";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
@@ -321,10 +321,21 @@ function Editor({
     salesCash,
     reconciliacion: reporte.reconciliation ?? null,
   });
-  const inicio = cerrado ? inicioInput : vivo.inicio;
+  // `vivo.inicio` (recién abierto, sin escribir conteo) viene del fondoInicial que el BE YA tiene
+  // guardado — 0 si el cuadre de hoy ni se ha abierto — así que editar Inicio o destildar Aplica no
+  // se veía reflejado en el resumen hasta empezar a contar (checkbox sin gracia, 15-oct-2026). Para
+  // UN cajero (no consolidado) el Inicio mostrado es siempre el de pantalla, y la diferencia se
+  // recalcula con ESE inicio — nunca la del BE, que puede estar desactualizada. El consolidado sigue
+  // 100% del BE (es la Σ de todos los cajeros; no hay un "inicio de pantalla" de uno solo que valga
+  // ahí — bug real 03-oct-2026, no se repite).
+  const inicioEnVivo = esConsolidado ? vivo.inicio : inicioInput;
+  const diferenciaEnVivo = esConsolidado
+    ? vivo.diferencia
+    : diferenciaCaja(vivo.contado, inicioEnVivo, salesCash);
+  const inicio = cerrado ? inicioInput : inicioEnVivo;
   const contado = cerrado ? contadoLocal : vivo.contado;
-  const diferencia = cerrado ? (cuadreInicial?.difference ?? 0) : vivo.diferencia;
-  const aDepositar = cerrado ? contado - inicio : vivo.aDepositar;
+  const diferencia = cerrado ? (cuadreInicial?.difference ?? 0) : diferenciaEnVivo;
+  const aDepositar = cerrado ? contado - inicio : contado - inicioEnVivo;
   // Nadie ha guardado un conteo real todavía: nunca el verde de "cuadra" (handoff
   // cuadre-efectivo-sin-conteo-descuadra-handoff-fe.md).
   const sinContar = !cerrado && vivo.sinContar;
