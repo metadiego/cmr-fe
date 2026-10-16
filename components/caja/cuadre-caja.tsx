@@ -197,8 +197,10 @@ function Loader(props: LoaderProps) {
       getReporteDia(fecha, division, usuarioId),
       getDenominaciones(),
       listarCuadres({ fecha, division, usuarioId: usuarioIdParam }),
-      // Roster completo de cajeros para el selector (solo gerencia lo necesita; el BE lo acota por rol).
-      isGerencia ? getCajeros() : Promise.resolve([] as Cajero[]),
+      // Cajeros del selector, acotados a quien cobró esta (fecha × división) o tiene cuadre ese día
+      // (BE PR #439, 16-oct-2026): antes traía el roster COMPLETO del centro, obligando a buscar
+      // entre decenas de nombres para un día con 2 cajeros reales. Solo gerencia lo necesita.
+      isGerencia ? getCajeros(undefined, fecha, division) : Promise.resolve([] as Cajero[]),
       // Grupos configurables de método de pago (para subtotales informativos, p.ej. visa_mc).
       getGruposMetodoPago(),
     ]);
@@ -321,13 +323,10 @@ function Editor({
     salesCash,
     reconciliacion: reporte.reconciliation ?? null,
   });
-  // `vivo.inicio` (recién abierto, sin escribir conteo) viene del fondoInicial que el BE YA tiene
-  // guardado — 0 si el cuadre de hoy ni se ha abierto — así que editar Inicio o destildar Aplica no
-  // se veía reflejado en el resumen hasta empezar a contar (checkbox sin gracia, 15-oct-2026). Para
-  // UN cajero (no consolidado) el Inicio mostrado es siempre el de pantalla, y la diferencia se
-  // recalcula con ESE inicio — nunca la del BE, que puede estar desactualizada. El consolidado sigue
-  // 100% del BE (es la Σ de todos los cajeros; no hay un "inicio de pantalla" de uno solo que valga
-  // ahí — bug real 03-oct-2026, no se repite).
+  // `vivo.inicio` cae al fondoInicial ya guardado (0 si nada se ha abierto hoy) hasta que se
+  // empieza a contar — editar Inicio/Aplica no se veía reflejado antes de eso. Para UN cajero el
+  // Inicio mostrado es siempre el de pantalla, con la diferencia recalculada sobre ESE valor. El
+  // consolidado sigue 100% del BE (Σ de todos los cajeros, bug real 03-oct-2026 no se repite).
   const inicioEnVivo = esConsolidado ? vivo.inicio : inicioInput;
   const diferenciaEnVivo = esConsolidado
     ? vivo.diferencia
@@ -367,30 +366,27 @@ function Editor({
       }))
       .filter((s) => s.monto !== 0);
   }, [grupos, reporte]);
-  // Opciones del selector: roster completo del BE (gerencia ve todos, cajero solo a sí mismo).
-  // Fallback si el roster viene vacío: "yo" + quienes facturaron ese día.
-  const opcionesCajero: Array<{ usuarioId: string; nombre: string }> =
-    cajeros.length > 0
-      ? cajeros.map((c) => ({ usuarioId: c.userId, nombre: c.name }))
-      : [
-          ...(meId ? [{ usuarioId: meId, nombre: t("scope.mine") }] : []),
-          ...porCajero
-            .filter((c): c is { usuarioId: string; nombre: string | null; total: number } =>
-              !!c.usuarioId && c.usuarioId !== meId,
-            )
-            .map((c) => ({ usuarioId: c.usuarioId, nombre: c.nombre ?? c.usuarioId.slice(0, 8) })),
-        ];
+  // Ya vienen acotadas a esta (fecha × división) por el BE (PR #439): vacío = "nadie cobró", no un
+  // roster roto — se pinta el aviso, sin fallback que lo oculte.
+  const opcionesCajero: Array<{ usuarioId: string; nombre: string }> = cajeros.map((c) => ({
+    usuarioId: c.userId,
+    nombre: c.name,
+  }));
+
+  // Limpia la selección si el cajero elegido no está en la lista de esta fecha (cambió de fecha, o
+  // nadie cobró) — `.some` en vacío ya da `false`, cubre ambos casos sin chequeo aparte.
+  React.useEffect(() => {
+    if (!isGerencia || esConsolidado) return;
+    if (!cajeros.some((c) => c.userId === usuarioId)) setScope("consolidated");
+  }, [cajeros, usuarioId, esConsolidado, isGerencia, setScope]);
 
   async function procesarCierre() {
     setProcesando(true);
     try {
-      // `inicio` (arriba) es de PRESENTACIÓN: cuando nadie escribió un conteo todavía, se apoya en
-      // la reconciliación ya resuelta por el BE (`vivo.inicio`), que para un cuadre sin abrir es 0 —
-      // mandarlo tal cual aquí BORRABA el Inicio escrito en el input si se cerraba sin antes contar
-      // nada (bug real, encontrado por BE leyendo la fila en prod: declared_petty_cash=0 con "50"
-      // escrito en pantalla). El valor que se GUARDA es siempre el del input, tal cual está escrito,
-      // nunca cero por desmarcar Aplica (eso lo resuelve `pettyCashApplies` aparte, no borrando el
-      // número).
+      // `inicio` (arriba) es de presentación y puede caer a 0 sin haber contado nada — mandarlo
+      // tal cual aquí BORRABA el Inicio escrito al cerrar sin contar antes (bug real, visto en la
+      // fila de prod). Se guarda siempre el valor del input; Aplica viaja aparte, sin poner el
+      // número en 0.
       const abierto = await abrirCuadre({
         division,
         userId: usuarioId,
@@ -477,11 +473,17 @@ function Editor({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
-              {opcionesCajero.map((c) => (
-                <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                  {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
-                </SelectItem>
-              ))}
+              {opcionesCajero.length > 0 ? (
+                opcionesCajero.map((c) => (
+                  <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
+                    {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  {t("cajeros.vacio")}
+                </div>
+              )}
             </SelectContent>
           </Select>
           {cerrado && (

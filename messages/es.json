@@ -3492,6 +3492,9 @@
       "consolidated": "Todos (consolidado)",
       "select": "Elegir cajero"
     },
+    "cajeros": {
+      "vacio": "Nadie cobró ese día"
+    },
     "open": "Abrir cuadre",
     "openHelp": "No hay un cuadre para esta selección. Ábrelo para empezar a contar.",
     "reopen": "Retomar cuadre abierto",

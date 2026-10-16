@@ -127916,6 +127916,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -127938,6 +127940,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -127960,6 +127964,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -127982,6 +127988,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -128004,6 +128012,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -128026,6 +128036,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -128048,6 +128060,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;
@@ -128070,6 +128084,8 @@ export interface operations {
             query?: {
                 q?: string;
                 active?: string;
+                date?: string;
+                division?: string;
             };
             header?: never;
             path?: never;

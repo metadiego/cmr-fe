@@ -167,9 +167,19 @@ export function getGruposMetodoPago(): Promise<GrupoMetodoPago[]> {
 
 // Roster de cajeros del centro (auth user id + nombre). El BE aplica el alcance por rol: gerencia
 // ve todos; un cajero solo a sí mismo. Puebla el selector con nombres reales (no UUID).
-export function getCajeros(q?: string): Promise<Cajero[]> {
-  const qs = q ? `?q=${encodeURIComponent(q)}` : "";
-  return apiFetch<Cajero[]>(`/cash/cashiers${qs}`);
+// `fecha`+`division` (BE PR #439): acota a quien cobró esa división ese día o tiene cuadre — sin
+// `fecha` sigue siendo el roster completo (compatible con los demás usos de este mismo endpoint).
+export function getCajeros(
+  q?: string,
+  fecha?: string,
+  division?: CajaDivision,
+): Promise<Cajero[]> {
+  const sp = new URLSearchParams();
+  if (q) sp.set("q", q);
+  if (fecha) sp.set("date", fecha);
+  if (division) sp.set("division", division);
+  const qs = sp.toString();
+  return apiFetch<Cajero[]>(`/cash/cashiers${qs ? `?${qs}` : ""}`);
 }
 
 // ---- reporte del día (CC3) ------------------------------------------
