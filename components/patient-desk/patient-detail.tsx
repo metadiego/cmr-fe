@@ -28,7 +28,8 @@ import { apiErrorLabel, toastError } from "@/lib/api/errors"
 import { ApiError } from "@/lib/api/types"
 import { ServiceSessionsTable } from "@/components/patient-desk/service-sessions-table"
 import { ConsultationRows } from "@/components/patient-desk/consultation-rows"
-import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal"
+import { EhrGateHost, EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal"
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion"
 import type { EhrReadinessField } from "@/lib/api/ehr-integration"
 import { PacienteFormSheet as PatientFormSheet } from "@/components/clientes/paciente-form-sheet"
 import { Button } from "@/components/ui/button"
@@ -176,6 +177,11 @@ export function PatientDetail({
     faltantes: EhrReadinessField[]
     consultIds: string[]
   } | null>(null)
+  // Gate per-row de un servicio (p. ej. al avanzar el flujo de una sesión puntual, NO el "Presente"
+  // masivo de arriba, que para servicios nunca bloquea por diseño — ver el comentario anterior). Vive
+  // aquí, no en ServiceSessionsTable/FilaSesion, porque la fila puede desmontarse a mitad de la acción
+  // (la sesión sale del tablero al refrescar) y este panel del paciente sí es estable mientras se ve.
+  const [serviceEhrGate, setServiceEhrGate] = React.useState<EhrGateCtx | null>(null)
 
   // Récord: "Generar #" asigna el siguiente de la secuencia del centro (mismo botón/endpoint que
   // nueva-cita-modal.tsx cuando el paciente llega sin uno). El lápiz abre el MISMO formulario de
@@ -492,6 +498,7 @@ export function PatientDetail({
                     servicioId: ctx.servicioId ?? x.service.serviceId,
                   })
                 }
+                onEhrGate={setServiceEhrGate}
               />
             )
           : kind !== "services" &&
@@ -522,6 +529,12 @@ export function PatientDetail({
           }}
         />
       )}
+
+      <EhrGateHost
+        gate={serviceEhrGate}
+        centroId={centerId}
+        onClose={() => setServiceEhrGate(null)}
+      />
 
       {editingPatient && (
         // Montado SOLO una vez que `editingPatient` ya tiene el paciente completo: si este Sheet

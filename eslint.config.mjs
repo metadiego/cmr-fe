@@ -26,14 +26,17 @@ const DEBT = {
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
   // 09-oct-2026: 930 → 880 — the header/toolbar row moved to components/frontdesk/frontdesk-toolbar.tsx.
-  // 20-oct-2026: both of these went UP, not down — the EHR-missing-data gate (PACIENTE_DATOS_REQUERIDOS)
-  // needed a new `onEhrGate` prop + a few lines in the one error-handling chokepoint each already had, to
-  // stop falling back to a bare toast (handoff quejas-de-mostrador-2026-10-20 §1, real complaints from
-  // Christian and Yadira). The shared modal-rendering boilerplate was extracted first (EhrGateHost, in
-  // ehr-readiness-modal.tsx) to keep the increase to just that — raising these two is admitted debt, not
-  // a silent bump; said here and in the commit, not hidden.
-  "components/frontdesk/frontdesk-board.tsx": 825, // 10-oct-2026: → 816; 20-oct-2026: 816 → 825 (onEhrGate wiring, see note above)
-  "components/frontdesk/fila-sesion.tsx": 725, // 20-oct-2026: 714 → 725 (onEhrGate wiring, see note above)
+  // 20-oct-2026: briefly got the quejas-de-mostrador EHR-gate wiring too, then REVERTED — the owner
+  // confirmed this whole screen (the old frontdesk, /boards/frontdesk) is deprecated and gets no more
+  // new work; the live one is /boards/patient-desk.
+  "components/frontdesk/frontdesk-board.tsx": 816, // 10-oct-2026: 843 → 817 → 816
+  // 20-oct-2026: 714 → 723 — FilaSesion is SHARED: components/patient-desk/service-sessions-table.tsx
+  // (the LIVE /boards/patient-desk Services tab) imports it as SessionRow. The quejas-de-mostrador
+  // EHR-gate wiring (onEhrGate prop) is needed there, not for the deprecated old frontdesk — the gate
+  // STATE itself lives one level up, in patient-detail.tsx (stable per patient; the row can unmount
+  // mid-action on refetch). Keeping this prop is reuse of shared code, not new work on the deprecated
+  // screen.
+  "components/frontdesk/fila-sesion.tsx": 723,
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
   // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to

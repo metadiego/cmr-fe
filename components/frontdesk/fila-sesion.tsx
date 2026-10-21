@@ -92,8 +92,6 @@ export function FilaSesion({
   estados: { clave: string; label: string }[];
   onChanged: () => void;
   onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
-  // Candado PACIENTE_DATOS_REQUERIDOS: el gate se abre en el PADRE (frontdesk-board.tsx), no aquí
-  // (la fila se desmonta al refrescar si el paciente sale del filtro activo).
   onEhrGate?: (ctx: EhrGateCtx) => void;
 }) {
   const t = useTranslations("frontdesk");

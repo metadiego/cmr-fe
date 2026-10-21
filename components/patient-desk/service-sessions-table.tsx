@@ -31,6 +31,7 @@ import type {
 import { NotificarCell as NotifyBell } from "@/components/agenda/tablero-dinamico"
 import { STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers"
 import { FilaSesion as SessionRow } from "@/components/frontdesk/fila-sesion"
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion"
 import { useCan } from "@/hooks/use-can"
 import { cn } from "@/lib/utils"
 import { ServiceTableSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
@@ -58,6 +59,7 @@ interface Props {
     pacienteNombre?: string
     servicioId?: string
   }) => void
+  onEhrGate?: (ctx: EhrGateCtx) => void
 }
 
 // One of the patient's services for the day: the service's own columns (exactly the frontdesk board's,
@@ -78,6 +80,7 @@ export function ServiceSessionsTable({
   centerId,
   onChanged,
   onSchedule,
+  onEhrGate,
 }: Props) {
   const t = useTranslations("patientDesk")
   const tRoot = useTranslations()
@@ -275,6 +278,7 @@ export function ServiceSessionsTable({
                   }))}
                   onChanged={onChanged}
                   onProgramar={onSchedule}
+                  onEhrGate={onEhrGate}
                 />
               ))}
             </tbody>
