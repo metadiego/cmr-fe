@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { useTranslations } from "next-intl"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Stethoscope02Icon } from "@hugeicons/core-free-icons"
 
 import {
   getOpciones as getColumnOptions,
@@ -99,18 +101,37 @@ export function ConsultationRows({
           {t("sessionsCount", { n: rows.length })}
         </span>
         {notify && (
-          <span className="ml-auto flex items-center gap-1">
-            {rows.map((row) => (
-              <NotifyBell
-                key={row.id}
-                col={notify}
-                fila={row}
-                tablero="atencion"
-                centroId={centerId}
-                optionsByCol={options}
-                onRefresh={onChanged}
-              />
-            ))}
+          <span className="ml-auto flex items-center gap-2">
+            {rows.map((row) => {
+              // Quién toma los vitales: ya vive en la FILA (fd_enfermera, el BE la proyecta exista o no
+              // la columna en este tablero — ver NotificarCell). Antes solo se podía ASIGNAR desde la
+              // campana, nunca se veía quién — igual que el legado (campana + nombre), pero como una
+              // píldora junto a la campana en vez de una celda aparte (handoff
+              // quejas-de-mostrador-2026-10-20 §6, pedido del dueño: "mejor y más elegante").
+              const enfermera = (row as Record<string, unknown>).fd_enfermera
+              const nombreVitales = typeof enfermera === "string" ? enfermera : ""
+              return (
+                <span key={row.id} className="flex items-center gap-1">
+                  {nombreVitales && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] font-medium text-muted-foreground ring-1 ring-foreground/10"
+                      title={t("vitalsBy", { name: nombreVitales })}
+                    >
+                      <HugeiconsIcon icon={Stethoscope02Icon} className="size-3" />
+                      {nombreVitales}
+                    </span>
+                  )}
+                  <NotifyBell
+                    col={notify}
+                    fila={row}
+                    tablero="atencion"
+                    centroId={centerId}
+                    optionsByCol={options}
+                    onRefresh={onChanged}
+                  />
+                </span>
+              )
+            })}
           </span>
         )}
       </header>

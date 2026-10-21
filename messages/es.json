@@ -4692,6 +4692,7 @@
     "markPresent": "Presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
+    "vitalsBy": "Vitales: {name}",
     "consultation": "Consulta",
     "kindLabel": "Mostrar",
     "filterByService": "Filtrar por servicio",
