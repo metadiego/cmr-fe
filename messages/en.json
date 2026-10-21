@@ -34,7 +34,35 @@
     "claimPrinterHelp": "When a new patient is onboarded in the EHR, their code prints by itself on this printer, through the branch hub.",
     "claimPrinterNone": "This center has no printers in the print hub (Settings → Corporate look).",
     "claimPrinterUnset": "Not set",
-    "claimPrinterNotInCenter": "Esa impresora no es de este centro."
+    "claimPrinterNotInCenter": "Esa impresora no es de este centro.",
+    "webhook": {
+      "title": "EHR events (webhook)",
+      "help": "The EHR notifies us of the patient's movements at this address, signed with a shared secret. The same address and secret serve both centers.",
+      "url": "URL for the EHR",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "Could not copy; select it and copy it by hand.",
+      "secret": "Shared secret",
+      "secretSet": "Set ✓",
+      "secretUnset": "Not set",
+      "change": "Change",
+      "set": "Set",
+      "secretPh": "Paste the secret the EHR uses",
+      "clear": "Remove secret",
+      "saved": "Secret saved",
+      "cleared": "Secret removed: this center no longer accepts events",
+      "allCenters": "Apply to the {n} centers",
+      "recent": "Latest events received",
+      "noEvents": "No event has arrived yet.",
+      "linked": "Linked",
+      "notLinked": "Not linked to a patient",
+      "col": {
+        "receivedAt": "Received",
+        "type": "Type",
+        "record": "Record",
+        "patient": "Patient"
+      }
+    }
   },
   "resources": {
     "title": "Resources",

@@ -14,6 +14,7 @@ import { useResource } from "@/hooks/use-resource"
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla"
 import { ConfigGuard } from "@/components/configuracion/config-guard"
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector"
+import { EhrWebhookSettings } from "@/components/configuracion/ehr-webhook-settings"
 import { EhrOrphans } from "@/components/configuracion/ehr-orphans"
 import { Switch } from "@/components/ui/switch"
 import { getPrintHub, type CenterPrinter } from "@/lib/api/print-hub"
@@ -49,6 +50,12 @@ export default function EhrIntegrationConfigPage() {
             <EhrToggle
               centroId={estado.fetchCentroId}
               puedeEscribir={estado.puedeEscribir}
+            />
+            <EhrWebhookSettings
+              centroId={estado.fetchCentroId}
+              puedeEscribir={estado.puedeEscribir}
+              // Read and write use the same permission here, so the listed centers are writable.
+              centrosEscribibles={estado.centros}
             />
             <EhrOrphans
               centroId={estado.fetchCentroId}

@@ -34,7 +34,35 @@
     "claimPrinterHelp": "Cuando un paciente nuevo queda dado de alta en el EHR, su código se imprime solo en esta impresora, por el hub de la sucursal.",
     "claimPrinterNone": "Este centro no tiene impresoras en el hub de impresión (Configuración → Apariencia corporativa).",
     "claimPrinterUnset": "Sin elegir",
-    "claimPrinterNotInCenter": "Esa impresora no es de este centro."
+    "claimPrinterNotInCenter": "Esa impresora no es de este centro.",
+    "webhook": {
+      "title": "Eventos del EHR (webhook)",
+      "help": "El EHR nos avisa de los movimientos del paciente en esta dirección, firmados con un secreto compartido. La misma dirección y el mismo secreto sirven para los dos centros.",
+      "url": "URL para el EHR",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar; selecciónala y cópiala a mano.",
+      "secret": "Secreto compartido",
+      "secretSet": "Configurado ✓",
+      "secretUnset": "Sin configurar",
+      "change": "Cambiar",
+      "set": "Configurar",
+      "secretPh": "Pega aquí el secreto que usa el EHR",
+      "clear": "Quitar secreto",
+      "saved": "Secreto guardado",
+      "cleared": "Secreto quitado: este centro ya no acepta eventos",
+      "allCenters": "Aplicar a los {n} centros",
+      "recent": "Últimos eventos recibidos",
+      "noEvents": "Todavía no ha llegado ningún evento.",
+      "linked": "Ligado",
+      "notLinked": "Sin ligar a un paciente",
+      "col": {
+        "receivedAt": "Recibido",
+        "type": "Tipo",
+        "record": "Récord",
+        "patient": "Paciente"
+      }
+    }
   },
   "resources": {
     "title": "Recursos",

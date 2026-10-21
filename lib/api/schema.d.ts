@@ -19667,6 +19667,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ehr-integration/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Eventos recibidos del EHR, del centro activo o de `centerIds`, más nuevos primero.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["EhrEventsController_list_v1"];
+        put?: never;
+        /**
+         * Webhook del EHR, UNA URL para los dos centros: firma con el secreto cargado; el centro sale de la llave del paciente («BAY-015520»). Sin centro reconocible responde 200 con centerId null y no guarda.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["EhrEventsController_receiveForAnyCenter_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ehr-integration/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Eventos recibidos del EHR, del centro activo o de `centerIds`, más nuevos primero. */
+        get: operations["EhrEventsController_list_v2"];
+        put?: never;
+        /** Webhook del EHR, UNA URL para los dos centros: firma con el secreto cargado; el centro sale de la llave del paciente («BAY-015520»). Sin centro reconocible responde 200 con centerId null y no guarda. */
+        post: operations["EhrEventsController_receiveForAnyCenter_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ehr-integration/events/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Webhook del EHR (público, firmado): verifica X-CMR-Signature con el secreto del centro, guarda el evento una sola vez (X-CMR-Event-Id) y responde 200 al momento.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events/{centerId}`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["EhrEventsController_receive_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ehr-integration/events/{centerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Webhook del EHR (público, firmado): verifica X-CMR-Signature con el secreto del centro, guarda el evento una sola vez (X-CMR-Event-Id) y responde 200 al momento. */
+        post: operations["EhrEventsController_receive_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/impresion-hubs": {
         parameters: {
             query?: never;
@@ -52699,6 +52781,8 @@ export interface components {
              */
             createdByStaffId: string | null;
             legacyCode: string | null;
+            /** Format: date-time */
+            legacyFullImportAt: string | null;
             active: boolean;
             id: string;
             clinicId: string | null;
@@ -53397,6 +53481,8 @@ export interface components {
             serviceEmail?: string;
             /** @description Contraseña del usuario de servicio. SE ESCRIBE, NUNCA SE LEE: la lectura solo dice si está puesta. */
             servicePassword?: string;
+            /** @description Secreto compartido con el que el EHR firma su webhook de eventos. SE ESCRIBE, NUNCA SE LEE: la lectura solo dice si está puesto (`webhookSecretSet`). "" lo borra. / Shared secret of the EHR webhook; write-only. */
+            webhookSecret?: string;
             enabledForConsultations?: boolean;
             enabledForServices?: boolean;
             /**
@@ -53417,6 +53503,24 @@ export interface components {
             /** Format: uuid */
             ehrRoleId?: string;
             fullName?: string;
+        };
+        EhrEventEntity: {
+            eventId: string;
+            eventType: string;
+            /** Format: date-time */
+            occurredAt: string | null;
+            patientRecord: string | null;
+            patientId: string | null;
+            payload: Record<string, never>;
+            status: string;
+            /** Format: date-time */
+            receivedAt: string;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         CenterPrintHubEntity: {
             enabled: boolean;
@@ -84539,7 +84643,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -84562,7 +84668,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -84581,7 +84689,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -84604,7 +84714,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -85013,6 +85125,132 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EhrEventsController_list_v1: {
+        parameters: {
+            query?: {
+                /** @description Solo los eventos de este paciente. */
+                patientId?: string;
+                /** @description ISO date-time: solo lo recibido desde aquí. */
+                since?: string;
+                /** @description Máximo de filas (1..500, default 100). */
+                limit?: number;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EhrEventEntity"][];
+                };
+            };
+        };
+    };
+    EhrEventsController_receiveForAnyCenter_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EhrEventsController_list_v2: {
+        parameters: {
+            query?: {
+                /** @description Solo los eventos de este paciente. */
+                patientId?: string;
+                /** @description ISO date-time: solo lo recibido desde aquí. */
+                since?: string;
+                /** @description Máximo de filas (1..500, default 100). */
+                limit?: number;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EhrEventEntity"][];
+                };
+            };
+        };
+    };
+    EhrEventsController_receiveForAnyCenter_v2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EhrEventsController_receive_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EhrEventsController_receive_v2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                centerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

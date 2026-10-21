@@ -1,3 +1,4 @@
+import type { components } from "./schema"
 import { apiFetch } from "./client"
 
 // Enganche con el EHR externo (cmr-ehr): al marcar PRESENTE en el tablero de Atención, el paciente
@@ -59,6 +60,19 @@ export interface EhrConfig {
   // Where the claim code of a new EHR patient prints (a center_printers.id), through the branch hub's
   // print queue. null = not set. Handoff codigo-de-alta-del-ehr.
   claimCodePrinterId?: string | null
+  // EHR events webhook (handoff ehr-webhook-en-la-configuracion). The secret is WRITE-ONLY: reads only
+  // say whether it is set; `webhookSecret: ""` clears it.
+  webhookSecretSet?: boolean
+  webhookPath?: string | null
+  webhookSecret?: string
+}
+
+// Events the EHR sent us (GET /ehr-integration/events, ehr-integration.read) — to see it is sending.
+export type EhrEvent = components["schemas"]["EhrEventEntity"] & {
+  patient?: { id: string; medicalRecordNumber?: string | null; name?: string | null } | null
+}
+export function listEhrEvents(limit = 20, centroId?: string): Promise<EhrEvent[]> {
+  return apiFetch<EhrEvent[]>(`/ehr-integration/events?limit=${limit}`, {}, centroId)
 }
 function centerQs(centerIds?: string[]): string {
   if (!centerIds?.length) return ""
