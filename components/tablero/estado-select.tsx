@@ -9,6 +9,8 @@ import { LockedIcon } from "@hugeicons/core-free-icons";
 import { ejecutarAccion, type Transicion } from "@/lib/api/tablero";
 import type { EstadoCitaCatalogo } from "@/lib/api/citas";
 import { toastError } from "@/lib/api/errors";
+import { datosFaltantesDe } from "@/lib/api/ehr-gate";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import {
   Select,
   SelectContent,
@@ -28,7 +30,9 @@ export function EstadoSelect({
   estados,
   transiciones,
   centroId,
+  pacienteId,
   onDone,
+  onEhrGate,
 }: {
   tablero: string;
   entidadId: string;
@@ -36,7 +40,12 @@ export function EstadoSelect({
   estados: EstadoCitaCatalogo[];
   transiciones: Transicion[];
   centroId?: string;
+  pacienteId?: string;
   onDone: () => void;
+  // Igual que en CeldaToggleHora: el candado PACIENTE_DATOS_REQUERIDOS abre el modal en el PADRE,
+  // nunca aquí (esta fila puede desmontarse al refrescar). Sin esta prop, solo un toast (handoff
+  // quejas-de-mostrador-2026-10-20).
+  onEhrGate?: (ctx: EhrGateCtx) => void;
 }) {
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
@@ -57,6 +66,11 @@ export function EstadoSelect({
       await ejecutarAccion({ boardSlug: tablero, entityId: entidadId, action: tr.slug, payload: {} }, centroId);
       onDone();
     } catch (err) {
+      const faltantes = datosFaltantesDe(err);
+      if (faltantes && pacienteId && onEhrGate) {
+        onEhrGate({ pacienteId, faltantes, onCompleted: () => void change(nuevo) });
+        return;
+      }
       toastError(err, tRoot);
     } finally {
       setBusy(false);

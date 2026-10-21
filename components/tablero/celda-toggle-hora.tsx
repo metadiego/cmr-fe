@@ -8,6 +8,8 @@ import type { ColumnaEfectiva } from "@/lib/api/agenda-dia";
 import { resolveToggle, type EstadoLite } from "@/lib/tablero/toggle-hora";
 import { colColor } from "@/components/agenda/tablero-dinamico";
 import { toastError } from "@/lib/api/errors";
+import { datosFaltantesDe } from "@/lib/api/ehr-gate";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Formats a sealed timestamp to HH:MM in the clinic timezone (America/Puerto_Rico).
@@ -42,7 +44,9 @@ export function CeldaToggleHora({
   transiciones,
   estados,
   centroId,
+  pacienteId,
   onSaved,
+  onEhrGate,
 }: {
   tablero: string;
   entidadId: string;
@@ -52,7 +56,13 @@ export function CeldaToggleHora({
   transiciones: Transicion[];
   estados: EstadoLite[];
   centroId?: string;
+  pacienteId?: string;
   onSaved?: () => void;
+  // Si el BE rechaza por PACIENTE_DATOS_REQUERIDOS, el gate se abre en el PADRE (no aquí): esta
+  // celda puede desmontarse al refrescar si la fila sale del filtro activo, y con ella se perdería
+  // el modal antes de usarlo — mismo motivo que FlujoAtencion. Sin esta prop, cae a solo un toast
+  // (handoff quejas-de-mostrador-2026-10-20, antes era el único de los 4 casos sin el modal).
+  onEhrGate?: (ctx: EhrGateCtx) => void;
 }) {
   const tRoot = useTranslations();
   const [busy, setBusy] = React.useState(false);
@@ -83,6 +93,11 @@ export function CeldaToggleHora({
       onSaved?.();
     } catch (err) {
       setOptimistic(undefined); // revertir
+      const faltantes = datosFaltantesDe(err);
+      if (faltantes && pacienteId && onEhrGate) {
+        onEhrGate({ pacienteId, faltantes, onCompleted: () => void toggle() });
+        return;
+      }
       toastError(err, tRoot);
     } finally {
       setBusy(false);

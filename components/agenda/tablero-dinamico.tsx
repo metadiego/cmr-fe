@@ -25,7 +25,7 @@ import { CeldaToggleHora } from "@/components/tablero/celda-toggle-hora";
 import { CeldaToggleIcon } from "@/components/tablero/celda-toggle-icon";
 import { FlujoAtencion, type PostAccionCtx, type EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { PostAccionHost } from "@/components/tablero/post-accion";
-import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
+import { EhrGateHost } from "@/components/tablero/ehr-readiness-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 import { BoardHeadSkeleton, BoardRowsSkeleton } from "@/components/agenda/tablero-dinamico-skeleton";
 
@@ -407,7 +407,9 @@ export function TableroDinamico({
           transiciones={transiciones ?? []}
           estados={estados ?? []}
           centroId={centroId}
+          pacienteId={(fila as { pacienteId?: unknown }).pacienteId != null ? String((fila as { pacienteId?: unknown }).pacienteId) : undefined}
           onSaved={onRefresh}
+          onEhrGate={setEhrGate}
         />
       );
     }
@@ -544,19 +546,7 @@ export function TableroDinamico({
         </tbody>
       </table>
     </div>
-    {ehrGate && (
-      <EhrReadinessModal
-        pacienteId={ehrGate.pacienteId}
-        faltantes={ehrGate.faltantes}
-        centroId={centroId}
-        onCancel={() => setEhrGate(null)}
-        onCompleted={() => {
-          const g = ehrGate;
-          setEhrGate(null);
-          g.onCompleted();
-        }}
-      />
-    )}
+    <EhrGateHost gate={ehrGate} centroId={centroId} onClose={() => setEhrGate(null)} />
     {postAccion && (
       <PostAccionHost
         postAccion={postAccion.accion}

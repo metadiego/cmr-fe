@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/citas";
 import { getOpciones, ejecutarAccion, type Opcion } from "@/lib/api/tablero";
 import { pickDoctor } from "@/lib/tablero/pick-doctor";
+import { patientDoctorOption } from "@/lib/medicos/patient-doctor-option";
 import { asignarRecord } from "@/lib/api/pacientes";
 import { toastError } from "@/lib/api/errors";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -100,6 +101,12 @@ export function NuevaCitaModal({
 
   const [tipoId, setTipoId] = React.useState<string>("");
   const [medicoId, setMedicoId] = React.useState<string>(NO_MEDICO);
+  // Médico de la cita cuando NO está en `medicos` (las opciones activas del tablero): se añade como
+  // opción extra, con su nombre, para que no "desaparezca" al ir a Asistido (reporte del dueño,
+  // 14-oct-2026 / 20-oct-2026). Sin el centro del médico (GET /appointments no lo trae, solo
+  // doctorId+doctorName) no se puede decir si está retirado o es de otro centro — se muestra el
+  // nombre solo, nunca una etiqueta que no se pueda verificar.
+  const [doctorExtra, setDoctorExtra] = React.useState<{ id: string; name: string } | null>(null);
   const [fecha, setFecha] = React.useState<string>("");
   const [notas, setNotas] = React.useState<string>("");
   const [busy, setBusy] = React.useState<null | "save" | "open" | "exit" | "record">(null);
@@ -124,11 +131,25 @@ export function NuevaCitaModal({
       .then(([o, cita]) => {
         if (!active) return;
         setMedicos(o);
-        const id = pickDoctor(o, {
-          id: cita?.doctorId ?? (fila.medico__valor as string | undefined) ?? null,
-          name: cita?.doctorName ?? String(fila.medico ?? ""),
-        });
-        if (id) setMedicoId(id);
+        const doctorId = cita?.doctorId ?? (fila.medico__valor as string | undefined) ?? null;
+        const doctorName = cita?.doctorName || String(fila.medico ?? "");
+        const id = pickDoctor(o, { id: doctorId, name: doctorName });
+        if (id) {
+          setMedicoId(id);
+          setDoctorExtra(null);
+          return;
+        }
+        // No está entre las opciones activas: añadirlo igual, en vez de caer en "Sin médico"
+        // (lib/medicos/patient-doctor-option.ts, la misma pieza de facturación y agregar-cita).
+        const extra = patientDoctorOption(
+          o.map((m) => m.value),
+          { doctorId, doctorName },
+          centroId,
+        );
+        if (extra) {
+          setMedicoId(extra.id);
+          setDoctorExtra({ id: extra.id, name: extra.name });
+        }
       })
       .catch(() => {});
     if (pacienteId) {
@@ -383,6 +404,9 @@ export function NuevaCitaModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={NO_MEDICO}>{t("noDoctor")}</SelectItem>
+                  {doctorExtra && (
+                    <SelectItem value={doctorExtra.id}>{doctorExtra.name}</SelectItem>
+                  )}
                   {medicos.map((m) => (
                     <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
                   ))}

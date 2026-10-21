@@ -18,6 +18,8 @@ import { editarCelda, ejecutarAccion, type Opcion, type Transicion } from "@/lib
 import { useCan } from "@/hooks/use-can";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
 import { toastError } from "@/lib/api/errors";
+import { datosFaltantesDe } from "@/lib/api/ehr-gate";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { FormatosModal } from "@/components/frontdesk/formatos-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
 import { PriorityFlagsBadges } from "@/components/clientes/priority-flags-badges";
@@ -69,6 +71,7 @@ export function FilaSesion({
   estados,
   onChanged,
   onProgramar,
+  onEhrGate,
 }: {
   fila: FrontdeskFila;
   sesion?: Sesion;
@@ -89,6 +92,9 @@ export function FilaSesion({
   estados: { clave: string; label: string }[];
   onChanged: () => void;
   onProgramar: (ctx: { pacienteId: string; pacienteNombre?: string; servicioId?: string }) => void;
+  // Candado PACIENTE_DATOS_REQUERIDOS: el gate se abre en el PADRE (frontdesk-board.tsx), no aquí
+  // (la fila se desmonta al refrescar si el paciente sale del filtro activo).
+  onEhrGate?: (ctx: EhrGateCtx) => void;
 }) {
   const t = useTranslations("frontdesk");
   const tRoot = useTranslations();
@@ -133,6 +139,11 @@ export function FilaSesion({
       onChanged();
       return true;
     } catch (err) {
+      const faltantes = datosFaltantesDe(err);
+      if (faltantes && sesion?.patientId && onEhrGate) {
+        onEhrGate({ pacienteId: sesion.patientId, faltantes, onCompleted: () => void run(fn) });
+        return false;
+      }
       toastError(err, tRoot);
       return false;
     } finally {

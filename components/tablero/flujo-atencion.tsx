@@ -16,7 +16,16 @@ import { toastError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 
 export type PostAccionCtx = { fila: CitaFila; accion: string; render: Record<string, unknown> | null };
-export type EhrGateCtx = { pacienteId: string; faltantes: EhrReadinessField[]; onCompleted: () => void };
+export type EhrGateCtx = {
+  pacienteId: string;
+  faltantes: EhrReadinessField[];
+  onCompleted: () => void;
+  // Un paciente de seguimiento con datos faltantes NO bloquea (bloquear:false) — se le OFRECE
+  // completarlos sin impedir seguir («Completar ahora» / «Seguir sin completar», handoff
+  // quejas-de-mostrador-2026-10-20 §1b). Presente: `skip` repite la MISMA acción sin haber guardado
+  // nada. Omitido = candado normal (cancelar no hace nada, solo cierra).
+  skip?: () => void;
+};
 
 function fmtHora(v: unknown): string | null {
   if (v == null || v === "") return null;
@@ -146,15 +155,16 @@ export function FlujoAtencion({
       try {
         if (await isEhrEnabled(centroId, "consulta")) {
           const r = await getEhrReadiness(pacienteId, centroId, "consulta");
-          // Solo pacientes NUEVOS bloquean: a uno de seguimiento ya se le pidieron estos datos en
-          // persona antes, así que Presente sigue su curso aunque `listo` sea false.
-          if (r.nuevo && !r.listo && r.faltantes?.length) {
-            onEhrGate({
-              pacienteId,
-              faltantes: r.faltantes,
-              onCompleted: () => void runAccion(col, false, action),
-            });
-            return; // bloquea hasta completar los datos
+          if (!r.listo && r.faltantes?.length) {
+            const retry = () => void runAccion(col, false, action);
+            onEhrGate(
+              // `bloquear` (no `nuevo`): un paciente de seguimiento no bloquea — se le OFRECE
+              // completar sin impedir seguir (§1b); `skip` deja Presente avanzar igual.
+              r.bloquear
+                ? { pacienteId, faltantes: r.faltantes, onCompleted: retry }
+                : { pacienteId, faltantes: r.faltantes, onCompleted: retry, skip: retry },
+            );
+            return; // bloquea, u ofrece y espera la elección — nunca sigue de una
           }
         }
       } catch {

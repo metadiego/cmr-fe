@@ -44,6 +44,8 @@ import { UbicacionEnVivoWidget } from "@/components/frontdesk/ubicacion-en-vivo-
 import { FrontdeskToolbar } from "@/components/frontdesk/frontdesk-toolbar";
 import { BoardRowsSkeleton, BoardSkeleton, BoardTable, KPI_TILE, KpiTilesSkeleton, ServiceTabsSkeleton } from "@/components/frontdesk/frontdesk-skeleton";
 import { ControlSkeleton } from "@/components/kit/skeletons";
+import { EhrGateHost } from "@/components/tablero/ehr-readiness-modal";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -106,6 +108,10 @@ export function FrontdeskBoard() {
   // Se ignora cuando el usuario filtra explícitamente por el KPI "Cancelada" (quiere verlas para reactivar).
   const [ocultarCanceladas, setOcultarCanceladas] = React.useState(true);
   const [q, setQ] = React.useState("");
+  // Candado PACIENTE_DATOS_REQUERIDOS del BE (handoff quejas-de-mostrador-2026-10-20): se abre aquí,
+  // en el PADRE, no en FilaSesion — esa fila se desmonta al refrescar si el paciente sale del filtro
+  // activo, y con ella se perdería el modal a medio usar (mismo motivo que tablero-dinamico.tsx).
+  const [ehrGate, setEhrGate] = React.useState<EhrGateCtx | null>(null);
   // Cockpit de agendar: disparado por Citar (sin paciente) o por postAccion de una columna (con paciente).
   const [programar, setProgramar] = React.useState<{ open: boolean; pacienteId?: string; pacienteNombre?: string; servicioId?: string }>({ open: false });
 
@@ -625,6 +631,7 @@ export function FrontdeskBoard() {
                   estados={estados.map((e) => ({ clave: e.slug, label: tRoot(e.labelKey) }))}
                   onChanged={refetch}
                   onProgramar={(ctx) => setProgramar({ open: true, ...ctx, servicioId: ctx.servicioId ?? servicioActivo?.id })}
+                  onEhrGate={setEhrGate}
                 />
               ))}
             </BoardTable>
@@ -661,6 +668,8 @@ export function FrontdeskBoard() {
           />
         </DialogContent>
       </Dialog>
+
+      <EhrGateHost gate={ehrGate} centroId={gate.centro} onClose={() => setEhrGate(null)} />
 
       {/* Lista de DESCUIDOS del día (§2): paciente, servicio y quién lo hizo, con los tres contadores
           arriba. Clic en una fila → filtra el tablero a ese paciente para abrir su sesión y repararla. */}

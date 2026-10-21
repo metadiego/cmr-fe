@@ -22,6 +22,9 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { toastError } from "@/lib/api/errors";
+import { datosFaltantesDe } from "@/lib/api/ehr-gate";
+import type { EhrReadinessField } from "@/lib/api/ehr-integration";
+import { EhrReadinessModal } from "@/components/tablero/ehr-readiness-modal";
 import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
 import { useEstados } from "@/hooks/use-estados";
@@ -111,6 +114,10 @@ export function CitaModal({
   // Nace con la que trae el contexto (la vista del día / la cita en edición). Handoff bug-agenda-sin-selector §1.
   const [fechaSel, setFechaSel] = React.useState(fecha);
   const [paciente, setPaciente] = React.useState<Paciente | null>(pacienteInicial ?? null);
+  // Candado PACIENTE_DATOS_REQUERIDOS del BE: antes esta pantalla solo mostraba un toast genérico y
+  // el usuario no sabía qué faltaba (handoff quejas-de-mostrador-2026-10-20, era una de las 4
+  // pantallas sin el modal). null = sin gate.
+  const [ehrGate, setEhrGate] = React.useState<EhrReadinessField[] | null>(null);
   const [tipoCitaId, setTipoCitaId] = React.useState(cita?.appointmentTypeId ?? tipoCitaIdInicial ?? "");
   // El médico llega PRESELECCIONADO: el de la cita (edición) o el asignado al paciente (`paciente.doctorId`).
   // Vacío = "Sin médico" (opción nula, nunca un registro comodín). Handoff agenda-estado-y-el-medico-comodin.
@@ -289,6 +296,11 @@ export function CitaModal({
       onSaved(saved);
       onOpenChange(false);
     } catch (err) {
+      const faltantes = datosFaltantesDe(err);
+      if (faltantes) {
+        setEhrGate(faltantes);
+        return;
+      }
       toastError(err, tRoot);
     } finally {
       setSubmitting(false);
@@ -296,6 +308,7 @@ export function CitaModal({
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
@@ -481,6 +494,19 @@ export function CitaModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    {ehrGate && paciente && (
+      <EhrReadinessModal
+        pacienteId={paciente.id}
+        faltantes={ehrGate}
+        centroId={effectiveCentro || undefined}
+        onCancel={() => setEhrGate(null)}
+        onCompleted={() => {
+          setEhrGate(null);
+          void onSubmit();
+        }}
+      />
+    )}
+    </>
   );
 }
 

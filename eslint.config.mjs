@@ -26,8 +26,14 @@ const DEBT = {
   // piezas de estado local — partirlo más exigiría pasar esas piezas por props/contexto, un
   // refactor aparte no emprendido aquí). Ver HANDOFF-banderas-de-prioridad-del-paciente.md.
   // 09-oct-2026: 930 → 880 — the header/toolbar row moved to components/frontdesk/frontdesk-toolbar.tsx.
-  "components/frontdesk/frontdesk-board.tsx": 816, // 10-oct-2026: column layout + loading skeleton moved to lib/frontdesk/board-columns.ts / frontdesk-skeleton.tsx (843 → 817); 12-oct-2026: the natural row-order fix also moved there (→ 816)
-  "components/frontdesk/fila-sesion.tsx": 714,
+  // 20-oct-2026: both of these went UP, not down — the EHR-missing-data gate (PACIENTE_DATOS_REQUERIDOS)
+  // needed a new `onEhrGate` prop + a few lines in the one error-handling chokepoint each already had, to
+  // stop falling back to a bare toast (handoff quejas-de-mostrador-2026-10-20 §1, real complaints from
+  // Christian and Yadira). The shared modal-rendering boilerplate was extracted first (EhrGateHost, in
+  // ehr-readiness-modal.tsx) to keep the increase to just that — raising these two is admitted debt, not
+  // a silent bump; said here and in the commit, not hidden.
+  "components/frontdesk/frontdesk-board.tsx": 825, // 10-oct-2026: → 816; 20-oct-2026: 816 → 825 (onEhrGate wiring, see note above)
+  "components/frontdesk/fila-sesion.tsx": 725, // 20-oct-2026: 714 → 725 (onEhrGate wiring, see note above)
   // 08-oct-2026: bajado de 2274 a 2050 — el botón de impresión de respaldo (config del hub, salud del
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
   // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to
@@ -41,6 +47,9 @@ const DEBT = {
   "components/servicios/servicios-admin.tsx": 661,
   "components/auditoria/auditoria-log.tsx": 642,
   "components/clientes/paciente-form-sheet.tsx": 550,
+  // 20-oct-2026: first entry for this file — same EHR-gate wiring as above, in both CentroSheet and
+  // CentroSheetV2 (the classic and beta day views share this file). Admitted debt, not a silent bump.
+  "components/agenda/dia-view.tsx": 605,
 };
 
 const maxLines = (max) => ({

@@ -16,6 +16,7 @@ import { EstadoSelect } from "@/components/tablero/estado-select";
 import { CeldaEditable } from "@/components/tablero/celda-editable";
 import { AccionesModal, type AccionItem } from "@/components/tablero/acciones-modal";
 import { Cell } from "@/components/agenda/tablero-dinamico";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 
 // A cita's cell: the SAME logic the classic and the new view both use (no duplication). Estado =
 // inline selector; editable columns = CeldaEditable; accion = reserved; everything else = read-only Cell.
@@ -27,6 +28,7 @@ export function CeldaCita({
   transiciones,
   editableClaves,
   onChanged,
+  onEhrGate,
 }: {
   col: ColumnaEfectiva;
   fila: CitaFila;
@@ -35,8 +37,10 @@ export function CeldaCita({
   transiciones: Transicion[];
   editableClaves: Set<string>;
   onChanged: () => void;
+  onEhrGate?: (ctx: EhrGateCtx) => void;
 }) {
   const tRoot = useTranslations();
+  const pacienteId = (fila as { pacienteId?: unknown }).pacienteId;
   return (
     <td className="px-3 py-1.5 whitespace-nowrap">
       {col.clave === "estado" ? (
@@ -47,7 +51,9 @@ export function CeldaCita({
           estados={estados}
           transiciones={transiciones}
           centroId={clinicId}
+          pacienteId={pacienteId != null ? String(pacienteId) : undefined}
           onDone={onChanged}
+          onEhrGate={onEhrGate}
         />
       ) : editableClaves.has(col.clave) ? (
         <CeldaEditable
@@ -115,6 +121,7 @@ export function FranjaTipoSection({
   onChanged,
   onAgendar,
   esAhora,
+  onEhrGate,
 }: {
   franja: { time: string | null };
   tipo: TipoFranja;
@@ -126,6 +133,7 @@ export function FranjaTipoSection({
   onChanged: () => void;
   onAgendar: (hora: string | null, tipo: TipoFranja) => void;
   esAhora: boolean;
+  onEhrGate?: (ctx: EhrGateCtx) => void;
 }) {
   const t = useTranslations("agenda");
   const tRoot = useTranslations();
@@ -173,6 +181,7 @@ export function FranjaTipoSection({
                     transiciones={transiciones}
                     editableClaves={editableClaves}
                     onChanged={onChanged}
+                    onEhrGate={onEhrGate}
                   />
                 ))}
               </tr>

@@ -16,6 +16,7 @@
     "modalHelp": "El EHR exige estos datos antes de registrar la llegada. Complétalos para marcar Presente.",
     "saving": "Guardando…",
     "saveAndContinue": "Guardar y marcar Presente",
+    "skipLabel": "Seguir sin completar",
     "orphans": {
       "title": "Huérfanos del EHR",
       "help": "Pacientes creados en el EHR (desde «Registrar llegada») que aún no están atados a uno nuestro.",
@@ -225,6 +226,7 @@
       "seguimiento": "Seguimiento"
     },
     "paciente_ya_es_seguimiento": "Este paciente ya fue atendido: es de seguimiento, no puede agendarse como nuevo.",
+    "datos_no_verificables": "No se pudieron comprobar los datos del paciente, inténtalo de nuevo.",
     "bloqueo": {
       "sunday": "Los domingos no se atiende",
       "holiday": "Ese día es feriado",
@@ -4696,6 +4698,8 @@
     "filterByType": "Filtrar por tipo",
     "allServices": "Todos los servicios",
     "allTypes": "Todos los tipos",
+    "filteringBy": "filtrando: {name}",
+    "clearSearch": "Limpiar búsqueda",
     "kind": {
       "all": "Todos",
       "services": "Servicios",

@@ -19,14 +19,17 @@ export type EhrReadinessField =
 // `ehrPatientId`/`ehrRecordId` son INFORMATIVOS (ya está allá o no); el FE NO decide con ellos — el
 // emparejamiento lo hace el BE por nuestro récord + código de centro (BAY-064230), no por nombre.
 // `nuevo` (26-sep-2026, ya resuelto por el BE: nunca tuvo una cita con llegada sellada antes de
-// esta): el modal de datos faltantes SOLO aplica a pacientes nuevos — a uno de seguimiento ya se le
-// pidieron esos datos en persona, así que Presente sigue su curso aunque falten.
+// esta) ya no es lo que decide bloquear — eso es `bloquear` (BE 1582785, 20-oct-2026), separado de
+// `faltantes`: un paciente de seguimiento con datos faltantes NO bloquea (`bloquear:false`) pero
+// sigue mereciendo que se le ofrezca completarlos, sin impedir seguir (handoff quejas-de-mostrador
+// §1b). Verificado en vivo: GET .../readiness?tipo=consulta devuelve `bloquear` real.
 export interface EhrReadiness {
   listo: boolean
   faltantes: EhrReadinessField[]
   ehrPatientId?: string | null
   ehrRecordId?: string | null
   nuevo: boolean
+  bloquear: boolean
 }
 // `tipo` (cmr-be PR #393): Consulta y Servicios bloquean por su propio interruptor
 // (`enabledForConsultations`/`enabledForServices`). Omitido = "consulta" (default del BE), así el

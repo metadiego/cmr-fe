@@ -73,17 +73,32 @@ export interface ApiErrorShape {
 
 // Thrown by the API client on any non-2xx response.
 export class ApiError extends Error {
+  readonly code: string;
+  readonly status: number;
+  readonly details?: ApiErrorDetail[];
+  readonly labelKey?: string;
+  // Full error body from the BE, for domain errors whose UI needs more than
+  // the message (e.g. who owns a duplicated record number).
+  readonly data?: Record<string, unknown>;
+
+  // Spelled out instead of TS parameter-property shorthand: the shorthand isn't valid syntax under
+  // `node --experimental-strip-types` (type-stripping only, no real transform), which is what
+  // `npm test` runs on — a test importing ApiError directly (lib/api/ehr-integration.test.ts) failed
+  // to even parse until this changed. Behavior is identical.
   constructor(
-    public readonly code: string,
+    code: string,
     message: string,
-    public readonly status: number,
-    public readonly details?: ApiErrorDetail[],
-    public readonly labelKey?: string,
-    // Full error body from the BE, for domain errors whose UI needs more than
-    // the message (e.g. who owns a duplicated record number).
-    public readonly data?: Record<string, unknown>,
+    status: number,
+    details?: ApiErrorDetail[],
+    labelKey?: string,
+    data?: Record<string, unknown>,
   ) {
     super(message);
     this.name = "ApiError";
+    this.code = code;
+    this.status = status;
+    this.details = details;
+    this.labelKey = labelKey;
+    this.data = data;
   }
 }

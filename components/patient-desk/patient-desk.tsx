@@ -8,6 +8,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowDown01Icon,
   Calendar03Icon,
+  Cancel01Icon,
   Search01Icon,
 } from "@hugeicons/core-free-icons"
 
@@ -73,13 +74,21 @@ export function PatientDesk() {
   // FacturasListView: así "Ficha" (Link, no recarga) + el "Volver" de la ficha (router.back())
   // restauran esta pantalla EXACTAMENTE como estaba, en vez de los valores por defecto (13-oct-2026).
   const initialParams = useSearchParams()
+  // Restaurar TODO lo de arriba sirve para volver de una ficha abierta HOY — no para heredar el
+  // filtro de ayer en una pestaña que quedó abierta (o una URL vieja): si la fecha en la URL no es
+  // HOY, se ignoran kind/subtype/service/query/selección y se arranca en limpio (handoff
+  // quejas-de-mostrador-2026-10-20 §3 — el tablero debe abrir siempre en «Todos los tipos»).
+  const freshToday =
+    !initialParams.get("date") || initialParams.get("date") === todayISO()
 
   const [date, setDate] = React.useState(
     () => initialParams.get("date") ?? todayISO()
   )
-  const [query, setQuery] = React.useState(() => initialParams.get("q") ?? "")
+  const [query, setQuery] = React.useState(() =>
+    freshToday ? (initialParams.get("q") ?? "") : ""
+  )
   const [selectedId, setSelectedId] = React.useState<string | null>(() =>
-    initialParams.get("p")
+    freshToday ? initialParams.get("p") : null
   )
   const [schedule, setSchedule] = React.useState<
     (ScheduleRequest & { open: boolean }) | { open: false }
@@ -94,6 +103,7 @@ export function PatientDesk() {
   // staff record (the reception people, set per person in the staff screen — not a role list here).
   const preference = useMyFrontdeskPreference(gate.centro)
   const [kindPicked, setKindPicked] = React.useState<PatientKind | null>(() => {
+    if (!freshToday) return null
     const k = initialParams.get("kind")
     return k === "all" || k === "services" || k === "consultation" ? k : null
   })
@@ -107,11 +117,11 @@ export function PatientDesk() {
   // data-driven (servicesOfTheDay / the board's own subtype catalog), never a hardcoded list. Cleared
   // whenever the kind itself changes, so the little arrow never carries a stale, invisible filter.
   const [serviceFilter, setServiceFilter] = React.useState<string | null>(() =>
-    initialParams.get("service")
+    freshToday ? initialParams.get("service") : null
   )
   const [consultSubtypeFilter, setConsultSubtypeFilter] = React.useState<
     string | null
-  >(() => initialParams.get("subtype"))
+  >(() => (freshToday ? initialParams.get("subtype") : null))
   const pickKind = (k: PatientKind) => {
     setKindPicked(k)
     setServiceFilter(null)
@@ -201,9 +211,24 @@ export function PatientDesk() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="pl-9"
+            className="pr-8 pl-9"
             aria-label={t("searchPlaceholder")}
           />
+          {/* Antes no había forma de limpiar sin borrar a mano — un récord buscado dejaba el panel
+              "congelado" en ese paciente sin que se notara por qué (handoff
+              quejas-de-mostrador-2026-10-20 §5). El SSE de usePatientDay no depende de `query` (filtra
+              client-side sobre data.patients ya cargada), así que sigue vivo con la búsqueda puesta. */}
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label={t("clearSearch")}
+              title={t("clearSearch")}
+              className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+            </button>
+          )}
         </div>
         <DatePicker
           className="w-40"
@@ -303,6 +328,36 @@ export function PatientDesk() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : null}
+        {/* El filtro activo se ve, no solo se infiere del ícono relleno — antes alguien dejaba
+            "Seguimiento" puesto y no se daba cuenta de que algunos pacientes no aparecían (handoff
+            quejas-de-mostrador-2026-10-20 §3). */}
+        {kind === "services" && serviceFilter && (
+          <button
+            type="button"
+            onClick={() => setServiceFilter(null)}
+            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+          >
+            {t("filteringBy", {
+              name: servicesToday.find((s) => s.serviceId === serviceFilter)?.name ?? serviceFilter,
+            })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
+          </button>
+        )}
+        {kind === "consultation" && consultSubtypeFilter && (
+          <button
+            type="button"
+            onClick={() => setConsultSubtypeFilter(null)}
+            className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+          >
+            {t("filteringBy", {
+              name: (() => {
+                const s = consultSubtypes.find((x) => x.slug === consultSubtypeFilter)
+                return s ? (tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug) : consultSubtypeFilter
+              })(),
+            })}
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3" />
+          </button>
+        )}
         {loadingDay ? (
           <Skeleton aria-hidden className="h-3 w-20" />
         ) : (

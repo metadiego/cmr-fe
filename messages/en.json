@@ -16,6 +16,7 @@
     "modalHelp": "The EHR requires these fields before recording the arrival. Fill them in to mark Present.",
     "saving": "Saving…",
     "saveAndContinue": "Save and mark Present",
+    "skipLabel": "Continue without completing",
     "orphans": {
       "title": "EHR orphans",
       "help": "Patients created in the EHR (via \"Record arrival\") that aren't linked to one of ours yet.",
@@ -225,6 +226,7 @@
       "seguimiento": "Follow-up"
     },
     "paciente_ya_es_seguimiento": "This patient has already been seen: they are a follow-up, cannot be booked as new.",
+    "datos_no_verificables": "The patient's data could not be verified, please try again.",
     "bloqueo": {
       "sunday": "Sundays are not scheduled",
       "holiday": "That day is a holiday",
@@ -4696,6 +4698,8 @@
     "filterByType": "Filter by type",
     "allServices": "All services",
     "allTypes": "All types",
+    "filteringBy": "filtering: {name}",
+    "clearSearch": "Clear search",
     "kind": {
       "all": "All",
       "services": "Services",

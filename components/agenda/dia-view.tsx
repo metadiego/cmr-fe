@@ -27,6 +27,8 @@ import { useCitaStream } from "@/hooks/use-cita-stream";
 import { useCan } from "@/hooks/use-can";
 import { Can } from "@/components/kit/can";
 import { FranjaTipoSection, CeldaCita } from "@/components/agenda/franja-tipo-section";
+import { EhrGateHost } from "@/components/tablero/ehr-readiness-modal";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { tinteFila, esTipoNueva } from "@/lib/agenda/tinte-tipo";
 import { Chip, Kpi } from "@/components/agenda/dia-kpi";
 import {
@@ -311,6 +313,7 @@ function CentroSheet({
 }) {
   const t = useTranslations("agenda");
   const { can } = useCan();
+  const [ehrGate, setEhrGate] = React.useState<EhrGateCtx | null>(null);
   // Combined mode returns each center's columns concatenated → dedupe by clave.
   const seen = new Set<string>();
   const cols = columnas
@@ -378,10 +381,12 @@ function CentroSheet({
               onChanged={onChanged}
               onAgendar={onAgendar}
               esAhora={franja.time !== null && franja.time === horaResaltada}
+              onEhrGate={setEhrGate}
             />
           );
         }),
       )}
+      <EhrGateHost gate={ehrGate} centroId={centro.clinicId} onClose={() => setEhrGate(null)} />
     </div>
   );
 }
@@ -410,6 +415,7 @@ function CentroSheetV2({
   const tRoot = useTranslations();
   const { can } = useCan();
   const [filtro, setFiltro] = React.useState<string>(""); // "" = todos | tipoCitaId | "__sinhora__"
+  const [ehrGate, setEhrGate] = React.useState<EhrGateCtx | null>(null);
 
   const seen = new Set<string>();
   const cols = columnas
@@ -583,6 +589,7 @@ function CentroSheetV2({
                       transiciones={transiciones}
                       editableClaves={editableClaves}
                       onChanged={onChanged}
+                      onEhrGate={setEhrGate}
                     />
                   ))}
                 </tr>
@@ -591,6 +598,7 @@ function CentroSheetV2({
           </tbody>
         </table>
       </div>
+      <EhrGateHost gate={ehrGate} centroId={centro.clinicId} onClose={() => setEhrGate(null)} />
     </div>
   );
 }

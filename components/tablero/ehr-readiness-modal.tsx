@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { updatePaciente } from "@/lib/api/pacientes";
 import { type EhrReadinessField } from "@/lib/api/ehr-integration";
+import type { EhrGateCtx } from "@/components/tablero/flujo-atencion";
 import { toastError } from "@/lib/api/errors";
 import { todayPR } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
@@ -24,12 +25,16 @@ export function EhrReadinessModal({
   centroId,
   onCancel,
   onCompleted,
+  cancelLabel,
 }: {
   pacienteId: string;
   faltantes: EhrReadinessField[];
   centroId?: string;
   onCancel: () => void;
   onCompleted: () => void;
+  // §1b: un paciente de seguimiento no bloquea — el botón dice "Seguir sin completar" en vez de
+  // "Cancelar", porque `onCancel` SÍ avanza (no se queda sin marcar). Omitido = candado normal.
+  cancelLabel?: string;
 }) {
   const t = useTranslations("patients.form");
   const te = useTranslations("ehrIntegration");
@@ -121,10 +126,42 @@ export function EhrReadinessModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel} disabled={busy}>{tRoot("common.cancel")}</Button>
+          <Button variant="outline" onClick={onCancel} disabled={busy}>{cancelLabel ?? tRoot("common.cancel")}</Button>
           <Button onClick={guardar} disabled={!completo || busy}>{busy ? te("saving") : te("saveAndContinue")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// El wiring de "si hay gate, pintar el modal; cancelar o completar lo cierra y sigue" se repetía
+// idéntico en cada pantalla que lo adoptó (tablero-dinamico.tsx, dia-view.tsx ×2, frontdesk-board.tsx)
+// — una sola pieza, en vez de 4 copias del mismo bloque (handoff quejas-de-mostrador-2026-10-20 §1).
+export function EhrGateHost({
+  gate,
+  centroId,
+  onClose,
+}: {
+  gate: EhrGateCtx | null;
+  centroId?: string;
+  onClose: () => void;
+}) {
+  const te = useTranslations("ehrIntegration");
+  if (!gate) return null;
+  return (
+    <EhrReadinessModal
+      pacienteId={gate.pacienteId}
+      faltantes={gate.faltantes}
+      centroId={centroId}
+      cancelLabel={gate.skip ? te("skipLabel") : undefined}
+      onCancel={() => {
+        onClose();
+        gate.skip?.();
+      }}
+      onCompleted={() => {
+        onClose();
+        gate.onCompleted();
+      }}
+    />
   );
 }
