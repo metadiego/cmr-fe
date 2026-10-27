@@ -1190,7 +1190,8 @@
     "collapseNav": "Plegar menú",
     "expandNav": "Desplegar menú",
     "patientDesk": "Centro de Pacientes (por paciente)",
-    "paquetesVenta": "Paquetes de venta"
+    "paquetesVenta": "Paquetes de venta",
+    "inventory_live_stock": "Stock live (balanzas)"
   },
   "admin": {
     "title": "Administración",
@@ -4815,5 +4816,38 @@
     "notFound": "No se encontró el paquete.",
     "inactive": "Ese paquete está retirado.",
     "lineLocked": "Una línea de paquete no se edita: quítala y agrégala de nuevo."
+  },
+  "liveStock": {
+    "title": "Stock live (balanzas)",
+    "subtitle": "Lo que cuentan las balanzas en cada plato del almacén. Solo informa: no cambia el inventario contable.",
+    "warehouse": "Almacén",
+    "updated": "Actualizado {when}",
+    "refresh": "Actualizar",
+    "retry": "Reintentar",
+    "empty": "Ninguna balanza ha enviado datos en este almacén.",
+    "byProduct": "Por producto",
+    "byScale": "Por balanza",
+    "searchPh": "Buscar SKU o producto…",
+    "bookNote": "El contable incluye los displays fuera del almacén.",
+    "noMatches": "Nada coincide con la búsqueda.",
+    "doubtful": "Conteo dudoso",
+    "padN": "Plato {n}",
+    "emptyPad": "Vacío",
+    "history": "Historial",
+    "historyTitle": "Historial de la balanza",
+    "historyEmpty": "Sin eventos.",
+    "col": {
+      "sku": "SKU",
+      "product": "Producto",
+      "live": "Almacén (balanza)",
+      "book": "Contable",
+      "scales": "Balanzas",
+      "lastReading": "Última lectura"
+    },
+    "kind": {
+      "change": "Cambio",
+      "snapshot": "Foto",
+      "boot": "Arranque"
+    }
   }
 }

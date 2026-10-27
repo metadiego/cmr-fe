@@ -1190,7 +1190,8 @@
     "collapseNav": "Collapse menu",
     "expandNav": "Expand menu",
     "patientDesk": "Centro de Pacientes (por paciente)",
-    "paquetesVenta": "Sales packages"
+    "paquetesVenta": "Sales packages",
+    "inventory_live_stock": "Live stock (scales)"
   },
   "admin": {
     "title": "Administration",
@@ -4815,5 +4816,38 @@
     "notFound": "The package was not found.",
     "inactive": "That package is retired.",
     "lineLocked": "A package line cannot be edited: remove it and add it again."
+  },
+  "liveStock": {
+    "title": "Live stock (scales)",
+    "subtitle": "What the scales count on each pad of the warehouse. Informative only: it never changes book stock.",
+    "warehouse": "Warehouse",
+    "updated": "Updated {when}",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "empty": "No scale has sent data for this warehouse.",
+    "byProduct": "By product",
+    "byScale": "By scale",
+    "searchPh": "Search SKU or product…",
+    "bookNote": "Book stock includes the displays outside the warehouse.",
+    "noMatches": "Nothing matches the search.",
+    "doubtful": "Doubtful count",
+    "padN": "Pad {n}",
+    "emptyPad": "Empty",
+    "history": "History",
+    "historyTitle": "Scale history",
+    "historyEmpty": "No events.",
+    "col": {
+      "sku": "SKU",
+      "product": "Product",
+      "live": "Warehouse (scale)",
+      "book": "Book",
+      "scales": "Scales",
+      "lastReading": "Last reading"
+    },
+    "kind": {
+      "change": "Change",
+      "snapshot": "Snapshot",
+      "boot": "Boot"
+    }
   }
 }

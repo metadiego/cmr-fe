@@ -19749,6 +19749,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ehr-integration/events/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events/summary`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["EhrEventsController_summary[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ehr-integration/events/resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ehr-integration/events/resumen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["EhrEventsController_summary[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ehr-integration/events/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`. */
+        get: operations["EhrEventsController_summary[2]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/ehr-integration/events/resumen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Lo que manda el EHR de un vistazo: por tipo (cuántos, primero, último, ligados y un ejemplo), los huecos de `seq` (eventos que no llegaron) y la última llegada. Del centro activo o de `centerIds`. */
+        get: operations["EhrEventsController_summary[3]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/impresion-hubs": {
         parameters: {
             query?: never;
@@ -41565,6 +41641,506 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventario/balanza/almacenes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/almacenes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_warehouses[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/warehouses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/warehouses`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_warehouses[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/almacenes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/almacenes`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_warehouses[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/warehouses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos).
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/warehouses`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_warehouses[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/almacenes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos). */
+        get: operations["InventoryScaleController_warehouses[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/warehouses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos). */
+        get: operations["InventoryScaleController_warehouses[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/almacenes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos). */
+        get: operations["InventoryScaleController_warehouses[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/warehouses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Almacenes activos del centro de la llave: a cuál se asigna cada balanza (warehouseId de sus eventos). */
+        get: operations["InventoryScaleController_warehouses[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/eventos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/eventos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_stockEvents[0]_v1"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/eventos`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/stock-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/stock-events`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_stockEvents[1]_v1"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/stock-events`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/eventos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/eventos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_stockEvents[2]_v1"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/eventos`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/stock-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/stock-events`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_stockEvents[3]_v1"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/stock-events`, que devuelve lo mismo con los nombres en inglés.
+         *
+         *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/eventos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`. */
+        get: operations["InventoryScaleController_stockEvents[4]_v2"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/stock-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`. */
+        get: operations["InventoryScaleController_stockEvents[5]_v2"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/eventos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`. */
+        get: operations["InventoryScaleController_stockEvents[6]_v2"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/stock-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Historial de eventos de stock de las balanzas, más nuevos primero; filtra por almacén, balanza, plato, variante y fechas. Acepta `centerIds`. */
+        get: operations["InventoryScaleController_stockEvents[7]_v2"];
+        put?: never;
+        /**
+         * Lote de eventos de stock de una balanza (máx. 500)
+         * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
+         */
+        post: operations["InventoryScaleController_ingestStockEvents[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/stock-vivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/stock-vivo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_liveStock[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventario/balanza/live-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/live-stock`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_liveStock[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/stock-vivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/stock-vivo`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_liveStock[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/scale/live-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/live-stock`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["InventoryScaleController_liveStock[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/stock-vivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`. */
+        get: operations["InventoryScaleController_liveStock[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventario/balanza/live-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`. */
+        get: operations["InventoryScaleController_liveStock[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/stock-vivo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`. */
+        get: operations["InventoryScaleController_liveStock[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/inventory/scale/live-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stock live por almacén: el último conteo de cada plato y el consolidado por producto con su desglose, junto al stock contable del mismo almacén (en su unidad; no se restan). Acepta `centerIds`, `warehouseId` y `productId`. */
+        get: operations["InventoryScaleController_liveStock[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/configuracion/panel": {
         parameters: {
             query?: never;
@@ -51693,7 +52269,7 @@ export interface components {
             priceTypeId: string | null;
             sourceId: string | null;
             /** @enum {string} */
-            status: "anulada" | "emitida" | "borrador" | "devuelta_parcial" | "devuelta_total";
+            status: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
             subtotal: number;
             globalDiscountType: string;
             globalDiscountValue: number;
@@ -51717,7 +52293,7 @@ export interface components {
              *     vecina de otra como un RENAME (casi tiró `staff.active`), y esta convive con la que sustituye.
              * @enum {string}
              */
-            context: "consulta" | "general";
+            context: "general" | "consulta";
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -52090,9 +52666,9 @@ export interface components {
             slug: string;
             labelKey: string;
             /** @enum {string} */
-            type: "numero" | "readonly" | "texto" | "select" | "calculado";
+            type: "numero" | "texto" | "select" | "readonly" | "calculado";
             /** @enum {string} */
-            role: "cantidad" | "subtotal" | "accion" | "descuento" | "impuesto" | "precio" | "producto" | "tarifa" | "multiplicador" | "informativo";
+            role: "cantidad" | "accion" | "producto" | "subtotal" | "descuento" | "impuesto" | "precio" | "tarifa" | "multiplicador" | "informativo";
             /**
              * @description Solo para `rol = multiplicador`: ¿este multiplicador cuenta VISITAS?
              *
@@ -53143,7 +53719,7 @@ export interface components {
             slug: string;
             labelKey: string;
             /** @enum {string} */
-            type: "fecha" | "hora" | "badge" | "accion" | "texto" | "medicion" | "select" | "toggle" | "derivado";
+            type: "fecha" | "hora" | "badge" | "accion" | "texto" | "select" | "toggle" | "derivado" | "medicion";
             binding: string;
             editable: boolean;
             permissionSlug: string | null;
@@ -53418,7 +53994,7 @@ export interface components {
             profileId: string;
             centerId: string;
             /** @enum {string} */
-            type: "base" | "fijo" | "temporal";
+            type: "base" | "temporal" | "fijo";
             validFrom: string;
             validUntil: string | null;
             forced: boolean;
@@ -53979,7 +54555,7 @@ export interface components {
             slug: string;
             name: string;
             /** @enum {string|null} */
-            dimension: "conteo" | "masa" | "volumen" | "actividad" | "longitud" | null;
+            dimension: "masa" | "volumen" | "actividad" | "conteo" | "longitud" | null;
             canonicalConversionFactor: number;
             isCanonical: boolean;
             /** @deprecated */
@@ -54817,7 +55393,7 @@ export interface components {
             /** @enum {string} */
             event: "a_la_venta" | "a_la_entrega" | "por_sesion";
             /** @enum {string} */
-            type: "receta" | "directa" | "conversion" | "dosis_vial";
+            type: "directa" | "conversion" | "receta" | "dosis_vial";
             baseUnitId: string | null;
             quantityPerApplication: number | null;
             baseFactor: number | null;
@@ -54953,7 +55529,7 @@ export interface components {
             scope: "centro" | "rol" | "usuario";
             targets: Record<string, never> | null;
             /** @enum {string} */
-            status: "resuelta" | "activa" | "descartada";
+            status: "activa" | "resuelta" | "descartada";
             /** Format: date-time */
             validUntil: string | null;
             createdBy: string | null;
@@ -55052,7 +55628,7 @@ export interface components {
             subject: string | null;
             body: string;
             /** @enum {string} */
-            status: "pendiente" | "lista" | "enviada" | "fallida";
+            status: "pendiente" | "enviada" | "fallida" | "lista";
             providerReference: string | null;
             error: string | null;
             /** Format: date-time */
@@ -55225,7 +55801,7 @@ export interface components {
             time: string | null;
             endTime: string | null;
             /** @enum {string} */
-            status: "presente" | "cancelada" | "triage" | "programada" | "confirmada" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
+            status: "presente" | "cancelada" | "programada" | "confirmada" | "triage" | "en_consulta" | "atendida" | "no_show" | "reprogramada";
             isFirstVisit: boolean;
             /** @enum {string} */
             channel: "atencion" | "callcenter" | "webhook" | "ia";
@@ -55722,7 +56298,7 @@ export interface components {
             durationSeconds: number;
             talkTimeSeconds: number;
             /** @enum {string} */
-            status: "desconocido" | "fallida" | "perdida" | "contestada" | "ocupada";
+            status: "desconocido" | "perdida" | "fallida" | "contestada" | "ocupada";
             recordingFile: string | null;
             id: string;
             clinicId: string | null;
@@ -56027,6 +56603,37 @@ export interface components {
             measuredAt: string;
             deviceId: string;
             externalId: string;
+            id: string;
+            clinicId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        IngestScaleStockEventsDto: {
+            /** @description Scale that sends the batch (the ESP32 identifier, e.g. scale-2). */
+            deviceId: string;
+            /** @description Events (at most 500): { externalId, pad, supplierPresentationId, warehouseId?, units, previousUnits?, totalWeightG?, unitWeightG?, kind: change|snapshot|boot, doubtful?, measuredAt }. Each is checked on its own: an invalid one comes back in `rejected` and does not sink the batch. */
+            stockEvents: Record<string, never>[];
+            /** @description Firmware version that sends (informative only). */
+            firmware?: string;
+        };
+        ScaleStockEventEntity: {
+            warehouseId: string;
+            deviceId: string;
+            pad: number;
+            externalId: string;
+            supplierPresentationId: string;
+            productId: string;
+            units: number;
+            previousUnits: number | null;
+            totalWeightG: number | null;
+            unitWeightG: number | null;
+            /** @enum {string} */
+            kind: "change" | "snapshot" | "boot";
+            doubtful: boolean;
+            /** Format: date-time */
+            measuredAt: string;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -56744,7 +57351,7 @@ export interface components {
         CuadreCajaEntity: {
             userId: string | null;
             /** @enum {string|null} */
-            division: "consulta" | "general" | null;
+            division: "general" | "consulta" | null;
             date: string;
             currencyId: string | null;
             /** @enum {string} */
@@ -85255,6 +85862,98 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "EhrEventsController_summary[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description ISO date-time: solo lo recibido desde aquí. */
+                since?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EhrEventsController_summary[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description ISO date-time: solo lo recibido desde aquí. */
+                since?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EhrEventsController_summary[2]_v2": {
+        parameters: {
+            query?: {
+                /** @description ISO date-time: solo lo recibido desde aquí. */
+                since?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "EhrEventsController_summary[3]_v2": {
+        parameters: {
+            query?: {
+                /** @description ISO date-time: solo lo recibido desde aquí. */
+                since?: string;
+                centerIds?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };
@@ -116996,6 +117695,790 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_warehouses[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_stockEvents[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                warehouseId?: string;
+                /** @description Scale identifier. */
+                deviceId?: string;
+                /** @description Pad within the scale (1, 2…). */
+                pad?: number;
+                supplierPresentationId?: string;
+                /** @description ISO date-time: measured from here on. */
+                since?: string;
+                /** @description ISO date-time: measured up to here. */
+                until?: string;
+                /** @description Rows (1..500, default 100). */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScaleStockEventEntity"][];
+                };
+            };
+        };
+    };
+    "InventoryScaleController_ingestStockEvents[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestScaleStockEventsDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "InventoryScaleController_liveStock[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Only this warehouse. */
+                warehouseId?: string;
+                /** @description Only this product (e.g. for a column in Stock). */
+                productId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
