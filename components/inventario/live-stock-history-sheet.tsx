@@ -44,31 +44,39 @@ export function LiveStockHistorySheet({
 
   return (
     <Sheet open onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-md">
+      <SheetContent className="flex w-full flex-col overflow-y-auto sm:max-w-lg">
         <SheetHeader>
           <SheetTitle>{t("historyTitle")}</SheetTitle>
           <SheetDescription>{target.title}</SheetDescription>
         </SheetHeader>
-        <ol className="divide-y px-4 pb-4">
+        <ol className="divide-y px-6 pb-4">
           {state.kind === "loading" && Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="my-2 h-8 w-full" />)}
           {state.kind === "fail" && <li className="py-4 text-sm text-destructive">{state.message}</li>}
           {state.kind === "ok" && state.data.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">{t("historyEmpty")}</li>}
           {state.kind === "ok" &&
             state.data.map((e) => (
-              <li key={e.id} className="flex items-center gap-3 py-2 text-sm">
-                <span className="w-24 font-semibold tabular-nums">
+              <li key={e.id} className="flex items-center gap-3 py-2.5 text-sm">
+                <span className="w-20 shrink-0 whitespace-nowrap text-base font-semibold tabular-nums">
                   {e.previousUnits != null ? `${e.previousUnits} → ${e.units}` : e.units}
                 </span>
-                <Badge variant="outline" className={cn("text-[10px]", e.kind !== "change" && "text-muted-foreground")}>
-                  {t(`kind.${e.kind}`)}
-                </Badge>
-                {e.doubtful && <Badge variant="outline" className="border-warning-foreground/30 bg-warning text-[10px] text-warning-foreground">{t("doubtful")}</Badge>}
-                {target.kind === "product" && (
-                  <span className="font-mono text-xs text-muted-foreground">
-                    {e.deviceId} · {t("padN", { n: e.pad })}
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    <Badge variant="outline" className={cn("text-[10px]", e.kind !== "change" && "text-muted-foreground")}>
+                      {t(`kind.${e.kind}`)}
+                    </Badge>
+                    {e.doubtful && (
+                      <Badge variant="outline" className="border-warning-foreground/30 bg-warning text-[10px] text-warning-foreground">
+                        {t("doubtful")}
+                      </Badge>
+                    )}
                   </span>
-                )}
-                <span className="ml-auto whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+                  {target.kind === "product" && (
+                    <span className="truncate font-mono text-xs text-muted-foreground">
+                      {e.deviceId} · {t("padN", { n: e.pad })}
+                    </span>
+                  )}
+                </span>
+                <span className="shrink-0 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
                   {format.dateTime(new Date(e.measuredAt), "dateAndTime")}
                 </span>
               </li>
