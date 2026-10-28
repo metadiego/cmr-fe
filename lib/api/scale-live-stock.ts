@@ -79,3 +79,11 @@ export function listScaleStockEvents(f: StockEventsFilter): Promise<ScaleStockEv
   sp.set("limit", String(f.limit ?? 100));
   return apiFetch<ScaleStockEvent[]>(`/inventory/scale/stock-events?${sp}`, {}, f.centroId);
 }
+
+// Retires a scale: deletes ALL its stock events in the center (e.g. a test device). Book stock is never
+// touched. Requires inventario.ajustar.
+export function retireScaleDevice(deviceId: string, centroId?: string): Promise<{ deviceId: string; deleted: number }> {
+  const sp = new URLSearchParams({ deviceId });
+  if (centroId) sp.set("centerIds", centroId);
+  return apiFetch<{ deviceId: string; deleted: number }>(`/inventory/scale/stock-events?${sp}`, { method: "DELETE" }, centroId);
+}

@@ -9,8 +9,10 @@ import { getLiveStock, type LivePad, type LiveProduct, type LiveStock } from "@/
 import { groupPadsByDevice, isStale, latestReading, matchesQuery } from "@/lib/inventory/live-stock";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
+import { useCan } from "@/hooks/use-can";
 import { cn } from "@/lib/utils";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
+import { RetireScaleButton } from "@/components/inventario/retire-scale-button";
 import { LiveStockHistorySheet, type HistoryTarget } from "@/components/inventario/live-stock-history-sheet";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Button } from "@/components/ui/button";
@@ -28,12 +30,14 @@ const POLL_MS = 60_000;
 export function LiveStockView() {
   const t = useTranslations("liveStock");
   const format = useFormatter();
-  const estado = useCentroPantalla("inventario.read", "inventario.read");
+  const estado = useCentroPantalla("inventario.read", "inventario.ajustar");
   const centroId = estado.centroActivo || undefined;
   const [warehouseId, setWarehouseId] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [history, setHistory] = React.useState<HistoryTarget | null>(null);
   const [now, setNow] = React.useState(() => Date.now());
+  const { can } = useCan();
+  const canRetire = estado.puedeEscribir && can("inventario.ajustar");
 
   const { state, reload, refresh: poll } = useResource<LiveStock>(
     () => (centroId ? getLiveStock({ centroId }) : Promise.resolve({ generatedAt: "", warehouses: [] })),
@@ -134,7 +138,12 @@ export function LiveStockView() {
             <ProductsTable products={products} now={now} onHistory={(p) => setHistory({ kind: "product", ...p })} />
           </TabsContent>
           <TabsContent value="pads">
-            <PadsBoard pads={pads} now={now} onHistory={(p) => setHistory({ kind: "pad", ...p })} />
+            <PadsBoard
+              pads={pads}
+              now={now}
+              onHistory={(p) => setHistory({ kind: "pad", ...p })}
+              renderRetire={canRetire ? (deviceId) => <RetireScaleButton deviceId={deviceId} centroId={centroId} onDone={refresh} /> : undefined}
+            />
           </TabsContent>
         </Tabs>
       )}
@@ -269,10 +278,13 @@ function PadsBoard({
   pads,
   now,
   onHistory,
+  renderRetire,
 }: {
   pads: LivePad[];
   now: number;
   onHistory: (p: { deviceId: string; pad: number; title: string }) => void;
+  // Only for users who can adjust inventory in this center.
+  renderRetire?: (deviceId: string) => React.ReactNode;
 }) {
   const t = useTranslations("liveStock");
   const format = useFormatter();
@@ -284,7 +296,10 @@ function PadsBoard({
     <div className="space-y-4">
       {groups.map((g) => (
         <section key={g.deviceId} className="space-y-2">
-          <h3 className="font-mono text-sm font-semibold">{g.deviceId}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-mono text-sm font-semibold">{g.deviceId}</h3>
+            {renderRetire?.(g.deviceId)}
+          </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
             {g.pads.map((p) => {
               const stale = isStale(p.measuredAt, now);

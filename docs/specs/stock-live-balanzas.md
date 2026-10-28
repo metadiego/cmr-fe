@@ -76,8 +76,22 @@ mostrar «Almacén (balanza)» junto al stock contable.
 
 ## Pruebas que pide
 
-- Con el usuario real de inventario de Caguas, la pantalla muestra el producto de prueba VALERI120 con
-  12 en balanza y 23 en contable, y **no** muestra una resta.
-- Un usuario de Bayamón no ve el almacén de Caguas.
-- El chip «Conteo dudoso» sale en EASYDUST1 (`doubtful: true`).
-- El historial del plato 1 muestra 13 y luego 12.
+**Actualizado el 28-oct.** El dispositivo de prueba `qa-test-scale` se retiró: sus eventos se borraron
+con `DELETE /api/v2/inventory/scale/stock-events?deviceId=qa-test-scale`. Ahora solo quedan las
+balanzas reales de Caguas.
+
+- Con el usuario real de inventario de Caguas, la pantalla muestra NEUAID300 (scale-1, plato 1) con 59
+  en balanza y 123 en contable, y 113 ARTHRITINE PLUS (scale-2, plato 1) con 59 en balanza y **-20** en
+  contable.
+  - El contable negativo se muestra tal cual, con estilo de aviso.
+  - No se muestra ninguna resta.
+- Un usuario de Bayamón ve el estado vacío: Bayamón todavía no tiene balanzas.
+- El historial del plato 1 de scale-1 muestra los cambios del 28-oct: la carga de la mañana y luego 59
+  → 58 → 59.
+
+### Retirar una balanza (opcional, para administración)
+
+`DELETE /api/v2/inventory/scale/stock-events?deviceId=<id>`, con `centerIds` opcional, borra todos los
+eventos de esa balanza en el centro y devuelve `{ deviceId, deleted }`.
+- Requiere `inventario.ajustar`.
+- Si se pone en la pantalla, que sea con una confirmación que muestre el `deviceId`.

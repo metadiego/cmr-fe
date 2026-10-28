@@ -4849,6 +4849,10 @@
       "snapshot": "Foto",
       "boot": "Arranque"
     },
-    "negativeBook": "Contable negativo: revisar el inventario contable"
+    "negativeBook": "Contable negativo: revisar el inventario contable",
+    "retire": "Retirar balanza",
+    "retireTitle": "¿Retirar la balanza {deviceId}?",
+    "retireBody": "Se borran todos los eventos de la balanza {deviceId} en este centro y deja de aparecer aquí. El inventario contable no cambia. No se puede deshacer.",
+    "retired": "Balanza {deviceId} retirada ({n} eventos borrados)"
   }
 }

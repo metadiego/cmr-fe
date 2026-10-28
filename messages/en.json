@@ -4849,6 +4849,10 @@
       "snapshot": "Snapshot",
       "boot": "Boot"
     },
-    "negativeBook": "Negative book stock: check the book inventory"
+    "negativeBook": "Negative book stock: check the book inventory",
+    "retire": "Retire scale",
+    "retireTitle": "Retire scale {deviceId}?",
+    "retireBody": "Every event of scale {deviceId} in this center is deleted and it stops showing here. Book stock does not change. This cannot be undone.",
+    "retired": "Scale {deviceId} retired ({n} events deleted)"
   }
 }
