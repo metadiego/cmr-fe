@@ -4846,7 +4846,8 @@
       "live": "Warehouse (scale)",
       "book": "Book",
       "scales": "Scales",
-      "lastReading": "Last reading"
+      "lastReading": "Last reading",
+      "liveColumn": "Live (scale)"
     },
     "kind": {
       "change": "Change",
@@ -4857,6 +4858,7 @@
     "retire": "Retire scale",
     "retireTitle": "Retire scale {deviceId}?",
     "retireBody": "Every event of scale {deviceId} in this center is deleted and it stops showing here. Book stock does not change. This cannot be undone.",
-    "retired": "Scale {deviceId} retired ({n} events deleted)"
+    "retired": "Scale {deviceId} retired ({n} events deleted)",
+    "liveShort": "Live"
   }
 }

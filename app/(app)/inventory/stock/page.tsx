@@ -14,6 +14,8 @@ import {
 import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
+import { liveForRows } from "@/lib/inventory/live-stock";
+import { LiveCount, useLiveIndex } from "@/components/inventario/live-cell";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -72,6 +74,7 @@ export default function StockPage() {
   // Clic en un producto → modal con su DESGLOSE (por almacén/lote y estado): explica dónde está y por qué
   // un negativo. (El historial Entró/Salió aún no lo sirve el BE; ver handoff.)
   const tAj = useTranslations("inventarioAjuste");
+  const tLive = useTranslations("liveStock");
   const [detalleDe, setDetalleDe] = React.useState<{ productoId: string; nombre: string } | null>(null);
   // AJUSTAR: el botón vive en la fila donde se VE el descuadre — ahí es donde la persona lo nota, y que
   // el ajuste esté a un clic de ese número es la mitad del trabajo.
@@ -94,6 +97,8 @@ export default function StockPage() {
   // se cambió de Caguas a Bayamón), cae a "" (Todos). Evita el fallo de heredar el almacén de otro centro
   // → 0 filas, y que el chip quede en blanco filtrando en silencio. Cada centro tiene su propio almacén.
   const almacenValido = almacenId && almacenes.some((a) => a.id === almacenId) ? almacenId : "";
+  // Scale counts («Live») shown beside each row — informative, never added to the quantity.
+  const liveIdx = useLiveIndex(vista === "centro" ? tenantCentro : undefined);
 
   // Datos de la vista activa.
   const resumenRes = useResource<Paginated<StockResumenFila>>(
@@ -113,6 +118,7 @@ export default function StockPage() {
 
   const cargando = vista === "centro" ? resumenRes.state.kind === "loading" : consolRes.state.kind === "loading";
   const resumen = resumenRes.state.kind === "ok" ? resumenRes.state.data : null;
+  const liveCells = resumen ? liveForRows(resumen.items, liveIdx) : [];
   const consol = consolRes.state.kind === "ok" ? consolRes.state.data : null;
   const total = vista === "centro" ? resumen?.pagination.total ?? 0 : consol?.pagination.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / 50));
@@ -229,6 +235,7 @@ export default function StockPage() {
                       <TableHead>{t("col.almacen")}</TableHead>
                       <TableHead>{t("col.lote")}</TableHead>
                       <TableHead className="text-right">{t("col.cantidad")}</TableHead>
+                      {liveIdx.size > 0 && <TableHead className="text-right">{tLive("col.liveColumn")}</TableHead>}
                       <TableHead className="text-right sr-only">{tAj("titulo")}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -249,6 +256,7 @@ export default function StockPage() {
                           <Lote numero={r.lotNumber} fecha={r.expirationDate} vencido={r.expired} porVencer={r.expiringSoon} tVencido={t("vencido")} tPorVencer={t("porVencer")} />
                         </TableCell>
                         <TableCell className="text-right"><Cantidad valor={r.quantity} negativo={r.negative} unidad={r.unidadClave} /></TableCell>
+                        {liveIdx.size > 0 && <TableCell className="text-right"><LiveCount cell={liveCells[i]} /></TableCell>}
                         <TableCell className="text-right">
                           <Button
                             variant="outline"
@@ -283,7 +291,10 @@ export default function StockPage() {
                           <div className="flex items-center gap-1.5"><EstadoDot estado={r.status} /><span className="truncate font-medium">{r.name ?? r.sku ?? "—"}</span></div>
                           <div className="truncate text-xs text-muted-foreground">{r.sku}{r.technicalName ? ` · ${r.technicalName}` : ""}</div>
                         </div>
-                        <Cantidad valor={r.quantity} negativo={r.negative} unidad={r.unidadClave} />
+                        <span className="flex flex-col items-end gap-1">
+                          <Cantidad valor={r.quantity} negativo={r.negative} unidad={r.unidadClave} />
+                          <LiveCount cell={liveCells[i]} />
+                        </span>
                       </div>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{r.almacenNombre ?? "—"}</span>

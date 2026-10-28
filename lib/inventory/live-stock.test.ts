@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { groupPadsByDevice, isStale, latestReading, matchesQuery, STALE_AFTER_MS } from "./live-stock.ts";
+import { groupPadsByDevice, isStale, latestReading, liveForRows, liveIndex, matchesQuery, STALE_AFTER_MS } from "./live-stock.ts";
 
 const NOW = Date.parse("2026-10-27T17:00:00.000Z");
 
@@ -46,4 +46,32 @@ test("matchesQuery searches SKU and name ignoring case and accents", () => {
   assert.equal(matchesQuery(p, "capsulas"), true);
   assert.equal(matchesQuery(p, "easy"), false);
   assert.equal(matchesQuery({ sku: null, productName: null }, "x"), false);
+});
+
+test("liveForRows: live goes on the first lot row of a product+warehouse only, never repeated", () => {
+  const idx = liveIndex([
+    { warehouseId: "w1", products: [{ productId: "p1", liveUnits: 59, doubtful: false, byPad: [{ measuredAt: "2026-10-28T17:00:00.000Z" }] }] },
+    { warehouseId: "w2", products: [{ productId: "p1", liveUnits: 3, doubtful: true, byPad: [{ measuredAt: "2026-10-28T16:00:00.000Z" }] }] },
+  ]);
+  const cells = liveForRows(
+    [
+      { productId: "p1", warehouseId: "w1" },
+      { productId: "p1", warehouseId: "w1" },
+      { productId: "p2", warehouseId: "w1" },
+      { productId: "p1", warehouseId: "w2" },
+    ],
+    idx,
+  );
+  assert.deepEqual(cells.map((c) => c?.units ?? null), [59, null, null, 3]);
+  assert.equal(cells[3]?.doubtful, true);
+});
+
+test("liveForRows: a row without warehouse combines the product across warehouses, once", () => {
+  const idx = liveIndex([
+    { warehouseId: "w1", products: [{ productId: "p1", liveUnits: 5, doubtful: false, byPad: [{ measuredAt: "2026-10-28T10:00:00.000Z" }] }] },
+    { warehouseId: "w2", products: [{ productId: "p1", liveUnits: 2, doubtful: true, byPad: [{ measuredAt: "2026-10-28T12:00:00.000Z" }] }] },
+  ]);
+  const cells = liveForRows([{ productId: "p1", warehouseId: null }, { productId: "p1", warehouseId: null }], idx);
+  assert.deepEqual(cells[0], { units: 7, doubtful: true, measuredAt: "2026-10-28T12:00:00.000Z" });
+  assert.equal(cells[1], null);
 });

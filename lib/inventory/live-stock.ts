@@ -45,3 +45,45 @@ export function matchesQuery(p: { sku: string | null; productName: string | null
   if (!needle) return true;
   return fold(`${p.sku ?? ""} ${p.productName ?? ""}`).includes(needle);
 }
+
+export type LiveCell = { units: number; doubtful: boolean; measuredAt: string | null };
+
+// Index of the scale counts by product + warehouse, for the «Live» column of Existencias. It is shown
+// NEXT TO book stock and never added to it (owner, 28-oct-2026: «que NO sume, solo que diga live»).
+export function liveIndex(
+  warehouses: ReadonlyArray<{
+    warehouseId: string;
+    products: ReadonlyArray<{ productId: string; liveUnits: number; doubtful: boolean; byPad: ReadonlyArray<{ measuredAt: string }> }>;
+  }>,
+): Map<string, LiveCell> {
+  const idx = new Map<string, LiveCell>();
+  for (const w of warehouses) {
+    for (const p of w.products) {
+      idx.set(`${p.productId}|${w.warehouseId}`, { units: p.liveUnits, doubtful: p.doubtful, measuredAt: latestReading(p.byPad) });
+    }
+  }
+  return idx;
+}
+
+// The live cell for a stock row. Stock rows are per lot, so the same product + warehouse can repeat:
+// only the FIRST of them gets the live count (repeating it would read as if it added up). A row with no
+// warehouse (stock spread over several) matches the product in any warehouse, combined, once.
+export function liveForRows<R extends { productId: string; warehouseId?: string | null }>(
+  rows: ReadonlyArray<R>,
+  idx: ReadonlyMap<string, LiveCell>,
+): Array<LiveCell | null> {
+  const seen = new Set<string>();
+  return rows.map((r) => {
+    const key = `${r.productId}|${r.warehouseId ?? "*"}`;
+    if (seen.has(key)) return null;
+    seen.add(key);
+    if (r.warehouseId) return idx.get(key) ?? null;
+    const cells = [...idx.entries()].filter(([k]) => k.startsWith(`${r.productId}|`)).map(([, c]) => c);
+    if (cells.length === 0) return null;
+    return {
+      units: cells.reduce((s, c) => s + c.units, 0),
+      doubtful: cells.some((c) => c.doubtful),
+      measuredAt: latestReading(cells.filter((c) => c.measuredAt).map((c) => ({ measuredAt: c.measuredAt as string }))),
+    };
+  });
+}
