@@ -2619,6 +2619,10 @@
         "recepcionFactura": {
           "title": "Recibir desde factura",
           "desc": "Pega la factura del proveedor y empareja; el sistema aprende sus nombres."
+        },
+        "liveStock": {
+          "title": "Stock live (balanzas)",
+          "desc": "Lo que cuentan las balanzas en cada plato del almacén, junto al contable."
         }
       }
     },

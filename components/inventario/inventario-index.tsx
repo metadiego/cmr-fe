@@ -12,6 +12,7 @@ const SECTIONS: { key: string; href: string }[] = [
   // Existencias primero: "cuánto hay" es la pregunta más frecuente (stock por centro + consolidado).
   { key: "existencias", href: "/inventory/stock" },
   { key: "viales", href: "/inventory/vials" },
+  { key: "liveStock", href: "/inventory/live-stock" },
   { key: "productos", href: "/inventory/products" },
   { key: "recepcion", href: "/inventory/receive-purchase" },
   { key: "planificacion", href: "/inventory/planning" },
