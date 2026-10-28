@@ -55,7 +55,7 @@ export function RetireScaleButton({ deviceId, centroId, onDone }: { deviceId: st
             <AlertDialogCancel disabled={busy}>{tRoot("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={busy}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              variant="destructive"
               onClick={(e) => {
                 e.preventDefault();
                 retire();
