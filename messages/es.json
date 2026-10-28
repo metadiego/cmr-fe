@@ -4848,6 +4848,7 @@
       "change": "Cambio",
       "snapshot": "Foto",
       "boot": "Arranque"
-    }
+    },
+    "negativeBook": "Contable negativo: revisar el inventario contable"
   }
 }

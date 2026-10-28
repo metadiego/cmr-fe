@@ -4848,6 +4848,7 @@
       "change": "Change",
       "snapshot": "Snapshot",
       "boot": "Boot"
-    }
+    },
+    "negativeBook": "Negative book stock: check the book inventory"
   }
 }

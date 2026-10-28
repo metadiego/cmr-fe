@@ -212,7 +212,14 @@ function ProductsTable({
                     {p.doubtful && <span className="ml-2"><DoubtfulChip /></span>}
                   </td>
                   <td className="px-3 py-2 text-right text-base font-semibold tabular-nums">{p.liveUnits}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                  {/* A negative book figure is real accounting data: shown as-is, flagged, never clamped. */}
+                  <td
+                    className={cn(
+                      "px-3 py-2 text-right tabular-nums",
+                      p.bookUnits != null && p.bookUnits < 0 ? "font-semibold text-destructive" : "text-muted-foreground",
+                    )}
+                    title={p.bookUnits != null && p.bookUnits < 0 ? t("negativeBook") : undefined}
+                  >
                     {p.bookUnits ?? "—"}
                     {p.bookUnit && <span className="ml-1 text-xs">{p.bookUnit}</span>}
                   </td>
