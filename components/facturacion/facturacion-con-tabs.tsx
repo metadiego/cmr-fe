@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TabsBarWithActions } from "@/components/kit/tabs-actions-slot";
 import { FacturasListView } from "@/components/facturacion/facturas-list-view";
 import { DevolucionesListView } from "@/components/facturacion/devoluciones-list-view";
 import { CuadreCaja } from "@/components/caja/cuadre-caja";
@@ -41,12 +42,18 @@ export function FacturacionConTabs({ contexto }: { contexto: "general" | "consul
 
   return (
     <Tabs value={tab} onValueChange={selectTab}>
-      <TabsList className="mb-4">
-        <TabsTrigger value="facturas">{t("facturas")}</TabsTrigger>
-        <TabsTrigger value="devoluciones">{t("devoluciones")}</TabsTrigger>
-        <TabsTrigger value="caja">{t("caja")}</TabsTrigger>
-        {contexto === "general" && <TabsTrigger value="estadisticas">{t("estadisticas")}</TabsTrigger>}
-      </TabsList>
+      {/* The active tab's header actions (e.g. Live + New sale) share this row, right-aligned. */}
+      <TabsBarWithActions
+        className="mb-4"
+        tabs={
+          <TabsList>
+            <TabsTrigger value="facturas">{t("facturas")}</TabsTrigger>
+            <TabsTrigger value="devoluciones">{t("devoluciones")}</TabsTrigger>
+            <TabsTrigger value="caja">{t("caja")}</TabsTrigger>
+            {contexto === "general" && <TabsTrigger value="estadisticas">{t("estadisticas")}</TabsTrigger>}
+          </TabsList>
+        }
+      >
       <TabsContent value="facturas">
         <FacturasListView contexto={contexto} />
       </TabsContent>
@@ -61,6 +68,7 @@ export function FacturacionConTabs({ contexto }: { contexto: "general" | "consul
           <EstadisticasDiariasView />
         </TabsContent>
       )}
+      </TabsBarWithActions>
     </Tabs>
   );
 }

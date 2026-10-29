@@ -41,7 +41,11 @@ const DEBT = {
   // hub/impresora, envío en cascada) salió a components/facturacion/backup-print-button.tsx.
   // 08-oct-2026: lowered from 2050 to 1966 — the regenerate-availability dialog moved to
   // components/facturacion/regenerar-disponibilidad-dialog.tsx, which also made room for Reopen.
-  "app/(app)/billing/invoices/[id]/page.tsx": 1535,
+  // 29-oct-2026: lowered from 1535 to 1460 — the receipt preview card and the editor grid moved to
+  // components/facturacion/receipt-preview-card.tsx (shared with the skeleton), the receipt print dialog
+  // to components/facturacion/receipt-print-dialog.tsx; back link removed; the patient-today summary
+  // became a header button.
+  "app/(app)/billing/invoices/[id]/page.tsx": 1460,
   "components/inventario/productos-admin.tsx": 1048,
   "components/configuracion/menu-editor.tsx": 700,
   // 07-oct-2026: bajado de 686 a 661 — Field/Toggle/GrupoSelect (genéricos, sin lógica de dominio)

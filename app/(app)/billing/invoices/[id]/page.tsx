@@ -1,10 +1,8 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { safeInternalPath } from "@/lib/utils";
 import {
   getFactura,
   getCatalogoFacturacion,
@@ -38,10 +36,11 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { getProfiles, type Perfil } from "@/lib/api/profiles";
-import { ResumenPacientePanel } from "@/components/facturacion/resumen-paciente-panel";
+import { PatientTodaySummaryButton } from "@/components/facturacion/resumen-paciente-panel";
 import { toastError } from "@/lib/api/errors";
 import { buildRecibo } from "@/lib/factura/build-recibo";
-import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
+import { ReceiptPrintDialog } from "@/components/facturacion/receipt-print-dialog";
+import { ShellCrumb } from "@/components/shell-crumb";
 import { InvoiceHeaderDialog as CabeceraDialog } from "@/components/facturacion/invoice-header-dialog";
 import { RegenerarDisponibilidadDialog } from "@/components/facturacion/regenerar-disponibilidad-dialog";
 import { ReopenInvoiceButton, InvoiceReopenings } from "@/components/facturacion/invoice-reopen";
@@ -55,6 +54,7 @@ import { buildReceiptText } from "@/lib/print/receipt-labels";
 import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
 import { loadLogoRaster } from "@/lib/print/load-logo";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
+import { EDITOR_GRID, INVOICE_PAGE_FILL, CardSection, ReceiptPreviewCard } from "@/components/facturacion/receipt-preview-card";
 import { PagosFactura } from "@/components/facturacion/pagos-factura";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, MoreHorizontalIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
@@ -75,7 +75,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardAction, CardContent, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DataTable, TableEmpty } from "@/components/ui/data-table";
 import {
@@ -92,9 +92,6 @@ import { InvoiceDetailSkeleton, DialogRowsSkeleton } from "@/components/facturac
 const n = (v: unknown) => Number(v ?? 0);
 const money = (v: unknown) => `$${n(v).toFixed(2)}`;
 
-// Panel «lo que suma el paciente hoy»: ENCENDIDO. El BE arregló GET /facturas/resumen-paciente (ya acepta
-// pacienteId; verificado en prod: Felicita → total general 7.640, sin colar la consulta de 20).
-const RESUMEN_PACIENTE_ENABLED = true;
 
 export default function FacturacionPage() {
   const params = useParams<{ id: string }>();
@@ -121,12 +118,9 @@ export default function FacturacionPage() {
   const [formas, setFormas] = React.useState<FormaPago[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [busy, setBusy] = React.useState(false);
-  // Visor del recibo en un MODAL (no se sale de facturación) con botón para imprimir/reimprimir. Dentro va un
-  // iframe a la página dedicada /print/invoice/:id?embed=1 (solo el recibo, como el legado); imprimir ese
-  // iframe manda solo el recibo al papel. Handoff: visor de recibo + reimprimir sin salir de la pantalla.
+  // Receipt viewer + print, in a modal so the user never leaves billing: see ReceiptPrintDialog.
   const [reciboOpen, setReciboOpen] = React.useState(false);
   const invoiceCenter = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
-  const reciboIframeRef = React.useRef<HTMLIFrameElement>(null);
 
   const refetch = React.useCallback(() => {
     return getFactura(id, centro)
@@ -209,14 +203,6 @@ export default function FacturacionPage() {
   function imprimir() {
     setReciboOpen(true);
   }
-  // Imprimir/reimprimir: SIMPLE, un solo camino, sin ajustes. Abre la página dedicada (solo el recibo,
-  // sin la app alrededor) en una pestaña nueva; esa página se imprime A SÍ MISMA con `window.print()`
-  // (abre el diálogo nativo en todo navegador, incluido Firefox) y se cierra sola al terminar. Se decidió
-  // NO perseguir la ruta ESC/POS por QZ Tray: exige instalar software en cada equipo y una cola de
-  // impresión limpia en el servidor que la comparte, fuera del alcance de este repo por ahora.
-  function imprimirDesdeVisor() {
-    window.open(`/print/invoice/${id}${centro ? `?centro=${centro}` : ""}`, "_blank", "noopener");
-  }
 
   // ESC/POS bytes of this receipt for the backup print button (it marks the invoice printed first,
   // like the normal path). Which hub/printer and whether they are up is the button's business.
@@ -235,7 +221,6 @@ export default function FacturacionPage() {
   // Tipo por la propia factura: con cita = CONSULTA, sin cita = GENERAL (productos/servicios).
   // El encabezado y el "Volver" deben reflejarlo (no mezclar: una venta general NO dice "Facturar consulta").
   const esGeneral = !factura.appointmentId;
-  const backHref = safeInternalPath(search.get("volver")) ?? (esGeneral ? "/billing/invoices" : "/boards/frontdesk?tab=consulta"); // consulta: Frontdesk→Consulta
   const nombre = paciente ? (paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ")) : "";
   const record = paciente?.medicalRecordNumber ?? "";
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
@@ -253,19 +238,16 @@ export default function FacturacionPage() {
   const recibo = buildRecibo(factura, diasCatalogo, clavePorFormaId, presupuestoNum);
   // Un borrador con saldo pendiente es un PRESUPUESTO (no se emite al imprimir). Rige el rótulo del botón.
   const esPresupuesto = estado === "borrador" && n(factura.total) - n(factura.paidAmount) > 0.005;
+  const numeroFactura = factura.number != null ? `${factura.series ? `${factura.series}-` : "F"}${factura.number}` : null;
 
   return (
-    <PageContainer>
-      <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">← {t("back")}</Link>
+    <PageContainer className={INVOICE_PAGE_FILL}>
+      {/* Top bar: "Facturación general › Nueva venta" while it is a draft being made, "› Factura F-123" after. */}
+      <ShellCrumb label={estado === "borrador" ? tRoot("facturacionList.nuevaVenta") : [tReceipt("invoice"), numeroFactura].filter(Boolean).join(" ")} />
 
       {/* Cabecera */}
       <PageHeader
-        title={
-          <>
-            <span className="block text-[11px] font-semibold uppercase tracking-wider text-primary/80">{esGeneral ? t("titleGeneral") : t("title")}</span>
-            {nombre || t("patient")}
-          </>
-        }
+        title={nombre || t("patient")}
         description={
           <>
             {paciente?.documentId && <p className="text-xs text-muted-foreground">ID {paciente.documentId}</p>}
@@ -297,11 +279,7 @@ export default function FacturacionPage() {
             {record && (
               <span className="rounded-lg bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">#{record}</span>
             )}
-            {factura.number != null && (
-              <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">
-                {factura.series ? `${factura.series}-` : "F"}{String(factura.number)}
-              </span>
-            )}
+            {numeroFactura && <span className="rounded-md bg-background/70 px-2.5 py-1 font-mono text-sm font-semibold tabular-nums ring-1 ring-border">{numeroFactura}</span>}
             <EstadoBadge estado={estado} />
             {/* Nº de presupuesto (tras imprimir un borrador con saldo): el mostrador lo cita por teléfono. */}
             {presupuestoNum && (
@@ -318,6 +296,11 @@ export default function FacturacionPage() {
               <Button variant="outline" size="sm" className="no-print text-destructive hover:text-destructive" disabled={descartando} onClick={descartar}>
                 {t("descartar")}
               </Button>
+            )}
+            {/* «Lo que suma el paciente hoy» (all of the patient's invoices today, summed by the BE) in a side
+                sheet. Needs a center: the URL's, else the invoice's own (admin/master without one → 400). */}
+            {factura.patientId && (
+              <PatientTodaySummaryButton pacienteId={String(factura.patientId)} facturaActualId={id} centro={centro ?? (factura as { clinicId?: string }).clinicId ?? undefined} />
             )}
             <Button variant="outline" size="sm" className="no-print" onClick={imprimir}>
               <HugeiconsIcon icon={PrinterIcon} className="size-4" />
@@ -345,36 +328,14 @@ export default function FacturacionPage() {
         }
       />
 
-      {/* Visor del recibo (no se sale de facturación): iframe a la página dedicada (solo el recibo) + imprimir. */}
-      <Dialog open={reciboOpen} onOpenChange={setReciboOpen}>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[400px]">
-          <DialogHeader className="border-b px-4 py-3">
-            <DialogTitle className="text-base">{tRoot("receipt.print")}</DialogTitle>
-          </DialogHeader>
-          <iframe
-            ref={reciboIframeRef}
-            // `centro` SIEMPRE en la URL: la página dedicada vive en su propia pestaña/iframe, sin estado
-            // compartido con esta pantalla. Sin esto caía a la cookie `cmr_active_centro` (el último centro
-            // elegido en el selector), que puede ser OTRO centro que el de esta factura — hallado auditando
-            // el bug real (no era el CSS): la pantalla principal carga por `?centro=` de la URL, pero el
-            // iframe no lo heredaba. Verificado por HTTP: facturas cruzadas entre Bayamón/Caguas.
-            src={reciboOpen ? `/print/invoice/${id}?embed=1${centro ? `&centro=${centro}` : ""}` : "about:blank"}
-            title={tRoot("receipt.previewTitle")}
-            className="h-[66vh] w-full bg-white"
-          />
-          <div className="flex items-center justify-between gap-2 border-t px-4 py-3">
-            {/* Backup path, apart from the normal "Print": raw ESC/POS through the print hub. */}
-            {reciboOpen ? <BackupPrintButton centerId={invoiceCenter} buildBytes={buildBackupReceiptBytes} /> : <span />}
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setReciboOpen(false)}>{tRoot("common.cancel")}</Button>
-              <Button size="sm" onClick={imprimirDesdeVisor}>
-                <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-                {tRoot("receipt.print")}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ReceiptPrintDialog
+        open={reciboOpen}
+        onOpenChange={setReciboOpen}
+        invoiceId={id}
+        centerId={invoiceCenter}
+        printLabel={esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
+        buildBackupBytes={buildBackupReceiptBytes}
+      />
 
       <RegenerarDisponibilidadDialog
         open={regenOpen}
@@ -416,54 +377,19 @@ export default function FacturacionPage() {
         }}
       />
 
-      {/* «Lo que suma el paciente hoy»: varias facturas del mismo paciente → total sin calculadora. Solo
-          facturación general y solo si la factura tiene paciente. Handoff resumen-de-facturas-del-paciente.
-          DESACTIVADO: el endpoint GET /facturas/resumen-paciente está roto en prod (valida contradictorio:
-          exige pacienteId como UUID y a la vez lo rechaza como propiedad → 400 con cualquier llamada). Ver
-          docs/specs/resumen-paciente-endpoint-roto-handoff-be.md. Poner en true cuando el BE lo acepte. */}
-      {RESUMEN_PACIENTE_ENABLED && factura.patientId && (
-        <div className="mb-4 no-print">
-          {/* El resumen exige centro (admin/master sin centro → 400). Usar el de la URL o, si falta, el de
-              la propia factura (clinicId) → nunca 400 por centro al abrir el panel. */}
-          <ResumenPacientePanel
-            pacienteId={String(factura.patientId)}
-            facturaActualId={id}
-            centro={centro ?? (factura as { clinicId?: string }).clinicId ?? undefined}
-          />
-        </div>
-      )}
-
       {/* Editor keyeado por updatedAt → tras guardar, remonta con los valores del servidor. */}
       <Editor
         key={String(factura.updatedAt ?? factura.id)}
-        factura={factura}
-        id={id}
-        centro={centro}
-        catalogo={catalogo}
-        formas={formas}
-        busy={busy}
-        run={run}
+        factura={factura} id={id} centro={centro} catalogo={catalogo} formas={formas} busy={busy} run={run}
+        receipt={
+          // Thermal receipt preview (print CSS isolates it when printing).
+          <ReceiptPreviewCard>
+            <ReciboTermico recibo={recibo} />
+          </ReceiptPreviewCard>
+        }
       />
 
       <InvoiceReopenings invoiceId={id} centerId={invoiceCenter} invoice={factura} />
-
-      {/* Vista previa del recibo térmico 80mm (el print CSS lo aísla al imprimir). */}
-      <Card>
-        <CardHeader className="no-print">
-          <CardTitle className="text-muted-foreground">{tRoot("receipt.previewTitle")}</CardTitle>
-          <CardAction>
-            <Button variant="outline" size="sm" onClick={imprimir}>
-              <HugeiconsIcon icon={PrinterIcon} className="size-4" />
-              {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex justify-center rounded-xl bg-muted/30 py-6">
-          <div className="shadow-lg ring-1 ring-border">
-            <ReciboTermico recibo={recibo} />
-          </div>
-        </CardContent>
-      </Card>
     </PageContainer>
   );
 }
@@ -476,6 +402,7 @@ function Editor({
   formas,
   busy,
   run,
+  receipt,
 }: {
   factura: FacturaConItems;
   id: string;
@@ -484,6 +411,7 @@ function Editor({
   formas: FormaPago[];
   busy: boolean;
   run: (fn: () => Promise<unknown>) => Promise<void>;
+  receipt: React.ReactNode;
 }) {
   const t = useTranslations("facturacion");
   const { can } = useCan();
@@ -620,169 +548,165 @@ function Editor({
       .join(" × ");
 
   return (
-    <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
-      {/* Líneas */}
-      <section className="space-y-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {t("items")}
-              {esGeneral && listaNombre && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                  {t("listaLabel", { lista: listaNombre })}
-                </span>
+    <div className={EDITOR_GRID}>
+      {/* Lines: one card — the add-line row sits above the table, "add package" in the header. */}
+      <Card className="min-w-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {t("items")}
+            {esGeneral && listaNombre && (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                {t("listaLabel", { lista: listaNombre })}
+              </span>
+            )}
+          </CardTitle>
+          {esBorrador && esGeneral && <CardAction><AddSalesPackage centro={centro} disabled={busy} onPick={(pkg) => run(() => sellSalesPackage(id, pkg.id, centro))} /></CardAction>}
+        </CardHeader>
+        <CardContent className="flex-1 space-y-4">
+          {esBorrador && (
+            <AddItem
+              catalogo={catalogo}
+              showIvu={esGeneral}
+              tipoPrecioId={(factura as { priceTypeId?: string }).priceTypeId ?? null}
+              tenant={(factura as { clinicId?: string }).clinicId ?? centro ?? null}
+              disabled={busy}
+              onAdd={(p) => run(() => agregarItem(id, p, centro))}
+            />
+          )}
+          <DataTable>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("concept")}</TableHead>
+                <TableHead className="w-20 text-right">{t("qty")}</TableHead>
+                <TableHead className="w-28 text-right">{t("price")}</TableHead>
+                {esGeneral && <TableHead className="w-20 text-center">{t("ivu")}</TableHead>}
+                <TableHead className="w-28 text-right">{t("lineTotal")}</TableHead>
+                {esBorrador && <TableHead className="w-10" />}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {serverItems.length === 0 && (
+                <TableEmpty colSpan={4 + (esGeneral ? 1 : 0) + (esBorrador ? 1 : 0)}>{t("noItems")}</TableEmpty>
               )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("concept")}</TableHead>
-                  <TableHead className="w-20 text-right">{t("qty")}</TableHead>
-                  <TableHead className="w-28 text-right">{t("price")}</TableHead>
-                  {esGeneral && <TableHead className="w-20 text-center">{t("ivu")}</TableHead>}
-                  <TableHead className="w-28 text-right">{t("lineTotal")}</TableHead>
-                  {esBorrador && <TableHead className="w-10" />}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {serverItems.length === 0 && (
-                  <TableEmpty colSpan={4 + (esGeneral ? 1 : 0) + (esBorrador ? 1 : 0)}>{t("noItems")}</TableEmpty>
-                )}
-                {serverItems.map((it) => {
-                  const e = edits[it.id] ?? { quantity: n(it.quantity), unitPrice: n(it.unitPrice) };
-                  return ( // border-l-* nunca compiló aquí (0 reglas en el CSS cargado): inline style
-                    <TableRow key={it.id} className="bg-primary/10" style={{ borderLeft: "3px solid var(--primary)" }}>
-                      <TableCell>
-                        <span>{it.description ?? "—"}</span>
-                        <PackageEvidence item={it} locked={esBorrador} />
-                        {esBorrador && esKit(it) && (
+              {serverItems.map((it) => {
+                const e = edits[it.id] ?? { quantity: n(it.quantity), unitPrice: n(it.unitPrice) };
+                return ( // border-l-* nunca compiló aquí (0 reglas en el CSS cargado): inline style
+                  <TableRow key={it.id} className="bg-primary/10" style={{ borderLeft: "3px solid var(--primary)" }}>
+                    <TableCell>
+                      <span>{it.description ?? "—"}</span>
+                      <PackageEvidence item={it} locked={esBorrador} />
+                      {esBorrador && esKit(it) && (
+                        <button
+                          type="button"
+                          onClick={() => setOpcItemId(it.id)}
+                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                        >
+                          {t("opcionales")}
+                        </button>
+                      )}
+                      {esBorrador && esKit(it) && (
+                        <button
+                          type="button"
+                          onClick={() => setKitItem(it)}
+                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                        >
+                          {t("kit.abrir")}
+                        </button>
+                      )}
+                      {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
+                      {multsDe(it) && (
+                        <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
+                      )}
+                      {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
+                          data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
+                      {impuestosDeLinea(it).length > 0 && (
+                        <span className="block text-[11px] text-muted-foreground">
+                          {impuestosDeLinea(it).map((im, i) => (
+                            <span key={i}>
+                              {i > 0 ? " · " : ""}
+                              {(im.name || "") + (im.rate != null ? ` ${im.rate}%` : "")}: {money(im.amount)}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                      {/* Corregir el impuesto de una línea EMITIDA (recomputa totales, puede dejar saldo).
+                          Solo con permiso factura.reparar — el sistema deja arreglar, no bloquear. */}
+                      {!esBorrador && esGeneral && can("factura.reparar") && (
+                        <button
+                          type="button"
+                          onClick={() => setImpuestoItem(it)}
+                          className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                        >
+                          {t("corregirImpuesto.abrir")}
+                        </button>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
+                      {multsDe(it) ? (
+                        <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
+                      ) : esBorrador && !isPackageLine(it) ? (
+                        <Input
+                          value={String(e.quantity)}
+                          onChange={(ev) => setEdit(it.id, { quantity: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
+                          onBlur={() => persist(it)}
+                          className="h-7 w-16 text-right tabular-nums" inputMode="numeric" disabled={busy}
+                        />
+                      ) : <span className="tabular-nums">{n(it.quantity)}</span>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {esBorrador && !isPackageLine(it) ? (
+                        <Input
+                          value={String(e.unitPrice)}
+                          onChange={(ev) => setEdit(it.id, { unitPrice: Math.max(0, Number(ev.target.value) || 0) })}
+                          onBlur={() => persist(it)}
+                          className="h-7 w-24 text-right tabular-nums" inputMode="decimal" disabled={busy}
+                        />
+                      ) : <span className="tabular-nums">{money(it.unitPrice)}</span>}
+                    </TableCell>
+                    {esGeneral && (
+                      <TableCell className="text-center">
+                        {/* A package line is not toggled: the toggle deletes and re-adds the line. */}
+                        {esBorrador && !isPackageLine(it) ? (
                           <button
                             type="button"
-                            onClick={() => setOpcItemId(it.id)}
-                            className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                            onClick={() => toggleGravado(it)}
+                            disabled={busy}
+                            className={
+                              "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
+                              (it.taxable
+                                ? "bg-info/15 text-info-foreground"
+                                : "bg-muted text-muted-foreground")
+                            }
+                            title={t("ivuToggleHint")}
                           >
-                            {t("opcionales")}
+                            {it.taxable ? t("ivuGravado") : t("ivuExento")}
                           </button>
-                        )}
-                        {esBorrador && esKit(it) && (
-                          <button
-                            type="button"
-                            onClick={() => setKitItem(it)}
-                            className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
-                          >
-                            {t("kit.abrir")}
-                          </button>
-                        )}
-                        {/* Desglose de multiplicadores (láser: días × áreas) — data-driven */}
-                        {multsDe(it) && (
-                          <span className="block text-[11px] text-muted-foreground">({multTexto(multsDe(it)!)})</span>
-                        )}
-                        {/* Impuestos de la línea DISCRIMINADOS (Estatal + Municipal + los que haya). N renglones,
-                            data-driven: recorre el array del BE, no cablea dos. Handoff IVU compuesto. */}
-                        {impuestosDeLinea(it).length > 0 && (
-                          <span className="block text-[11px] text-muted-foreground">
-                            {impuestosDeLinea(it).map((im, i) => (
-                              <span key={i}>
-                                {i > 0 ? " · " : ""}
-                                {(im.name || "") + (im.rate != null ? ` ${im.rate}%` : "")}: {money(im.amount)}
-                              </span>
-                            ))}
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">
+                            {it.taxable ? t("ivuGravado") : t("ivuExento")}
                           </span>
                         )}
-                        {/* Corregir el impuesto de una línea EMITIDA (recomputa totales, puede dejar saldo).
-                            Solo con permiso factura.reparar — el sistema deja arreglar, no bloquear. */}
-                        {!esBorrador && esGeneral && can("factura.reparar") && (
-                          <button
-                            type="button"
-                            onClick={() => setImpuestoItem(it)}
-                            className="ml-2 rounded-md border px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/10"
-                          >
-                            {t("corregirImpuesto.abrir")}
-                          </button>
-                        )}
                       </TableCell>
+                    )}
+                    <TableCell className="text-right font-medium tabular-nums">{money(lineTotal(it))}</TableCell>
+                    {esBorrador && (
                       <TableCell className="text-right">
-                        {/* Cantidad EFECTIVA (base × multiplicadores) read-only cuando hay multiplicadores. */}
-                        {multsDe(it) ? (
-                          <span className="tabular-nums font-medium" title={t("cantEfectivaHint")}>{cantEfectiva(it)}</span>
-                        ) : esBorrador && !isPackageLine(it) ? (
-                          <Input
-                            value={String(e.quantity)}
-                            onChange={(ev) => setEdit(it.id, { quantity: Math.max(1, Math.floor(Number(ev.target.value) || 0)) })}
-                            onBlur={() => persist(it)}
-                            className="h-7 w-16 text-right tabular-nums" inputMode="numeric" disabled={busy}
-                          />
-                        ) : <span className="tabular-nums">{n(it.quantity)}</span>}
+                        <button type="button" onClick={() => run(() => eliminarItem(id, it.id, centro))} disabled={busy} aria-label={t("remove")} className="text-destructive hover:opacity-70 disabled:opacity-40">×</button>
                       </TableCell>
-                      <TableCell className="text-right">
-                        {esBorrador && !isPackageLine(it) ? (
-                          <Input
-                            value={String(e.unitPrice)}
-                            onChange={(ev) => setEdit(it.id, { unitPrice: Math.max(0, Number(ev.target.value) || 0) })}
-                            onBlur={() => persist(it)}
-                            className="h-7 w-24 text-right tabular-nums" inputMode="decimal" disabled={busy}
-                          />
-                        ) : <span className="tabular-nums">{money(it.unitPrice)}</span>}
-                      </TableCell>
-                      {esGeneral && (
-                        <TableCell className="text-center">
-                          {/* A package line is not toggled: the toggle deletes and re-adds the line. */}
-                          {esBorrador && !isPackageLine(it) ? (
-                            <button
-                              type="button"
-                              onClick={() => toggleGravado(it)}
-                              disabled={busy}
-                              className={
-                                "rounded-full px-2 py-0.5 text-[11px] font-medium disabled:opacity-40 " +
-                                (it.taxable
-                                  ? "bg-info/15 text-info-foreground"
-                                  : "bg-muted text-muted-foreground")
-                              }
-                              title={t("ivuToggleHint")}
-                            >
-                              {it.taxable ? t("ivuGravado") : t("ivuExento")}
-                            </button>
-                          ) : (
-                            <span className="text-[11px] text-muted-foreground">
-                              {it.taxable ? t("ivuGravado") : t("ivuExento")}
-                            </span>
-                          )}
-                        </TableCell>
-                      )}
-                      <TableCell className="text-right font-medium tabular-nums">{money(lineTotal(it))}</TableCell>
-                      {esBorrador && (
-                        <TableCell className="text-right">
-                          <button type="button" onClick={() => run(() => eliminarItem(id, it.id, centro))} disabled={busy} aria-label={t("remove")} className="text-destructive hover:opacity-70 disabled:opacity-40">×</button>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </DataTable>
-          </CardContent>
-        </Card>
+                    )}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </DataTable>
+        </CardContent>
+      </Card>
 
-        {esBorrador && (
-          <AddItem
-            catalogo={catalogo}
-            showIvu={esGeneral}
-            tipoPrecioId={(factura as { priceTypeId?: string }).priceTypeId ?? null}
-            tenant={(factura as { clinicId?: string }).clinicId ?? centro ?? null}
-            disabled={busy}
-            onAdd={(p) => run(() => agregarItem(id, p, centro))}
-          />
-        )}
-        {esBorrador && esGeneral && (
-          <AddSalesPackage centro={centro} disabled={busy} onPick={(pkg) => run(() => sellSalesPackage(id, pkg.id, centro))} />
-        )}
-      </section>
-
-      {/* Resumen + acciones */}
-      <aside className="space-y-4">
-        <Card>
+      {/* Summary: ONE card — totals, then divided sections (discount, VAT exemption, payments), with
+          Issue as its footer. */}
+      <Card className={esBorrador ? "pb-0" : undefined}>
+        <CardHeader><CardTitle>{t("summary")}</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           <Row label={t("subtotal")} value={money(subtotal)} />
           <Row label={t("discount")} value={`- ${money(descuento)}`} />
@@ -803,14 +727,11 @@ function Editor({
           <div className="border-t pt-2"><Row label={t("total")} value={money(total)} strong /></div>
           <PackageSavingsRow items={serverItems} />
         </CardContent>
-        </Card>
 
-        {esBorrador && (
-          <DescuentoGlobal disabled={busy} subtotal={subtotal} descuentoActual={descuento} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { type: tipo, value: valor } as never, centro))} applyLabel={t("applyDiscount")} />
-        )}
+        {esBorrador && <CardSection><DescuentoGlobal disabled={busy} subtotal={subtotal} descuentoActual={descuento} onApply={(tipo, valor) => run(() => setDescuentoGlobal(id, { type: tipo, value: valor } as never, centro))} applyLabel={t("applyDiscount")} /></CardSection>}
 
         {esBorrador && esGeneral && (
-          <label className="flex items-center justify-between rounded-xl border px-4 py-3">
+          <CardSection className="flex items-center justify-between">
             <span className="text-sm">{t("exentoLabel")}</span>
             <input
               type="checkbox"
@@ -819,20 +740,21 @@ function Editor({
               disabled={busy}
               onChange={(e) => run(() => setExento(id, { exempt: e.target.checked }, centro))}
             />
-          </label>
+          </CardSection>
         )}
 
         {!esBorrador && esGeneral && sesionesPorEntregar > 0 && (
-          <div className="rounded-md border border-info/40 bg-info px-4 py-3 text-sm text-info-foreground">
-            {t("sesionesPorEntregar", { n: sesionesPorEntregar })}
-          </div>
+          <CardSection><div className="rounded-md border border-info/40 bg-info px-4 py-3 text-sm text-info-foreground">{t("sesionesPorEntregar", { n: sesionesPorEntregar })}</div></CardSection>
         )}
 
         {esBorrador ? (
-          <div className="space-y-4">
+          <>
+          <CardSection>
             {/* Primero se cobra, después se emite: el cobro es el paso PREVIO a emitir (regla
                 cobrar-antes-de-emitir). El BE ya acepta pagos en borrador. */}
             <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} />
+          </CardSection>
+          <CardFooter className="mt-auto flex-col items-stretch pb-4">
             {/* Emitir solo cuando está SALDADA (nada por cobrar). Cortesía / 100% de descuento = total 0
                 → saldo 0 → habilitado de un clic. Con saldo pendiente, deshabilitado y con el importe que
                 falta a la vista (no hay que pulsarlo para enterarse). El BE es la autoridad: si igual llega
@@ -845,11 +767,14 @@ function Editor({
               disabled={busy || serverItems.length === 0 || saldo > 0.005}
               label={saldo > 0.005 ? t("emitFaltaCobrar", { monto: money(saldo) }) : t("emit")}
             />
-          </div>
+          </CardFooter>
+          </>
         ) : (
-          <PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} />
+          <CardSection><PagosFactura pagos={factura.payments ?? []} formas={formas} id={id} centro={centro} busy={busy} run={run} saldo={saldo} montoAbonado={n(factura.paidAmount)} esBorrador={esBorrador} /></CardSection>
         )}
-      </aside>
+      </Card>
+
+      {receipt}
 
       {opcItemId && (
         <OpcionalesDialog
@@ -1473,7 +1398,7 @@ function DescuentoGlobal({ disabled, onApply, applyLabel, subtotal, descuentoAct
   const error = pctPasa100 || montoPasaBase;
 
   return (
-    <div className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
+    <div className="space-y-2">
       <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("globalDiscount")}</span>
       <div className="flex items-center gap-2">
         <Select value={tipo} onValueChange={setTipo}>

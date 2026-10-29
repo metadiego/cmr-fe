@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
@@ -16,20 +17,24 @@ const DENOMINATIONS = 10;
 export function CuadreCajaSkeleton({
   isGerencia,
   esConsolidado,
+  filterSlot,
 }: {
   isGerencia: boolean;
   esConsolidado: boolean;
+  /** The date row's slot (see cuadre-caja.tsx): the cashier placeholder goes there, beside the date. */
+  filterSlot?: HTMLElement | null;
 }) {
   const t = useTranslations("caja");
   const tp = useTranslations("caja.payments");
+  const scopeSkeleton = (
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-muted-foreground">{t("scope.label")}</span>
+      <ControlSkeleton className="w-64" />
+    </div>
+  );
   return (
     <LoadingRegion className="space-y-4">
-      {isGerencia && (
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">{t("scope.label")}</span>
-          <ControlSkeleton className="w-64" />
-        </div>
-      )}
+      {isGerencia && (filterSlot ? createPortal(scopeSkeleton, filterSlot) : scopeSkeleton)}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <div className="space-y-4">

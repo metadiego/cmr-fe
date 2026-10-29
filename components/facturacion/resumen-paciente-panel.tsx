@@ -4,21 +4,24 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowRight01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { Invoice03Icon } from "@hugeicons/core-free-icons";
 
 import { getResumenPaciente, type ResumenPaciente } from "@/lib/api/facturas";
 import { formaPagoLabel } from "@/lib/facturacion/forma-pago-label";
 import { useResource } from "@/hooks/use-resource";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// «Lo que suma el paciente hoy»: panel PLEGABLE (cerrado por defecto) dentro de la factura, para cobrar
+// «Lo que suma el paciente hoy»: a header button on the invoice that opens this summary in a side
+// sheet (it used to be a full-width collapsible bar on every invoice), para cobrar
 // varias facturas del mismo paciente sin calculadora. La SUMA la hace el BE (por `neto`, ya sin lo
 // devuelto): aquí NO se suman `total` a mano. Handoff resumen-de-facturas-del-paciente.
 const money = (v: number) => `$${(Number(v) || 0).toFixed(2)}`;
 
-export function ResumenPacientePanel({
+export function PatientTodaySummaryButton({
   pacienteId,
   facturaActualId,
   centro,
@@ -50,18 +53,18 @@ export function ResumenPacientePanel({
   const data = res.state.kind === "ok" ? res.state.data : null;
 
   return (
-    <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left"
-      >
-        <span className="text-sm font-semibold">{t("title")}</span>
-        <HugeiconsIcon icon={open ? ArrowDown01Icon : ArrowRight01Icon} className="size-4 text-muted-foreground" />
-      </button>
-
-      {open && (
-        <div className="border-t px-2 pb-2">
+    <>
+      <Button variant="outline" size="sm" className="no-print" onClick={() => setOpen(true)}>
+        <HugeiconsIcon icon={Invoice03Icon} className="size-4" />
+        {t("button")}
+      </Button>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>{t("title")}</SheetTitle>
+            <SheetDescription>{t("description")}</SheetDescription>
+          </SheetHeader>
+        <div className="px-2 pb-4">
           {res.state.kind === "loading" && <ResumenRowsSkeleton />}
           {res.state.kind === "fail" && (
             <p className="m-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -185,8 +188,9 @@ export function ResumenPacientePanel({
             </>
           )}
         </div>
-      )}
-    </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 
