@@ -82,7 +82,7 @@ export function FrontdeskBoard() {
   function dispatchAccion(a: AccionTablero) {
     if (a.handler === "abrir_citas_servicio") {
       // Opens the Citas de Servicio tab (browse/create).
-      router.push("/scheduling/appointments?tab=servicios");
+      router.push("/scheduling/appointments/services");
     }
   }
   // Acción DEFAULT del FE: "Citas de servicio" siempre disponible en el riel aunque el BE aún no la
