@@ -129,7 +129,7 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
   return (
     <PageContainer>
       <Link
-        href="/scheduling/appointments?tab=servicios"
+        href="/scheduling/appointments/services"
         className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
         <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
@@ -141,14 +141,14 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
         <h1 className="text-2xl font-bold capitalize">{dayTitle}</h1>
         <div className="flex items-center gap-1">
           <Button asChild variant="outline" size="icon" aria-label="prev">
-            <Link href={`/scheduling/appointments/${prev}?tab=servicios`}>‹</Link>
+            <Link href={`/scheduling/appointments/services/${prev}`}>‹</Link>
           </Button>
           <Button asChild variant="outline" size="icon" aria-label="next">
-            <Link href={`/scheduling/appointments/${next}?tab=servicios`}>›</Link>
+            <Link href={`/scheduling/appointments/services/${next}`}>›</Link>
           </Button>
           {fecha !== today && (
             <Button asChild variant="ghost" size="sm">
-              <Link href={`/scheduling/appointments/${today}?tab=servicios`}>{tAgenda("today")}</Link>
+              <Link href={`/scheduling/appointments/services/${today}`}>{tAgenda("today")}</Link>
             </Button>
           )}
         </div>

@@ -11,6 +11,17 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_SHA: buildSha,
   },
+  // Billing screens that became tabs (lib/nav/tab-routes.ts) keep their old URLs working: bookmarks
+  // and any menu catalog row still pointing there land on the tab. (/billing/consultations/returns
+  // needs no redirect: it IS the tab's path now.) Not permanent, so the routes can still change.
+  async redirects() {
+    return [
+      { source: "/billing/returns", destination: "/billing/invoices/returns", permanent: false },
+      { source: "/billing/cash/general", destination: "/billing/invoices/cash", permanent: false },
+      { source: "/billing/cash/consultation", destination: "/billing/consultations/cash", permanent: false },
+      { source: "/reports/daily", destination: "/billing/invoices/stats", permanent: false },
+    ]
+  },
 }
 
 // Cookie-based i18n (no URL routing). Explicit path because this repo has no

@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings02Icon } from "@hugeicons/core-free-icons";
@@ -12,37 +11,27 @@ import { MedicasCalendar } from "@/components/agenda/medicas-calendar";
 import { ServiciosCalendar } from "@/components/agenda/servicios-calendar";
 import { PageContainer } from "@/components/ui/page";
 import { Can } from "@/components/kit/can";
+import { useTabRoute } from "@/hooks/use-tab-route";
+import { APPOINTMENTS_TABS } from "@/lib/nav/tab-routes";
 
-// Agenda: two calendars over the same shell — medical appointments (citas, with
-// time) and service sessions (frontdesk, by day). `?tab=servicios` deep-links
-// the services tab.
-// The active tab is driven by the URL (not kept as local state), so a deep link always opens the tab it
-// names and switching tabs updates the URL; reload and Back then land on the same tab. There is no
-// in-page "back" link: the sidebar and the browser's Back already cover it.
+// Agenda: two calendars over the same shell — medical appointments (with time) at
+// /scheduling/appointments and service sessions (frontdesk, by day) at /scheduling/appointments/services.
+// The active tab is the URL path (lib/nav/tab-routes.ts), so a link opens the tab it names and reload
+// lands on the same tab. This is the layout of both tab routes, so switching tabs keeps it mounted.
+// There is no in-page "back" link: the sidebar and the browser's Back already cover it.
 // Scheduling configuration (slots, resources, holidays) is reached from the settings button on the
 // tab row, not from the sidebar: it is configuration OF this screen, so it lives with it.
-export default function CitasPage() {
+export default function AppointmentsLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations("agenda");
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useSearchParams();
-  const tab = params.get("tab") === "servicios" ? "servicios" : "medicas";
-
-  function selectTab(next: string) {
-    const q = new URLSearchParams(params.toString());
-    if (next === "servicios") q.set("tab", next);
-    else q.delete("tab");
-    const qs = q.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }
+  const [tab, selectTab] = useTabRoute(APPOINTMENTS_TABS);
 
   return (
     <PageContainer>
       <Tabs value={tab} onValueChange={selectTab}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <TabsList>
-            <TabsTrigger value="medicas">{t("tabMedicas")}</TabsTrigger>
-            <TabsTrigger value="servicios">{t("tabServicios")}</TabsTrigger>
+            <TabsTrigger value="medical">{t("tabMedicas")}</TabsTrigger>
+            <TabsTrigger value="services">{t("tabServicios")}</TabsTrigger>
           </TabsList>
           <Can permiso="citas.config">
             <Button variant="outline" asChild>
@@ -53,13 +42,14 @@ export default function CitasPage() {
             </Button>
           </Can>
         </div>
-        <TabsContent value="medicas">
+        <TabsContent value="medical">
           <MedicasCalendar />
         </TabsContent>
-        <TabsContent value="servicios">
+        <TabsContent value="services">
           <ServiciosCalendar />
         </TabsContent>
       </Tabs>
+      {children}
     </PageContainer>
   );
 }
