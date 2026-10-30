@@ -162,7 +162,7 @@ export function ServiciosCalendar() {
           <div className="ml-auto flex items-center gap-2">
             {/* «Nuevo servicio» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
             {centro.puedeEscribir && (
-              <Button onClick={() => router.push(`/scheduling/appointments/${toISO(new Date())}?tab=servicios`)}>
+              <Button onClick={() => router.push(`/scheduling/appointments/services/${toISO(new Date())}`)}>
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={2} data-icon="inline-start" />
                 {t("newService")}
               </Button>
@@ -182,7 +182,7 @@ export function ServiciosCalendar() {
             eventsByDate={eventsByDate}
             loading={state.kind === "loading"}
             festivos={festivos}
-            onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}?tab=servicios`)}
+            onDayClick={(iso) => router.push(`/scheduling/appointments/services/${iso}`)}
             onEventClick={() => { /* sessions are managed on the day-of board */ }}
           />
         )}

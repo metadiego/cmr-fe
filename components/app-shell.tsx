@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { isActive } from "@/lib/nav";
 import { routeForClave } from "@/lib/nav/manifest";
+import { screenPathOf } from "@/lib/nav/tab-routes";
 import { useMenu } from "@/hooks/use-menu";
 import { useMe } from "@/hooks/use-me";
 import { MeProvider } from "@/components/me-provider";
@@ -92,10 +93,12 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   // for its exact path (e.g. the catalog's "Facturación general" → /billing/invoices/new): then the
   // section is the closest entry ABOVE it, which the top bar links back to.
   const [crumb, setCrumb] = React.useState<ShellCrumbValue | null>(null);
-  const here = pathname.replace(/\/$/, "");
+  // A tab path (/billing/invoices/returns) is its screen (/billing/invoices): same title on every tab.
+  const screen = screenPathOf(pathname);
+  const here = screen.replace(/\/$/, "");
   const activeMatch = menu
     .map((m) => ({ item: m, route: routeForClave(m.slug, m.path) }))
-    .filter(({ route }) => !!route && route !== "#" && isActive(pathname, route))
+    .filter(({ route }) => !!route && route !== "#" && isActive(screen, route))
     .filter(({ route }) => !crumb || route.replace(/\/$/, "") !== here)
     .sort((a, b) => b.route.length - a.route.length)[0];
   const active = activeMatch?.item;

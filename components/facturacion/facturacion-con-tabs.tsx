@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,36 +8,19 @@ import { FacturasListView } from "@/components/facturacion/facturas-list-view";
 import { DevolucionesListView } from "@/components/facturacion/devoluciones-list-view";
 import { CuadreCaja } from "@/components/caja/cuadre-caja";
 import { EstadisticasDiariasView } from "@/components/reportes/estadisticas-diarias-view";
+import { useTabRoute } from "@/hooks/use-tab-route";
+import { BILLING_CONSULTATION_TABS, BILLING_GENERAL_TABS } from "@/lib/nav/tab-routes";
 
-type Tab = "facturas" | "devoluciones" | "caja" | "estadisticas";
-const TABS_GENERAL: Tab[] = ["facturas", "devoluciones", "caja", "estadisticas"];
-const TABS_CONSULTA: Tab[] = ["facturas", "devoluciones", "caja"];
-
-// Facturación (General/Consulta) con Devoluciones y Cuadre de caja como PESTAÑAS, no ítems de menú
-// aparte (owner, 09-oct-2026): son del mismo contexto — correponden siempre a la MISMA división que
-// la pantalla (nunca una mezcla), así que viven juntas en vez de obligar a saltar de pantalla.
-// Estadísticas diarias es la EXCEPCIÓN: no tiene noción de general/consulta (suma ambas divisiones,
-// una tarjeta por CENTRO permitido) — vive solo en General, nunca duplicada en Consultas.
-// `?tab=` sigue el mismo patrón que /scheduling/appointments: la pestaña activa la decide la URL, no
-// un estado local, así un enlace a `?tab=caja` abre directo esa pestaña y sobrevive a un reload.
-// TabsContent de Radix solo monta el panel activo (no las tres/cuatro a la vez), así que cambiar de
-// pestaña no dispara las llamadas de las demás.
+// Billing (general/consultation) with Returns and Cash count as TABS, not separate menu items (owner,
+// 09-oct-2026): they always belong to the SAME division as the screen, so they live together instead
+// of forcing a jump between screens. Daily stats is the EXCEPTION: it has no general/consultation
+// notion (it adds up both divisions, one card per allowed CENTER), so it lives only in General.
+// Each tab is a path under the screen (/billing/invoices/cash, /billing/consultations/returns — see
+// lib/nav/tab-routes.ts), so a link opens that tab directly and survives a reload. Radix TabsContent
+// mounts only the active panel, so switching tabs does not fire the other tabs' requests.
 export function FacturacionConTabs({ contexto }: { contexto: "general" | "consulta" }) {
   const t = useTranslations("facturacionTabs");
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useSearchParams();
-  const tabs = contexto === "general" ? TABS_GENERAL : TABS_CONSULTA;
-  const tabParam = params.get("tab");
-  const tab: Tab = tabs.includes(tabParam as Tab) ? (tabParam as Tab) : "facturas";
-
-  function selectTab(next: string) {
-    const q = new URLSearchParams(params.toString());
-    if (next === "facturas") q.delete("tab");
-    else q.set("tab", next);
-    const qs = q.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }
+  const [tab, selectTab] = useTabRoute(contexto === "general" ? BILLING_GENERAL_TABS : BILLING_CONSULTATION_TABS);
 
   return (
     <Tabs value={tab} onValueChange={selectTab}>
@@ -47,24 +29,24 @@ export function FacturacionConTabs({ contexto }: { contexto: "general" | "consul
         className="mb-4"
         tabs={
           <TabsList>
-            <TabsTrigger value="facturas">{t("facturas")}</TabsTrigger>
-            <TabsTrigger value="devoluciones">{t("devoluciones")}</TabsTrigger>
-            <TabsTrigger value="caja">{t("caja")}</TabsTrigger>
-            {contexto === "general" && <TabsTrigger value="estadisticas">{t("estadisticas")}</TabsTrigger>}
+            <TabsTrigger value="invoices">{t("facturas")}</TabsTrigger>
+            <TabsTrigger value="returns">{t("devoluciones")}</TabsTrigger>
+            <TabsTrigger value="cash">{t("caja")}</TabsTrigger>
+            {contexto === "general" && <TabsTrigger value="stats">{t("estadisticas")}</TabsTrigger>}
           </TabsList>
         }
       >
-      <TabsContent value="facturas">
+      <TabsContent value="invoices">
         <FacturasListView contexto={contexto} />
       </TabsContent>
-      <TabsContent value="devoluciones">
+      <TabsContent value="returns">
         <DevolucionesListView contexto={contexto} />
       </TabsContent>
-      <TabsContent value="caja">
+      <TabsContent value="cash">
         <CuadreCaja division={contexto === "general" ? "general" : "consulta"} />
       </TabsContent>
       {contexto === "general" && (
-        <TabsContent value="estadisticas">
+        <TabsContent value="stats">
           <EstadisticasDiariasView />
         </TabsContent>
       )}
