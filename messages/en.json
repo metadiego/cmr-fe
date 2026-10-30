@@ -1,5 +1,6 @@
 {
   "shell": {
+    "breadcrumb": "Breadcrumb",
     "noProfileTitle": "Your account has no profile assigned",
     "noProfileBody": "You're signed in, but an administrator hasn't linked your account to a profile with permissions yet. Contact an administrator to get it assigned."
   },
@@ -2712,6 +2713,8 @@
   "receipt": {
     "print": "Print receipt",
     "previewTitle": "Receipt preview",
+    "loadFailed": "Couldn't load the receipt",
+    "preparing": "Preparing receipt…",
     "void": "VOID",
     "invoice": "Invoice",
     "returnDoc": "Return",
@@ -2757,6 +2760,7 @@
       "sugerencia": "{sku} is delivered but has no service anchored to its billing group. If it's a therapy, give it its group so this doesn't happen again."
     },
     "items": "Line items",
+    "summary": "Summary",
     "concept": "Concept",
     "qty": "Qty",
     "price": "Price",
@@ -4298,6 +4302,8 @@
   },
   "resumenPaciente": {
     "title": "What the patient owes today",
+    "button": "Patient's total today",
+    "description": "All of this patient's invoices today in this department, how each one was paid, and the grand total.",
     "vacio": "No invoices for this patient today.",
     "actual": "This invoice",
     "abrir": "Open",

@@ -122,13 +122,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {gate.puedeCambiar && (
-            <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 text-sm">
-              <span className="text-muted-foreground">{tRoot("facturacion.general.centroLabel")} <span className="font-medium text-foreground">{gate.centroNombre}</span></span>
-              <button type="button" onClick={gate.cambiarCentro} className="text-xs font-medium text-primary hover:underline">{tRoot("facturacion.general.cambiarCentro")}</button>
-            </div>
-          )}
-
+          {/* Center: switched from the app header's center selector (no per-list bar). */}
           <ListToolbar search={q} onSearchChange={setQ} searchPlaceholder={t("searchPlaceholder")}>
             <Select value={estado || ALL} onValueChange={(v) => setEstado(v === ALL ? "" : v)}>
               <SelectTrigger size="sm" className="w-[160px]"><SelectValue placeholder={t("allStates")} /></SelectTrigger>

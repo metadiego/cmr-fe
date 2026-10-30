@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -84,6 +85,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [fecha, setFecha] = React.useState(hoy);
   const [scope, setScope] = React.useState<Scope | null>(null);
+  const [filterSlot, setFilterSlot] = React.useState<HTMLDivElement | null>(null);
   const effScope: Scope = scope ?? (isGerencia ? "consolidated" : "self");
 
   const loadingGate = gate.cargando || meState.kind === "loading";
@@ -103,26 +105,32 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   }
 
   return (
-    <Shell division={division} centroNombre={gate.centroNombre}>
-      <div className="mb-4 flex items-center gap-2">
-        <Label htmlFor="caja-fecha" className="text-sm text-muted-foreground">
-          {t("date")}
-        </Label>
-        <DatePicker
-          id="caja-fecha"
-          value={fecha}
-          max={hoy}
-          onChange={(v) => setFecha(v || hoy)}
-          className="h-9 w-40"
-        />
+    <Shell division={division}>
+      {/* Filters on ONE row: the date, then the cashier selector (gerencia), which the editor below
+          renders into `filterSlot` because it needs that day's cashier list. */}
+      <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="caja-fecha" className="text-sm text-muted-foreground">
+            {t("date")}
+          </Label>
+          <DatePicker
+            id="caja-fecha"
+            value={fecha}
+            max={hoy}
+            onChange={(v) => setFecha(v || hoy)}
+            className="h-9 w-40"
+          />
+        </div>
+        <div ref={setFilterSlot} className="contents" />
       </div>
 
       {/* While the centre gate / profile resolve, the date row is already real and the editor area
           shows its skeleton. Permissions arrive with the profile, so until then it is the cashier layout. */}
       {loadingGate ? (
-        <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={effScope === "consolidated"} />
+        <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={effScope === "consolidated"} filterSlot={filterSlot} />
       ) : (
         <Loader
+          filterSlot={filterSlot}
           key={`${division}:${effScope}:${gate.centro}:${fecha}`}
           division={division}
           fecha={fecha}
@@ -141,29 +149,12 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   );
 }
 
-function Shell({
-  division,
-  children,
-  centroNombre,
-}: {
-  division: CajaDivision;
-  children: React.ReactNode;
-  centroNombre?: string;
-}) {
+// No center pill here: the center is the one chosen in the app header's center selector.
+function Shell({ division, children }: { division: CajaDivision; children: React.ReactNode }) {
   const t = useTranslations("caja");
   return (
     <PageContainer>
-      <PageHeader
-        title={<>{t("title")} — {t(`division.${division}`)}</>}
-        description={t("help")}
-        count={
-          centroNombre && (
-            <Badge variant="secondary" className="font-normal">
-              {centroNombre}
-            </Badge>
-          )
-        }
-      />
+      <PageHeader title={<>{t("title")} — {t(`division.${division}`)}</>} description={t("help")} />
       {children}
     </PageContainer>
   );
@@ -181,6 +172,8 @@ type LoaderProps = {
   canCerrar: boolean;
   centro?: string;
   centroNombre?: string;
+  /** The date row's slot: the cashier selector renders there, on the same line as the date. */
+  filterSlot?: HTMLElement | null;
 };
 
 // Carga el reporte del día + denominaciones + los cuadres de esa (fecha × división). Para un cajero
@@ -222,7 +215,7 @@ function Loader(props: LoaderProps) {
   }, []);
 
   if (bundle.state.kind === "loading")
-    return <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={esConsolidado} />;
+    return <CuadreCajaSkeleton isGerencia={isGerencia} esConsolidado={esConsolidado} filterSlot={props.filterSlot} />;
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
@@ -256,6 +249,7 @@ function Editor({
   canCerrar,
   centro,
   centroNombre,
+  filterSlot,
   reporte,
   denoms,
   cuadreInicial,
@@ -463,36 +457,38 @@ function Editor({
       ? t("count.pastLocked")
       : undefined;
 
+  // Selector de alcance (solo gerencia), on the date's row when the page gives us its slot.
+  const scopeSelector = isGerencia && (
+    <div className="flex items-center gap-2">
+      <Label className="text-sm text-muted-foreground">{t("scope.label")}</Label>
+      <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
+        <SelectTrigger className="h-9 w-64">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
+          {opcionesCajero.length > 0 ? (
+            opcionesCajero.map((c) => (
+              <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
+                {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
+              </SelectItem>
+            ))
+          ) : (
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">
+              {t("cajeros.vacio")}
+            </div>
+          )}
+        </SelectContent>
+      </Select>
+      {cerrado && (
+        <Badge variant="secondary">{t("status.cerrado")}</Badge>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-4">
-      {/* Selector de alcance (solo gerencia) */}
-      {isGerencia && (
-        <div className="flex items-center gap-2">
-          <Label className="text-sm text-muted-foreground">{t("scope.label")}</Label>
-          <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
-            <SelectTrigger className="h-9 w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="consolidated">{t("scope.consolidated")}</SelectItem>
-              {opcionesCajero.length > 0 ? (
-                opcionesCajero.map((c) => (
-                  <SelectItem key={c.usuarioId} value={`user:${c.usuarioId}`}>
-                    {c.usuarioId === meId ? `${c.nombre} · ${t("scope.mine")}` : c.nombre}
-                  </SelectItem>
-                ))
-              ) : (
-                <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                  {t("cajeros.vacio")}
-                </div>
-              )}
-            </SelectContent>
-          </Select>
-          {cerrado && (
-            <Badge variant="secondary">{t("status.cerrado")}</Badge>
-          )}
-        </div>
-      )}
+      {filterSlot ? scopeSelector && createPortal(scopeSelector, filterSlot) : scopeSelector}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         {/* Panel izquierdo: conteo + inicio + resumen por cajero */}

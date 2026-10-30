@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Badge } from "@/components/ui/badge";
 import { PageContainer, PageHeader } from "@/components/ui/page";
+import { TabsActions, useTabsActionsSlot } from "@/components/kit/tabs-actions-slot";
 import { DataTable, TableEmpty, TableError } from "@/components/ui/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableRowsSkeleton } from "@/components/kit/skeletons";
@@ -70,6 +71,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const tRoot = useTranslations();
   const router = useRouter();
   const params = useSearchParams();
+  const inTabsBar = useTabsActionsSlot();
 
   // Abrir filtrando el DÍA DE HOY (fecha local): la caja se trabaja por el día, no por el histórico. Si la
   // URL ya trae un rango (el usuario lo cambió), se respeta. Handoff facturacion-filtro-dia-actual.
@@ -181,21 +183,22 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
     return <span>{value == null || value === "" ? "—" : String(value)}</span>;
   }
 
+  const headerActions = (
+    <>
+      {live && <LiveBadge label={t("live")} />}
+      {!esConsulta && (
+        <Button size="sm" asChild>
+          <Link href={`/billing/invoices/new?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
+        </Button>
+      )}
+    </>
+  );
+
   return (
     <PageContainer>
-      <PageHeader
-        title={esConsulta ? t("titleConsulta") : t("title")}
-        actions={
-          <>
-            {live && <LiveBadge label={t("live")} />}
-            {!esConsulta && (
-              <Button size="sm" asChild>
-                <Link href={`/billing/invoices/new?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
-              </Button>
-            )}
-          </>
-        }
-      />
+      {/* Under the billing tabs, the actions go on the tab bar's row; anywhere else, in the header. */}
+      {inTabsBar && <TabsActions>{headerActions}</TabsActions>}
+      <PageHeader title={esConsulta ? t("titleConsulta") : t("title")} actions={inTabsBar ? undefined : headerActions} />
 
       {gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
@@ -203,17 +206,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
         <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {gate.puedeCambiar && (
-            <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2 text-sm">
-              <span className="text-muted-foreground">
-                {tRoot("facturacion.general.centroLabel")} <span className="font-medium text-foreground">{gate.centroNombre}</span>
-              </span>
-              <button type="button" onClick={gate.cambiarCentro} className="text-xs font-medium text-primary hover:underline">
-                {tRoot("facturacion.general.cambiarCentro")}
-              </button>
-            </div>
-          )}
-
+          {/* Center: switched from the app header's center selector (no per-list bar). */}
           <ListToolbar search={q} onSearchChange={setQ} searchPlaceholder={t("searchPlaceholder")}>
             <Select value={estado || ALL} onValueChange={(v) => setEstado(v === ALL ? "" : v)}>
               <SelectTrigger size="sm" className="w-[170px]"><SelectValue placeholder={t("allStates")} /></SelectTrigger>

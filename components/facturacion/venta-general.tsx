@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Search01Icon, Building01Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { Search01Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { toast } from "sonner";
 
 import { buscarPaciente, crearFactura, type PacienteBusqueda } from "@/lib/api/facturas";
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingRegion } from "@/components/kit/skeletons";
+import { ShellCrumb } from "@/components/shell-crumb";
 import {
   Select,
   SelectContent,
@@ -39,14 +40,14 @@ const SHOW_BILL_TO_THIRD_PARTY = false;
 // y el editor lo hereda por ?centro=). 1 centro → auto. Consultas usará el mismo picker luego.
 export function VentaGeneral() {
   const t = useTranslations("facturacion.general");
+  const tList = useTranslations("facturacionList");
   const router = useRouter();
   const gate = useCentroGate();
 
   return (
     <PageContainer>
-      <Link href="/billing/invoices" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-        ← {t("verLista")}
-      </Link>
+      {/* Way back = the top bar's breadcrumb ("Facturación general › Nueva venta"), not an in-page link. */}
+      <ShellCrumb label={tList("nuevaVenta")} replacesTitle />
       <PageHeader title={t("title")} description={t("help")} />
 
       {gate.cargando ? (
@@ -58,30 +59,16 @@ export function VentaGeneral() {
         // Crear solo desde la lista con "Nueva venta".
         <CentroPicker centros={gate.centros} onPick={(id) => router.push(`/billing/invoices?centro=${id}`)} />
       ) : (
-        <Finder
-          centro={gate.centro}
-          centroNombre={gate.centroNombre}
-          puedeCambiar={gate.puedeCambiar}
-          onCambiarCentro={gate.cambiarCentro}
-        />
+        <Finder centro={gate.centro} />
       )}
     </PageContainer>
   );
 }
 
 // El finder + creación. TODO usa `centro` como X-Tenant-ID (no el selector global del header).
-function Finder({
-  centro,
-  centroNombre,
-  puedeCambiar,
-  onCambiarCentro,
-}: {
-  centro?: string;
-  centroNombre: string;
-  puedeCambiar: boolean;
-  onCambiarCentro: () => void;
-}) {
+function Finder({ centro }: { centro?: string }) {
   const t = useTranslations("facturacion.general");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [q, setQ] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
@@ -155,20 +142,7 @@ function Finder({
 
   return (
     <>
-      {/* Centro fijado de la sesión */}
-      <div className="mb-4 flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
-        <span className="flex items-center gap-2 text-sm">
-          <HugeiconsIcon icon={Building01Icon} className="size-4 text-primary" />
-          <span className="text-muted-foreground">{t("centroLabel")}</span>
-          <span className="font-medium">{centroNombre || "—"}</span>
-        </span>
-        {puedeCambiar && (
-          <button type="button" onClick={onCambiarCentro} className="text-xs font-medium text-primary hover:underline">
-            {t("cambiarCentro")}
-          </button>
-        )}
-      </div>
-
+      {/* The session's center is the one in the app header's center selector (no bar here). */}
       <div className="mb-3 flex items-center gap-2 rounded-md border px-3">
         <HugeiconsIcon icon={Search01Icon} className="size-4 opacity-60" />
         <Input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchPlaceholder")} className="border-0 px-0 shadow-none focus-visible:ring-0" />
@@ -213,7 +187,8 @@ function Finder({
         </div>
       )}
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+      {/* Price list · doctor · referral on one line from md up. */}
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {listasRes.state.kind === "loading" && <SelectFieldSkeleton label={t("lista")} />}
         {medicosRes.state.kind === "loading" && <SelectFieldSkeleton label={t("medico")} />}
         {mediosRes.state.kind === "loading" && <SelectFieldSkeleton label={t("referencia")} />}
@@ -293,9 +268,14 @@ function Finder({
       </div>
       )}
 
-      <Button className="w-full" onClick={iniciar} disabled={!sel || creating}>
-        {creating ? t("creando") : t("iniciar")}
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" asChild>
+          <Link href={`/billing/invoices${centro ? `?centro=${centro}` : ""}`}>{tc("cancel")}</Link>
+        </Button>
+        <Button className="flex-1" onClick={iniciar} disabled={!sel || creating}>
+          {creating ? t("creando") : t("iniciar")}
+        </Button>
+      </div>
     </>
   );
 }
@@ -330,17 +310,11 @@ function ResultRowsSkeleton() {
 function FinderSkeleton() {
   return (
     <LoadingRegion>
-      <div className="mb-4 flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
-        <span className="flex h-5 items-center gap-2">
-          <Skeleton className="size-4" />
-          <Skeleton className="h-4 w-40" />
-        </span>
-      </div>
       <Skeleton className="mb-3 h-9 w-full" />
       <div className="mb-4 rounded-md bg-card px-3 py-8 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <Skeleton className="mx-auto h-4 w-56" />
       </div>
-      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex flex-col gap-1.5">
             <span className="flex h-4 items-center"><Skeleton className="h-3 w-20" /></span>
@@ -348,11 +322,10 @@ function FinderSkeleton() {
           </div>
         ))}
       </div>
-      <div className="mb-4 flex items-center justify-between rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-        <span className="flex h-5 items-center"><Skeleton className="h-4 w-36" /></span>
-        <Skeleton className="h-3 w-12" />
+      <div className="flex gap-2">
+        <Skeleton className="h-9 w-24" />
+        <Skeleton className="h-9 flex-1" />
       </div>
-      <Skeleton className="h-9 w-full" />
     </LoadingRegion>
   );
 }

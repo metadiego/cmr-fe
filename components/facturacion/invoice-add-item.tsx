@@ -47,6 +47,33 @@ function CatalogoCombobox({
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
+  // The list must fit INSIDE the card holding this form (cards clip their overflow) and the viewport:
+  // it opens downward when there is room, otherwise upward, capped to the space it actually has.
+  const [placement, setPlacement] = React.useState<{ up: boolean; maxHeight: number }>({ up: false, maxHeight: 288 });
+  React.useLayoutEffect(() => {
+    if (!open) return;
+    function place() {
+      const el = rootRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const box = el.closest('[data-slot="card"]')?.getBoundingClientRect();
+      const gap = 8;
+      const below = Math.min(box?.bottom ?? window.innerHeight, window.innerHeight) - r.bottom - gap;
+      const above = r.top - Math.max(box?.top ?? 0, 0) - gap;
+      const up = below < 160 && above > below;
+      const maxHeight = Math.round(Math.max(96, Math.min(288, up ? above : below)));
+      // Scrolling the list itself also fires "scroll": skip the re-render when nothing moved.
+      setPlacement((prev) => (prev.up === up && prev.maxHeight === maxHeight ? prev : { up, maxHeight }));
+    }
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open]);
+
   const q = debounced.trim();
   // Buscar por SKU y por nombre en el catálogo de precios (alcanza TODO, no solo los 100). El precio
   // definitivo lo resuelve AddItem; aquí solo se necesita id/sku/nombre para elegir.
@@ -74,7 +101,10 @@ function CatalogoCombobox({
         className="h-9 w-full"
       />
       {open && (
-        <div className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+        <div
+          className={"absolute z-50 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md " + (placement.up ? "bottom-full mb-1" : "top-full mt-1")}
+          style={{ maxHeight: placement.maxHeight }}
+        >
           {buscando && <ProductOptionsSkeleton />}
           {!buscando && resultados.length === 0 && (
             <p className="px-2 py-2 text-xs text-muted-foreground">{q ? t("noMatches") : t("selectProduct")}</p>
@@ -251,8 +281,8 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   }
 
   return (
-    <div data-addline className="grid grid-cols-2 items-end gap-3 rounded-md border border-dashed p-3 md:flex md:flex-wrap">
-      <label className="col-span-2 flex min-w-0 flex-1 flex-col gap-1">
+    <div data-addline className="grid grid-cols-2 items-end gap-3 md:flex md:flex-wrap">
+      <label className="col-span-2 flex min-w-48 flex-1 flex-col gap-1">
         <Lbl>{t("addItem")}</Lbl>
         <CatalogoCombobox
           catalogoInicial={catalogo}

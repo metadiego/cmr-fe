@@ -1,5 +1,6 @@
 {
   "shell": {
+    "breadcrumb": "Ruta de navegación",
     "noProfileTitle": "Tu cuenta no tiene un perfil asignado",
     "noProfileBody": "Iniciaste sesión, pero un administrador aún no ha enlazado tu cuenta a un perfil con permisos. Contacta a un administrador para que te lo asigne."
   },
@@ -2712,6 +2713,8 @@
   "receipt": {
     "print": "Imprimir recibo",
     "previewTitle": "Vista previa del recibo",
+    "loadFailed": "No se pudo cargar el recibo",
+    "preparing": "Preparando recibo…",
     "void": "ANULADA",
     "invoice": "Factura",
     "returnDoc": "Devolución",
@@ -2757,6 +2760,7 @@
       "sugerencia": "{sku} se entrega pero no tiene un servicio anclado a su grupo de facturación. Si es una terapia, dale su grupo para que no vuelva a pasar."
     },
     "items": "Líneas",
+    "summary": "Resumen",
     "concept": "Concepto",
     "qty": "Cant.",
     "price": "Precio",
@@ -4298,6 +4302,8 @@
   },
   "resumenPaciente": {
     "title": "Lo que suma el paciente hoy",
+    "button": "Total del paciente hoy",
+    "description": "Todas las facturas de este paciente hoy en este departamento, con cómo se pagó cada una y el total general.",
     "vacio": "Sin facturas del paciente hoy.",
     "actual": "Esta factura",
     "abrir": "Abrir",

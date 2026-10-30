@@ -2,11 +2,14 @@
 
 import * as React from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { imprimirFactura, getCatalogoFacturacion, getFormasPago } from "@/lib/api/facturas";
 import { buildRecibo, type Recibo } from "@/lib/factura/build-recibo";
 import { getActiveCentro } from "@/lib/tenant";
 import { ReciboTermico } from "@/components/facturacion/recibo-termico";
+import { apiErrorDetails, apiErrorLabel } from "@/lib/api/errors";
+import { receiptStatusMessage } from "@/lib/print/receipt-status-message";
 
 // Página DEDICADA del recibo, fuera de la app (como el print.php del legado): la hoja contiene SOLO el
 // recibo, sin menú ni pantalla alrededor, así que al imprimir no hay nada que esconder ni que descuadre y el
@@ -24,8 +27,15 @@ export default function PrintInvoicePage() {
   // factura (bug real encontrado: la pantalla de facturación ya resuelve el centro por `?centro=`, pero el
   // iframe no lo pasaba). La cookie queda de respaldo solo si no vino en la URL.
   const centroParam = searchParams?.get("centro") || undefined;
+  const t = useTranslations("receipt");
+  const tRoot = useTranslations();
   const [recibo, setRecibo] = React.useState<Recibo | null>(null);
-  const [error, setError] = React.useState(false);
+  // The failure itself, never swallowed: a bare "could not load" left nobody able to tell a wrong center
+  // from an unprintable invoice. Translated at render (labelKey → errores.<CODE> → the BE's message), so
+  // the load effect — which POSTs /print and so ISSUES the invoice — doesn't depend on the translator.
+  const [error, setError] = React.useState<unknown>(null);
+  // A 400 VALIDATION_ERROR alone says nothing; its per-field details say what the server objected to.
+  const errorText = error == null ? null : [apiErrorLabel(error, tRoot), apiErrorDetails(error)].filter(Boolean).join(" — ");
   // Firefox no imprime bien este recibo pase lo que pase con sus ajustes (causa aún sin encontrar; Chrome,
   // Edge y Brave sí funcionan — Edge/Brave necesitan Márgenes=Mínimo). Se avisa y se evita el intento
   // automático para no gastar papel a ciegas; el usuario puede imprimir manualmente si insiste. Detección
@@ -56,14 +66,22 @@ export default function PrintInvoicePage() {
           if (fp.slug) clavePorFormaId[fp.id] = fp.slug;
         });
         setRecibo(buildRecibo(f, diasCatalogo, clavePorFormaId, r.quoteNumber ?? undefined));
-      } catch {
-        if (active) setError(true);
+        if (embed) window.parent.postMessage(receiptStatusMessage("ready"), window.location.origin);
+      } catch (err) {
+        if (!active) return;
+        console.error("[print/invoice] could not load the receipt", err);
+        setError(err);
       }
     })();
     return () => {
       active = false;
     };
-  }, [id, centroParam]);
+  }, [id, centroParam, embed]);
+
+  // Inside the billing dialog: tell it the reason, so it shows it and keeps Print disabled.
+  React.useEffect(() => {
+    if (embed && errorText != null) window.parent.postMessage(receiptStatusMessage("error", errorText), window.location.origin);
+  }, [embed, errorText]);
 
   // Autoimprimir cuando el recibo ya está pintado (y los estilos/imagen cargados). En modo visor (embed) NO:
   // ahí el usuario mira el iframe y el botón "Imprimir" del modal abre ESTA MISMA página en una pestaña
@@ -85,8 +103,14 @@ export default function PrintInvoicePage() {
     return () => clearTimeout(h);
   }, [recibo, embed]);
 
-  if (error) return <p style={{ padding: 16, fontSize: 14 }}>No se pudo cargar el recibo.</p>;
-  if (!recibo) return <p style={{ padding: 16, fontSize: 14 }}>Preparando recibo…</p>;
+  if (errorText != null)
+    return (
+      <div role="alert" style={{ padding: 16, fontSize: 14, fontFamily: "sans-serif" }}>
+        <p style={{ margin: 0, fontWeight: 600 }}>{t("loadFailed")}</p>
+        {errorText && <p style={{ margin: "4px 0 0", color: "#555" }}>{errorText}</p>}
+      </div>
+    );
+  if (!recibo) return <p style={{ padding: 16, fontSize: 14, fontFamily: "sans-serif", color: "#555" }}>{t("preparing")}</p>;
   // `#pagina-recibo`: marca que ESTA página es solo el recibo (AppShell no le pinta chrome, ver
   // BARE_PREFIXES) para que el CSS de impresión (globals.css) deje de esconder/posicionar-absoluto — ese
   // truco (necesario cuando el recibo vive DENTRO de la pantalla de facturación) era justo lo frágil entre

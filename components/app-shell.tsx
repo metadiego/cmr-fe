@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -26,6 +27,9 @@ import { AlertasBell } from "@/components/comunicaciones/alertas-bell";
 import { useHasCustomBackground } from "@/components/presentation-provider";
 import { cn } from "@/lib/utils";
 import { PageTitleInShellContext } from "@/components/ui/page";
+import { ShellCrumbProvider, type ShellCrumbValue } from "@/components/shell-crumb";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 // Shell ÚNICO: rail navy (AppSidebar) + inset con header y contenido. Reemplaza el
 // esquema dual anterior (SiteHeader clásico / NavSidebar beta, alternados por
@@ -84,15 +88,26 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
   };
   // Match against the FE-owned resolved route (not the BE path), so the section
   // title survives route renames (Phase 1+). Most specific (longest) route wins.
+  // A page that declares a crumb (<ShellCrumb />) is a SUB-page even if the menu catalog has an entry
+  // for its exact path (e.g. the catalog's "Facturación general" → /billing/invoices/new): then the
+  // section is the closest entry ABOVE it, which the top bar links back to.
+  const [crumb, setCrumb] = React.useState<ShellCrumbValue | null>(null);
+  const here = pathname.replace(/\/$/, "");
   const activeMatch = menu
     .map((m) => ({ item: m, route: routeForClave(m.slug, m.path) }))
     .filter(({ route }) => !!route && route !== "#" && isActive(pathname, route))
+    .filter(({ route }) => !crumb || route.replace(/\/$/, "") !== here)
     .sort((a, b) => b.route.length - a.route.length)[0];
   const active = activeMatch?.item;
   const sectionTitle = active ? labelOf(active) : "";
+  const onSectionRoute = !!activeMatch && here === activeMatch.route.replace(/\/$/, "");
   // On the menu destination itself the top bar already names the page, so page headers hide
-  // their own title (see PageTitleInShellContext). Deeper routes keep theirs.
-  const titleInShell = !!activeMatch && pathname.replace(/\/$/, "") === activeMatch.route.replace(/\/$/, "");
+  // their own title (see PageTitleInShellContext). Same when the page's crumb replaces its title
+  // (<ShellCrumb replacesTitle />). Other deeper routes keep theirs.
+  const titleInShell = onSectionRoute || !!crumb?.replacesTitle;
+  // Below the menu destination, the section title links back to it (breadcrumb), and the page can name
+  // itself as the last crumb (<ShellCrumb />). Cleared on navigation by the page's own unmount.
+  const sectionHref = activeMatch && !onSectionRoute ? activeMatch.route : undefined;
 
   // Pinned = the user's deliberate choice (header toggle / Ctrl+B), same cookie-backed state
   // shadcn always had. Peeking = hovering the collapsed rail (owner's request, 2026-09-23):
@@ -121,8 +136,10 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
       <LocaleSync />
       <SidebarProvider open={pinnedOpen || peeking} onOpenChange={togglePinned}>
         <AppSidebar onHoverChange={setPeeking} />
-        <ShellBody sectionTitle={sectionTitle} session={session} sinPerfil={sinPerfil} onCollapseRequest={collapseNow}>
-          <PageTitleInShellContext.Provider value={titleInShell}>{children}</PageTitleInShellContext.Provider>
+        <ShellBody sectionTitle={sectionTitle} sectionHref={sectionHref} crumb={crumb?.label} session={session} sinPerfil={sinPerfil} onCollapseRequest={collapseNow}>
+          <ShellCrumbProvider onChange={setCrumb}>
+            <PageTitleInShellContext.Provider value={titleInShell}>{children}</PageTitleInShellContext.Provider>
+          </ShellCrumbProvider>
         </ShellBody>
       </SidebarProvider>
     </TooltipProvider>
@@ -136,12 +153,16 @@ function ShellChrome({ children }: { children: React.ReactNode }) {
 function ShellBody({
   children,
   sectionTitle,
+  sectionHref,
+  crumb,
   session,
   sinPerfil,
   onCollapseRequest,
 }: {
   children: React.ReactNode;
   sectionTitle: string;
+  sectionHref?: string;
+  crumb?: string | null;
   session: unknown;
   sinPerfil?: boolean;
   onCollapseRequest: () => void;
@@ -164,7 +185,24 @@ function ShellBody({
           con `--card` (ya parte de la paleta carbón) en vez de quedar blanco a la fuerza. */}
       <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4 dark:bg-card">
         <SidebarTrigger />
-        <span className="text-sm font-semibold">{sectionTitle}</span>
+        {sectionHref ? (
+          <nav aria-label={t("breadcrumb")} className="flex min-w-0 items-center gap-1.5 text-sm">
+            <Link
+              href={sectionHref}
+              className={cn("shrink-0 hover:text-foreground hover:underline underline-offset-4", crumb ? "font-medium text-muted-foreground" : "font-semibold")}
+            >
+              {sectionTitle}
+            </Link>
+            {crumb && (
+              <>
+                <HugeiconsIcon icon={ArrowRight01Icon} className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                <span aria-current="page" className="truncate font-semibold">{crumb}</span>
+              </>
+            )}
+          </nav>
+        ) : (
+          <span className="text-sm font-semibold">{sectionTitle}</span>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <CenterSelector />
           <SearchBar />

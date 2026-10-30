@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 import { LoadingRegion } from "@/components/kit/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
-import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
+import { EDITOR_GRID, INVOICE_PAGE_FILL, CardSection, ReceiptPreviewCard } from "@/components/facturacion/receipt-preview-card";
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Loading placeholders for the invoice screens (docs/specs/2026-10-10-skeletons-de-carga.md), kept out
@@ -84,7 +85,7 @@ function ItemsCardSkeleton({ rows = 3 }: { rows?: number }) {
   const t = useTranslations("facturacion");
   const tc = useTranslations("common");
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader>
         <CardTitle>{t("items")}</CardTitle>
       </CardHeader>
@@ -123,13 +124,13 @@ function ItemsCardSkeleton({ rows = 3 }: { rows?: number }) {
   );
 }
 
-/** Totals card + payments panel of the editor's aside, with their real labels. */
-function SummaryAsideSkeleton() {
+/** The summary card (totals + payments section), with its real labels. */
+function SummaryCardSkeleton() {
   const t = useTranslations("facturacion");
   const tp = useTranslations("pagosFactura");
   return (
-    <aside className="space-y-4">
-      <Card>
+    <Card>
+      <CardHeader><CardTitle>{t("summary")}</CardTitle></CardHeader>
         <LoadingRegion>
           <CardContent className="space-y-2">
             <AmountRow label={t("subtotal")} />
@@ -138,9 +139,9 @@ function SummaryAsideSkeleton() {
             <div className="border-t pt-2"><AmountRow label={t("total")} strong /></div>
           </CardContent>
         </LoadingRegion>
-      </Card>
-      {/* Same box as PagosFactura: header, one payment row, the balance strip. */}
-      <LoadingRegion className="space-y-2 rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] p-4">
+      {/* Same section as PagosFactura: header, one payment row, the balance strip. */}
+      <CardSection>
+      <LoadingRegion className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{tp("title")}</span>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -157,24 +158,23 @@ function SummaryAsideSkeleton() {
           <Skeleton className="h-4 w-14" />
         </div>
       </LoadingRegion>
-    </aside>
+      </CardSection>
+    </Card>
   );
 }
 
 /**
- * The whole invoice detail before the invoice arrives: back link, header (title, user line, record and
+ * The whole invoice detail before the invoice arrives: header (title, user line, record and
  * number chips, status badge, print), items + totals grid and the receipt preview card.
  */
 export function InvoiceDetailSkeleton() {
   const tRoot = useTranslations();
   return (
-    <PageContainer>
-      <Bar className="h-5 w-16" />
+    <PageContainer className={INVOICE_PAGE_FILL}>
       <PageHeader
         title={
           <span aria-busy="true">
             <span className="sr-only">{tRoot("common.loading")}</span>
-            <span className="flex h-[15px] items-center"><Bar className="h-2.5 w-28" /></span>
             <span className="flex h-8 items-center"><Bar className="h-6 w-56" /></span>
           </span>
         }
@@ -188,23 +188,13 @@ export function InvoiceDetailSkeleton() {
           </span>
         }
       />
-      <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_20rem]">
-        <section className="space-y-3">
-          <ItemsCardSkeleton />
-        </section>
-        <SummaryAsideSkeleton />
+      <div className={EDITOR_GRID}>
+        <ItemsCardSkeleton />
+        <SummaryCardSkeleton />
+        <ReceiptPreviewCard>
+          <ReceiptPaperSkeleton />
+        </ReceiptPreviewCard>
       </div>
-      <Card>
-        <CardHeader className="no-print">
-          <CardTitle className="text-muted-foreground">{tRoot("receipt.previewTitle")}</CardTitle>
-          <CardAction><Skeleton className="h-8 w-24" /></CardAction>
-        </CardHeader>
-        <CardContent className="flex justify-center rounded-xl bg-muted/30 py-6">
-          <div className="shadow-lg ring-1 ring-border">
-            <ReceiptPaperSkeleton />
-          </div>
-        </CardContent>
-      </Card>
     </PageContainer>
   );
 }
