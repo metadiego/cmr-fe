@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ArrowLeft01Icon,
   PencilEdit02Icon,
   Call02Icon,
   WhatsappIcon,
@@ -77,15 +76,10 @@ export default function PatientRecordLayout({ children }: { children: React.Reac
 
   return (
     <PageContainer>
-      <div className="mb-6 flex flex-wrap items-center gap-4">
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
-          {t("back")}
-        </button>
-        {callOrigin && (
+      {/* No generic "Back" link: the top bar's breadcrumb (Clientes) and the browser's Back cover it.
+          Returning to an ongoing call is a task, not navigation, so that one stays. */}
+      {callOrigin && (
+        <div className="mb-6">
           <button
             onClick={() => {
               clearCallOrigin();
@@ -96,8 +90,8 @@ export default function PatientRecordLayout({ children }: { children: React.Reac
             <HugeiconsIcon icon={Call02Icon} className="size-4" />
             {t("backToCall")}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {state.kind === "loading" && <DetailSkeleton />}
 
