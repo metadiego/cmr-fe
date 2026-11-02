@@ -809,7 +809,6 @@
     "confirmDeactivateTitle": "Deactivate patient?",
     "confirmDeactivateBody": "{name} will no longer appear in the list. Their history is kept and you can reactivate them later.",
     "yearsOld": "{age} years old",
-    "allCenters": "All centers",
     "priorityFlags": {
       "oxigeno": "Oxygen",
       "sillaRuedas": "Wheelchair",
@@ -836,7 +835,6 @@
       "phone": "Phone",
       "email": "Email",
       "status": "Status",
-      "centro": "Center",
       "record": "Record"
     },
     "form": {

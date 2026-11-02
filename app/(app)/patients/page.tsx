@@ -7,17 +7,14 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getActiveCentro } from "@/lib/tenant";
-import { puedeVerTodosLosCentros } from "@/lib/centros-scope";
 import { useResource } from "@/hooks/use-resource";
-import { useMe } from "@/hooks/use-me";
 import type { Paginated } from "@/lib/api/types";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable, TableEmpty, TableError } from "@/components/ui/data-table";
-import { ControlSkeleton, TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
+import { TableRowsSkeleton, type CellShape } from "@/components/kit/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   TableBody,
@@ -30,18 +27,8 @@ import { ListToolbar } from "@/components/kit/list-toolbar";
 import { Can } from "@/components/kit/can";
 import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { AccionesPacienteSheet } from "@/components/clientes/acciones-paciente-sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const LIMIT = 20;
-// Sentinel scope: omit X-Tenant-ID so the BE returns patients across ALL the
-// user's centers (only offered to multi-center / master users).
-const ALL_CENTERS = "__all__";
 
 export default function ClientesPage() {
   const t = useTranslations("patients");
@@ -52,47 +39,14 @@ export default function ClientesPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
-  // The user's centers (with names). Master → all; operativo → their allowed
-  // ones. Drives the scope selector and resolves clinicId → name in the table.
-  const { state: centrosState } = useResource<Centro[]>(() => getMyCentros());
-  const centros = React.useMemo(() => (centrosState.kind === "ok" ? centrosState.data : []), [centrosState]);
-  const multiCentro = centros.length > 1;
-  // La vista combinada (sin centro) es potestad de admin/master: el BE rechaza
-  // con 409 a un no-admin sin centro (evita leer pacientes de otros centros).
-  const meState = useMe();
-  const puedeCombinado = puedeVerTodosLosCentros(
-    meState.kind === "ok" ? meState.me : null,
-  );
-  const centroName = React.useMemo(() => {
-    const m = new Map<string, string>();
-    centros.forEach((c) => m.set(c.id, c.name));
-    return m;
-  }, [centros]);
-
-  // Scope: which center's patients to show. Derived (no effect): an explicit
-  // user choice wins; otherwise default to the active center (header selector),
-  // else the single center, else "all" for a multi-center user so the mixed
-  // list is at least distinguishable via the Centro column.
-  const [scopeChoice, setScopeChoice] = React.useState<string | null>(null);
-  const scope =
-    scopeChoice ??
-    getActiveCentro() ??
-    (centros.length === 1
-      ? centros[0].id
-      : centros.length > 1 && puedeCombinado
-        ? ALL_CENTERS
-        : centros.length > 1
-          ? centros[0].id
-          : "");
-
-  // undefined → default header center; a centroId → force it; null → omit tenant.
-  const tenant = scope === ALL_CENTERS ? null : scope || undefined;
-  const showCentroCol = scope === ALL_CENTERS && multiCentro;
+  // The list is the active center's (the clinic picker in the top bar): no second picker here
+  // (owner, 02-nov-2026). Changing the top-bar center reloads the page, so reading it per render is enough.
+  const tenant = getActiveCentro() ?? undefined;
 
   // Server-side search: the BE filters by name/docId/phone/etc via `q`.
   const { state, reload } = useResource<Paginated<Paciente>>(
     () => listPacientes({ page, limit: LIMIT, q }, tenant),
-    [page, q, scope],
+    [page, q, tenant],
   );
 
   function onSearch(value: string) {
@@ -100,54 +54,33 @@ export default function ClientesPage() {
     setQ(value);
   }
 
-  function onScopeChange(value: string) {
-    setPage(1);
-    setScopeChoice(value);
-  }
-
-  // Total table columns: index, record, name, docId, phone, email, status,
-  // [centro], acciones — drives the colSpan of the loading/empty/error rows.
-  const colCount = 8 + (showCentroCol ? 1 : 0);
-  const loadingShapes: CellShape[] = ["short", "short", "long", "text", "text", "long", "badge", ...(showCentroCol ? (["badge"] as const) : []), "button"];
+  // Total table columns: index, record, name, docId, phone, email, status, actions — drives the
+  // colSpan of the loading/empty/error rows.
+  const colCount = 8;
+  const loadingShapes: CellShape[] = ["short", "short", "long", "text", "text", "long", "badge", "button"];
 
   return (
     <PageContainer>
-      <PageHeader
-        title={t("title")}
-        count={state.kind === "ok" ? t("total", { count: state.data.pagination.total }) : state.kind === "loading" ? <Skeleton aria-hidden className="inline-block h-3 w-20 align-middle" /> : undefined}
-      />
+      <PageHeader title={t("title")} />
 
-      <ListToolbar
-        search={q}
-        onSearchChange={onSearch}
-        searchPlaceholder={t("searchPlaceholder")}
-        filters={
-          centrosState.kind === "loading" ? <ControlSkeleton className="w-[190px]" /> : multiCentro && (
-            <Select value={scope || undefined} onValueChange={onScopeChange}>
-              <SelectTrigger className="w-[190px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {puedeCombinado && (
-                  <SelectItem value={ALL_CENTERS}>{t("allCenters")}</SelectItem>
-                )}
-                {centros.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )
-        }
-      >
-        <Can permiso="pacientes.create">
-          <Button onClick={() => setCreateOpen(true)}>
-            <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
-            {t("new")}
-          </Button>
-        </Can>
-      </ListToolbar>
+      {/* The total sits under the search box, small: it is context for the search, not a heading. */}
+      <div className="flex flex-col gap-1.5">
+        <ListToolbar search={q} onSearchChange={onSearch} searchPlaceholder={t("searchPlaceholder")}>
+          <Can permiso="pacientes.create">
+            <Button onClick={() => setCreateOpen(true)}>
+              <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+              {t("new")}
+            </Button>
+          </Can>
+        </ListToolbar>
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {state.kind === "ok" ? (
+            t("total", { count: state.data.pagination.total })
+          ) : state.kind === "loading" ? (
+            <Skeleton aria-hidden className="inline-block h-3 w-20 align-middle" />
+          ) : null}
+        </p>
+      </div>
 
       <DataTable>
         <TableHeader>
@@ -161,7 +94,6 @@ export default function ClientesPage() {
             <TableHead>{t("columns.phone")}</TableHead>
             <TableHead>{t("columns.email")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
-            {showCentroCol && <TableHead>{t("columns.centro")}</TableHead>}
             <TableHead className="text-right" />
           </TableRow>
         </TableHeader>
@@ -199,13 +131,6 @@ export default function ClientesPage() {
                     <Badge variant="outline">{t("inactive")}</Badge>
                   )}
                 </TableCell>
-                {showCentroCol && (
-                  <TableCell>
-                    <Badge variant="outline">
-                      {(p.clinicId && centroName.get(p.clinicId)) || "—"}
-                    </Badge>
-                  </TableCell>
-                )}
                 <TableCell className="text-right">
                   {/* «Acciones»: historiales del paciente (compras/servicios/citas/prescripción) +
                       crear cita, sin salir de la lista. stopPropagation para no navegar a la ficha
@@ -255,7 +180,7 @@ export default function ClientesPage() {
       {accionesFor && (
         <AccionesPacienteSheet
           paciente={accionesFor}
-          centro={tenant ?? undefined}
+          centro={tenant}
           onClose={() => setAccionesFor(null)}
         />
       )}
