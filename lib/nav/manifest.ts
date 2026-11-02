@@ -53,13 +53,14 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "calendario", route: "/scheduling/calendar", group: "scheduling", order: 3 },
   { clave: "atencion", route: "/boards/atencion", group: "scheduling", order: 4 }, // board surfaced in scheduling
   { clave: "therapy-day", route: "/scheduling/therapy-day", group: "scheduling", order: 5 },
-  // Services: Patient Center (front desk), Patients, Nursing Panel; then the services board and protocol change
+  // Services: front desk, Patient Center (patient desk) above Patients (owner, 02-nov-2026), Nursing Panel;
+  // then the services board and protocol change
   { clave: "frontdesk", route: "/boards/frontdesk", group: "services", order: 1 },
   { clave: "patient-desk", route: "/boards/patient-desk", group: "services", order: 2 },
-  { clave: "clientes", route: "/patients", group: "services", order: 2 },
-  { clave: "panel-enfermeria", route: "/services/nursing-panel", group: "services", order: 3 },
-  { clave: "servicios", route: "/boards/servicios", group: "services", order: 4 },
-  { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "services", order: 5 },
+  { clave: "clientes", route: "/patients", group: "services", order: 3 },
+  { clave: "panel-enfermeria", route: "/services/nursing-panel", group: "services", order: 4 },
+  { clave: "servicios", route: "/boards/servicios", group: "services", order: 5 },
+  { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "services", order: 6 },
   // Billing
   { clave: "facturacion", route: "/billing/invoices", group: "billing", order: 1 },
   { clave: "consultas", route: "/billing/consultations", group: "billing", order: 2 },

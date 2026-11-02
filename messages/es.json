@@ -1189,7 +1189,7 @@
     "configuracion_datos_paciente": "Datos obligatorios del paciente",
     "collapseNav": "Plegar menú",
     "expandNav": "Desplegar menú",
-    "patientDesk": "Centro de Pacientes (por paciente)",
+    "patientDesk": "Centro de Pacientes",
     "paquetesVenta": "Paquetes de venta",
     "inventory_live_stock": "Stock live (balanzas)"
   },
@@ -4714,7 +4714,7 @@
     "period": "AM/PM"
   },
   "patientDesk": {
-    "title": "Centro de Pacientes (por paciente)",
+    "title": "Centro de Pacientes",
     "live": "En vivo",
     "searchPlaceholder": "Buscar paciente: nombre, record o servicio…",
     "date": "Fecha",

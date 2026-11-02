@@ -113,13 +113,14 @@ test("groupForClave / orderForClave resolve known claves", () => {
   assert.equal(typeof orderForClave("facturacion"), "number");
 });
 
-test("patients sit in Services: patient center, patients, nursing panel first", () => {
-  for (const c of ["frontdesk", "clientes", "panel-enfermeria", "servicios", "cambio-de-protocolo"]) {
+test("patients sit in Services: front desk, patient center (patient desk), patients, nursing panel first", () => {
+  for (const c of ["frontdesk", "patient-desk", "clientes", "panel-enfermeria", "servicios", "cambio-de-protocolo"]) {
     assert.equal(groupForClave(c), "services", c);
   }
+  // Patient desk above Patients (owner, 02-nov-2026): a strict order, not a tie left to the BE's order.
   assert.deepEqual(
-    ["frontdesk", "clientes", "panel-enfermeria"].map(orderForClave),
-    [1, 2, 3],
+    ["frontdesk", "patient-desk", "clientes", "panel-enfermeria", "servicios", "cambio-de-protocolo"].map(orderForClave),
+    [1, 2, 3, 4, 5, 6],
   );
 });
 
