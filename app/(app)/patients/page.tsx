@@ -8,8 +8,9 @@ import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { getActiveCentro } from "@/lib/tenant";
-import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
-import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
+import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
+import { patientCenterScope, patientRecordHref } from "@/lib/pacientes/center-scope";
+import { CenterFilter } from "@/components/kit/center-filter";
 import { useResource } from "@/hooks/use-resource";
 import type { Paginated } from "@/lib/api/types";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -41,29 +42,29 @@ export default function ClientesPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
-  // The screen's own center picker, the same one every screen uses (hooks/use-centro-pantalla.ts): for
-  // someone who can switch the top bar it hides and the list follows the top bar; for staff granted
-  // pacientes.read in another center it is how they look at that center's patients.
-  const centro = useCentroPantalla("pacientes.read", "pacientes.create");
-  const otroCentro = centro.fetchCentroId;
-  // New patients are created in the session's center, so "New patient" shows only while looking at it.
+  // Every clinic the person may read patients in, in one list (lib/pacientes/center-scope.ts): one clinic
+  // → pre-filtered to it; more → all by default, a filter to narrow them and a clinic column.
+  const centrosRes = useResource<Centro[]>(() => getCentrosDondePuedo("pacientes.read"));
+  const centros = React.useMemo(() => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []), [centrosRes.state]);
+  const centroName = React.useMemo(() => new Map(centros.map((c) => [c.id, c.name])), [centros]);
+  const [selected, setSelected] = React.useState<string[] | null>(null);
+  const scope = patientCenterScope(centros.map((c) => c.id), selected);
   const sesion = getActiveCentro();
-  const enElCentroDeLaSesion = !sesion || centro.centroActivo === sesion;
 
   // Server-side search: the BE filters by name/docId/phone/etc via `q`. Waits (a pending promise keeps
-  // the table in its loading state) until the screen knows its center, so it never flashes another
-  // center's list — e.g. a master's first load without a center is every center.
+  // the table in its loading state) until the clinics are known, so it never flashes the session
+  // clinic's list before the full one.
   const { state, reload } = useResource<Paginated<Paciente>>(
     () =>
-      centro.cargando
+      centrosRes.state.kind === "loading"
         ? new Promise<never>(() => {})
-        : listPacientes({ page, limit: LIMIT, q, centerIds: otroCentro ? [otroCentro] : undefined }),
-    [page, q, otroCentro, centro.cargando],
+        : listPacientes({ page, limit: LIMIT, q, centerIds: scope.centerIds }),
+    [page, q, scope.centerIds, centrosRes.state.kind],
   );
 
-  function openPatient(id: string) {
-    // A patient of another center is looked up there (?centro=, read by the record's layout).
-    router.push(otroCentro ? `/patients/${id}?centro=${encodeURIComponent(otroCentro)}` : `/patients/${id}`);
+  function onCentersChange(next: string[] | null) {
+    setPage(1);
+    setSelected(next);
   }
 
   function onSearch(value: string) {
@@ -71,10 +72,10 @@ export default function ClientesPage() {
     setQ(value);
   }
 
-  // Total table columns: index, record, name, docId, phone, email, status, actions — drives the
-  // colSpan of the loading/empty/error rows.
-  const colCount = 8;
-  const loadingShapes: CellShape[] = ["short", "short", "long", "text", "text", "long", "badge", "button"];
+  // Total table columns: index, record, name, docId, phone, email, status, [clinic], actions — drives
+  // the colSpan of the loading/empty/error rows.
+  const colCount = 8 + (scope.showColumn ? 1 : 0);
+  const loadingShapes: CellShape[] = ["short", "short", "long", "text", "text", "long", "badge", ...(scope.showColumn ? (["badge"] as const) : []), "button"];
 
   return (
     <PageContainer>
@@ -86,16 +87,14 @@ export default function ClientesPage() {
           search={q}
           onSearchChange={onSearch}
           searchPlaceholder={t("searchPlaceholder")}
-          filters={<CentroPantallaSelector estado={centro} />}
+          filters={scope.showFilter && <CenterFilter centers={centros} selected={selected} onChange={onCentersChange} />}
         >
-          {enElCentroDeLaSesion && (
-            <Can permiso="pacientes.create">
-              <Button onClick={() => setCreateOpen(true)}>
-                <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
-                {t("new")}
-              </Button>
-            </Can>
-          )}
+          <Can permiso="pacientes.create">
+            <Button onClick={() => setCreateOpen(true)}>
+              <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+              {t("new")}
+            </Button>
+          </Can>
         </ListToolbar>
         <p className="text-xs text-muted-foreground tabular-nums">
           {state.kind === "ok" ? (
@@ -118,6 +117,7 @@ export default function ClientesPage() {
             <TableHead>{t("columns.phone")}</TableHead>
             <TableHead>{t("columns.email")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
+            {scope.showColumn && <TableHead>{t("columns.clinic")}</TableHead>}
             <TableHead className="text-right" />
           </TableRow>
         </TableHeader>
@@ -134,7 +134,7 @@ export default function ClientesPage() {
               <TableRow
                 key={p.id}
                 className="cursor-pointer"
-                onClick={() => openPatient(p.id)}
+                onClick={() => router.push(patientRecordHref(p, sesion))}
               >
                 <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
                   {(page - 1) * LIMIT + i + 1}
@@ -155,6 +155,11 @@ export default function ClientesPage() {
                     <Badge variant="outline">{t("inactive")}</Badge>
                   )}
                 </TableCell>
+                {scope.showColumn && (
+                  <TableCell>
+                    <Badge variant="outline">{(p.clinicId && centroName.get(p.clinicId)) || "—"}</Badge>
+                  </TableCell>
+                )}
                 <TableCell className="text-right">
                   {/* «Acciones»: historiales del paciente (compras/servicios/citas/prescripción) +
                       crear cita, sin salir de la lista. stopPropagation para no navegar a la ficha
@@ -204,7 +209,7 @@ export default function ClientesPage() {
       {accionesFor && (
         <AccionesPacienteSheet
           paciente={accionesFor}
-          centro={centro.centroActivo || undefined}
+          centro={accionesFor.clinicId ?? undefined}
           onClose={() => setAccionesFor(null)}
         />
       )}

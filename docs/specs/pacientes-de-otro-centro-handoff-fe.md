@@ -25,14 +25,18 @@ llegue a un BE sin este cambio devuelve 400.
 2. **La pantalla arranca en el centro de la barra**, luego en el de la sesión, luego en el primero.
    Antes arrancaba en el de la sesión: para un master (sin centro de sesión) eso era el primero de la
    lista, aunque la barra dijera otro.
-3. **Pacientes vuelve al selector común** (`useCentroPantalla("pacientes.read", "pacientes.create")`)
-   en vez de no tener ninguno. La lista manda `centerIds` solo al mirar otro centro; la fila abre la
-   ficha con `?centro=<id>` y la ficha lo pasa como `centerIds`. «Nuevo paciente» solo sale mirando el
-   centro de la sesión, porque el alta va siempre a ese centro.
+3. **Pacientes lista TODOS los centros que la persona puede leer, en una sola llamada** (owner,
+   02-nov-2026; `lib/pacientes/center-scope.ts`, con tests). Los centros salen de
+   `GET /me/centros-donde-puedo?permiso=pacientes.read` y van todos en `centerIds`.
+   - **Con un centro**: la lista viene ya filtrada a ese centro, sin filtro ni columna.
+   - **Con más de uno**: todos por defecto, un filtro de centros (casillas, `components/kit/center-filter.tsx`)
+     para acotar, y una columna «Centro» mientras haya más de uno en la lista.
+   - La fila de un paciente de otro centro abre la ficha con `?centro=<id>`, y la ficha lo pasa como
+     `centerIds`.
+   - «Nuevo paciente» sigue creando en el centro de la sesión.
+   Pacientes no usa `useCentroPantalla` (un solo centro a la vez): aquí la lista es de varios.
 
 ## Fuera de alcance
 
-- La vista «Todos los centros» de admin en Pacientes no vuelve. Si hace falta, lo coherente es una
-  opción «Todos» en la barra superior.
 - Las pestañas de la ficha (citas, facturación…) usan sus propios endpoints con su propia regla de
   centro.

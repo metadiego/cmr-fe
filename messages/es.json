@@ -835,7 +835,8 @@
       "phone": "Teléfono",
       "email": "Email",
       "status": "Estado",
-      "record": "Récord"
+      "record": "Récord",
+      "clinic": "Centro"
     },
     "form": {
       "createTitle": "Nuevo paciente",
@@ -926,6 +927,11 @@
       "refunded": "Devuelto",
       "lastVisit": "Última visita",
       "noLastVisit": "Sin visitas registradas."
+    },
+    "centerFilter": {
+      "label": "Centros",
+      "all": "Todos los centros",
+      "some": "{count} centros"
     }
   },
   "common": {
