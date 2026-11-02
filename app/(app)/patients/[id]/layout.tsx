@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -72,7 +72,12 @@ export default function PatientRecordLayout({ children }: { children: React.Reac
   // lib/scheduling/call-origin.ts) — single-use, so it does not linger past this visit.
   const [callOrigin] = React.useState<string | null>(() => readCallOrigin());
 
-  const { state, reload } = useResource<Paciente>(() => getPaciente(id), [id]);
+  // Opened from the patient list while it looked at another center (?centro=): look the patient up there.
+  const centroPedido = useSearchParams().get("centro");
+  const { state, reload } = useResource<Paciente>(
+    () => getPaciente(id, undefined, { centerIds: centroPedido ? [centroPedido] : undefined }),
+    [id, centroPedido],
+  );
 
   return (
     <PageContainer>

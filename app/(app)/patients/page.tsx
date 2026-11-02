@@ -8,6 +8,8 @@ import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { getActiveCentro } from "@/lib/tenant";
+import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
+import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { useResource } from "@/hooks/use-resource";
 import type { Paginated } from "@/lib/api/types";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -39,15 +41,30 @@ export default function ClientesPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
-  // The list is the active center's (the clinic picker in the top bar): no second picker here
-  // (owner, 02-nov-2026). Changing the top-bar center reloads the page, so reading it per render is enough.
-  const tenant = getActiveCentro() ?? undefined;
+  // The screen's own center picker, the same one every screen uses (hooks/use-centro-pantalla.ts): for
+  // someone who can switch the top bar it hides and the list follows the top bar; for staff granted
+  // pacientes.read in another center it is how they look at that center's patients.
+  const centro = useCentroPantalla("pacientes.read", "pacientes.create");
+  const otroCentro = centro.fetchCentroId;
+  // New patients are created in the session's center, so "New patient" shows only while looking at it.
+  const sesion = getActiveCentro();
+  const enElCentroDeLaSesion = !sesion || centro.centroActivo === sesion;
 
-  // Server-side search: the BE filters by name/docId/phone/etc via `q`.
+  // Server-side search: the BE filters by name/docId/phone/etc via `q`. Waits (a pending promise keeps
+  // the table in its loading state) until the screen knows its center, so it never flashes another
+  // center's list — e.g. a master's first load without a center is every center.
   const { state, reload } = useResource<Paginated<Paciente>>(
-    () => listPacientes({ page, limit: LIMIT, q }, tenant),
-    [page, q, tenant],
+    () =>
+      centro.cargando
+        ? new Promise<never>(() => {})
+        : listPacientes({ page, limit: LIMIT, q, centerIds: otroCentro ? [otroCentro] : undefined }),
+    [page, q, otroCentro, centro.cargando],
   );
+
+  function openPatient(id: string) {
+    // A patient of another center is looked up there (?centro=, read by the record's layout).
+    router.push(otroCentro ? `/patients/${id}?centro=${encodeURIComponent(otroCentro)}` : `/patients/${id}`);
+  }
 
   function onSearch(value: string) {
     setPage(1);
@@ -65,13 +82,20 @@ export default function ClientesPage() {
 
       {/* The total sits under the search box, small: it is context for the search, not a heading. */}
       <div className="flex flex-col gap-1.5">
-        <ListToolbar search={q} onSearchChange={onSearch} searchPlaceholder={t("searchPlaceholder")}>
-          <Can permiso="pacientes.create">
-            <Button onClick={() => setCreateOpen(true)}>
-              <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
-              {t("new")}
-            </Button>
-          </Can>
+        <ListToolbar
+          search={q}
+          onSearchChange={onSearch}
+          searchPlaceholder={t("searchPlaceholder")}
+          filters={<CentroPantallaSelector estado={centro} />}
+        >
+          {enElCentroDeLaSesion && (
+            <Can permiso="pacientes.create">
+              <Button onClick={() => setCreateOpen(true)}>
+                <HugeiconsIcon icon={Add01Icon} data-icon="inline-start" />
+                {t("new")}
+              </Button>
+            </Can>
+          )}
         </ListToolbar>
         <p className="text-xs text-muted-foreground tabular-nums">
           {state.kind === "ok" ? (
@@ -110,7 +134,7 @@ export default function ClientesPage() {
               <TableRow
                 key={p.id}
                 className="cursor-pointer"
-                onClick={() => router.push(`/patients/${p.id}`)}
+                onClick={() => openPatient(p.id)}
               >
                 <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
                   {(page - 1) * LIMIT + i + 1}
@@ -180,7 +204,7 @@ export default function ClientesPage() {
       {accionesFor && (
         <AccionesPacienteSheet
           paciente={accionesFor}
-          centro={tenant}
+          centro={centro.centroActivo || undefined}
           onClose={() => setAccionesFor(null)}
         />
       )}
