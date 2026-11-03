@@ -15,6 +15,7 @@ import {
 } from "@/lib/frontdesk/therapy-queue"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 import { toastError } from "@/lib/api/errors"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -34,6 +35,7 @@ import {
 interface Props {
   centerId: string | undefined
   date: string
+  className?: string
 }
 
 function serviceName(queue: FrontdeskQueue, serviceId: string): string {
@@ -47,7 +49,7 @@ function serviceName(queue: FrontdeskQueue, serviceId: string): string {
 // está en terapia, y quién está libre para tomarla ahora. Oculta en la vista "Consulta" (acuerdo
 // con BE 10-oct-2026, §2.1.3 del spec): esa vista no tiene terapias que colear. Verificado en
 // navegador real contra Bayamón (10-oct-2026, commit dd31008).
-export function TherapyQueueStrip({ centerId, date }: Props) {
+export function TherapyQueueStrip({ centerId, date, className }: Props) {
   const t = useTranslations("patientDesk.queue")
   const tRoot = useTranslations()
   const { queue, refresh } = useTherapyQueue(centerId, date)
@@ -90,7 +92,7 @@ export function TherapyQueueStrip({ centerId, date }: Props) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
         {visible.map((svc) => (
           <button
             key={svc.serviceId}

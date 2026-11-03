@@ -14,6 +14,9 @@ export interface ListPacientesParams {
   limit?: number
   q?: string
   doctorId?: string // pacientes de UN médico (GET /patients?doctorId=) — para el hub del médico
+  // Centers to read instead of the session's: the screen's own center picker. Each needs
+  // pacientes.read THERE (BE PR #442, docs/specs/pacientes-de-otro-centro-handoff-fe.md).
+  centerIds?: string[]
 }
 
 // GET /pacientes — paginated; `q` searches name/docId/etc. Tenant scope:
@@ -24,15 +27,24 @@ export function listPacientes(
   params: ListPacientesParams = {},
   tenant?: string | null
 ): Promise<Paginated<Paciente>> {
-  const { page = 1, limit = 20, q, doctorId } = params
+  const { page = 1, limit = 20, q, doctorId, centerIds } = params
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) })
   if (q?.trim()) sp.set("q", q.trim())
   if (doctorId) sp.set("doctorId", doctorId)
+  if (centerIds?.length) sp.set("centerIds", centerIds.join(","))
   return apiFetchPaged<Paciente>(`/patients?${sp.toString()}`, {}, tenant)
 }
 
-export function getPaciente(id: string, centroId?: string): Promise<Paciente> {
-  return apiFetch<Paciente>(`/patients/${id}`, {}, centroId)
+// `centerIds`: look the patient up in those centers instead of the session's (same rule as the list).
+export function getPaciente(
+  id: string,
+  centroId?: string,
+  opts: { centerIds?: string[] } = {}
+): Promise<Paciente> {
+  const qs = opts.centerIds?.length
+    ? `?${new URLSearchParams({ centerIds: opts.centerIds.join(",") })}`
+    : ""
+  return apiFetch<Paciente>(`/patients/${id}${qs}`, {}, centroId)
 }
 
 // Writes are tenant-scoped: the BE needs the target center. Pass `centroId` to

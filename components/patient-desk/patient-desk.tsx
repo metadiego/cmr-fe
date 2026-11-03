@@ -431,10 +431,10 @@ export function PatientDesk() {
         </div>
       </div>
 
+      {/* The strip owns its bottom margin: on a day with no queue it renders nothing, and a wrapper
+          margin here left an empty band between the toolbar and the list. */}
       {kind !== "consultation" && (
-        <div className="mb-4">
-          <TherapyQueueStrip centerId={gate.centro} date={date} />
-        </div>
+        <TherapyQueueStrip centerId={gate.centro} date={date} className="mb-4" />
       )}
 
       {gate.cargando ? (

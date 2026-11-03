@@ -794,7 +794,6 @@
   },
   "patients": {
     "title": "Pacientes",
-    "back": "Volver",
     "total": "{count, plural, one {# paciente} other {# pacientes}}",
     "backToCall": "Volver a la llamada",
     "searchPlaceholder": "Buscar por nombre o ID…",
@@ -810,7 +809,6 @@
     "confirmDeactivateTitle": "¿Desactivar paciente?",
     "confirmDeactivateBody": "{name} dejará de aparecer en la lista. Su historial se conserva y puedes reactivarlo después.",
     "yearsOld": "{age} años",
-    "allCenters": "Todos los centros",
     "priorityFlags": {
       "oxigeno": "Oxígeno",
       "sillaRuedas": "Silla de ruedas",
@@ -837,8 +835,8 @@
       "phone": "Teléfono",
       "email": "Email",
       "status": "Estado",
-      "centro": "Centro",
-      "record": "Récord"
+      "record": "Récord",
+      "clinic": "Centro"
     },
     "form": {
       "createTitle": "Nuevo paciente",
@@ -929,6 +927,11 @@
       "refunded": "Devuelto",
       "lastVisit": "Última visita",
       "noLastVisit": "Sin visitas registradas."
+    },
+    "centerFilter": {
+      "label": "Centros",
+      "all": "Todos los centros",
+      "some": "{count} centros"
     }
   },
   "common": {
@@ -1190,7 +1193,7 @@
     "configuracion_datos_paciente": "Datos obligatorios del paciente",
     "collapseNav": "Plegar menú",
     "expandNav": "Desplegar menú",
-    "patientDesk": "Centro de Pacientes (por paciente)",
+    "patientDesk": "Centro de Pacientes",
     "paquetesVenta": "Paquetes de venta",
     "inventory_live_stock": "Stock live (balanzas)"
   },
@@ -4715,7 +4718,7 @@
     "period": "AM/PM"
   },
   "patientDesk": {
-    "title": "Centro de Pacientes (por paciente)",
+    "title": "Centro de Pacientes",
     "live": "En vivo",
     "searchPlaceholder": "Buscar paciente: nombre, record o servicio…",
     "date": "Fecha",
