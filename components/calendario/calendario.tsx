@@ -1,5 +1,6 @@
 "use client";
 
+import { isMine } from "@/lib/auth/who-did-it";
 import * as React from "react";
 import { sentenceCase } from "@/lib/format/text";
 import { useFormatter, useTranslations, useLocale } from "next-intl";
@@ -83,9 +84,8 @@ export function Calendario() {
   // autor (creadoPor null, legacyId) → solo admin. El BE re-comprueba (403 con motivo), así que esto solo
   // evita ofrecer un botón que va a fallar. Handoff calendario-selector-de-centro §«Cada uno toca lo suyo».
   const esAdmin = me.kind === "ok" && (me.me.isMaster || me.me.accessMode === "admin" || me.me.roles.some((r) => r === "admin" || r === "super_admin"));
-  const miId = me.kind === "ok" ? me.me.profileId : null;
-  const miUserId = me.kind === "ok" ? me.me.id : null;
-  const esMio = (ev?: CalendarioEvento) => !!ev?.createdBy && (ev.createdBy === miId || ev.createdBy === miUserId);
+  // The author is the PERSON (staff id), not the login or the profile: see lib/auth/who-did-it.ts.
+  const esMio = (ev?: CalendarioEvento) => isMine(ev?.createdBy, me.kind === "ok" ? me.me : null);
   // Staff absences are projected read-only rows (see lib/api/calendario.ts): they don't belong to
   // calendar_events, so editing/deleting them here 404s — only Disponibilidad can change them.
   const puedeTocar = (ev?: CalendarioEvento) =>

@@ -1,5 +1,6 @@
 "use client";
 
+import { myStaffId } from "@/lib/auth/who-did-it";
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -139,7 +140,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
           setScope={setScope}
           isGerencia={isGerencia}
           puedeRetroactivo={puedeRetroactivo}
-          meId={me?.id ?? null}
+          meId={myStaffId(me)}
           canCerrar={canCerrar}
           centro={gate.centro}
           centroNombre={gate.centroNombre}
