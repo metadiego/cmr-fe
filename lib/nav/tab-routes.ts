@@ -1,6 +1,6 @@
 // Tabs as URL paths. A tabbed screen's tabs are path segments under the screen's own route, named
-// in English after the tab they open: /billing/invoices/returns, /patients/<id>/billing,
-// /scheduling/appointments/services. The FIRST tab is the default and lives at the screen's route
+// in English after the tab they open: /billing/invoices/returns, /patients/<id>/billing.
+// The FIRST tab is the default and lives at the screen's route
 // itself (no segment), so the sidebar link and an old bookmark keep landing where they always did.
 //
 // Before this, some screens named their tab in `?tab=` (with Spanish values: `?tab=caja`) and others
@@ -38,12 +38,6 @@ export const BILLING_CONSULTATION_TABS = {
   legacy: { facturas: "invoices", devoluciones: "returns", caja: "cash" },
 } as const satisfies TabRoute;
 
-export const APPOINTMENTS_TABS = {
-  pattern: "/scheduling/appointments",
-  tabs: ["medical", "services"],
-  legacy: { medicas: "medical", servicios: "services" },
-} as const satisfies TabRoute;
-
 export const ADMIN_TABS = {
   pattern: "/admin",
   tabs: ["staff", "users", "roles", "permissions", "role-editor", "pending", "centers", "theme", "menu"],
@@ -54,7 +48,6 @@ export const TAB_ROUTES: readonly TabRoute[] = [
   PATIENT_TABS,
   BILLING_GENERAL_TABS,
   BILLING_CONSULTATION_TABS,
-  APPOINTMENTS_TABS,
   ADMIN_TABS,
 ];
 

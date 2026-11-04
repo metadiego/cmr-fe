@@ -3,10 +3,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ADMIN_TABS,
-  APPOINTMENTS_TABS,
   BILLING_CONSULTATION_TABS,
   BILLING_GENERAL_TABS,
   PATIENT_TABS,
+  TAB_ROUTES,
   legacyTab,
   matchTab,
   screenPathOf,
@@ -38,8 +38,9 @@ test("pages below a tabbed screen are not tabs: invoice detail, new sale, a cale
   assert.equal(matchTab(BILLING_GENERAL_TABS, "/billing/invoices/new"), null);
   assert.equal(matchTab(BILLING_GENERAL_TABS, "/billing/invoices/0b6f2c1e-7d1a-4f43-9b1e-2a7c9d1e0f11"), null);
   assert.equal(matchTab(BILLING_GENERAL_TABS, "/billing/invoices/cash/extra"), null);
-  assert.equal(matchTab(APPOINTMENTS_TABS, "/scheduling/appointments/2026-10-29"), null);
-  assert.equal(matchTab(APPOINTMENTS_TABS, "/scheduling/appointments/services/2026-10-29"), null);
+  // The appointments screen is no longer tabbed: no tab route matches its calendar days either.
+  assert.equal(TAB_ROUTES.some((r) => matchTab(r, "/scheduling/appointments/2026-10-29")), false);
+  assert.equal(TAB_ROUTES.some((r) => matchTab(r, "/scheduling/appointments/services/2026-10-29")), false);
 });
 
 test("a tab of another screen does not count (stats exists only in general billing)", () => {
@@ -58,14 +59,16 @@ test("a tab link keeps the query string (the center) but drops an old ?tab=", ()
     tabHref(BILLING_GENERAL_TABS, "/billing/invoices", "cash", "centro=c1&tab=caja"),
     "/billing/invoices/cash?centro=c1",
   );
-  assert.equal(tabHref(APPOINTMENTS_TABS, "/scheduling/appointments", "medical", new URLSearchParams("tab=servicios")), "/scheduling/appointments");
+  // The booking screen (one route, no tabs) is not a tab route: neither its own path nor the old services tab.
+  assert.equal(TAB_ROUTES.some((r) => matchTab(r, "/scheduling/appointments")), false);
+  assert.equal(TAB_ROUTES.some((r) => matchTab(r, "/scheduling/appointments/services")), false);
 });
 
 test("old ?tab= values map to the new slugs, unchanged names included", () => {
   assert.equal(legacyTab(BILLING_GENERAL_TABS, "caja"), "cash");
   assert.equal(legacyTab(BILLING_GENERAL_TABS, "estadisticas"), "stats");
   assert.equal(legacyTab(BILLING_CONSULTATION_TABS, "estadisticas"), null);
-  assert.equal(legacyTab(APPOINTMENTS_TABS, "servicios"), "services");
+  assert.equal(TAB_ROUTES.some((r) => r.pattern === "/scheduling/appointments"), false);
   assert.equal(legacyTab(ADMIN_TABS, "editorRol"), "role-editor");
   assert.equal(legacyTab(ADMIN_TABS, "users"), "users");
   assert.equal(legacyTab(ADMIN_TABS, "nope"), null);
@@ -79,4 +82,5 @@ test("the shell sees every tab of a screen as the screen itself", () => {
   assert.equal(screenPathOf("/billing/invoices/new"), "/billing/invoices/new");
   assert.equal(screenPathOf("/patients/legacy-availability/preparation"), "/patients/legacy-availability/preparation");
   assert.equal(screenPathOf("/inventory/stock"), "/inventory/stock");
+  assert.equal(screenPathOf("/scheduling/appointments/services"), "/scheduling/appointments/services");
 });
