@@ -18,13 +18,16 @@ export function useCashCountAutosave(
   enabled: boolean,
   open: AbrirCuadrePayload,
   counts: Record<string, number>,
+  onSaved?: () => void, // e.g. refetch the day report so its count (screen + print) is current
   debounceMs = 800,
 ): { state: AutosaveState; flush: () => Promise<void> } {
   const [state, setState] = React.useState<AutosaveState>("idle");
+  const [savedCount, setSavedCount] = React.useState(0);
   const key = JSON.stringify([open, counts]);
   const latest = React.useRef<{ key: string; payload: Payload }>({ key, payload: { open, counts } });
   const lastQueued = React.useRef(key); // what is on screen at mount is what the BE already has
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSavedRef = React.useRef(onSaved);
   const queue = React.useMemo(
     () =>
       latestOnlyQueue<Payload>(
@@ -35,14 +38,22 @@ export function useCashCountAutosave(
             .map(([denominationId, quantity]) => ({ denominationId, quantity }));
           await contarCuadre(cuadre.id, lines);
         },
-        (s) => setState(s),
+        (s) => {
+          setState(s);
+          if (s === "saved") setSavedCount((n) => n + 1);
+        },
       ),
     [],
   );
 
   React.useEffect(() => {
     latest.current = { key, payload: { open, counts } };
+    onSavedRef.current = onSaved;
   });
+
+  React.useEffect(() => {
+    if (savedCount > 0) onSavedRef.current?.();
+  }, [savedCount]);
 
   React.useEffect(() => {
     if (!enabled || key === lastQueued.current) return;

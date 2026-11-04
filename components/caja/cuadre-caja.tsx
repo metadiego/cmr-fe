@@ -224,7 +224,8 @@ function Loader(props: LoaderProps) {
   const { reporte, denoms, cuadre, conteoInicial, cuadres, cajeros, grupos } = bundle.state.data;
   return (
     <Editor
-      key={cuadre?.id ?? (props.scope === "consolidated" ? "consolidado" : "nuevo")}
+      // Stable: the first autosave creates the cuadre (null → id) and a remount would drop keystrokes.
+      key="editor"
       {...props}
       reporte={reporte}
       denoms={denoms}
@@ -297,7 +298,7 @@ function Editor({
   const [emailing, setEmailing] = React.useState(false);
   // The Inicio input is saved as typed; «Aplica» travels apart without zeroing it (see procesarCierre).
   const openPayload = { division, userId: usuarioId, date: fecha, declaredPettyCash: Math.max(0, Number(inicioStr) || 0), pettyCashApplies: aplicarInicio };
-  const autosave = useCashCountAutosave(contarHabilitado, openPayload, conteo);
+  const autosave = useCashCountAutosave(contarHabilitado, openPayload, conteo, onReload);
 
   // Conteo/inicio por cajero (de los cuadres del día) para UNIR en el consolidado.
   const conteoPorCajero = React.useMemo(() => {
