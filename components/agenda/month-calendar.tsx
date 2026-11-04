@@ -87,7 +87,7 @@ export function MonthCalendar({
           </div>
         ))}
       </div>
-      <div className={cn("grid grid-cols-7", height && "min-h-0 flex-1 auto-rows-fr overflow-y-auto")}>
+      <div className={cn("grid grid-cols-7", height && "min-h-0 flex-1 overflow-y-auto [grid-auto-rows:minmax(min-content,1fr)]")}>
         {weeks.flat().map((date, idx) => {
           const iso = toISO(date);
           const inMonth = date.getMonth() === month0;
