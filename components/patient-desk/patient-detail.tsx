@@ -230,7 +230,11 @@ export function PatientDetail({
   async function handlePresent() {
     setPresenceBusy(true)
     try {
-      const res = await presentPatient(patient.patientId, date, centerId)
+      // Consulta view: the button speaks only of the consultation — never marks the therapies.
+      const res =
+        kind === "consultation"
+          ? { failed: [] as { reason: string }[] }
+          : await presentPatient(patient.patientId, date, centerId)
       const warnings = res.failed.map((f) => f.reason)
       const pendingConsultIds = patient.consultationIds.filter((_, i) =>
         CONSULT_PENDING_STATUSES.has(patient.consultationStatuses[i])
@@ -293,7 +297,9 @@ export function PatientDetail({
   async function handleUndoPresent() {
     setPresenceBusy(true)
     try {
-      await undoPresentPatient(patient.patientId, centerId)
+      // Consulta view: undo only the consultation's arrival; the therapies keep theirs.
+      if (kind !== "consultation")
+        await undoPresentPatient(patient.patientId, centerId)
       // Simétrico: solo la consulta que el present de arriba pudo haber marcado (sigue en "presente"
       // exacto) — nunca una que ya avanzó a triage/en_consulta/atendida por su cuenta.
       const presentConsultIds = patient.consultationIds.filter(
@@ -403,7 +409,7 @@ export function PatientDetail({
                   {t("undoPresent")}
                 </Button>
                 {/* Already present, but a therapy/consultation is still waiting: mark those too. */}
-                {pendingArrivals(patient) > 0 && (
+                {kind !== "consultation" && pendingArrivals(patient) > 0 && (
                   <Button
                     type="button"
                     size="sm"

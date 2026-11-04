@@ -11,6 +11,7 @@ test("consultation view: every present patient together by arrival, finished or 
     consultationStatuses: ["asistido"],
     consultationSubtypes: [""],
     allCancelled: false,
+    consultationPresentAt: null,
   }
   const list = [
     { ...base, patientId: "late", name: "Late", presentAt: "2026-11-04T14:30:00Z", earliestTime: "09:00" },
@@ -30,10 +31,21 @@ test("present patient: counts sessions still pendiente and consultations not yet
     serviceId: "s", slug: "s", name: "S", color: null, staffGroup: 0 as never, sessionIds: statuses.map((_, i) => String(i)), statuses,
   })
   const p = {
-    patientId: "p", name: "P", record: "", earliestTime: null, presentAt: "2026-11-04T14:00:00Z", allCancelled: false,
+    patientId: "p", name: "P", record: "", earliestTime: null, presentAt: "2026-11-04T14:00:00Z", consultationPresentAt: null, allCancelled: false,
     services: [svc(["presente", "pendiente"]), svc(["asistido"])],
     consultationIds: ["c1", "c2"], consultationStatuses: ["confirmada", "en_consulta"], consultationSubtypes: ["", ""],
   }
   assert.equal(pendingArrivals(p), 2)
   assert.equal(pendingArrivals({ ...p, services: [svc(["presente"])], consultationStatuses: ["presente", "asistido"] }), 0)
+})
+
+test("consultation view: a patient who came only for therapies reads not present there", async () => {
+  const { asConsultationView } = await import("./patient-day.ts")
+  const p = {
+    patientId: "p", name: "P", record: "", earliestTime: null, allCancelled: false, services: [],
+    presentAt: "2026-11-04T14:47:00Z", consultationPresentAt: null,
+    consultationIds: ["c"], consultationStatuses: ["confirmada"], consultationSubtypes: [""],
+  }
+  assert.equal(asConsultationView(p).presentAt, null)
+  assert.equal(asConsultationView({ ...p, consultationPresentAt: "2026-11-04T15:00:00Z" }).presentAt, "2026-11-04T15:00:00Z")
 })
