@@ -45,7 +45,13 @@ async function fetchDay(
   date: string,
   patientId?: string
 ): Promise<DaySlots | null> {
-  const key = dayKey(center, kind, typeId, date, patientId)
+  const key = dayKey(
+    center,
+    kind,
+    typeId,
+    date,
+    kind === "service" ? patientId : undefined
+  )
   let value: DaySlots | null
   if (kind === "medical") {
     const r = await getCuposLibres(date, typeId, center)
@@ -113,6 +119,8 @@ export function useMonthAvailability(p: {
       if (pending.length === 0) return
       void runLimited(
         pending.map((d) => async () => {
+          // Skip queued work of a superseded generation (in-flight requests may still finish).
+          if (!isCurrent(requestScope, scopeRef.current)) return
           let result: DayResult
           try {
             result = await fetchDay(center, kind, typeId, d)
@@ -175,7 +183,13 @@ export function useDayAvailability(p: {
   const { center, kind, typeId, date, patientId } = p
   const key =
     center && kind && typeId && date
-      ? dayKey(center, kind, typeId, date, patientId)
+      ? dayKey(
+          center,
+          kind,
+          typeId,
+          date,
+          kind === "service" ? patientId : undefined
+        )
       : ""
   const [state, setState] = React.useState<{ key: string; day: DayResult }>({
     key: "",
