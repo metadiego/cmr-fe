@@ -81,19 +81,37 @@ export function usePatientDay(
         : Promise.resolve(null),
     [centerId]
   )
+  // A failed REFETCH (429, network blip) keeps the last good day on screen: dropping to an empty list
+  // is what "closed everything" at the desk on 04-nov-2026. A failed FIRST load still reports the error.
+  const lastSessions = React.useRef<{ key: string; data: Session[] } | null>(null)
+  const lastConsult = React.useRef<{ key: string; data: BoardRows } | null>(null)
+  const dayKey = `${centerId ?? ""}|${date}`
   const sessionsRes = useResource<Session[]>(
     () =>
       centerId
         ? listSessions({ desde: date, hasta: date, centroId: centerId })
+            .then((data) => {
+              lastSessions.current = { key: dayKey, data }
+              return data
+            })
+            .catch((err: unknown) => {
+              if (lastSessions.current?.key === dayKey) return lastSessions.current.data
+              throw err
+            })
         : Promise.resolve([]),
     [centerId, date]
   )
   const consultRes = useResource<BoardRows | null>(
     () =>
       centerId
-        ? getBoardRows("atencion", date, { centroId: centerId }).catch(
-            () => null
-          )
+        ? getBoardRows("atencion", date, { centroId: centerId })
+            .then((data) => {
+              lastConsult.current = { key: dayKey, data }
+              return data
+            })
+            .catch(() =>
+              lastConsult.current?.key === dayKey ? lastConsult.current.data : null
+            )
         : Promise.resolve(null),
     [centerId, date]
   )
@@ -223,18 +241,29 @@ export function useServiceBoards(
   refreshTick: number
 ): Record<string, ServiceBoard> {
   const slugsKey = [...new Set(slugs)].sort().join(",")
+  // Last good board per center/day/slug: a failed refetch (a 429, a network blip) keeps the table the
+  // desk was looking at instead of blanking it to bare column titles.
+  const lastGood = React.useRef(new Map<string, ServiceBoard>())
   const res = useResource<Record<string, ServiceBoard>>(
     () =>
       centerId && slugsKey
         ? Promise.all(
-            slugsKey.split(",").map((slug) =>
-              getServiceBoard(slug, date, centerId)
-                .then((b) => [slug, b] as const)
+            slugsKey.split(",").map((slug) => {
+              const key = `${centerId}|${date}|${slug}`
+              return getServiceBoard(slug, date, centerId)
+                .then((b) => {
+                  lastGood.current.set(key, b)
+                  return [slug, b] as const
+                })
                 .catch(
                   () =>
-                    [slug, { columns: [], rows: [] } as ServiceBoard] as const
+                    [
+                      slug,
+                      lastGood.current.get(key) ??
+                        ({ columns: [], rows: [] } as ServiceBoard),
+                    ] as const
                 )
-            )
+            })
           ).then((pairs) => Object.fromEntries(pairs))
         : Promise.resolve({}),
     [centerId, date, slugsKey]
