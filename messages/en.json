@@ -4882,6 +4882,11 @@
     "moved": "Appointment moved to {date}",
     "booked": "Appointment booked for {date}",
     "notMovable": "This appointment is no longer open and cannot be moved from here.",
-    "notFollowUp": "Only follow-up appointments can be moved here. This one is of another type: move it from the schedule."
+    "notFollowUp": "Only follow-up appointments can be moved here. This one is of another type: move it from the schedule.",
+    "freeAt": "Follow-up room at {time} ({n} free).",
+    "fullAt": "No follow-up room at {time}.",
+    "noTime": "Pick a time.",
+    "useTime": "Use {time}",
+    "noneThatDay": "No follow-up room left that day."
   }
 }

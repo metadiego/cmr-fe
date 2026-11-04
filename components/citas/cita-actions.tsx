@@ -23,6 +23,7 @@ import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getAgendaDia, type AgendaDia } from "@/lib/api/agenda-dia";
 import { toastError } from "@/lib/api/errors";
+import { slotAvailability } from "@/lib/agenda/slot-availability";
 import { useCan } from "@/hooks/use-can";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -287,17 +288,8 @@ function RescheduleDialog({
     const data = agendaRes.state.kind === "ok" ? agendaRes.state.data : null;
     const c = data?.centers?.[0];
     if (!c) return null;
-    const vaciosOf = (fr: { tipos: { appointmentTypeId: string; vacios: number }[] }) =>
-      fr.tipos.find((tp) => tp.appointmentTypeId === cita.appointmentTypeId)?.vacios ?? 0;
-    const here = (c.slots ?? c.franjas ?? []).find((fr) => fr.time === hora);
-    const vacios = here ? vaciosOf(here) : 0;
-    const next =
-      (c.slots ?? c.franjas ?? [])
-        .filter((fr) => fr.time && vaciosOf(fr) > 0)
-        .map((fr) => fr.time as string)
-        .sort()
-        .find((h) => h >= hora) ?? null;
-    return { vacios, next };
+    const { free, next } = slotAvailability(c.slots ?? c.franjas ?? [], String(cita.appointmentTypeId), hora);
+    return { vacios: free, next };
   }, [agendaRes.state, hora, cita.appointmentTypeId]);
 
   const origen = centros.find((c) => c.id === cita.clinicId)?.name ?? cita.clinicId ?? "";
