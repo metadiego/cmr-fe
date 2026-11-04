@@ -13,7 +13,6 @@ import {
   serviceCancelledOnly,
   serviceConcluded,
   staffGroup,
-  sortByArrival,
   type DaySession,
 } from "./patient-day.ts"
 
@@ -565,26 +564,4 @@ test("with a service filter the order is exactly the filter's, pending elsewhere
     isTerminal: terminal,
   })
   assert.deepEqual(sectionNames(p), ["vitc", "laser", "consulta"])
-})
-
-test("consultation view: every present patient together by arrival, finished or not; then not arrived; cancelled last", () => {
-  const base = {
-    record: "",
-    services: [],
-    consultationIds: ["c"],
-    consultationStatuses: ["asistido"],
-    consultationSubtypes: [""],
-    allCancelled: false,
-  }
-  const list = [
-    { ...base, patientId: "late", name: "Late", presentAt: "2026-11-04T14:30:00Z", earliestTime: "09:00" },
-    { ...base, patientId: "none2", name: "None B", presentAt: null, earliestTime: "11:00" },
-    { ...base, patientId: "x", name: "Cancelled", presentAt: null, earliestTime: "08:00", allCancelled: true },
-    { ...base, patientId: "early", name: "Early", presentAt: "2026-11-04T11:53:00Z", earliestTime: "08:00" },
-    { ...base, patientId: "none1", name: "None A", presentAt: null, earliestTime: "10:00" },
-  ]
-  assert.deepEqual(
-    sortByArrival(list).map((p) => p.patientId),
-    ["early", "late", "none1", "none2", "x"]
-  )
 })

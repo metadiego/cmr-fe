@@ -4732,6 +4732,7 @@
     "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
     "record": "Record",
     "firstAt": "primera cita {time}",
+    "markPendingPresent": "Marcar presente (pendientes: {n})",
     "markPresent": "Presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",

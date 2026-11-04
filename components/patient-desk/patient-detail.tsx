@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  pendingArrivals,
   patientSections,
   serviceCancelledOnly,
   serviceConcluded,
@@ -401,6 +402,19 @@ export function PatientDetail({
                 >
                   {t("undoPresent")}
                 </Button>
+                {/* Already present, but a therapy/consultation is still waiting: mark those too. */}
+                {pendingArrivals(patient) > 0 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    className="h-6 px-2 text-xs"
+                    disabled={presenceBusy}
+                    onClick={handlePresent}
+                  >
+                    {t("markPendingPresent", { n: pendingArrivals(patient) })}
+                  </Button>
+                )}
               </div>
             ) : (
               <Button size="sm" disabled={presenceBusy} onClick={handlePresent}>

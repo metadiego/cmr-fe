@@ -240,6 +240,22 @@ export function sortPatients(
   })
 }
 
+// Present patient with something still waiting to be marked present: a service session still
+// 'pendiente' (added after arrival, or created by the scheduling bridge the day before) or a
+// consultation still programada/confirmada. Per-row «presente» is hidden on purpose (one arrival per
+// patient), so the header must offer it again or those rows stay locked (BE, 04-nov-2026: records
+// 14497, 11643, 4604).
+const CONSULTATION_AWAITING = new Set(["programada", "confirmada"])
+export function pendingArrivals(p: PatientDay): number {
+  const sessions = p.services
+    .flatMap((s) => s.statuses)
+    .filter((x) => x === "pendiente").length
+  const consults = p.consultationStatuses.filter((x) =>
+    CONSULTATION_AWAITING.has(x)
+  ).length
+  return sessions + consults
+}
+
 // Consultation view: everyone PRESENT together, in arrival order — finished or not (owner 04-nov-2026:
 // the presents were split, some on top, the rest sunk below the not-yet-arrived). Then whoever has
 // not arrived, by booking time; fully cancelled days last.
