@@ -124,13 +124,16 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 // - tablasLadoALado: nº de tablas en paralelo (MLS=2). casillas: selectores de tipo (RADIAL/FOCAL).
 // - notas / porPagina: para `layout:"sessions"` — las 2 cajas de notas VACÍAS y cuántas sesiones por página.
 // - subtitulo: línea más chica arriba del título (p. ej. "Cámara Energética" arriba de "CONTROL DE
-//   SESIONES"). `numerarFilas`/`numerarComoFraccion` son internos del BE (quién "hornea" el contador de la
-//   rejilla): el FE nunca los lee ni recalcula — siempre pinta el valor de la fila tal cual llega.
+//   SESIONES"). `numerarFilas`/`numerarComoFraccion`: el BE "hornea" el contador de la rejilla y el FE pinta
+//   el valor tal cual, SALVO cuando el usuario escribe cuántas terapias imprimir (solo impresión,
+//   lib/formatos/print-rows.ts): ahí el FE renumera esa columna.
 // - camposEnLinea: claves de `fields` que van JUNTAS en la primera línea del layout "campos", en ese orden
 //   (APEX: paciente, record, sesion, fecha). Sin la clave, un campo por línea como el legacy.
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
   camposEnLinea?: string[];
+  numerarFilas?: string;
+  numerarComoFraccion?: boolean;
   casillasEnFilas?: boolean;
   imagenEscalaDolor?: string | null;
   imagenCuerpo?: string | null; // GLP-1: diagrama hombre/mujer, ruta ya resuelta por el BE según sexo del paciente

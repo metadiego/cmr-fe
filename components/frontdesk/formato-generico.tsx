@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
 import { splitInlineFields } from "@/lib/formatos/inline-fields";
+import { rowsForPrint } from "@/lib/formatos/print-rows";
+import { Input } from "@/components/ui/input";
 
 // Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
 // del BE armado (membrete/título/paciente/columnas/filas). Papel A4/Letter, tinta negra, @media print
@@ -19,13 +21,14 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const t = useTranslations("frontdesk");
   const res = useResource<FormatoArmado>(() => getFormatoArmado(clave, sesionId, centro), [clave, sesionId, centro]);
   const printRef = React.useRef<HTMLDivElement>(null);
+  // How many therapies to print (print only, never saved). Empty = the BE's rows as they come.
+  const [printCount, setPrintCount] = React.useState("");
   if (res.state.kind === "loading") return <p className="text-sm text-muted-foreground">…</p>;
   // Say WHY (e.g. FORBIDDEN: the user's role lacks the permission), not just that it failed.
   if (res.state.kind === "fail") return <p className="text-sm text-destructive">{t("formatoError")} — {res.state.message}</p>;
   if (res.state.kind !== "ok") return null;
   const d = res.state.data;
   const cols = d.columns ?? [];
-  const filas = d.rows ?? [];
   const campos = d.fields ?? [];
   const secciones = d.sections ?? [];
   // ¿Hay OBSERVACIONES (caja o renglones) que CREZCAN? Si no, va un espaciador flexible.
@@ -37,6 +40,9 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const render = d.render ?? {};
   const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
   const camposEnLinea = splitInlineFields(campos, render.camposEnLinea);
+  // Numbered grid (one row per therapy): the desk can type how many to print — see print-rows.ts.
+  const contadorFilas = !esCampos && d.layout !== "sesiones" && d.layout !== "sessions" ? render.numerarFilas : undefined;
+  const filas = rowsForPrint(d.rows ?? [], contadorFilas ? Number(printCount) : null, contadorFilas, !!render.numerarComoFraccion);
   // Láser a color por sesión (multipágina): bloques por sesión con paginación; las firmas se pintan DENTRO
   // de cada bloque (no al final), así que se sacan de las secciones normales.
   // "sesiones" es el valor real (enum en español por convención del proyecto, igual que "campos"/"tabla"
@@ -79,6 +85,21 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
         <Button variant="ghost" size="sm" onClick={onVolver}>{t("volver")}</Button>
+        {contadorFilas && (
+          <label className="ml-auto mr-3 flex items-center gap-2 text-sm text-muted-foreground">
+            {t("formatoTherapyCount")}
+            <Input
+              type="number"
+              min={1}
+              max={99}
+              inputMode="numeric"
+              value={printCount}
+              placeholder={String((d.rows ?? []).length)}
+              onChange={(e) => setPrintCount(e.target.value)}
+              className="h-8 w-20"
+            />
+          </label>
+        )}
         <Button size="sm" onClick={() => imprimirFormato(printRef.current, d.title || t("imprimirPdf"))}>{t("imprimirPdf")}</Button>
       </div>
       {/* .formato-doc = columna flex que LLENA la hoja (min-height:100vh en impresión): la zona de
