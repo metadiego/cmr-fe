@@ -1,19 +1,24 @@
 "use client";
 
+import * as React from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import type { SeriesDay } from "@/hooks/use-series-availability";
 import type { SeriesRow } from "@/lib/agenda/booking/series";
 import { rowTimeOptions } from "@/lib/agenda/booking/series-booking";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { rejectDate, type DateRejection } from "@/lib/agenda/booking/series-edit";
+import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
 // The dates of a weekly series: each row's day, its time (a select over that day's times), its status
-// chip and, when it is full or blocked, the planner's "Use … instead". A row can be dropped.
+// chip and, when it is full or blocked, the planner's "Use … instead". A row's date can be changed
+// (past days are greyed in the calendar; a Sunday or another row's date is refused with the reason),
+// and a row can be dropped.
 
 export function useDayLabel(): (date: string) => string {
   const format = useFormatter();
@@ -30,6 +35,7 @@ export function SeriesRows({
   disabled,
   canDrop,
   onTime,
+  onDate,
   onSuggestion,
   onDrop,
 }: {
@@ -40,11 +46,22 @@ export function SeriesRows({
   disabled: boolean;
   canDrop: boolean;
   onTime: (index: number, time: string) => void;
+  /** Row `index` takes `date` (already checked: not past, not Sunday, not another row's). */
+  onDate: (index: number, date: string) => void;
   onSuggestion: (index: number, s: { date: string; time: string }) => void;
   onDrop: (index: number) => void;
 }) {
   const t = useTranslations("appointmentsBooking.series");
   const dayLabel = useDayLabel();
+  const [refused, setRefused] = React.useState<{ index: number; reason: DateRejection } | null>(null);
+  const today = todayPR();
+
+  const pickDate = (index: number, date: string) => {
+    if (!date) return;
+    const reason = rejectDate(rows, index, date, today);
+    setRefused(reason ? { index, reason } : null);
+    if (!reason && date !== rows[index]?.date) onDate(index, date);
+  };
 
   return (
     <ol className="flex flex-col gap-1.5" aria-label={t("dates")}>
@@ -84,7 +101,18 @@ export function SeriesRows({
             )}
           >
             <div className="flex items-center gap-2">
-              <span className="min-w-0 flex-1 truncate font-medium">{dayLabel(r.date)}</span>
+              <div className="min-w-0 flex-1">
+                <DatePicker
+                  value={r.date}
+                  onChange={(d) => pickDate(r.index, d)}
+                  min={today}
+                  disabled={disabled}
+                  displayFormat="dayWeekdayShort"
+                  aria-label={t("changeDate", { date: dayLabel(r.date) })}
+                  title={t("changeDate", { date: dayLabel(r.date) })}
+                  className="h-7 w-auto max-w-full px-2 font-medium"
+                />
+              </div>
               <select
                 aria-label={t("time")}
                 className="h-7 rounded-md border border-input bg-background px-1 text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -106,12 +134,20 @@ export function SeriesRows({
                   aria-label={t("remove")}
                   title={t("remove")}
                   disabled={disabled}
-                  onClick={() => onDrop(r.index)}
+                  onClick={() => {
+                    setRefused(null);
+                    onDrop(r.index);
+                  }}
                 >
                   <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
                 </Button>
               )}
             </div>
+            {refused?.index === r.index && (
+              <p role="alert" className="text-xs text-destructive">
+                {t(refused.reason === "past" ? "datePast" : refused.reason === "sunday" ? "dateSunday" : "dateTaken")}
+              </p>
+            )}
             <div className="flex flex-wrap items-center gap-1.5">
               <span className={cn("rounded px-1.5 py-0.5 text-[11px] font-medium", chip.tone)}>{chip.label}</span>
               {s && (

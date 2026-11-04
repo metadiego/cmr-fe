@@ -13,7 +13,7 @@ import { SeriesRows, useDayLabel } from "@/components/appointments-booking/serie
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import { suggestionKey, useSeriesAvailability, type SeriesNeed } from "@/hooks/use-series-availability";
-import { buildSeriesRows, canBookSeries, seriesDates } from "@/lib/agenda/booking/series";
+import { buildSeriesRows, canBookSeries } from "@/lib/agenda/booking/series";
 import {
   MAX_SESSIONS,
   MIN_SESSIONS,
@@ -25,8 +25,16 @@ import {
   overridesOf,
   setRowTime,
   suggestionExclusions,
-  type SeriesItem,
 } from "@/lib/agenda/booking/series-booking";
+import {
+  addItem,
+  fitLoadedTimes,
+  generateItems,
+  nextDate,
+  replaceDate,
+  type EditableItem,
+} from "@/lib/agenda/booking/series-edit";
+import { todayPR } from "@/lib/format/fecha";
 import { normalizeTime, type DaySlots } from "@/lib/agenda/booking/availability";
 import type { RecurringPlanItem } from "@/lib/agenda/recurring-plan";
 import { agendarVariosServicios, crearSesion, getServiciosConSaldo } from "@/lib/api/frontdesk";
@@ -40,6 +48,8 @@ import { warningText } from "@/lib/frontdesk/avisos";
 // weeks, N sessions, one row per date with its own time, status and the planner's suggestion. A full
 // time is bookable (overbook) with a warning; a blocked row (holiday, closed, already has the service
 // that day) must be fixed or dropped first. A series goes out as one bulk request per distinct time.
+// Once a row is edited (time, date, suggestion, drop, "+ Add date") the rows are that explicit list;
+// changing "every" or the number of sessions regenerates it from start + every + count.
 
 const SELECT_CLASS =
   "h-8 rounded-md border border-input bg-background px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -102,15 +112,18 @@ export function ServiceBookingForm({
     saldoRes.state.kind === "ok" ? saldoRes.state.data.find((s) => s.serviceId === serviceId)?.pending : undefined;
   const count = countChoice ?? defaultSessions(sessionsLeft);
 
-  // The rows as generated, unless edited (time, suggestion, drop) for this cadence and count.
-  const genKey = `${everyWeeks}|${count}`;
-  const [edits, setEdits] = React.useState<{ key: string; items: SeriesItem[] } | null>(null);
-  const items: SeriesItem[] =
-    edits && edits.key === genKey ? edits.items : seriesDates(date, everyWeeks, count).map((d) => ({ date: d }));
-  const editItems = (fn: (items: SeriesItem[]) => SeriesItem[]) => setEdits({ key: genKey, items: fn(items) });
+  // The rows as generated, unless edited for this start, cadence and count. A row whose date just
+  // changed gets its time fitted to that day as soon as the day loads (derived, so no extra render).
+  const genKey = `${date}|${everyWeeks}|${count}`;
+  const [edits, setEdits] = React.useState<{ key: string; items: EditableItem[] } | null>(null);
+  const edited = !!edits && edits.key === genKey;
+  const baseItems: EditableItem[] = edited ? edits.items : generateItems(date, everyWeeks, count);
 
-  const rowDates = repeat && patientId ? items.map((i) => i.date) : [];
+  const rowDates = repeat && patientId ? baseItems.map((i) => i.date) : [];
   const series = useSeriesAvailability({ center, serviceId, patientId, dates: rowDates });
+  const items = fitLoadedTimes(baseItems, series.days, time);
+  const editItems = (fn: (items: EditableItem[]) => EditableItem[]) => setEdits({ key: genKey, items: fn(items) });
+  const addDate = nextDate(items, everyWeeks, todayPR());
 
   const loadedDays: Record<string, DaySlots | null> = {};
   for (const [d, v] of Object.entries(series.days)) if (v !== "error") loadedDays[d] = v;
@@ -282,7 +295,10 @@ export function ServiceBookingForm({
               className={SELECT_CLASS}
               value={everyWeeks}
               disabled={busy}
-              onChange={(e) => setEveryWeeks(e.target.value === "2" ? 2 : 1)}
+              onChange={(e) => {
+                setEveryWeeks(e.target.value === "2" ? 2 : 1);
+                setEdits(null);
+              }}
             >
               {[1, 2].map((n) => (
                 <option key={n} value={n}>
@@ -294,16 +310,20 @@ export function ServiceBookingForm({
             <select
               id="service-booking-count"
               className={SELECT_CLASS}
-              value={count}
+              value={items.length}
               disabled={busy}
-              onChange={(e) => setCountChoice(Number(e.target.value))}
+              onChange={(e) => {
+                setCountChoice(Number(e.target.value));
+                setEdits(null);
+              }}
             >
-              {Array.from({ length: MAX_SESSIONS - MIN_SESSIONS + 1 }, (_, i) => MIN_SESSIONS + i).map((n) => (
+              {sessionOptions(items.length).map((n) => (
                 <option key={n} value={n}>
                   {n}
                 </option>
               ))}
             </select>
+            {edited && <span className="text-xs text-muted-foreground">{t("series.resetsEdits")}</span>}
           </div>
 
           {!patient ? (
@@ -317,9 +337,24 @@ export function ServiceBookingForm({
                 disabled={busy}
                 canDrop={rows.length > 1}
                 onTime={(index, v) => editItems((list) => setRowTime(list, index, v, time))}
+                onDate={(index, d) => editItems((list) => replaceDate(list, index, d))}
                 onSuggestion={(index, s) => editItems((list) => applySuggestion(list, index, s, time))}
                 onDrop={(index) => editItems((list) => dropRow(list, index))}
               />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  disabled={busy || !addDate}
+                  onClick={() => addDate && editItems((list) => addItem(list, addDate))}
+                >
+                  {t("series.addDate")}
+                </Button>
+                {items.length >= MAX_SESSIONS && (
+                  <span className="text-xs text-muted-foreground">{t("series.maxDates", { n: MAX_SESSIONS })}</span>
+                )}
+              </div>
               {anyFailed && (
                 <div className="flex items-center gap-2 text-destructive">
                   <span>{t("series.checkFailed")}</span>
@@ -349,4 +384,10 @@ export function ServiceBookingForm({
       </div>
     </div>
   );
+}
+
+/** The sessions select: 2–20, plus the current row count when drops took it below 2. */
+function sessionOptions(current: number): number[] {
+  const range = Array.from({ length: MAX_SESSIONS - MIN_SESSIONS + 1 }, (_, i) => MIN_SESSIONS + i);
+  return current < MIN_SESSIONS ? [current, ...range] : range;
 }

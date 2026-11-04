@@ -5035,7 +5035,14 @@
       "fullOption": "{time} (full)",
       "checking": "Checking…",
       "checkFailed": "Could not check these dates.",
-      "noPermission": "You do not have permission to book services."
+      "noPermission": "You do not have permission to book services.",
+      "changeDate": "Change the date ({date})",
+      "datePast": "That day has already passed.",
+      "dateSunday": "Closed on Sundays: pick another day.",
+      "dateTaken": "Another session of this series is already on that day.",
+      "addDate": "+ Add date",
+      "maxDates": "Up to {n} sessions.",
+      "resetsEdits": "Changing this resets your edits."
     },
     "toasts": {
       "booked": "{n, plural, one {# session booked} other {# sessions booked}}",

@@ -5035,7 +5035,14 @@
       "fullOption": "{time} (lleno)",
       "checking": "Comprobando…",
       "checkFailed": "No se pudieron comprobar estas fechas.",
-      "noPermission": "No tienes permiso para agendar servicios."
+      "noPermission": "No tienes permiso para agendar servicios.",
+      "changeDate": "Cambiar la fecha ({date})",
+      "datePast": "Ese día ya pasó.",
+      "dateSunday": "Los domingos está cerrado: elige otro día.",
+      "dateTaken": "Otra sesión de esta serie ya está ese día.",
+      "addDate": "+ Añadir fecha",
+      "maxDates": "Hasta {n} sesiones.",
+      "resetsEdits": "Cambiar esto deshace tus cambios."
     },
     "toasts": {
       "booked": "{n, plural, one {# sesión agendada} other {# sesiones agendadas}}",

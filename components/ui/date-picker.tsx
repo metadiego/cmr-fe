@@ -43,6 +43,8 @@ type DatePickerProps = {
   /** Adds a "Clear" action, for optional dates and filters. */
   clearable?: boolean
   placeholder?: string
+  /** Named format (i18n/formats.ts) of the trigger's label; a compact trigger can show the weekday. */
+  displayFormat?: "dayMonthYear" | "dayWeekdayShort"
   id?: string
   className?: string
   title?: string
@@ -59,6 +61,7 @@ function DatePicker({
   readOnly,
   clearable,
   placeholder,
+  displayFormat = "dayMonthYear",
   id,
   className,
   title,
@@ -108,7 +111,7 @@ function DatePicker({
         >
           <HugeiconsIcon icon={Calendar03Icon} strokeWidth={2} data-icon="inline-start" />
           <span className="truncate">
-            {shown ? format.dateTime(shown, "dayMonthYear") : (placeholder ?? t("pickDate"))}
+            {shown ? format.dateTime(shown, displayFormat) : (placeholder ?? t("pickDate"))}
           </span>
         </Button>
       </PopoverTrigger>
