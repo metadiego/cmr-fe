@@ -539,7 +539,6 @@ export function FilaSesion({
   const flujoCell = (
     <div className="flex items-start gap-0">
       {pasos.map((paso, i) => {
-        if (pasosOcultos?.has(paso.estado)) return null;
         const hecho = !!paso.stamp;
         const siguiente = i === nextIdx; // accionable ahora, según el estado del BE (nunca si cancelada)
         const faltan = siguiente ? faltantesPara(paso.estado) : [];
@@ -564,6 +563,7 @@ export function FilaSesion({
             action: { label: t("deshacer"), onClick: () => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: reversa }, centro)) },
           });
         };
+        if (pasosOcultos?.has(paso.estado)) return hecho && puedeDeshacer ? <button key={paso.key} type="button" onClick={deshacer} className="mt-1 mr-2 shrink-0 self-start rounded-md border border-dashed px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground">{t("removeStep", { step: tRoot(paso.labelKey) })}</button> : null; // hidden per-row step (patient desk): still undoable, per service
         return (
           <React.Fragment key={paso.key}>
             {i > 0 && !pasos.slice(0, i).every((p) => pasosOcultos?.has(p.estado)) && <span className="mt-3 h-px w-4 shrink-0" style={{ backgroundColor: hecho && col ? col : "var(--border)" }} aria-hidden />}

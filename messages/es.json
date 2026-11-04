@@ -1887,6 +1887,7 @@
     "colAreas": "Áreas",
     "volver": "Volver",
     "generar": "Generar",
+    "removeStep": "Quitar {step}",
     "formatoTherapyCount": "Terapias a imprimir",
     "formatoError": "No se pudo cargar el formato",
     "formatoHiltTitle": "Terapia HILT",

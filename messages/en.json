@@ -1887,6 +1887,7 @@
     "colAreas": "Areas",
     "volver": "Back",
     "generar": "Generate",
+    "removeStep": "Remove {step}",
     "formatoTherapyCount": "Therapies to print",
     "formatoError": "Could not load the format",
     "formatoHiltTitle": "HILT therapy",
