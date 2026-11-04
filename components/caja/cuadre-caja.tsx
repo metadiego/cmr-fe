@@ -32,6 +32,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
+import { useCashCountAutosave } from "@/hooks/use-cash-count-autosave";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
@@ -294,6 +295,9 @@ function Editor({
   );
   const [procesando, setProcesando] = React.useState(false);
   const [emailing, setEmailing] = React.useState(false);
+  // The Inicio input is saved as typed; «Aplica» travels apart without zeroing it (see procesarCierre).
+  const openPayload = { division, userId: usuarioId, date: fecha, declaredPettyCash: Math.max(0, Number(inicioStr) || 0), pettyCashApplies: aplicarInicio };
+  const autosave = useCashCountAutosave(contarHabilitado, openPayload, conteo);
 
   // Conteo/inicio por cajero (de los cuadres del día) para UNIR en el consolidado.
   const conteoPorCajero = React.useMemo(() => {
@@ -380,17 +384,9 @@ function Editor({
   async function procesarCierre() {
     setProcesando(true);
     try {
-      // `inicio` (arriba) es de presentación y puede caer a 0 sin haber contado nada — mandarlo
-      // tal cual aquí BORRABA el Inicio escrito al cerrar sin contar antes (bug real, visto en la
-      // fila de prod). Se guarda siempre el valor del input; Aplica viaja aparte, sin poner el
-      // número en 0.
-      const abierto = await abrirCuadre({
-        division,
-        userId: usuarioId,
-        date: fecha,
-        declaredPettyCash: Math.max(0, Number(inicioStr) || 0),
-        pettyCashApplies: aplicarInicio,
-      });
+      // Never `inicio` (presentation, may fall to 0): it wiped the typed Inicio on close (real bug).
+      await autosave.flush(); // no autosave in flight while closing (the BE re-inserts count lines)
+      const abierto = await abrirCuadre(openPayload);
       const lineas = Object.entries(conteo)
         .filter(([, c]) => c > 0)
         .map(([denominationId, quantity]) => ({ denominationId, quantity }));
@@ -499,6 +495,7 @@ function Editor({
             cantidades={conteo}
             disabled={!contarHabilitado}
             hint={hint}
+            saveState={contarHabilitado ? autosave.state : "idle"}
             onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
           />
 

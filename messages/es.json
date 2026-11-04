@@ -3560,6 +3560,7 @@
       "empty": "No hay denominaciones configuradas.",
       "saving": "Guardando…",
       "saved": "Conteo guardado",
+      "saveError": "No se pudo guardar el conteo; se reintentará al cambiar algo.",
       "hint": "Selecciona un cajero para habilitar el conteo.",
       "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo).",
       "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros."
