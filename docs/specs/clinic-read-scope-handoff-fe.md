@@ -1,7 +1,7 @@
 # Handoff FE: el sistema enseña el centro (alcance de lectura por permiso)
 
 Fecha: 03-nov-2026. BE: `cmr-be/docs/specs/clinic-read-scope.md` y `docs/plans/clinic-read-scope.md`.
-Serie: PR #446 (core) y el PR de Pacientes que va encima. Se amplía con cada módulo que migra.
+Serie: PR #446 (core), #447 (Pacientes) y el PR de Citas, cada uno encima del anterior. Se amplía con cada módulo que migra.
 
 ## La idea
 
@@ -38,6 +38,7 @@ Regla para la pantalla, sin llamar a nada más:
 | Módulo | Endpoints | Estado |
 |---|---|---|
 | Pacientes | `GET /patients`, `GET /patients/:id`, `GET /patients/priority-flags` (y MCP `list_patients`, `get_patient`, `list_priority_flags_of_patients`) | BE listo (PR de Pacientes) |
+| Citas | `GET /appointments`, `GET /appointments/:id`, `GET /appointments/board`, `GET /appointments/count-by-day`, `GET /appointments/reports/{summary,doctor-by,times,vitals-by-nurse}` (y su MCP) | BE listo (PR de Citas). **Sin `centerIds`, todavía la sesión**: ver abajo |
 
 ### Pacientes: qué cambia en el FE (después del PR #114)
 
@@ -52,6 +53,35 @@ mismo resultado. Para simplificar, cuando el PR del BE esté desplegado:
    ficha se encuentra por id en todo el alcance. Se puede dejar para no romper enlaces guardados;
    el BE lo sigue aceptando como `centerIds`.
 4. `app/(app)/patients/[id]/layout.tsx`: `getPaciente(id)` sin `centerIds`.
+
+### Citas: qué cambia en el FE
+
+**Ojo, aquí el orden importa.** Estas pantallas eligen el centro con `X-Tenant-ID` (el tercer
+argumento `centroId` de `apiFetch`), no con `centerIds`. Por eso el BE, **sin `centerIds`, sigue
+leyendo el centro de la sesión**, como hoy: nada cambia al desplegarlo. Para que el sistema enseñe
+todos los centros, el FE tiene que mandar `centerIds`. Cuando el FE lo mande siempre, el BE pasa
+el defecto a «todos» (un PR de una línea; avisar).
+
+Con el BE desplegado:
+
+1. `lib/api/citas.ts` (`listCitas`, `listCitasRango`, `countByDay`) y `lib/api/tablero.ts`
+   (`getTablero`): aceptar `centerIds?: string[]` y mandarlo como `?centerIds=a,b`.
+   - Con un centro elegido en el selector: `centerIds=[ese]`.
+   - Sin selector o con «todos»: `centerIds` = los centros donde se puede leer citas
+     (`getCentrosDondePuedo("citas.read")` o el `meta.clinicScope` de una respuesta anterior).
+   - Dejar de usar `centroId` (el `X-Tenant-ID`) para LEER; las escrituras no cambian todavía.
+2. Pintar el centro: filas de la lista y del tablero traen `clinicId` y `clinicName`. Columna
+   «Centro» cuando `meta.clinicScope.clinicIds.length > 1` (en el tablero, cuando las filas traen
+   más de un `clinicId`).
+3. Ficha del paciente y hub del médico (`components/clientes/ficha-tabs.tsx`,
+   `acciones-paciente-sheet.tsx`, `components/personal/medico-hub-tabs.tsx`): con `centerIds` de
+   todos los legibles, las citas del paciente/médico en cualquier centro, cada una con su centro.
+4. `getCita(id)`: ya busca en todos los centros legibles, sin cambiar nada; trae `clinicName`.
+5. Reportes de citas: igual que la lista (`centerIds`; sin él, la sesión).
+6. `agenda-dia` y `cupos-libres` **no cambian**: siguen con `centroId` (son vistas de un centro).
+
+Errores: un `centerIds` con un centro sin `citas.read` → 403 `CENTROS_NO_AUTORIZADOS`. Si se piden
+varios y alguno sí vale, se devuelve lo permitido (`meta.clinicScope.filtered = true`).
 
 ## Sin cambios
 
