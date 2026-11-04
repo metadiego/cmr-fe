@@ -33,6 +33,8 @@ import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
 import { useCan } from "@/hooks/use-can";
 import { useCashCountAutosave } from "@/hooks/use-cash-count-autosave";
+import { consolidatedCount } from "@/lib/caja/consolidated-count";
+import { ConsolidatedCountBar } from "@/components/caja/consolidated-count-bar";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
@@ -199,21 +201,14 @@ function Loader(props: LoaderProps) {
       // Grupos configurables de método de pago (para subtotales informativos, p.ej. visa_mc).
       getGruposMetodoPago(),
     ]);
-    // Cuadre editable: un cajero concreto (no el consolidado). En consolidado se traen TODOS los
-    // cuadres con su conteo para UNIR (sumar) las cantidades por denominación (vista solo lectura).
+    // One cashier: their cuadre. Consolidated: every cuadre — the manager's own count (userId null)
+    // wins, else the sum of the cashiers' (lib/caja/consolidated-count.ts).
     const found = esConsolidado ? null : lista[0];
-    const detalles = esConsolidado
-      ? await Promise.all(lista.map((c) => getCuadre(c.id)))
-      : found
-        ? [await getCuadre(found.id)]
-        : [];
-    const cuadre = esConsolidado ? null : (detalles[0] ?? null);
-    // Conteo inicial = unión de las líneas de conteo de los cuadres traídos (por denominacionId).
-    const conteoInicial: Record<string, number> = {};
-    for (const d of detalles)
-      for (const l of d.conteo)
-        conteoInicial[l.denominationId] = (conteoInicial[l.denominationId] ?? 0) + l.quantity;
-    return { reporte, denoms, cuadre, conteoInicial, cuadres: lista, cajeros, grupos };
+    const detalles = esConsolidado ? await Promise.all(lista.map((c) => getCuadre(c.id))) : found ? [await getCuadre(found.id)] : [];
+    const cc = consolidatedCount(detalles);
+    const cuadre = esConsolidado ? cc.manager : (detalles[0] ?? null);
+    const conteoInicial = cc.initial;
+    return { reporte, denoms, cuadre, conteoInicial, conteoSuma: cc.sum, managerCounted: cc.managerCounted, cuadres: lista, cajeros, grupos };
   }, []);
 
   if (bundle.state.kind === "loading")
@@ -221,7 +216,7 @@ function Loader(props: LoaderProps) {
   if (bundle.state.kind !== "ok")
     return <p className="text-sm text-destructive">{bundle.state.message}</p>;
 
-  const { reporte, denoms, cuadre, conteoInicial, cuadres, cajeros, grupos } = bundle.state.data;
+  const { reporte, denoms, cuadre, conteoInicial, conteoSuma, managerCounted, cuadres, cajeros, grupos } = bundle.state.data;
   return (
     <Editor
       // Stable: the first autosave creates the cuadre (null → id) and a remount would drop keystrokes.
@@ -231,6 +226,8 @@ function Loader(props: LoaderProps) {
       denoms={denoms}
       cuadreInicial={cuadre}
       conteoInicial={conteoInicial}
+      conteoSuma={conteoSuma}
+      managerCounted={managerCounted}
       cuadres={cuadres}
       cajeros={cajeros}
       grupos={grupos}
@@ -257,6 +254,8 @@ function Editor({
   denoms,
   cuadreInicial,
   conteoInicial,
+  conteoSuma,
+  managerCounted,
   cuadres,
   cajeros,
   grupos,
@@ -266,6 +265,8 @@ function Editor({
   denoms: Denominacion[];
   cuadreInicial: CuadreConItems | null;
   conteoInicial: Record<string, number>;
+  conteoSuma: Record<string, number>;
+  managerCounted: boolean;
   cuadres: CuadreRow[];
   cajeros: Cajero[];
   grupos: GrupoMetodoPago[];
@@ -276,10 +277,11 @@ function Editor({
   const usuarioId = scopeUsuarioId(scope);
   const esConsolidado = usuarioId === null;
   const cerrado = cuadreInicial?.status === "cerrado";
-  // Contar habilitado: cajero concreto, no cerrado, y (hoy O permiso de retroactivo — RBAC). El
-  // consolidado NO se cuenta (es la UNIÓN de todos los cajeros); tampoco fechas pasadas sin permiso.
-  const contarHabilitado =
-    !cerrado && !esConsolidado && (esHoy || puedeRetroactivo);
+  // Counting: not closed, today (or caja.retroactivo), and a concrete cashier — or the consolidated,
+  // only for caja.ver_todos once the manager chose to do ONE count (else it is the read-only sum).
+  const [managerCounting, setManagerCounting] = React.useState(managerCounted);
+  const puedeContarDia = !cerrado && (esHoy || puedeRetroactivo);
+  const contarHabilitado = puedeContarDia && (!esConsolidado || (isGerencia && managerCounting));
 
   // Conteo inicial: en un cajero = su conteo; en consolidado = la UNIÓN (Σ) de todos (solo lectura).
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => ({ ...conteoInicial }));
@@ -297,7 +299,7 @@ function Editor({
   const [procesando, setProcesando] = React.useState(false);
   const [emailing, setEmailing] = React.useState(false);
   // The Inicio input is saved as typed; «Aplica» travels apart without zeroing it (see procesarCierre).
-  const openPayload = { division, userId: usuarioId, date: fecha, declaredPettyCash: Math.max(0, Number(inicioStr) || 0), pettyCashApplies: aplicarInicio };
+  const openPayload = { division, userId: usuarioId, date: fecha, declaredPettyCash: esConsolidado ? 0 : Math.max(0, Number(inicioStr) || 0), pettyCashApplies: !esConsolidado && aplicarInicio }; // consolidated Inicio = the cashiers' funds
   const autosave = useCashCountAutosave(contarHabilitado, openPayload, conteo, onReload);
 
   // Conteo/inicio por cajero (de los cuadres del día) para UNIR en el consolidado.
@@ -311,13 +313,13 @@ function Editor({
     [denoms, conteo],
   );
   const salesCash = reporte.detalle.efectivo.amount;
-  const inicioInput = aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
+  const inicioInput = esConsolidado ? (reporte.reconciliation?.fondoInicial ?? 0) : aplicarInicio ? Math.max(0, Number(inicioStr) || 0) : 0;
   // Mientras el cajero está TECLEANDO su propio conteo se usa la fórmula legacy en vivo (el BE no
   // puede conocer lo que aún no se guardó); en cualquier otro caso — recién abierto, o el
   // consolidado de gerencia (ya NO se suma a mano, bug real 03-oct-2026) — manda siempre la
   // reconciliación resuelta por el BE. El cuadre ya CERRADO queda fuera: su diferencia está
   // sellada y no se toca (no-scope del handoff).
-  const escribiendo = !esConsolidado && !cerrado && Object.values(conteo).some((c) => c > 0);
+  const escribiendo = (!esConsolidado || managerCounting) && !cerrado && Object.values(conteo).some((c) => c > 0);
   const vivo = estadoCuadreVivo({
     escribiendo,
     contadoLocal,
@@ -449,7 +451,7 @@ function Editor({
     toast.success(t("exported"));
   }
 
-  const hint = esConsolidado
+  const hint = esConsolidado && !managerCounting
     ? t("count.consolidatedHint")
     : !esHoy && !puedeRetroactivo
       ? t("count.pastLocked")
@@ -491,6 +493,7 @@ function Editor({
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         {/* Panel izquierdo: conteo + inicio + resumen por cajero */}
         <div className="space-y-4">
+          {esConsolidado && isGerencia && puedeContarDia && <ConsolidatedCountBar counting={managerCounting} onCount={() => setManagerCounting(true)} backToSum={async () => { await autosave.flush(); await contarCuadre((await abrirCuadre(openPayload)).id, []); setManagerCounting(false); setConteo({ ...conteoSuma }); onReload(); }} />}
           <ConteoDenominaciones
             denominaciones={denoms}
             cantidades={conteo}

@@ -3561,6 +3561,13 @@
       "saving": "Saving…",
       "saved": "Count saved",
       "saveError": "The count could not be saved; it will retry on the next change.",
+      "managerCount": "Manager's count",
+      "managerCountHint": "This single count overrides the cashiers' sum.",
+      "cashiersSum": "Cashiers' sum",
+      "cashiersSumHint": "Read only: the sum of each cashier's count.",
+      "countMyself": "Do a single count",
+      "backToSum": "Back to the cashiers' sum",
+      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used.",
       "hint": "Select a cashier to enable counting.",
       "pastLocked": "Editing past dates requires permission (caja.retroactivo).",
       "consolidatedHint": "Consolidated count (read-only): sum of all cashiers."
