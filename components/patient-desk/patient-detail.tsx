@@ -421,7 +421,8 @@ export function PatientDetail({
               <Button
                 size="sm"
                 variant="outline"
-                className="border-dashed border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                className="border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                title={t("markPresentHint")}
                 disabled={presenceBusy}
                 onClick={handlePresent}
               >
