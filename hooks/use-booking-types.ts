@@ -17,6 +17,10 @@ export interface BookingType {
   name: string
   color: string | null
   slug: string
+  /** Medical types only: their configured length. */
+  durationMinutes: number | null
+  /** Medical types only: booked with a doctor. */
+  requiresDoctor: boolean
 }
 
 export interface BookingTypes {
@@ -36,6 +40,8 @@ const fromTipo = (x: TipoCita): BookingType => ({
   name: x.name,
   color: x.color,
   slug: x.slug,
+  durationMinutes: x.durationMinutes > 0 ? x.durationMinutes : null,
+  requiresDoctor: x.requiresDoctor,
 })
 
 const fromServicio = (x: Servicio): BookingType => ({
@@ -44,6 +50,8 @@ const fromServicio = (x: Servicio): BookingType => ({
   name: x.name,
   color: x.color,
   slug: x.slug,
+  durationMinutes: null,
+  requiresDoctor: false,
 })
 
 export function useBookingTypes(center: string | undefined): BookingTypes {

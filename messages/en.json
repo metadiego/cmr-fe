@@ -4912,7 +4912,20 @@
       "serviceGroup": "Service",
       "sessionsLeft": "{n, plural, one {# session left} other {# sessions left}}",
       "noMedical": "There are no appointment types.",
-      "noServices": "This center has no services."
+      "noServices": "This center has no services.",
+      "searchLabel": "Search appointment type or service",
+      "searchPlaceholder": "Type to filter… (laser, IV, chamber…)",
+      "noMatches": "Nothing matches “{q}”.",
+      "packages": "Packages",
+      "packagesOf": "{name}'s packages",
+      "minutes": "{n} min",
+      "withDoctor": "with doctor",
+      "nextFree": "next free",
+      "today": "Today",
+      "checking": "Looking for the next free time…",
+      "noneSoon": "No free time in the next 14 days",
+      "nextFailed": "Could not look for the next free time",
+      "notSetUp": "Not set up for booking"
     },
     "patient": {
       "clear": "Back to start",

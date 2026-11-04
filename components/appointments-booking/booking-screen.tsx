@@ -14,7 +14,7 @@ import { Can } from "@/components/kit/can";
 import { LiveBadge } from "@/components/live-badge";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling-panel";
-import { TypePickerPanel } from "@/components/appointments-booking/type-picker-panel";
+import { TypeListPanel } from "@/components/appointments-booking/type-list-panel";
 import { PatientCard } from "@/components/appointments-booking/patient-card";
 import { BookingCalendar, type CalendarMoving } from "@/components/appointments-booking/booking-calendar";
 import { ServiceBookingForm } from "@/components/appointments-booking/service-booking-form";
@@ -448,7 +448,7 @@ export function BookingScreen() {
 
         {/* RIGHT: what we are booking, or the calendar for the chosen type. */}
         {!typeChosen ? (
-          <TypePickerPanel
+          <TypeListPanel
             title={
               state.patientId && firstName
                 ? t("typePicker.titleFor", { name: firstName })
@@ -456,6 +456,7 @@ export function BookingScreen() {
             }
             center={center}
             patientId={state.patientId}
+            patientName={state.patientId ? firstName : undefined}
             types={types}
             onPick={pickType}
           />

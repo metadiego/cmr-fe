@@ -53,3 +53,31 @@ export async function runLimited<T>(
   )
   return results
 }
+
+/**
+ * A shared queue: `run(task)` starts the task when fewer than `limit` are in flight, else when one ends.
+ * Unlike `runLimited` (one batch), callers from anywhere share the same limit.
+ */
+export function createLimiter(limit: number): <T>(task: () => Promise<T>) => Promise<T> {
+  let active = 0
+  const queue: (() => void)[] = []
+  const next = () => {
+    if (active >= limit) return
+    const start = queue.shift()
+    if (start) start()
+  }
+  return <T>(task: () => Promise<T>) =>
+    new Promise<T>((resolve, reject) => {
+      queue.push(() => {
+        active++
+        Promise.resolve()
+          .then(task)
+          .then(resolve, reject)
+          .finally(() => {
+            active--
+            next()
+          })
+      })
+      next()
+    })
+}

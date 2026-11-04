@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
 
-import { datesToRefresh, dayKey, isCurrent, runLimited } from "./day-cache.ts"
+import { createLimiter, datesToRefresh, dayKey, isCurrent, runLimited } from "./day-cache.ts"
 
 test("datesToRefresh returns all visible dates when event has no date", () => {
   const visible = ["2026-11-01", "2026-11-02"]
@@ -66,4 +66,31 @@ test("dayKey differs by patient", () => {
 test("cache ignores results for a stale key", () => {
   assert.equal(isCurrent("a|1", "a|1"), true)
   assert.equal(isCurrent("a|1", "b|2"), false)
+})
+
+test("createLimiter: callers share the limit and every result comes back", async () => {
+  const run = createLimiter(2)
+  let active = 0
+  let peak = 0
+  const task = (v: number) => async () => {
+    active++
+    peak = Math.max(peak, active)
+    await new Promise((r) => setTimeout(r, 5))
+    active--
+    return v
+  }
+  const out = await Promise.all([1, 2, 3, 4, 5].map((v) => run(task(v))))
+  assert.deepEqual(out, [1, 2, 3, 4, 5])
+  assert.equal(peak, 2)
+})
+
+test("createLimiter: a failing task rejects its caller and frees its place", async () => {
+  const run = createLimiter(1)
+  await assert.rejects(
+    run(() => {
+      throw new Error("boom")
+    }),
+    /boom/
+  )
+  assert.equal(await run(async () => "next"), "next")
 })

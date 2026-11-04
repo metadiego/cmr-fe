@@ -8,6 +8,7 @@ import {
   type DaySlots,
 } from "@/lib/agenda/booking/availability"
 import {
+  createLimiter,
   datesToRefresh,
   dayKey,
   isCurrent,
@@ -104,6 +105,28 @@ async function requestDay(
   }
   cache.set(key, { at: Date.now(), value })
   return value
+}
+
+// The type list's "next free" scans share one queue with the same limit as a month load.
+const scanQueue = createLimiter(MONTH_CONCURRENCY)
+
+/**
+ * One day for a scan (no patient), from the cache or through the shared queue. `skip()` is asked when the
+ * request's turn comes: a scan that was dropped meanwhile (its row filtered out or gone) resolves
+ * undefined without asking the API.
+ */
+export function loadDay(
+  center: string,
+  kind: BookingKind,
+  typeId: string,
+  date: string,
+  skip: () => boolean
+): Promise<DaySlots | null | undefined> {
+  const hit = cached(dayKey(center, kind, typeId, date))
+  if (hit !== undefined) return Promise.resolve(hit)
+  return scanQueue(() =>
+    skip() ? Promise.resolve(undefined) : fetchDay(center, kind, typeId, date)
+  )
 }
 
 export function useMonthAvailability(p: {
