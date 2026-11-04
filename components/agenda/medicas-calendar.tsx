@@ -221,6 +221,7 @@ export function MedicasCalendar() {
           </p>
         ) : (
           <MonthCalendar
+            fill
             year={year}
             month0={month0}
             weekdays={weekdays}

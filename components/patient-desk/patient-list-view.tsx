@@ -12,6 +12,7 @@ import {
 } from "@/components/patient-desk/patient-detail"
 import { cn } from "@/lib/utils"
 import { usePatientsPriorityFlags } from "@/hooks/use-patients-priority-flags"
+import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height"
 import { PriorityFlagPill } from "@/components/clientes/priority-flags-badges"
 import { fmtHora } from "@/components/frontdesk/frontdesk-board.helpers"
 
@@ -48,10 +49,18 @@ export function PatientListView({
     centerId
   )
   const selected = patients.find((p) => p.patientId === selectedId) ?? null
+  // On desktop both panels run to the bottom of the window (minus the page's bottom padding) and
+  // scroll on their own; on narrow screens they stack at their natural height.
+  const gridRef = React.useRef<HTMLDivElement>(null)
+  const fillHeight = useFillViewportHeight(gridRef)
   return (
-    <div className="grid min-h-[60vh] gap-4 lg:grid-cols-[minmax(280px,360px)_1fr]">
+    <div
+      ref={gridRef}
+      style={fillHeight ? { height: fillHeight } : undefined}
+      className="grid gap-4 lg:grid-cols-[minmax(280px,360px)_1fr]"
+    >
       <ul
-        className="max-h-[calc(100vh-15rem)] space-y-1.5 overflow-y-auto rounded-lg bg-card p-2 ring-1 ring-foreground/10"
+        className="max-h-[70vh] space-y-1.5 overflow-y-auto rounded-lg bg-card p-2 ring-1 ring-foreground/10 lg:max-h-none"
         aria-label={t("patients")}
       >
         {patients.map((p) => (
@@ -111,7 +120,7 @@ export function PatientListView({
           </li>
         ))}
       </ul>
-      <div className="min-w-0 rounded-lg bg-card p-4 ring-1 ring-foreground/10">
+      <div className="min-w-0 overflow-y-auto rounded-lg bg-card p-4 ring-1 ring-foreground/10">
         {selected ? (
           <PatientDetail
             patient={selected}
