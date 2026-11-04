@@ -2219,9 +2219,12 @@
       "cienDescuento": "100% descuento",
       "cobradas": "cobradas",
       "pagina": "Página",
-      "rango": "Rango"
+      "rango": "Rango",
+      "centros": "Total ({n} centros)"
     },
-    "live": "En vivo"
+    "live": "En vivo",
+    "nuevaVentaEn": "Nueva venta en {centro}",
+    "colCentro": "Centro"
   },
   "facturacionTabs": {
     "facturas": "Facturas",
@@ -3519,7 +3522,8 @@
       "monto": "Monto",
       "estado": "Estado",
       "motivo": "Motivo",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "centro": "Centro"
     }
   },
   "caja": {

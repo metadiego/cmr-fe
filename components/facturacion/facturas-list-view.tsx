@@ -9,10 +9,11 @@ import { getFacturasTablero, getFacturasResumen, editarCabeceraFactura, type Fac
 import { getOpciones, type Opcion } from "@/lib/api/tablero";
 import { toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
-import { useCentroGate } from "@/hooks/use-centro-gate";
-import { useCitaStream } from "@/hooks/use-cita-stream";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { useActiveClinic } from "@/hooks/use-active-clinic";
 import { LiveBadge } from "@/components/live-badge";
-import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { CenterFilter } from "@/components/kit/center-filter";
+import { InvoiceLiveFeeds, useInvoiceLiveFeeds } from "@/components/facturacion/invoice-live-feeds";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,14 @@ import { DataTable, TableEmpty, TableError } from "@/components/ui/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableRowsSkeleton } from "@/components/kit/skeletons";
 import { DEFAULT_INVOICE_COLUMNS, invoiceColumnShape } from "@/lib/facturacion/invoice-board-defaults";
+import {
+  clinicForNewSale,
+  invoiceDetailHref,
+  newSaleHref,
+  optionsKey,
+  rangeTotalScope,
+  rowClinicIds,
+} from "@/lib/facturacion/invoice-clinics";
 import {
   TableBody,
   TableCell,
@@ -92,72 +101,70 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
     router.replace(qs ? `?${qs}` : "?", { scroll: false });
   }, [q, estado, desde, hasta, router]);
 
-  const gate = useCentroGate();
+  // Every clinic where the person reads invoices, narrowed by the filter (clinic-read-scope). No screen
+  // clinic any more: each row carries its own, and every action on a row runs in the ROW's clinic.
+  const filter = useClinicFilter("factura.read");
+  const readable = React.useMemo(() => filter.centers.map((c) => c.id), [filter.centers]);
   const { state, refresh } = useResource<FacturaTablero>(
-    () =>
-      gate.centro
-        ? getFacturasTablero({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
-        : Promise.resolve({ columns: [], rows: [] }),
-    [q, estado, desde, hasta, gate.centro, contexto],
+    () => getFacturasTablero({ q, status: estado, from: desde, to: hasta, context: contexto }, filter.choice),
+    [q, estado, desde, hasta, filter.choiceKey, contexto],
   );
 
-  // Resumen del RANGO (total del servidor): mismos filtros que la lista. La lista pinta /facturas/tablero
-  // (filas resueltas, sin resumen) → este es el único que trae importe/exentas/cobradas + total del rango.
+  // Summary of the RANGE (server total): same filters and the same clinics as the list. The list paints
+  // /invoices/board (resolved rows, no summary) → this is the only one with importe/exentas/cobradas.
   const resumenRes = useResource<FacturasResumen>(
-    () =>
-      gate.centro
-        ? getFacturasResumen({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
-        : Promise.resolve({ importe: 0, exentas: 0, cobradas: 0, total: 0 }),
-    [q, estado, desde, hasta, gate.centro, contexto],
+    () => getFacturasResumen({ q, status: estado, from: desde, to: hasta, context: contexto }, filter.choice),
+    [q, estado, desde, hasta, filter.choiceKey, contexto],
   );
   const resumen = resumenRes.state.kind === "ok" ? resumenRes.state.data : null;
 
-  // Live: the BE publishes invoice events (issued, paid, …) on the center's single SSE bus. Any of them
-  // refreshes the list and its range total in place; the hook also refetches on tab focus and polls
-  // while the stream is down.
+  // Live: the BE publishes invoice events (issued, paid, …) on each clinic's SSE bus; we listen to every
+  // clinic shown. Any event refreshes the list and its range total in place.
   const { refresh: refreshResumen } = resumenRes;
-  const { live } = useCitaStream({
-    centroId: gate.centro ?? null,
-    enabled: !!gate.centro,
-    entidad: "factura",
-    onInvalidate: () => {
-      refresh();
-      refreshResumen();
-    },
-  });
+  const liveClinics = filter.choice ?? readable;
+  const { live, onLive } = useInvoiceLiveFeeds(liveClinics);
+  const onInvalidate = React.useCallback(() => {
+    refresh();
+    refreshResumen();
+  }, [refresh, refreshResumen]);
 
   const tablero = state.kind === "ok" ? state.data : null;
   // The board's columns survive a filter change: while the new range loads, the header stays put and
-  // only the body turns into skeleton rows (a centre-less placeholder fetch never counts).
+  // only the body turns into skeleton rows.
   const [knownCols, setKnownCols] = React.useState<FacturaTableroColumna[] | null>(null);
-  const freshCols = gate.centro && tablero ? tablero.columns : null;
+  const freshCols = tablero ? tablero.columns : null;
   if (freshCols && freshCols !== knownCols) setKnownCols(freshCols);
   const rawCols = freshCols ?? knownCols;
   const columnas = (rawCols ?? []).filter((c) => c.clave !== "fac_acciones");
-  const loading = gate.cargando || state.kind === "loading";
+  const loading = state.kind === "loading";
   const filas = tablero?.rows ?? [];
 
-  // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select+editable con writeBinding.
-  // Las opciones salen del motor de tableros (GET /tablero/opciones), cargadas UNA vez por columna.
+  // Inline-editable columns (fac_medico/fac_usuario): the BE declares them select+editable with a
+  // writeBinding. Their options (doctors, users) belong to a clinic, so they load once per column AND per
+  // distinct clinic of the rows shown; a row's select offers its own clinic's options.
   const selectCols = columnas.filter((c) => c.tipo === "select" && c.editable);
   const selectKey = selectCols.map((c) => c.clave).join(",");
+  const rowClinics = rowClinicIds(filas);
+  const rowClinicsKey = rowClinics.join(",");
   const opcionesRes = useResource<Record<string, Opcion[]>>(
     async () => {
-      if (!gate.centro || selectCols.length === 0) return {};
+      if (selectCols.length === 0 || rowClinics.length === 0) return {};
+      const pairs = rowClinics.flatMap((clinic) => selectCols.map((c) => [clinic, c.clave] as const));
       const entries = await Promise.all(
-        selectCols.map(async (c) => [c.clave, await getOpciones("facturacion", c.clave, gate.centro!)] as const),
+        pairs.map(async ([clinic, col]) => [optionsKey(clinic, col), await getOpciones("facturacion", col, clinic)] as const),
       );
       return Object.fromEntries(entries);
     },
-    [selectKey, gate.centro],
+    [selectKey, rowClinicsKey],
   );
   const opciones = opcionesRes.state.kind === "ok" ? opcionesRes.state.data : {};
 
-  // Celda: select editable (médico/usuario) reusando el escritor correcto (PUT /facturas/:id/cabecera);
-  // el resto, display. stopPropagation para no navegar al detalle al usar el select.
+  // Cell: editable select (doctor/user) through the right writer (PUT /invoices/:id/header) in the ROW's
+  // clinic; the rest, display. stopPropagation so using the select does not open the detail.
   function renderCelda(col: FacturaTableroColumna, fila: FacturaTableroFila) {
     if (col.tipo === "select" && col.editable) {
-      return <SelectCelda col={col} fila={fila} opciones={opciones[col.clave] ?? []} centro={gate.centro} onSaved={refresh} />;
+      const clinic = fila.clinicId ?? undefined;
+      return <SelectCelda col={col} fila={fila} opciones={opciones[optionsKey(clinic, col.clave)] ?? []} centro={clinic} onSaved={refresh} />;
     }
     return cell(col.clave, fila[col.clave]);
   }
@@ -172,7 +179,20 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   const labelExentas = esConsulta ? t("totales.cortesias") : t("totales.cienDescuento");
   // ¿Página == rango? (sin resumen aún, o mismo conteo) → un solo total.
   const totalUnico = !resumen || paginaCount === resumen.total;
-  const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
+  // The range total sums the clinics shown: say which (one by name, several by count) to whoever reads
+  // more than one clinic.
+  const totalScope = filter.showColumn ? rangeTotalScope(filter.choice, readable) : null;
+  const totalScopeLabel = !totalScope
+    ? null
+    : totalScope.kind === "one"
+      ? filter.nameOf(totalScope.clinicId)
+      : t("totales.centros", { n: totalScope.count });
+
+  // A new sale needs ONE clinic: the single ticked one, else the active one (top bar). Shown on the
+  // button to whoever can bill in more than one clinic.
+  const active = useActiveClinic();
+  const saleClinic = clinicForNewSale(filter.choice, readable, active);
+  const saleClinicName = filter.showFilter && saleClinic ? filter.nameOf(saleClinic) : "";
 
   function cell(clave: string, value: unknown) {
     if (clave === "fac_estado") return <EstadoBadge estado={String(value ?? "")} />;
@@ -188,26 +208,31 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
       {live && <LiveBadge label={t("live")} />}
       {!esConsulta && (
         <Button size="sm" asChild>
-          <Link href={`/billing/invoices/new?nuevo=1${gate.centro ? `&centro=${gate.centro}` : ""}`}>{t("nuevaVenta")}</Link>
+          <Link href={newSaleHref(saleClinic)}>{saleClinicName ? t("nuevaVentaEn", { centro: saleClinicName }) : t("nuevaVenta")}</Link>
         </Button>
       )}
     </>
   );
 
+  const colCount = columnas.length + 2 + (filter.showColumn ? 1 : 0);
+
   return (
     <PageContainer>
+      <InvoiceLiveFeeds clinicIds={liveClinics} onInvalidate={onInvalidate} onLive={onLive} />
       {/* Under the billing tabs, the actions go on the tab bar's row; anywhere else, in the header. */}
       {inTabsBar && <TabsActions>{headerActions}</TabsActions>}
       <PageHeader title={esConsulta ? t("titleConsulta") : t("title")} actions={inTabsBar ? undefined : headerActions} />
 
-      {gate.sinCentro ? (
+      {!filter.loading && filter.centers.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
-      ) : gate.necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {/* Center: switched from the app header's center selector (no per-list bar). */}
-          <ListToolbar search={q} onSearchChange={setQ} searchPlaceholder={t("searchPlaceholder")}>
+          <ListToolbar
+            search={q}
+            onSearchChange={setQ}
+            searchPlaceholder={t("searchPlaceholder")}
+            filters={filter.showFilter && <CenterFilter centers={filter.centers} selected={filter.selected} onChange={filter.setSelected} />}
+          >
             <Select value={estado || ALL} onValueChange={(v) => setEstado(v === ALL ? "" : v)}>
               <SelectTrigger size="sm" className="w-[170px]"><SelectValue placeholder={t("allStates")} /></SelectTrigger>
               <SelectContent>
@@ -245,6 +270,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
           )}
           {state.kind === "ok" && filas.length > 0 && (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border bg-muted/30 px-3 py-2 text-sm">
+              {totalScopeLabel && <span className="font-medium text-muted-foreground">{totalScopeLabel}:</span>}
               {totalUnico ? (
                 <>
                   <span className="font-semibold tabular-nums">{moneyBar.format(resumen?.importe ?? paginaImporte)}</span>
@@ -283,6 +309,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                 {(rawCols ? columnas : DEFAULT_INVOICE_COLUMNS).map((c) => (
                   <TableHead key={c.clave}>{tRoot(c.labelKey)}</TableHead>
                 ))}
+                {filter.showColumn && <TableHead>{t("colCentro")}</TableHead>}
                 <TableHead className="text-right">{tRoot("fac.col.acciones")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -292,25 +319,32 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
                   columns={[
                     "short",
                     ...(rawCols ? columnas : DEFAULT_INVOICE_COLUMNS).map((c) => invoiceColumnShape(c.clave)),
+                    ...(filter.showColumn ? (["badge"] as const) : []),
                     "button",
                   ]}
                 />
               )}
               {!loading && state.kind === "fail" && (
-                <TableError colSpan={columnas.length + 2}>{tRoot("common.error")}</TableError>
+                <TableError colSpan={colCount}>{tRoot("common.error")}</TableError>
               )}
               {!loading && state.kind === "ok" && filas.length === 0 && (
-                <TableEmpty colSpan={columnas.length + 2}>{rangoEsHoy ? t("emptyHoy") : t("empty")}</TableEmpty>
+                <TableEmpty colSpan={colCount}>{rangoEsHoy ? t("emptyHoy") : t("empty")}</TableEmpty>
               )}
               {!loading && filas.map((f, i) => (
-                <TableRow key={f.id} className="cursor-pointer" onClick={() => router.push(detalleHref(f.id))}>
+                <TableRow key={f.id} className="cursor-pointer" onClick={() => router.push(invoiceDetailHref(f.id, f.clinicId))}>
                   {/* Ordinal continuo (con paginación: (page-1)*limit + i + 1; hoy la lista es de una página). */}
                   <TableCell className="text-right tabular-nums text-muted-foreground">{i + 1}</TableCell>
                   {columnas.map((c) => (
                     <TableCell key={c.clave}>{renderCelda(c, f)}</TableCell>
                   ))}
+                  {filter.showColumn && (
+                    <TableCell>
+                      <Badge variant="outline">{f.clinicName || filter.nameOf(f.clinicId) || "—"}</Badge>
+                    </TableCell>
+                  )}
                   <TableCell className="text-right">
-                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={gate.centro} onChanged={refresh} />
+                    {/* Void, return, email, edit: in the invoice's OWN clinic. */}
+                    <FacturaRowActions facturaId={f.id} estado={String(f.fac_estado ?? "")} centroId={f.clinicId ?? undefined} onChanged={refresh} />
                   </TableCell>
                 </TableRow>
               ))}
