@@ -1,5 +1,6 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { streamError } from "@/lib/api/stream-retry";
@@ -9,8 +10,12 @@ import { streamError } from "@/lib/api/stream-retry";
 // /alertas y /notificaciones están deprecados — NO usarlos). Verificado prod 2026-07-13.
 
 // metadata viene como Record<string,never> en OpenAPI (quirk) → lo tipamos usable.
+// `clinicId`/`clinicName`: the alert's clinic (clinic-read-scope: the list spans every clinic where the
+// person holds alertas.read; the BE adds `clinicName` to each row, not yet in the generated schema).
 export type Alerta = Omit<components["schemas"]["AlertaEntity"], "metadata"> & {
   metadata: Record<string, unknown> | null;
+  clinicId?: string | null;
+  clinicName?: string | null;
 };
 // El BE agregó `dominio` (inventario|caja|clinico|agenda|…) y `color` (clave SEMÁNTICA: verde|ambar|
 // rojo|azul|violeta|gris, NO un hex) a cada tipo — la campana los mapea a la paleta. El schema generado
@@ -20,7 +25,11 @@ export type TipoAlerta = components["schemas"]["TipoAlertaEntity"] & {
   domain?: string | null;
   color?: string | null; // se dice igual (CAMPOS_IGUALES)
 };
-export type Notificacion = components["schemas"]["NotificacionEntity"];
+// Same for the notifications log (notificaciones.read).
+export type Notificacion = components["schemas"]["NotificacionEntity"] & {
+  clinicId?: string | null;
+  clinicName?: string | null;
+};
 export type Plantilla = components["schemas"]["PlantillaNotificacionEntity"];
 export type EnviarNotificacionPayload = components["schemas"]["EnviarNotificacionDto"];
 export type CreatePlantillaPayload = components["schemas"]["CreatePlantillaDto"];
@@ -35,8 +44,9 @@ export interface AlertasResponse {
   unread: number;
 }
 
-export function listAlertas(): Promise<AlertasResponse> {
-  return apiFetch<AlertasResponse>(`/communications/alerts`);
+// `choice` null (default) = every clinic where the person holds alertas.read; ids = only those.
+export async function listAlertas(choice: CenterChoice = null): Promise<AlertasResponse> {
+  return apiFetch<AlertasResponse>(await oneCenterPath(`/communications/alerts`, choice), undefined, tenantOf(choice));
 }
 export function marcarLeida(id: string): Promise<unknown> {
   return apiFetch(`/communications/alerts/${id}/read`, { method: "POST" });
@@ -65,9 +75,14 @@ export function alertaHref(a: Alerta): string | null {
 }
 
 // Notificaciones (canales salientes).
-export function listNotificaciones(citaId?: string): Promise<Notificacion[]> {
+// `choice` null (default) = every clinic where the person holds notificaciones.read; ids = only those.
+export async function listNotificaciones(citaId?: string, choice: CenterChoice = null): Promise<Notificacion[]> {
   const qs = citaId ? `?appointmentId=${encodeURIComponent(citaId)}` : "";
-  return apiFetch<Notificacion[]>(`/communications/notifications${qs}`);
+  return apiFetch<Notificacion[]>(
+    await oneCenterPath(`/communications/notifications${qs}`, choice),
+    undefined,
+    tenantOf(choice),
+  );
 }
 export function enviarNotificacion(
   payload: EnviarNotificacionPayload,

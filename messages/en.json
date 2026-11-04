@@ -3403,7 +3403,8 @@
       "estado": "Status",
       "destino": "Recipient",
       "fecha": "Date",
-      "cuerpo": "Body"
+      "cuerpo": "Body",
+      "centro": "Clinic"
     },
     "estadoNotif": {
       "pendiente": "Pending",

@@ -14,9 +14,11 @@ import {
   type TransferenciaHistorial,
   type DestinoTransferencia,
 } from "@/lib/api/transferencias";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/centers";
 import { useResource } from "@/hooks/use-resource";
-import { getActiveCentro } from "@/lib/tenant";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { canReceiveTransfer, transferClinicName } from "@/lib/inventario/transfer-clinics";
+import { CenterFilter } from "@/components/kit/center-filter";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,13 +41,24 @@ const ESTADO_VARIANT: Record<string, "default" | "secondary" | "outline" | "dest
 const ESTADOS = ["pendiente", "recibida", "recibida_parcial", "rechazada", "cancelada"];
 const TODOS = "__todos__";
 
-// Transferencias del centro: bandeja de PENDIENTES (accionable) arriba + HISTORIAL con filtros abajo.
+// Transfers with either end in a clinic the person reads (inventario.read, clinic filter on top): the
+// PENDING inbox (actionable) first, then the HISTORY with its own filters.
 export function TransferenciasList() {
   const t = useTranslations("transferencias");
   const tc = useTranslations("common");
-  const activeCentro = getActiveCentro();
+  const clinics = useClinicFilter("inventario.read");
+  // Clinics where the person can receive: "to receive" follows the transfer's destination, not the
+  // active clinic (the BE receives in the destination clinic, inventario.recibir checked there).
+  const receivableRes = useResource<Centro[]>(() => getCentrosDondePuedo("inventario.recibir"));
+  const receivable = React.useMemo(
+    () => (receivableRes.state.kind === "ok" ? receivableRes.state.data.map((c) => c.id) : []),
+    [receivableRes.state],
+  );
 
-  const pendRes = useResource<Transferencia[]>(() => listTransferenciasPendientes());
+  const pendRes = useResource<Transferencia[]>(
+    () => listTransferenciasPendientes(clinics.choice),
+    [clinics.choiceKey],
+  );
   const pendientes = pendRes.state.kind === "ok" ? pendRes.state.data : [];
 
   // Nombres de centro: me/centros (propio) ∪ destinos (los ajenos) → origen y destino resuelven.
@@ -57,7 +70,8 @@ export function TransferenciasList() {
     if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.name));
     return m;
   }, [centrosRes.state, destinosRes.state]);
-  const centroName = (cid: string) => centroNames.get(cid) ?? cid;
+  const centroName = (resolved: string | null | undefined, cid: string) =>
+    transferClinicName(resolved, cid, (id) => centroNames.get(id), clinics.nameOf) ?? "—";
 
   // Filtros del historial.
   const [estado, setEstado] = React.useState<string>(TODOS);
@@ -67,8 +81,8 @@ export function TransferenciasList() {
       listTransferencias({
         status: estado === TODOS ? undefined : estado,
         address: direccion === "todas" ? undefined : direccion,
-      }),
-    [estado, direccion],
+      }, clinics.choice),
+    [estado, direccion, clinics.choiceKey],
   );
   const historial = histRes.state.kind === "ok" ? histRes.state.data : [];
 
@@ -78,12 +92,17 @@ export function TransferenciasList() {
         title={t("title")}
         description={t("help")}
         actions={
-          <Button size="sm" asChild>
-            <Link href="/inventory/transfers/new">
-              <HugeiconsIcon icon={Add01Icon} className="size-4" />
-              {t("new")}
-            </Link>
-          </Button>
+          <>
+            {clinics.showFilter && (
+              <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.setSelected} />
+            )}
+            <Button size="sm" asChild>
+              <Link href="/inventory/transfers/new">
+                <HugeiconsIcon icon={Add01Icon} className="size-4" />
+                {t("new")}
+              </Link>
+            </Button>
+          </>
         }
       />
 
@@ -113,10 +132,10 @@ export function TransferenciasList() {
               <tr><td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">{t("empty")}</td></tr>
             )}
             {pendientes.map((tr) => {
-              const porRecibir = tr.status === "pendiente" && activeCentro === tr.destinationClinicId;
+              const porRecibir = canReceiveTransfer(tr, receivable);
               return (
                 <tr key={tr.id} className="hover:bg-muted/30">
-                  <td className="px-3 py-2 font-medium">{centroName(tr.sourceClinicId)} → {centroName(tr.destinationClinicId)}</td>
+                  <td className="px-3 py-2 font-medium">{centroName(null, tr.sourceClinicId)} → {centroName(null, tr.destinationClinicId)}</td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-2">
                       <Badge variant={ESTADO_VARIANT[tr.status] ?? "outline"}>{t(`estado.${tr.status}`)}</Badge>
@@ -193,7 +212,7 @@ export function TransferenciasList() {
               <tr key={tr.id} className="hover:bg-muted/30">
                 <td className="px-3 py-2 tabular-nums text-muted-foreground">{tr.createdAt ? formatFechaSolo(tr.createdAt.slice(0, 10)) : "—"}</td>
                 <td className="px-3 py-2 font-medium">
-                  {(tr.originName ?? centroName(tr.sourceClinicId))} → {(tr.destinationName ?? centroName(tr.destinationClinicId))}
+                  {centroName(tr.originName, tr.sourceClinicId)} → {centroName(tr.destinationName, tr.destinationClinicId)}
                 </td>
                 <td className="px-3 py-2"><Badge variant={ESTADO_VARIANT[tr.status] ?? "outline"}>{t(`estado.${tr.status}`)}</Badge></td>
                 <td className="px-3 py-2 text-muted-foreground">{tr.reason ?? "—"}</td>
