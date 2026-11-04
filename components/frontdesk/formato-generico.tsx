@@ -9,6 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
+import { splitInlineFields } from "@/lib/formatos/inline-fields";
 
 // Documento GENÉRICO imprimible (tabla con filas en blanco para llenar a mano). Data-driven: todo viene
 // del BE armado (membrete/título/paciente/columnas/filas). Papel A4/Letter, tinta negra, @media print
@@ -27,7 +28,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const filas = d.rows ?? [];
   const campos = d.fields ?? [];
   const secciones = d.sections ?? [];
-  // ¿Hay una caja de OBSERVACIONES que CREZCA? (la de "lineas" no crece). Si no, va un espaciador flexible.
+  // ¿Hay OBSERVACIONES (caja o renglones) que CREZCAN? Si no, va un espaciador flexible.
   const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre");
   // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
   // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
@@ -35,6 +36,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // Metadatos declarativos del papel (bolsa `render`). ocultarEmpresa puede venir aquí o en letterhead.
   const render = d.render ?? {};
   const ocultarEmpresa = d.letterhead?.ocultarEmpresa || render.ocultarEmpresa;
+  const camposEnLinea = splitInlineFields(campos, render.camposEnLinea);
   // Láser a color por sesión (multipágina): bloques por sesión con paginación; las firmas se pintan DENTRO
   // de cada bloque (no al final), así que se sacan de las secciones normales.
   // "sesiones" es el valor real (enum en español por convención del proyecto, igual que "campos"/"tabla"
@@ -148,7 +150,17 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
                valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
             <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
-              {campos.map((c) => (
+              {/* render.camposEnLinea: esos campos juntos en la PRIMERA línea (APEX); el resto, uno por línea. */}
+              {camposEnLinea.inline.length > 0 && (
+                <div className="campo flex flex-wrap gap-x-8 gap-y-1" style={{ display: "flex", flexWrap: "wrap", columnGap: 32 }}>
+                  {camposEnLinea.inline.map((c) => (
+                    <span key={c.clave}>
+                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {campoValor(c)}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {camposEnLinea.rest.map((c) => (
                 <div key={c.clave} className="campo flex gap-2">
                   {/* Se PREFIERE el `label` que manda el BE (ya con dos puntos); si no, se traduce el labelKey. */}
                   <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>

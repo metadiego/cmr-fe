@@ -126,8 +126,11 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 // - subtitulo: línea más chica arriba del título (p. ej. "Cámara Energética" arriba de "CONTROL DE
 //   SESIONES"). `numerarFilas`/`numerarComoFraccion` son internos del BE (quién "hornea" el contador de la
 //   rejilla): el FE nunca los lee ni recalcula — siempre pinta el valor de la fila tal cual llega.
+// - camposEnLinea: claves de `fields` que van JUNTAS en la primera línea del layout "campos", en ese orden
+//   (APEX: paciente, record, sesion, fecha). Sin la clave, un campo por línea como el legacy.
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
+  camposEnLinea?: string[];
   casillasEnFilas?: boolean;
   imagenEscalaDolor?: string | null;
   imagenCuerpo?: string | null; // GLP-1: diagrama hombre/mujer, ruta ya resuelta por el BE según sexo del paciente
