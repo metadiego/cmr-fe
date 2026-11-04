@@ -4,6 +4,13 @@
     "noProfileTitle": "Tu cuenta no tiene un perfil asignado",
     "noProfileBody": "Iniciaste sesión, pero un administrador aún no ha enlazado tu cuenta a un perfil con permisos. Contacta a un administrador para que te lo asigne."
   },
+  "reports": {
+    "clinicScope": {
+      "many": "{count, plural, one {# centro} other {# centros}}",
+      "total": "{label} ({scope})",
+      "covers": "Cubre: {scope}"
+    }
+  },
   "ehrIntegration": {
     "title": "Enganche con el EHR",
     "description": "Al marcar Presente, el paciente se registra también en el EHR. Consultas y Servicios se encienden por separado, por centro.",

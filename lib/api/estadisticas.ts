@@ -1,8 +1,10 @@
-import { apiFetch, oneCenterPath } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 
 // Estadísticas de Servicios (BE PRs #212/#213). Una sola llamada trae la matriz GENERAL (personal ×
 // servicio) y el desglose por servicio (bloques por rol). Contrato: cmr-be/docs/specs/estadisticas-servicios.md.
-// Permiso estadisticas.read (admin/super_admin/gerente). Tenant-scoped por X-Tenant-ID (centro activo).
+// Permiso estadisticas.read (admin/super_admin/gerente).
+// Services: every clinic where the person holds estadisticas.read, narrowed by `centerIds`. Daily: one clinic.
 
 // Fila de la matriz GENERAL: un miembro del personal y sus participaciones por servicio (solo las claves
 // con valor; las ausentes son 0). `personalId: null` + nombre "Sin asignar" = visita sin esa persona.
@@ -72,9 +74,9 @@ export function getEstadisticasDiarias(
 export async function getEstadisticasServicios(
   desde: string,
   hasta: string,
-  centroId?: string,
+  choice?: CenterChoice,
 ): Promise<EstadisticasServicios> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  // The report screen shows the picked center (its gate), not the sum of every readable one.
-  return apiFetch<EstadisticasServicios>(await oneCenterPath(`/statistics/services?${sp.toString()}`, centroId), {}, centroId);
+  // `choice`: the report's clinic filter (null = every clinic with estadisticas.read; the BE sums them).
+  return apiFetch<EstadisticasServicios>(await oneCenterPath(`/statistics/services?${sp.toString()}`, choice), {}, tenantOf(choice));
 }

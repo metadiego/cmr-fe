@@ -4,6 +4,13 @@
     "noProfileTitle": "Your account has no profile assigned",
     "noProfileBody": "You're signed in, but an administrator hasn't linked your account to a profile with permissions yet. Contact an administrator to get it assigned."
   },
+  "reports": {
+    "clinicScope": {
+      "many": "{count, plural, one {# clinic} other {# clinics}}",
+      "total": "{label} ({scope})",
+      "covers": "Covers: {scope}"
+    }
+  },
   "ehrIntegration": {
     "title": "EHR integration",
     "description": "When you mark Present, the patient is also registered in the EHR. Consultations and Services are switched on separately, per center.",

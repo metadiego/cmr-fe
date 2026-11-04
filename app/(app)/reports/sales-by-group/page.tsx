@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Download04Icon, Alert02Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
@@ -13,6 +12,8 @@ import {
   type DivisionReporte,
 } from "@/lib/api/facturacion-reportes";
 import { useResource } from "@/hooks/use-resource";
+import { useReportClinics } from "@/hooks/use-report-clinics";
+import { CenterFilter } from "@/components/kit/center-filter";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -40,7 +41,9 @@ export default function VentasPorGrupoPage() {
   const t = useTranslations("facturacion.ventasPorGrupo");
   const tc = useTranslations("common");
   const tRoot = useTranslations();
-  const centro = useSearchParams().get("centro") ?? undefined;
+  // Every clinic with reportes.grupo.read (a ?centro= link preselects one); the BE sums them into ONE
+  // report and ONE reconciliation, shown as it comes.
+  const clinics = useReportClinics("reportes.grupo.read");
 
   const hoy = new Date();
   const primero = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -53,8 +56,8 @@ export default function VentasPorGrupoPage() {
   );
 
   const { state } = useResource<ReportePorGrupo>(
-    () => getReportePorGrupo(query, centro),
-    [query.from, query.to, query.context, centro],
+    () => (clinics.ready ? getReportePorGrupo(query, clinics.choice) : new Promise<ReportePorGrupo>(() => {})),
+    [query.from, query.to, query.context, clinics.ready, clinics.choiceKey],
   );
   const data = state.kind === "ok" ? state.data : null;
   const grupos = data?.grupos ?? [];
@@ -97,7 +100,7 @@ export default function VentasPorGrupoPage() {
     const lines = [head.join(",")];
     grupos.forEach((g) => lines.push([csv(rotulo(g)), g.facturado, g.discount, g.refunds, g.tax, g.shipping, g.neto, g.invoices].join(",")));
     const to = data.totals;
-    lines.push([csv(t("totales")), to.facturado, to.discount, to.refunds, to.tax, to.shipping, to.neto, ""].join(","));
+    lines.push([csv(clinics.withScope(t("totales"))), to.facturado, to.discount, to.refunds, to.tax, to.shipping, to.neto, ""].join(","));
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -152,6 +155,12 @@ export default function VentasPorGrupoPage() {
             <Button key={k} variant="ghost" size="sm" className="h-9 text-xs" onClick={() => atajo(k)}>{t(`atajo.${k}`)}</Button>
           ))}
         </div>
+        {clinics.showFilter && (
+          <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.onChange} />
+        )}
+        {clinics.scopeLabel && (
+          <div className="ml-auto self-center text-sm text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</div>
+        )}
       </div>
 
       {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
@@ -161,8 +170,8 @@ export default function VentasPorGrupoPage() {
 
       {data && (
         <>
-          {/* CUADRE: la garantía de que el reporte se puede creer. */}
-          <div>
+          {/* Reconciliation, exactly as the BE returns it (over the clinics shown; never recomputed here). */}
+          <div className="flex flex-wrap items-center gap-2">
             {data.reconciliation.cuadra ? (
               <div className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-sm font-medium text-success">
                 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-4" />
@@ -174,6 +183,7 @@ export default function VentasPorGrupoPage() {
                 {t("noCuadra", { diferencia: money(data.reconciliation.difference) })}
               </div>
             )}
+            {clinics.scopeLabel && <span className="text-xs text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</span>}
           </div>
 
           {/* Subtotales por MEGAGRUPO (del BE, sin recalcular). Solo si agrupan 2+ grupos. */}
@@ -220,7 +230,7 @@ export default function VentasPorGrupoPage() {
               {grupos.length > 0 && (
                 <tfoot>
                   <tr className="border-t-2 bg-muted/40 font-semibold">
-                    <td className="px-3 py-2">{t("totales")}</td>
+                    <td className="px-3 py-2">{clinics.withScope(t("totales"))}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.facturado)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.discount)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{money(data.totals.refunds)}</td>
