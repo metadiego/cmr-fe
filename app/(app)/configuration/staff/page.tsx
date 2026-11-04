@@ -3,60 +3,48 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Search01Icon, UserAccountIcon } from "@hugeicons/core-free-icons";
+import { UserAccountIcon } from "@hugeicons/core-free-icons";
 
-import {
-  listPersonal, getCargos, getPersonalCentros, updatePersonalCentros,
-  updateFrontdeskStartsOnConsultation, updateConsultationBoardInitialTab,
-  type Personal, type CargoCatalogo, type CentroDePersonal, type PersonalConPreferenciaFrontdesk,
-} from "@/lib/api/personal";
+import { listPersonalAll, getCargos, type Personal, type PersonalEnAlcance, type CargoCatalogo } from "@/lib/api/personal";
 import { FichaEditor } from "@/components/personal/ficha-editor";
 import { NuevoPersonalDialog } from "@/components/personal/nuevo-personal-dialog";
-import { getDefinicion, type TableroDefinicion } from "@/lib/api/tablero";
+import { StaffList } from "@/components/personal/staff-list";
+import { CentrosDePersona, FrontdeskConsultaPreferencia } from "@/components/personal/staff-record-sections";
+import { DarAccesoDialog } from "@/components/personal/give-access-dialog";
 import { getRoles, type Rol } from "@/lib/api/rbac";
-import { inviteUser } from "@/lib/api/profiles";
 import { getEhrRoles, listEhrStaffLinks, type EhrRole, type EhrStaffLink } from "@/lib/api/ehr-integration";
 import { getCentrosDondePuedo } from "@/lib/api/centers";
+import { staffFullName as nombreDe } from "@/lib/personal/staff-name";
 import { EhrLinkSection } from "@/components/personal/ehr-link-section";
-import { toastError } from "@/lib/api/errors";
+import { CenterFilter } from "@/components/kit/center-filter";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
-import { useCentroGate } from "@/hooks/use-centro-gate";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { useCreateClinic } from "@/hooks/use-create-clinic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MedicoDisponibilidad } from "@/components/personal/medico-disponibilidad";
 import { MedicoAgenda, MedicoPacientes, MedicoProduccion } from "@/components/personal/medico-hub-tabs";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 
 // Ficha de personal: TODO en una pantalla, sin saltar. Lista a la izquierda, ficha de la persona a la
-// derecha (identidad, cargo/capacidades y «Dar acceso al sistema»). El objetivo del dueño: uno o dos
-// clics y ver el estado final aquí mismo, no un «guardado» a secas. Handoff ficha-de-personal-todo-en-una-pantalla.
-// NOTA: el bloque «Centros de servicio» queda pendiente hasta que el BE exponga la LECTURA del set (hoy
-// solo hay PUT; sin GET no se pueden precargar los checkboxes sin arriesgar borrar lo que no se ve).
-const nombreDe = (p: Personal) => [p.name, p.lastName].filter(Boolean).join(" ").trim() || p.name;
+// derecha (identidad, cargo/capacidades y «Dar acceso al sistema»). Handoff ficha-de-personal-todo-en-una-pantalla.
+// The list shows every clinic where the viewer holds personal.read (handoff clinic-read-scope), one row
+// per person, with a clinic filter; the record and every action on it run in the PERSON's home clinic.
 
 // Contenido de la ficha de Personal SIN contenedor/encabezado, para poder montarlo tanto en su ruta propia
 // como dentro de la pestaña «Personal» de «Personal y accesos» (handoff personal-y-accesos-una-sola-pagina).
 export function StaffPanel() {
   const t = useTranslations("personalFicha");
-  const gate = useCentroGate();
+  const filter = useClinicFilter("personal.read");
+  const create = useCreateClinic("personal.create", filter.choice);
   const [verInactivos, setVerInactivos] = React.useState(false);
   const [nuevoOpen, setNuevoOpen] = React.useState(false);
-  const listRes = useResource<Personal[]>(
-    () => (gate.centro ? listPersonal({ limit: 100, onlyInactive: verInactivos }, gate.centro).then((r) => r.items) : Promise.resolve([])),
-    [gate.centro, verInactivos],
+  const listRes = useResource<PersonalEnAlcance[]>(
+    () => listPersonalAll({ onlyInactive: verInactivos }, filter.choice),
+    [filter.choiceKey, verInactivos],
   );
   const personal = React.useMemo(
     () => (listRes.state.kind === "ok" ? listRes.state.data : []),
@@ -64,26 +52,21 @@ export function StaffPanel() {
   );
   const rolesRes = useResource<Rol[]>(() => getRoles());
   const roles = rolesRes.state.kind === "ok" ? rolesRes.state.data : [];
-  // Catálogo de cargos del BE (ruta ya arreglada). Si por lo que sea no llega, se cae a valores del listado.
-  const cargosRes = useResource<CargoCatalogo[]>(() => (gate.centro ? getCargos(gate.centro) : Promise.resolve([])), [gate.centro]);
+  // Catálogo de cargos del BE: one closed list, the same in every clinic.
+  const cargosRes = useResource<CargoCatalogo[]>(() => getCargos());
   const cargoCatalogo = cargosRes.state.kind === "ok" ? cargosRes.state.data : [];
-  // Vincular con el EHR (handoff vincular-personal-con-el-ehr): BE todavía no desplegado en prod a
-  // esta fecha (verificado: 404) — tolerante al fallo, igual que isEhrEnabled, así el botón no rompe
-  // la ficha mientras tanto; sencillamente no tiene opciones que ofrecer hasta que el BE despliegue.
-  const ehrRolesRes = useResource<EhrRole[]>(() => (gate.centro ? getEhrRoles(gate.centro).catch(() => []) : Promise.resolve([])), [gate.centro]);
-  const ehrRoles = ehrRolesRes.state.kind === "ok" ? ehrRolesRes.state.data : [];
   // La cuenta del EHR no es por centro (una persona, una cuenta) pero el BE la guarda contra el centro
-  // donde se creó: pedir solo el centro activo deja afuera a quien se vinculó desde otro (verificado en
-  // vivo 2026-10-01, Glorimar/Javier de alta en Bayamón salían "sin vincular" vistos desde Caguas). Se
-  // piden TODOS los centros donde el que mira tiene el permiso, igual que el patrón de selector-de-centro.
+  // donde se creó: se piden TODOS los centros donde el que mira tiene ehr-integration.read (verificado
+  // en vivo 2026-10-01). Tolerante al fallo: sin BE, sencillamente no hay vínculos que mostrar.
   const ehrCentrosRes = useResource<Awaited<ReturnType<typeof getCentrosDondePuedo>>>(
     () => getCentrosDondePuedo("ehr-integration.read").catch(() => []),
     [],
   );
   const ehrCenterIds = ehrCentrosRes.state.kind === "ok" ? ehrCentrosRes.state.data.map((c) => c.id) : undefined;
+  const ehrCenterKey = ehrCenterIds?.join(",");
   const ehrLinksRes = useResource<EhrStaffLink[]>(
-    () => (gate.centro ? listEhrStaffLinks(gate.centro, ehrCenterIds).catch(() => []) : Promise.resolve([])),
-    [gate.centro, ehrCenterIds],
+    () => (ehrCenterIds ? listEhrStaffLinks(undefined, ehrCenterIds).catch(() => []) : Promise.resolve([])),
+    [ehrCenterKey],
   );
   const ehrLinks = ehrLinksRes.state.kind === "ok" ? ehrLinksRes.state.data : [];
 
@@ -103,53 +86,40 @@ export function StaffPanel() {
     })
     .sort((a, b) => nombreDe(a).localeCompare(nombreDe(b)));
   const sel = personal.find((p) => p.id === selId) ?? null;
+  // The selected person's home clinic: the record, its EHR roles and every write run there.
+  const selClinic = sel?.clinicId ?? undefined;
+  const ehrRolesRes = useResource<EhrRole[]>(
+    () => (selClinic ? getEhrRoles(selClinic).catch(() => []) : Promise.resolve([])),
+    [selClinic],
+  );
+  const ehrRoles = ehrRolesRes.state.kind === "ok" ? ehrRolesRes.state.data : [];
 
   return (
     <>
-      {gate.necesitaPicker && <p className="text-sm text-muted-foreground">{t("elegirCentro")}</p>}
-
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[20rem_1fr]">
         {/* Lista */}
         <aside className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
+            {filter.showFilter && (
+              <CenterFilter centers={filter.centers} selected={filter.selected} onChange={(next) => { filter.setSelected(next); setSelId(""); }} />
+            )}
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <input type="checkbox" checked={verInactivos} onChange={(e) => { setVerInactivos(e.target.checked); setSelId(""); }} className="size-3.5" />
               {t("verInactivos")}
             </label>
           </div>
-          <div className="relative">
-            <HugeiconsIcon icon={Search01Icon} className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("buscar")} className="h-9 pl-8" />
-          </div>
-          {listRes.state.kind === "loading" && <p className="text-sm text-muted-foreground">{t("cargando")}</p>}
-          <ul className="max-h-[70vh] space-y-1 overflow-auto">
-            {filtrados.map((p) => (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  onClick={() => setSelId(p.id)}
-                  className={cn(
-                    "flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
-                    p.id === selId ? "bg-primary text-primary-foreground" : "hover:bg-accent",
-                  )}
-                >
-                  <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-medium", p.id === selId ? "bg-primary-foreground/20" : "bg-primary/10 text-primary")}>
-                    {(p.name?.[0] ?? "") + (p.lastName?.[0] ?? "")}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium">{nombreDe(p)}</span>
-                    <span className={cn("block truncate text-xs", p.id === selId ? "text-primary-foreground/70" : "text-muted-foreground")}>
-                      {p.jobTitle || t("sinCargo")}{p.profileId ? "" : ` · ${t("sinCuenta")}`}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
-            {filtrados.length === 0 && listRes.state.kind === "ok" && (
-              <li className="px-2 py-6 text-center text-sm text-muted-foreground">{t("vacio")}</li>
-            )}
-          </ul>
+          <StaffList
+            people={filtrados}
+            selectedId={selId}
+            onSelect={setSelId}
+            q={q}
+            onQChange={setQ}
+            loading={listRes.state.kind === "loading"}
+            loaded={listRes.state.kind === "ok"}
+            showClinics={filter.showColumn}
+          />
+          {listRes.state.kind === "fail" && <p className="text-sm text-destructive">{listRes.state.message}</p>}
         </aside>
 
         {/* Ficha */}
@@ -164,7 +134,8 @@ export function StaffPanel() {
               ehrRoles={ehrRoles}
               ehrLink={ehrLinks.find((l) => l.staffId === sel.id)}
               ehrCenterIds={ehrCenterIds}
-              centro={gate.centro}
+              centro={selClinic}
+              centroNombre={filter.showColumn ? (sel.clinicName ?? filter.nameOf(selClinic)) : ""}
               onChanged={() => listRes.reload()}
               onEhrChanged={() => ehrLinksRes.reload()}
             />
@@ -178,7 +149,9 @@ export function StaffPanel() {
 
       {nuevoOpen && (
         <NuevoPersonalDialog
-          centro={gate.centro}
+          centers={create.centers}
+          defaultClinicId={create.defaultClinicId}
+          showClinic={filter.showColumn}
           onClose={() => setNuevoOpen(false)}
           onCreated={(id) => { setNuevoOpen(false); setVerInactivos(false); listRes.reload(); setSelId(id); }}
         />
@@ -186,6 +159,7 @@ export function StaffPanel() {
     </>
   );
 }
+
 
 // Ruta propia de Personal (se mantiene). «Personal y accesos» monta StaffPanel en su primera pestaña.
 export default function PersonalPage() {
@@ -199,7 +173,7 @@ export default function PersonalPage() {
 }
 
 function FichaPersonal({
-  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, centro, onChanged, onEhrChanged,
+  persona, cargoCatalogo, capacidadOpciones, roles, ehrRoles, ehrLink, ehrCenterIds, centro, centroNombre, onChanged, onEhrChanged,
 }: {
   persona: Personal;
   cargoCatalogo: CargoCatalogo[];
@@ -208,7 +182,10 @@ function FichaPersonal({
   ehrRoles: EhrRole[];
   ehrLink: EhrStaffLink | undefined;
   ehrCenterIds: string[] | undefined;
+  /** The person's home clinic (`persona.clinicId`): the record is read and written there. */
   centro?: string;
+  /** Its name, shown when the screen spans more than one clinic; "" otherwise. */
+  centroNombre: string;
   onChanged: () => void;
   onEhrChanged: () => void;
 }) {
@@ -234,6 +211,7 @@ function FichaPersonal({
         <div className="min-w-0">
           <div className="truncate text-lg font-semibold">{nombreDe(persona)}</div>
           <div className="truncate text-sm text-muted-foreground">{persona.email || (persona.profileId ? t("conCuenta") : t("sinCuenta"))}</div>
+          {centroNombre && <div className="truncate text-xs text-muted-foreground">{t("centroOrigen", { nombre: centroNombre })}</div>}
         </div>
       </div>
 
@@ -301,241 +279,5 @@ function FichaPersonal({
         />
       )}
     </div>
-  );
-}
-
-function CentrosDePersona({ persona, centro }: { persona: Personal; centro?: string }) {
-  const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
-  const res = useResource<CentroDePersonal[]>(() => getPersonalCentros(persona.id, centro), [persona.id, centro]);
-  const base = res.state.kind === "ok" ? res.state.data : [];
-  // Selección local (activos) sobre lo que trae el BE; guardar manda la lista de encendidos.
-  const [activos, setActivos] = React.useState<Set<string> | null>(null);
-  const marcados = activos ?? new Set(base.filter((c) => c.active).map((c) => c.id));
-  const [busy, setBusy] = React.useState(false);
-  const original = new Set(base.filter((c) => c.active).map((c) => c.id));
-  const sucio = base.length > 0 && (marcados.size !== original.size || [...marcados].some((id) => !original.has(id)));
-
-  function toggle(id: string) {
-    setActivos(() => {
-      const next = new Set(marcados);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updatePersonalCentros(persona.id, [...marcados], centro);
-      toast.success(t("centrosGuardados"));
-      setActivos(null);
-      res.reload();
-    } catch (e) {
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="border-t pt-4">
-      <Label className="mb-1 block">{t("centros")}</Label>
-      <p className="mb-2 text-xs text-muted-foreground">{t("centrosAyuda")}</p>
-      {res.state.kind === "loading" && <p className="text-sm text-muted-foreground">{t("cargando")}</p>}
-      {res.state.kind === "fail" && <p className="text-sm text-destructive">{res.state.message}</p>}
-      <div className="flex flex-wrap gap-2">
-        {base.map((c) => {
-          const on = marcados.has(c.id);
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => toggle(c.id)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-sm font-medium transition-colors",
-                on ? "border-primary/40 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:bg-accent",
-              )}
-            >
-              {on ? "✓ " : ""}{c.name}
-            </button>
-          );
-        })}
-      </div>
-      {sucio && (
-        <div className="mt-3 flex justify-end">
-          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCentros")}</Button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FrontdeskConsultaPreferencia({ persona, centro }: { persona: Personal; centro?: string }) {
-  const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
-  // Lee su propio valor ya traído en la lista (ningún GET nuevo): hoy el campo no existe en prod
-  // (PR #386 sin desplegar), así que esto da `undefined` → el switch nace apagado, sin romper nada.
-  const actual = (persona as PersonalConPreferenciaFrontdesk).frontdeskStartsOnConsultation ?? false;
-  const [valor, setValor] = React.useState(actual);
-  const [busy, setBusy] = React.useState(false);
-  const sucio = valor !== actual;
-
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updateFrontdeskStartsOnConsultation(persona.id, valor, centro);
-      toast.success(t("frontdeskConsultaGuardado"));
-    } catch (e) {
-      toastError(e, tRoot);
-      setValor(actual);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="border-t pt-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-0.5">
-          <Label>{t("frontdeskConsultaLabel")}</Label>
-          <p className="text-xs text-muted-foreground">{t("frontdeskConsultaAyuda")}</p>
-        </div>
-        <Switch checked={valor} disabled={busy} onCheckedChange={setValor} />
-      </div>
-      {sucio && (
-        <div className="mt-3 flex justify-end">
-          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
-        </div>
-      )}
-      <ConsultaInitialTab persona={persona} centro={centro} />
-    </div>
-  );
-}
-
-// Con qué pestaña de ESTADO abre el tablero de Consulta — preferencia de la persona (handoff
-// traer-al-dia-y-la-pestana-inicial). Opciones data-driven desde los estados del tablero de Atención: hoy
-// "Como está configurado" (null) + cada estado; si mañana se añade uno, aparece solo, es dato no código.
-function ConsultaInitialTab({ persona, centro }: { persona: Personal; centro?: string }) {
-  const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
-  const AS_IS = "__as_is__"; // null no es value válido de <Select>: se mapea a null al guardar
-  const actual = (persona as PersonalConPreferenciaFrontdesk).consultationBoardInitialTab ?? null;
-  const [valor, setValor] = React.useState<string>(actual ?? AS_IS);
-  const [busy, setBusy] = React.useState(false);
-  const sucio = (valor === AS_IS ? null : valor) !== actual;
-  const defRes = useResource<TableroDefinicion>(
-    () => (centro ? getDefinicion("atencion", centro) : Promise.resolve({ statuses: [], transitions: [], columns: [], subtypes: [] } as unknown as TableroDefinicion)),
-    [centro],
-  );
-  const estados = defRes.state.kind === "ok" ? defRes.state.data.statuses : [];
-
-  async function guardar() {
-    if (busy || !sucio) return;
-    setBusy(true);
-    try {
-      await updateConsultationBoardInitialTab(persona.id, valor === AS_IS ? null : valor, centro);
-      toast.success(t("consultaInicialGuardado"));
-    } catch (e) {
-      toastError(e, tRoot);
-      setValor(actual ?? AS_IS);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="mt-4 flex items-start justify-between gap-4">
-      <div className="space-y-0.5">
-        <Label>{t("consultaInicialLabel")}</Label>
-        <p className="text-xs text-muted-foreground">{t("consultaInicialAyuda")}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Select value={valor} disabled={busy} onValueChange={setValor}>
-          <SelectTrigger size="sm" className="w-56"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value={AS_IS}>{t("consultaInicialAsIs")}</SelectItem>
-            {estados.map((e) => (
-              <SelectItem key={e.slug} value={e.slug}>{tRoot.has(e.labelKey) ? tRoot(e.labelKey) : e.slug}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {sucio && (
-          <Button size="sm" onClick={guardar} disabled={busy}>{busy ? t("guardando") : t("guardarCambios")}</Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DarAccesoDialog({
-  persona, roles, centro, onClose, onDone,
-}: {
-  persona: Personal;
-  roles: Rol[];
-  centro?: string;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  const t = useTranslations("personalFicha");
-  const tRoot = useTranslations();
-  const [email, setEmail] = React.useState(persona.email ?? "");
-  const [rolClave, setRolClave] = React.useState("");
-  const [busy, setBusy] = React.useState(false);
-
-  async function dar() {
-    if (busy || !email.trim() || !rolClave) return;
-    setBusy(true);
-    try {
-      // UNA sola llamada: crea la cuenta, la enlaza a la ficha (personalId), da el rol y asigna el centro.
-      await inviteUser({
-        email: email.trim(),
-        name: persona.name,
-        lastName: persona.lastName ?? undefined,
-        staffId: persona.id,
-        rolClave,
-        centerId: centro,
-        tipoAsignacion: "base",
-        redirectTo: `${window.location.origin}/auth/set-password`,
-      });
-      toast.success(t("accesoDado", { nombre: nombreDe(persona) }));
-      onDone();
-    } catch (e) {
-      // PERSONAL_YA_TIENE_CUENTA / PERSONAL_DE_OTRO_CENTRO / PERSONAL_NO_EXISTE → mensaje del BE (labelKey).
-      toastError(e, tRoot);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("darAccesoTitulo", { nombre: nombreDe(persona) })}</DialogTitle>
-          <DialogDescription>{t("darAccesoDesc")}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid gap-2">
-            <Label>{t("correo")}</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="persona@correo.com" autoComplete="off" />
-          </div>
-          <div className="grid gap-2">
-            <Label>{t("rol")}</Label>
-            <Select value={rolClave || undefined} onValueChange={setRolClave}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("rolPlaceholder")} /></SelectTrigger>
-              <SelectContent>
-                {roles.map((r) => <SelectItem key={r.id} value={r.slug}>{r.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={busy}>{tRoot("common.cancel")}</Button>
-          <Button onClick={dar} disabled={busy || !email.trim() || !rolClave}>{busy ? t("dando") : t("darAcceso")}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }

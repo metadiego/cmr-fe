@@ -4221,7 +4221,8 @@
       "categoria": "Category",
       "selCategoria": "Pick category",
       "descripcion": "Description",
-      "global": "Global event (all centers)"
+      "global": "Global event (all centers)",
+      "centro": "Clinic"
     },
     "proximos": "Upcoming events",
     "anterior": "Previous",
@@ -4451,7 +4452,6 @@
     "buscar": "Search by name or role…",
     "cargando": "Loading…",
     "vacio": "No staff.",
-    "elegirCentro": "Pick a center to see its staff.",
     "elegirPersona": "Pick a person from the list.",
     "sinCargo": "No role",
     "sinCuenta": "no login account",
@@ -4518,7 +4518,9 @@
     "ehrGuardando": "Saving…",
     "ehrGuardar": "Save",
     "ehrVinculado": "Linked with the EHR.",
-    "ehrActualizado": "EHR role updated."
+    "ehrActualizado": "EHR role updated.",
+    "centroOrigen": "Home clinic: {nombre}",
+    "centrosColumna": "Clinic(s)"
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
@@ -4886,5 +4888,10 @@
     "notMovable": "This appointment is no longer open and cannot be moved from here.",
     "noneThatDay": "No follow-up room left that day.",
     "freeDay": "Follow-up room that day ({n} free)."
+  },
+  "createClinic": {
+    "label": "Clinic",
+    "placeholder": "Choose a clinic…",
+    "help": "It is created in this clinic."
   }
 }

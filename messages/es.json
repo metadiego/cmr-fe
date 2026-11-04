@@ -4221,7 +4221,8 @@
       "categoria": "Categoría",
       "selCategoria": "Elige categoría",
       "descripcion": "Descripción",
-      "global": "Evento global (todos los centros)"
+      "global": "Evento global (todos los centros)",
+      "centro": "Centro"
     },
     "proximos": "Próximos eventos",
     "anterior": "Anterior",
@@ -4451,7 +4452,6 @@
     "buscar": "Buscar por nombre o cargo…",
     "cargando": "Cargando…",
     "vacio": "Sin personal.",
-    "elegirCentro": "Elige un centro para ver su personal.",
     "elegirPersona": "Elige una persona de la lista.",
     "sinCargo": "Sin cargo",
     "sinCuenta": "sin cuenta de acceso",
@@ -4518,7 +4518,9 @@
     "ehrGuardando": "Guardando…",
     "ehrGuardar": "Guardar",
     "ehrVinculado": "Vinculado con el EHR.",
-    "ehrActualizado": "Rol del EHR actualizado."
+    "ehrActualizado": "Rol del EHR actualizado.",
+    "centroOrigen": "Centro de origen: {nombre}",
+    "centrosColumna": "Centro(s)"
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
@@ -4886,5 +4888,10 @@
     "notMovable": "Esta cita ya no está abierta y no se puede mover desde aquí.",
     "noneThatDay": "No queda cupo de seguimiento ese día.",
     "freeDay": "Hay cupo de seguimiento ese día ({n} libres)."
+  },
+  "createClinic": {
+    "label": "Centro",
+    "placeholder": "Elegir centro…",
+    "help": "Se crea en este centro."
   }
 }
