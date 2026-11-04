@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { useResource } from "@/hooks/use-resource";
 import { listCitas, type Cita } from "@/lib/api/citas";
-import { listSesionesRango } from "@/lib/api/frontdesk";
+import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
 import { inDaysPR, todayPR } from "@/lib/format/fecha";
 import {
   fromCita,
@@ -25,6 +25,9 @@ import {
 // One side failing does not hide the other: each is loaded on its own and `failed` names the kinds that
 // failed. `reload()` refetches silently (the list stays on screen while it runs).
 
+const NONE_CITAS: Cita[] = [];
+const NONE_SESIONES: Sesion[] = [];
+
 export interface PatientAppointments {
   upcoming: PatientAppointment[];
   past: PatientAppointment[];
@@ -35,51 +38,48 @@ export interface PatientAppointments {
   reload: () => void;
 }
 
-interface Loaded {
-  citas: Cita[] | null; // null = failed
-  items: PatientAppointment[];
-  serviceFailed: boolean;
-}
-
-const EMPTY: Loaded = { citas: [], items: [], serviceFailed: false };
-
 export function usePatientAppointments(
   patientId: string | undefined,
   center: string | undefined,
 ): PatientAppointments {
-  const res = useResource<Loaded>(async () => {
-    if (!patientId) return EMPTY;
-    const from = inDaysPR(-90);
-    const to = inDaysPR(365);
-    const [medical, service] = await Promise.allSettled([
-      listCitas({ patientId, from, to, limit: 100 }),
-      center
-        ? listSesionesRango({ desde: from, hasta: to, pacienteId: patientId, centroId: center })
+  // Two loads, so switching the screen's center (a move into the appointment's own center does) only
+  // re-asks the center-scoped sessions; the medical list, and with it the moving card, stays put.
+  const medicalRes = useResource<Cita[]>(
+    async () =>
+      patientId ? (await listCitas({ patientId, from: inDaysPR(-90), to: inDaysPR(365), limit: 100 })).items : [],
+    [patientId],
+  );
+  const serviceRes = useResource<Sesion[]>(
+    () =>
+      patientId && center
+        ? listSesionesRango({ desde: inDaysPR(-90), hasta: inDaysPR(365), pacienteId: patientId, centroId: center })
         : Promise.resolve([]),
-    ]);
-    const citas = medical.status === "fulfilled" ? medical.value.items : null;
-    const sesiones = service.status === "fulfilled" ? service.value : [];
-    return {
-      citas,
-      items: [...(citas ?? []).map(fromCita), ...sesiones.map(fromSesion)],
-      serviceFailed: service.status === "rejected",
-    };
-  }, [patientId, center]);
+    [patientId, center],
+  );
 
-  const data = res.state.kind === "ok" ? res.state.data : EMPTY;
+  const citas = medicalRes.state.kind === "ok" ? medicalRes.state.data : NONE_CITAS;
+  const sesiones = serviceRes.state.kind === "ok" ? serviceRes.state.data : NONE_SESIONES;
   const today = todayPR();
-  const { upcoming, past } = React.useMemo(() => splitUpcomingPast(data.items, today), [data.items, today]);
+  const { upcoming, past } = React.useMemo(
+    () => splitUpcomingPast([...citas.map(fromCita), ...sesiones.map(fromSesion)], today),
+    [citas, sesiones, today],
+  );
 
   const failed: ("medical" | "service")[] = [];
-  if (res.state.kind === "fail" || data.citas === null) failed.push("medical");
-  if (res.state.kind === "fail" || data.serviceFailed) failed.push("service");
+  if (medicalRes.state.kind === "fail") failed.push("medical");
+  if (serviceRes.state.kind === "fail") failed.push("service");
 
+  const refreshMedical = medicalRes.refresh;
+  const refreshService = serviceRes.refresh;
   return {
     upcoming,
     past,
-    loading: !!patientId && res.state.kind === "loading",
+    loading: !!patientId && (medicalRes.state.kind === "loading" || serviceRes.state.kind === "loading"),
     failed,
-    citaOf: (id) => data.citas?.find((c) => c.id === id),
-    reload: res.refresh,
+    citaOf: (id) => citas.find((c) => c.id === id),
+    reload: () => {
+      refreshMedical();
+      refreshService();
+    },
   };
 }

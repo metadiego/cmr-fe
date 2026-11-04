@@ -16,7 +16,7 @@ import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointmen
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import { cancelarCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { cancelarSesion } from "@/lib/api/frontdesk";
-import { apiErrorMessage } from "@/lib/api/errors";
+import { apiErrorLabel } from "@/lib/api/errors";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -94,7 +94,7 @@ export function PatientRail({
           setCancelling(null);
           onCancelled(a);
         } catch (err) {
-          toast.error(tb("toasts.cancelFailed", { message: apiErrorMessage(err) }));
+          toast.error(tb("toasts.cancelFailed", { message: apiErrorLabel(err) }));
         }
       }}
     />

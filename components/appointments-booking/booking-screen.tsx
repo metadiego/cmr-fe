@@ -35,7 +35,7 @@ import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/age
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { reagendarCita, type Cita } from "@/lib/api/citas";
 import { reagendarSesion } from "@/lib/api/frontdesk";
-import { apiErrorMessage } from "@/lib/api/errors";
+import { apiErrorLabel } from "@/lib/api/errors";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -181,11 +181,13 @@ export function BookingScreen() {
   const clearType = () => update({ kind: undefined, typeId: undefined, date: undefined, movingId: null });
 
   // Services belong to a center: switching center drops a chosen service (medical types are global).
+  // A move never changes an appointment's center, so switching center by hand also stops a move.
   const centroEstado = {
     ...centro,
     setCentro: (id: string) => {
       centro.setCentro(id);
       if (state.kind === "service") clearType();
+      else if (state.movingId) update({ movingId: null });
     },
   };
 
@@ -213,11 +215,15 @@ export function BookingScreen() {
   };
 
   // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, orange
-  // ring on its day); the day panel's "Move here?" box commits. Stop, Esc or a reload that no longer
-  // lists it ends the move.
+  // ring on its day) in the appointment's OWN center: a move never changes the center, so the screen
+  // switches to it when the user can read it there. The day panel's "Move here?" box commits. Stop,
+  // Esc, a manual center switch or a reload that no longer lists it ends the move.
   const appointmentLabel = useAppointmentLabel();
   const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
-  const startMove = (a: PatientAppointment) =>
+  const startMove = (a: PatientAppointment) => {
+    if (a.centerId && a.centerId !== center && centro.centros.some((c) => c.id === a.centerId)) {
+      centro.setCentro(a.centerId); // the raw setter: the wrapper above would stop the move
+    }
     update({
       movingId: a.id,
       kind: a.kind,
@@ -226,6 +232,7 @@ export function BookingScreen() {
       month: monthOf(a.date),
       view: a.kind === "medical" ? state.view : "free",
     });
+  };
   const stopMove = () => update({ movingId: null });
   const onEscape = React.useEffectEvent((e: KeyboardEvent) => {
     // An open dialog (e.g. CitaModal) handles its own Esc first.
@@ -244,17 +251,22 @@ export function BookingScreen() {
     needsReason: movingItem.kind === "medical",
     onConfirm: async (to, reason) => {
       const a = movingItem;
-      // The call runs in the appointment's own center (X-Tenant-ID); a medical move lands in the screen's
-      // center (`centerId`, the destination). A service session has no destination center: same one.
+      // The call runs in the appointment's own center (X-Tenant-ID) and keeps it there: no `centerId`
+      // (omit = keep current) and no `doctorId` on the medical reschedule.
       const tenant = a.centerId ?? center;
+      const why = reason?.trim() ?? "";
+      if (a.kind === "medical" && !why) {
+        toast.error(t("toasts.moveReasonRequired"));
+        return false;
+      }
       try {
         if (a.kind === "medical") {
-          await reagendarCita(a.id, { date: to.date, time: to.time, reason: reason ?? "", centerId: center }, tenant);
+          await reagendarCita(a.id, { date: to.date, time: to.time, reason: why }, tenant);
         } else {
           await reagendarSesion(a.id, to.date, tenant, to.time);
         }
       } catch (err) {
-        toast.error(t("toasts.moveFailed", { message: apiErrorMessage(err) }));
+        toast.error(t("toasts.moveFailed", { message: apiErrorLabel(err) }));
         return false;
       }
       toast.success(
@@ -321,10 +333,7 @@ export function BookingScreen() {
               onMove={startMove}
               onStopMove={stopMove}
               onEdit={(a) => setEditing(rail.citaOf(a.id) ?? null)}
-              onCancelled={(a) => {
-                if (state.movingId === a.id) stopMove();
-                onAppointmentsChanged([a.date]);
-              }}
+              onCancelled={(a) => onAppointmentsChanged([a.date])}
             />
           </aside>
         ) : (

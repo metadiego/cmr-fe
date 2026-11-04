@@ -5021,7 +5021,8 @@
       "warnings": "Check: {list}",
       "bookFailed": "Could not book: {message}",
       "moveFailed": "Could not move: {message}",
-      "cancelFailed": "Could not cancel: {message}"
+      "cancelFailed": "Could not cancel: {message}",
+      "moveReasonRequired": "A reason is required to move a medical appointment."
     }
   }
 }

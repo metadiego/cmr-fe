@@ -5021,7 +5021,8 @@
       "warnings": "Revisar: {list}",
       "bookFailed": "No se pudo agendar: {message}",
       "moveFailed": "No se pudo mover: {message}",
-      "cancelFailed": "No se pudo cancelar: {message}"
+      "cancelFailed": "No se pudo cancelar: {message}",
+      "moveReasonRequired": "Para mover una cita médica hace falta un motivo."
     }
   }
 }
