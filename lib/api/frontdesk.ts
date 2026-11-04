@@ -1,6 +1,7 @@
 import type { components } from "./schema";
 import type { ApiWarning } from "./types";
 import { apiFetch, apiFetchEnvelope } from "./client";
+import { normalizeBookMultiple, type BookMultipleResponseRaw } from "@/lib/frontdesk/book-multiple";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
@@ -113,18 +114,19 @@ export async function agendarMultiple(
 // pares ya existían: idempotente), + avisos de cupo (meta.warnings) y de disponibilidad excedida por
 // servicio (data.aviso). Nunca bloquea. Handoff citar-varios-servicios.
 export type BookMultipleResult = { creadas: Sesion[]; omitidas: number; aviso: unknown | null };
+type BookMultipleRaw = BookMultipleResponseRaw<Sesion>;
 export async function agendarVariosServicios(
   // Handoff citar-varios-servicios / citar-marcar-los-servicios-con-saldo.
   payload: { patientId: string; serviceIds: string[]; dates: string[]; time?: string },
   centroId?: string,
 ): Promise<ConWarnings<BookMultipleResult>> {
-  const env = await apiFetchEnvelope<BookMultipleResult>(`/frontdesk/sessions/book-multiple`, {
+  const env = await apiFetchEnvelope<BookMultipleRaw>(`/frontdesk/sessions/book-multiple`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
   return {
-    data: env.data ?? { creadas: [], omitidas: 0, aviso: null },
+    data: normalizeBookMultiple(env.data),
     warnings: env.meta.warnings ?? [],
   };
 }

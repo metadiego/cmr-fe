@@ -57,6 +57,18 @@ test("duplicate row is blocked", () => {
   assert.equal(rows[2].reason, "duplicate");
 });
 
+test("a date whose only session is cancelled is blocked with its own reason", () => {
+  const rows = buildSeriesRows({ ...base, existingDates: ["2026-11-24"], cancelledDates: ["2026-11-24"] });
+  assert.equal(rows[2].status, "blocked");
+  assert.equal(rows[2].reason, "cancelled");
+  assert.equal(canBookSeries(rows), false);
+});
+
+test("a date with a live session stays duplicate even if listed as cancelled elsewhere", () => {
+  const rows = buildSeriesRows({ ...base, existingDates: ["2026-11-24"], cancelledDates: [] });
+  assert.equal(rows[2].reason, "duplicate");
+});
+
 test("missing day, null day or missing slot is closed", () => {
   const days: Record<string, DaySlots | null> = { ...base.days, "2026-11-10": null };
   delete days["2026-11-17"];

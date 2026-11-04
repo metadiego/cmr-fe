@@ -68,7 +68,9 @@ export function SeriesRows({
                         ? "statusHoliday"
                         : r.reason === "duplicate"
                           ? "statusDuplicate"
-                          : "statusClosed",
+                          : r.reason === "cancelled"
+                            ? "statusCancelled"
+                            : "statusClosed",
                     ),
                     tone: "bg-destructive/10 text-destructive",
                   };

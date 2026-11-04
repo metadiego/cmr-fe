@@ -10,7 +10,7 @@ export function seriesDates(start: string, everyWeeks: 1 | 2, count: number): st
 }
 
 export type SeriesRowStatus = "free" | "full" | "blocked";
-export type SeriesBlockReason = "closed" | "holiday" | "duplicate";
+export type SeriesBlockReason = "closed" | "holiday" | "duplicate" | "cancelled";
 
 export interface SeriesRow {
   index: number;
@@ -28,6 +28,8 @@ export function buildSeriesRows(input: {
   days: Record<string, DaySlots | null>;
   holidays: string[];
   existingDates: string[];
+  /** Subset of `existingDates` whose only session that day is cancelled (the bulk endpoint still skips it). */
+  cancelledDates?: string[];
   plan?: RecurringPlanItem[];
 }): SeriesRow[] {
   return input.dates.map((date, index) => {
@@ -39,7 +41,7 @@ export function buildSeriesRows(input: {
       reason = "holiday";
     } else if (input.existingDates.includes(date)) {
       status = "blocked";
-      reason = "duplicate";
+      reason = input.cancelledDates?.includes(date) ? "cancelled" : "duplicate";
     } else {
       const slot = input.days[date]?.slots.find((s) => normalizeTime(s.time) === time);
       if (!slot || slot.state === "unavailable") {

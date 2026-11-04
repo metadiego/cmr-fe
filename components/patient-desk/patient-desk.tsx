@@ -377,7 +377,7 @@ export function PatientDesk() {
             onChanged={data.refresh}
           />
           <Button variant="outline" size="sm" asChild>
-            <Link href="/scheduling/appointments/services">
+            <Link href="/scheduling/appointments">
               {t("serviceAppointments")}
             </Link>
           </Button>

@@ -5004,6 +5004,7 @@
       "statusClosed": "closed",
       "statusHoliday": "holiday",
       "statusDuplicate": "already has this service that day",
+      "statusCancelled": "cancelled session that day: book it on its own",
       "useTimeInstead": "Use {time} instead",
       "useDateInstead": "Use {date} instead",
       "fixRed": "Fix or drop the red dates before booking.",

@@ -5004,6 +5004,7 @@
       "statusClosed": "cerrado",
       "statusHoliday": "feriado",
       "statusDuplicate": "ya tiene este servicio ese día",
+      "statusCancelled": "sesión cancelada ese día: agéndala por separado",
       "useTimeInstead": "Usar {time}",
       "useDateInstead": "Usar {date}",
       "fixRed": "Corrige o quita las fechas en rojo antes de agendar.",

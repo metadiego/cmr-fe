@@ -43,6 +43,8 @@ export function useSeriesAvailability(p: {
 }): {
   days: Record<string, SeriesDay>;
   existingDates: string[];
+  /** Dates in `existingDates` whose only session of the service is cancelled. */
+  cancelledDates: string[];
   holidays: string[];
   /** Existing sessions and holidays answered (or failed): rows may be judged. */
   ready: boolean;
@@ -121,7 +123,7 @@ export function useSeriesAvailability(p: {
 
   // ---- The patient's existing sessions of this service over the rows (+ the forward search).
   const range = existingRange(dates);
-  const existingRes = useResource<string[]>(
+  const existingRes = useResource<{ date: string; cancelled: boolean }[]>(
     () =>
       scope && range
         ? listSesionesRango({
@@ -132,7 +134,9 @@ export function useSeriesAvailability(p: {
             centroId: center,
           }).then((list) =>
             // Every status counts: the BE skips a date the patient has ANY session of the service on.
-            list.filter((s) => !s.serviceId || s.serviceId === serviceId).map((s) => String(s.date).slice(0, 10)),
+            list
+              .filter((s) => !s.serviceId || s.serviceId === serviceId)
+              .map((s) => ({ date: String(s.date).slice(0, 10), cancelled: s.status === "cancelada" })),
           )
         : Promise.resolve([]),
     [scope, range?.from, range?.to, nonce],
@@ -154,16 +158,22 @@ export function useSeriesAvailability(p: {
   );
 
   const existingDates = React.useMemo(
-    () => (existingRes.state.kind === "ok" ? existingRes.state.data : []),
+    () => (existingRes.state.kind === "ok" ? [...new Set(existingRes.state.data.map((e) => e.date))] : []),
     [existingRes.state],
   );
+  const cancelledDates = React.useMemo(() => {
+    if (existingRes.state.kind !== "ok") return [];
+    const live = new Set(existingRes.state.data.filter((e) => !e.cancelled).map((e) => e.date));
+    return existingDates.filter((d) => !live.has(d));
+  }, [existingRes.state, existingDates]);
   const holidays = React.useMemo(
     () => (holidaysRes.state.kind === "ok" ? holidaysRes.state.data : []),
     [holidaysRes.state],
   );
   const ready = existingRes.state.kind !== "loading" && holidaysRes.state.kind !== "loading";
-  // A failed existing-sessions read would let a duplicate through unseen: the form must not book on it.
-  const failed = existingRes.state.kind === "fail";
+  // A failed existing-sessions or holidays read would let a duplicate / a holiday through unseen: the
+  // form must not book on either.
+  const failed = existingRes.state.kind === "fail" || holidaysRes.state.kind === "fail";
 
   // ---- Suggestions: one single-date plan per row that is not free.
   const [suggestions, setSuggestions] = React.useState<{ scope: string; map: Record<string, Suggestion> }>({
@@ -232,6 +242,7 @@ export function useSeriesAvailability(p: {
   return {
     days,
     existingDates,
+    cancelledDates,
     holidays,
     ready,
     failed,

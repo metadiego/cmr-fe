@@ -27,7 +27,7 @@ import {
   suggestionExclusions,
   type SeriesItem,
 } from "@/lib/agenda/booking/series-booking";
-import type { DaySlots } from "@/lib/agenda/booking/availability";
+import { normalizeTime, type DaySlots } from "@/lib/agenda/booking/availability";
 import type { RecurringPlanItem } from "@/lib/agenda/recurring-plan";
 import { agendarVariosServicios, crearSesion, getServiciosConSaldo } from "@/lib/api/frontdesk";
 import type { ApiWarning } from "@/lib/api/types";
@@ -121,6 +121,7 @@ export function ServiceBookingForm({
     days: loadedDays,
     holidays: series.holidays,
     existingDates: series.existingDates,
+    cancelledDates: series.cancelledDates,
   };
   const firstPass = buildSeriesRows(rowInput);
   const allLoaded = series.ready && rowDates.every((d) => series.days[d] !== undefined);
@@ -168,7 +169,7 @@ export function ServiceBookingForm({
 
   const bookSingle = async (p: Paciente) => {
     try {
-      const { warnings } = await crearSesion({ patientId: p.id, serviceId, date, time }, center);
+      const { warnings } = await crearSesion({ patientId: p.id, serviceId, date, time: normalizeTime(time) }, center);
       toast.success(t("toasts.booked", { n: 1 }));
       if (warnings.length) toast.warning(t("toasts.warnings", { list: warnings.map((w) => warningText(w, tRoot)).join(" · ") }));
       onBooked({ patient: p, dates: [date], done: true });
