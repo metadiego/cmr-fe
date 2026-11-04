@@ -5011,7 +5011,11 @@
       "remove": "Drop this date",
       "book": "Book",
       "bookSeries": "Book {n, plural, one {# session} other {# sessions}}",
-      "back": "Back"
+      "back": "Back",
+      "fullOption": "{time} (full)",
+      "checking": "Checking…",
+      "checkFailed": "Could not check these dates.",
+      "noPermission": "You do not have permission to book services."
     },
     "toasts": {
       "booked": "{n, plural, one {# session booked} other {# sessions booked}}",

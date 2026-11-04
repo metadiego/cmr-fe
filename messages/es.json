@@ -5011,7 +5011,11 @@
       "remove": "Quitar esta fecha",
       "book": "Agendar",
       "bookSeries": "Agendar {n, plural, one {# sesión} other {# sesiones}}",
-      "back": "Volver"
+      "back": "Volver",
+      "fullOption": "{time} (lleno)",
+      "checking": "Comprobando…",
+      "checkFailed": "No se pudieron comprobar estas fechas.",
+      "noPermission": "No tienes permiso para agendar servicios."
     },
     "toasts": {
       "booked": "{n, plural, one {# sesión agendada} other {# sesiones agendadas}}",

@@ -71,7 +71,7 @@ function withoutPast(
 }
 
 /** Blocking, active holidays as YYYY-MM-DD. */
-function holidayDates(list: Festivo[]): string[] {
+export function holidayDates(list: Festivo[]): string[] {
   return list
     .filter((f) => f.active !== false && f.blocksSchedule !== false)
     .map((f) => f.date.slice(0, 10))

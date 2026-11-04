@@ -17,6 +17,7 @@ import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling
 import { TypePickerPanel } from "@/components/appointments-booking/type-picker-panel";
 import { PatientCard } from "@/components/appointments-booking/patient-card";
 import { BookingCalendar, type CalendarMoving } from "@/components/appointments-booking/booking-calendar";
+import { ServiceBookingForm } from "@/components/appointments-booking/service-booking-form";
 import {
   EditAppointmentModal,
   PatientRail,
@@ -31,7 +32,7 @@ import { useBookingCalendar } from "@/hooks/use-booking-calendar";
 import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
-import type { TimeWindow } from "@/lib/agenda/booking/availability";
+import { normalizeTime, type TimeWindow } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { reagendarCita, type Cita } from "@/lib/api/citas";
@@ -292,6 +293,37 @@ export function BookingScreen() {
     },
   };
 
+  // ---- Service booking: the form under the day's times for the picked time (never while moving: the
+  // calendar shows it only then). It books in the calendar's center; a patient chosen in the form
+  // becomes the screen's patient once something is booked.
+  const serviceForm =
+    state.kind === "service" && state.typeId
+      ? ({ date, time, clear }: { date: string; time: string; clear: () => void }) => {
+          const day = calendar.day;
+          const slot =
+            day && day !== "error" ? day.slots.find((s) => s.time === normalizeTime(time)) : undefined;
+          return (
+            <ServiceBookingForm
+              key={`${state.typeId}|${date}|${time}`}
+              center={calCenter}
+              serviceId={state.typeId ?? ""}
+              serviceName={chosenType?.name ?? ""}
+              date={date}
+              time={time}
+              pickedFull={!!slot && (slot.state === "full" || slot.free <= 0)}
+              patient={patient}
+              patientCenterIds={patientCenters?.map((c) => c.id)}
+              onBooked={(r) => {
+                if (!state.patientId) pickPatient(r.patient);
+                onAppointmentsChanged(r.dates);
+                if (r.done) clear();
+              }}
+              onBack={clear}
+            />
+          );
+        }
+      : undefined;
+
   // ---- Edit (medical only): the shared CitaModal in edit mode, on the rail's raw appointment.
   const [editing, setEditing] = React.useState<Cita | null>(null);
 
@@ -387,6 +419,7 @@ export function BookingScreen() {
             appointmentTypes={types.appointmentTypes}
             moving={moving}
             ringDate={movingItem?.date}
+            serviceForm={serviceForm}
             onAppointmentsChanged={onAppointmentsChanged}
           />
         )}

@@ -10,12 +10,15 @@ import { Input } from "@/components/ui/input";
 
 // Async patient picker: type to search (server-side `q`), click a result to
 // select. Once selected, shows the patient with a "change" affordance.
+// `centerIds`: search in those centers instead of only the session's (X-Tenant-ID).
 export function PacienteSelect({
   value,
   onChange,
+  centerIds,
 }: {
   value: Paciente | null;
   onChange: (p: Paciente | null) => void;
+  centerIds?: string[];
 }) {
   const t = useTranslations("appointments");
   const [query, setQuery] = React.useState("");
@@ -31,9 +34,9 @@ export function PacienteSelect({
   const { state } = useResource(
     () =>
       debounced.length >= 1
-        ? listPacientes({ q: debounced, limit: 8 })
+        ? listPacientes({ q: debounced, limit: 8, ...(centerIds?.length ? { centerIds } : {}) })
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 8 } }),
-    [debounced],
+    [debounced, centerIds?.join(",") ?? ""],
   );
 
   if (value) {
