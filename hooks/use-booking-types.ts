@@ -22,6 +22,8 @@ export interface BookingType {
 export interface BookingTypes {
   medical: BookingType[]
   services: BookingType[]
+  /** The raw active medical types, as CitaModal takes them. */
+  appointmentTypes: TipoCita[]
   loading: boolean
   error: string | null
   find: (kind: BookingKind | undefined, id: string | undefined) => BookingType | undefined
@@ -51,13 +53,14 @@ export function useBookingTypes(center: string | undefined): BookingTypes {
     [center]
   )
 
-  const medical = React.useMemo(
+  const appointmentTypes = React.useMemo(
     () =>
       tiposRes.state.kind === "ok"
-        ? tiposRes.state.data.filter((x) => x.active !== false).map(fromTipo)
+        ? tiposRes.state.data.filter((x) => x.active !== false)
         : [],
     [tiposRes.state]
   )
+  const medical = React.useMemo(() => appointmentTypes.map(fromTipo), [appointmentTypes])
   const services = React.useMemo(
     () =>
       serviciosRes.state.kind === "ok"
@@ -93,6 +96,7 @@ export function useBookingTypes(center: string | undefined): BookingTypes {
   return {
     medical,
     services,
+    appointmentTypes,
     loading: tiposRes.state.kind === "loading" || serviciosRes.state.kind === "loading",
     error: failed ? failed.message : null,
     find,

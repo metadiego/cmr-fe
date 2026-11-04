@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
+import { Settings02Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -15,13 +15,14 @@ import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling-panel";
 import { TypePickerPanel } from "@/components/appointments-booking/type-picker-panel";
 import { PatientCard } from "@/components/appointments-booking/patient-card";
+import { BookingCalendar } from "@/components/appointments-booking/booking-calendar";
+import type { BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useResource } from "@/hooks/use-resource";
 import { useBookingTypes } from "@/hooks/use-booking-types";
-import { useBookingLive } from "@/hooks/use-booking-availability";
+import { useBookingCalendar } from "@/hooks/use-booking-calendar";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
-import { monthWeeks } from "@/lib/agenda/booking/month";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
@@ -41,7 +42,7 @@ import { cn } from "@/lib/utils";
 // the screen; the rest (time window, Free/Booked, visible month, the appointment being moved) is local.
 // The work area fills the window (useFillViewportHeight); the panels scroll inside it, never the page.
 
-export type BookingView = "free" | "booked";
+export type { BookingView };
 
 export interface BookingScreenState {
   kind?: BookingKind;
@@ -80,13 +81,21 @@ export function BookingScreen() {
 
   // State → URL, written by the change itself (not by an effect), so the screen knows which URLs it
   // wrote: `pending` holds them until the router reports them back. Replace, not push: picking a
-  // patient or a type is not a history step. One `update` per event (it merges into this render's state).
+  // patient or a type is not a history step. Several `update`s in one event all land: the state uses a
+  // functional updater, and `latest` (written only here and after each commit, read only in handlers)
+  // carries the merged state so each call compares the URL against the previous call's result.
   const [pending, setPending] = React.useState<string[]>([]);
+  const latest = React.useRef(state);
+  React.useEffect(() => {
+    latest.current = state;
+  });
   const update = (patch: Partial<BookingScreenState>) => {
-    const next = { ...state, ...patch };
-    setState(next);
+    const prev = latest.current;
+    const next = { ...prev, ...patch };
+    latest.current = next;
+    setState((s) => ({ ...s, ...patch }));
     const nextSearch = toBookingSearch(next);
-    if (nextSearch !== search) {
+    if (nextSearch !== toBookingSearch(prev)) {
       setPending((p) => [...p, nextSearch]);
       router.replace(`${pathname}${nextSearch}`, { scroll: false });
     }
@@ -169,16 +178,24 @@ export function BookingScreen() {
     },
   };
 
-  // ---- Month on screen and live refresh. The calendar slot (Task 7) plugs its month/day refresh into
-  // onLiveRefresh; until then the stream only drives the Live pill.
-  const weeks = React.useMemo(() => monthWeeks(state.month.year, state.month.month0), [state.month]);
-  const visibleDates = React.useMemo(() => weeks.flat(), [weeks]);
-  const onLiveRefresh = React.useCallback(() => {}, []);
-  const { live } = useBookingLive({
-    center: typeChosen ? center : undefined,
-    visible: visibleDates,
-    onRefresh: onLiveRefresh,
+  // ---- Calendar data: holidays, the month's free spots, the selected day, Next free and the live
+  // refresh (which re-asks the month dates and the selected day an event touches).
+  const calendar = useBookingCalendar({
+    center,
+    kind: typeChosen ? state.kind : undefined,
+    typeId: typeChosen ? state.typeId : undefined,
+    month: state.month,
+    date: state.date,
+    patientId: state.patientId,
+    window: state.window,
   });
+  const live = calendar.live;
+  const refreshCalendarDates = calendar.refreshDates;
+  // After a booking (and, Task 8, a move or cancel): refresh those dates; Task 8 also reloads the
+  // patient rail's upcoming/past list from here.
+  const onAppointmentsChanged = (dates: string[]) => {
+    refreshCalendarDates(dates);
+  };
 
   // ---- Layout: the work area ends at the window's bottom; its two columns scroll inside themselves.
   const workRef = React.useRef<HTMLDivElement>(null);
@@ -243,36 +260,24 @@ export function BookingScreen() {
             onPick={pickType}
           />
         ) : (
-          // Calendar slot (Task 7: BookingToolbar + AvailabilityMonth + DayPanel; Task 9: the service form
-          // inside the day panel). For now: the toolbar's label and the type chip with ✕ to change it.
-          <section
-            className="flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10"
-            data-slot="booking-calendar"
-          >
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold">
-                {firstName ? t("toolbar.bookingFor", { name: firstName }) : t("toolbar.booking")}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-1 pl-2.5 text-sm">
-                <span
-                  className="size-2.5 rounded-full bg-muted-foreground/40"
-                  style={chosenType?.color ? { backgroundColor: chosenType.color } : undefined}
-                  aria-hidden
-                />
-                {chosenType?.name ?? t("loading")}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-6"
-                  onClick={clearType}
-                  aria-label={t("toolbar.changeType")}
-                >
-                  <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3.5" />
-                </Button>
-              </span>
-            </div>
-            <div className="min-h-0 flex-1" />
-          </section>
+          <BookingCalendar
+            data={calendar}
+            center={center}
+            kind={state.kind ?? "medical"}
+            typeId={state.typeId ?? ""}
+            typeName={chosenType?.name ?? t("loading")}
+            color={chosenType?.color ?? null}
+            label={firstName ? t("toolbar.bookingFor", { name: firstName }) : t("toolbar.booking")}
+            onClearType={clearType}
+            date={state.date}
+            month={state.month}
+            window={state.window}
+            view={state.view}
+            onChange={update}
+            patient={patient}
+            appointmentTypes={types.appointmentTypes}
+            onAppointmentsChanged={onAppointmentsChanged}
+          />
         )}
       </div>
     </PageContainer>

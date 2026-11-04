@@ -68,6 +68,8 @@ export const formats = {
     dayMonthYear: { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" },
     // "jue, 4 sept" / "Thu, Sep 4"
     dayWeekdayShort: { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" },
+    // Month grid column headers: "dom" / "Sun"
+    dayWeekdayOnly: { weekday: "short", timeZone: "UTC" },
   },
   number: {
     currency: { style: "currency", currency: "USD" },
