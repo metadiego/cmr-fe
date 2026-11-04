@@ -16,3 +16,18 @@ export function protocolChangeClinic(
   for (const id of [picked, urlCenter, topBarCenter]) if (id && allowed.includes(id)) return id;
   return allowed[0];
 }
+
+/**
+ * The clinics that get a change form: every allowed clinic where the patient has pending packages (each
+ * change runs in its package's clinic), in the allowed order; when there are none, the one clinic
+ * (`fallback`), so its form shows "nothing pending" there.
+ */
+export function protocolChangeClinics(
+  allowed: readonly string[],
+  pendingClinicIds: readonly string[],
+  fallback: string | null,
+): string[] {
+  const withPending = allowed.filter((id) => pendingClinicIds.includes(id));
+  if (allowed.length > 1 && withPending.length > 0) return withPending;
+  return fallback ? [fallback] : [];
+}

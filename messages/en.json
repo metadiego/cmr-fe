@@ -3936,6 +3936,7 @@
       "historialTitulo": "Previous changes",
       "sinHistorial": "No protocol changes.",
       "cargando": "Loading…",
+      "enCentro": "At {centro}",
       "cambioResumen": "{cerrados} closed · {creados} new",
       "nuevoTitulo": "New change"
     }

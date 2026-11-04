@@ -160,10 +160,17 @@ filtre a uno.
   centro no pinta el día como cerrado; el texto dice de quién es.
 - Alertas, notificaciones, transferencias: el centro de cada fila (y filtro donde hay barra).
 
-**Huecos del BE encontrados (no bloquean):** `GET /services` sin `centerIds` (el FE lo pide por centro);
-`/inventory/transfers/pending` sin nombres de centro; el cambio de protocolo y `delivery-pending` son de
-un centro; «ventas por usuario» no trae total (lo suma el FE, como antes); festivos sin centro quizá no
-salen a quien no es admin (sin comprobar).
+**Huecos del BE, resueltos en el mismo PR (#455):**
+- `GET /services?centerIds`: el calendario de servicios lee los catálogos de todos los centros que
+  enseña en una sola llamada (`getServiciosDe`).
+- `/inventory/transfers/pending` trae `origenNombre`/`destinoNombre`, como el historial.
+- `GET /facturas/pendientes-entrega?centerIds`: el cambio de protocolo (página y pestaña de la ficha)
+  enseña un formulario por cada centro donde el paciente tiene paquetes pendientes
+  (`CambioProtocoloPorCentro`); cada cambio se hace en el centro de sus paquetes.
+- Festivos de toda la empresa: los calendarios mensuales nunca los pedían (van aparte, `scope=global`);
+  ahora sí (`getFestivos` los añade).
+
+**Queda como estaba:** «ventas por usuario» no trae total del BE; lo suma el FE, igual que antes.
 
 ## Sin cambios
 

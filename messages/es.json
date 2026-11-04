@@ -3936,6 +3936,7 @@
       "historialTitulo": "Cambios anteriores",
       "sinHistorial": "Sin cambios de protocolo.",
       "cargando": "Cargando…",
+      "enCentro": "En {centro}",
       "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
       "nuevoTitulo": "Nuevo cambio"
     }
