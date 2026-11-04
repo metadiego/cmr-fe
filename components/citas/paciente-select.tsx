@@ -41,7 +41,8 @@ export function PacienteSelect({
 
   if (value) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+      // Same h-9 box as the inputs/selects around it, so form rows line up.
+      <div className="flex h-9 items-center justify-between gap-2 rounded-md border border-input bg-input/30 pr-1 pl-3">
         <span className="truncate text-sm font-medium">
           {(value.displayName || [value.firstName, value.lastName].filter(Boolean).join(" "))}
           {value.documentId && (
@@ -54,6 +55,7 @@ export function PacienteSelect({
           type="button"
           variant="ghost"
           size="sm"
+          className="h-7"
           onClick={() => {
             onChange(null);
             setQuery("");

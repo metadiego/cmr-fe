@@ -19,7 +19,7 @@ import type { Personal } from "@/lib/api/personal";
 import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
-import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
+import { SlotPicker, type Slot } from "@/components/agenda/slot-picker";
 import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
 import { toastError } from "@/lib/api/errors";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
@@ -134,20 +134,8 @@ export function CitaModal({
     return addMinutes(start, tp?.durationMinutes ?? 30);
   });
 
-  // UNA sola hora, de los CUPOS del TIPO ese día (endpoint dedicado available-slots, BE 2-oct): franjas en
-  // horas enteras con huecos libres/capacidad + la duración del tipo (para la hora de fin). NO bloqueante.
-  // Dos variantes (desplegable/chips) para comparar. Handoff citas-hora-por-cupo-handoff-be.
-  const [slotVar, setSlotVar] = React.useState<SlotVariant>("dropdown");
-  const [slotSeeded, setSlotSeeded] = React.useState(false);
-  if (!slotSeeded && typeof window !== "undefined") {
-    setSlotSeeded(true);
-    const sv = window.localStorage.getItem("cmr_slot_variant");
-    if (sv === "dropdown" || sv === "chips") setSlotVar(sv);
-  }
-  function pickSlotVar(v: SlotVariant) {
-    setSlotVar(v);
-    try { window.localStorage.setItem("cmr_slot_variant", v); } catch { /* storage bloqueado */ }
-  }
+  // One time, from the type's SLOTS that day (available-slots endpoint): whole-hour bands with free/capacity
+  // plus the type's duration (for the end time). Never blocking. Handoff citas-hora-por-cupo-handoff-be.
   const cuposRes = useResource<CuposLibres | null>(
     () => (effectiveCentro && fechaSel && tipoCitaId ? getCuposLibres(fechaSel, tipoCitaId, effectiveCentro) : Promise.resolve(null)),
     [effectiveCentro, fechaSel, tipoCitaId],
@@ -201,7 +189,9 @@ export function CitaModal({
   );
   const esPrimeraVezEff = !yaSeguimiento;
   // El tipo se autoselecciona al elegir paciente (seguimiento/nueva), salvo que el usuario lo cambie a mano.
-  const [tipoTouched, setTipoTouched] = React.useState(false);
+  // A type passed in by the caller is an explicit choice (the booking screen's "What are we booking?"):
+  // it counts as touched, so the history-based auto-pick never overrides it.
+  const [tipoTouched, setTipoTouched] = React.useState(!!tipoCitaIdInicial);
   const tipoAutoId = React.useMemo(() => {
     if (!paciente) return "";
     const slug = yaSeguimiento ? "seguimiento" : "nueva";
@@ -351,20 +341,10 @@ export function CitaModal({
               <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} />
             </Field>
             <Field label={t("time")} required>
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <span className="text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</span>
-                <div className="inline-flex rounded-md border p-0.5 text-xs">
-                  <button type="button" onClick={() => pickSlotVar("dropdown")}
-                    className={"rounded px-2 py-0.5 " + (slotVar === "dropdown" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                    {t("variantList")}
-                  </button>
-                  <button type="button" onClick={() => pickSlotVar("chips")}
-                    className={"rounded px-2 py-0.5 " + (slotVar === "chips" ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
-                    {t("variantGrid")}
-                  </button>
-                </div>
-              </div>
-              <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant={slotVar} />
+              {/* Times always as the grid (owner, 4-nov-2026: no list/grid switch). The end time sits under
+                  the grid so the Fecha and Hora inputs start on the same line. */}
+              <SlotPicker slots={slots} value={hora} onChange={(time) => onHoraChange(time)} variant="chips" />
+              <p className="mt-1.5 text-xs text-muted-foreground">{t("endAuto", { time: horaFin })}</p>
               {/* Aviso NO bloqueante: la hora elegida ya no tiene cupo. El BE no bloquea ni avisa en citas, así
                   que el aviso lo da el FE. Handoff citas-hora-por-cupo-handoff-be. */}
               {slotLleno && (

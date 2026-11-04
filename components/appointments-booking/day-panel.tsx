@@ -74,7 +74,9 @@ export function DayPanel({
   const pickedSlot = picked ? slots.find((s) => s.time === picked) : undefined;
 
   return (
-    <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto pr-1" data-slot="day-panel">
+    // px-1 (not just pr-1): the picked time's ring + offset draws ~3px outside its box, and this
+    // scroll container clips both axes — without left padding the first column's ring was cut off.
+    <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto px-1 pt-0.5" data-slot="day-panel">
       <div className="flex flex-col gap-0.5">
         <h3 className="text-sm font-semibold first-letter:uppercase">
           {format.dateTime(d, "dayWeekdayLong")}
