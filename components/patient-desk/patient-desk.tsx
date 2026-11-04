@@ -14,6 +14,7 @@ import {
 
 import {
   filterByConsultationSubtype,
+  sortByArrival,
   filterByKind,
   filterByService,
   filterPatients,
@@ -143,7 +144,9 @@ export function PatientDesk() {
     const serviceFiltered = kind === "services" && !!serviceFilter
     if (serviceFiltered) list = filterByService(list, serviceFilter)
     if (kind === "consultation")
-      list = filterByConsultationSubtype(list, consultSubtypeFilter)
+      list = sortByArrival(
+        filterByConsultationSubtype(list, consultSubtypeFilter)
+      )
     // Pending sections first, unless a service filter sets the order (handoff lo-pendiente-primero).
     list = orderSections(list, {
       serviceFiltered,

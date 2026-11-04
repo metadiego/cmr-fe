@@ -240,6 +240,24 @@ export function sortPatients(
   })
 }
 
+// Consultation view: everyone PRESENT together, in arrival order — finished or not (owner 04-nov-2026:
+// the presents were split, some on top, the rest sunk below the not-yet-arrived). Then whoever has
+// not arrived, by booking time; fully cancelled days last.
+export function sortByArrival(list: PatientDay[]): PatientDay[] {
+  const rankOf = (p: PatientDay) => (p.allCancelled ? 2 : p.presentAt ? 0 : 1)
+  return list.slice().sort((a, b) => {
+    const ra = rankOf(a)
+    const rb = rankOf(b)
+    if (ra !== rb) return ra - rb
+    if (a.presentAt && b.presentAt && a.presentAt !== b.presentAt)
+      return a.presentAt.localeCompare(b.presentAt)
+    if (a.earliestTime && b.earliestTime && a.earliestTime !== b.earliestTime)
+      return a.earliestTime.localeCompare(b.earliestTime)
+    if (a.earliestTime !== b.earliestTime) return a.earliestTime ? -1 : 1
+    return a.name.localeCompare(b.name)
+  })
+}
+
 // Accent- and case-insensitive search over name, record and the names of the patient's services.
 export function filterPatients(
   list: PatientDay[],
