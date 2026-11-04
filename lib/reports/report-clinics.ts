@@ -5,7 +5,8 @@ import { clinicFilterChoice } from "../clinic-read-scope.ts";
 
 /**
  * What the report asks for. Until the person touches the filter, a `?centro=` link preselects that one
- * clinic (old links keep opening on it). `null` = every readable clinic. While the readable list is
+ * clinic (old links keep opening on it). Nothing ticked = every readable clinic, named (active first, see
+ * `clinicFilterChoice`). While the readable list is
  * unknown (empty), a link's clinic is still honoured so the report never widens behind the person's back.
  */
 export function reportClinicChoice(
@@ -13,10 +14,11 @@ export function reportClinicChoice(
   selected: readonly string[] | null,
   urlCenter: string | null | undefined,
   touched: boolean,
+  activeCenterId: string | null,
 ): string[] | null {
   const effective = touched ? selected : urlCenter ? [urlCenter] : null;
   if (readable.length === 0) return effective?.length ? [...effective] : null;
-  return clinicFilterChoice(readable, effective);
+  return clinicFilterChoice(readable, effective, activeCenterId);
 }
 
 /** The filter's ticks as shown: the link's clinic until the person touches the filter. */

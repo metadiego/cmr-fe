@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { clinicCoverage, reportClinicChoice, reportFilterSelection } from "@/lib/reports/report-clinics";
+import { getActiveCentro } from "@/lib/tenant";
 
 /**
  * A report over "every clinic I can read + a filter" (handoff clinic-read-scope). Wraps `useClinicFilter`
@@ -21,7 +22,7 @@ export function useReportClinics(permission: string) {
   const [touched, setTouched] = React.useState(false);
   const readable = React.useMemo(() => filter.centers.map((c) => c.id), [filter.centers]);
 
-  const choice = reportClinicChoice(readable, filter.selected, urlCenter, touched);
+  const choice = reportClinicChoice(readable, filter.selected, urlCenter, touched, getActiveCentro());
   const coverage = clinicCoverage(readable, choice);
   // What the figures cover, always (e.g. a printed letterhead); `scopeLabel` only for a multi-clinic reader.
   const coverageText =
