@@ -139,11 +139,31 @@ cambiarlas. Crear sigue en el centro pedido (`centroId` en el cuerpo de la cita)
 **Gerencial:** con varios centros y sin cabecera ya no recibe 409: entra en su centro base y las
 lecturas ven todos sus centros.
 
-**Pendiente (FE, no bloquea):**
-- Columna «Centro» donde una lista ahora puede traer dos centros: campana de alertas, notificaciones,
-  transferencias, cuadres (si se quita `centerIds`), personal (`servesInCenters`).
-- Retirar `useCentroPantalla` pantalla a pantalla cuando una pantalla pase a enseñar todos los centros
-  con filtro (`CenterFilter`), como Pacientes.
+### «Todos mis centros + filtro» (decisión del dueño, 04-nov-2026)
+
+Piezas comunes: `hooks/use-clinic-filter.ts` (`useClinicFilter(permiso)`) y `CenterFilter`. El filtro
+nombra SIEMPRE los centros que lee (sin marcar nada = todos los legibles, el activo primero) y el
+primero va como `X-Tenant-ID`: los guards del BE miran los permisos de ESE centro, así que nunca es uno
+donde la persona no tiene el permiso. Columna «Centro» para quien puede leer más de un centro, aunque
+filtre a uno.
+
+- Facturas y devoluciones: cada acción de una fila (celdas, anular, detalle, recibo) usa el centro de
+  la fila; las opciones de las celdas se piden por centro; el total del rango dice qué centros suma.
+  «Nueva venta» dice en qué centro; si no es obvio, la pantalla de venta pregunta (no cae en «el
+  primero», porque es dinero).
+- Reportes (servicios, por grupo, por usuario, insumos): todos los centros + filtro; los totales dicen
+  qué cubren. `?centro=` preselecciona ese centro. El cierre diario sigue de un centro.
+- Personal: una fila por persona con los centros donde sirve; lo de cada persona va en su centro de
+  origen. Crear pregunta el centro si hay más de uno.
+- Calendario de eventos y calendarios mensuales (citas, servicios): todos + filtro; el clic en un día
+  abre la vista del día en UN centro (`?centro=`), y crear/agendar dice en cuál. Un festivo de un solo
+  centro no pinta el día como cerrado; el texto dice de quién es.
+- Alertas, notificaciones, transferencias: el centro de cada fila (y filtro donde hay barra).
+
+**Huecos del BE encontrados (no bloquean):** `GET /services` sin `centerIds` (el FE lo pide por centro);
+`/inventory/transfers/pending` sin nombres de centro; el cambio de protocolo y `delivery-pending` son de
+un centro; «ventas por usuario» no trae total (lo suma el FE, como antes); festivos sin centro quizá no
+salen a quien no es admin (sin comprobar).
 
 ## Sin cambios
 
