@@ -3,16 +3,19 @@
 import * as React from "react"
 
 import { dropPastTimes } from "@/lib/agenda/booking/availability"
-import { firstOpening, scanDates } from "@/lib/agenda/booking/type-list"
+import {
+  emptyRunStep,
+  firstOpening,
+  NEXT_OPENING_DAYS,
+  scanDates,
+} from "@/lib/agenda/booking/type-list"
 import type { BookingKind } from "@/lib/agenda/booking/url-state"
 import { nowTimePR, todayPR } from "@/lib/format/fecha"
 import { loadDay } from "@/hooks/use-booking-availability"
 
 // "Next free" of one row of the type list: scans forward day by day, up to 14 bookable days, and stops
-// at the first free time. Uses the availability cache and the shared request queue; nothing is asked
+// at the first free time; a service gives up after EMPTY_RUN_LIMIT empty days in a row. Uses the availability cache and the shared request queue; nothing is asked
 // until `enabled` (the row is on screen), and a row that goes away stops its scan.
-
-export const NEXT_OPENING_DAYS = 14
 
 export type NextOpening =
   | { state: "idle" }
@@ -51,6 +54,7 @@ export function useNextOpening(p: {
       const today = todayPR()
       const now = nowTimePR()
       const days = scanDates(today, holidaysKey ? holidaysKey.split(",") : [], NEXT_OPENING_DAYS)
+      let run = 0
       for (const date of days) {
         let day
         try {
@@ -61,8 +65,12 @@ export function useNextOpening(p: {
         if (stopped || day === undefined) return
         // Not configured is a property of the service, not of the day: no point asking further.
         if (day === null) return done({ state: "notConfigured" })
-        const time = firstOpening(dropPastTimes(day, today, now), { date: today, time: now })
+        const open = dropPastTimes(day, today, now)
+        const time = firstOpening(open, { date: today, time: now })
         if (time) return done({ state: "found", date, time })
+        const step = emptyRunStep(kind, run, open)
+        if (step.stop) return done({ state: "none" })
+        run = step.run
       }
       done({ state: "none" })
     }

@@ -6,6 +6,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useNextOpening } from "@/hooks/use-next-opening";
 import type { BookingType } from "@/hooks/use-booking-types";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
+import { NEXT_OPENING_DAYS } from "@/lib/agenda/booking/type-list";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -62,7 +63,7 @@ export function TypeListRow({
   } else if (next.state === "idle" || next.state === "loading") {
     nextLabel = <span className="ml-auto block h-4 w-16 animate-pulse rounded bg-muted" aria-label={t("checking")} />;
   } else {
-    const title = next.state === "none" ? t("noneSoon") : next.state === "error" ? t("nextFailed") : undefined;
+    const title = next.state === "none" ? t("noneSoon", { days: NEXT_OPENING_DAYS }) : next.state === "error" ? t("nextFailed") : undefined;
     nextLabel = (
       <span className="text-muted-foreground" title={title} aria-label={title}>
         —

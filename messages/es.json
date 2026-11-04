@@ -4923,7 +4923,7 @@
       "nextFree": "próximo libre",
       "today": "Hoy",
       "checking": "Buscando la próxima hora libre…",
-      "noneSoon": "Sin horas libres en los próximos 14 días",
+      "noneSoon": "Sin horas libres en los próximos {days} días",
       "nextFailed": "No se pudo buscar la próxima hora libre",
       "notSetUp": "Sin configurar para agendar"
     },
@@ -5043,7 +5043,7 @@
       "moveReasonRequired": "Para mover una cita médica hace falta un motivo."
     },
     "period": {
-      "menuLabel": "Vista del calendario",
+      "menuLabel": "Vista del calendario: {view}",
       "views": {
         "day": "Día",
         "week": "Semana",

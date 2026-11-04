@@ -2,7 +2,16 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import type { BookingSlot } from "./availability.ts";
-import { firstOpening, foldText, matchesQuery, scanDates, typeListGroups } from "./type-list.ts";
+import {
+  EMPTY_RUN_LIMIT,
+  emptyRunStep,
+  firstOpening,
+  foldText,
+  isEmptyDay,
+  matchesQuery,
+  scanDates,
+  typeListGroups,
+} from "./type-list.ts";
 
 test("foldText: no accents, lower case, trimmed", () => {
   assert.equal(foldText(" Sónica "), "sonica");
@@ -75,4 +84,25 @@ test("firstOpening: first time with room, today only from now on", () => {
   assert.equal(firstOpening(day, { date: "2026-11-04", time: "07:30" }), "15:40");
   assert.equal(firstOpening(day, { date: "2026-11-04", time: "16:00" }), null);
   assert.equal(firstOpening({ date: "2026-11-05", slots: [slot("09:00", 0)] }, { date: "2026-11-04" }), null);
+});
+
+test("isEmptyDay: no times, or none with room", () => {
+  assert.ok(isEmptyDay({ date: "2026-11-04", slots: [] }));
+  assert.ok(isEmptyDay({ date: "2026-11-04", slots: [slot("07:00", 0)] }));
+  assert.ok(!isEmptyDay({ date: "2026-11-04", slots: [slot("07:00", 0), slot("08:00", 1)] }));
+});
+
+test("emptyRunStep: a service stops after EMPTY_RUN_LIMIT empty days in a row; medical never", () => {
+  const empty = { date: "2026-11-04", slots: [] };
+  const open = { date: "2026-11-04", slots: [slot("07:00", 1)] };
+  assert.equal(EMPTY_RUN_LIMIT, 5);
+  let run = 0;
+  for (let i = 1; i < EMPTY_RUN_LIMIT; i++) {
+    const r = emptyRunStep("service", run, empty);
+    assert.deepEqual(r, { run: i, stop: false });
+    run = r.run;
+  }
+  assert.deepEqual(emptyRunStep("service", run, empty), { run: EMPTY_RUN_LIMIT, stop: true });
+  assert.deepEqual(emptyRunStep("service", run, open), { run: 0, stop: false });
+  assert.deepEqual(emptyRunStep("medical", 20, empty), { run: 21, stop: false });
 });

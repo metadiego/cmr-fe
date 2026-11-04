@@ -8,7 +8,13 @@ import {
   type DaySlots,
   type TimeWindow,
 } from "@/lib/agenda/booking/availability"
-import { bookableDays, monthWeeks, shiftMonth } from "@/lib/agenda/booking/month"
+import {
+  bookableDays,
+  dayKind,
+  monthOf,
+  monthWeeks,
+  shiftMonth,
+} from "@/lib/agenda/booking/month"
 import { holidayDates } from "@/lib/agenda/booking/holidays"
 import { bookableWeekDays } from "@/lib/agenda/booking/week"
 import type { BookingKind } from "@/lib/agenda/booking/url-state"
@@ -90,8 +96,10 @@ export function useBookingCalendar(p: {
     `${month.year}-${String(month.month0 + 1).padStart(2, "0")}` ===
     todayIso.slice(0, 7)
 
-  // Holidays of the visible month's year and of the next month's (they differ in December).
-  const years = Array.from(new Set([month.year, next.year]))
+  // Holidays of the visible month's year and of the next month's (they differ in December), and of the
+  // shown week's Monday (a week starting in late December while the month is January).
+  const weekYear = p.week[0] ? Number(p.week[0].slice(0, 4)) : month.year
+  const years = Array.from(new Set([weekYear, month.year, next.year])).sort()
   const holidaysRes = useResource<string[]>(
     () =>
       center && kind
@@ -183,7 +191,13 @@ export function useBookingCalendar(p: {
     [weekAv.days, todayIso, nowTime]
   )
 
-  const dayAv = useDayAvailability({ center, kind, typeId, date, patientId })
+  // A closed day (Sunday, holiday: reachable in Day view) is never asked for.
+  const closedKind = date
+    ? dayKind(date, monthOf(date).month0, todayIso, holidays)
+    : undefined
+  const askDate =
+    closedKind === "sunday" || closedKind === "holiday" ? undefined : date
+  const dayAv = useDayAvailability({ center, kind, typeId, date: askDate, patientId })
   // A medical day is the same request (and cache entry) as the month's copy: while the month or the
   // lookahead holds the date, read and refresh it there, so a refresh asks for it once.
   const monthEntry = date
@@ -242,8 +256,8 @@ export function useBookingCalendar(p: {
       !monthComplete || (nextDates.length > 0 && nextAv.loading),
     live,
     refreshDates,
-    retryDay: (d: string) =>
-      monthDates.includes(d) ? monthRefresh([d]) : weekRefresh([d]),
+    // Re-asks the day wherever it is shown (month, lookahead, week).
+    retryDay: (d: string) => refreshDates([d]),
     retrySelected: () =>
       dayFromMonth && date ? refreshDates([date]) : dayRefresh(),
   }

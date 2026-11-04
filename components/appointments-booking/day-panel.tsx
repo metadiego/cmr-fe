@@ -86,9 +86,10 @@ export function DayPanel({
     // scroll container clips both axes — without left padding the first column's ring was cut off.
     <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto px-1 pt-0.5" data-slot="day-panel">
       <div className="flex flex-col gap-0.5">
-        <h3 className={cn("font-semibold first-letter:uppercase", large ? "text-base" : "text-sm")}>
-          {format.dateTime(d, "dayWeekdayLong")}
-        </h3>
+        {/* Day view: the period row above already names the day. */}
+        {!large && (
+          <h3 className="text-sm font-semibold first-letter:uppercase">{format.dateTime(d, "dayWeekdayLong")}</h3>
+        )}
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="truncate">{typeName}</span>
           {fullDayHref && (

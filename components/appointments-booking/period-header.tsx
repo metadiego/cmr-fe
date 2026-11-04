@@ -85,7 +85,7 @@ export function PeriodHeader({
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="ml-auto" aria-label={t("menuLabel")}>
+          <Button variant="outline" size="sm" className="ml-auto" aria-label={t("menuLabel", { view: t(`views.${period}`) })}>
             {t(`views.${period}`)}
             <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} data-icon="inline-end" />
           </Button>

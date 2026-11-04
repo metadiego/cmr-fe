@@ -37,7 +37,12 @@ import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/age
 import { monthOf } from "@/lib/agenda/booking/month";
 import { periodFocus, periodForKey, type BookingPeriod } from "@/lib/agenda/booking/period";
 import { weekDays } from "@/lib/agenda/booking/week";
-import { isPlainKey, isTypingTarget } from "@/lib/agenda/booking/keys";
+import {
+  blocksViewShortcut,
+  isPlainKey,
+  isTypingTarget,
+  OPEN_MODAL_SELECTOR,
+} from "@/lib/agenda/booking/keys";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { reagendarCita, type Cita } from "@/lib/api/citas";
 import { reagendarSesion } from "@/lib/api/frontdesk";
@@ -294,12 +299,12 @@ export function BookingScreen() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isMoving]);
-  // D / W / M switch the calendar's view, with the Esc guard (never while typing) and never inside an
-  // open dialog or menu (their letters are theirs, e.g. a menu's type-ahead).
+  // D / W / M switch the calendar's view: never while typing, never while a modal is open (CitaModal's
+  // selects are portaled outside it), never inside a menu or listbox (their type-ahead).
   const onViewKey = React.useEffectEvent((e: KeyboardEvent) => {
     if (e.defaultPrevented || !isPlainKey(e)) return;
     const el = e.target instanceof HTMLElement ? e.target : null;
-    if (isTypingTarget(el) || el?.closest('[role="dialog"],[role="alertdialog"],[role="menu"]')) return;
+    if (blocksViewShortcut(el, !!document.querySelector(OPEN_MODAL_SELECTOR))) return;
     const period = periodForKey(e.key);
     if (!period) return;
     e.preventDefault();

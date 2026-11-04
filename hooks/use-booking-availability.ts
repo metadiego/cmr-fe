@@ -124,9 +124,14 @@ export function loadDay(
 ): Promise<DaySlots | null | undefined> {
   const hit = cached(dayKey(center, kind, typeId, date))
   if (hit !== undefined) return Promise.resolve(hit)
-  return scanQueue(() =>
-    skip() ? Promise.resolve(undefined) : fetchDay(center, kind, typeId, date)
-  )
+  return scanQueue(() => {
+    if (skip()) return Promise.resolve(undefined)
+    // Another scan or the month may have answered it while this one waited in the queue.
+    const late = cached(dayKey(center, kind, typeId, date))
+    return late !== undefined
+      ? Promise.resolve(late)
+      : fetchDay(center, kind, typeId, date)
+  })
 }
 
 export function useMonthAvailability(p: {

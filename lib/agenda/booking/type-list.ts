@@ -59,6 +59,33 @@ export function scanDates(todayIso: string, holidays: string[], n: number): stri
   return out;
 }
 
+/** How many bookable days the "next free" column looks ahead. */
+export const NEXT_OPENING_DAYS = 14;
+
+/**
+ * A service scan gives up after this many bookable days in a row with no free time at all: a service
+ * with nothing set up answers empty days, and ~20 of them would otherwise cost ~280 requests.
+ */
+export const EMPTY_RUN_LIMIT = 5;
+
+/** No free spot that day (no times, or every time full or unavailable). */
+export function isEmptyDay(day: DaySlots): boolean {
+  return !day.slots.some((s) => s.free > 0);
+}
+
+/**
+ * The empty-run count after one more scanned day (reset by a day with room), and whether the scan
+ * stops there. Only services stop early: a fully booked medical week is real and the scan goes on.
+ */
+export function emptyRunStep(
+  kind: "medical" | "service",
+  run: number,
+  day: DaySlots,
+): { run: number; stop: boolean } {
+  const next = isEmptyDay(day) ? run + 1 : 0;
+  return { run: next, stop: kind === "service" && next >= EMPTY_RUN_LIMIT };
+}
+
 /** The day's first time with room (in any window), today only from `from.time` on; null when none. */
 export function firstOpening(day: DaySlots, from: { date: string; time?: string }): string | null {
   return nextFree([day], "any", 1, from)[0]?.time ?? null;

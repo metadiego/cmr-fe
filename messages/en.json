@@ -4923,7 +4923,7 @@
       "nextFree": "next free",
       "today": "Today",
       "checking": "Looking for the next free time…",
-      "noneSoon": "No free time in the next 14 days",
+      "noneSoon": "No free time in the next {days} days",
       "nextFailed": "Could not look for the next free time",
       "notSetUp": "Not set up for booking"
     },
@@ -5043,7 +5043,7 @@
       "moveReasonRequired": "A reason is required to move a medical appointment."
     },
     "period": {
-      "menuLabel": "Calendar view",
+      "menuLabel": "Calendar view: {view}",
       "views": {
         "day": "Day",
         "week": "Week",
