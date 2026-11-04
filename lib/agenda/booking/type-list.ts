@@ -63,8 +63,11 @@ export function scanDates(todayIso: string, holidays: string[], n: number): stri
 export const NEXT_OPENING_DAYS = 14;
 
 /**
- * A service scan gives up after this many bookable days in a row with no free time at all: a service
- * with nothing set up answers empty days, and ~20 of them would otherwise cost ~280 requests.
+ * A service scan gives up after this many empty bookable days in a row, but ONLY while no scanned day
+ * had any bookable (open or full) time: that is what a service with nothing set up answers, and ~20 of
+ * those days would otherwise cost ~280 requests. Once a day showed bookable times (a real, merely
+ * fully booked schedule), the scan goes on to the full NEXT_OPENING_DAYS: a booked-out week must not
+ * hide the openings after it.
  */
 export const EMPTY_RUN_LIMIT = 5;
 
@@ -73,17 +76,31 @@ export function isEmptyDay(day: DaySlots): boolean {
   return !day.slots.some((s) => s.free > 0);
 }
 
+/** The day has some open or full time (an unconfigured-like answer has none). */
+export function hasBookableTime(day: DaySlots): boolean {
+  return day.slots.some((s) => s.state !== "unavailable");
+}
+
+export interface EmptyRun {
+  /** Empty days in a row so far. */
+  run: number;
+  /** Some scanned day had an open or full time. */
+  sawBookable: boolean;
+}
+
 /**
- * The empty-run count after one more scanned day (reset by a day with room), and whether the scan
- * stops there. Only services stop early: a fully booked medical week is real and the scan goes on.
+ * The scan state after one more scanned day (`day` as answered, before today's past times are
+ * dropped), and whether the scan stops there. Only services stop early, and only when no day so far
+ * had any open/full time; a fully booked medical week is real and the scan goes on.
  */
 export function emptyRunStep(
   kind: "medical" | "service",
-  run: number,
+  prev: EmptyRun,
   day: DaySlots,
-): { run: number; stop: boolean } {
-  const next = isEmptyDay(day) ? run + 1 : 0;
-  return { run: next, stop: kind === "service" && next >= EMPTY_RUN_LIMIT };
+): EmptyRun & { stop: boolean } {
+  const run = isEmptyDay(day) ? prev.run + 1 : 0;
+  const sawBookable = prev.sawBookable || hasBookableTime(day);
+  return { run, sawBookable, stop: kind === "service" && !sawBookable && run >= EMPTY_RUN_LIMIT };
 }
 
 /** The day's first time with room (in any window), today only from `from.time` on; null when none. */

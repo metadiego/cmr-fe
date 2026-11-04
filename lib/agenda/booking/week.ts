@@ -1,5 +1,5 @@
 import { addDays, weekdayOf } from "../recurring-plan.ts";
-import { inWindow, type DaySlots, type TimeWindow } from "./availability.ts";
+import { inWindow, sessionCount, type DaySlots, type TimeWindow } from "./availability.ts";
 
 // Week grid of the booking calendar: Monday–Saturday columns (the clinic is closed on Sunday) × hour
 // rows. Pure UTC day arithmetic, like month.ts.
@@ -64,6 +64,9 @@ export function weekCell(day: DaySlots, hour: string, w: TimeWindow): WeekCell |
     capacity += s.capacity;
   }
   const open = slots.find((s) => s.free > 0);
+  // Services: free stations per half-hour start → sessions that fit (availability.ts sessionCount).
+  free = sessionCount(day, free);
+  capacity = sessionCount(day, capacity);
   return { free, booked: Math.max(capacity - free, 0), capacity, time: (open ?? slots[0]).time };
 }
 

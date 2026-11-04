@@ -118,7 +118,7 @@ export function DayPanel({
       ) : day === null ? (
         <EmptyState title={tb("month.notConfigured")} description={tb("month.notConfiguredHint")} />
       ) : slots.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("noTimes")}</p>
+        <p className="text-sm text-muted-foreground">{day.droppedPast ? t("noMoreToday") : t("noTimes")}</p>
       ) : (
         <>
           {morning.length > 0 && (
@@ -195,7 +195,16 @@ function TimeGroup({
           }
           if (s.state === "full" || s.free <= 0) {
             return (
-              <Tooltip key={s.time} content={t("fullTooltip")} className="flex w-full">
+              // A warning reason (e.g. noStaff) is said too: it does not block the booking.
+              <Tooltip
+                key={s.time}
+                content={
+                  s.reasonKey && tRoot.has(s.reasonKey)
+                    ? `${tRoot(s.reasonKey)} ${t("fullTooltip")}`
+                    : t("fullTooltip")
+                }
+                className="flex w-full"
+              >
                 <button
                   type="button"
                   className={cn(timeClass, "border border-dashed bg-muted/40 text-muted-foreground hover:bg-muted", pickedRing)}

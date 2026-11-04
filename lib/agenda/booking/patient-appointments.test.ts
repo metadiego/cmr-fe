@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import {
   fromCita,
   fromSesion,
+  railActions,
   splitUpcomingPast,
+  startedToday,
   type PatientAppointment,
 } from "./patient-appointments.ts";
 import type { Cita } from "../../api/citas.ts";
@@ -129,4 +131,66 @@ test("both kinds carry the appointment's center (the tenant for its cancel and m
   assert.equal(fromCita(cita({})).centerId, null);
   assert.equal(fromSesion(sesion({ clinicId: "bay" })).centerId, "bay");
   assert.equal(fromSesion(sesion({})).centerId, null);
+});
+
+const appt = (over: Partial<PatientAppointment> = {}): PatientAppointment => ({
+  id: "a1",
+  kind: "medical",
+  typeId: "t",
+  date: "2026-11-10",
+  time: "10:00",
+  status: "programada",
+  withLabel: null,
+  isLive: true,
+  ...over,
+});
+const only = (...perms: string[]) => (p: string) => perms.includes(p);
+const ctx = { past: false, todayIso: "2026-11-09", nowTime: "12:00" };
+
+test("railActions: medical move/cancel need citas.create + citas.update; edit needs citas.update", () => {
+  assert.deepEqual(railActions(appt(), { ...ctx, can: only("citas.update") }), {
+    move: false,
+    edit: true,
+    cancel: false,
+  });
+  assert.deepEqual(railActions(appt(), { ...ctx, can: only("citas.update", "citas.create") }), {
+    move: true,
+    edit: true,
+    cancel: true,
+  });
+  assert.deepEqual(railActions(appt(), { ...ctx, can: only("citas.create") }), {
+    move: false,
+    edit: false,
+    cancel: false,
+  });
+});
+
+test("railActions: service cancel needs frontdesk.create + frontdesk.update; move frontdesk.update", () => {
+  const s = appt({ kind: "service" });
+  assert.deepEqual(railActions(s, { ...ctx, can: only("frontdesk.update") }), {
+    move: true,
+    edit: false,
+    cancel: false,
+  });
+  assert.deepEqual(railActions(s, { ...ctx, can: only("frontdesk.update", "frontdesk.create") }), {
+    move: true,
+    edit: false,
+    cancel: true,
+  });
+});
+
+test("railActions: past ones and today's already started offer nothing", () => {
+  const all = () => true;
+  const none = { move: false, edit: false, cancel: false };
+  assert.deepEqual(railActions(appt(), { ...ctx, past: true, can: all }), none);
+  const today = appt({ date: "2026-11-09", time: "09:00" });
+  assert.deepEqual(railActions(today, { ...ctx, can: all }), none);
+  assert.equal(startedToday(today, "2026-11-09", "09:00"), false);
+  assert.equal(startedToday(today, "2026-11-09", "9:01"), true);
+  assert.equal(startedToday(appt({ date: "2026-11-09", time: null }), "2026-11-09", "23:00"), false);
+  assert.deepEqual(railActions(appt({ date: "2026-11-09", time: "13:00" }), { ...ctx, can: all }), {
+    move: true,
+    edit: true,
+    cancel: true,
+  });
 });

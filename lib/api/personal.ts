@@ -29,6 +29,8 @@ export interface ListPersonalParams {
   // mezcla con los activos. Verificado en vivo contra /api/v2/staff. Handoff personal-crud-completo.
   onlyInactive?: boolean;
   includeInactive?: boolean;
+  /** Narrows the read to these centers (BE CenterIdsQueryDto; a single value is fine, commaList). */
+  centerIds?: string[];
 }
 
 // `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, para el selector de centro EN
@@ -38,12 +40,13 @@ export function listPersonal(
   params: ListPersonalParams = {},
   centroId?: string,
 ): Promise<Paginated<Personal>> {
-  const { page = 1, limit = 50, q, capacidad, onlyInactive, includeInactive } = params;
+  const { page = 1, limit = 50, q, capacidad, onlyInactive, includeInactive, centerIds } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
   if (capacidad) sp.set("capacity", capacidad);
   if (onlyInactive) sp.set("onlyInactive", "true");
   if (includeInactive) sp.set("includeInactive", "true");
+  if (centerIds?.length) sp.set("centerIds", centerIds.join(","));
   return apiFetchPaged<Personal>(`/staff?${sp.toString()}`, {}, centroId);
 }
 
@@ -166,9 +169,13 @@ export function listPersonalPorCapacidad(capacidad: string, centro?: string): Pr
   return apiFetch<PersonalPorCapacidad[]>(`/staff/capacity-by/${encodeURIComponent(capacidad)}`, {}, centro);
 }
 
-// Doctors available to be assigned to appointments (capacidad = "medico"). `centroId` recarga la lista
-// con los médicos del centro que se está mirando (selector de centro EN la pantalla).
+// Doctors available to be assigned to appointments (capacity = "medico"). With `centroId`, the list is
+// THAT center's doctors only: GET /staff ignores X-Tenant-ID for its scope (it reads every center the
+// caller can read), so the center also goes as `centerIds` (a single value is accepted: commaList).
 export async function getMedicos(centroId?: string): Promise<Personal[]> {
-  const { items } = await listPersonal({ capacidad: "medico", limit: 100 }, centroId);
+  const { items } = await listPersonal(
+    { capacidad: "medico", limit: 100, ...(centroId ? { centerIds: [centroId] } : {}) },
+    centroId,
+  );
   return items;
 }

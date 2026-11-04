@@ -78,3 +78,13 @@ test("bookableWeekDays: from today, no holidays", () => {
   const days = weekDays("2026-11-04");
   assert.deepEqual(bookableWeekDays(days, "2026-11-04", ["2026-11-06"]), ["2026-11-04", "2026-11-05", "2026-11-07"]);
 });
+
+test("weekCell: a service hour counts sessions that fit, not free stations per half-hour start", () => {
+  // 5 rooms free at 09:00 and 09:30, 1-hour sessions → 5 sessions in that hour (not 10).
+  const day: DaySlots = {
+    date: "2026-11-09",
+    slots: [slot("09:00", 5, 5), slot("09:30", 5, 5)],
+    sessionMinutes: 60,
+  };
+  assert.deepEqual(weekCell(day, "09", "any"), { free: 5, booked: 0, capacity: 5, time: "09:00" });
+});

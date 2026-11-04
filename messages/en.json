@@ -151,6 +151,7 @@
   "therapies": {
     "full": "Full: no stations left at that time.",
     "noStaff": "No staff: nobody to provide it at that time.",
+    "endsAfterClosing": "Ends after closing: the session would not finish before the last time slot ends.",
     "overMaxPerPatient": "Exceeds the per-patient minute cap.",
     "holiday": "Holiday: the schedule is closed."
   },
@@ -4914,6 +4915,7 @@
       "serviceGroup": "Service",
       "sessionsLeft": "{n, plural, one {# session left} other {# sessions left}}",
       "noMedical": "There are no appointment types.",
+      "noServicesPermission": "You do not have permission to see services (servicios.read).",
       "noServices": "This center has no services.",
       "searchLabel": "Search appointment type or service",
       "searchPlaceholder": "Type to filter… (laser, IV, chamber…)",
@@ -4925,7 +4927,8 @@
       "nextFree": "next free",
       "today": "Today",
       "checking": "Looking for the next free time…",
-      "noneSoon": "No free time in the next {days} days",
+      "noneSoon": "No free time in the next {days} bookable days (Sundays and holidays skipped)",
+      "noneBookable": "No bookable times in the next {days} bookable days: is it set up?",
       "nextFailed": "Could not look for the next free time",
       "notSetUp": "Not set up for booking"
     },
@@ -4972,6 +4975,7 @@
       "booked": "booked",
       "full": "full",
       "closed": "closed",
+      "noMoreToday": "no more today",
       "holiday": "holiday",
       "unavailable": "unavailable",
       "errorRetry": "Could not load this day. Click to retry.",
@@ -4988,6 +4992,7 @@
       "openFullDay": "Open full day",
       "pickDay": "Pick a day to see its times.",
       "noTimes": "No times on this day.",
+      "noMoreToday": "No more times today.",
       "closed": "Closed on this day.",
       "holiday": "Holiday: closed.",
       "noPermissionMedical": "You do not have permission to book appointments."

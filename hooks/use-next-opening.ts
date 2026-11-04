@@ -14,14 +14,16 @@ import { nowTimePR, todayPR } from "@/lib/format/fecha"
 import { loadDay } from "@/hooks/use-booking-availability"
 
 // "Next free" of one row of the type list: scans forward day by day, up to 14 bookable days, and stops
-// at the first free time; a service gives up after EMPTY_RUN_LIMIT empty days in a row. Uses the availability cache and the shared request queue; nothing is asked
+// at the first free time; a service gives up after EMPTY_RUN_LIMIT empty days in a row only while no day
+// had any bookable time (see emptyRunStep). Uses the availability cache and the shared request queue; nothing is asked
 // until `enabled` (the row is on screen), and a row that goes away stops its scan.
 
 export type NextOpening =
   | { state: "idle" }
   | { state: "loading" }
   | { state: "found"; date: string; time: string }
-  | { state: "none" }
+  /** `scanned` bookable days were looked at; `early` = stopped before NEXT_OPENING_DAYS (nothing bookable). */
+  | { state: "none"; scanned: number; early: boolean }
   | { state: "notConfigured" }
   | { state: "error" }
 
@@ -54,7 +56,8 @@ export function useNextOpening(p: {
       const today = todayPR()
       const now = nowTimePR()
       const days = scanDates(today, holidaysKey ? holidaysKey.split(",") : [], NEXT_OPENING_DAYS)
-      let run = 0
+      let st = { run: 0, sawBookable: false }
+      let scanned = 0
       for (const date of days) {
         let day
         try {
@@ -68,11 +71,12 @@ export function useNextOpening(p: {
         const open = dropPastTimes(day, today, now)
         const time = firstOpening(open, { date: today, time: now })
         if (time) return done({ state: "found", date, time })
-        const step = emptyRunStep(kind, run, open)
-        if (step.stop) return done({ state: "none" })
-        run = step.run
+        scanned++
+        const step = emptyRunStep(kind, st, day)
+        if (step.stop) return done({ state: "none", scanned, early: true })
+        st = step
       }
-      done({ state: "none" })
+      done({ state: "none", scanned, early: false })
     }
     void scan()
     return () => {

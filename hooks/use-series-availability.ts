@@ -8,10 +8,9 @@ import { existingRange, suggestionExclusions } from "@/lib/agenda/booking/series
 import { buildRecurringPlan, weekdayOf, type AvailabilityLookup } from "@/lib/agenda/recurring-plan";
 import { getAvailability, type Availability } from "@/lib/api/resources";
 import { listSesionesRango } from "@/lib/api/frontdesk";
-import { getFestivos } from "@/lib/api/festivos";
+import { getBookingHolidays } from "@/lib/api/festivos";
 import { nowTimePR, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
-import { holidayDates } from "@/lib/agenda/booking/holidays";
 
 // Everything a weekly series of one service needs for one patient: each row date's real availability
 // (areas 1, patient-aware, 4 requests at a time), the patient's existing sessions of the service, the
@@ -151,8 +150,8 @@ export function useSeriesAvailability(p: {
     : [];
   const holidaysRes = useResource<string[]>(
     () =>
-      scope && years.length
-        ? Promise.all(years.map((anio) => getFestivos({ anio, centroId: center }))).then((l) => holidayDates(l.flat()))
+      scope && center && years.length
+        ? getBookingHolidays(years, center)
         : Promise.resolve([]),
     [scope, years.join(","), nonce],
   );

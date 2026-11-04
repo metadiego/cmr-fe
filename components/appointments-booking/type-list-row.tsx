@@ -63,7 +63,14 @@ export function TypeListRow({
   } else if (next.state === "idle" || next.state === "loading") {
     nextLabel = <span className="ml-auto block h-4 w-16 animate-pulse rounded bg-muted" aria-label={t("checking")} />;
   } else {
-    const title = next.state === "none" ? t("noneSoon", { days: NEXT_OPENING_DAYS }) : next.state === "error" ? t("nextFailed") : undefined;
+    const title =
+      next.state === "none"
+        ? next.early
+          ? t("noneBookable", { days: next.scanned })
+          : t("noneSoon", { days: next.scanned || NEXT_OPENING_DAYS })
+        : next.state === "error"
+          ? t("nextFailed")
+          : undefined;
     nextLabel = (
       <span className="text-muted-foreground" title={title} aria-label={title}>
         —

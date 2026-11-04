@@ -8,11 +8,10 @@ import { Input } from "@/components/ui/input";
 import { useResource } from "@/hooks/use-resource";
 import type { BookingTypes } from "@/hooks/use-booking-types";
 import { TypeListRow } from "@/components/appointments-booking/type-list-row";
-import { holidayDates } from "@/lib/agenda/booking/holidays";
 import { NEXT_OPENING_DAYS, typeListGroups, type TypeListGroupKey } from "@/lib/agenda/booking/type-list";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import { getServiciosConSaldo, type ServicioConSaldo } from "@/lib/api/frontdesk";
-import { getFestivos } from "@/lib/api/festivos";
+import { getBookingHolidays } from "@/lib/api/festivos";
 import { inDaysPR, todayPR } from "@/lib/format/fecha";
 
 // "What are we booking?": a searchable list (accent- and case-insensitive) of the medical appointment
@@ -58,7 +57,7 @@ export function TypeListPanel({
   const holidaysRes = useResource<string[]>(
     () =>
       center
-        ? Promise.all(years.map((anio) => getFestivos({ anio, centroId: center }))).then((l) => holidayDates(l.flat()))
+        ? getBookingHolidays(years, center)
         : Promise.resolve([]),
     [center, years.join(",")],
   );
@@ -75,7 +74,7 @@ export function TypeListPanel({
   const emptyLabel: Record<TypeListGroupKey, string> = {
     medical: t("typePicker.noMedical"),
     packages: "",
-    services: t("typePicker.noServices"),
+    services: types.servicesHidden ? t("typePicker.noServicesPermission") : t("typePicker.noServices"),
   };
 
   const rows = () => [...(listRef.current?.querySelectorAll<HTMLButtonElement>("[data-type-row]") ?? [])];

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { buildSeriesRows, canBookSeries, seriesDates } from "./series.ts";
-import type { DaySlots } from "./availability.ts";
+import { fromServiceAvailability, type DaySlots } from "./availability.ts";
 import type { RecurringPlanItem } from "../recurring-plan.ts";
 
 function day(date: string, slots: [string, number][]): DaySlots {
@@ -82,10 +82,22 @@ test("unavailable slot is closed", () => {
     ...base.days,
     "2026-11-10": {
       date: "2026-11-10",
-      slots: [{ time: "09:00", capacity: 0, free: 0, state: "unavailable" as const, reasonKey: "therapies.noStaff" }],
+      slots: [{ time: "09:00", capacity: 0, free: 0, state: "unavailable" as const, reasonKey: "therapies.endsAfterClosing" }],
     },
   };
   assert.equal(buildSeriesRows({ ...base, days })[0].reason, "closed");
+});
+
+test("noStaff is a warning, not closed: the row is full (overbookable) and the series can book", () => {
+  const svc = fromServiceAvailability("2026-11-10", {
+    configured: true,
+    minutes: 30,
+    slots: [{ time: "09:00", fits: false, freeStations: 0, reasonKey: "therapies.noStaff" }],
+  });
+  const rows = buildSeriesRows({ ...base, days: { ...base.days, "2026-11-10": svc } });
+  assert.equal(rows[0].status, "full");
+  assert.equal(rows[0].reason, null);
+  assert.equal(canBookSeries(rows), true);
 });
 
 test("override time applies to that row only", () => {

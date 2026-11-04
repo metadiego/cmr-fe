@@ -5,6 +5,7 @@ import type { BookingSlot } from "./availability.ts";
 import {
   EMPTY_RUN_LIMIT,
   emptyRunStep,
+  hasBookableTime,
   firstOpening,
   foldText,
   isEmptyDay,
@@ -92,17 +93,34 @@ test("isEmptyDay: no times, or none with room", () => {
   assert.ok(!isEmptyDay({ date: "2026-11-04", slots: [slot("07:00", 0), slot("08:00", 1)] }));
 });
 
-test("emptyRunStep: a service stops after EMPTY_RUN_LIMIT empty days in a row; medical never", () => {
+test("emptyRunStep: a service with no bookable time at all stops after EMPTY_RUN_LIMIT days; medical never", () => {
   const empty = { date: "2026-11-04", slots: [] };
   const open = { date: "2026-11-04", slots: [slot("07:00", 1)] };
   assert.equal(EMPTY_RUN_LIMIT, 5);
-  let run = 0;
+  let st = { run: 0, sawBookable: false };
   for (let i = 1; i < EMPTY_RUN_LIMIT; i++) {
-    const r = emptyRunStep("service", run, empty);
-    assert.deepEqual(r, { run: i, stop: false });
-    run = r.run;
+    const r = emptyRunStep("service", st, empty);
+    assert.deepEqual(r, { run: i, sawBookable: false, stop: false });
+    st = r;
   }
-  assert.deepEqual(emptyRunStep("service", run, empty), { run: EMPTY_RUN_LIMIT, stop: true });
-  assert.deepEqual(emptyRunStep("service", run, open), { run: 0, stop: false });
-  assert.deepEqual(emptyRunStep("medical", 20, empty), { run: 21, stop: false });
+  assert.deepEqual(emptyRunStep("service", st, empty), { run: EMPTY_RUN_LIMIT, sawBookable: false, stop: true });
+  assert.deepEqual(emptyRunStep("service", st, open), { run: 0, sawBookable: true, stop: false });
+  assert.deepEqual(emptyRunStep("medical", { run: 20, sawBookable: false }, empty), {
+    run: 21,
+    sawBookable: false,
+    stop: false,
+  });
+});
+
+test("emptyRunStep: a fully booked week never stops a service scan (openings after it stay visible)", () => {
+  const booked = { date: "2026-11-04", slots: [slot("07:00", 0), slot("08:00", 0)] };
+  let st = { run: 0, sawBookable: false };
+  for (let i = 0; i < 13; i++) {
+    const r = emptyRunStep("service", st, booked);
+    assert.equal(r.stop, false, `day ${i + 1}`);
+    st = r;
+  }
+  assert.equal(st.run, 13);
+  assert.equal(hasBookableTime(booked), true);
+  assert.equal(hasBookableTime({ date: "2026-11-04", slots: [] }), false);
 });

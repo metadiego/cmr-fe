@@ -15,10 +15,9 @@ import {
   monthWeeks,
   shiftMonth,
 } from "@/lib/agenda/booking/month"
-import { holidayDates } from "@/lib/agenda/booking/holidays"
 import { bookableWeekDays } from "@/lib/agenda/booking/week"
 import type { BookingKind } from "@/lib/agenda/booking/url-state"
-import { getFestivos } from "@/lib/api/festivos"
+import { getBookingHolidays } from "@/lib/api/festivos"
 import { nowTimePR, todayPR } from "@/lib/format/fecha"
 import { useResource } from "@/hooks/use-resource"
 import {
@@ -74,6 +73,10 @@ function withoutPast(
   return out
 }
 
+function allError(dates: string[]): Record<string, DayResult> {
+  return Object.fromEntries(dates.map((d) => [d, "error" as const]))
+}
+
 export function useBookingCalendar(p: {
   center: string | undefined
   kind: BookingKind | undefined
@@ -103,14 +106,16 @@ export function useBookingCalendar(p: {
   const holidaysRes = useResource<string[]>(
     () =>
       center && kind
-        ? Promise.all(
-            years.map((anio) => getFestivos({ anio, centroId: center }))
-          ).then((lists) => holidayDates(lists.flat()))
+        ? getBookingHolidays(years, center)
         : Promise.resolve([]),
     [center, !!kind, years.join(",")]
   )
-  // A failed holiday load must not block the calendar: the day requests then say what is closed.
-  const holidaysReady = holidaysRes.state.kind !== "loading"
+  // A failed holiday load is an ERROR, never "no holidays": medical available-slots does not check
+  // holidays, so an empty list would show a holiday as bookable. Every bookable day then shows the
+  // usual error cell, and its Retry re-asks the holidays (nothing else is asked until they answer).
+  const holidaysReady = holidaysRes.state.kind === "ok"
+  const holidaysFailed = holidaysRes.state.kind === "fail"
+  const reloadHolidays = holidaysRes.reload
   const holidays = React.useMemo(
     () => (holidaysRes.state.kind === "ok" ? holidaysRes.state.data : []),
     [holidaysRes.state]
@@ -196,7 +201,9 @@ export function useBookingCalendar(p: {
     ? dayKind(date, monthOf(date).month0, todayIso, holidays)
     : undefined
   const askDate =
-    closedKind === "sunday" || closedKind === "holiday" ? undefined : date
+    closedKind === "sunday" || closedKind === "holiday" || !holidaysReady
+      ? undefined
+      : date
   const dayAv = useDayAvailability({ center, kind, typeId, date: askDate, patientId })
   // A medical day is the same request (and cache entry) as the month's copy: while the month or the
   // lookahead holds the date, read and refresh it there, so a refresh asks for it once.
@@ -205,7 +212,22 @@ export function useBookingCalendar(p: {
     : undefined
   const dayFromMonth = kind === "medical" && monthEntry !== undefined
   const rawDay = dayFromMonth ? monthEntry : (dayAv.day ?? monthEntry)
-  const day = isDaySlots(rawDay) ? dropPastTimes(rawDay, todayIso, nowTime) : rawDay
+  const day =
+    holidaysFailed && date && closedKind !== "sunday" && closedKind !== "past"
+      ? ("error" as const)
+      : isDaySlots(rawDay)
+        ? dropPastTimes(rawDay, todayIso, nowTime)
+        : rawDay
+
+  // Holidays failed: every day that would have been asked is an error cell (retry = the holidays).
+  const failedMonth = React.useMemo(
+    () => (holidaysFailed ? allError(bookableDays(weeks, month.month0, todayIso, [])) : null),
+    [holidaysFailed, weeks, month.month0, todayIso]
+  )
+  const failedWeek = React.useMemo(
+    () => (holidaysFailed && weekKey ? allError(bookableWeekDays(weekKey.split(","), todayIso, [])) : null),
+    [holidaysFailed, weekKey, todayIso]
+  )
 
   const monthRefresh = monthAv.refresh
   const nextRefresh = nextAv.refresh
@@ -246,19 +268,24 @@ export function useBookingCalendar(p: {
     todayIso,
     weeks,
     holidays,
-    days: monthDays,
-    weekDays,
-    loading: monthAv.loading || !holidaysReady,
+    days: failedMonth ?? monthDays,
+    weekDays: failedWeek ?? weekDays,
+    loading: monthAv.loading || holidaysRes.state.kind === "loading",
     notConfigured: monthAv.notConfigured || weekAv.notConfigured,
     day,
-    nextFree: nextFreeTimes,
+    nextFree: holidaysFailed ? [] : nextFreeTimes,
     nextFreeLoading:
-      !monthComplete || (nextDates.length > 0 && nextAv.loading),
+      !holidaysFailed &&
+      (!monthComplete || (nextDates.length > 0 && nextAv.loading)),
     live,
     refreshDates,
     // Re-asks the day wherever it is shown (month, lookahead, week).
-    retryDay: (d: string) => refreshDates([d]),
+    retryDay: (d: string) => (holidaysFailed ? reloadHolidays() : refreshDates([d])),
     retrySelected: () =>
-      dayFromMonth && date ? refreshDates([date]) : dayRefresh(),
+      holidaysFailed
+        ? reloadHolidays()
+        : dayFromMonth && date
+          ? refreshDates([date])
+          : dayRefresh(),
   }
 }

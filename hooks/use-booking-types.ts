@@ -5,6 +5,7 @@ import * as React from "react"
 import type { BookingKind } from "@/lib/agenda/booking/url-state"
 import { getTiposCita, type TipoCita } from "@/lib/api/citas"
 import { getServicios, type Servicio } from "@/lib/api/servicios"
+import { useCan } from "@/hooks/use-can"
 import { useResource } from "@/hooks/use-resource"
 
 // What the booking screen can book: the active medical appointment types (global) and the active
@@ -30,6 +31,8 @@ export interface BookingTypes {
   appointmentTypes: TipoCita[]
   loading: boolean
   error: string | null
+  /** The user lacks `servicios.read` (GET /services would 403): services are not listed, medical are. */
+  servicesHidden: boolean
   find: (kind: BookingKind | undefined, id: string | undefined) => BookingType | undefined
   reload: () => void
 }
@@ -55,10 +58,14 @@ const fromServicio = (x: Servicio): BookingType => ({
 })
 
 export function useBookingTypes(center: string | undefined): BookingTypes {
+  const { can, ready: permsReady } = useCan()
+  const canServices = permsReady && can("servicios.read")
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita())
+  // GET /services needs `servicios.read`: without it the services are not asked for (a 403 would fail
+  // the whole list); the medical types still show, with a note in the services group.
   const serviciosRes = useResource<Servicio[]>(
-    () => (center ? getServicios(center) : Promise.resolve([])),
-    [center]
+    () => (center && canServices ? getServicios(center) : Promise.resolve([])),
+    [center, canServices]
   )
 
   const appointmentTypes = React.useMemo(
@@ -105,8 +112,12 @@ export function useBookingTypes(center: string | undefined): BookingTypes {
     medical,
     services,
     appointmentTypes,
-    loading: tiposRes.state.kind === "loading" || serviciosRes.state.kind === "loading",
+    loading:
+      !permsReady ||
+      tiposRes.state.kind === "loading" ||
+      serviciosRes.state.kind === "loading",
     error: failed ? failed.message : null,
+    servicesHidden: permsReady && !canServices,
     find,
     reload,
   }

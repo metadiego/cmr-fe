@@ -12,6 +12,7 @@ import {
   inWindow,
   nextFree,
   normalizeTime,
+  sessionCount,
   type DaySlots,
 } from "./availability.ts";
 import type { SlotLibre } from "../../api/citas.ts";
@@ -65,8 +66,11 @@ test("fromServiceAvailability maps fits, full and unavailable", () => {
   };
   const d = fromServiceAvailability("2026-11-10", a)!;
   assert.deepEqual(d.slots.map((s) => s.free), [2, 0, 0]);
-  assert.deepEqual(d.slots.map((s) => s.state), ["open", "full", "unavailable"]);
-  assert.deepEqual(d.slots.map((s) => s.capacity), [2, 1, 0]);
+  // noStaff is a warning (the BE books anyway): full/overbookable, never unavailable.
+  assert.deepEqual(d.slots.map((s) => s.state), ["open", "full", "full"]);
+  assert.deepEqual(d.slots.map((s) => s.capacity), [2, 1, 1]);
+  assert.equal(d.slots[2].reasonKey, "therapies.noStaff");
+  assert.equal(d.sessionMinutes, 30);
 });
 
 test("fromServiceAvailability: fits without freeStations counts as one free", () => {
@@ -158,4 +162,71 @@ test("dropPastTimes trims today's past times only", () => {
   assert.equal(freeIn(dropPastTimes(today, "2026-11-10", "09:31"), "any"), 0);
   const tomorrow = day("2026-11-11", [["08:00", 1, 1]]);
   assert.equal(dropPastTimes(tomorrow, "2026-11-10", "23:00"), tomorrow);
+});
+
+test("fromServiceAvailability: holiday stays unavailable", () => {
+  const a: Availability = {
+    configured: true,
+    minutes: 30,
+    slots: [{ time: "09:00", fits: false, reasonKey: "therapies.holiday" }],
+  };
+  assert.equal(fromServiceAvailability("2026-11-10", a)!.slots[0].state, "unavailable");
+});
+
+/** A BE day of service slots: 07:00..17:00 every 30 min (21 starts), `free` stations at each. */
+function serviceDay(minutes: number, free: number): Availability {
+  return {
+    configured: true,
+    minutes,
+    slots: Array.from({ length: 21 }, (_, i) => {
+      const m = 7 * 60 + i * 30;
+      return { time: `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`, fits: true, freeStations: free };
+    }),
+  };
+}
+
+test("fromServiceAvailability: a start whose session ends after closing (17:30) is unavailable", () => {
+  const d = fromServiceAvailability("2026-11-10", serviceDay(60, 5))!;
+  const last = d.slots.at(-1)!;
+  assert.equal(last.time, "17:00");
+  assert.equal(last.state, "unavailable");
+  assert.equal(last.reasonKey, "therapies.endsAfterClosing");
+  // 16:30 + 60 = 17:30: ends exactly at closing → still bookable.
+  assert.equal(d.slots.at(-2)!.state, "open");
+  // A 30-minute session fits at 17:00.
+  assert.equal(fromServiceAvailability("2026-11-10", serviceDay(30, 5))!.slots.at(-1)!.state, "open");
+});
+
+test("freeIn for services counts sessions, not free stations per start", () => {
+  // Empty Láser day, 5 rooms, 1-hour sessions: 20 valid starts × 5 = 100 station-starts → 50 sessions
+  // (before: 21 × 5 = 105).
+  const d = fromServiceAvailability("2026-11-10", serviceDay(60, 5))!;
+  assert.equal(freeIn(d, "any"), 50);
+  // 30-minute sessions: every start is its own session.
+  assert.equal(freeIn(fromServiceAvailability("2026-11-10", serviceDay(30, 5))!, "any"), 105);
+  // Shorter than a slot still takes the slot (max(minutes, 30)).
+  assert.equal(sessionCount({ sessionMinutes: 15 }, 7), 7);
+  assert.equal(sessionCount({ sessionMinutes: 90 }, 7), 2);
+  // Medical: unchanged.
+  assert.equal(sessionCount({}, 7), 7);
+});
+
+test("dropPastTimes: a medical band stays until start + 60", () => {
+  const bands: SlotLibre[] = [
+    { time: "09:00", capacity: 3, free: 2, cappedBy: null },
+    { time: "10:00", capacity: 3, free: 2, cappedBy: null },
+  ];
+  const d = fromMedicalBands("2026-11-10", bands);
+  assert.deepEqual(dropPastTimes(d, "2026-11-10", "09:40").slots.map((s) => s.time), ["09:00", "10:00"]);
+  assert.deepEqual(dropPastTimes(d, "2026-11-10", "10:00").slots.map((s) => s.time), ["10:00"]);
+  // Services keep the old rule: gone once the start passed.
+  const sv = fromServiceAvailability("2026-11-10", serviceDay(30, 1))!;
+  assert.equal(dropPastTimes(sv, "2026-11-10", "07:10").slots[0].time, "07:30");
+});
+
+test("dropPastTimes counts what it dropped (today with nothing left vs closed)", () => {
+  const today = day("2026-11-10", [["08:00", 2, 2], ["09:30", 1, 1]]);
+  const d = dropPastTimes(today, "2026-11-10", "18:00");
+  assert.equal(d.slots.length, 0);
+  assert.equal(d.droppedPast, 2);
 });

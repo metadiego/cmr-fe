@@ -12,13 +12,13 @@ import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import type { PatientAppointments } from "@/hooks/use-patient-appointments";
-import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
+import { railActions, type PatientAppointment, type RailActions } from "@/lib/agenda/booking/patient-appointments";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import { cancelarCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { cancelarSesion } from "@/lib/api/frontdesk";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { getMedicos, type Personal } from "@/lib/api/personal";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { nowTimePR, parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
 // The patient rail under the PatientCard: the patient's Upcoming appointments (both kinds, by date then
@@ -28,8 +28,11 @@ import { cn } from "@/lib/utils";
 // - Edit (medical only) opens the shared CitaModal in edit mode.
 // - Cancel opens an inline box with a required free-text reason; the call runs here, in the
 //   appointment's own center (X-Tenant-ID), falling back to the screen's center.
-// Actions the user lacks are hidden: medical move/edit/cancel need `citas.update`, service move/cancel
-// `frontdesk.update` (the BE's guards on reschedule/cancel and PATCH …/agenda).
+// Actions the user lacks are hidden (railActions in lib/agenda/booking/patient-appointments.ts): the BE
+// guard's door permission comes from the verb (POST → .create) and the handler checks .update, so
+// medical move/cancel need citas.create + citas.update, edit citas.update; service cancel needs
+// frontdesk.create + frontdesk.update, service move (PATCH …/agenda) frontdesk.update. Today's
+// appointments whose time already passed stay in Upcoming without actions.
 
 export type TypeLookup = (kind: BookingKind, typeId: string) => { name: string; color: string | null } | undefined;
 
@@ -65,7 +68,8 @@ export function PatientRail({
   const t = useTranslations("appointmentsBooking.patient");
   const tb = useTranslations("appointmentsBooking");
   const { can } = useCan();
-  const canChange = (kind: BookingKind) => can(kind === "medical" ? "citas.update" : "frontdesk.update");
+  const todayIso = todayPR();
+  const nowTime = nowTimePR();
   const [cancelling, setCancelling] = React.useState<string | null>(null);
 
   const card = (a: PatientAppointment, past: boolean) => (
@@ -75,7 +79,7 @@ export function PatientRail({
       past={past}
       type={typeLookup(a.kind, a.typeId)}
       moving={movingId === a.id}
-      canChange={!past && canChange(a.kind)}
+      actions={railActions(a, { past, can, todayIso, nowTime })}
       cancelling={cancelling === a.id}
       onMove={() => {
         setCancelling(null);
@@ -136,7 +140,7 @@ function AppointmentCard({
   past,
   type,
   moving,
-  canChange,
+  actions,
   cancelling,
   onMove,
   onStopMove,
@@ -149,7 +153,7 @@ function AppointmentCard({
   past: boolean;
   type: { name: string; color: string | null } | undefined;
   moving: boolean;
-  canChange: boolean;
+  actions: RailActions;
   cancelling: boolean;
   onMove: () => void;
   onStopMove: () => void;
@@ -200,19 +204,23 @@ function AppointmentCard({
       ) : cancelling ? (
         <CancelBox onKeep={onKeep} onCancel={onCancel} id={a.id} />
       ) : (
-        canChange && (
+        (actions.move || actions.edit || actions.cancel) && (
           <div className="flex gap-1">
-            <Button size="xs" variant="outline" onClick={onMove}>
-              {t("move")}
-            </Button>
-            {a.kind === "medical" && (
+            {actions.move && (
+              <Button size="xs" variant="outline" onClick={onMove}>
+                {t("move")}
+              </Button>
+            )}
+            {actions.edit && (
               <Button size="xs" variant="ghost" onClick={onEdit}>
                 {t("edit")}
               </Button>
             )}
-            <Button size="xs" variant="ghost" className="text-destructive" onClick={onAskCancel}>
-              {t("cancel")}
-            </Button>
+            {actions.cancel && (
+              <Button size="xs" variant="ghost" className="text-destructive" onClick={onAskCancel}>
+                {t("cancel")}
+              </Button>
+            )}
           </div>
         )
       )}

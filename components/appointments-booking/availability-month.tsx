@@ -88,7 +88,8 @@ export function AvailabilityMonth({
 
   const valueCell = (d: DaySlots): Cell => {
     const open = d.slots.filter((s) => s.state !== "unavailable" && inWindow(s.time, window));
-    if (open.length === 0) return { kind: "inert", label: t("closed") };
+    // Today after its last time: "no more today", not "closed" (dropPastTimes counted what it dropped).
+    if (open.length === 0) return { kind: "inert", label: d.droppedPast ? t("noMoreToday") : t("closed") };
     if (view === "booked") {
       const { booked, capacity } = bookedIn({ ...d, slots: open });
       return {

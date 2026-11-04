@@ -151,6 +151,7 @@
   "therapies": {
     "full": "Lleno: no quedan puestos a esa hora.",
     "noStaff": "Sin personal: no hay quien lo dé a esa hora.",
+    "endsAfterClosing": "Termina después del cierre: la sesión no acabaría antes de que termine la última franja.",
     "overMaxPerPatient": "Se pasa del tope de minutos por paciente.",
     "holiday": "Día festivo: la agenda está cerrada."
   },
@@ -4914,6 +4915,7 @@
       "serviceGroup": "Servicio",
       "sessionsLeft": "{n, plural, one {# sesión pendiente} other {# sesiones pendientes}}",
       "noMedical": "No hay tipos de cita.",
+      "noServicesPermission": "No tiene permiso para ver los servicios (servicios.read).",
       "noServices": "Este centro no tiene servicios.",
       "searchLabel": "Buscar tipo de cita o servicio",
       "searchPlaceholder": "Escribe para filtrar… (láser, suero, cámara…)",
@@ -4925,7 +4927,8 @@
       "nextFree": "próximo libre",
       "today": "Hoy",
       "checking": "Buscando la próxima hora libre…",
-      "noneSoon": "Sin horas libres en los próximos {days} días",
+      "noneSoon": "Sin horas libres en los próximos {days} días hábiles (sin domingos ni feriados)",
+      "noneBookable": "Sin horas para citar en los próximos {days} días hábiles: ¿está configurado?",
       "nextFailed": "No se pudo buscar la próxima hora libre",
       "notSetUp": "Sin configurar para agendar"
     },
@@ -4972,6 +4975,7 @@
       "booked": "ocupados",
       "full": "lleno",
       "closed": "cerrado",
+      "noMoreToday": "no hay más hoy",
       "holiday": "feriado",
       "unavailable": "no disponible",
       "errorRetry": "No se pudo cargar este día. Haz clic para reintentar.",
@@ -4988,6 +4992,7 @@
       "openFullDay": "Abrir el día completo",
       "pickDay": "Elige un día para ver sus horas.",
       "noTimes": "No hay horas este día.",
+      "noMoreToday": "No quedan horas hoy.",
       "closed": "Cerrado este día.",
       "holiday": "Feriado: cerrado.",
       "noPermissionMedical": "No tienes permiso para agendar citas."

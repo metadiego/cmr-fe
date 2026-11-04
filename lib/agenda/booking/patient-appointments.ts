@@ -73,3 +73,40 @@ export function splitUpcomingPast(
     .slice(0, pastLimit);
   return { upcoming, past };
 }
+
+/** Today's appointment whose start time already passed (it is not offered Move or any change). */
+export function startedToday(a: Pick<PatientAppointment, "date" | "time">, todayIso: string, nowTime: string): boolean {
+  if (a.date !== todayIso || !a.time) return false;
+  return a.time.slice(0, 5) < nowTime.slice(0, 5).padStart(5, "0");
+}
+
+export interface RailActions {
+  move: boolean;
+  edit: boolean;
+  cancel: boolean;
+}
+
+/**
+ * Which rail actions an upcoming appointment offers. The BE guard derives a "door" permission from
+ * the HTTP verb (POST → .create) before the handler checks its own (.update), so:
+ * - medical cancel / move (POST …/cancel, …/reschedule): citas.create AND citas.update;
+ *   medical edit (PUT): citas.update.
+ * - service cancel (POST …/sessions/:id/cancel): frontdesk.create AND frontdesk.update;
+ *   service move (PATCH …/agenda): frontdesk.update. Services have no edit here.
+ * Past appointments and today's that already started offer nothing.
+ */
+export function railActions(
+  a: PatientAppointment,
+  opts: { past: boolean; can: (permission: string) => boolean; todayIso: string; nowTime: string },
+): RailActions {
+  const none = { move: false, edit: false, cancel: false };
+  if (opts.past || startedToday(a, opts.todayIso, opts.nowTime)) return none;
+  const { can } = opts;
+  if (a.kind === "medical") {
+    const update = can("citas.update");
+    const createAndUpdate = update && can("citas.create");
+    return { move: createAndUpdate, edit: update, cancel: createAndUpdate };
+  }
+  const update = can("frontdesk.update");
+  return { move: update, edit: false, cancel: update && can("frontdesk.create") };
+}

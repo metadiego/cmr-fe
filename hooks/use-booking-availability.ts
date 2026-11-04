@@ -95,8 +95,10 @@ async function requestDay(
       {
         date,
         serviceId: typeId,
-        areas: 1,
-        ...(patientId ? { patientId } : {}),
+        // With a patient (the day panel) `areas` is left out: requested areas win over the patient's
+        // own on the BE (lasAreasDelPaciente), so sending both made patientId change nothing. Without
+        // one (month, week, scans) a single area. The cache key already carries the patient.
+        ...(patientId ? { patientId } : { areas: 1 }),
       },
       // The center travels ONLY as X-Tenant-ID. Do not also send `centerIds`: the BE validates it with
       // @IsArray(), and a single `?centerIds=<uuid>` arrives as a string → 400 on every day (that is why
