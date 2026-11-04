@@ -1,10 +1,12 @@
 import type { components } from "./schema";
-import { apiFetch, oneCenterPath } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 
 // Doctor working hours (per-doctor, or global when medicoId is null) and
 // holidays — used to compute bookable slots and grey out unavailable days.
 export type HorarioMedico = components["schemas"]["StaffScheduleResponseDto"];
-export type Festivo = components["schemas"]["FestivoEntity"];
+// `clinicName`: the BE names each row's clinic (clinic-read-scope); a holiday of no clinic has none.
+export type Festivo = components["schemas"]["FestivoEntity"] & { clinicName?: string | null };
 
 function asArray<T>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];
@@ -23,8 +25,11 @@ export async function getHorariosMedico(
 
 // GET /holidays?anio= — holidays for the year (recurring ones resolved to it).
 // `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera `anio`: se manda tal cual.
-export async function getFestivos(anio: number): Promise<Festivo[]> {
-  return asArray<Festivo>(await apiFetch(await oneCenterPath(`/holidays?anio=${anio}`)));
+// `centers`: the clinics a month calendar shows (`null` = every one with citas.read); omitted = the
+// active one, as before. Each row says its clinic.
+export async function getFestivos(anio: number, centers?: CenterChoice): Promise<Festivo[]> {
+  const path = await oneCenterPath(`/holidays?anio=${anio}`, centers);
+  return asArray<Festivo>(await apiFetch(path, {}, tenantOf(centers)));
 }
 
 // ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).

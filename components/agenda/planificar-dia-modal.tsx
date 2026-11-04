@@ -19,6 +19,7 @@ export function PlanificarDiaModal({
   fecha,
   paciente,
   centro,
+  centroNombre,
   onOpenChange,
   onSaved,
 }: {
@@ -26,6 +27,8 @@ export function PlanificarDiaModal({
   fecha: string;
   paciente?: Paciente | null;
   centro?: string;
+  /** The clinic it books in, shown in the title when the person reads several. */
+  centroNombre?: string;
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
 }) {
@@ -34,7 +37,7 @@ export function PlanificarDiaModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-5xl">
         <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogTitle>{centroNombre ? `${t("title")} · ${centroNombre}` : t("title")}</DialogTitle>
         </DialogHeader>
         <TherapyDayScheduler
           defaultDate={fecha}

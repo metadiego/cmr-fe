@@ -1,6 +1,7 @@
 import type { components } from "./schema";
 import type { ApiWarning } from "./types";
-import { apiFetch, apiFetchEnvelope, oneCenterPath } from "./client";
+import { apiFetch, apiFetchEnvelope, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
@@ -12,7 +13,7 @@ export type EmbeddedPatient = { id: string; medicalRecordNumber: string | null; 
 
 // Service session (frontdesk). Day-based (no hora/horaFin). `patient` viene adjunto (ver EmbeddedPatient),
 // opcional en el tipo porque el schema aún no lo declara, pero el API ya lo manda (verificado prod 29-sep).
-export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null };
+export type Sesion = components["schemas"]["FrontdeskSesionEntity"] & { patient?: EmbeddedPatient | null; clinicName?: string | null };
 export type CreateSesionPayload = components["schemas"]["CreateSesionDto"];
 export type EstadoSesion = Sesion["status"];
 
@@ -22,23 +23,22 @@ function asArray<T>(res: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-// GET /frontdesk/sesiones?desde&hasta&servicioId?&tecnicoId? — flat array (NOT
-// paginated) of sessions in the range; for the month calendar.
+// GET /frontdesk/sesiones?desde&hasta&servicioId?&tecnicoId? — flat array (NOT paginated) of the range.
 export async function listSesionesRango(params: {
   desde: string;
   hasta: string;
   servicioId?: string;
   tecnicoId?: string;
   pacienteId?: string; // historial de servicios de un paciente (ficha → Acciones)
-  centroId?: string; // fuerza el centro de la lectura vía X-Tenant-ID (selector de centro EN la pantalla)
+  centroId?: CenterChoice; // one center (X-Tenant-ID), several or `null` (every readable one: calendar)
 }): Promise<Sesion[]> {
   const sp = new URLSearchParams({ from: params.desde, to: params.hasta });
   if (params.servicioId) sp.set("serviceId", params.servicioId);
   if (params.tecnicoId) sp.set("technicianId", params.tecnicoId);
   if (params.pacienteId) sp.set("patientId", params.pacienteId);
-  // A patient's history spans every readable center; a calendar or day view is one center.
+  // A patient's history spans every readable center; a day view is one; the calendar, those shown.
   const path = `/frontdesk/sesiones?${sp.toString()}`;
-  return asArray<Sesion>(await apiFetch(params.pacienteId ? path : await oneCenterPath(path, params.centroId), {}, params.centroId));
+  return asArray<Sesion>(await apiFetch(params.pacienteId ? path : await oneCenterPath(path, params.centroId), {}, tenantOf(params.centroId)));
 }
 
 export function getSesion(id: string): Promise<Sesion> {

@@ -1,5 +1,6 @@
 import type { components } from "./schema";
-import { apiFetch, apiFetchPaged, oneCenterPath } from "./client";
+import { apiFetch, apiFetchPaged, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 import type { Paginated } from "./types";
 
 // Staff member. `capacidades` includes role-like tags (e.g. "medico") used to
@@ -36,7 +37,7 @@ export interface ListPersonalParams {
 // médico que no está allí (p.ej. Emma/Javier de Caguas salían en Bayamón). Handoff selector-de-centro.
 export async function listPersonal(
   params: ListPersonalParams = {},
-  centroId?: string,
+  centroId?: CenterChoice,
 ): Promise<Paginated<Personal>> {
   const { page = 1, limit = 50, q, capacidad, onlyInactive, includeInactive } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
@@ -44,8 +45,9 @@ export async function listPersonal(
   if (capacidad) sp.set("capacity", capacidad);
   if (onlyInactive) sp.set("onlyInactive", "true");
   if (includeInactive) sp.set("includeInactive", "true");
-  // One center: a staff list or doctor picker never offers someone of another center.
-  return apiFetchPaged<Personal>(await oneCenterPath(`/staff?${sp.toString()}`, centroId), {}, centroId);
+  // One center unless a list of them (or `null`, every readable one) is asked: a staff list or doctor
+  // picker never offers someone of a center it does not show.
+  return apiFetchPaged<Personal>(await oneCenterPath(`/staff?${sp.toString()}`, centroId), {}, tenantOf(centroId));
 }
 
 // Ficha de UN miembro (GET /staff/:id) para el hub del médico. Tenant-scoped; `centroId` fuerza el centro.
@@ -169,8 +171,9 @@ export async function listPersonalPorCapacidad(capacidad: string, centro?: strin
 }
 
 // Doctors available to be assigned to appointments (capacidad = "medico"). `centroId` recarga la lista
-// con los médicos del centro que se está mirando (selector de centro EN la pantalla).
-export async function getMedicos(centroId?: string): Promise<Personal[]> {
+// con los médicos del centro que se está mirando (selector de centro EN la pantalla); a list of centers
+// (or `null`, every readable one) is the doctors of the clinics a calendar shows.
+export async function getMedicos(centroId?: CenterChoice): Promise<Personal[]> {
   const { items } = await listPersonal({ capacidad: "medico", limit: 100 }, centroId);
   return items;
 }

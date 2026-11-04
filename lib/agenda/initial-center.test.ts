@@ -77,3 +77,21 @@ test("no centers loaded yet: null, never a guess", () => {
     null,
   );
 });
+
+test("the center the link asks for (the calendar's clinic) wins over the saved one", () => {
+  assert.equal(
+    initialAgendaCenter({ canSeeAllCenters: false, saved: "bayamon", activeCenter: "bayamon", centers, requested: "caguas" }),
+    "caguas",
+  );
+  assert.equal(
+    initialAgendaCenter({ canSeeAllCenters: true, saved: ALL_CENTERS, activeCenter: null, centers, requested: "caguas" }),
+    "caguas",
+  );
+});
+
+test("a requested center the profile is not assigned to is ignored", () => {
+  assert.equal(
+    initialAgendaCenter({ canSeeAllCenters: false, saved: null, activeCenter: "bayamon", centers, requested: "elsewhere" }),
+    "bayamon",
+  );
+});
