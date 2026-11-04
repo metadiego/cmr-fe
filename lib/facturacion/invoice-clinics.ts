@@ -6,6 +6,8 @@
  * The ONE clinic a new sale is created in: the filter's clinic when exactly one is ticked, else the
  * active clinic (top bar / session) when the person may bill there, else the only readable clinic.
  * `null` = undecided: the sale screen asks for one. `readable` empty = not known yet (trust `active`).
+ * Unlike `createClinicOf` (lib/create-clinic.ts), it never falls back to "the first clinic": a sale moves
+ * money, so when the clinic is not obvious the person picks it.
  */
 export function clinicForNewSale(
   choice: readonly string[] | null,

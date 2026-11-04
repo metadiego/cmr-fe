@@ -39,7 +39,14 @@ export interface CentroPantalla {
   cargando: boolean;
 }
 
-export function useCentroPantalla(permisoRead: string, permisoWrite: string): CentroPantalla {
+// `requested`: a center the screen was opened on (the month calendar's clinic, `?centro=`). When it is one
+// the screen can show, the screen starts there and its picker shows (even where it would repeat the top
+// bar), so the person sees which center it is and can move.
+export function useCentroPantalla(
+  permisoRead: string,
+  permisoWrite: string,
+  requested?: string | null,
+): CentroPantalla {
   const me = useMe();
   const sessionCentroId = me.kind === "ok" ? (me.me.activeClinicId ?? null) : null;
   // The top bar shows the cookie's center, else the session's (components/center-selector.tsx).
@@ -54,9 +61,10 @@ export function useCentroPantalla(permisoRead: string, permisoWrite: string): Ce
   const operativosIds = operativosRes.state.kind === "ok" ? operativosRes.state.data.map((c) => c.id) : [];
 
   const centroIds = centros.map((c) => c.id);
-  const redundante = isScreenPickerRedundant(centroIds, operativosIds, topBarCentroId);
+  const pedido = !!requested && centroIds.includes(requested);
+  const redundante = !pedido && isScreenPickerRedundant(centroIds, operativosIds, topBarCentroId);
 
-  const [centroSel, setCentroSel] = React.useState("");
+  const [centroSel, setCentroSel] = React.useState(requested ?? "");
   const centroActivo =
     (!redundante && centroSel && centroIds.includes(centroSel) ? centroSel : "") ||
     defaultScreenCenter(centroIds, topBarCentroId, sessionCentroId);

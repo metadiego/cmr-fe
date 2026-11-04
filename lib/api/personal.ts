@@ -198,8 +198,9 @@ export async function listPersonalPorCapacidad(capacidad: string, centro?: strin
 }
 
 // Doctors available to be assigned to appointments (capacidad = "medico"). `centroId` recarga la lista
-// con los médicos del centro que se está mirando (selector de centro EN la pantalla).
-export async function getMedicos(centroId?: string): Promise<Personal[]> {
+// con los médicos del centro que se está mirando (selector de centro EN la pantalla); a list of centers
+// (or `null`, every readable one) is the doctors of the clinics a calendar shows.
+export async function getMedicos(centroId?: CenterChoice): Promise<Personal[]> {
   const { items } = await listPersonal({ capacidad: "medico", limit: 100 }, centroId);
   return items;
 }

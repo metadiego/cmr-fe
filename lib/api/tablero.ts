@@ -3,7 +3,7 @@ import type { components } from "./schema";
 import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
-import { readCenterIds } from "@/lib/clinic-read-scope";
+import { readCenterIds, tenantOf } from "@/lib/clinic-read-scope";
 
 // Catalog column definition (GET /board/columns). `scopes` = which boards
 // it's eligible for. Distinct from ColumnaEfectiva (a placed column).
@@ -32,7 +32,7 @@ export function getTablero(
   if (opts.soloAtencion) sp.set("onlyCare", "true");
   const ids = readCenterIds(opts.centroId, opts.centerIds);
   if (ids) sp.set("centerIds", ids.join(","));
-  return apiFetch<Tablero>(`/appointments/board?${sp.toString()}`);
+  return apiFetch<Tablero>(`/appointments/board?${sp.toString()}`, {}, tenantOf(ids));
 }
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────

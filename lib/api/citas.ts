@@ -2,7 +2,7 @@ import type { components } from "./schema";
 import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
 import type { Paginated } from "./types";
 import { getCentrosDondePuedo } from "./centers";
-import { readCenterIds } from "@/lib/clinic-read-scope";
+import { readCenterIds, tenantOf } from "@/lib/clinic-read-scope";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
 //
@@ -96,7 +96,8 @@ export function listCitas(
 ): Promise<Paginated<Cita>> {
   const { page = 1, limit = 100, centerIds, ...filters } = params;
   const sp = readQuery({ page, limit, ...filters }, centroId, centerIds);
-  return apiFetchPaged<Cita>(`/appointments?${sp.toString()}`);
+  // X-Tenant-ID = a clinic of the read, so the guard checks one where the permission is held.
+  return apiFetchPaged<Cita>(`/appointments?${sp.toString()}`, {}, tenantOf(readCenterIds(centroId, centerIds)));
 }
 
 // Centers where the person can read appointments. Empty = not known (the read falls back to the
@@ -158,7 +159,7 @@ export function countByDay(params: {
 }): Promise<ConteoPorDia[]> {
   const { centroId, centerIds, ...filters } = params;
   const sp = readQuery(filters, centroId, centerIds);
-  return apiFetch<ConteoPorDia[]>(`/appointments/count-by-day?${sp.toString()}`);
+  return apiFetch<ConteoPorDia[]>(`/appointments/count-by-day?${sp.toString()}`, {}, tenantOf(readCenterIds(centroId, centerIds)));
 }
 
 // Found by id in every center the person can read; the row carries `clinicId`/`clinicName`.
