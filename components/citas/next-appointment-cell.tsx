@@ -96,10 +96,14 @@ export function NextAppointmentCell({
     setOpen(next);
   }
 
-  const movable = canReschedule(appt) && can("citas.update");
-  const bookable = !appt && !loading && can("citas.create");
   const type = appt ? types.find((x) => x.id === appt.appointmentTypeId) : null;
-  const followUp = types.find((x) => x.slug === "seguimiento") ?? types[0];
+  // Owner's rule (04-nov-2026): every appointment booked or moved from this cell is a FOLLOW-UP.
+  // Booking sends the follow-up type; the reschedule endpoint cannot change the type yet (BE handoff
+  // docs/specs/next-appointment-follow-up-handoff-be.md), so only follow-ups can be moved from here.
+  const followUp = types.find((x) => x.slug === "seguimiento");
+  const isFollowUp = !!appt && !!followUp && appt.appointmentTypeId === followUp.id;
+  const movable = canReschedule(appt) && isFollowUp && can("citas.update");
+  const bookable = !appt && !loading && !!followUp && can("citas.create");
   const doctorForAviso = appt?.doctorId ?? doctorId;
 
   async function save() {
@@ -119,6 +123,7 @@ export function NextAppointmentCell({
         );
         toast.success(t("moved", { date: fmtDay(day, "dayWeekdayShort") }));
       } else if (patientId && followUp) {
+        // Always a follow-up (owner's rule), never the first type of the catalogue.
         await createCita(
           {
             patientId,
@@ -208,7 +213,9 @@ export function NextAppointmentCell({
         )}
 
         {!loading && appt && !movable && (
-          <p className="px-4 py-3 text-xs text-muted-foreground">{t("notMovable")}</p>
+          <p className="px-4 py-3 text-xs text-muted-foreground">
+            {canReschedule(appt) && !isFollowUp ? t("notFollowUp") : t("notMovable")}
+          </p>
         )}
 
         <div className="flex justify-end gap-2 border-t bg-muted/30 px-4 py-2.5">
@@ -216,7 +223,7 @@ export function NextAppointmentCell({
             {tNueva("exit")}
           </Button>
           {(movable || bookable) && (
-            <Button type="button" size="sm" onClick={save} disabled={!day || busy || (!appt && !followUp)}>
+            <Button type="button" size="sm" onClick={save} disabled={!day || busy}>
               {appt ? t("move") : t("book")}
             </Button>
           )}
