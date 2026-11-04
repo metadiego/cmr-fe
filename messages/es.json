@@ -897,6 +897,7 @@
       "protocolChange": "Cambio de protocolo"
     },
     "hub": {
+      "clinic": "Centro",
       "alerts": "Alertas y precauciones",
       "allergies": "Alergias",
       "implants": "Implantes y dispositivos",
@@ -4557,6 +4558,7 @@
     "issuedOn": "Expedido el {fecha}."
   },
   "medicoHub": {
+    "clinic": "Centro",
     "back": "Personal",
     "loading": "Cargando…",
     "active": "Activo",

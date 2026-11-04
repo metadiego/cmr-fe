@@ -83,6 +83,25 @@ Con el BE desplegado:
 Errores: un `centerIds` con un centro sin `citas.read` → 403 `CENTROS_NO_AUTORIZADOS`. Si se piden
 varios y alguno sí vale, se devuelve lo permitido (`meta.clinicScope.filtered = true`).
 
+## Hecho en el FE (PR `feat/clinic-read-scope`, 04-nov-2026)
+
+Va **después** de que el BE de Citas (#450) esté desplegado: antes, el BE responde 400 a
+`centerIds` en `/appointments` (los DTO rechazan campos desconocidos).
+
+- `apiFetchPaged` devuelve también `clinicScope` (`lib/api/client.ts`, `Paginated`).
+- Pacientes: la lista carga sin esperar a la lista de centros; `centerIds` solo con el filtro; la
+  columna «Centro» sale de `meta.clinicScope`; el nombre, de `clinicName`. La ficha se abre por id
+  (sin `?centro=`; los enlaces viejos siguen valiendo).
+- Citas: `listCitas`, `listCitasRango`, `countByDay` y `getTablero` mandan el centro elegido como
+  `centerIds` y ya no cambian `X-Tenant-ID` para leer (`lib/clinic-read-scope.ts`). La ficha del
+  paciente (citas, última visita, reagendamientos), las acciones del paciente y el hub del médico
+  (agenda, producción) leen todos los centros legibles (`listCitasEveryCenter`), con el centro de
+  cada cita cuando hay más de uno.
+- Sin tocar: `agenda-dia`, `cupos-libres`, `getVisitasRecientes` y todas las escrituras.
+
+Con esto desplegado, el BE ya puede pasar el defecto de Citas a «todos»: cada pantalla de un centro
+lo nombra en `centerIds`. Al hacerlo, `listCitasEveryCenter` queda como `listCitas` a secas.
+
 ## Sin cambios
 
 - Crear un paciente sigue creando en el centro de la sesión (la barra superior).

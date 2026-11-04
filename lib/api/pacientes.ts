@@ -3,8 +3,11 @@ import { apiFetch, apiFetchPaged } from "./client"
 import type { Paginated } from "./types"
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
+// `clinicName` is hand-added: the BE puts it on every row it reads (clinic-read-scope), the entity
+// schema does not declare it.
 export type Paciente = components["schemas"]["PacienteEntity"] & {
   displayName?: string | null
+  clinicName?: string | null
 }
 export type CreatePacientePayload = components["schemas"]["CreatePacienteDto"]
 export type UpdatePacientePayload = components["schemas"]["UpdatePacienteDto"]
@@ -14,8 +17,8 @@ export interface ListPacientesParams {
   limit?: number
   q?: string
   doctorId?: string // pacientes de UN médico (GET /patients?doctorId=) — para el hub del médico
-  // Centers to read instead of the session's: the screen's own center picker. Each needs
-  // pacientes.read THERE (BE PR #442, docs/specs/pacientes-de-otro-centro-handoff-fe.md).
+  // Narrows the read to these centers; each needs pacientes.read THERE. Omitted = every center the
+  // person can read (docs/specs/clinic-read-scope-handoff-fe.md).
   centerIds?: string[]
 }
 
@@ -35,7 +38,7 @@ export function listPacientes(
   return apiFetchPaged<Paciente>(`/patients?${sp.toString()}`, {}, tenant)
 }
 
-// `centerIds`: look the patient up in those centers instead of the session's (same rule as the list).
+// Found by id in every center the person can read. `centerIds` narrows that (old `?centro=` links).
 export function getPaciente(
   id: string,
   centroId?: string,

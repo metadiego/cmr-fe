@@ -87,9 +87,10 @@ export function MedicasCalendar() {
         from: desde,
         to: hasta,
         doctorId: medicoEfectivo === ALL ? undefined : medicoEfectivo,
-        centroId: centro.fetchCentroId,
+        // The center being looked at, named in the read so it stays one center whatever the BE default.
+        centroId: centro.centroActivo || undefined,
       }),
-    [desde, hasta, medicoEfectivo, centro.fetchCentroId],
+    [desde, hasta, medicoEfectivo, centro.centroActivo],
   );
   const conteos = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 

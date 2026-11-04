@@ -148,7 +148,7 @@ export async function apiRequest<T>(
   return envelope == null ? (undefined as T) : envelope.data;
 }
 
-// Like apiRequest but keeps meta.pagination, returning { items, pagination }.
+// Like apiRequest but keeps meta.pagination (and meta.clinicScope), returning { items, pagination, clinicScope }.
 // Falls back to a single-page shape when the BE omits meta.pagination.
 export async function apiRequestPaged<T>(
   path: string,
@@ -162,7 +162,7 @@ export async function apiRequestPaged<T>(
     page: 1,
     limit: items.length,
   };
-  return { items, pagination };
+  return { items, pagination, clinicScope: envelope?.meta.clinicScope };
 }
 
 // Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v2/api-keys.

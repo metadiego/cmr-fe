@@ -7,7 +7,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
-import { getActiveCentro } from "@/lib/tenant";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { patientCenterScope, patientRecordHref } from "@/lib/pacientes/center-scope";
 import { CenterFilter } from "@/components/kit/center-filter";
@@ -42,24 +41,25 @@ export default function ClientesPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
-  // Every clinic the person may read patients in, in one list (lib/pacientes/center-scope.ts): one clinic
-  // → pre-filtered to it; more → all by default, a filter to narrow them and a clinic column.
+  // The BE reads every clinic the person may read patients in (lib/pacientes/center-scope.ts), so the
+  // list loads at once. The clinics this person can read only fill the filter; the column follows what
+  // the response covered.
   const centrosRes = useResource<Centro[]>(() => getCentrosDondePuedo("pacientes.read"));
   const centros = React.useMemo(() => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []), [centrosRes.state]);
   const centroName = React.useMemo(() => new Map(centros.map((c) => [c.id, c.name])), [centros]);
   const [selected, setSelected] = React.useState<string[] | null>(null);
-  const scope = patientCenterScope(centros.map((c) => c.id), selected);
-  const sesion = getActiveCentro();
+  const chosen = patientCenterScope(centros.map((c) => c.id), selected, undefined).centerIds;
+  const chosenKey = chosen?.join(",");
 
-  // Server-side search: the BE filters by name/docId/phone/etc via `q`. Waits (a pending promise keeps
-  // the table in its loading state) until the clinics are known, so it never flashes the session
-  // clinic's list before the full one.
+  // Server-side search: the BE filters by name/docId/phone/etc via `q`.
   const { state, reload } = useResource<Paginated<Paciente>>(
-    () =>
-      centrosRes.state.kind === "loading"
-        ? new Promise<never>(() => {})
-        : listPacientes({ page, limit: LIMIT, q, centerIds: scope.centerIds }),
-    [page, q, scope.centerIds, centrosRes.state.kind],
+    () => listPacientes({ page, limit: LIMIT, q, centerIds: chosen }),
+    [page, q, chosenKey],
+  );
+  const scope = patientCenterScope(
+    centros.map((c) => c.id),
+    selected,
+    state.kind === "ok" ? state.data.clinicScope?.clinicIds : undefined,
   );
 
   function onCentersChange(next: string[] | null) {
@@ -134,7 +134,7 @@ export default function ClientesPage() {
               <TableRow
                 key={p.id}
                 className="cursor-pointer"
-                onClick={() => router.push(patientRecordHref(p, sesion))}
+                onClick={() => router.push(patientRecordHref(p))}
               >
                 <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
                   {(page - 1) * LIMIT + i + 1}
@@ -157,7 +157,7 @@ export default function ClientesPage() {
                 </TableCell>
                 {scope.showColumn && (
                   <TableCell>
-                    <Badge variant="outline">{(p.clinicId && centroName.get(p.clinicId)) || "—"}</Badge>
+                    <Badge variant="outline">{p.clinicName || (p.clinicId && centroName.get(p.clinicId)) || "—"}</Badge>
                   </TableCell>
                 )}
                 <TableCell className="text-right">

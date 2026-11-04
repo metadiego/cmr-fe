@@ -9,7 +9,8 @@ import { Calendar03Icon, InvoiceIcon, StethoscopeIcon, Add01Icon } from "@hugeic
 
 import type { Paciente } from "@/lib/api/pacientes";
 import { listFacturas, type Factura } from "@/lib/api/facturas";
-import { listCitas, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
+import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
+import { spansClinics } from "@/lib/clinic-read-scope";
 import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
 import { getServicios, type Servicio } from "@/lib/api/servicios";
 import { getMedicos, type Personal } from "@/lib/api/personal";
@@ -67,7 +68,7 @@ export function AccionesPacienteSheet({
           )}
           {can("citas.read") && (
             <Seccion icon={Calendar03Icon} titulo={t("citas")}>
-              <Citas pid={pid} centro={centro} />
+              <Citas pid={pid} />
             </Seccion>
           )}
 
@@ -172,19 +173,24 @@ function Servicios({ pid, centro }: { pid: string; centro?: string }) {
   );
 }
 
-function Citas({ pid, centro }: { pid: string; centro?: string }) {
+// The patient's appointments in every clinic the person can read; each names its clinic once they span two.
+function Citas({ pid }: { pid: string }) {
   const t = useTranslations("acciones");
-  const res = useResource<Cita[]>(() => listCitas({ patientId: pid, limit: 100 }, centro).then((r) => r.items), [pid, centro]);
+  const res = useResource<Cita[]>(() => listCitasEveryCenter({ patientId: pid, limit: 100 }).then((r) => r.items), [pid]);
   if (res.state.kind === "loading") return <Cargando />;
   if (res.state.kind === "fail") return <Alert variant="destructive"><AlertDescription>{res.state.message}</AlertDescription></Alert>;
   const citas = res.state.data;
   if (citas.length === 0) return <Vacio>{t("sinCitas")}</Vacio>;
+  const conCentro = spansClinics(citas);
   return (
     <ul className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {citas.map((c) => (
         <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
           <span className="tabular-nums">{c.date}{c.time ? ` · ${c.time}` : ""}</span>
-          <Badge variant="outline">{c.status}</Badge>
+          <span className="flex shrink-0 items-center gap-2 text-xs">
+            {conCentro && <span className="text-muted-foreground">{c.clinicName ?? "—"}</span>}
+            <Badge variant="outline">{c.status}</Badge>
+          </span>
         </li>
       ))}
     </ul>

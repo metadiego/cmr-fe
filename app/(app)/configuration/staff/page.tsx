@@ -286,7 +286,7 @@ function FichaPersonal({
         <TabsContent value="disponibilidad" className="pt-2">
           <MedicoDisponibilidad doctorId={persona.id} centro={centro} />
         </TabsContent>
-        {puedeAgenda && <TabsContent value="agenda" className="pt-2"><MedicoAgenda doctorId={persona.id} centro={centro} /></TabsContent>}
+        {puedeAgenda && <TabsContent value="agenda" className="pt-2"><MedicoAgenda doctorId={persona.id} /></TabsContent>}
         {puedePacientes && <TabsContent value="pacientes" className="pt-2"><MedicoPacientes doctorId={persona.id} centro={centro} /></TabsContent>}
         {puedeProduccion && <TabsContent value="produccion" className="pt-2"><MedicoProduccion doctorId={persona.id} centro={centro} /></TabsContent>}
       </Tabs>
