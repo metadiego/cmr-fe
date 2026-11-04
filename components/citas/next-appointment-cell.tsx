@@ -199,7 +199,7 @@ export function NextAppointmentCell({
             </span>
             <ReturnDatePicker value={day} onChange={setDay} />
             <AvisoDisponibilidad doctorId={doctorForAviso} date={day} centro={centroId} onUseSuggested={setDay} />
-            {appt && day && (
+            {appt && day && day !== appt.date && (
               <p className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
                 {t("fromTo", { from: fmtDay(appt.date, "dayWeekdayShort"), to: fmtDay(day, "dayWeekdayShort") })}
               </p>
@@ -223,7 +223,7 @@ export function NextAppointmentCell({
             {tNueva("exit")}
           </Button>
           {(movable || bookable) && (
-            <Button type="button" size="sm" onClick={save} disabled={!day || busy}>
+            <Button type="button" size="sm" onClick={save} disabled={!day || busy || day === appt?.date}>
               {appt ? t("move") : t("book")}
             </Button>
           )}
