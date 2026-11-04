@@ -4527,7 +4527,8 @@
     "ehrGuardando": "Saving…",
     "ehrGuardar": "Save",
     "ehrVinculado": "Linked with the EHR.",
-    "ehrActualizado": "EHR role updated."
+    "ehrActualizado": "EHR role updated.",
+    "extension": "Extension (phone system)"
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
@@ -4896,5 +4897,84 @@
     "notMovable": "This appointment is no longer open and cannot be moved from here.",
     "noneThatDay": "No follow-up room left that day.",
     "freeDay": "Follow-up room that day ({n} free)."
+  },
+  "rightNow": {
+    "title": "Right now",
+    "description": "What is happening in each office, live.",
+    "updatedAt": "Updated {time}",
+    "live": "Live",
+    "offline": "Live updates offline",
+    "combined": "All centers",
+    "kpi": {
+      "netSales": "Net sales",
+      "invoices": "Invoices",
+      "refunds": "Refunds",
+      "present": "Patients present",
+      "attended": "Attended",
+      "pending": "Pending",
+      "calls": "Calls",
+      "alerts": "Alerts"
+    },
+    "sales": {
+      "title": "Sales",
+      "net": "Net today",
+      "refunds": "Refunds: {n}",
+      "topSellers": "Top sellers",
+      "noSellers": "No sales yet.",
+      "unknownSeller": "No name"
+    },
+    "patients": {
+      "title": "Patients (consultations)",
+      "present": "Present",
+      "firstVisit": "First visit",
+      "followUp": "Follow-up",
+      "attended": "Attended",
+      "pending": "Pending"
+    },
+    "doctors": {
+      "title": "Doctors",
+      "colDoctor": "Doctor",
+      "colTotal": "Appts",
+      "colAttended": "Attended",
+      "colFirst": "1st",
+      "colFollow": "F/U",
+      "colNet": "Billed",
+      "empty": "No consultations today."
+    },
+    "prescriptions": {
+      "title": "Prescriptions",
+      "empty": "Prescriptions will come from the medical record (EHR); no data yet."
+    },
+    "services": {
+      "title": "Services",
+      "colService": "Service",
+      "colWaiting": "Waiting",
+      "colInCare": "In care",
+      "colCompleted": "Completed",
+      "colStaff": "Staff",
+      "empty": "No services today.",
+      "waitingList": "Waiting · {service}",
+      "completedList": "Completed · {service}",
+      "minutes": "{n} min",
+      "attendedBy": "Seen by {name}",
+      "none": "Nobody."
+    },
+    "calls": {
+      "title": "Calls",
+      "total": "Total",
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "missed": "Missed",
+      "answerRate": "Answered",
+      "byPbx": "By PBX",
+      "ranking": "Operators",
+      "colExtension": "Ext.",
+      "colName": "Operator",
+      "colAnswered": "Answered",
+      "colOutbound": "Outbound",
+      "empty": "No calls recorded yet."
+    },
+    "noCenters": "You have no centers to view.",
+    "error": "Could not load «Right now»."
   }
 }

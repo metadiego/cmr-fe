@@ -51003,7 +51003,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Snapshot del día del centro activo (fuentes según preferencias).
+         * The day of the active center; `centerIds` = that center, or the combined of several.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -51024,7 +51024,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Snapshot del día del centro activo (fuentes según preferencias).
+         * The day of the active center; `centerIds` = that center, or the combined of several.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -51044,7 +51044,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Snapshot del día del centro activo (fuentes según preferencias). */
+        /** The day of the active center; `centerIds` = that center, or the combined of several. */
         get: operations["AhoraMismoController_delDia[2]_v2"];
         put?: never;
         post?: never;
@@ -51061,7 +51061,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Snapshot del día del centro activo (fuentes según preferencias). */
+        /** The day of the active center; `centerIds` = that center, or the combined of several. */
         get: operations["AhoraMismoController_delDia[3]_v2"];
         put?: never;
         post?: never;
@@ -51079,7 +51079,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Snapshot por centro de los centros alcanzables del principal + combinado.
+         * One snapshot per center the user may read (narrowed by `centerIds`) + the combined one.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/centros`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -51100,7 +51100,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Snapshot por centro de los centros alcanzables del principal + combinado.
+         * One snapshot per center the user may read (narrowed by `centerIds`) + the combined one.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/ahora-mismo/centers`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -51121,7 +51121,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Snapshot por centro de los centros alcanzables del principal + combinado.
+         * One snapshot per center the user may read (narrowed by `centerIds`) + the combined one.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/centros`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -51142,7 +51142,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Snapshot por centro de los centros alcanzables del principal + combinado.
+         * One snapshot per center the user may read (narrowed by `centerIds`) + the combined one.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/right-now/centers`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -51162,7 +51162,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Snapshot por centro de los centros alcanzables del principal + combinado. */
+        /** One snapshot per center the user may read (narrowed by `centerIds`) + the combined one. */
         get: operations["AhoraMismoController_delDiaCentros[4]_v2"];
         put?: never;
         post?: never;
@@ -51179,7 +51179,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Snapshot por centro de los centros alcanzables del principal + combinado. */
+        /** One snapshot per center the user may read (narrowed by `centerIds`) + the combined one. */
         get: operations["AhoraMismoController_delDiaCentros[5]_v2"];
         put?: never;
         post?: never;
@@ -51196,7 +51196,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Snapshot por centro de los centros alcanzables del principal + combinado. */
+        /** One snapshot per center the user may read (narrowed by `centerIds`) + the combined one. */
         get: operations["AhoraMismoController_delDiaCentros[6]_v2"];
         put?: never;
         post?: never;
@@ -51213,7 +51213,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Snapshot por centro de los centros alcanzables del principal + combinado. */
+        /** One snapshot per center the user may read (narrowed by `centerIds`) + the combined one. */
         get: operations["AhoraMismoController_delDiaCentros[7]_v2"];
         put?: never;
         post?: never;
@@ -53578,6 +53578,12 @@ export interface components {
             email: string | null;
             color: string;
             legacyCode: string | null;
+            /**
+             * @description The person's phone extension on the call center PBX. It is how a call (which only knows the
+             *     extension) gets a name in the operators ranking of «Ahora mismo». Loaded from the legacy
+             *     (`loginpass.extension`) and edited in the staff file. See docs/specs/ahora-mismo-de-la-oficina.md.
+             */
+            extension: string | null;
             active: boolean;
             /**
              * @description Con qué pestaña abre esta persona el tablero de Consulta.
@@ -53624,6 +53630,8 @@ export interface components {
             /** Format: email */
             email?: string;
             legacyCode?: string;
+            /** @description Phone extension on the call center PBX (names the operator in «Ahora mismo»). */
+            extension?: string;
             /**
              * @description Color con el que se pinta a esta persona en los tableros. Es un dato suyo y se edita como el
              *     resto: no tener dónde cambiarlo obligaba a tocar la base a mano.
@@ -53655,6 +53663,8 @@ export interface components {
             /** Format: email */
             email?: string;
             active?: boolean;
+            /** @description Phone extension on the call center PBX (names the operator in «Ahora mismo»). */
+            extension?: string;
             /**
              * @description Color con el que se pinta a esta persona en los tableros. Es un dato suyo y se edita como el
              *     resto: no tener dónde cambiarlo obligaba a tocar la base a mano.
@@ -131660,7 +131670,10 @@ export interface operations {
     "AhoraMismoController_delDia[0]_v1": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131681,7 +131694,10 @@ export interface operations {
     "AhoraMismoController_delDia[1]_v1": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131702,7 +131718,10 @@ export interface operations {
     "AhoraMismoController_delDia[2]_v2": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131723,7 +131742,10 @@ export interface operations {
     "AhoraMismoController_delDia[3]_v2": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131744,7 +131766,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[0]_v1": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131763,7 +131788,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[1]_v1": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131782,7 +131810,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[2]_v1": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131801,7 +131832,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[3]_v1": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131820,7 +131854,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[4]_v2": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131839,7 +131876,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[5]_v2": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131858,7 +131898,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[6]_v2": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;
@@ -131877,7 +131920,10 @@ export interface operations {
     "AhoraMismoController_delDiaCentros[7]_v2": {
         parameters: {
             query?: {
+                /** @description Day (YYYY-MM-DD). Default: today in the center time zone. */
                 date?: string;
+                /** @description Centers to show, comma separated. Only narrows the centers where the user holds ahora-mismo.read; none of them allowed = 403. */
+                centerIds?: string[];
             };
             header?: never;
             path?: never;

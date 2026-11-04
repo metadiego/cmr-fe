@@ -4527,7 +4527,8 @@
     "ehrGuardando": "Guardando…",
     "ehrGuardar": "Guardar",
     "ehrVinculado": "Vinculado con el EHR.",
-    "ehrActualizado": "Rol del EHR actualizado."
+    "ehrActualizado": "Rol del EHR actualizado.",
+    "extension": "Extensión (central telefónica)"
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
@@ -4896,5 +4897,84 @@
     "notMovable": "Esta cita ya no está abierta y no se puede mover desde aquí.",
     "noneThatDay": "No queda cupo de seguimiento ese día.",
     "freeDay": "Hay cupo de seguimiento ese día ({n} libres)."
+  },
+  "rightNow": {
+    "title": "Ahora mismo",
+    "description": "Lo que pasa en cada oficina, en vivo.",
+    "updatedAt": "Actualizado {time}",
+    "live": "En vivo",
+    "offline": "Sin conexión en vivo",
+    "combined": "Todos los centros",
+    "kpi": {
+      "netSales": "Ventas netas",
+      "invoices": "Facturas",
+      "refunds": "Devoluciones",
+      "present": "Pacientes presentes",
+      "attended": "Atendidos",
+      "pending": "Pendientes",
+      "calls": "Llamadas",
+      "alerts": "Alertas"
+    },
+    "sales": {
+      "title": "Ventas",
+      "net": "Neto del día",
+      "refunds": "Devoluciones: {n}",
+      "topSellers": "Mejores vendedores",
+      "noSellers": "Aún no hay ventas.",
+      "unknownSeller": "Sin nombre"
+    },
+    "patients": {
+      "title": "Pacientes (consultas)",
+      "present": "Presentes",
+      "firstVisit": "Primera vez",
+      "followUp": "Seguimiento",
+      "attended": "Atendidos",
+      "pending": "Pendientes"
+    },
+    "doctors": {
+      "title": "Médicos",
+      "colDoctor": "Médico",
+      "colTotal": "Citas",
+      "colAttended": "Atendidos",
+      "colFirst": "1ª vez",
+      "colFollow": "Seg.",
+      "colNet": "Facturado",
+      "empty": "Sin consultas hoy."
+    },
+    "prescriptions": {
+      "title": "Recetas",
+      "empty": "Las recetas llegarán desde el expediente (EHR); todavía no hay datos."
+    },
+    "services": {
+      "title": "Servicios",
+      "colService": "Servicio",
+      "colWaiting": "En espera",
+      "colInCare": "En atención",
+      "colCompleted": "Completados",
+      "colStaff": "Atiende",
+      "empty": "Sin servicios hoy.",
+      "waitingList": "En espera · {service}",
+      "completedList": "Completados · {service}",
+      "minutes": "{n} min",
+      "attendedBy": "Atendió {name}",
+      "none": "Nadie."
+    },
+    "calls": {
+      "title": "Llamadas",
+      "total": "Total",
+      "inbound": "Entrantes",
+      "outbound": "Salientes",
+      "missed": "Perdidas",
+      "answerRate": "Contestadas",
+      "byPbx": "Por central",
+      "ranking": "Operadoras",
+      "colExtension": "Ext.",
+      "colName": "Operadora",
+      "colAnswered": "Contestadas",
+      "colOutbound": "Salientes",
+      "empty": "Sin llamadas registradas todavía."
+    },
+    "noCenters": "No tienes centros para ver.",
+    "error": "No se pudo cargar «Ahora mismo»."
   }
 }

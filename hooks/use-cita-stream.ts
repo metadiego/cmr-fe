@@ -19,8 +19,9 @@ export function useCitaStream(opts: {
   onEvent?: (e: CitaStreamEvent) => void;
   debounceMs?: number;
   pollMs?: number; // safety-net refetch interval while NOT live (SSE down)
+  path?: string; // another SSE bus with the same framing (default: the board bus)
 }): { live: boolean; failure: StreamFailure | null } {
-  const { centroId, enabled = true, debounceMs = 400, pollMs = 20000 } = opts;
+  const { centroId, enabled = true, debounceMs = 400, pollMs = 20000, path } = opts;
   const [live, setLive] = React.useState(false);
   const [failure, setFailure] = React.useState<StreamFailure | null>(null);
 
@@ -86,6 +87,7 @@ export function useCitaStream(opts: {
       while (!stopped) {
         try {
           await subscribeCitas({
+            path,
             centroId,
             lastEventId: lastId,
             signal: controller.signal,
@@ -133,7 +135,7 @@ export function useCitaStream(opts: {
       // The center changed (or the stream was switched off): the old reason describes nothing now.
       setFailure(null);
     };
-  }, [centroId, enabled, debounceMs]);
+  }, [centroId, enabled, debounceMs, path]);
 
   return { live, failure };
 }
