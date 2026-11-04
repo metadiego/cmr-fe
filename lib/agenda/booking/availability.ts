@@ -97,6 +97,16 @@ export function bookedBucket(booked: number, capacity: number): 0 | 1 | 2 | 3 | 
   return 4;
 }
 
+/**
+ * Today's times that already passed are gone: drops slots before `nowTime` when the day is today (same
+ * rule as `nextFree`: a slot at exactly `nowTime` stays). Other days come back unchanged (same object).
+ */
+export function dropPastTimes(day: DaySlots, todayIso: string, nowTime: string): DaySlots {
+  if (day.date !== todayIso) return day;
+  const now = normalizeTime(nowTime);
+  return { ...day, slots: day.slots.filter((s) => s.time >= now) };
+}
+
 export function nextFree(
   days: DaySlots[],
   w: TimeWindow,

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   bookedBucket,
   bookedIn,
+  dropPastTimes,
   freeBucket,
   freeIn,
   fromMedicalBands,
@@ -146,4 +147,15 @@ test("nextFree honours the window", () => {
   assert.deepEqual(nextFree([d1], "afternoon", 5, { date: "2026-11-10" }), [
     { date: "2026-11-10", time: "13:00" },
   ]);
+});
+
+test("dropPastTimes trims today's past times only", () => {
+  const today = day("2026-11-10", [["08:00", 2, 2], ["09:30", 1, 1], ["10:00", 1, 0]]);
+  assert.deepEqual(
+    dropPastTimes(today, "2026-11-10", "9:30").slots.map((s) => s.time),
+    ["09:30", "10:00"],
+  );
+  assert.equal(freeIn(dropPastTimes(today, "2026-11-10", "09:31"), "any"), 0);
+  const tomorrow = day("2026-11-11", [["08:00", 1, 1]]);
+  assert.equal(dropPastTimes(tomorrow, "2026-11-10", "23:00"), tomorrow);
 });

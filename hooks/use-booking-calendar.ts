@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import {
+  dropPastTimes,
   nextFree,
   type DaySlots,
   type TimeWindow,
@@ -30,13 +31,15 @@ export interface BookingCalendarData {
   todayIso: string
   weeks: string[][]
   holidays: string[]
-  /** Free spots per day of the visible month (only bookable days are asked). */
+  /** Free spots per day of the visible month (only bookable days are asked); today without past times. */
   days: Record<string, DayResult>
   loading: boolean
   notConfigured: boolean
   /** The selected day: the day request (patient-aware), else the month's copy while it loads. */
   day: DayResult | undefined
   nextFree: { date: string; time: string }[]
+  /** The month or the next-month lookahead is still loading (so "none soon" is not final yet). */
+  nextFreeLoading: boolean
   live: boolean
   /** Re-asks these dates in the month(s) and the selected day when it is among them. */
   refreshDates: (dates: string[]) => void
@@ -52,6 +55,19 @@ function addMonth(m: { year: number; month0: number }) {
 
 function isDaySlots(d: DayResult | undefined): d is DaySlots {
   return !!d && d !== "error"
+}
+
+/** Today's past times removed from every loaded day (the month, the day panel and Next free agree). */
+function withoutPast(
+  days: Record<string, DayResult>,
+  todayIso: string,
+  nowTime: string
+): Record<string, DayResult> {
+  const out: Record<string, DayResult> = {}
+  for (const [d, v] of Object.entries(days)) {
+    out[d] = isDaySlots(v) ? dropPastTimes(v, todayIso, nowTime) : v
+  }
+  return out
 }
 
 /** Blocking, active holidays as YYYY-MM-DD. */
@@ -114,19 +130,25 @@ export function useBookingCalendar(p: {
     dates: monthDates,
   })
 
-  const loadedDays = React.useMemo(
-    () => Object.values(monthAv.days).filter(isDaySlots),
-    [monthAv.days]
+  const nowTime = nowTimePR()
+  const monthDays = React.useMemo(
+    () => withoutPast(monthAv.days, todayIso, nowTime),
+    [monthAv.days, todayIso, nowTime]
   )
-  const from = { date: todayIso, time: nowTimePR() }
+  const loadedDays = React.useMemo(
+    () => Object.values(monthDays).filter(isDaySlots),
+    [monthDays]
+  )
+  const from = { date: todayIso, time: nowTime }
   const inMonth = nextFree(loadedDays, window, NEXT_FREE_COUNT, from)
 
-  // Fewer than 4 free times left in the current month: also look at the start of the next one.
+  // Fewer than 4 free times left in the current month: also look at the start of the next one. Gated on
+  // every month day having answered once (not on `loading`), so a live refresh or a retry in this month
+  // does not drop the lookahead and its in-flight requests.
+  const monthComplete =
+    holidaysReady && monthDates.every((d) => d in monthAv.days)
   const wantNext =
-    isCurrentMonth &&
-    holidaysReady &&
-    !monthAv.loading &&
-    inMonth.length < NEXT_FREE_COUNT
+    isCurrentMonth && monthComplete && inMonth.length < NEXT_FREE_COUNT
   const nextDates = React.useMemo(
     () =>
       wantNext
@@ -154,7 +176,14 @@ export function useBookingCalendar(p: {
         )
 
   const dayAv = useDayAvailability({ center, kind, typeId, date, patientId })
-  const day = dayAv.day ?? (date ? monthAv.days[date] : undefined)
+  // A medical day is the same request (and cache entry) as the month's copy: while the month or the
+  // lookahead holds the date, read and refresh it there, so a refresh asks for it once.
+  const monthEntry = date
+    ? (monthDays[date] ?? nextAv.days[date])
+    : undefined
+  const dayFromMonth = kind === "medical" && monthEntry !== undefined
+  const rawDay = dayFromMonth ? monthEntry : (dayAv.day ?? monthEntry)
+  const day = isDaySlots(rawDay) ? dropPastTimes(rawDay, todayIso, nowTime) : rawDay
 
   const monthRefresh = monthAv.refresh
   const nextRefresh = nextAv.refresh
@@ -165,10 +194,14 @@ export function useBookingCalendar(p: {
       const inNext = dates.filter((d) => nextDates.includes(d))
       if (inVisible.length > 0) monthRefresh(inVisible)
       if (inNext.length > 0) nextRefresh(inNext)
-      // Day entries asked with a patient are cached apart from the month's: refresh the day itself.
-      if (date && dates.includes(date)) dayRefresh()
+      // Service days asked with a patient are cached apart from the month's: refresh the day itself.
+      // A medical day held by the month was just refreshed there.
+      const coveredByMonth =
+        kind === "medical" &&
+        (monthDates.includes(date ?? "") || nextDates.includes(date ?? ""))
+      if (date && dates.includes(date) && !coveredByMonth) dayRefresh()
     },
-    [monthDates, nextDates, date, monthRefresh, nextRefresh, dayRefresh]
+    [kind, monthDates, nextDates, date, monthRefresh, nextRefresh, dayRefresh]
   )
 
   const liveVisible = React.useMemo(
@@ -185,14 +218,17 @@ export function useBookingCalendar(p: {
     todayIso,
     weeks,
     holidays,
-    days: monthAv.days,
+    days: monthDays,
     loading: monthAv.loading || !holidaysReady,
     notConfigured: monthAv.notConfigured,
     day,
     nextFree: nextFreeTimes,
+    nextFreeLoading:
+      !monthComplete || (nextDates.length > 0 && nextAv.loading),
     live,
     refreshDates,
     retryDay: (d: string) => monthRefresh([d]),
-    retrySelected: dayRefresh,
+    retrySelected: () =>
+      dayFromMonth && date ? refreshDates([date]) : dayRefresh(),
   }
 }

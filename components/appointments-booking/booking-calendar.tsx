@@ -136,7 +136,7 @@ export function BookingCalendar({
         view={medical ? view : undefined}
         onView={medical ? (v) => onChange({ view: v }) : undefined}
         nextFree={data.notConfigured ? [] : data.nextFree}
-        nextFreeLoading={data.loading}
+        nextFreeLoading={data.nextFreeLoading}
         onPickNext={pickNext}
       />
 
