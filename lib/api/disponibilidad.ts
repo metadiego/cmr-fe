@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 
 // Doctor working hours (per-doctor, or global when medicoId is null) and
 // holidays — used to compute bookable slots and grey out unavailable days.
@@ -18,13 +18,13 @@ export async function getHorariosMedico(
   medicoId?: string,
 ): Promise<HorarioMedico[]> {
   const q = medicoId ? `?doctorId=${encodeURIComponent(medicoId)}` : "";
-  return asArray<HorarioMedico>(await apiFetch(`/doctors/schedules${q}`));
+  return asArray<HorarioMedico>(await apiFetch(await oneCenterPath(`/doctors/schedules${q}`)));
 }
 
 // GET /holidays?anio= — holidays for the year (recurring ones resolved to it).
 // `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera `anio`: se manda tal cual.
 export async function getFestivos(anio: number): Promise<Festivo[]> {
-  return asArray<Festivo>(await apiFetch(`/holidays?anio=${anio}`));
+  return asArray<Festivo>(await apiFetch(await oneCenterPath(`/holidays?anio=${anio}`)));
 }
 
 // ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).
@@ -63,7 +63,7 @@ export async function listDoctorAbsences(doctorId: string, from?: string, to?: s
   const sp = new URLSearchParams({ doctorId });
   if (from) sp.set("from", from);
   if (to) sp.set("to", to);
-  return asArray<DoctorAbsence>(await apiFetch(`/doctors/absences?${sp.toString()}`, {}, centroId));
+  return asArray<DoctorAbsence>(await apiFetch(await oneCenterPath(`/doctors/absences?${sp.toString()}`, centroId), {}, centroId));
 }
 export function createDoctorAbsence(payload: DoctorAbsencePayload, centroId?: string): Promise<DoctorAbsence> {
   return apiFetch<DoctorAbsence>(`/doctors/absences`, { method: "POST", body: JSON.stringify(payload) }, centroId);

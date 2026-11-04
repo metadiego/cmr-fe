@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
 
 // Stock por centro y consolidado (BE PR #248). SOLO LECTURA. Tenant-scoped: gerente ve su centro; admin
@@ -100,7 +100,8 @@ export function getStockConsolidado(
   if (params.includeNonInventoryItems) sp.set("includeNonInventoryItems", "true");
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(Math.min(params.limit ?? 50, 100)));
-  // `centro` undefined → admin combinado (todos los centros); un id → recortado a ese centro (1 columna).
+  // `centro` undefined/null → every center the person can read (one column each); an id → that center.
+  if (centro) sp.set("centerIds", centro);
   return apiFetchPaged<StockConsolidadoFila>(`/inventory/stock/consolidated?${sp.toString()}`, {}, centro);
 }
 
@@ -122,9 +123,9 @@ export type StockDetalleFila = {
   dañado?: number;
   disponible?: number;
 };
-export function getStockDetalle(productId: string, centro?: string | null): Promise<StockDetalleFila[]> {
+export async function getStockDetalle(productId: string, centro?: string | null): Promise<StockDetalleFila[]> {
   return apiFetch<unknown>(
-    `/inventory/stock/detail?productId=${encodeURIComponent(productId)}`,
+    await oneCenterPath(`/inventory/stock/detail?productId=${encodeURIComponent(productId)}`, centro ?? undefined),
     {},
     centro,
   ).then((r) => (Array.isArray(r) ? (r as StockDetalleFila[]) : (((r as { items?: StockDetalleFila[] })?.items) ?? [])));

@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 import type { Paginated } from "./types";
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged, oneCenterPath } from "./client";
 
 // Inventario — proveedores, productos y catálogos de apoyo.
 export type Producto = components["schemas"]["ProductoEntity"];
@@ -204,10 +204,10 @@ export function listClasificaciones(type?: string): Promise<Clasificacion[]> {
 export type Almacen = components["schemas"]["AlmacenEntity"];
 export type Ubicacion = components["schemas"]["UbicacionEntity"];
 
-// `tenant`: undefined = centro activo; un id = almacenes de ESE centro (para elegir el
-// almacén destino en una transferencia entre centros).
-export function listAlmacenes(tenant?: string | null): Promise<Almacen[]> {
-  return apiFetch<Almacen[]>(`/inventory/warehouses?limit=100`, {}, tenant);
+// `tenant`: undefined = the active center; an id = THAT center's warehouses (e.g. the destination of a
+// transfer between centers). Always one center: a warehouse picker never mixes centers.
+export async function listAlmacenes(tenant?: string | null): Promise<Almacen[]> {
+  return apiFetch<Almacen[]>(await oneCenterPath(`/inventory/warehouses?limit=100`, tenant ?? undefined), {}, tenant);
 }
 // Ubicaciones (opcional; puede filtrar por almacén). Devuelve [] si el BE no soporta el filtro.
 export function listUbicaciones(warehouseId?: string): Promise<Ubicacion[]> {
@@ -295,8 +295,9 @@ export type VialAbierto = components["schemas"]["VialAbiertoEntity"] & {
   agotado?: boolean;
   excedido?: number;
 };
-export function listVialesAbiertos(productId: string, centroId?: string): Promise<VialAbierto[]> {
-  return apiFetch<VialAbierto[]>(`/inventory/open-vials?productId=${encodeURIComponent(productId)}`, {}, centroId);
+export async function listVialesAbiertos(productId: string, centroId?: string): Promise<VialAbierto[]> {
+  const path = await oneCenterPath(`/inventory/open-vials?productId=${encodeURIComponent(productId)}`, centroId);
+  return apiFetch<VialAbierto[]>(path, {}, centroId);
 }
 
 // Recetas de compuestos (bill-of-materials): un producto `compuesto` (derivado) consume

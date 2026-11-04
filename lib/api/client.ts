@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { getActiveCentro } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
+import { oneCenterIds } from "@/lib/clinic-read-scope";
 import {
   ApiError,
   type ApiEnvelope,
@@ -216,4 +217,19 @@ export function apiFetchPagedV1<T>(
   tenant?: string | null,
 ): Promise<Paginated<T>> {
   return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
+}
+
+// `path` of a ONE-center read with its center named as `?centerIds=` (lib/clinic-read-scope.ts
+// `oneCenterIds`): the picked `tenant`, else the center X-Tenant-ID carries. The BE reads every center
+// in scope when none is named, so a screen that shows one center names it.
+export async function oneCenterPath(path: string, tenant?: string | null): Promise<string> {
+  const active = getActiveCentro();
+  let sessionCenter: string | null = null;
+  if (tenant === undefined && !active) {
+    const { data } = await createClient().auth.getSession();
+    sessionCenter = (data.session?.user.app_metadata?.clinic_id as string | undefined) ?? null;
+  }
+  const ids = oneCenterIds(tenant, active, sessionCenter);
+  if (!ids) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}centerIds=${ids.map(encodeURIComponent).join(",")}`;
 }

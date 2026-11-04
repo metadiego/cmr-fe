@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch, apiFetchPaged } from "./client";
+import { apiFetch, apiFetchPaged, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
 
 // Staff member. `capacidades` includes role-like tags (e.g. "medico") used to
@@ -34,7 +34,7 @@ export interface ListPersonalParams {
 // `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, para el selector de centro EN
 // la pantalla: el personal cuelga del centro, así que al mirar otro hay que recargarlo o se agenda con un
 // médico que no está allí (p.ej. Emma/Javier de Caguas salían en Bayamón). Handoff selector-de-centro.
-export function listPersonal(
+export async function listPersonal(
   params: ListPersonalParams = {},
   centroId?: string,
 ): Promise<Paginated<Personal>> {
@@ -44,7 +44,8 @@ export function listPersonal(
   if (capacidad) sp.set("capacity", capacidad);
   if (onlyInactive) sp.set("onlyInactive", "true");
   if (includeInactive) sp.set("includeInactive", "true");
-  return apiFetchPaged<Personal>(`/staff?${sp.toString()}`, {}, centroId);
+  // One center: a staff list or doctor picker never offers someone of another center.
+  return apiFetchPaged<Personal>(await oneCenterPath(`/staff?${sp.toString()}`, centroId), {}, centroId);
 }
 
 // Ficha de UN miembro (GET /staff/:id) para el hub del médico. Tenant-scoped; `centroId` fuerza el centro.
@@ -162,8 +163,9 @@ export interface PersonalPorCapacidad {
   name: string;
   lastName?: string | null;
 }
-export function listPersonalPorCapacidad(capacidad: string, centro?: string): Promise<PersonalPorCapacidad[]> {
-  return apiFetch<PersonalPorCapacidad[]>(`/staff/capacity-by/${encodeURIComponent(capacidad)}`, {}, centro);
+export async function listPersonalPorCapacidad(capacidad: string, centro?: string): Promise<PersonalPorCapacidad[]> {
+  const path = await oneCenterPath(`/staff/capacity-by/${encodeURIComponent(capacidad)}`, centro);
+  return apiFetch<PersonalPorCapacidad[]>(path, {}, centro);
 }
 
 // Doctors available to be assigned to appointments (capacidad = "medico"). `centroId` recarga la lista

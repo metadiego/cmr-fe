@@ -18,3 +18,19 @@ export function readCenterIds(
 export function spansClinics(rows: readonly { clinicId?: string | null }[]): boolean {
   return new Set(rows.map((r) => r.clinicId).filter(Boolean)).size > 1;
 }
+
+/**
+ * The center a one-center read is about, as `centerIds`: the picked one (`tenant`), else the one the
+ * X-Tenant-ID header carries (the active center, else the session's). `tenant === null` is a combined
+ * view: nothing is sent and the BE reads every center in scope. Keeps one-center screens on one
+ * center now that the BE defaults to every readable center.
+ */
+export function oneCenterIds(
+  tenant: string | null | undefined,
+  activeCenterId: string | null,
+  sessionCenterId: string | null,
+): string[] | undefined {
+  if (tenant === null) return undefined;
+  const id = tenant ?? activeCenterId ?? sessionCenterId;
+  return id ? [id] : undefined;
+}
