@@ -57,7 +57,18 @@ is not surprised. Proposal: filter the bulk dedupe like the single create, with 
 in that `where`. Once it ships, the FE can drop the `cancelled` block reason
 (`lib/agenda/booking/series.ts`).
 
-## 3. Small related note: v2 key dictionary
+## 3. A single `centerIds` query value is rejected
+
+`CentersScopeQueryDto` (`cmr-be/src/modules/resources/dto/resource.dto.ts:19-23`) declares
+`centerIds?: string[]` with `@IsArray()` and no transform. A request with one value
+(`?centerIds=<uuid>`) reaches validation as a string, so every `/resources/*` call that passes exactly
+one center fails validation. The booking calendar sent one and every service day came back as an error;
+the FE now sends the center only as `X-Tenant-ID`. The FE-wide rule is "every endpoint may take the
+array of centers", so this DTO should accept a single value too, e.g.
+`@Transform(({ value }) => (value == null ? value : Array.isArray(value) ? value : [value]))` (the same
+fix is worth checking in every DTO that declares `centerIds` with `@IsArray()`).
+
+## 4. Small related note: v2 key dictionary
 
 `creadas`, `omitidas` and `aviso` (the book-multiple response) are missing from the v2 key dictionary
 (`cmr-be/src/core/api-ingles/campos.ts`), so `/api/v2` still returns Spanish keys for them. The FE

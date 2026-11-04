@@ -98,8 +98,10 @@ async function requestDay(
         areas: 1,
         ...(patientId ? { patientId } : {}),
       },
-      center,
-      [center]
+      // The center travels ONLY as X-Tenant-ID. Do not also send `centerIds`: the BE validates it with
+      // @IsArray(), and a single `?centerIds=<uuid>` arrives as a string → 400 on every day (that is why
+      // services showed "—" everywhere while medical, which never sent it, worked).
+      center
     )
     value = fromServiceAvailability(date, a)
   }

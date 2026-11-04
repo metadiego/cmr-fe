@@ -81,7 +81,7 @@ export function useSeriesAvailability(p: {
       const running = inflight.current.get(date);
       if (running) return running;
       const requestScope = scope;
-      const req = getAvailability({ date, serviceId, areas: 1, ...(patientId ? { patientId } : {}) }, center, center ? [center] : []);
+      const req = getAvailability({ date, serviceId, areas: 1, ...(patientId ? { patientId } : {}) }, center); // center as X-Tenant-ID only — see use-booking-availability.ts (single centerIds → 400)
       inflight.current.set(date, req);
       const store = (value: Availability | "error") => {
         inflight.current.delete(date);
