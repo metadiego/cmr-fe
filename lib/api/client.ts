@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
 import { getActiveCentro } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
-import { oneCenterIds } from "@/lib/clinic-read-scope";
+import { oneCenterIds, type CenterChoice } from "@/lib/clinic-read-scope";
 import {
   ApiError,
   type ApiEnvelope,
@@ -219,10 +219,10 @@ export function apiFetchPagedV1<T>(
   return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
 }
 
-// `path` of a ONE-center read with its center named as `?centerIds=` (lib/clinic-read-scope.ts
-// `oneCenterIds`): the picked `tenant`, else the center X-Tenant-ID carries. The BE reads every center
-// in scope when none is named, so a screen that shows one center names it.
-export async function oneCenterPath(path: string, tenant?: string | null): Promise<string> {
+// `path` of a read with its centers named as `?centerIds=` (lib/clinic-read-scope.ts `oneCenterIds`):
+// the picked `tenant`, a clinic filter's list, nothing for every center in scope (`null` or `[]`), else
+// the center X-Tenant-ID carries. The BE reads every center in scope when none is named.
+export async function oneCenterPath(path: string, tenant?: CenterChoice): Promise<string> {
   const active = getActiveCentro();
   let sessionCenter: string | null = null;
   if (tenant === undefined && !active) {
@@ -232,4 +232,9 @@ export async function oneCenterPath(path: string, tenant?: string | null): Promi
   const ids = oneCenterIds(tenant, active, sessionCenter);
   if (!ids) return path;
   return `${path}${path.includes("?") ? "&" : "?"}centerIds=${ids.map(encodeURIComponent).join(",")}`;
+}
+
+// The X-Tenant-ID of a read that may span centers: only a single picked center forces it.
+export function tenantOf(choice: CenterChoice): string | undefined {
+  return typeof choice === "string" ? choice : undefined;
 }
