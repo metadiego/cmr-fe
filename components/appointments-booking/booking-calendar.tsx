@@ -54,6 +54,7 @@ function monthOf(iso: string): Month {
 export function BookingCalendar({
   data,
   center,
+  centerNote,
   kind,
   typeId,
   typeName,
@@ -74,6 +75,8 @@ export function BookingCalendar({
 }: {
   data: BookingCalendarData;
   center: string | undefined;
+  /** One line under the toolbar, e.g. while a move shows the appointment's own center. */
+  centerNote?: string;
   kind: BookingKind;
   typeId: string;
   typeName: string;
@@ -152,6 +155,7 @@ export function BookingCalendar({
         nextFreeLoading={data.nextFreeLoading}
         onPickNext={pickNext}
       />
+      {centerNote && <p className="text-xs font-medium text-primary">{centerNote}</p>}
 
       {data.notConfigured ? (
         <EmptyState

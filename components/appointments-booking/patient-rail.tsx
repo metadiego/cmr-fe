@@ -109,20 +109,22 @@ export function PatientRail({
       ))}
       <section className="flex flex-col gap-2">
         <h3 className="text-xs font-medium text-muted-foreground uppercase">{t("upcoming")}</h3>
-        {data.loading ? (
-          <p className="text-sm text-muted-foreground">{tb("loading")}</p>
-        ) : data.upcoming.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("noUpcoming")}</p>
-        ) : (
+        {/* What is loaded shows while the rest loads (e.g. sessions after a center switch), so a moving
+            card and its Stop never disappear; "Loading…" only while nothing is there yet. */}
+        {data.upcoming.length > 0 ? (
           data.upcoming.map((a) => card(a, false))
+        ) : data.loading ? (
+          <p className="text-sm text-muted-foreground">{tb("loading")}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("noUpcoming")}</p>
         )}
       </section>
       <section className="flex flex-col gap-2">
         <h3 className="text-xs font-medium text-muted-foreground uppercase">{t("past")}</h3>
-        {data.loading ? null : data.past.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("noPast")}</p>
-        ) : (
+        {data.past.length > 0 ? (
           data.past.map((a) => card(a, true))
+        ) : data.loading ? null : (
+          <p className="text-sm text-muted-foreground">{t("noPast")}</p>
         )}
       </section>
     </div>

@@ -4985,7 +4985,8 @@
       "reasonLabel": "Motivo del cambio",
       "reasonPlaceholder": "¿Por qué se mueve?",
       "confirm": "Mover",
-      "notThis": "Esta no"
+      "notThis": "Esta no",
+      "showingCenter": "Mostrando {center}: el centro de la cita"
     },
     "series": {
       "patient": "Paciente",

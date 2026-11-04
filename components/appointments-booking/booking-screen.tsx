@@ -28,6 +28,7 @@ import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useResource } from "@/hooks/use-resource";
 import { useBookingTypes } from "@/hooks/use-booking-types";
 import { useBookingCalendar } from "@/hooks/use-booking-calendar";
+import { calendarCenter } from "@/lib/agenda/booking/calendar-center";
 import { usePatientAppointments } from "@/hooks/use-patient-appointments";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
@@ -191,10 +192,27 @@ export function BookingScreen() {
     },
   };
 
+  // ---- Patient rail: the patient's upcoming/past appointments of both kinds.
+  const rail = usePatientAppointments(state.patientId, center);
+  const reloadRail = rail.reload;
+
+  // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, orange
+  // ring on its day). A move never changes the appointment's center, so while it moves the calendar
+  // reads availability from the appointment's OWN center (calendarCenter), whatever the picker or the
+  // top bar shows, with a note saying so. The day panel's "Move here?" box commits. Stop, Esc, a change
+  // of the screen's center or a reload that no longer lists it ends the move.
+  const appointmentLabel = useAppointmentLabel();
+  const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
+  const calCenter = calendarCenter(center, movingItem);
+  const calCenterName =
+    movingItem && calCenter !== center
+      ? [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter)?.name
+      : undefined;
+
   // ---- Calendar data: holidays, the month's free spots, the selected day, Next free and the live
   // refresh (which re-asks the month dates and the selected day an event touches).
   const calendar = useBookingCalendar({
-    center,
+    center: calCenter,
     kind: typeChosen ? state.kind : undefined,
     typeId: typeChosen ? state.typeId : undefined,
     month: state.month,
@@ -205,25 +223,13 @@ export function BookingScreen() {
   const live = calendar.live;
   const refreshCalendarDates = calendar.refreshDates;
 
-  // ---- Patient rail: the patient's upcoming/past appointments of both kinds.
-  const rail = usePatientAppointments(state.patientId, center);
-  const reloadRail = rail.reload;
   // After a booking, move, edit or cancel: refresh those dates (month + day) and the patient's list.
   const onAppointmentsChanged = (dates: string[]) => {
     refreshCalendarDates([...new Set(dates.filter(Boolean))]);
     reloadRail();
   };
 
-  // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, orange
-  // ring on its day) in the appointment's OWN center: a move never changes the center, so the screen
-  // switches to it when the user can read it there. The day panel's "Move here?" box commits. Stop,
-  // Esc, a manual center switch or a reload that no longer lists it ends the move.
-  const appointmentLabel = useAppointmentLabel();
-  const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
   const startMove = (a: PatientAppointment) => {
-    if (a.centerId && a.centerId !== center && centro.centros.some((c) => c.id === a.centerId)) {
-      centro.setCentro(a.centerId); // the raw setter: the wrapper above would stop the move
-    }
     update({
       movingId: a.id,
       kind: a.kind,
@@ -245,6 +251,14 @@ export function BookingScreen() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isMoving]);
+  // The screen's center changing for any reason (picker, top bar, session) while moving ends the move.
+  // Adjusted during render (as the URL → state sync above); movingId is not in the URL, so a plain
+  // setState is enough and `latest` catches up after the commit.
+  const [seenCenter, setSeenCenter] = React.useState(center);
+  if (center !== seenCenter) {
+    setSeenCenter(center);
+    if (state.movingId) setState((s) => ({ ...s, movingId: null }));
+  }
 
   const moving: CalendarMoving | undefined = movingItem && {
     fromLabel: appointmentLabel(movingItem.date, movingItem.time),
@@ -356,7 +370,8 @@ export function BookingScreen() {
         ) : (
           <BookingCalendar
             data={calendar}
-            center={center}
+            center={calCenter}
+            centerNote={calCenterName ? t("move.showingCenter", { center: calCenterName }) : undefined}
             kind={state.kind ?? "medical"}
             typeId={state.typeId ?? ""}
             typeName={chosenType?.name ?? t("loading")}

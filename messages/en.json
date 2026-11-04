@@ -4985,7 +4985,8 @@
       "reasonLabel": "Reason for the change",
       "reasonPlaceholder": "Why is it being moved?",
       "confirm": "Move",
-      "notThis": "Not this one"
+      "notThis": "Not this one",
+      "showingCenter": "Showing {center}: the appointment's center"
     },
     "series": {
       "patient": "Patient",
