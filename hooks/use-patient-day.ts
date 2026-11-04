@@ -248,23 +248,26 @@ export function useServiceBoards(
     () =>
       centerId && slugsKey
         ? Promise.all(
-            slugsKey.split(",").map((slug) => {
+            slugsKey.split(",").map(async (slug) => {
               const key = `${centerId}|${date}|${slug}`
-              return getServiceBoard(slug, date, centerId)
-                .then((b) => {
+              // A rejected load (429 / blip) is retried twice with a pause before giving up.
+              for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                  const b = await getServiceBoard(slug, date, centerId)
                   lastGood.current.set(key, b)
                   return [slug, b] as const
-                })
-                .catch(
-                  () =>
-                    [
-                      slug,
-                      lastGood.current.get(key) ??
-                        ({ columns: [], rows: [] } as ServiceBoard),
-                    ] as const
-                )
+                } catch {
+                  if (attempt < 2) await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)))
+                }
+              }
+              // Still failing: the last good board, else NOTHING — the table shows its skeleton
+              // instead of an empty board that reads as "0 sessions" (desk photo, 04-nov 13:51).
+              const prev = lastGood.current.get(key)
+              return prev ? ([slug, prev] as const) : null
             })
-          ).then((pairs) => Object.fromEntries(pairs))
+          ).then((pairs) =>
+            Object.fromEntries(pairs.filter((p) => p !== null))
+          )
         : Promise.resolve({}),
     [centerId, date, slugsKey]
   )
