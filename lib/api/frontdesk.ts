@@ -154,10 +154,10 @@ export function getFrontdeskTabs(centroId?: string): Promise<FrontdeskTab[]> {
   return apiFetch<FrontdeskTab[]>(`/frontdesk/tabs`, {}, centroId).then((r) => (Array.isArray(r) ? r : []));
 }
 // Reagendar una sesión a otra fecha (fechas flexibles).
-export function reagendarSesion(sesionId: string, fecha: string, centroId?: string): Promise<Sesion> {
+export function reagendarSesion(sesionId: string, fecha: string, centroId?: string, time?: string): Promise<Sesion> {
   return apiFetch<Sesion>(
     `/frontdesk/sesiones/${sesionId}/agenda`,
-    { method: "PATCH", body: JSON.stringify({ date: fecha }) },
+    { method: "PATCH", body: JSON.stringify(time ? { date: fecha, time } : { date: fecha }) },
     centroId,
   );
 }
