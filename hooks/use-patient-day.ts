@@ -31,7 +31,10 @@ import { useCitaStream as useLiveStream } from "@/hooks/use-cita-stream"
 export interface PatientDayData {
   patients: PatientDay[]
   sessionsById: Map<string, Session>
+  // Filled by the desk from useServiceBoards (only the open patient's services).
   boardsBySlug: Record<string, ServiceBoard>
+  dayServices: DayService[]
+  refreshTick: number
   servicesById: Map<string, Service>
   serviceDefinition: BoardDefinition | null
   consultations: BoardRows | null
@@ -46,13 +49,13 @@ export interface PatientDayData {
 }
 
 // Everything the patient desk shows for one center and day: the day's sessions across ALL services
-// (one call), the board of each service that has any (columns + projected rows, only those), the
+// (one call), the
 // consultation board, and the definitions that drive the flow. Live: any frontdesk or consultation
 // event refetches (same single SSE bus as the frontdesk), with the hook's focus/poll safety nets.
 export function usePatientDay(
   centerId: string | undefined,
   date: string
-): PatientDayData {
+): Omit<PatientDayData, "boardsBySlug"> {
   const tabsRes = useResource<FrontdeskTab[]>(
     () =>
       centerId
@@ -131,31 +134,6 @@ export function usePatientDay(
     return out
   }, [tabs, servicesById])
 
-  // Boards only for the services someone has today.
-  const slugsKey = React.useMemo(() => {
-    const ids = new Set(sessions.map((s) => s.serviceId))
-    return dayServices
-      .filter((s) => ids.has(s.id))
-      .map((s) => s.slug)
-      .join(",")
-  }, [sessions, dayServices])
-  const boardsRes = useResource<Record<string, ServiceBoard>>(
-    () =>
-      centerId && slugsKey
-        ? Promise.all(
-            slugsKey.split(",").map((slug) =>
-              getServiceBoard(slug, date, centerId)
-                .then((b) => [slug, b] as const)
-                .catch(
-                  () =>
-                    [slug, { columns: [], rows: [] } as ServiceBoard] as const
-                )
-            )
-          ).then((pairs) => Object.fromEntries(pairs))
-        : Promise.resolve({}),
-    [centerId, date, slugsKey]
-  )
-
   const consultations =
     consultRes.state.kind === "ok" ? consultRes.state.data : null
   // Final consultation statuses come from the board's catalog (isTerminal), not from code.
@@ -194,11 +172,14 @@ export function usePatientDay(
     [sessions]
   )
 
+  // Bumped on every refresh (action or live event) so the open patient's boards
+  // (useServiceBoards) refetch together with the day.
+  const [refreshTick, setRefreshTick] = React.useState(0)
   const refresh = React.useCallback(() => {
     sessionsRes.refresh()
     consultRes.refresh()
-    boardsRes.refresh()
-  }, [sessionsRes, consultRes, boardsRes])
+    setRefreshTick((n) => n + 1)
+  }, [sessionsRes, consultRes])
 
   const { live } = useLiveStream({
     centroId: centerId ?? null,
@@ -212,7 +193,8 @@ export function usePatientDay(
   return {
     patients,
     sessionsById,
-    boardsBySlug: boardsRes.state.kind === "ok" ? boardsRes.state.data : {},
+    dayServices,
+    refreshTick,
     servicesById,
     serviceDefinition:
       serviceDefRes.state.kind === "ok" ? serviceDefRes.state.data : null,
@@ -229,4 +211,38 @@ export function usePatientDay(
     refresh,
     isConsultationTerminal,
   }
+}
+
+// The boards (columns + projected rows) of ONE patient's services — the open one. Fetching every
+// service with sessions today on each refresh (~14 in Caguas) burst past the BE's 100 requests/min
+// per person when a session was marked attended (RATE_LIMITED, owner 04-nov-2026).
+export function useServiceBoards(
+  centerId: string | undefined,
+  date: string,
+  slugs: string[],
+  refreshTick: number
+): Record<string, ServiceBoard> {
+  const slugsKey = [...new Set(slugs)].sort().join(",")
+  const res = useResource<Record<string, ServiceBoard>>(
+    () =>
+      centerId && slugsKey
+        ? Promise.all(
+            slugsKey.split(",").map((slug) =>
+              getServiceBoard(slug, date, centerId)
+                .then((b) => [slug, b] as const)
+                .catch(
+                  () =>
+                    [slug, { columns: [], rows: [] } as ServiceBoard] as const
+                )
+            )
+          ).then((pairs) => Object.fromEntries(pairs))
+        : Promise.resolve({}),
+    [centerId, date, slugsKey]
+  )
+  // A refresh (action or live event) refetches in place, keeping the tables on screen meanwhile.
+  const { refresh } = res
+  React.useEffect(() => {
+    if (refreshTick > 0) refresh()
+  }, [refreshTick, refresh])
+  return res.state.kind === "ok" ? res.state.data : {}
 }

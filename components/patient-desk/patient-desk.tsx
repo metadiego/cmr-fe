@@ -23,7 +23,7 @@ import {
 } from "@/lib/frontdesk/patient-day"
 import { useMyFrontdeskPreference } from "@/hooks/use-frontdesk-default-tab"
 import { cn } from "@/lib/utils"
-import { usePatientDay } from "@/hooks/use-patient-day"
+import { usePatientDay, useServiceBoards } from "@/hooks/use-patient-day"
 import { useCentroGate as useCenterGate } from "@/hooks/use-centro-gate"
 import { useCan } from "@/hooks/use-can"
 import { todayISO } from "@/components/frontdesk/frontdesk-board.helpers"
@@ -98,7 +98,7 @@ export function PatientDesk() {
     | { open: false }
   >({ open: false })
 
-  const data = usePatientDay(gate.centro, date)
+  const day = usePatientDay(gate.centro, date)
   // Services / consultation / all. Starts on consultation for whoever has «lands on Consulta» in their
   // staff record (the reception people, set per person in the staff screen — not a role list here).
   const preference = useMyFrontdeskPreference(gate.centro)
@@ -128,18 +128,18 @@ export function PatientDesk() {
     setConsultSubtypeFilter(null)
   }
   const servicesToday = React.useMemo(
-    () => servicesOfTheDay(data.patients),
-    [data.patients]
+    () => servicesOfTheDay(day.patients),
+    [day.patients]
   )
   const consultSubtypes = React.useMemo(
     () =>
-      [...(data.consultationDefinition?.subtypes ?? [])].sort(
+      [...(day.consultationDefinition?.subtypes ?? [])].sort(
         (a, b) => a.sortOrder - b.sortOrder
       ),
-    [data.consultationDefinition]
+    [day.consultationDefinition]
   )
   const patients = React.useMemo(() => {
-    let list = filterByKind(data.patients, kind)
+    let list = filterByKind(day.patients, kind)
     const serviceFiltered = kind === "services" && !!serviceFilter
     if (serviceFiltered) list = filterByService(list, serviceFilter)
     if (kind === "consultation")
@@ -147,12 +147,12 @@ export function PatientDesk() {
     // Pending sections first, unless a service filter sets the order (handoff lo-pendiente-primero).
     list = orderSections(list, {
       serviceFiltered,
-      isTerminal: data.isConsultationTerminal,
+      isTerminal: day.isConsultationTerminal,
     })
     return filterPatients(list, query)
   }, [
-    data.patients,
-    data.isConsultationTerminal,
+    day.patients,
+    day.isConsultationTerminal,
     kind,
     serviceFilter,
     consultSubtypeFilter,
@@ -162,6 +162,14 @@ export function PatientDesk() {
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
     : (patients[0]?.patientId ?? null)
+  // Only the open patient's service boards are fetched (and refetched on every refresh).
+  const boardsBySlug = useServiceBoards(
+    gate.centro,
+    date,
+    (day.patients.find((p) => p.patientId === effectiveSelected)?.services ?? []).map((s) => s.slug),
+    day.refreshTick
+  )
+  const data = React.useMemo(() => ({ ...day, boardsBySlug }), [day, boardsBySlug])
 
   // First load (or a new date/center): skeleton instead of a "0 patients" count and an empty list.
   const loadingDay =
