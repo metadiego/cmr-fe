@@ -12207,6 +12207,8 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Every center where the user can read patients (admin: all), each row with its `clinicName`.
+         *     `centerIds` (optional) only narrows; none of it authorized → 403. docs/specs/clinic-read-scope.md.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/pacientes`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -12233,6 +12235,8 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Every center where the user can read patients (admin: all), each row with its `clinicName`.
+         *     `centerIds` (optional) only narrows; none of it authorized → 403. docs/specs/clinic-read-scope.md.
          * @deprecated
          * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/patients`, que devuelve lo mismo con los nombres en inglés.
          */
@@ -12258,6 +12262,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Every center where the user can read patients (admin: all), each row with its `clinicName`.
+         *     `centerIds` (optional) only narrows; none of it authorized → 403. docs/specs/clinic-read-scope.md.
+         */
         get: operations["PacientesController_list[2]_v2"];
         put?: never;
         /**
@@ -12278,6 +12286,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Every center where the user can read patients (admin: all), each row with its `clinicName`.
+         *     `centerIds` (optional) only narrows; none of it authorized → 403. docs/specs/clinic-read-scope.md.
+         */
         get: operations["PacientesController_list[3]_v2"];
         put?: never;
         /**
@@ -41815,7 +41827,12 @@ export interface paths {
          *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[0]_v1"];
-        delete?: never;
+        /**
+         * Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/eventos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["InventoryScaleController_retireDevice[0]_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41843,7 +41860,12 @@ export interface paths {
          *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[1]_v1"];
-        delete?: never;
+        /**
+         * Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventario/balanza/stock-events`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["InventoryScaleController_retireDevice[1]_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41871,7 +41893,12 @@ export interface paths {
          *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[2]_v1"];
-        delete?: never;
+        /**
+         * Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/eventos`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["InventoryScaleController_retireDevice[2]_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41899,7 +41926,12 @@ export interface paths {
          *     Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[3]_v1"];
-        delete?: never;
+        /**
+         * Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/inventory/scale/stock-events`, que devuelve lo mismo con los nombres en inglés.
+         */
+        delete: operations["InventoryScaleController_retireDevice[3]_v1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41920,7 +41952,8 @@ export interface paths {
          * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[4]_v2"];
-        delete?: never;
+        /** Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory. */
+        delete: operations["InventoryScaleController_retireDevice[4]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41941,7 +41974,8 @@ export interface paths {
          * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[5]_v2"];
-        delete?: never;
+        /** Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory. */
+        delete: operations["InventoryScaleController_retireDevice[5]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41962,7 +41996,8 @@ export interface paths {
          * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[6]_v2"];
-        delete?: never;
+        /** Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory. */
+        delete: operations["InventoryScaleController_retireDevice[6]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -41983,7 +42018,8 @@ export interface paths {
          * @description Stock live: cuántas unidades hay en cada plato. El centro sale de la API key, nunca del cuerpo; el almacén tiene que ser de ese centro (si tiene uno solo, se usa ese). Idempotente por (centro, deviceId, externalId). Un evento inválido vuelve en `rejected` y no tumba el lote. NUNCA toca el inventario contable.
          */
         post: operations["InventoryScaleController_ingestStockEvents[7]_v2"];
-        delete?: never;
+        /** Retires a scale: DELETES all its stock events in the active center (or `centerIds`, with the permission in each). `deviceId` is required. Never touches the book inventory. */
+        delete: operations["InventoryScaleController_retireDevice[7]_v2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -52126,18 +52162,27 @@ export interface components {
         };
         TransferenciaTratamientoEntity: {
             sourcePackageId: string;
+            paqueteOrigenIdRef?: Record<string, never>;
             destinationPackageId: string;
+            paqueteDestinoIdRef?: Record<string, never>;
             sourceClinicId: string;
+            clinicOrigenIdRef?: Record<string, never>;
             destinationClinicId: string;
+            clinicDestinoIdRef?: Record<string, never>;
             patientId: string;
+            pacienteIdRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             sessions: number;
             /** @enum {string} */
             mode: "virtual" | "fisica";
             sourceWarehouseId: string | null;
+            almacenOrigenIdRef?: Record<string, never>;
             destinationWarehouseId: string | null;
+            almacenDestinoIdRef?: Record<string, never>;
             reason: string | null;
             actorId: string | null;
+            actorIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "anulada" | "aplicada";
             id: string;
@@ -52174,6 +52219,7 @@ export interface components {
             actorId?: string;
         };
         SecuenciaFacturaEntity: {
+            clinicRef?: Record<string, never>;
             series: string;
             prefix: string | null;
             padding: number;
@@ -52252,22 +52298,31 @@ export interface components {
             legacyOrigin?: string;
         };
         FacturaEntity: {
+            clinicRef?: Record<string, never>;
             number: string | null;
             series: string | null;
             quoteNumber: string | null;
             legacyNumber: string | null;
             legacyOrigin: string | null;
             patientId: string;
+            pacienteIdRef?: Record<string, never>;
             billToName: string | null;
             billToDocumentId: string | null;
             billToType: string | null;
             doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
             issuerId: string | null;
+            emisorIdRef?: Record<string, never>;
             createdBy: string | null;
+            creadoPorRef?: Record<string, never>;
             issuedBy: string | null;
+            emitidoPorRef?: Record<string, never>;
             appointmentId: string | null;
+            citaIdRef?: Record<string, never>;
             priceTypeId: string | null;
+            tipoPrecioIdRef?: Record<string, never>;
             sourceId: string | null;
+            medioIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "borrador" | "emitida" | "anulada" | "devuelta_parcial" | "devuelta_total";
             subtotal: number;
@@ -52280,6 +52335,7 @@ export interface components {
             total: number;
             shipping: number;
             warehouseId: string | null;
+            almacenIdRef?: Record<string, never>;
             paidAmount: number;
             cancelled: boolean;
             date: string | null;
@@ -52287,6 +52343,7 @@ export interface components {
             /** Format: date-time */
             cancelledAt: string | null;
             cancelledBy: string | null;
+            anuladaPorRef?: Record<string, never>;
             cancellationReason: string | null;
             /**
              * @description Se declara aquí abajo, lejos de `citaId`, a propósito: TypeORM ha leído una columna nueva
@@ -52348,9 +52405,13 @@ export interface components {
             optionalItemsIncluded?: string[];
         };
         FacturaItemEntity: {
+            clinicRef?: Record<string, never>;
             invoiceId: string;
+            facturaIdRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             presentationId: string | null;
+            presentacionIdRef?: Record<string, never>;
             description: string;
             quantity: number;
             sessions: number;
@@ -52360,6 +52421,7 @@ export interface components {
             discount: number;
             taxable: boolean;
             taxId: string | null;
+            impuestoIdRef?: Record<string, never>;
             taxAmount: number;
             total: number;
             deductionMode: string;
@@ -52368,8 +52430,11 @@ export interface components {
             meta: Record<string, never> | null;
             optionalItemsIncluded: string[] | null;
             salesPackageId: string | null;
+            salesPackageIdRef?: Record<string, never>;
             billingGroupId: string | null;
+            grupoFacturacionIdRef?: Record<string, never>;
             categoryId: string | null;
+            categoriaIdRef?: Record<string, never>;
             refundedQuantity: number;
             refundedSessions: number;
             id: string;
@@ -52410,17 +52475,23 @@ export interface components {
             reason?: string;
         };
         ReparacionEntity: {
+            clinicRef?: Record<string, never>;
             invoiceId: string;
+            facturaIdRef?: Record<string, never>;
             invoiceItemId: string;
+            facturaItemIdRef?: Record<string, never>;
             field: string;
             valueBefore: string | null;
             valueAfter: string | null;
             movementIds: string[] | null;
             packageId: string | null;
+            paqueteIdRef?: Record<string, never>;
             packageAction: string | null;
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             reason: string | null;
             revertedFromId: string | null;
+            revertidoDeIdRef?: Record<string, never>;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -52528,7 +52599,9 @@ export interface components {
             actorId?: string;
         };
         DevolucionEntity: {
+            clinicRef?: Record<string, never>;
             invoiceId: string;
+            facturaIdRef?: Record<string, never>;
             invoiceNumber: string | null;
             number: number | null;
             series: string | null;
@@ -52539,13 +52612,16 @@ export interface components {
             refundedAmount: number;
             refundedTax: number;
             refundMethodId: string | null;
+            formaReembolsoIdRef?: Record<string, never>;
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             date: string | null;
             notes: string | null;
             status: string;
             /** Format: date-time */
             cancelledAt: string | null;
             cancelledBy: string | null;
+            anuladaPorRef?: Record<string, never>;
             cancellationReason: string | null;
             id: string;
             clinicId: string | null;
@@ -52566,8 +52642,10 @@ export interface components {
             payments: components["schemas"]["RegistrarPagoDto"][];
         };
         PagoEntity: {
+            clinicRef?: Record<string, never>;
             invoiceId: string;
             paymentMethodId: string | null;
+            formaPagoIdRef?: Record<string, never>;
             amount: number;
             /** @enum {string} */
             type: "pago" | "reembolso";
@@ -52575,14 +52653,18 @@ export interface components {
             status: "activo" | "anulado";
             date: string | null;
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             notes: string | null;
             reference: string | null;
             /** Format: date-time */
             anuladoEn: string | null;
             anuladoPor: string | null;
+            anuladoPorRef?: Record<string, never>;
             cancellationReason: string | null;
             replacesId: string | null;
+            reemplazaARef?: Record<string, never>;
             refundId: string | null;
+            devolucionIdRef?: Record<string, never>;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -52646,6 +52728,7 @@ export interface components {
             division: string;
             active: boolean;
             parentId: string | null;
+            parentIdRef?: Record<string, never>;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -52796,6 +52879,7 @@ export interface components {
             };
         };
         SecuenciaDevolucionEntity: {
+            clinicRef?: Record<string, never>;
             series: string;
             prefix: string | null;
             padding: number;
@@ -53035,11 +53119,16 @@ export interface components {
         PrecioEntity: {
             /** @default null */
             clinicId: string | null;
+            clinicIdRef?: Record<string, never>;
             presentationId: string;
+            presentacionIdRef?: Record<string, never>;
             priceTypeId: string;
+            tipoPrecioIdRef?: Record<string, never>;
             price: number;
             currencyId: string | null;
+            monedaIdRef?: Record<string, never>;
             taxId: string | null;
+            impuestoIdRef?: Record<string, never>;
             /** Format: date-time */
             validFrom: string | null;
             /** Format: date-time */
@@ -53080,7 +53169,9 @@ export interface components {
             active?: boolean;
         };
         OfertaEntity: {
+            clinicRef?: Record<string, never>;
             presentationId: string;
+            presentacionIdRef?: Record<string, never>;
             name: string;
             price: number | null;
             discountPct: number | null;
@@ -53170,6 +53261,7 @@ export interface components {
             reason?: string;
         };
         SecuenciaRecordPacienteEntity: {
+            clinicRef?: Record<string, never>;
             series: string;
             prefix: string | null;
             padding: number;
@@ -53182,6 +53274,7 @@ export interface components {
             updatedAt: string;
         };
         LegacyPatientSyncConfigEntity: {
+            clinicRef?: Record<string, never>;
             enabled: boolean;
             intervalMinutes: number;
             /** Format: date-time */
@@ -53203,7 +53296,9 @@ export interface components {
             intervalMinutes?: number;
         };
         PatientRecordHistoryEntity: {
+            clinicRef?: Record<string, never>;
             patientId: string;
+            patientIdRef?: Record<string, never>;
             oldRecord: string;
             newRecord: string;
             reason: string;
@@ -53309,6 +53404,7 @@ export interface components {
             legacyCode?: string;
         };
         PacienteEntity: {
+            clinicRef?: Record<string, never>;
             firstName: string;
             lastName: string | null;
             documentId: string | null;
@@ -53326,20 +53422,28 @@ export interface components {
             medicalRecordNumber: string | null;
             insurer: string | null;
             doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
             homePhone: string | null;
             officePhone: string | null;
             /** @enum {string|null} */
             preferredPhone: "principal" | "casa" | "oficina" | "whatsapp" | null;
             cityId: string | null;
+            ciudadIdRef?: Record<string, never>;
             stateId: string | null;
+            estadoIdRef?: Record<string, never>;
             countryId: string | null;
+            paisIdRef?: Record<string, never>;
             shippingAddress: string | null;
             shippingCityId: string | null;
+            envCiudadIdRef?: Record<string, never>;
             shippingStateId: string | null;
+            envEstadoIdRef?: Record<string, never>;
             shippingCountryId: string | null;
+            envPaisIdRef?: Record<string, never>;
             shippingZipCode: string | null;
             sameShippingAddress: boolean;
             attendedBy: string | null;
+            atendidoPorRef?: Record<string, never>;
             deceased: boolean;
             isTestimonial: boolean;
             /** Format: date-time */
@@ -53356,6 +53460,7 @@ export interface components {
              *     See docs/specs/quien-capto-al-paciente.md.
              */
             createdByStaffId: string | null;
+            creadoPorPersonalIdRef?: Record<string, never>;
             legacyCode: string | null;
             /** Format: date-time */
             legacyFullImportAt: string | null;
@@ -53440,9 +53545,11 @@ export interface components {
             note?: string;
         };
         PersonalEntity: {
+            clinicRef?: Record<string, never>;
             name: string;
             lastName: string | null;
             profileId: string | null;
+            perfilIdRef?: Record<string, never>;
             jobTitle: string | null;
             capabilities: string[] | null;
             /**
@@ -53810,8 +53917,10 @@ export interface components {
         TableroColumnaEntity: {
             /** @default null */
             clinicId: string | null;
+            clinicIdRef?: Record<string, never>;
             boardSlug: string;
             columnId: string;
+            columnaIdRef?: Record<string, never>;
             sortOrder: number;
             visible: boolean;
             pinned: boolean;
@@ -53854,9 +53963,12 @@ export interface components {
             pinned?: boolean;
         };
         UsuarioColumnaEntity: {
+            clinicRef?: Record<string, never>;
             userId: string;
+            usuarioIdRef?: Record<string, never>;
             boardSlug: string;
             columnId: string;
+            columnaIdRef?: Record<string, never>;
             visible: boolean | null;
             sortOrder: number | null;
             pinned: boolean | null;
@@ -54081,12 +54193,14 @@ export interface components {
             fullName?: string;
         };
         EhrEventEntity: {
+            clinicRef?: Record<string, never>;
             eventId: string;
             eventType: string;
             /** Format: date-time */
             occurredAt: string | null;
             patientRecord: string | null;
             patientId: string | null;
+            patientIdRef?: Record<string, never>;
             payload: Record<string, never>;
             status: string;
             /** Format: date-time */
@@ -54099,6 +54213,7 @@ export interface components {
             updatedAt: string;
         };
         CenterPrintHubEntity: {
+            clinicRef?: Record<string, never>;
             enabled: boolean;
             hubUrls: string[];
             /** @enum {string} */
@@ -54107,6 +54222,7 @@ export interface components {
             printerPort: number | null;
             printerQueue: string | null;
             updatedBy: string | null;
+            updatedByRef?: Record<string, never>;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -54597,8 +54713,10 @@ export interface components {
             type: "categoria" | "subcategoria" | "familia" | "marca" | "fabricante" | "linea";
             name: string;
             parentId: string | null;
+            parentIdRef?: Record<string, never>;
             taxable: boolean | null;
             taxId: string | null;
+            impuestoIdRef?: Record<string, never>;
             active: boolean;
             id: string;
             /** Format: date-time */
@@ -54642,6 +54760,7 @@ export interface components {
             sessionOptions: number[] | null;
             hasDefinedRule: boolean;
             inventoryUnitId: string | null;
+            unidadInventarioIdRef?: Record<string, never>;
             content: number | null;
             unitsPerContainer: number | null;
             treatmentDays: number | null;
@@ -54651,13 +54770,18 @@ export interface components {
             printComponents: boolean;
             applyBasePriceOnRefund: boolean;
             contentUnitId: string | null;
+            unidadContenidoIdRef?: Record<string, never>;
             size: string | null;
             weight: number | null;
             weightUnitId: string | null;
+            pesoUnidadIdRef?: Record<string, never>;
             categoryId: string | null;
+            categoriaIdRef?: Record<string, never>;
             billingGroupId: string | null;
+            grupoFacturacionIdRef?: Record<string, never>;
             taxable: boolean | null;
             taxId: string | null;
+            impuestoIdRef?: Record<string, never>;
             brandId: string | null;
             manufacturerId: string | null;
             tracksLots: boolean;
@@ -54794,15 +54918,19 @@ export interface components {
         };
         PresentacionEntity: {
             productId: string;
+            productoIdRef?: Record<string, never>;
             name: string;
             salesUnitId: string | null;
+            unidadVentaIdRef?: Record<string, never>;
             /** @deprecated */
             conversionFactor: number;
             basePrice: number | null;
             taxable: boolean | null;
             taxId: string | null;
+            impuestoIdRef?: Record<string, never>;
             content: number | null;
             contentUnitId: string | null;
+            unidadContenidoIdRef?: Record<string, never>;
             isDefault: boolean;
             barcode: string | null;
             active: boolean;
@@ -54861,10 +54989,14 @@ export interface components {
         };
         ProductoComponenteEntity: {
             compositeProductId: string;
+            productoCompuestoIdRef?: Record<string, never>;
             componentId: string;
+            componenteIdRef?: Record<string, never>;
             quantity: number;
             unitId: string | null;
+            unidadIdRef?: Record<string, never>;
             presentationId: string | null;
+            presentacionIdRef?: Record<string, never>;
             active: boolean;
             estimated: boolean;
             optional: boolean;
@@ -54913,7 +55045,9 @@ export interface components {
             active?: boolean;
         };
         ProductoCentroEntity: {
+            clinicRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             active: boolean;
             minStock: number | null;
             maxStock: number | null;
@@ -54936,6 +55070,7 @@ export interface components {
             maxStock?: number;
         };
         AlmacenEntity: {
+            clinicRef?: Record<string, never>;
             name: string;
             /** @enum {string} */
             type: "principal" | "farmacia" | "terapias" | "cuarto_frio" | "consignacion" | "transito";
@@ -54959,7 +55094,9 @@ export interface components {
             active?: boolean;
         };
         UbicacionEntity: {
+            clinicRef?: Record<string, never>;
             warehouseId: string;
+            almacenIdRef?: Record<string, never>;
             name: string;
             type: string | null;
             active: boolean;
@@ -54982,14 +55119,19 @@ export interface components {
             active?: boolean;
         };
         LoteEntity: {
+            clinicRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             warehouseId: string;
+            almacenIdRef?: Record<string, never>;
             lotNumber: string | null;
             purchaseInvoiceNumber: string | null;
             expirationDate: string | null;
             unitCost: number | null;
             supplierId: string | null;
+            proveedorIdRef?: Record<string, never>;
             supplierPresentationId: string | null;
+            presentacionProveedorIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "activo" | "vencido" | "recall" | "bloqueado";
             id: string;
@@ -55024,20 +55166,27 @@ export interface components {
             status?: "activo" | "recall" | "bloqueado" | "vencido";
         };
         VialAbiertoEntity: {
+            clinicRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             lotId: string | null;
+            loteIdRef?: Record<string, never>;
             warehouseId: string;
+            almacenIdRef?: Record<string, never>;
             totalCapacity: number;
             unitId: string | null;
+            unidadIdRef?: Record<string, never>;
             /** Format: date-time */
             openedAt: string | null;
             /** Format: date-time */
             openingExpiresAt: string | null;
             presentationId: string | null;
+            presentacionIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "abierto" | "agotado" | "descartado";
             number: number | null;
             patientId: string | null;
+            pacienteIdRef?: Record<string, never>;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -55152,14 +55301,23 @@ export interface components {
             clinicId?: string;
         };
         MovimientoInventarioEntity: {
+            clinicRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             lotId: string | null;
+            loteIdRef?: Record<string, never>;
             openVialId: string | null;
+            vialAbiertoIdRef?: Record<string, never>;
             movementTypeId: string;
+            tipoMovimientoIdRef?: Record<string, never>;
             reasonId: string;
+            motivoIdRef?: Record<string, never>;
             sourceWarehouseId: string | null;
+            almacenOrigenIdRef?: Record<string, never>;
             destinationWarehouseId: string | null;
+            almacenDestinoIdRef?: Record<string, never>;
             locationId: string | null;
+            ubicacionIdRef?: Record<string, never>;
             quantity: number;
             unitCost: number | null;
             /** Format: date-time */
@@ -55168,8 +55326,10 @@ export interface components {
             documentType: string | null;
             documentId: string | null;
             deductionRuleId: string | null;
+            reglaDescargaIdRef?: Record<string, never>;
             ruleVersion: number | null;
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             notes: string | null;
             id: string;
             clinicId: string | null;
@@ -55179,9 +55339,11 @@ export interface components {
             updatedAt: string;
         };
         CierreInventarioEntity: {
+            clinicRef?: Record<string, never>;
             /** Format: date-time */
             cutoffDate: string;
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             status: string;
             totalQuantity: number | null;
             notes: string | null;
@@ -55199,10 +55361,15 @@ export interface components {
             notes?: string;
         };
         CierreInventarioDetalleEntity: {
+            clinicRef?: Record<string, never>;
             closingId: string;
+            cierreIdRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             warehouseId: string | null;
+            almacenIdRef?: Record<string, never>;
             lotId: string | null;
+            loteIdRef?: Record<string, never>;
             quantity: number;
             id: string;
             clinicId: string | null;
@@ -55387,6 +55554,7 @@ export interface components {
         };
         ReglaDescargaEntity: {
             productId: string;
+            productoIdRef?: Record<string, never>;
             version: number;
             /** @enum {string} */
             status: "borrador" | "activa" | "reemplazada";
@@ -55395,10 +55563,12 @@ export interface components {
             /** @enum {string} */
             type: "directa" | "conversion" | "receta" | "dosis_vial";
             baseUnitId: string | null;
+            unidadBaseIdRef?: Record<string, never>;
             quantityPerApplication: number | null;
             baseFactor: number | null;
             validFrom: string | null;
             createdBy: string | null;
+            creadoPorRef?: Record<string, never>;
             reason: string | null;
             /** Format: date-time */
             publishedAt: string | null;
@@ -55454,15 +55624,21 @@ export interface components {
         };
         TransferenciaInventarioEntity: {
             sourceClinicId: string;
+            clinicOrigenIdRef?: Record<string, never>;
             destinationClinicId: string;
+            clinicDestinoIdRef?: Record<string, never>;
             sourceWarehouseId: string;
+            almacenOrigenIdRef?: Record<string, never>;
             destinationWarehouseId: string;
+            almacenDestinoIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "pendiente" | "cancelada" | "recibida" | "recibida_parcial" | "rechazada";
             requiresReceipt: boolean;
             reason: string | null;
             createdBy: string | null;
+            creadoPorRef?: Record<string, never>;
             receivedBy: string | null;
+            recibidoPorRef?: Record<string, never>;
             /** Format: date-time */
             receivedAt: string | null;
             notes: string | null;
@@ -55515,6 +55691,7 @@ export interface components {
             validUntil?: string;
         };
         AlertaEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             /** @enum {string} */
             severity: "info" | "warning" | "critica";
@@ -55533,7 +55710,9 @@ export interface components {
             /** Format: date-time */
             validUntil: string | null;
             createdBy: string | null;
+            creadaPorRef?: Record<string, never>;
             resolvedBy: string | null;
+            resueltaPorRef?: Record<string, never>;
             /** Format: date-time */
             resolvedAt: string | null;
             id: string;
@@ -55544,8 +55723,11 @@ export interface components {
             updatedAt: string;
         };
         AlertaDestinatarioEntity: {
+            clinicRef?: Record<string, never>;
             alertId: string;
+            alertaIdRef?: Record<string, never>;
             userId: string;
+            usuarioIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "descartada" | "no_leida" | "leida" | "acusada";
             /** Format: date-time */
@@ -55620,7 +55802,9 @@ export interface components {
             destinatario?: "paciente" | "medico";
         };
         NotificacionEntity: {
+            clinicRef?: Record<string, never>;
             appointmentId: string | null;
+            citaIdRef?: Record<string, never>;
             /** @enum {string} */
             channel: "email" | "whatsapp" | "sms" | "impresa";
             destination: string | null;
@@ -55641,6 +55825,7 @@ export interface components {
             updatedAt: string;
         };
         PlantillaNotificacionEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             /** @enum {string} */
             channel: "email" | "whatsapp" | "sms" | "impresa";
@@ -55666,6 +55851,7 @@ export interface components {
         EstadoCitaEntity: {
             /** @default null */
             clinicId: string | null;
+            clinicIdRef?: Record<string, never>;
             boardSlug: string;
             slug: string;
             labelKey: string;
@@ -55709,6 +55895,7 @@ export interface components {
             durationMinutes: number;
             code: string | null;
             productId: string | null;
+            productoIdRef?: Record<string, never>;
             active: boolean;
             id: string;
             /** Format: date-time */
@@ -55719,11 +55906,14 @@ export interface components {
         CupoAgendaEntity: {
             /** @default null */
             clinicId: string | null;
+            clinicIdRef?: Record<string, never>;
             date: string | null;
             dayOfWeek: number | null;
             time: string;
             appointmentTypeId: string | null;
+            tipoCitaIdRef?: Record<string, never>;
             serviceId: string | null;
+            servicioIdRef?: Record<string, never>;
             quantity: number;
             active: boolean;
             id: string;
@@ -55772,9 +55962,11 @@ export interface components {
             scope?: "centro" | "global";
         };
         NotaDiaEntity: {
+            clinicRef?: Record<string, never>;
             date: string;
             content: string;
             authorId: string | null;
+            autorIdRef?: Record<string, never>;
             active: boolean;
             id: string;
             clinicId: string | null;
@@ -55794,9 +55986,13 @@ export interface components {
             active?: boolean;
         };
         CitaEntity: {
+            clinicRef?: Record<string, never>;
             patientId: string;
+            pacienteIdRef?: Record<string, never>;
             appointmentTypeId: string;
+            tipoCitaIdRef?: Record<string, never>;
             doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
             date: string;
             time: string | null;
             endTime: string | null;
@@ -55808,10 +56004,15 @@ export interface components {
             reason: string | null;
             notes: string | null;
             rescheduledFromId: string | null;
+            reprogramadaDeIdRef?: Record<string, never>;
             bookedByStaffId: string | null;
+            callcenterIdRef?: Record<string, never>;
             createdByProfileId: string | null;
+            creadoPorPerfilIdRef?: Record<string, never>;
             frontDeskStaffId: string | null;
+            atencionIdRef?: Record<string, never>;
             vitalsNurseId: string | null;
+            enfermeraVitalesIdRef?: Record<string, never>;
             /** Format: date-time */
             confirmedAt: string | null;
             /** Format: date-time */
@@ -55972,6 +56173,13 @@ export interface components {
              * @description Personal que reagenda (queda en el evento reprogramada + como citadoPor de la nueva).
              */
             actorId?: string;
+            /**
+             * Format: uuid
+             * @description Type of the NEW appointment (v2: `appointmentTypeId`). Omitted = the original's type. Changing to
+             *     a type that is not the first-visit one clears the first-visit mark.
+             *     See docs/specs/reagendar-con-tipo-de-cita.md.
+             */
+            appointmentTypeId?: string;
         };
         TransicionCitaDto: {
             /** Format: uuid */
@@ -56106,6 +56314,7 @@ export interface components {
         FestivoEntity: {
             /** @default null */
             clinicId: string | null;
+            clinicIdRef?: Record<string, never>;
             date: string;
             name: string;
             recursAnnually: boolean;
@@ -56198,6 +56407,7 @@ export interface components {
             isGlobal?: boolean;
         };
         EventoCalendarioEntity: {
+            clinicRef?: Record<string, never>;
             day: string;
             endDay: string | null;
             time: string | null;
@@ -56205,8 +56415,10 @@ export interface components {
             title: string;
             description: string | null;
             categoryId: string | null;
+            categoriaIdRef?: Record<string, never>;
             isGlobal: boolean;
             createdBy: string | null;
+            creadoPorRef?: Record<string, never>;
             legacyId: string | null;
             id: string;
             clinicId: string | null;
@@ -56268,6 +56480,7 @@ export interface components {
             }[];
         };
         LlamadaEnVivoEntity: {
+            clinicRef?: Record<string, never>;
             pbx: string;
             extension: string;
             status: string;
@@ -56283,6 +56496,7 @@ export interface components {
             updatedAt: string;
         };
         LlamadaEntity: {
+            clinicRef?: Record<string, never>;
             pbx: string;
             externalId: string;
             from: string | null;
@@ -56339,14 +56553,18 @@ export interface components {
         };
         PresentacionProveedorEntity: {
             productId: string;
+            productoIdRef?: Record<string, never>;
             supplierId: string | null;
+            proveedorIdRef?: Record<string, never>;
             name: string;
             manufacturerId: string | null;
             brandId: string | null;
             concentration: number | null;
             concentrationUnitId: string | null;
+            unidadConcentracionIdRef?: Record<string, never>;
             contentPerPackage: number | null;
             contentUnitId: string | null;
+            unidadContenidoIdRef?: Record<string, never>;
             baseConversionFactor: number | null;
             sku: string | null;
             barcode: string | null;
@@ -56412,9 +56630,12 @@ export interface components {
             active?: boolean;
         };
         OrdenCompraEntity: {
+            clinicRef?: Record<string, never>;
             number: string | null;
             supplierId: string;
+            proveedorIdRef?: Record<string, never>;
             warehouseId: string;
+            almacenIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "cancelada" | "borrador" | "enviada" | "recibida";
             total: number | null;
@@ -56441,8 +56662,11 @@ export interface components {
             notes?: string;
         };
         OrdenCompraDetalleEntity: {
+            clinicRef?: Record<string, never>;
             purchaseOrderId: string;
+            ordenCompraIdRef?: Record<string, never>;
             productId: string;
+            productoIdRef?: Record<string, never>;
             quantity: number;
             unitCost: number | null;
             id: string;
@@ -56491,6 +56715,7 @@ export interface components {
             name: string;
             abbreviation: string | null;
             countryId: string | null;
+            paisIdRef?: Record<string, never>;
             legacyCode: string | null;
             id: string;
             /** Format: date-time */
@@ -56501,7 +56726,9 @@ export interface components {
         CiudadEntity: {
             name: string;
             stateId: string | null;
+            estadoIdRef?: Record<string, never>;
             countryId: string | null;
+            paisIdRef?: Record<string, never>;
             legacyCode: string | null;
             id: string;
             /** Format: date-time */
@@ -56595,7 +56822,9 @@ export interface components {
             firmware?: string;
         };
         ScaleReadingEntity: {
+            clinicRef?: Record<string, never>;
             supplierPresentationId: string;
+            supplierPresentationIdRef?: Record<string, never>;
             unitWeightG: number;
             unitsCounted: number;
             totalWeightG: number;
@@ -56619,12 +56848,16 @@ export interface components {
             firmware?: string;
         };
         ScaleStockEventEntity: {
+            clinicRef?: Record<string, never>;
             warehouseId: string;
+            warehouseIdRef?: Record<string, never>;
             deviceId: string;
             pad: number;
             externalId: string;
             supplierPresentationId: string;
+            supplierPresentationIdRef?: Record<string, never>;
             productId: string;
+            productIdRef?: Record<string, never>;
             units: number;
             previousUnits: number | null;
             totalWeightG: number | null;
@@ -56652,6 +56885,7 @@ export interface components {
             destination?: string;
         };
         ExportConfigEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             includeIdentity: boolean;
             includeLogo: boolean;
@@ -56675,6 +56909,7 @@ export interface components {
             footer?: string;
         };
         ExportJobEntity: {
+            clinicRef?: Record<string, never>;
             resource: string;
             format: string;
             channel: string;
@@ -56684,6 +56919,7 @@ export interface components {
             /** @enum {string} */
             status: "generado" | "enviado" | "fallido";
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             error: string | null;
             id: string;
             clinicId: string | null;
@@ -56693,13 +56929,16 @@ export interface components {
             updatedAt: string;
         };
         ServicioEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             name: string;
             color: string | null;
             icon: string | null;
             sortOrder: number;
             billingGroupId: string | null;
+            grupoFacturacionIdRef?: Record<string, never>;
             productId: string | null;
+            productoIdRef?: Record<string, never>;
             code: string | null;
             requiresTechnician: boolean;
             requiresNurse: boolean;
@@ -56831,10 +57070,14 @@ export interface components {
             statusTypeId?: string | null;
         };
         NurseStatusLogEntity: {
+            clinicRef?: Record<string, never>;
             staffId: string;
+            personalIdRef?: Record<string, never>;
             date: string;
             statusTypeId: string | null;
+            statusTipoIdRef?: Record<string, never>;
             actorId: string | null;
+            actorIdRef?: Record<string, never>;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -56873,13 +57116,20 @@ export interface components {
         };
         Object: Record<string, never>;
         FrontdeskSesionEntity: {
+            clinicRef?: Record<string, never>;
             patientId: string;
+            pacienteIdRef?: Record<string, never>;
             serviceId: string;
+            servicioIdRef?: Record<string, never>;
             consumedPackages: string[] | null;
             packageId: string | null;
+            paqueteIdRef?: Record<string, never>;
             technicianId: string | null;
+            tecnicoIdRef?: Record<string, never>;
             nurseId: string | null;
+            enfermeraIdRef?: Record<string, never>;
             doctorId: string | null;
+            medicoIdRef?: Record<string, never>;
             date: string;
             time: string | null;
             /** @enum {string} */
@@ -56897,10 +57147,13 @@ export interface components {
             /** @enum {string} */
             source: "manual" | "autopresente" | "agendada";
             appliedProductId: string | null;
+            productoAplicadoIdRef?: Record<string, never>;
             openVialId: string | null;
+            vialAbiertoIdRef?: Record<string, never>;
             legacyId: string | null;
             legacyOrigin: string | null;
             bookedByStaffId: string | null;
+            callcenterIdRef?: Record<string, never>;
             id: string;
             clinicId: string | null;
             /** Format: date-time */
@@ -56951,10 +57204,13 @@ export interface components {
             actorId?: string;
         };
         FrontdeskEventoEntity: {
+            clinicRef?: Record<string, never>;
             sessionId: string;
+            sesionIdRef?: Record<string, never>;
             /** @enum {string} */
             type: "presente" | "en_terapia" | "asistido" | "cancelada" | "autopresente" | "datos" | "creada" | "reparada" | "auto_revertida" | "corregida" | "campo_editado" | "reagendada" | "entrega_sin_saldo" | "dosis_no_comprada" | "entrega_sin_paquete" | "called" | "call_undone";
             actorId: string | null;
+            actorIdRef?: Record<string, never>;
             reason: string | null;
             payload: Record<string, never> | null;
             isRetroactive: boolean;
@@ -57030,6 +57286,7 @@ export interface components {
             active?: boolean;
         };
         ResourceEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             name: string;
             labelKey: string | null;
@@ -57037,6 +57294,7 @@ export interface components {
             /** @enum {string} */
             kind: "person" | "room" | "chair" | "machine";
             staffId: string | null;
+            staffIdRef?: Record<string, never>;
             staffRole: string | null;
             patientsPerStaff: number;
             blocksStaffAgenda: boolean;
@@ -57058,8 +57316,11 @@ export interface components {
             preferForwardTime: boolean;
         };
         ServiceResourceEntity: {
+            clinicRef?: Record<string, never>;
             serviceId: string;
+            serviceIdRef?: Record<string, never>;
             resourceId: string;
+            resourceIdRef?: Record<string, never>;
             minutes: number;
             /** @enum {string} */
             per: "area" | "session";
@@ -57115,6 +57376,7 @@ export interface components {
             active?: boolean;
         };
         PanelEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             labelKey: string;
             layout: string;
@@ -57162,7 +57424,9 @@ export interface components {
             color?: string;
         };
         PanelSeccionEntity: {
+            clinicRef?: Record<string, never>;
             panelId: string;
+            panelIdRef?: Record<string, never>;
             slug: string;
             labelKey: string;
             sortOrder: number;
@@ -57228,6 +57492,7 @@ export interface components {
             reason?: string;
         };
         FormatoTerapiaEntity: {
+            clinicRef?: Record<string, never>;
             slug: string;
             labelKey: string;
             title: string;
@@ -57324,6 +57589,7 @@ export interface components {
         };
         DenominacionEntity: {
             currencyId: string;
+            monedaIdRef?: Record<string, never>;
             value: number;
             /** @enum {string} */
             type: "moneda" | "billete";
@@ -57349,11 +57615,14 @@ export interface components {
             updatedAt: string;
         };
         CuadreCajaEntity: {
+            clinicRef?: Record<string, never>;
             userId: string | null;
+            usuarioIdRef?: Record<string, never>;
             /** @enum {string|null} */
             division: "general" | "consulta" | null;
             date: string;
             currencyId: string | null;
+            monedaIdRef?: Record<string, never>;
             /** @enum {string} */
             status: "abierto" | "cerrado";
             declaredPettyCash: number;
@@ -57373,7 +57642,7 @@ export interface components {
             updatedAt: string;
         };
         CajeroDto: {
-            /** @description Auth user id del cajero (= perfiles.authUserId, el que usa el cuadre). */
+            /** @description Staff id of the cashier (staff.id, the person): what payments and reconciliations store. */
             userId: string;
             /** @description Nombre completo del cajero (fallback: email). */
             name: string;
@@ -57493,6 +57762,7 @@ export interface components {
             active?: boolean;
         };
         SchedulingSyncRunEntity: {
+            clinicRef?: Record<string, never>;
             /** Format: date-time */
             startedAt: string;
             /** Format: date-time */
@@ -57533,6 +57803,7 @@ export interface components {
             dryRun?: boolean;
         };
         SchedulingBridgeConfigEntity: {
+            clinicRef?: Record<string, never>;
             enabled: boolean;
             pollIntervalSeconds: number;
             workDays: number[];
@@ -57563,6 +57834,7 @@ export interface components {
         DoctorMappingEntity: {
             externalName: string;
             staffId: string;
+            staffIdRef?: Record<string, never>;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -57582,6 +57854,7 @@ export interface components {
         AgentMappingEntity: {
             externalCode: string;
             staffId: string;
+            staffIdRef?: Record<string, never>;
             id: string;
             /** Format: date-time */
             createdAt: string;
@@ -74920,6 +75193,8 @@ export interface operations {
     "PacientesController_list[0]_v1": {
         parameters: {
             query: {
+                /** @description Centros a leer en vez del de la sesión, separados por coma; cada uno exige pacientes.read EN él. / Centers to read instead of the session one; each needs pacientes.read there. */
+                centerIds?: string[];
                 q?: string;
                 /**
                  * @description Código del paciente en el sistema legado (`codclien`). Filtro EXACTO y aparte de `q`: nadie en
@@ -74972,6 +75247,8 @@ export interface operations {
     "PacientesController_list[1]_v1": {
         parameters: {
             query: {
+                /** @description Centros a leer en vez del de la sesión, separados por coma; cada uno exige pacientes.read EN él. / Centers to read instead of the session one; each needs pacientes.read there. */
+                centerIds?: string[];
                 q?: string;
                 /**
                  * @description Código del paciente en el sistema legado (`codclien`). Filtro EXACTO y aparte de `q`: nadie en
@@ -75024,6 +75301,8 @@ export interface operations {
     "PacientesController_list[2]_v2": {
         parameters: {
             query: {
+                /** @description Centros a leer en vez del de la sesión, separados por coma; cada uno exige pacientes.read EN él. / Centers to read instead of the session one; each needs pacientes.read there. */
+                centerIds?: string[];
                 q?: string;
                 /**
                  * @description Código del paciente en el sistema legado (`codclien`). Filtro EXACTO y aparte de `q`: nadie en
@@ -75076,6 +75355,8 @@ export interface operations {
     "PacientesController_list[3]_v2": {
         parameters: {
             query: {
+                /** @description Centros a leer en vez del de la sesión, separados por coma; cada uno exige pacientes.read EN él. / Centers to read instead of the session one; each needs pacientes.read there. */
+                centerIds?: string[];
                 q?: string;
                 /**
                  * @description Código del paciente en el sistema legado (`codclien`). Filtro EXACTO y aparte de `q`: nadie en
@@ -77787,7 +78068,10 @@ export interface operations {
     };
     "PacientesController_get[0]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros donde buscar al paciente en vez del de la sesión; cada uno exige pacientes.read EN él. / Centers to look the patient up in; each needs pacientes.read there. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -77852,7 +78136,10 @@ export interface operations {
     };
     "PacientesController_get[1]_v1": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros donde buscar al paciente en vez del de la sesión; cada uno exige pacientes.read EN él. / Centers to look the patient up in; each needs pacientes.read there. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -77917,7 +78204,10 @@ export interface operations {
     };
     "PacientesController_get[2]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros donde buscar al paciente en vez del de la sesión; cada uno exige pacientes.read EN él. / Centers to look the patient up in; each needs pacientes.read there. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -77982,7 +78272,10 @@ export interface operations {
     };
     "PacientesController_get[3]_v2": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Centros donde buscar al paciente en vez del de la sesión; cada uno exige pacientes.read EN él. / Centers to look the patient up in; each needs pacientes.read there. */
+                centerIds?: string[];
+            };
             header?: never;
             path: {
                 id: string;
@@ -117891,6 +118184,28 @@ export interface operations {
             };
         };
     };
+    "InventoryScaleController_retireDevice[0]_v1": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "InventoryScaleController_stockEvents[1]_v1": {
         parameters: {
             query?: {
@@ -117945,6 +118260,28 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "InventoryScaleController_retireDevice[1]_v1": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -118005,6 +118342,28 @@ export interface operations {
             };
         };
     };
+    "InventoryScaleController_retireDevice[2]_v1": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "InventoryScaleController_stockEvents[3]_v1": {
         parameters: {
             query?: {
@@ -118059,6 +118418,28 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "InventoryScaleController_retireDevice[3]_v1": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -118119,6 +118500,28 @@ export interface operations {
             };
         };
     };
+    "InventoryScaleController_retireDevice[4]_v2": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "InventoryScaleController_stockEvents[5]_v2": {
         parameters: {
             query?: {
@@ -118173,6 +118576,28 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "InventoryScaleController_retireDevice[5]_v2": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -118233,6 +118658,28 @@ export interface operations {
             };
         };
     };
+    "InventoryScaleController_retireDevice[6]_v2": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "InventoryScaleController_stockEvents[7]_v2": {
         parameters: {
             query?: {
@@ -118287,6 +118734,28 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+        };
+    };
+    "InventoryScaleController_retireDevice[7]_v2": {
+        parameters: {
+            query: {
+                /** @description Centers to read (each one needs the permission there). Without it, the active center. */
+                centerIds?: string[];
+                /** @description Scale whose events are ALL deleted (e.g. qa-test-scale). Required: there is no delete-everything. */
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

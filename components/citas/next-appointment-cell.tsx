@@ -100,11 +100,9 @@ export function NextAppointmentCell({
 
   const type = appt ? types.find((x) => x.id === appt.appointmentTypeId) : null;
   // Owner's rule (04-nov-2026): every appointment booked or moved from this cell is a FOLLOW-UP.
-  // Booking sends the follow-up type; the reschedule endpoint cannot change the type yet (BE handoff
-  // docs/specs/next-appointment-follow-up-handoff-be.md), so only follow-ups can be moved from here.
+  // Booking and rescheduling both send the follow-up type (reschedule takes appointmentTypeId, BE #449).
   const followUp = types.find((x) => x.slug === "seguimiento");
-  const isFollowUp = !!appt && !!followUp && appt.appointmentTypeId === followUp.id;
-  const movable = canReschedule(appt) && isFollowUp && can("citas.update");
+  const movable = canReschedule(appt) && !!followUp && can("citas.update");
   const bookable = !appt && !loading && !!followUp && can("citas.create");
   const doctorForAviso = appt?.doctorId ?? doctorId;
 
@@ -118,6 +116,7 @@ export function NextAppointmentCell({
           {
             date: day,
             time: appt.time ?? undefined, // only the date moves
+            appointmentTypeId: followUp?.id,
             reason: reason.trim() || t("defaultReason"),
             actorId,
           },
@@ -224,7 +223,7 @@ export function NextAppointmentCell({
 
         {!loading && appt && !movable && (
           <p className="px-4 py-3 text-xs text-muted-foreground">
-            {canReschedule(appt) && !isFollowUp ? t("notFollowUp") : t("notMovable")}
+            {t("notMovable")}
           </p>
         )}
 

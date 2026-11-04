@@ -4882,7 +4882,6 @@
     "moved": "Cita movida al {date}",
     "booked": "Cita agendada para el {date}",
     "notMovable": "Esta cita ya no está abierta y no se puede mover desde aquí.",
-    "notFollowUp": "Solo se mueven aquí las citas de seguimiento. Esta es de otro tipo: muévela desde la agenda.",
     "noneThatDay": "No queda cupo de seguimiento ese día.",
     "freeDay": "Hay cupo de seguimiento ese día ({n} libres)."
   }

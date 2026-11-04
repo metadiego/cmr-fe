@@ -35,3 +35,7 @@ tipo, el panel lo explica y no ofrece moverla.
 - el evento `reprogramada` debería registrar el tipo antes y después, para que quede en la traza.
 
 Cuando esté en producción, el FE enviará siempre el id de `seguimiento` al mover y quitará el bloqueo.
+
+## Cerrado (04-nov-2026)
+
+El BE lo publicó en el PR #449. El FE envía `appointmentTypeId` = seguimiento al mover y ya no bloquea las citas de otro tipo.

@@ -251,6 +251,7 @@ export function reagendarCita(
     centerId?: string; // destination center (omit → keep current)
     doctorId?: string;
     actorId?: string;
+    appointmentTypeId?: string; // type of the NEW appointment (omit → the original's)
   },
   tenant?: string,
 ): Promise<Cita> {
