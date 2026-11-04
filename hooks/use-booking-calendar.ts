@@ -10,6 +10,7 @@ import {
 } from "@/lib/agenda/booking/availability"
 import { bookableDays, monthWeeks, shiftMonth } from "@/lib/agenda/booking/month"
 import { holidayDates } from "@/lib/agenda/booking/holidays"
+import { bookableWeekDays } from "@/lib/agenda/booking/week"
 import type { BookingKind } from "@/lib/agenda/booking/url-state"
 import { getFestivos } from "@/lib/api/festivos"
 import { nowTimePR, todayPR } from "@/lib/format/fecha"
@@ -34,6 +35,8 @@ export interface BookingCalendarData {
   holidays: string[]
   /** Free spots per day of the visible month (only bookable days are asked); today without past times. */
   days: Record<string, DayResult>
+  /** Week view: the shown week's bookable days, same shape as `days` (empty in the other views). */
+  weekDays: Record<string, DayResult>
   loading: boolean
   notConfigured: boolean
   /** The selected day: the day request (patient-aware), else the month's copy while it loads. */
@@ -73,6 +76,8 @@ export function useBookingCalendar(p: {
   date: string | undefined
   patientId: string | undefined
   window: TimeWindow
+  /** Week view: the six shown days (Mon–Sat); [] in the other views. */
+  week: string[]
 }): BookingCalendarData {
   const { center, kind, typeId, month, date, patientId, window } = p
   const todayIso = todayPR()
@@ -163,11 +168,26 @@ export function useBookingCalendar(p: {
           from
         )
 
+  // Week view: the shown week's days, through the same per-day cache (the month's copies are hits).
+  const weekKey = p.week.join(",")
+  const weekDates = React.useMemo(
+    () =>
+      holidaysReady && weekKey
+        ? bookableWeekDays(weekKey.split(","), todayIso, holidays)
+        : [],
+    [holidaysReady, weekKey, todayIso, holidays]
+  )
+  const weekAv = useMonthAvailability({ center, kind, typeId, dates: weekDates })
+  const weekDays = React.useMemo(
+    () => withoutPast(weekAv.days, todayIso, nowTime),
+    [weekAv.days, todayIso, nowTime]
+  )
+
   const dayAv = useDayAvailability({ center, kind, typeId, date, patientId })
   // A medical day is the same request (and cache entry) as the month's copy: while the month or the
   // lookahead holds the date, read and refresh it there, so a refresh asks for it once.
   const monthEntry = date
-    ? (monthDays[date] ?? nextAv.days[date])
+    ? (monthDays[date] ?? nextAv.days[date] ?? weekAv.days[date])
     : undefined
   const dayFromMonth = kind === "medical" && monthEntry !== undefined
   const rawDay = dayFromMonth ? monthEntry : (dayAv.day ?? monthEntry)
@@ -175,6 +195,7 @@ export function useBookingCalendar(p: {
 
   const monthRefresh = monthAv.refresh
   const nextRefresh = nextAv.refresh
+  const weekRefresh = weekAv.refresh
   const dayRefresh = dayAv.refresh
   const refreshDates = React.useCallback(
     (dates: string[]) => {
@@ -182,19 +203,24 @@ export function useBookingCalendar(p: {
       const inNext = dates.filter((d) => nextDates.includes(d))
       if (inVisible.length > 0) monthRefresh(inVisible)
       if (inNext.length > 0) nextRefresh(inNext)
+      // The week's days the month (or lookahead) just re-asked only re-read; the rest are re-asked here.
+      const inWeek = dates.filter((d) => weekDates.includes(d))
+      const shared = inWeek.filter((d) => inVisible.includes(d) || inNext.includes(d))
+      const own = inWeek.filter((d) => !shared.includes(d))
+      if (shared.length > 0) weekRefresh(shared, false)
+      if (own.length > 0) weekRefresh(own)
       // Service days asked with a patient are cached apart from the month's: refresh the day itself.
-      // A medical day held by the month was just refreshed there.
-      const coveredByMonth =
-        kind === "medical" &&
-        (monthDates.includes(date ?? "") || nextDates.includes(date ?? ""))
+      // A medical day held by the month or the week was just refreshed there.
+      const held = [...monthDates, ...nextDates, ...weekDates]
+      const coveredByMonth = kind === "medical" && held.includes(date ?? "")
       if (date && dates.includes(date) && !coveredByMonth) dayRefresh()
     },
-    [kind, monthDates, nextDates, date, monthRefresh, nextRefresh, dayRefresh]
+    [kind, monthDates, nextDates, weekDates, date, monthRefresh, nextRefresh, weekRefresh, dayRefresh]
   )
 
   const liveVisible = React.useMemo(
-    () => [...monthDates, ...nextDates, ...(date ? [date] : [])],
-    [monthDates, nextDates, date]
+    () => [...new Set([...monthDates, ...nextDates, ...weekDates, ...(date ? [date] : [])])],
+    [monthDates, nextDates, weekDates, date]
   )
   const { live } = useBookingLive({
     center: kind && typeId ? center : undefined,
@@ -207,15 +233,17 @@ export function useBookingCalendar(p: {
     weeks,
     holidays,
     days: monthDays,
+    weekDays,
     loading: monthAv.loading || !holidaysReady,
-    notConfigured: monthAv.notConfigured,
+    notConfigured: monthAv.notConfigured || weekAv.notConfigured,
     day,
     nextFree: nextFreeTimes,
     nextFreeLoading:
       !monthComplete || (nextDates.length > 0 && nextAv.loading),
     live,
     refreshDates,
-    retryDay: (d: string) => monthRefresh([d]),
+    retryDay: (d: string) =>
+      monthDates.includes(d) ? monthRefresh([d]) : weekRefresh([d]),
     retrySelected: () =>
       dayFromMonth && date ? refreshDates([date]) : dayRefresh(),
   }

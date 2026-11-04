@@ -37,8 +37,41 @@ function cached(key: string): DaySlots | null | undefined {
   return hit.value
 }
 
+// Requests in flight by cache key: the month, the week and the day asking for the same day at once
+// share one request.
+const inflight = new Map<string, Promise<DaySlots | null>>()
+
+/** A refresh must not join a request that started before the change it reacts to. */
+function forget(key: string): void {
+  cache.delete(key)
+  inflight.delete(key)
+}
+
 /** null = the service has no resource configured. Throws on a failed request (never cached). */
-async function fetchDay(
+function fetchDay(
+  center: string,
+  kind: BookingKind,
+  typeId: string,
+  date: string,
+  patientId?: string
+): Promise<DaySlots | null> {
+  const key = dayKey(
+    center,
+    kind,
+    typeId,
+    date,
+    kind === "service" ? patientId : undefined
+  )
+  const running = inflight.get(key)
+  if (running) return running
+  const p = requestDay(center, kind, typeId, date, patientId).finally(() => {
+    if (inflight.get(key) === p) inflight.delete(key)
+  })
+  inflight.set(key, p)
+  return p
+}
+
+async function requestDay(
   center: string,
   kind: BookingKind,
   typeId: string,
@@ -82,7 +115,7 @@ export function useMonthAvailability(p: {
   days: Record<string, DayResult>
   loading: boolean
   notConfigured: boolean
-  refresh: (dates?: string[]) => void
+  refresh: (dates?: string[], force?: boolean) => void
 } {
   const { center, kind, typeId } = p
   const datesKey = p.dates.join(",")
@@ -151,11 +184,13 @@ export function useMonthAvailability(p: {
     load(datesRef.current, scope)
   }, [scope, load])
 
+  // `force: false` re-reads the dates without dropping them (another hook just refreshed them: this one
+  // joins that request or reads its answer from the cache).
   const refresh = React.useCallback(
-    (dates?: string[]) => {
+    (dates?: string[], force = true) => {
       if (!center || !kind || !typeId) return
       const target = dates ?? datesRef.current
-      for (const d of target) cache.delete(dayKey(center, kind, typeId, d))
+      if (force) for (const d of target) forget(dayKey(center, kind, typeId, d))
       load(target, scopeRef.current)
     },
     [center, kind, typeId, load]
@@ -203,7 +238,7 @@ export function useDayAvailability(p: {
   const load = React.useCallback(
     (force: boolean) => {
       if (!center || !kind || !typeId || !date || !key) return
-      if (force) cache.delete(key)
+      if (force) forget(key)
       const hit = cached(key)
       const source =
         hit !== undefined

@@ -1,4 +1,8 @@
-// URL state of the booking screen: ?type=medical:<id>|service:<id>&date=YYYY-MM-DD&patient=<id>.
+import { isPeriod, type BookingPeriod } from "./period.ts";
+
+// URL state of the booking screen:
+// ?type=medical:<id>|service:<id>&date=YYYY-MM-DD&patient=<id>&view=day|week (month, the default, is
+// left out of the URL).
 
 export type BookingKind = "medical" | "service";
 
@@ -7,6 +11,7 @@ export interface BookingUrlState {
   typeId?: string;
   date?: string;
   patientId?: string;
+  period?: BookingPeriod;
 }
 
 function isRealDay(s: string): boolean {
@@ -33,6 +38,8 @@ export function parseBookingParams(sp: URLSearchParams): BookingUrlState {
   if (date && isRealDay(date)) out.date = date;
   const patient = sp.get("patient");
   if (patient) out.patientId = patient;
+  const view = sp.get("view");
+  if (isPeriod(view) && view !== "month") out.period = view;
   return out;
 }
 
@@ -41,5 +48,6 @@ export function toBookingSearch(s: BookingUrlState): string {
   if (s.kind && s.typeId) parts.push(`type=${s.kind}:${encodeURIComponent(s.typeId)}`);
   if (s.date) parts.push(`date=${s.date}`);
   if (s.patientId) parts.push(`patient=${encodeURIComponent(s.patientId)}`);
+  if (s.period && s.period !== "month") parts.push(`view=${s.period}`);
   return parts.length ? `?${parts.join("&")}` : "";
 }

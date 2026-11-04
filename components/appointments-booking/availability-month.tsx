@@ -1,10 +1,6 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
-
-import { Button } from "@/components/ui/button";
 import {
   bookedBucket,
   bookedIn,
@@ -23,16 +19,17 @@ import { cn } from "@/lib/utils";
 // The month of free spots: one cell per day with its number (free in the time window, or booked in
 // Booked view), a small label and a colour bucket. Only the weeks the month needs; the rows share the
 // available height. Past days, Sundays, holidays and days with nothing set up are grey and inert; a day
-// whose request failed shows "—" and asks again on click.
+// whose request failed shows "—" and asks again on click. The ‹ Today › row and the title live in the
+// PeriodHeader above it.
 
-const FREE_CLASS: Record<ReturnType<typeof freeBucket>, string> = {
+export const FREE_CLASS: Record<ReturnType<typeof freeBucket>, string> = {
   full: "bg-destructive/10 text-destructive",
   low: "bg-warning text-warning-foreground",
   some: "bg-success/50 text-success-foreground",
   many: "bg-success text-success-foreground",
 };
 
-const BOOKED_CLASS: Record<ReturnType<typeof bookedBucket>, string> = {
+export const BOOKED_CLASS: Record<ReturnType<typeof bookedBucket>, string> = {
   0: "bg-primary/5",
   1: "bg-primary/15",
   2: "bg-primary/25",
@@ -50,7 +47,6 @@ type Cell =
 export function AvailabilityMonth({
   weeks,
   month0,
-  year,
   todayIso,
   holidays,
   days,
@@ -60,11 +56,9 @@ export function AvailabilityMonth({
   ringDate,
   onSelect,
   onRetry,
-  onMonth,
 }: {
   weeks: string[][];
   month0: number;
-  year: number;
   todayIso: string;
   holidays: string[];
   days: Record<string, DayResult>;
@@ -75,13 +69,9 @@ export function AvailabilityMonth({
   ringDate?: string;
   onSelect: (date: string) => void;
   onRetry: (date: string) => void;
-  /** -1 / +1 month, or 0 for the current month. */
-  onMonth: (delta: -1 | 0 | 1) => void;
 }) {
   const t = useTranslations("appointmentsBooking.month");
-  const tt = useTranslations("appointmentsBooking.toolbar");
   const format = useFormatter();
-  const title = parseDayUTC(`${year}-${String(month0 + 1).padStart(2, "0")}-01`);
 
   const cellOf = (date: string): Cell => {
     const k = dayKind(date, month0, todayIso, holidays);
@@ -120,23 +110,6 @@ export function AvailabilityMonth({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2" data-slot="availability-month">
-      <div className="flex items-center gap-2">
-        <h2 className="text-base font-semibold first-letter:uppercase">
-          {title ? format.dateTime(title, "monthYear") : ""}
-        </h2>
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="outline" size="icon-sm" onClick={() => onMonth(-1)} aria-label={tt("prevMonth")}>
-            <HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => onMonth(0)}>
-            {tt("today")}
-          </Button>
-          <Button variant="outline" size="icon-sm" onClick={() => onMonth(1)} aria-label={tt("nextMonth")}>
-            <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} />
-          </Button>
-        </div>
-      </div>
-
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
         {(weeks[0] ?? []).map((d) => {
           const day = parseDayUTC(d);

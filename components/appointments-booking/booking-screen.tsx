@@ -35,6 +35,9 @@ import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointmen
 import { normalizeTime, type TimeWindow } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { monthOf } from "@/lib/agenda/booking/month";
+import { periodFocus, periodForKey, type BookingPeriod } from "@/lib/agenda/booking/period";
+import { weekDays } from "@/lib/agenda/booking/week";
+import { isPlainKey, isTypingTarget } from "@/lib/agenda/booking/keys";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { reagendarCita, type Cita } from "@/lib/api/citas";
 import { reagendarSesion } from "@/lib/api/frontdesk";
@@ -52,8 +55,9 @@ import { cn } from "@/lib/utils";
 //   no patient, type    → Who's calling? (narrow) | calendar slot
 //   patient, no type    → patient rail | "Book for <name>: what?"
 //   patient, type       → patient rail | calendar slot
-// kind/typeId/date/patientId live in the URL (?type=kind:id&date=&patient=) so reload and links restore
-// the screen; the rest (time window, Free/Booked, visible month, the appointment being moved) is local.
+// kind/typeId/date/patientId and the Day/Week/Month view live in the URL (?type=kind:id&date=&patient=
+// &view=) so reload and links restore the screen; the rest (time window, Free/Booked, visible month and
+// week, the appointment being moved) is local. D / W / M switch the view (not while typing).
 // The work area fills the window (useFillViewportHeight); the panels scroll inside it, never the page.
 
 export type { BookingView };
@@ -65,7 +69,9 @@ export interface BookingScreenState {
   patientId?: string;
   window: TimeWindow;
   view: BookingView; // "booked" is only offered for medical types
+  period: BookingPeriod; // Day / Week / Month (URL `view=`)
   month: { year: number; month0: number };
+  anchor: string; // Week view: any day of the shown week
   movingId: string | null; // the appointment being moved (patient rail → day panel)
 }
 
@@ -77,7 +83,17 @@ function bookableDate(date: string | undefined): string | undefined {
 function initialState(sp: URLSearchParams): BookingScreenState {
   const url = parseBookingParams(sp);
   const date = bookableDate(url.date);
-  return { ...url, date, window: "any", view: "free", month: monthOf(date ?? todayPR()), movingId: null };
+  const focus = date ?? todayPR();
+  return {
+    ...url,
+    date,
+    period: url.period ?? "month",
+    window: "any",
+    view: "free",
+    month: monthOf(focus),
+    anchor: focus,
+    movingId: null,
+  };
 }
 
 export function BookingScreen() {
@@ -137,7 +153,9 @@ export function BookingScreen() {
           typeId: url.typeId,
           date,
           patientId: url.patientId,
+          period: url.period ?? "month",
           month: date ? monthOf(date) : state.month,
+          anchor: date ?? state.anchor,
           movingId: null,
         });
       }
@@ -217,6 +235,18 @@ export function BookingScreen() {
       ? [...centro.centros, ...(patientCenters ?? [])].find((c) => c.id === calCenter)?.name
       : undefined;
 
+  // ---- Period: Day view always shows a day (today when none is picked); Week asks its six days.
+  const today = todayPR();
+  const shownDate = state.period === "day" ? (state.date ?? today) : state.date;
+  const setPeriod = (period: BookingPeriod) => {
+    if (period === state.period) return;
+    const focus = periodFocus({ ...state, date: shownDate }, today);
+    const month = monthOf(focus);
+    if (period === "month") update({ period, month });
+    else if (period === "week") update({ period, anchor: focus, month });
+    else update({ period, date: focus, month });
+  };
+
   // ---- Calendar data: holidays, the month's free spots, the selected day, Next free and the live
   // refresh (which re-asks the month dates and the selected day an event touches).
   const calendar = useBookingCalendar({
@@ -224,9 +254,10 @@ export function BookingScreen() {
     kind: typeChosen ? state.kind : undefined,
     typeId: typeChosen ? state.typeId : undefined,
     month: state.month,
-    date: state.date,
+    date: shownDate,
     patientId: state.patientId,
     window: state.window,
+    week: typeChosen && state.period === "week" ? weekDays(state.anchor) : [],
   });
   const live = calendar.live;
   const refreshCalendarDates = calendar.refreshDates;
@@ -244,6 +275,7 @@ export function BookingScreen() {
       typeId: a.typeId,
       date: a.date,
       month: monthOf(a.date),
+      anchor: a.date,
       view: a.kind === "medical" ? state.view : "free",
     });
   };
@@ -252,8 +284,7 @@ export function BookingScreen() {
     // An open dialog (e.g. CitaModal) handles its own Esc first; Esc while typing (the move's reason,
     // the patient search) belongs to that field and never ends the move.
     if (e.key !== "Escape" || e.defaultPrevented) return;
-    const el = e.target instanceof HTMLElement ? e.target : null;
-    if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
+    if (isTypingTarget(e.target instanceof HTMLElement ? e.target : null)) return;
     stopMove();
   });
   const isMoving = !!state.movingId;
@@ -263,6 +294,23 @@ export function BookingScreen() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isMoving]);
+  // D / W / M switch the calendar's view, with the Esc guard (never while typing) and never inside an
+  // open dialog or menu (their letters are theirs, e.g. a menu's type-ahead).
+  const onViewKey = React.useEffectEvent((e: KeyboardEvent) => {
+    if (e.defaultPrevented || !isPlainKey(e)) return;
+    const el = e.target instanceof HTMLElement ? e.target : null;
+    if (isTypingTarget(el) || el?.closest('[role="dialog"],[role="alertdialog"],[role="menu"]')) return;
+    const period = periodForKey(e.key);
+    if (!period) return;
+    e.preventDefault();
+    setPeriod(period);
+  });
+  React.useEffect(() => {
+    if (!typeChosen) return;
+    const onKey = (e: KeyboardEvent) => onViewKey(e);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [typeChosen]);
   // The screen's center changing for any reason (picker, top bar, session) while moving ends the move.
   // Adjusted during render (as the URL → state sync above); movingId is not in the URL, so a plain
   // setState is enough and `latest` catches up after the commit.
@@ -427,10 +475,13 @@ export function BookingScreen() {
             color={chosenType?.color ?? null}
             label={firstName ? t("toolbar.bookingFor", { name: firstName }) : t("toolbar.booking")}
             onClearType={clearType}
-            date={state.date}
+            date={shownDate}
             month={state.month}
             window={state.window}
             view={state.view}
+            period={state.period}
+            anchor={state.anchor}
+            onPeriod={setPeriod}
             onChange={update}
             patient={patient}
             appointmentTypes={types.appointmentTypes}

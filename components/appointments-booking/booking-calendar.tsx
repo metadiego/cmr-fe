@@ -8,17 +8,23 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { BookingToolbar, type BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { AvailabilityMonth } from "@/components/appointments-booking/availability-month";
 import { DayPanel } from "@/components/appointments-booking/day-panel";
+import { PeriodHeader } from "@/components/appointments-booking/period-header";
+import { WeekGrid } from "@/components/appointments-booking/week-grid";
 import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import type { BookingCalendarData } from "@/hooks/use-booking-calendar";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
-import { monthOf, shiftMonth, type MonthRef } from "@/lib/agenda/booking/month";
+import { dayKind, monthOf, shiftMonth, type MonthRef } from "@/lib/agenda/booking/month";
+import { shiftDay, type BookingPeriod } from "@/lib/agenda/booking/period";
+import { shiftWeek, weekDays } from "@/lib/agenda/booking/week";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import type { TipoCita } from "@/lib/api/citas";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMedicos, type Personal } from "@/lib/api/personal";
 
-// The calendar half of the booking screen: toolbar, month of free spots and the selected day's times.
+// The calendar half of the booking screen: toolbar, the period row (‹ Today › · title · Day/Week/Month)
+// and the period itself: Month (month of free spots + the selected day's times), Week (hours × days +
+// the selected day's times) or Day (that day's times, large, hosting the form / Move box itself).
 // Picking a medical time opens the shared CitaModal with everything preset (it owns doctor choice,
 // validation, the overlap warning, the EHR gate and the BE's reschedule-instead behaviour). Picking a
 // service time renders the `serviceForm` slot under the day's grid. While moving an appointment the day
@@ -42,6 +48,8 @@ export interface BookingCalendarPatch {
   month?: Month;
   window?: TimeWindow;
   view?: BookingView;
+  /** Week view: any day of the shown week. */
+  anchor?: string;
 }
 
 export function BookingCalendar({
@@ -58,6 +66,9 @@ export function BookingCalendar({
   month,
   window,
   view,
+  period,
+  anchor,
+  onPeriod,
   onChange,
   patient,
   appointmentTypes,
@@ -80,6 +91,10 @@ export function BookingCalendar({
   month: Month;
   window: TimeWindow;
   view: BookingView;
+  period: BookingPeriod;
+  /** Week view: any day of the shown week. */
+  anchor: string;
+  onPeriod: (p: BookingPeriod) => void;
   /** One call per event: the screen merges the patch into its state (and the URL for `date`). */
   onChange: (patch: BookingCalendarPatch) => void;
   patient: Paciente | null;
@@ -124,9 +139,32 @@ export function BookingCalendar({
   };
 
   const pickNext = (day: string, time: string) => {
-    if (day !== date) onChange({ date: day, month: monthOf(day) });
+    if (day !== date) onChange({ date: day, month: monthOf(day), anchor: day });
     pickTime(day, time);
   };
+
+  // A week cell = that day + the hour's first time with room, exactly like picking it in the day panel.
+  const pickCell = (day: string, time: string) => {
+    if (day !== date) onChange({ date: day });
+    pickTime(day, time);
+  };
+
+  const today = data.todayIso;
+  const dayDate = date ?? today;
+  const shift = (delta: -1 | 0 | 1) => {
+    if (period === "month") {
+      onChange({ month: delta === 0 ? monthOf(today) : shiftMonth(month, delta) });
+    } else if (period === "week") {
+      const next = delta === 0 ? today : shiftWeek(anchor, delta);
+      onChange({ anchor: next, month: monthOf(next) });
+    } else {
+      const next = delta === 0 ? today : shiftDay(dayDate, delta);
+      onChange({ date: next < today ? today : next, month: monthOf(next) });
+    }
+  };
+  const closedKind = date ? dayKind(date, monthOf(date).month0, today, data.holidays) : undefined;
+  const closedLabel =
+    closedKind === "sunday" ? t("day.closed") : closedKind === "holiday" ? t("day.holiday") : undefined;
 
   const fullDayHref = date
     ? medical
@@ -153,6 +191,15 @@ export function BookingCalendar({
         onPickNext={pickNext}
       />
       {centerNote && <p className="text-xs font-medium text-primary">{centerNote}</p>}
+      <PeriodHeader
+        period={period}
+        month={month}
+        anchor={anchor}
+        date={dayDate}
+        canGoBack={period !== "day" || dayDate > today}
+        onShift={shift}
+        onPeriod={onPeriod}
+      />
 
       {data.notConfigured ? (
         <EmptyState
@@ -161,28 +208,48 @@ export function BookingCalendar({
           description={t("month.notConfiguredHint")}
         />
       ) : (
-        // Month and day side by side only when this card is wide enough for both (a container query,
-        // so the app sidebar being open or folded counts): month >= ~560px + gap + the 19rem day panel.
-        // Narrower (laptops with the sidebar open), the day panel sits under the month and both share
-        // the height; the day panel scrolls inside itself, the page never does.
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:@max-[880px]:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @min-[880px]:grid-cols-[minmax(0,1fr)_19rem] @min-[880px]:grid-rows-[minmax(0,1fr)]">
-          <AvailabilityMonth
-            weeks={data.weeks}
-            month0={month.month0}
-            year={month.year}
-            todayIso={data.todayIso}
-            holidays={data.holidays}
-            days={data.days}
-            view={medical ? view : "free"}
-            window={window}
-            selected={date}
-            ringDate={ringDate}
-            onSelect={selectDay}
-            onRetry={data.retryDay}
-            onMonth={(delta) =>
-              onChange({ month: delta === 0 ? monthOf(data.todayIso) : shiftMonth(month, delta) })
-            }
-          />
+        // Month/Week and the day panel side by side only when this card is wide enough for both (a
+        // container query, so the app sidebar being open or folded counts): main >= ~560px + gap + the
+        // 19rem day panel. Narrower (laptops with the sidebar open), the day panel sits under the main
+        // area and both share the height; the day panel scrolls inside itself, the page never does.
+        // Day view is the day panel alone, large.
+        <div
+          className={
+            period === "day"
+              ? "flex min-h-0 flex-1 flex-col"
+              : "grid min-h-0 flex-1 grid-cols-1 gap-4 lg:@max-[880px]:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @min-[880px]:grid-cols-[minmax(0,1fr)_19rem] @min-[880px]:grid-rows-[minmax(0,1fr)]"
+          }
+        >
+          {period === "month" && (
+            <AvailabilityMonth
+              weeks={data.weeks}
+              month0={month.month0}
+              todayIso={today}
+              holidays={data.holidays}
+              days={data.days}
+              view={medical ? view : "free"}
+              window={window}
+              selected={date}
+              ringDate={ringDate}
+              onSelect={selectDay}
+              onRetry={data.retryDay}
+            />
+          )}
+          {period === "week" && (
+            <WeekGrid
+              week={weekDays(anchor)}
+              todayIso={today}
+              holidays={data.holidays}
+              days={data.weekDays}
+              view={medical ? view : "free"}
+              window={window}
+              selected={date}
+              picked={picked}
+              ringDate={ringDate}
+              onPick={pickCell}
+              onRetry={data.retryDay}
+            />
+          )}
           <DayPanel
             date={date}
             typeName={typeName}
@@ -203,6 +270,8 @@ export function BookingCalendar({
               }
             }
             fullDayHref={fullDayHref}
+            large={period === "day"}
+            closedLabel={closedLabel}
           >
             {date && picked && serviceForm ? (
               serviceForm({ date, time: picked, clear: () => setPick(null) })

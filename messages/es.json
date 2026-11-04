@@ -4950,8 +4950,6 @@
       "booked": "Ocupados",
       "nextFree": "Próximos libres",
       "noNextFree": "No hay horas libres pronto.",
-      "prevMonth": "Mes anterior",
-      "nextMonth": "Mes siguiente",
       "today": "Hoy"
     },
     "month": {
@@ -5030,6 +5028,31 @@
       "moveFailed": "No se pudo mover: {message}",
       "cancelFailed": "No se pudo cancelar: {message}",
       "moveReasonRequired": "Para mover una cita médica hace falta un motivo."
+    },
+    "period": {
+      "menuLabel": "Vista del calendario",
+      "views": {
+        "day": "Día",
+        "week": "Semana",
+        "month": "Mes"
+      },
+      "prev": {
+        "day": "Día anterior",
+        "week": "Semana anterior",
+        "month": "Mes anterior"
+      },
+      "next": {
+        "day": "Día siguiente",
+        "week": "Semana siguiente",
+        "month": "Mes siguiente"
+      }
+    },
+    "week": {
+      "loading": "Cargando la semana…",
+      "noTimes": "No hay horas esta semana en este momento del día.",
+      "noTimeShort": "Sin horas",
+      "cellFree": "{day} · {time}: {n} libres",
+      "cellBooked": "{day} · {time}: {n} ocupados"
     }
   }
 }

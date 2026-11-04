@@ -4950,8 +4950,6 @@
       "booked": "Booked",
       "nextFree": "Next free",
       "noNextFree": "No free times soon.",
-      "prevMonth": "Previous month",
-      "nextMonth": "Next month",
       "today": "Today"
     },
     "month": {
@@ -5030,6 +5028,31 @@
       "moveFailed": "Could not move: {message}",
       "cancelFailed": "Could not cancel: {message}",
       "moveReasonRequired": "A reason is required to move a medical appointment."
+    },
+    "period": {
+      "menuLabel": "Calendar view",
+      "views": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
+      "prev": {
+        "day": "Previous day",
+        "week": "Previous week",
+        "month": "Previous month"
+      },
+      "next": {
+        "day": "Next day",
+        "week": "Next week",
+        "month": "Next month"
+      }
+    },
+    "week": {
+      "loading": "Loading the week…",
+      "noTimes": "No times this week in this time of day.",
+      "noTimeShort": "No times",
+      "cellFree": "{day} · {time}: {n} free",
+      "cellBooked": "{day} · {time}: {n} booked"
     }
   }
 }

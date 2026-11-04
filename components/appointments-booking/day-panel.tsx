@@ -21,6 +21,8 @@ import { cn } from "@/lib/utils";
 // "{n} left"; full ones are dashed grey and still clickable (overbook); unavailable ones are dashed,
 // inert, and say why on hover. Below the grid: the "Move here?" box while moving an appointment, or the
 // picked-time slot (`children`: the service form, or a medical no-permission note). Scrolls inside itself.
+// The Day view shows it as the main area (`large`): bigger times, more per row, and "Closed" on a closed
+// day (`closedLabel`), since its ‹ › walks every day.
 
 export interface DayPanelMoving {
   /** The appointment's current day and time, already formatted ("Thu, Nov 5 · 8:00"). */
@@ -41,6 +43,8 @@ export function DayPanel({
   onRetry,
   moving,
   fullDayHref,
+  large = false,
+  closedLabel,
   children,
 }: {
   date: string | undefined;
@@ -52,6 +56,10 @@ export function DayPanel({
   onRetry: () => void;
   moving?: DayPanelMoving;
   fullDayHref: string | undefined;
+  /** Day view: the panel is the main area. */
+  large?: boolean;
+  /** The day is closed (Sunday, holiday): shown instead of its times. */
+  closedLabel?: string;
   /** Shown under the grid once a time is picked, not while moving: the service form, or a medical note. */
   children?: React.ReactNode;
 }) {
@@ -78,7 +86,7 @@ export function DayPanel({
     // scroll container clips both axes — without left padding the first column's ring was cut off.
     <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto px-1 pt-0.5" data-slot="day-panel">
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-sm font-semibold first-letter:uppercase">
+        <h3 className={cn("font-semibold first-letter:uppercase", large ? "text-base" : "text-sm")}>
           {format.dateTime(d, "dayWeekdayLong")}
         </h3>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -95,7 +103,9 @@ export function DayPanel({
         </div>
       </div>
 
-      {day === undefined ? (
+      {closedLabel ? (
+        <EmptyState title={closedLabel} />
+      ) : day === undefined ? (
         <p className="text-sm text-muted-foreground">{tb("loading")}</p>
       ) : day === "error" ? (
         <div className="flex items-center gap-2 text-sm text-destructive">
@@ -111,23 +121,25 @@ export function DayPanel({
       ) : (
         <>
           {morning.length > 0 && (
-            <TimeGroup title={t("morning")} slots={morning} picked={picked} onPick={onPickTime} />
+            <TimeGroup title={t("morning")} slots={morning} picked={picked} onPick={onPickTime} large={large} />
           )}
           {afternoon.length > 0 && (
-            <TimeGroup title={t("afternoon")} slots={afternoon} picked={picked} onPick={onPickTime} />
+            <TimeGroup title={t("afternoon")} slots={afternoon} picked={picked} onPick={onPickTime} large={large} />
           )}
         </>
       )}
 
       {picked && moving ? (
-        <MoveBox
-          key={`${date} ${picked}`}
-          moving={moving}
-          toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
-          full={pickedSlot?.state === "full"}
-        />
+        <div className={cn(large && "w-full max-w-xl")}>
+          <MoveBox
+            key={`${date} ${picked}`}
+            moving={moving}
+            toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
+            full={pickedSlot?.state === "full"}
+          />
+        </div>
       ) : picked ? (
-        children
+        <div className={cn(large && "w-full max-w-3xl")}>{children}</div>
       ) : null}
     </aside>
   );
@@ -138,11 +150,13 @@ function TimeGroup({
   slots,
   picked,
   onPick,
+  large,
 }: {
   title: string;
   slots: BookingSlot[];
   picked: string | null;
   onPick: (time: string) => void;
+  large?: boolean;
 }) {
   const t = useTranslations("appointmentsBooking.day");
   const tRoot = useTranslations();
@@ -150,11 +164,19 @@ function TimeGroup({
   return (
     <section className="flex flex-col gap-1.5">
       <h4 className="text-xs font-medium text-muted-foreground uppercase">{title}</h4>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div
+        className={cn(
+          "grid",
+          large ? "grid-cols-4 gap-2 @min-[640px]:grid-cols-6 @min-[960px]:grid-cols-8" : "grid-cols-4 gap-1.5",
+        )}
+      >
         {slots.map((s) => {
           const isPicked = s.time === picked;
           const pickedRing = isPicked && "ring-2 ring-primary ring-offset-1";
-          const timeClass = "flex w-full flex-col items-center rounded-md px-1 py-1.5 text-sm";
+          const timeClass = cn(
+            "flex w-full flex-col items-center rounded-md px-1",
+            large ? "py-3 text-base" : "py-1.5 text-sm",
+          );
           if (s.state === "unavailable") {
             const reason = s.reasonKey && tRoot.has(s.reasonKey) ? tRoot(s.reasonKey) : t("unavailable");
             return (
