@@ -274,7 +274,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             </div>
           )}
 
-          <DataTable>
+          <DataTable fill>
             <TableHeader>
               <TableRow>
                 {/* Ordinal: nº de línea (orden en que se ven), no un dato de la factura. */}

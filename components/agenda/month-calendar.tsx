@@ -8,6 +8,7 @@ import { monthMatrix, toISO, isFestivo } from "@/lib/agenda/calendar";
 import { cn } from "@/lib/utils";
 import { LoadingRegion, PillsSkeleton } from "@/components/kit/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 
 // Domain-agnostic event: the parent maps `id` back to its entity on click.
 export interface AgendaEvent {
@@ -41,6 +42,7 @@ export function MonthCalendar({
   onDayClick,
   onEventClick,
   loading = false,
+  fill = false,
 }: {
   year: number;
   month0: number;
@@ -53,13 +55,23 @@ export function MonthCalendar({
   onDayClick: (iso: string) => void;
   onEventClick?: (id: string) => void;
   loading?: boolean;
+  // On desktop, stretch the week rows so the month runs to the bottom of the window. If the window
+  // is too short for the rows' minimum height, the weeks scroll inside the calendar.
+  fill?: boolean;
 }) {
   const tCommon = useTranslations("common");
   const weeks = monthMatrix(year, month0);
   const todayIso = toISO(new Date());
+  const ref = React.useRef<HTMLDivElement>(null);
+  const height = useFillViewportHeight(ref, { enabled: fill });
 
   return (
-    <div aria-busy={loading || undefined} className="overflow-hidden rounded-lg border">
+    <div
+      ref={ref}
+      aria-busy={loading || undefined}
+      style={height ? { height } : undefined}
+      className={cn("overflow-hidden rounded-lg border", height && "flex flex-col")}
+    >
       {loading && <span className="sr-only">{tCommon("loading")}</span>}
       <div className="grid grid-cols-7 border-b bg-muted/40 text-xs font-medium text-muted-foreground">
         {weekdays.map((d) => (
@@ -68,7 +80,7 @@ export function MonthCalendar({
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7">
+      <div className={cn("grid grid-cols-7", height && "min-h-0 flex-1 auto-rows-fr overflow-y-auto")}>
         {weeks.flat().map((date, idx) => {
           const iso = toISO(date);
           const inMonth = date.getMonth() === month0;

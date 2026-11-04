@@ -96,16 +96,35 @@ export default function ClientesPage() {
             </Button>
           </Can>
         </ListToolbar>
-        <p className="text-xs text-muted-foreground tabular-nums">
+        <div className="text-xs text-muted-foreground tabular-nums">
           {state.kind === "ok" ? (
             t("total", { count: state.data.pagination.total })
           ) : state.kind === "loading" ? (
             <Skeleton aria-hidden className="inline-block h-3 w-20 align-middle" />
           ) : null}
-        </p>
+        </div>
       </div>
 
-      <DataTable>
+      <DataTable
+        fill
+        footer={
+          // Kept in place while a page/search loads, so the table does not jump.
+          state.kind === "loading" ? (
+            <div aria-hidden className="flex items-center justify-between">
+              <Skeleton className="h-4 w-40" />
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </div>
+          ) : state.kind === "ok" && state.data.items.length > 0 ? (
+            <PaginationFooter
+              meta={state.data.pagination}
+              onPageChange={setPage}
+            />
+          ) : null
+        }
+      >
         <TableHeader>
           <TableRow>
             <TableHead className="w-10 text-right tabular-nums text-muted-foreground">
@@ -179,23 +198,6 @@ export default function ClientesPage() {
             ))}
         </TableBody>
       </DataTable>
-
-      {/* Footer kept in place while a page/search loads, so the table does not jump. */}
-      {state.kind === "loading" && (
-        <div aria-hidden className="flex items-center justify-between">
-          <Skeleton className="h-4 w-40" />
-          <div className="flex gap-2">
-            <Skeleton className="h-8 w-20" />
-            <Skeleton className="h-8 w-20" />
-          </div>
-        </div>
-      )}
-      {state.kind === "ok" && state.data.items.length > 0 && (
-        <PaginationFooter
-          meta={state.data.pagination}
-          onPageChange={setPage}
-        />
-      )}
 
       <PacienteFormSheet
         open={createOpen}
