@@ -671,6 +671,8 @@
       "endAuto": "Fin automático {time}",
       "variantList": "Lista",
       "variantGrid": "Rejilla",
+      "editLocked": "Para cambiar la fecha, el tipo o el paciente, use Reagendar en el menú de acciones (⋯).",
+      "editLockedError": "Una edición no cambia la fecha, el tipo ni el paciente: use Reagendar.",
       "slotFullWarn": "Esa hora ya no tiene cupo; se agenda igual (no bloquea).",
       "rescheduledFrom": "El paciente ya tenía una cita el {date}: se movió a esta fecha (una cita viva por paciente).",
       "rescheduledFromUnknown": "El paciente ya tenía una cita viva: se movió a esta fecha."

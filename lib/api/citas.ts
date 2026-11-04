@@ -1,3 +1,4 @@
+import type { CitaEditPayload } from "@/lib/agenda/cita-edit-payload";
 import type { components } from "./schema";
 import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
 import type { Paginated } from "./types";
@@ -198,10 +199,12 @@ export async function crearCitaAgenda(
   return { cita: env.data, advertencias: env.meta?.advertencias ?? [] };
 }
 
-// Update returning cita + warnings (same envelope contract as create).
+// Update returning cita + warnings (same envelope contract as create). The body is NOT the create
+// payload: UpdateCitaDto (whitelist + forbidNonWhitelisted) accepts only these keys, so build it with
+// citaEditPayload (lib/agenda/cita-edit-payload.ts).
 export async function actualizarCitaAgenda(
   id: string,
-  payload: Partial<CreateCitaPayload>,
+  payload: CitaEditPayload & { vitalsNurseId?: string; frontDeskStaffId?: string },
   centroId?: string,
 ): Promise<{ cita: Cita; advertencias: NonNullable<import("./types").ApiMeta["advertencias"]> }> {
   const env = await apiFetchEnvelope<Cita>(`/appointments/${id}`, {

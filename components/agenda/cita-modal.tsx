@@ -30,6 +30,7 @@ import { useMe } from "@/hooks/use-me";
 import { useEstados } from "@/hooks/use-estados";
 import { Badge } from "@/components/ui/badge";
 import { addMinutes, todayISO } from "@/lib/agenda/calendar";
+import { citaEditPayload } from "@/lib/agenda/cita-edit-payload";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
@@ -260,6 +261,27 @@ export function CitaModal({
         }
       }
 
+      // Edit = PUT with only the fields the update accepts (lib/agenda/cita-edit-payload.ts); the
+      // date, type and patient are locked in edit mode (a new date or type is a reschedule).
+      let editPayload = null;
+      if (isEdit) {
+        const edit = citaEditPayload(cita!, {
+          patientId: paciente.id,
+          appointmentTypeId: tipoCitaId,
+          doctorId: medicoId,
+          date: fechaSel,
+          time: hora,
+          endTime: horaFin,
+          reason: motivo,
+          notes: notas,
+        });
+        if (edit.kind === "locked") {
+          toast.error(t("editLockedError"));
+          return;
+        }
+        editPayload = edit.payload;
+      }
+
       const payload = {
         patientId: paciente.id,
         appointmentTypeId: tipoCitaId,
@@ -273,7 +295,7 @@ export function CitaModal({
         notes: notas.trim() || undefined,
       };
       const { cita: saved, advertencias } = isEdit
-        ? await actualizarCitaAgenda(cita!.id, payload, effectiveCentro || undefined)
+        ? await actualizarCitaAgenda(cita!.id, editPayload ?? {}, effectiveCentro || undefined)
         : await crearCitaAgenda({ ...payload, status: estadoCrear, bookedByStaffId: callcenterId }, effectiveCentro || undefined);
       if (effectiveCentro) setActiveCentro(effectiveCentro);
       toast.success(isEdit ? t("updated") : t("created"));
@@ -334,11 +356,13 @@ export function CitaModal({
             </Field>
           )}
 
+          {isEdit && <p className="text-xs text-muted-foreground">{t("editLocked")}</p>}
+
           {/* Fecha y Hora LADO A LADO (aprovecha el ancho; deja aire para Notas abajo). La hora es por CUPOS
               del tipo ese día, horas enteras, fin automática, no bloqueante. Handoff citas-hora-por-cupo. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("date")} required>
-              <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} />
+              <DatePicker value={fechaSel} onChange={(v) => v && setFechaSel(v)} disabled={isEdit} />
             </Field>
             <Field label={t("time")} required>
               {/* Times always as the grid (owner, 4-nov-2026: no list/grid switch). The end time sits under
@@ -357,6 +381,12 @@ export function CitaModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("patient")} required>
+              {isEdit ? (
+                // Locked in edit mode: the update cannot move an appointment to another patient.
+                <div className="flex h-9 items-center truncate rounded-md border border-input bg-muted/40 px-3 text-sm font-medium">
+                  {paciente ? paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ") : "—"}
+                </div>
+              ) : (
               <PacienteSelect
                 value={paciente}
                 onChange={(p) => {
@@ -365,6 +395,7 @@ export function CitaModal({
                   if (!medicoId && medicoDelPaciente(p)) setMedicoId(medicoDelPaciente(p));
                 }}
               />
+              )}
             </Field>
             {/* El selector NUNCA sale vacío: si no hay médico, queda en "Sin médico" (no bloquea el
                 guardado salvo que el TIPO exija médico). Handoff citas-medico-y-confirmada. */}
@@ -387,7 +418,7 @@ export function CitaModal({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("type")} required>
-              <Select value={tipoCitaId || undefined} onValueChange={onTipoChange}>
+              <Select value={tipoCitaId || undefined} onValueChange={onTipoChange} disabled={isEdit}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("typePlaceholder")} />
                 </SelectTrigger>

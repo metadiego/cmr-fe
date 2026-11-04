@@ -671,6 +671,8 @@
       "endAuto": "Ends {time} (auto)",
       "variantList": "List",
       "variantGrid": "Grid",
+      "editLocked": "To change the date, type or patient, use Reschedule in the actions menu (⋯).",
+      "editLockedError": "An edit cannot change the date, type or patient: use Reschedule.",
       "slotFullWarn": "That time is full; it books anyway (non-blocking).",
       "rescheduledFrom": "The patient already had an appointment on {date}: it was moved to this date (one live appointment per patient).",
       "rescheduledFromUnknown": "The patient already had a live appointment: it was moved to this date."
