@@ -43,3 +43,16 @@ export function bookableDays(
 ): string[] {
   return weeks.flat().filter((d) => dayKind(d, month0, todayIso, holidays) === "bookable");
 }
+
+export type MonthRef = { year: number; month0: number };
+
+/** The month a YYYY-MM-DD day falls in. */
+export function monthOf(iso: string): MonthRef {
+  return { year: Number(iso.slice(0, 4)), month0: Number(iso.slice(5, 7)) - 1 };
+}
+
+/** `m` moved by `delta` months (negative goes back), across year boundaries. */
+export function shiftMonth(m: MonthRef, delta: number): MonthRef {
+  const i = m.year * 12 + m.month0 + delta;
+  return { year: Math.floor(i / 12), month0: ((i % 12) + 12) % 12 };
+}

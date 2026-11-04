@@ -34,6 +34,7 @@ import { usePatientAppointments } from "@/hooks/use-patient-appointments";
 import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import { normalizeTime, type TimeWindow } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
+import { monthOf } from "@/lib/agenda/booking/month";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
 import { reagendarCita, type Cita } from "@/lib/api/citas";
 import { reagendarSesion } from "@/lib/api/frontdesk";
@@ -68,13 +69,15 @@ export interface BookingScreenState {
   movingId: string | null; // the appointment being moved (patient rail → day panel)
 }
 
-function monthOf(iso: string): { year: number; month0: number } {
-  return { year: Number(iso.slice(0, 4)), month0: Number(iso.slice(5, 7)) - 1 };
+/** A day from the URL counts only from today on: a stale link to a past day opens on no day. */
+function bookableDate(date: string | undefined): string | undefined {
+  return date && date >= todayPR() ? date : undefined;
 }
 
 function initialState(sp: URLSearchParams): BookingScreenState {
   const url = parseBookingParams(sp);
-  return { ...url, window: "any", view: "free", month: monthOf(url.date ?? todayPR()), movingId: null };
+  const date = bookableDate(url.date);
+  return { ...url, date, window: "any", view: "free", month: monthOf(date ?? todayPR()), movingId: null };
 }
 
 export function BookingScreen() {
@@ -127,13 +130,14 @@ export function BookingScreen() {
       setPending([]);
       if (urlSearch !== search) {
         const url = parseBookingParams(new URLSearchParams(urlSearch));
+        const date = bookableDate(url.date);
         setState({
           ...state,
           kind: url.kind,
           typeId: url.typeId,
-          date: url.date,
+          date,
           patientId: url.patientId,
-          month: url.date ? monthOf(url.date) : state.month,
+          month: date ? monthOf(date) : state.month,
           movingId: null,
         });
       }
@@ -176,8 +180,11 @@ export function BookingScreen() {
   const types = useBookingTypes(center);
   const chosenType = types.find(state.kind, state.typeId);
   // A type from the URL that does not exist here (another center's service, or deactivated) counts as
-  // none chosen once the lists are in, so the picker shows instead of an empty calendar.
-  const typeChosen = !!state.kind && !!state.typeId && (types.loading || !!chosenType);
+  // none chosen once the lists are in, so the picker shows instead of an empty calendar. Not while
+  // moving: the moved appointment's type may be missing from the lists (e.g. an inactive medical
+  // type), and the calendar stays up, named as the rail names it.
+  const typeChosen =
+    !!state.kind && !!state.typeId && (types.loading || !!chosenType || !!state.movingId);
   const pickType = (kind: BookingKind, typeId: string) =>
     update({ kind, typeId, view: kind === "medical" ? state.view : "free", movingId: null });
   const clearType = () => update({ kind: undefined, typeId: undefined, date: undefined, movingId: null });
@@ -242,8 +249,12 @@ export function BookingScreen() {
   };
   const stopMove = () => update({ movingId: null });
   const onEscape = React.useEffectEvent((e: KeyboardEvent) => {
-    // An open dialog (e.g. CitaModal) handles its own Esc first.
-    if (e.key === "Escape" && !e.defaultPrevented) stopMove();
+    // An open dialog (e.g. CitaModal) handles its own Esc first; Esc while typing (the move's reason,
+    // the patient search) belongs to that field and never ends the move.
+    if (e.key !== "Escape" || e.defaultPrevented) return;
+    const el = e.target instanceof HTMLElement ? e.target : null;
+    if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
+    stopMove();
   });
   const isMoving = !!state.movingId;
   React.useEffect(() => {
@@ -358,7 +369,8 @@ export function BookingScreen() {
         style={height ? { height } : undefined}
         className={cn(
           "grid min-h-0 grid-cols-1 gap-4 lg:grid-rows-[minmax(0,1fr)]",
-          start ? "lg:grid-cols-2" : "lg:grid-cols-[22rem_minmax(0,1fr)]",
+          // The left column narrows below xl so the calendar keeps room on laptops with the sidebar open.
+          start ? "lg:grid-cols-2" : "lg:grid-cols-[16rem_minmax(0,1fr)] xl:grid-cols-[22rem_minmax(0,1fr)]",
         )}
       >
         {/* LEFT: who is calling, or the chosen patient with their upcoming/past appointments. */}
@@ -406,7 +418,12 @@ export function BookingScreen() {
             centerNote={calCenterName ? t("move.showingCenter", { center: calCenterName }) : undefined}
             kind={state.kind ?? "medical"}
             typeId={state.typeId ?? ""}
-            typeName={chosenType?.name ?? t("loading")}
+            typeName={
+              chosenType?.name ??
+              (movingItem && !types.loading
+                ? t(movingItem.kind === "medical" ? "patient.kindMedical" : "patient.kindService")
+                : t("loading"))
+            }
             color={chosenType?.color ?? null}
             label={firstName ? t("toolbar.bookingFor", { name: firstName }) : t("toolbar.booking")}
             onClearType={clearType}

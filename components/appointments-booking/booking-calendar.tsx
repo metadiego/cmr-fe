@@ -8,9 +8,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { BookingToolbar, type BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { AvailabilityMonth } from "@/components/appointments-booking/availability-month";
 import { DayPanel } from "@/components/appointments-booking/day-panel";
+import { useCan } from "@/hooks/use-can";
 import { useResource } from "@/hooks/use-resource";
 import type { BookingCalendarData } from "@/hooks/use-booking-calendar";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
+import { monthOf, shiftMonth, type MonthRef } from "@/lib/agenda/booking/month";
 import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import type { TipoCita } from "@/lib/api/citas";
 import type { Paciente } from "@/lib/api/pacientes";
@@ -22,7 +24,7 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 // service time renders the `serviceForm` slot under the day's grid. While moving an appointment the day
 // panel asks "Move here?" instead. Data comes from the screen's useBookingCalendar.
 
-type Month = { year: number; month0: number };
+type Month = MonthRef;
 
 /**
  * An appointment from the patient rail being moved. The day panel's "Move here?" box confirms with the
@@ -40,15 +42,6 @@ export interface BookingCalendarPatch {
   month?: Month;
   window?: TimeWindow;
   view?: BookingView;
-}
-
-function shiftMonth(m: Month, delta: number): Month {
-  const i = m.year * 12 + m.month0 + delta;
-  return { year: Math.floor(i / 12), month0: i % 12 };
-}
-
-function monthOf(iso: string): Month {
-  return { year: Number(iso.slice(0, 4)), month0: Number(iso.slice(5, 7)) - 1 };
 }
 
 export function BookingCalendar({
@@ -102,6 +95,10 @@ export function BookingCalendar({
 }) {
   const t = useTranslations("appointmentsBooking");
   const medical = kind === "medical";
+  // Booking a medical time opens CitaModal, which creates: only with `citas.create`. Without it the
+  // time can still be picked (to read it), and the day panel says why nothing opens.
+  const { can, ready: permsReady } = useCan();
+  const canCreateMedical = can("citas.create");
 
   // The picked time belongs to one (type, day, moving or not): changing any drops it without an effect,
   // so starting or stopping a move never leaves a stale pick (and its form or Move box) behind.
@@ -119,7 +116,7 @@ export function BookingCalendar({
 
   const pickTime = (day: string, time: string) => {
     setPick({ key: keyOf(day), time });
-    if (medical && !moving) setModal({ date: day, time });
+    if (medical && !moving && canCreateMedical) setModal({ date: day, time });
   };
 
   const selectDay = (day: string) => {
@@ -139,7 +136,7 @@ export function BookingCalendar({
 
   return (
     <section
-      className="flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10"
+      className="@container flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10"
       data-slot="booking-calendar"
     >
       <BookingToolbar
@@ -164,7 +161,11 @@ export function BookingCalendar({
           description={t("month.notConfiguredHint")}
         />
       ) : (
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_19rem] lg:grid-rows-[minmax(0,1fr)]">
+        // Month and day side by side only when this card is wide enough for both (a container query,
+        // so the app sidebar being open or folded counts): month >= ~560px + gap + the 19rem day panel.
+        // Narrower (laptops with the sidebar open), the day panel sits under the month and both share
+        // the height; the day panel scrolls inside itself, the page never does.
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:@max-[880px]:grid-rows-[minmax(0,3fr)_minmax(0,2fr)] @min-[880px]:grid-cols-[minmax(0,1fr)_19rem] @min-[880px]:grid-rows-[minmax(0,1fr)]">
           <AvailabilityMonth
             weeks={data.weeks}
             month0={month.month0}
@@ -184,7 +185,6 @@ export function BookingCalendar({
           />
           <DayPanel
             date={date}
-            kind={kind}
             typeName={typeName}
             day={data.day}
             window={window}
@@ -204,9 +204,11 @@ export function BookingCalendar({
             }
             fullDayHref={fullDayHref}
           >
-            {date && picked && serviceForm
-              ? serviceForm({ date, time: picked, clear: () => setPick(null) })
-              : null}
+            {date && picked && serviceForm ? (
+              serviceForm({ date, time: picked, clear: () => setPick(null) })
+            ) : medical && picked && !moving && permsReady && !canCreateMedical ? (
+              <p className="text-sm text-muted-foreground">{t("day.noPermissionMedical")}</p>
+            ) : null}
           </DayPanel>
         </div>
       )}

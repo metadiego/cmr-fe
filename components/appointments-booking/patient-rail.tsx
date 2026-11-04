@@ -234,11 +234,16 @@ function CancelBox({
   const [busy, setBusy] = React.useState(false);
   const fieldId = `cancel-reason-${id}`;
 
+  // A ref, not only the state: two fast clicks land before the re-render that disables the button.
+  const inFlight = React.useRef(false);
   const confirm = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     try {
       await onCancel(reason.trim());
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };

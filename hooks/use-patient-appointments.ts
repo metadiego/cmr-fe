@@ -42,8 +42,9 @@ export function usePatientAppointments(
   patientId: string | undefined,
   center: string | undefined,
 ): PatientAppointments {
-  // Two loads, so switching the screen's center (a move into the appointment's own center does) only
-  // re-asks the center-scoped sessions; the medical list, and with it the moving card, stays put.
+  // Two loads, so switching the screen's center only re-asks the center-scoped sessions; the medical
+  // list stays put. (A move does not switch the screen's center: the calendar reads the appointment's
+  // own center instead, see calendarCenter.)
   const medicalRes = useResource<Cita[]>(
     async () =>
       patientId ? (await listCitas({ patientId, from: inDaysPR(-90), to: inDaysPR(365), limit: 100 })).items : [],

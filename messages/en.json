@@ -4976,7 +4976,8 @@
       "pickDay": "Pick a day to see its times.",
       "noTimes": "No times on this day.",
       "closed": "Closed on this day.",
-      "holiday": "Holiday: closed."
+      "holiday": "Holiday: closed.",
+      "noPermissionMedical": "You do not have permission to book appointments."
     },
     "move": {
       "title": "Move here?",

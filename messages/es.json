@@ -4976,7 +4976,8 @@
       "pickDay": "Elige un día para ver sus horas.",
       "noTimes": "No hay horas este día.",
       "closed": "Cerrado este día.",
-      "holiday": "Feriado: cerrado."
+      "holiday": "Feriado: cerrado.",
+      "noPermissionMedical": "No tienes permiso para agendar citas."
     },
     "move": {
       "title": "¿Mover aquí?",

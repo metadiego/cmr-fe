@@ -11,7 +11,7 @@ import { listSesionesRango } from "@/lib/api/frontdesk";
 import { getFestivos } from "@/lib/api/festivos";
 import { nowTimePR, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
-import { holidayDates } from "@/hooks/use-booking-calendar";
+import { holidayDates } from "@/lib/agenda/booking/holidays";
 
 // Everything a weekly series of one service needs for one patient: each row date's real availability
 // (areas 1, patient-aware, 4 requests at a time), the patient's existing sessions of the service, the

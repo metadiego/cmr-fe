@@ -8,9 +8,10 @@ import {
   type DaySlots,
   type TimeWindow,
 } from "@/lib/agenda/booking/availability"
-import { bookableDays, monthWeeks } from "@/lib/agenda/booking/month"
+import { bookableDays, monthWeeks, shiftMonth } from "@/lib/agenda/booking/month"
+import { holidayDates } from "@/lib/agenda/booking/holidays"
 import type { BookingKind } from "@/lib/agenda/booking/url-state"
-import { getFestivos, type Festivo } from "@/lib/api/festivos"
+import { getFestivos } from "@/lib/api/festivos"
 import { nowTimePR, todayPR } from "@/lib/format/fecha"
 import { useResource } from "@/hooks/use-resource"
 import {
@@ -47,12 +48,6 @@ export interface BookingCalendarData {
   retrySelected: () => void
 }
 
-function addMonth(m: { year: number; month0: number }) {
-  return m.month0 === 11
-    ? { year: m.year + 1, month0: 0 }
-    : { year: m.year, month0: m.month0 + 1 }
-}
-
 function isDaySlots(d: DayResult | undefined): d is DaySlots {
   return !!d && d !== "error"
 }
@@ -70,13 +65,6 @@ function withoutPast(
   return out
 }
 
-/** Blocking, active holidays as YYYY-MM-DD. */
-export function holidayDates(list: Festivo[]): string[] {
-  return list
-    .filter((f) => f.active !== false && f.blocksSchedule !== false)
-    .map((f) => f.date.slice(0, 10))
-}
-
 export function useBookingCalendar(p: {
   center: string | undefined
   kind: BookingKind | undefined
@@ -92,7 +80,7 @@ export function useBookingCalendar(p: {
     () => monthWeeks(month.year, month.month0),
     [month.year, month.month0]
   )
-  const next = addMonth(month)
+  const next = shiftMonth(month, 1)
   const isCurrentMonth =
     `${month.year}-${String(month.month0 + 1).padStart(2, "0")}` ===
     todayIso.slice(0, 7)

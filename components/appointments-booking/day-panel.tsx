@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip } from "@/components/ui/tooltip";
 import { inWindow, type BookingSlot, type TimeWindow } from "@/lib/agenda/booking/availability";
-import type { BookingKind } from "@/lib/agenda/booking/url-state";
 import type { DayResult } from "@/hooks/use-booking-availability";
 import { shortTime } from "@/components/appointments-booking/booking-toolbar";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -21,7 +20,7 @@ import { cn } from "@/lib/utils";
 // The selected day's times: Morning and Afternoon groups in a 4-column grid. Open times are green with
 // "{n} left"; full ones are dashed grey and still clickable (overbook); unavailable ones are dashed,
 // inert, and say why on hover. Below the grid: the "Move here?" box while moving an appointment, or the
-// booking form slot (`children`, the service form) once a time is picked. Scrolls inside itself.
+// picked-time slot (`children`: the service form, or a medical no-permission note). Scrolls inside itself.
 
 export interface DayPanelMoving {
   /** The appointment's current day and time, already formatted ("Thu, Nov 5 · 8:00"). */
@@ -34,7 +33,6 @@ export interface DayPanelMoving {
 
 export function DayPanel({
   date,
-  kind,
   typeName,
   day,
   window,
@@ -46,7 +44,6 @@ export function DayPanel({
   children,
 }: {
   date: string | undefined;
-  kind: BookingKind;
   typeName: string;
   day: DayResult | undefined;
   window: TimeWindow;
@@ -55,7 +52,7 @@ export function DayPanel({
   onRetry: () => void;
   moving?: DayPanelMoving;
   fullDayHref: string | undefined;
-  /** The booking form slot, shown under the grid once a time is picked (not while moving). */
+  /** Shown under the grid once a time is picked, not while moving: the service form, or a medical note. */
   children?: React.ReactNode;
 }) {
   const t = useTranslations("appointmentsBooking.day");
@@ -127,7 +124,7 @@ export function DayPanel({
           toLabel={`${format.dateTime(d, "dayWeekdayShort")} · ${shortTime(picked)}`}
           full={pickedSlot?.state === "full"}
         />
-      ) : picked && kind === "service" ? (
+      ) : picked ? (
         children
       ) : null}
     </aside>
@@ -222,11 +219,16 @@ function MoveBox({
   const [busy, setBusy] = React.useState(false);
   const missingReason = moving.needsReason && reason.trim() === "";
 
+  // A ref, not only the state: two fast clicks land before the re-render that disables the button.
+  const inFlight = React.useRef(false);
   const confirm = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     try {
       await moving.onConfirm(moving.needsReason ? reason.trim() : undefined);
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   };
