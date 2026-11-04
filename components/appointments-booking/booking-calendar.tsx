@@ -7,7 +7,7 @@ import { CitaModal } from "@/components/agenda/cita-modal";
 import { EmptyState } from "@/components/ui/empty-state";
 import { BookingToolbar, type BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { AvailabilityMonth } from "@/components/appointments-booking/availability-month";
-import { DayPanel, type DayPanelMoving } from "@/components/appointments-booking/day-panel";
+import { DayPanel } from "@/components/appointments-booking/day-panel";
 import { useResource } from "@/hooks/use-resource";
 import type { BookingCalendarData } from "@/hooks/use-booking-calendar";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
@@ -23,6 +23,17 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 // panel asks "Move here?" instead. Data comes from the screen's useBookingCalendar.
 
 type Month = { year: number; month0: number };
+
+/**
+ * An appointment from the patient rail being moved. The day panel's "Move here?" box confirms with the
+ * picked day and time; `onConfirm` resolves true when the move went through (the picked time is then
+ * dropped). "Not this one" only un-picks the time: moving goes on until the screen clears it.
+ */
+export interface CalendarMoving {
+  fromLabel: string;
+  needsReason: boolean;
+  onConfirm: (to: { date: string; time: string }, reason?: string) => Promise<boolean>;
+}
 
 export interface BookingCalendarPatch {
   date?: string;
@@ -77,9 +88,9 @@ export function BookingCalendar({
   onChange: (patch: BookingCalendarPatch) => void;
   patient: Paciente | null;
   appointmentTypes: TipoCita[];
-  /** Task 8: set while an appointment from the patient rail is being moved. */
-  moving?: DayPanelMoving;
-  /** Task 8: the moving appointment's current day (orange ring in the month). */
+  /** Set while an appointment from the patient rail is being moved. */
+  moving?: CalendarMoving;
+  /** The moving appointment's current day (orange ring in the month). */
   ringDate?: string;
   /** Task 9: the service booking form for the picked time; `clear` un-picks it (e.g. after booking). */
   serviceForm?: (pick: { date: string; time: string; clear: () => void }) => React.ReactNode;
@@ -89,8 +100,10 @@ export function BookingCalendar({
   const t = useTranslations("appointmentsBooking");
   const medical = kind === "medical";
 
-  // The picked time belongs to one (type, day): changing either drops it without an effect.
-  const pickKey = `${kind}|${typeId}|${date ?? ""}`;
+  // The picked time belongs to one (type, day, moving or not): changing any drops it without an effect,
+  // so starting or stopping a move never leaves a stale pick (and its form or Move box) behind.
+  const keyOf = (day: string) => `${kind}|${typeId}|${day}|${moving ? "move" : ""}`;
+  const pickKey = keyOf(date ?? "");
   const [pick, setPick] = React.useState<{ key: string; time: string } | null>(null);
   const picked = pick && pick.key === pickKey ? pick.time : null;
 
@@ -102,7 +115,7 @@ export function BookingCalendar({
   const medicos = medicosRes.state.kind === "ok" ? medicosRes.state.data : [];
 
   const pickTime = (day: string, time: string) => {
-    setPick({ key: `${kind}|${typeId}|${day}`, time });
+    setPick({ key: keyOf(day), time });
     if (medical && !moving) setModal({ date: day, time });
   };
 
@@ -174,7 +187,17 @@ export function BookingCalendar({
             picked={picked}
             onPickTime={(time) => date && pickTime(date, time)}
             onRetry={data.retrySelected}
-            moving={moving}
+            moving={
+              moving && {
+                fromLabel: moving.fromLabel,
+                needsReason: moving.needsReason,
+                onConfirm: async (reason) => {
+                  if (!date || !picked) return;
+                  if (await moving.onConfirm({ date, time: picked }, reason)) setPick(null);
+                },
+                onCancel: () => setPick(null),
+              }
+            }
             fullDayHref={fullDayHref}
           >
             {date && picked && serviceForm

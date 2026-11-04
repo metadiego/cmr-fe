@@ -4933,7 +4933,9 @@
       "cancelReasonLabel": "Reason for cancelling",
       "cancelReasonPlaceholder": "Why is it being cancelled?",
       "confirmCancel": "Cancel appointment",
-      "keep": "Keep it"
+      "keep": "Keep it",
+      "loadFailedMedical": "Could not load the medical appointments.",
+      "loadFailedService": "Could not load the service sessions."
     },
     "toolbar": {
       "booking": "Booking",

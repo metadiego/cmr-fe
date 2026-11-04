@@ -13,6 +13,8 @@ export interface PatientAppointment {
   status: string;
   withLabel: string | null;
   isLive: boolean;
+  /** The appointment's own center: the tenant (X-Tenant-ID) for its cancel and move. */
+  centerId?: string | null;
 }
 
 export const MEDICAL_LIVE = ["programada", "confirmada", "presente", "triage", "en_consulta"];
@@ -28,6 +30,7 @@ export function fromCita(c: Cita): PatientAppointment {
     status: c.status,
     withLabel: c.doctorName ?? null,
     isLive: MEDICAL_LIVE.includes(c.status),
+    centerId: c.clinicId ?? null,
   };
 }
 
@@ -43,6 +46,7 @@ export function fromSesion(s: Sesion): PatientAppointment {
     status: s.status,
     withLabel: null,
     isLive: SERVICE_LIVE.includes(s.status),
+    centerId: s.clinicId ?? null,
   };
 }
 

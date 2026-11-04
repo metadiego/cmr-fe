@@ -4933,7 +4933,9 @@
       "cancelReasonLabel": "Motivo de la cancelación",
       "cancelReasonPlaceholder": "¿Por qué se cancela?",
       "confirmCancel": "Cancelar cita",
-      "keep": "Mantenerla"
+      "keep": "Mantenerla",
+      "loadFailedMedical": "No se pudieron cargar las citas médicas.",
+      "loadFailedService": "No se pudieron cargar las sesiones de servicio."
     },
     "toolbar": {
       "booking": "Agendando",

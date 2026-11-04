@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings02Icon } from "@hugeicons/core-free-icons";
 
@@ -15,16 +16,26 @@ import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { WhosCallingPanel } from "@/components/appointments-booking/whos-calling-panel";
 import { TypePickerPanel } from "@/components/appointments-booking/type-picker-panel";
 import { PatientCard } from "@/components/appointments-booking/patient-card";
-import { BookingCalendar } from "@/components/appointments-booking/booking-calendar";
+import { BookingCalendar, type CalendarMoving } from "@/components/appointments-booking/booking-calendar";
+import {
+  EditAppointmentModal,
+  PatientRail,
+  useAppointmentLabel,
+} from "@/components/appointments-booking/patient-rail";
 import type { BookingView } from "@/components/appointments-booking/booking-toolbar";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { useResource } from "@/hooks/use-resource";
 import { useBookingTypes } from "@/hooks/use-booking-types";
 import { useBookingCalendar } from "@/hooks/use-booking-calendar";
+import { usePatientAppointments } from "@/hooks/use-patient-appointments";
+import type { PatientAppointment } from "@/lib/agenda/booking/patient-appointments";
 import type { TimeWindow } from "@/lib/agenda/booking/availability";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
+import { reagendarCita, type Cita } from "@/lib/api/citas";
+import { reagendarSesion } from "@/lib/api/frontdesk";
+import { apiErrorMessage } from "@/lib/api/errors";
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
@@ -191,11 +202,72 @@ export function BookingScreen() {
   });
   const live = calendar.live;
   const refreshCalendarDates = calendar.refreshDates;
-  // After a booking (and, Task 8, a move or cancel): refresh those dates; Task 8 also reloads the
-  // patient rail's upcoming/past list from here.
+
+  // ---- Patient rail: the patient's upcoming/past appointments of both kinds.
+  const rail = usePatientAppointments(state.patientId, center);
+  const reloadRail = rail.reload;
+  // After a booking, move, edit or cancel: refresh those dates (month + day) and the patient's list.
   const onAppointmentsChanged = (dates: string[]) => {
-    refreshCalendarDates(dates);
+    refreshCalendarDates([...new Set(dates.filter(Boolean))]);
+    reloadRail();
   };
+
+  // ---- Move: the rail's Move points the calendar at the appointment (its type, day and month, orange
+  // ring on its day); the day panel's "Move here?" box commits. Stop, Esc or a reload that no longer
+  // lists it ends the move.
+  const appointmentLabel = useAppointmentLabel();
+  const movingItem = state.movingId ? rail.upcoming.find((a) => a.id === state.movingId) : undefined;
+  const startMove = (a: PatientAppointment) =>
+    update({
+      movingId: a.id,
+      kind: a.kind,
+      typeId: a.typeId,
+      date: a.date,
+      month: monthOf(a.date),
+      view: a.kind === "medical" ? state.view : "free",
+    });
+  const stopMove = () => update({ movingId: null });
+  const onEscape = React.useEffectEvent((e: KeyboardEvent) => {
+    // An open dialog (e.g. CitaModal) handles its own Esc first.
+    if (e.key === "Escape" && !e.defaultPrevented) stopMove();
+  });
+  const isMoving = !!state.movingId;
+  React.useEffect(() => {
+    if (!isMoving) return;
+    const onKey = (e: KeyboardEvent) => onEscape(e);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMoving]);
+
+  const moving: CalendarMoving | undefined = movingItem && {
+    fromLabel: appointmentLabel(movingItem.date, movingItem.time),
+    needsReason: movingItem.kind === "medical",
+    onConfirm: async (to, reason) => {
+      const a = movingItem;
+      // The call runs in the appointment's own center (X-Tenant-ID); a medical move lands in the screen's
+      // center (`centerId`, the destination). A service session has no destination center: same one.
+      const tenant = a.centerId ?? center;
+      try {
+        if (a.kind === "medical") {
+          await reagendarCita(a.id, { date: to.date, time: to.time, reason: reason ?? "", centerId: center }, tenant);
+        } else {
+          await reagendarSesion(a.id, to.date, tenant, to.time);
+        }
+      } catch (err) {
+        toast.error(t("toasts.moveFailed", { message: apiErrorMessage(err) }));
+        return false;
+      }
+      toast.success(
+        t("toasts.moved", { from: appointmentLabel(a.date, a.time), to: appointmentLabel(to.date, to.time) }),
+      );
+      update({ movingId: null });
+      onAppointmentsChanged([a.date, to.date]);
+      return true;
+    },
+  };
+
+  // ---- Edit (medical only): the shared CitaModal in edit mode, on the rail's raw appointment.
+  const [editing, setEditing] = React.useState<Cita | null>(null);
 
   // ---- Layout: the work area ends at the window's bottom; its two columns scroll inside themselves.
   const workRef = React.useRef<HTMLDivElement>(null);
@@ -231,7 +303,7 @@ export function BookingScreen() {
           start ? "lg:grid-cols-2" : "lg:grid-cols-[22rem_minmax(0,1fr)]",
         )}
       >
-        {/* LEFT: who is calling, or the chosen patient (rail slot: Task 8 adds upcoming/past below the card). */}
+        {/* LEFT: who is calling, or the chosen patient with their upcoming/past appointments. */}
         {state.patientId ? (
           <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto" data-slot="booking-patient-rail">
             <PatientCard
@@ -240,6 +312,19 @@ export function BookingScreen() {
               failed={patientRes.state.kind === "fail"}
               centers={patientCenters ?? []}
               onClose={clearPatient}
+            />
+            <PatientRail
+              center={center}
+              data={rail}
+              typeLookup={(kind, id) => types.find(kind, id)}
+              movingId={movingItem ? movingItem.id : null}
+              onMove={startMove}
+              onStopMove={stopMove}
+              onEdit={(a) => setEditing(rail.citaOf(a.id) ?? null)}
+              onCancelled={(a) => {
+                if (state.movingId === a.id) stopMove();
+                onAppointmentsChanged([a.date]);
+              }}
             />
           </aside>
         ) : (
@@ -276,10 +361,27 @@ export function BookingScreen() {
             onChange={update}
             patient={patient}
             appointmentTypes={types.appointmentTypes}
+            moving={moving}
+            ringDate={movingItem?.date}
             onAppointmentsChanged={onAppointmentsChanged}
           />
         )}
       </div>
+
+      {editing && (
+        <EditAppointmentModal
+          key={editing.id}
+          cita={editing}
+          center={center}
+          appointmentTypes={types.appointmentTypes}
+          onClose={() => setEditing(null)}
+          onSaved={(saved) => {
+            const old = editing.date;
+            setEditing(null);
+            onAppointmentsChanged([old, saved?.date ? String(saved.date).slice(0, 10) : ""]);
+          }}
+        />
+      )}
     </PageContainer>
   );
 }

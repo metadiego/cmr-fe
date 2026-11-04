@@ -123,3 +123,10 @@ test("a live item today is upcoming; a live item in the past goes to past", () =
   assert.deepEqual(upcoming.map((i) => i.id), ["today"]);
   assert.deepEqual(past.map((i) => i.id), ["old"]);
 });
+
+test("both kinds carry the appointment's center (the tenant for its cancel and move)", () => {
+  assert.equal(fromCita(cita({ clinicId: "cag" })).centerId, "cag");
+  assert.equal(fromCita(cita({})).centerId, null);
+  assert.equal(fromSesion(sesion({ clinicId: "bay" })).centerId, "bay");
+  assert.equal(fromSesion(sesion({})).centerId, null);
+});
