@@ -4733,7 +4733,7 @@
     "record": "Record",
     "firstAt": "primera cita {time}",
     "markPendingPresent": "Marcar presente (pendientes: {n})",
-    "markPresent": "Presente",
+    "markPresent": "Marcar presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "vitalsBy": "Vitales: {name}",

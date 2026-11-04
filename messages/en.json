@@ -4733,7 +4733,7 @@
     "record": "Record",
     "firstAt": "first booking {time}",
     "markPendingPresent": "Mark present (pending: {n})",
-    "markPresent": "Present",
+    "markPresent": "Mark present",
     "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "vitalsBy": "Vitals: {name}",

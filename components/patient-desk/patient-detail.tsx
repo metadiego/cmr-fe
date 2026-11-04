@@ -407,8 +407,7 @@ export function PatientDetail({
                   <Button
                     type="button"
                     size="sm"
-                    variant="secondary"
-                    className="h-6 px-2 text-xs"
+                    className="h-6 bg-amber-400 px-2 text-xs text-black hover:bg-amber-300"
                     disabled={presenceBusy}
                     onClick={handlePresent}
                   >
@@ -417,8 +416,15 @@ export function PatientDetail({
                 )}
               </div>
             ) : (
-              <Button size="sm" disabled={presenceBusy} onClick={handlePresent}>
-                <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+              // NOT present yet: an action, so it must not look like the green «Presente 10:47» state
+              // (owner, 04-nov-2026: "no sé si dice marcar como presente o es que ya está presente").
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-dashed border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                disabled={presenceBusy}
+                onClick={handlePresent}
+              >
                 {t("markPresent")}
               </Button>
             ))}
