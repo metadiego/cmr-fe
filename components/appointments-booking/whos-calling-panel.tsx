@@ -12,24 +12,22 @@ import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 import { useResource } from "@/hooks/use-resource";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import type { Centro } from "@/lib/api/centers";
+import { patientName } from "@/lib/pacientes/display-name";
 
-// "Who's calling?": find the caller among the patients of every center the user may read (no tenant,
-// same as PacienteSelect), or create them. Each result shows what the receptionist checks on the phone:
+// "Who's calling?": find the caller among the patients of every center where the user may read
+// patients (`centerIds` = the `pacientes.read` centers; the BE checks the permission in each), or create
+// them. Without `centerIds` the BE would search only the session's center (X-Tenant-ID). Each result shows what the receptionist checks on the phone:
 // name, record, phone and center. Picking one (or saving a new one) hands the patient to the screen.
 
 const DEBOUNCE_MS = 250;
 const LIMIT = 8;
 
-export function patientName(p: Paciente): string {
-  return p.displayName || [p.firstName, p.lastName].filter(Boolean).join(" ");
-}
-
 export function WhosCallingPanel({
   centers,
   onPick,
 }: {
-  /** The centers the screen can show, to name each patient's center. */
-  centers: Centro[];
+  /** The centers where the user may read patients (null while loading): searched, and named per row. */
+  centers: Centro[] | null;
   onPick: (p: Paciente) => void;
 }) {
   const t = useTranslations("appointmentsBooking.whosCalling");
@@ -44,13 +42,13 @@ export function WhosCallingPanel({
 
   const { state } = useResource(
     () =>
-      debounced
-        ? listPacientes({ q: debounced, limit: LIMIT })
+      debounced && centers
+        ? listPacientes({ q: debounced, limit: LIMIT, ...(centers.length ? { centerIds: centers.map((c) => c.id) } : {}) })
         : Promise.resolve({ items: [] as Paciente[], pagination: { total: 0, page: 1, limit: LIMIT } }),
-    [debounced],
+    [debounced, centers],
   );
 
-  const centerName = (id: string | null) => (id ? centers.find((c) => c.id === id)?.name : undefined);
+  const centerName = (id: string | null) => (id ? centers?.find((c) => c.id === id)?.name : undefined);
 
   return (
     <section className="flex min-h-0 flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
@@ -83,7 +81,7 @@ export function WhosCallingPanel({
       <div className="min-h-0 flex-1 overflow-y-auto">
         {!debounced ? (
           <p className="px-1 py-2 text-sm text-muted-foreground">{t("hint")}</p>
-        ) : state.kind === "loading" ? (
+        ) : state.kind === "loading" || !centers ? (
           <p className="px-1 py-2 text-sm text-muted-foreground">{t("searching")}</p>
         ) : state.kind === "fail" ? (
           <p className="px-1 py-2 text-sm text-destructive">{t("searchFailed", { message: state.message })}</p>

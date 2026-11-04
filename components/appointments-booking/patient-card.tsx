@@ -6,7 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 
 import { Button } from "@/components/ui/button";
-import { patientName } from "@/components/appointments-booking/whos-calling-panel";
+import { patientName } from "@/lib/pacientes/display-name";
 import type { Paciente } from "@/lib/api/pacientes";
 import type { Centro } from "@/lib/api/centers";
 

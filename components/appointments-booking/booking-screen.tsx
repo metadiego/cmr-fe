@@ -24,6 +24,7 @@ import type { TimeWindow } from "@/lib/agenda/booking/availability";
 import { monthWeeks } from "@/lib/agenda/booking/month";
 import { parseBookingParams, toBookingSearch, type BookingKind } from "@/lib/agenda/booking/url-state";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
+import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 
@@ -74,28 +75,64 @@ export function BookingScreen() {
   const [state, setState] = React.useState<BookingScreenState>(() =>
     initialState(new URLSearchParams(searchParams.toString())),
   );
-  const update = React.useCallback(
-    (patch: Partial<BookingScreenState>) => setState((s) => ({ ...s, ...patch })),
-    [],
-  );
-
-  // URL ← state (replace: picking a patient or a type is not a history step).
   const search = toBookingSearch(state);
-  React.useEffect(() => {
-    const current = toBookingSearch(parseBookingParams(new URLSearchParams(window.location.search)));
-    if (current !== search) router.replace(`${pathname}${search}`, { scroll: false });
-  }, [search, pathname, router]);
+  const urlSearch = toBookingSearch(parseBookingParams(new URLSearchParams(searchParams.toString())));
+
+  // State → URL, written by the change itself (not by an effect), so the screen knows which URLs it
+  // wrote: `pending` holds them until the router reports them back. Replace, not push: picking a
+  // patient or a type is not a history step. One `update` per event (it merges into this render's state).
+  const [pending, setPending] = React.useState<string[]>([]);
+  const update = (patch: Partial<BookingScreenState>) => {
+    const next = { ...state, ...patch };
+    setState(next);
+    const nextSearch = toBookingSearch(next);
+    if (nextSearch !== search) {
+      setPending((p) => [...p, nextSearch]);
+      router.replace(`${pathname}${nextSearch}`, { scroll: false });
+    }
+  };
+
+  // URL → state: a navigation this screen did not make (the sidebar's "Citas" link to the bare route, a
+  // link carrying ?patient= or ?type=) re-derives the URL-held fields. Our own writes coming back are
+  // dropped from `pending` instead. Adjusted during render (React's "derive from a changed prop" pattern).
+  const [seenUrl, setSeenUrl] = React.useState(urlSearch);
+  if (urlSearch !== seenUrl) {
+    setSeenUrl(urlSearch);
+    const echo = pending.indexOf(urlSearch);
+    if (echo >= 0) {
+      setPending(pending.slice(echo + 1));
+    } else {
+      setPending([]);
+      if (urlSearch !== search) {
+        const url = parseBookingParams(new URLSearchParams(urlSearch));
+        setState({
+          ...state,
+          kind: url.kind,
+          typeId: url.typeId,
+          date: url.date,
+          patientId: url.patientId,
+          month: url.date ? monthOf(url.date) : state.month,
+          movingId: null,
+        });
+      }
+    }
+  }
 
   // ---- Patient: the object picked in the search, or loaded from ?patient=<id> on reload.
   const [picked, setPicked] = React.useState<Paciente | null>(null);
-  const centerIds = centro.centros.map((c) => c.id).join(",");
+  // Patients are read in every center where the user holds `pacientes.read` (not only the screen's
+  // `citas.read` centers): the search and the ?patient load pass them as `centerIds`.
+  const patientCentersRes = useResource<Centro[]>(() => getCentrosDondePuedo("pacientes.read"));
+  const patientCenters =
+    patientCentersRes.state.kind === "ok" ? patientCentersRes.state.data : patientCentersRes.state.kind === "fail" ? [] : null;
+  const centerIds = (patientCenters ?? []).map((c) => c.id).join(",");
   const needsLoad = !!state.patientId && picked?.id !== state.patientId;
   const patientRes = useResource<Paciente | null>(
     () =>
-      needsLoad && !centro.cargando && state.patientId
+      needsLoad && patientCenters && state.patientId
         ? getPaciente(state.patientId, undefined, centerIds ? { centerIds: centerIds.split(",") } : {})
         : Promise.resolve(null),
-    [state.patientId, needsLoad, centro.cargando, centerIds],
+    [state.patientId, needsLoad, !!patientCenters, centerIds],
   );
   const patient =
     picked && picked.id === state.patientId
@@ -184,12 +221,12 @@ export function BookingScreen() {
               patientId={state.patientId}
               patient={patient}
               failed={patientRes.state.kind === "fail"}
-              centers={centro.centros}
+              centers={patientCenters ?? []}
               onClose={clearPatient}
             />
           </aside>
         ) : (
-          <WhosCallingPanel centers={centro.centros} onPick={pickPatient} />
+          <WhosCallingPanel centers={patientCenters} onPick={pickPatient} />
         )}
 
         {/* RIGHT: what we are booking, or the calendar for the chosen type. */}
