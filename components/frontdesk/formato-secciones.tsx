@@ -85,11 +85,15 @@ export function SeccionInner({
         return (
           <>
             <Titulo>{titulo}</Titulo>
-            <div>
-              {Array.from({ length: n }).map((_, i) => (
-                <div key={i} style={{ borderBottom: BORDER, height: 24 }} />
-              ))}
-            </div>
+            {/* Ruled lines that GROW: at least `n`, and the sheet's leftover height becomes more lines to
+                write on — never a blank gap above the table (APEX, 04-nov-2026). */}
+            <div
+              style={{
+                flex: "1 1 auto",
+                minHeight: n * 24,
+                backgroundImage: "repeating-linear-gradient(to bottom, transparent 0 23px, #000 23px 24px)",
+              }}
+            />
           </>
         );
       }

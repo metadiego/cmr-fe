@@ -28,7 +28,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   const campos = d.fields ?? [];
   const secciones = d.sections ?? [];
   // ¿Hay una caja de OBSERVACIONES que CREZCA? (la de "lineas" no crece). Si no, va un espaciador flexible.
-  const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre" && s.estilo !== "lineas");
+  const tieneTextoLibre = secciones.some((s) => s.tipo === "texto_libre");
   // El discriminador es `layout` (no la presencia de columnas): "campos" = encabezado etiqueta/valor;
   // cualquier otro (o ausente con columnas) = rejilla. Contrato del handoff-formato-campos-secciones-pie.
   const esCampos = (d.layout ?? (cols.length ? "tabla" : "campos")) === "campos";
@@ -204,9 +204,9 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
 
           {/* Secciones (observaciones / firmas / párrafo / tabla de firmas / checklist / tabla temática /
               leyenda), en cualquier layout. El render de cada tipo vive en formato-secciones.tsx (data-driven,
-              idéntico al legacy). Solo OBSERVACIONES (texto_libre caja) crece para llenar la hoja. */}
+              idéntico al legacy). Solo OBSERVACIONES (texto_libre, caja o renglones) crece para llenar la hoja. */}
           {seccionesVisibles.map((s, i) => {
-            const crece = s.tipo === "texto_libre" && s.estilo !== "lineas";
+            const crece = s.tipo === "texto_libre";
             return (
               <div
                 key={s.clave ?? `sec-${i}`}
