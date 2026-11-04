@@ -26,10 +26,16 @@ export async function getHorariosMedico(
 // GET /holidays?anio= — holidays for the year (recurring ones resolved to it).
 // `anio` NO está en el mapa api-ingles (campos.ts) → el DTO del BE espera `anio`: se manda tal cual.
 // `centers`: the clinics a month calendar shows (`null` = every one with citas.read); omitted = the
-// active one, as before. Each row says its clinic.
+// active one, as before. Each row says its clinic. The company-wide holidays (no clinic) come too: the
+// clinic list never includes them (`scope=global` is a separate read), so the calendars never showed
+// them. A failed company-wide read only loses those.
 export async function getFestivos(anio: number, centers?: CenterChoice): Promise<Festivo[]> {
   const path = await oneCenterPath(`/holidays?anio=${anio}`, centers);
-  return asArray<Festivo>(await apiFetch(path, {}, tenantOf(centers)));
+  const [clinics, global] = await Promise.all([
+    apiFetch(path, {}, tenantOf(centers)),
+    apiFetch(`/holidays?anio=${anio}&scope=global`, {}, null).catch(() => []),
+  ]);
+  return [...asArray<Festivo>(clinics), ...asArray<Festivo>(global)];
 }
 
 // ── Schedules WRITE (RBAC citas.config). Campos ya en inglés en el schema (dayOfWeek/startTime/endTime).
