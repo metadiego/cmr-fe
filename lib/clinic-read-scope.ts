@@ -14,11 +14,6 @@ export function readCenterIds(
   return centroId ? [centroId] : undefined;
 }
 
-/** True when the rows come from more than one clinic: then each row shows its clinic. */
-export function spansClinics(rows: readonly { clinicId?: string | null }[]): boolean {
-  return new Set(rows.map((r) => r.clinicId).filter(Boolean)).size > 1;
-}
-
 /**
  * The center a one-center read is about, as `centerIds`: the picked one (`tenant`), else the one the
  * X-Tenant-ID header carries (the active center, else the session's). `tenant === null` is a combined

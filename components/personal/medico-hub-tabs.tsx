@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { citasReadableCenterIds, listCitasEveryCenter, listCitasRango, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
-import { spansClinics } from "@/lib/clinic-read-scope";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -48,7 +47,7 @@ function Kpi({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-// The doctor's appointments in every clinic the person can read; a clinic column once they span two.
+// The doctor's appointments in every clinic the person can read, each with its clinic.
 export function MedicoAgenda({ doctorId }: { doctorId: string }) {
   const t = useTranslations("medicoHub");
   const dia = useDia();
@@ -60,14 +59,13 @@ export function MedicoAgenda({ doctorId }: { doctorId: string }) {
   if (citasRes.state.kind === "loading") return <Vacio t={t("loading")} />;
   if (citasRes.state.kind === "fail") return <p className="text-sm text-destructive">{citasRes.state.message}</p>;
   if (citas.length === 0) return <Vacio t={t("noCitas")} />;
-  const conCentro = spansClinics(citas);
   return (
-    <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th>{conCentro && <Th>{t("clinic")}</Th>}<Th>{t("status")}</Th></tr>}>
+    <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("clinic")}</Th><Th>{t("status")}</Th></tr>}>
       {citas.map((c) => (
         <tr key={c.id} className="border-t">
           <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
           <Td>{tipoNombre(c.appointmentTypeId)}</Td>
-          {conCentro && <Td>{c.clinicName ?? "—"}</Td>}
+          <Td>{c.clinicName ?? "—"}</Td>
           <Td><Badge variant="secondary">{c.status}</Badge></Td>
         </tr>
       ))}

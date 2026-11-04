@@ -4,7 +4,6 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
-import { spansClinics } from "@/lib/clinic-read-scope";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
 import { getResumenPaciente, type ResumenPaciente } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
@@ -53,7 +52,7 @@ function Tabla({ head, children }: { head: React.ReactNode; children: React.Reac
   );
 }
 
-// The patient's appointments in every clinic the person can read; a clinic column once they span two.
+// The patient's appointments in every clinic the person can read, each with its clinic.
 export function FichaCitas({ pacienteId }: { pacienteId: string }) {
   const t = useTranslations("patients.hub");
   const dia = useDia();
@@ -73,7 +72,6 @@ export function FichaCitas({ pacienteId }: { pacienteId: string }) {
   if (citasRes.state.kind === "loading") return <Vacio texto={t("loading")} />;
   if (citasRes.state.kind === "fail") return <p className="text-sm text-destructive">{citasRes.state.message}</p>;
   if (citas.length === 0) return <Vacio texto={t("noCitas")} />;
-  const conCentro = spansClinics(citas);
   return (
     <div className="space-y-3">
       {/* El rastro de reagendamientos NO se lista aquí (el BE ya no devuelve las `reprogramada`): va detrás
@@ -81,13 +79,13 @@ export function FichaCitas({ pacienteId }: { pacienteId: string }) {
       <div className="flex justify-end">
         <Button variant="outline" size="sm" onClick={() => setHistOpen(true)}>{t("historialReagendamientos")}</Button>
       </div>
-      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("doctor")}</Th>{conCentro && <Th>{t("clinic")}</Th>}<Th>{t("status")}</Th></tr>}>
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("doctor")}</Th><Th>{t("clinic")}</Th><Th>{t("status")}</Th></tr>}>
         {citasOrdenadas.map((c) => (
           <tr key={c.id} className="border-t">
             <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
             <Td>{tipoNombre(c.appointmentTypeId)}</Td>
             <Td>{medicoNombre(c)}</Td>
-            {conCentro && <Td>{c.clinicName ?? "—"}</Td>}
+            <Td>{c.clinicName ?? "—"}</Td>
             <Td><Estado value={c.status} /></Td>
           </tr>
         ))}
@@ -248,7 +246,7 @@ export function FichaUltimaVisita({ pacienteId }: { pacienteId: string }) {
           <span className="font-medium">{tipoNombre(ultima.appointmentTypeId)}</span>
           <span className="text-sm text-muted-foreground">{dia(ultima.date)}{ultima.time ? ` · ${ultima.time}` : ""}</span>
           <Estado value={ultima.status} />
-          {spansClinics(citas) && ultima.clinicName && <span className="text-sm text-muted-foreground">{ultima.clinicName}</span>}
+          {ultima.clinicName && <span className="text-sm text-muted-foreground">{ultima.clinicName}</span>}
         </div>
       ) : (
         <div className="mt-0.5 text-sm text-muted-foreground">{t("noLastVisit")}</div>
