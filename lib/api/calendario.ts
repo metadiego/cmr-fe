@@ -1,4 +1,5 @@
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 
 // Calendario de eventos (BE sembrado en prod). Eventos del centro activo + los GLOBALES (esGlobal),
 // devueltos por SOLAPAMIENTO del rango y ya ordenados por día y hora. El color/rótulo salen de la
@@ -14,6 +15,8 @@ export interface CalendarioCategoria {
 export interface CalendarioEvento {
   id: string;
   clinicId?: string | null;
+  // The event's clinic name (cmr-be clinic-read-scope); null on company-wide events.
+  clinicName?: string | null;
   day: string; // YYYY-MM-DD (día calendario)
   endDay?: string | null; // último día si dura varios
   time?: string | null; // HH:mm; null = todo el día
@@ -38,18 +41,19 @@ export interface CrearEventoPayload {
   description?: string | null;
   categoryId?: string | null;
   isGlobal?: boolean;
-  // Solo al CREAR en un centro distinto al de la sesión: el evento nace en ese centro. Sin él, en el de
-  // la sesión. Requiere permiso de creación allí (si no, 403). NO se manda al editar.
+  // Only when CREATING: the clinic the event is born in (calendario.create there, else 403). Without it,
+  // the session's. Never sent on edit: an event stays in its clinic.
   centerId?: string | null;
 }
 
 // Los centros del selector (leer/escribir) ya NO salen de endpoints por dominio: se piden con el patrón
 // único `getCentrosDondePuedo(permiso)` (lib/api/centers). Handoff selector-de-centro-en-la-pantalla.
 
-export function getEventos(desde: string, hasta: string, centroId?: string): Promise<CalendarioEvento[]> {
+// The events of every clinic in `choice` (CenterChoice: `null` = every clinic where the person holds
+// calendario.read, the clinic filter's ids, or one clinic) PLUS the company-wide ones, which every clinic sees.
+export async function getEventos(desde: string, hasta: string, choice: CenterChoice): Promise<CalendarioEvento[]> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  if (centroId) sp.set("centerId", centroId);
-  return apiFetch<CalendarioEvento[]>(`/calendar/events?${sp.toString()}`);
+  return apiFetch<CalendarioEvento[]>(await oneCenterPath(`/calendar/events?${sp.toString()}`, choice), {}, tenantOf(choice));
 }
 export function crearEvento(payload: CrearEventoPayload): Promise<CalendarioEvento> {
   return apiFetch<CalendarioEvento>(`/calendar/events`, { method: "POST", body: JSON.stringify(payload) });

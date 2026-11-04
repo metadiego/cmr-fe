@@ -1,10 +1,20 @@
 import type { components } from "./schema";
-import { apiFetch, apiFetchPaged, oneCenterPath } from "./client";
+import { apiFetch, apiFetchPaged, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 import type { Paginated } from "./types";
 
 // Staff member. `capacidades` includes role-like tags (e.g. "medico") used to
 // filter who can be assigned to an appointment.
 export type Personal = components["schemas"]["PersonalEntity"];
+
+// A staff row of a list over clinics (cmr-be clinic-read-scope, `withServiceCenters`): one row per person,
+// `clinicName` = the home clinic (`clinicId`, where the record was created), `servesInCenters` = the
+// clinics of the read's scope where the person shows up in pickers. Declared by hand until `gen:api`
+// brings them into the schema.
+export type PersonalEnAlcance = Personal & {
+  clinicName?: string | null;
+  servesInCenters?: { clinicId: string; clinicName: string | null }[];
+};
 
 // `frontdeskStartsOnConsultation` (BE PR #386, EN REVISIÓN — sin desplegar a esta fecha): dato de la
 // persona, mismo GET/PUT /staff/:id de siempre, sin ruta nueva. Se declara A MANO porque el schema
@@ -31,21 +41,40 @@ export interface ListPersonalParams {
   includeInactive?: boolean;
 }
 
-// `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, para el selector de centro EN
-// la pantalla: el personal cuelga del centro, así que al mirar otro hay que recargarlo o se agenda con un
-// médico que no está allí (p.ej. Emma/Javier de Caguas salían en Bayamón). Handoff selector-de-centro.
+// Which clinics the read covers (`CenterChoice`, lib/clinic-read-scope.ts): a single clinic string (the
+// doctor pickers and every one-clinic screen: someone of another clinic is never offered there, e.g.
+// Emma/Javier of Caguas showing up in Bayamón), the clinic filter's ticked ids, `null` for every clinic
+// where the person holds personal.read, or `undefined` for the one X-Tenant-ID carries. Handoff
+// selector-de-centro / clinic-read-scope.
 export async function listPersonal(
   params: ListPersonalParams = {},
-  centroId?: string,
-): Promise<Paginated<Personal>> {
+  centroId?: CenterChoice,
+): Promise<Paginated<PersonalEnAlcance>> {
   const { page = 1, limit = 50, q, capacidad, onlyInactive, includeInactive } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
   if (capacidad) sp.set("capacity", capacidad);
   if (onlyInactive) sp.set("onlyInactive", "true");
   if (includeInactive) sp.set("includeInactive", "true");
-  // One center: a staff list or doctor picker never offers someone of another center.
-  return apiFetchPaged<Personal>(await oneCenterPath(`/staff?${sp.toString()}`, centroId), {}, centroId);
+  return apiFetchPaged<PersonalEnAlcance>(
+    await oneCenterPath(`/staff?${sp.toString()}`, centroId),
+    {},
+    tenantOf(centroId),
+  );
+}
+
+// Every page of a staff list (the BE caps `limit` at 100), for the staff screen across clinics.
+export async function listPersonalAll(
+  params: Omit<ListPersonalParams, "page" | "limit"> = {},
+  centroId?: CenterChoice,
+): Promise<PersonalEnAlcance[]> {
+  const limit = 100;
+  const first = await listPersonal({ ...params, page: 1, limit }, centroId);
+  const pages = Math.ceil(first.pagination.total / limit);
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(0, pages - 1) }, (_, i) => listPersonal({ ...params, page: i + 2, limit }, centroId)),
+  );
+  return [first, ...rest].flatMap((r) => r.items);
 }
 
 // Ficha de UN miembro (GET /staff/:id) para el hub del médico. Tenant-scoped; `centroId` fuerza el centro.
