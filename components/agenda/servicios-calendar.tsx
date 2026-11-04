@@ -8,7 +8,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { listSesionesRango, type Sesion } from "@/lib/api/frontdesk";
-import { getServicios, type Servicio } from "@/lib/api/servicios";
+import { getServicios, getServiciosDe, type Servicio } from "@/lib/api/servicios";
 import { getFestivos, type Festivo } from "@/lib/api/disponibilidad";
 import { listPacientes } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
@@ -58,14 +58,10 @@ export function ServiciosCalendar() {
   const desde = toISO(weeks[0][0]);
   const hasta = toISO(weeks[weeks.length - 1][6]);
 
-  // Services are per clinic and their list reads ONE (X-Tenant-ID): with several clinics, one read each.
-  // A clinic whose catalog fails only loses its colors/names; the others and the sessions still show.
+  // Services are per clinic: with several clinics shown, their catalogs in one read (?centerIds).
   const shownKey = clinics.shownIds.join(",");
   const serviciosRes = useResource<Servicio[]>(
-    () =>
-      clinics.showFilter
-        ? Promise.all(clinics.shownIds.map((id) => getServicios(id).catch(() => [] as Servicio[]))).then((all) => all.flat())
-        : getServicios(),
+    () => (clinics.showFilter && clinics.shownIds.length ? getServiciosDe(clinics.shownIds) : getServicios()),
     [clinics.showFilter, shownKey],
   );
   const festivosRes = useResource<Festivo[]>(() => getFestivos(year, clinics.choice), [year, clinics.choiceKey]);

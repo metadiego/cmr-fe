@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
 
 // A service tab (Láser, Vit C, …) with its color/icon. Drives the Servicios
 // calendar tabs/filter and event colors.
@@ -105,6 +105,12 @@ export async function getServicios(
 ): Promise<Servicio[]> {
   const qs = opts.includeInactive ? `?includeInactive=true` : "";
   return asArray<Servicio>(await apiFetch(`/services${qs}`, {}, centroId));
+}
+
+// The catalogs of several clinics in one read (GET /services?centerIds, servicios.read in each), each
+// service with its `clinicName` — for a screen that spans clinics (the services month calendar).
+export async function getServiciosDe(clinicIds: readonly string[]): Promise<Servicio[]> {
+  return asArray<Servicio>(await apiFetch(await oneCenterPath(`/services`, clinicIds), {}, tenantOf(clinicIds)));
 }
 
 // Crear un servicio = crear una PESTAÑA. El BE le pone las columnas por defecto → nace
