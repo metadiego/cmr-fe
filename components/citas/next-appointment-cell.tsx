@@ -59,7 +59,6 @@ export function NextAppointmentCell({
   const [types, setTypes] = React.useState<TipoCita[]>([]);
   const [day, setDay] = React.useState("");
   const [reason, setReason] = React.useState("");
-  const [time, setTime] = React.useState("");
   const [busy, setBusy] = React.useState(false);
 
   const fmtDay = (d: string, style: "dayWeekdayShort" | "dayMonthYear") => {
@@ -80,7 +79,6 @@ export function NextAppointmentCell({
         if (!active) return;
         const next = pickNextAppointment(list, current ? addDaysToDay(current, -1) : todayPR());
         setAppt(next);
-        setTime(next?.time ? next.time.slice(0, 5) : "");
         setTypes(ts);
       })
       .catch((err) => active && toastError(err, tRoot))
@@ -96,7 +94,6 @@ export function NextAppointmentCell({
       setLoading(true);
       setDay("");
       setReason("");
-      setTime("");
     }
     setOpen(next);
   }
@@ -120,7 +117,7 @@ export function NextAppointmentCell({
           appt.id,
           {
             date: day,
-            time: time || undefined,
+            time: appt.time ?? undefined, // only the date moves
             reason: reason.trim() || t("defaultReason"),
             actorId,
           },
@@ -134,7 +131,6 @@ export function NextAppointmentCell({
             patientId,
             appointmentTypeId: followUp.id,
             date: day,
-            ...(time ? { time } : {}),
             ...(doctorId ? { doctorId } : {}),
             ...(reason.trim() ? { notes: reason.trim() } : {}),
             // Booked at the desk with the patient present: confirmed, as in Nueva cita.
@@ -207,16 +203,14 @@ export function NextAppointmentCell({
             <AvisoDisponibilidad doctorId={doctorForAviso} date={day} centro={centroId} onUseSuggested={setDay} />
             <SlotAvailabilityHint
               day={day}
-              time={time}
               appointmentTypeId={followUp?.id}
               centroId={centroId}
-              onUseTime={setTime}
             />
-            {appt && day && (day !== appt.date || time !== (appt.time ?? "").slice(0, 5)) && (
+            {appt && day && day !== appt.date && (
               <p className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
                 {t("fromTo", {
-                  from: `${fmtDay(appt.date, "dayWeekdayShort")} ${(appt.time ?? "").slice(0, 5)}`.trim(),
-                  to: `${fmtDay(day, "dayWeekdayShort")} ${time}`.trim(),
+                  from: fmtDay(appt.date, "dayWeekdayShort"),
+                  to: fmtDay(day, "dayWeekdayShort"),
                 })}
               </p>
             )}
@@ -239,7 +233,7 @@ export function NextAppointmentCell({
             {tNueva("exit")}
           </Button>
           {(movable || bookable) && (
-            <Button type="button" size="sm" onClick={save} disabled={!day || busy || (day === appt?.date && time === (appt?.time ?? "").slice(0, 5))}>
+            <Button type="button" size="sm" onClick={save} disabled={!day || busy || day === appt?.date}>
               {appt ? t("move") : t("book")}
             </Button>
           )}
