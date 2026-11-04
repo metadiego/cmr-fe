@@ -234,7 +234,4 @@ export async function oneCenterPath(path: string, tenant?: CenterChoice): Promis
   return `${path}${path.includes("?") ? "&" : "?"}centerIds=${ids.map(encodeURIComponent).join(",")}`;
 }
 
-// The X-Tenant-ID of a read that may span centers: only a single picked center forces it.
-export function tenantOf(choice: CenterChoice): string | undefined {
-  return typeof choice === "string" ? choice : undefined;
-}
+export { tenantOf } from "@/lib/clinic-read-scope";

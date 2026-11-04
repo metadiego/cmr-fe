@@ -38,15 +38,32 @@ export function oneCenterIds(
 }
 
 /**
- * The clinic filter's choice as a read asks for it: `null` (every readable clinic) when nothing, all,
- * or only stale ids are ticked; else the ticked clinics that are still readable.
+ * The clinic filter's choice as a read asks for it: the ticked clinics that are still readable, or every
+ * readable clinic when nothing (or only stale ids) is ticked — named explicitly, with the active clinic
+ * first when it is readable, because the first one becomes the request's X-Tenant-ID (`tenantOf`) and
+ * the permission guards check THAT clinic. `null` only while the readable clinics are not known.
  */
 export function clinicFilterChoice(
   readable: readonly string[],
   selected: readonly string[] | null,
+  activeCenterId: string | null,
 ): string[] | null {
+  if (readable.length === 0) return null;
   const chosen = (selected ?? []).filter((id) => readable.includes(id));
-  return chosen.length === 0 || chosen.length === readable.length ? null : chosen;
+  const ids = chosen.length > 0 ? chosen : [...readable];
+  return activeCenterId && ids.includes(activeCenterId)
+    ? [activeCenterId, ...ids.filter((id) => id !== activeCenterId)]
+    : ids;
+}
+
+/**
+ * The X-Tenant-ID of a read: a single picked center, or the FIRST of a list (a clinic where the person
+ * holds the screen's permission, so the guards let the read in). Every center (`null`) or the default
+ * (`undefined`) forces nothing.
+ */
+export function tenantOf(choice: CenterChoice): string | undefined {
+  if (typeof choice === "string") return choice;
+  return choice?.[0];
 }
 
 /** The clinic column: for anyone who can read more than one clinic, even when filtered to one. */

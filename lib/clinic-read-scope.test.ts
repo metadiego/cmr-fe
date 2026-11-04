@@ -1,7 +1,7 @@
 // Reads across clinics (lib/clinic-read-scope.ts). Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clinicFilterChoice, oneCenterIds, readCenterIds, showsClinicColumn } from "./clinic-read-scope.ts";
+import { clinicFilterChoice, oneCenterIds, readCenterIds, showsClinicColumn, tenantOf } from "./clinic-read-scope.ts";
 
 test("a screen's picked center is sent as centerIds, so the read does not depend on the BE default", () => {
   assert.deepEqual(readCenterIds("cag", undefined), ["cag"]);
@@ -33,11 +33,27 @@ test("a list over several centers names exactly those; an empty list is every ce
   assert.equal(oneCenterIds([], "bay", "bay"), undefined);
 });
 
-test("the clinic filter: nothing chosen reads every readable clinic, a choice narrows, stale ids drop", () => {
-  assert.equal(clinicFilterChoice(["bay", "cag"], null), null);
-  assert.deepEqual(clinicFilterChoice(["bay", "cag"], ["cag"]), ["cag"]);
-  assert.equal(clinicFilterChoice(["bay", "cag"], ["pon"]), null);
-  assert.equal(clinicFilterChoice(["bay", "cag"], ["bay", "cag"]), null);
+test("the clinic filter: nothing chosen names every readable clinic, a choice narrows, stale ids drop", () => {
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], null, null), ["bay", "cag"]);
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], ["cag"], null), ["cag"]);
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], ["pon"], null), ["bay", "cag"]);
+});
+
+test("…the active clinic goes first when it is in the list: it is the request's X-Tenant-ID", () => {
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], null, "cag"), ["cag", "bay"]);
+  // Not readable here: never the header, so the guard checks a clinic that has the permission.
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], null, "pon"), ["bay", "cag"]);
+});
+
+test("…and while the clinics are not known yet, nothing (the BE default)", () => {
+  assert.equal(clinicFilterChoice([], null, "bay"), null);
+});
+
+test("a read over several clinics sends the first as X-Tenant-ID; every clinic (null) sends none", () => {
+  assert.equal(tenantOf(["cag", "bay"]), "cag");
+  assert.equal(tenantOf("bay"), "bay");
+  assert.equal(tenantOf(null), undefined);
+  assert.equal(tenantOf([]), undefined);
 });
 
 test("the clinic column shows for anyone who can read more than one clinic, even filtered to one", () => {
