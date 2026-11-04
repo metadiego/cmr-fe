@@ -4885,8 +4885,8 @@
     "notFollowUp": "Solo se mueven aquí las citas de seguimiento. Esta es de otro tipo: muévela desde la agenda.",
     "freeAt": "Hay cupo de seguimiento a las {time} ({n} libres).",
     "fullAt": "Sin cupo de seguimiento a las {time}.",
-    "noTime": "Elige una hora.",
     "useTime": "Usar {time}",
-    "noneThatDay": "No queda cupo de seguimiento ese día."
+    "noneThatDay": "No queda cupo de seguimiento ese día.",
+    "freeDay": "Hay cupo de seguimiento ese día ({n} libres)."
   }
 }

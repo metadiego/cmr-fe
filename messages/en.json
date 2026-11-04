@@ -4885,8 +4885,8 @@
     "notFollowUp": "Only follow-up appointments can be moved here. This one is of another type: move it from the schedule.",
     "freeAt": "Follow-up room at {time} ({n} free).",
     "fullAt": "No follow-up room at {time}.",
-    "noTime": "Pick a time.",
     "useTime": "Use {time}",
-    "noneThatDay": "No follow-up room left that day."
+    "noneThatDay": "No follow-up room left that day.",
+    "freeDay": "Follow-up room that day ({n} free)."
   }
 }

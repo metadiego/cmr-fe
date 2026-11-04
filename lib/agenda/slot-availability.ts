@@ -10,6 +10,8 @@ export type AgendaSlot = {
 export type SlotAvailability = {
   /** Free places of that type at that time (0 when the time is not a slot of the day). */
   free: number;
+  /** Free places of that type across the whole day (any time, including slots without one). */
+  freeDay: number;
   /** The first time with room for that type at or after the requested one (or the first of the day). */
   next: string | null;
 };
@@ -32,5 +34,6 @@ export function slotAvailability(
       .map((s) => hhmm(s.time))
       .sort()
       .find((t) => t >= want) ?? null;
-  return { free: here ? freeOf(here) : 0, next };
+  const freeDay = slots.reduce((n, s) => n + freeOf(s), 0);
+  return { free: here ? freeOf(here) : 0, freeDay, next };
 }

@@ -43,7 +43,19 @@ export function SlotAvailabilityHint({
   if (!day || !appointmentTypeId || !slots || slots.key !== key || slots.data.length === 0) return null;
   const a: SlotAvailability = slotAvailability(slots.data, appointmentTypeId, time);
 
-  if (time && a.free > 0) {
+  // Untimed appointments (the Atención board books by day, in arrival order): the day's room is the answer.
+  if (!time) {
+    return a.freeDay > 0 ? (
+      <p className="rounded-md border border-success/40 bg-success/10 px-3 py-2 text-xs">
+        {t("freeDay", { n: a.freeDay })}
+      </p>
+    ) : (
+      <p className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
+        {t("noneThatDay")}
+      </p>
+    );
+  }
+  if (a.free > 0) {
     return (
       <p className="rounded-md border border-success/40 bg-success/10 px-3 py-2 text-xs">
         {t("freeAt", { time: time.slice(0, 5), n: a.free })}
@@ -52,7 +64,7 @@ export function SlotAvailabilityHint({
   }
   return (
     <div className="rounded-md border border-warning/40 bg-warning px-3 py-2 text-xs text-warning-foreground">
-      {time ? t("fullAt", { time: time.slice(0, 5) }) : t("noTime")}
+      {t("fullAt", { time: time.slice(0, 5) })}
       {a.next ? (
         <button type="button" className="ml-1 font-medium underline" onClick={() => onUseTime(a.next!)}>
           {t("useTime", { time: a.next })}
