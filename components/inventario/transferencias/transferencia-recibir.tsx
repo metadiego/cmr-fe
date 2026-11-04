@@ -14,11 +14,11 @@ import {
   type DestinoTransferencia,
 } from "@/lib/api/transferencias";
 import { listProductos, type Producto } from "@/lib/api/inventario";
-import { getMyCentros, type Centro } from "@/lib/api/centers";
+import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useMe, isAdmin } from "@/hooks/use-me";
-import { getActiveCentro } from "@/lib/tenant";
+import { canReceiveTransfer, transferClinicName } from "@/lib/inventario/transfer-clinics";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,10 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   // destino, pero sí en el endpoint de destinos. Unión → origen y destino resuelven. Handoff transferencia-boton-recibir.
   const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia());
   const me = useMe();
+  // Clinics where the person can receive (inventario.recibir): the BE receives in the transfer's
+  // DESTINATION clinic whatever the active one is (clinic-read-scope).
+  const receivableRes = useResource<Centro[]>(() => getCentrosDondePuedo("inventario.recibir"));
+  const receivable = receivableRes.state.kind === "ok" ? receivableRes.state.data.map((c) => c.id) : [];
 
   const prodName = React.useMemo(() => {
     const m = new Map<string, string>();
@@ -81,7 +85,8 @@ export function TransferenciaRecibir({ id }: { id: string }) {
     if (destinosRes.state.kind === "ok") destinosRes.state.data.forEach((d) => m.set(d.clinicId, d.name));
     return m;
   }, [centrosRes.state, destinosRes.state]);
-  const centroName = (cid: string) => centroNames.get(cid) ?? cid;
+  const centroName = (resolved: string | null | undefined, cid: string) =>
+    transferClinicName(resolved, cid, (id) => centroNames.get(id)) ?? "—";
 
   const detalle = state.kind === "ok" ? state.data : null;
   const transfer = detalle?.transfer ?? null;
@@ -106,12 +111,11 @@ export function TransferenciaRecibir({ id }: { id: string }) {
   const [rechazando, setRechazando] = React.useState(false);
   const [motivo, setMotivo] = React.useState("");
 
-  const activeCentro = getActiveCentro();
-  const esDestino = !!transfer && activeCentro === transfer.destinationClinicId;
+  const esDestino = !!transfer && receivable.includes(transfer.destinationClinicId);
   const puedeRecibir =
     !!transfer &&
-    transfer.status === "pendiente" &&
-    (esDestino || (me.kind === "ok" && isAdmin(me.me)));
+    (canReceiveTransfer(transfer, receivable) ||
+      (transfer.status === "pendiente" && me.kind === "ok" && isAdmin(me.me)));
 
   // Validación por línea: 0 ≤ recibida ≤ enviada.
   const lineError = (it: (typeof items)[number]) => {
@@ -175,13 +179,13 @@ export function TransferenciaRecibir({ id }: { id: string }) {
       {/* Cabecera */}
       <div className="mb-6 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <PageHeader
-          title={`${centroName(transfer.sourceClinicId)} → ${centroName(transfer.destinationClinicId)}`}
+          title={`${centroName(transfer.originName, transfer.sourceClinicId)} → ${centroName(transfer.destinationName, transfer.destinationClinicId)}`}
           description={transfer.reason}
           actions={<Badge variant={ESTADO_VARIANT[transfer.status] ?? "outline"}>{t(`estado.${transfer.status}`)}</Badge>}
         />
         {!esDestino && transfer.status === "pendiente" && (
           <p className="mt-3 rounded-md border border-warning/40 bg-warning px-3 py-2 text-sm text-warning-foreground">
-            {t("soloDestino", { centro: centroName(transfer.destinationClinicId) })}
+            {t("soloDestino", { centro: centroName(transfer.destinationName, transfer.destinationClinicId) })}
           </p>
         )}
       </div>
