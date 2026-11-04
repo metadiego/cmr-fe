@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
+import { ReturnDatePicker } from "@/components/citas/return-date-picker";
 import { AvisoDisponibilidad } from "@/components/citas/aviso-disponibilidad";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -187,13 +187,6 @@ export function NuevaCitaModal({
     { key: "stepPresent", at: fila.presente },
     { key: "stepConsult", at: fila.en_consulta },
     { key: "stepAttended", at: fila.asistido, current: true },
-  ];
-
-  const quicks: Array<{ key: "quick1w" | "quick2w" | "quick1m" | "quick3m"; days: number }> = [
-    { key: "quick1w", days: 7 },
-    { key: "quick2w", days: 14 },
-    { key: "quick1m", days: 30 },
-    { key: "quick3m", days: 90 },
   ];
 
   async function crear(tId: string, f: string) {
@@ -359,32 +352,7 @@ export function NuevaCitaModal({
           <>
           <div className="space-y-2">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t("whenBack")}</span>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {quicks.map((q) => {
-                const iso = plusDaysISO(q.days);
-                const active = fecha === iso;
-                return (
-                  <button
-                    key={q.key}
-                    type="button"
-                    onClick={() => setFecha(iso)}
-                    aria-pressed={active}
-                    className={
-                      "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors " +
-                      (active ? "border-primary bg-primary text-primary-foreground" : "border-input text-muted-foreground hover:border-primary/50 hover:text-foreground")
-                    }
-                  >
-                    {t(q.key)}
-                  </button>
-                );
-              })}
-              <DatePicker
-                value={fecha}
-                onChange={setFecha}
-                className="w-[9.5rem]"
-                min={todayISO()}
-              />
-            </div>
+            <ReturnDatePicker value={fecha} onChange={setFecha} />
           </div>
 
           {/* Aviso de disponibilidad: si el médico no está ese día, explica y ofrece la próxima fecha. */}

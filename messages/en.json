@@ -4869,5 +4869,18 @@
     "retireBody": "Every event of scale {deviceId} in this center is deleted and it stops showing here. Book stock does not change. This cannot be undone.",
     "retired": "Scale {deviceId} retired ({n} events deleted)",
     "liveShort": "Live"
+  },
+  "nextAppointment": {
+    "title": "Next appointment",
+    "open": "See or change the next appointment",
+    "none": "No next appointment",
+    "fromTo": "From {from} to {to}",
+    "reasonPh": "Reason for the change (optional)",
+    "defaultReason": "Date changed from the board",
+    "move": "Change date",
+    "book": "Book",
+    "moved": "Appointment moved to {date}",
+    "booked": "Appointment booked for {date}",
+    "notMovable": "This appointment is no longer open and cannot be moved from here."
   }
 }

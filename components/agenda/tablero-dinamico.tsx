@@ -27,6 +27,7 @@ import { FlujoAtencion, type PostAccionCtx, type EhrGateCtx } from "@/components
 import { PostAccionHost } from "@/components/tablero/post-accion";
 import { EhrGateHost } from "@/components/tablero/ehr-readiness-modal";
 import { PanelNotificarModal } from "@/components/frontdesk/panel-notificar-modal";
+import { NextAppointmentCell } from "@/components/citas/next-appointment-cell";
 import { BoardHeadSkeleton, BoardRowsSkeleton } from "@/components/agenda/tablero-dinamico-skeleton";
 
 // Single renderer for the metadata-driven board (dynamic columns). Header per
@@ -389,6 +390,20 @@ export function TableroDinamico({
           centroId={centroId}
           optionsByCol={optionsByCol}
           onRefresh={onRefresh}
+        />
+      );
+    }
+    // "Next appt" (render.kind="nextAppointment"): the date opens a popover that moves the next
+    // appointment (or books one) with the return shortcuts. The render says what it is, not the binding.
+    if ((col.render as { kind?: string } | null)?.kind === "nextAppointment") {
+      const f = fila as { pacienteId?: unknown; medico__valor?: unknown };
+      return (
+        <NextAppointmentCell
+          value={fila[col.clave]}
+          patientId={f.pacienteId != null ? String(f.pacienteId) : undefined}
+          doctorId={typeof f.medico__valor === "string" ? f.medico__valor : undefined}
+          centroId={centroId}
+          onChanged={onRefresh}
         />
       );
     }
