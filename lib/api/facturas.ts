@@ -174,7 +174,6 @@ export async function getFacturasResumen(
   if (from) sp.set("from", from);
   if (to) sp.set("to", to);
   if (context) sp.set("context", context);
-  // Same center as the list it totals (getFacturasTablero).
   const env = await apiFetchEnvelope<unknown>(await oneCenterPath(`/invoices?${sp.toString()}`, centroId), {}, centroId);
   const r = env.meta.resumen;
   return {

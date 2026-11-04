@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 
 // Estadísticas de Servicios (BE PRs #212/#213). Una sola llamada trae la matriz GENERAL (personal ×
 // servicio) y el desglose por servicio (bloques por rol). Contrato: cmr-be/docs/specs/estadisticas-servicios.md.
@@ -69,11 +69,12 @@ export function getEstadisticasDiarias(
 }
 
 // GET /estadisticas/servicios?desde=YYYY-MM-DD&hasta=YYYY-MM-DD — general + todas las pestañas en una.
-export function getEstadisticasServicios(
+export async function getEstadisticasServicios(
   desde: string,
   hasta: string,
   centroId?: string,
 ): Promise<EstadisticasServicios> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  return apiFetch<EstadisticasServicios>(`/statistics/services?${sp.toString()}`, {}, centroId);
+  // The report screen shows the picked center (its gate), not the sum of every readable one.
+  return apiFetch<EstadisticasServicios>(await oneCenterPath(`/statistics/services?${sp.toString()}`, centroId), {}, centroId);
 }

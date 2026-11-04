@@ -1,5 +1,5 @@
 import type { components } from "./schema"
-import { apiFetch } from "./client"
+import { apiFetch, oneCenterPath } from "./client"
 
 // Enganche con el EHR externo (cmr-ehr): al marcar PRESENTE en el tablero de Atención, el paciente
 // queda también allá (se crea si no existe + se registra la llegada), lo hace el BE. El FE solo:
@@ -71,8 +71,9 @@ export interface EhrConfig {
 export type EhrEvent = components["schemas"]["EhrEventEntity"] & {
   patient?: { id: string; medicalRecordNumber?: string | null; name?: string | null } | null
 }
-export function listEhrEvents(limit = 20, centroId?: string): Promise<EhrEvent[]> {
-  return apiFetch<EhrEvent[]>(`/ehr-integration/events?limit=${limit}`, {}, centroId)
+// The events of the center whose webhook settings are on screen.
+export async function listEhrEvents(limit = 20, centroId?: string): Promise<EhrEvent[]> {
+  return apiFetch<EhrEvent[]>(await oneCenterPath(`/ehr-integration/events?limit=${limit}`, centroId), {}, centroId)
 }
 function centerQs(centerIds?: string[]): string {
   if (!centerIds?.length) return ""

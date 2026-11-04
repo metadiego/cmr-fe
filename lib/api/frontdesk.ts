@@ -36,11 +36,9 @@ export async function listSesionesRango(params: {
   if (params.servicioId) sp.set("serviceId", params.servicioId);
   if (params.tecnicoId) sp.set("technicianId", params.tecnicoId);
   if (params.pacienteId) sp.set("patientId", params.pacienteId);
-  // A patient's history spans every center the person can read; a calendar or day view is one center.
+  // A patient's history spans every readable center; a calendar or day view is one center.
   const path = `/frontdesk/sesiones?${sp.toString()}`;
-  return asArray<Sesion>(
-    await apiFetch(params.pacienteId ? path : await oneCenterPath(path, params.centroId), {}, params.centroId),
-  );
+  return asArray<Sesion>(await apiFetch(params.pacienteId ? path : await oneCenterPath(path, params.centroId), {}, params.centroId));
 }
 
 export function getSesion(id: string): Promise<Sesion> {
@@ -182,7 +180,6 @@ export async function getAgendaPaciente(
   centroId?: string,
 ): Promise<AgendaItem[]> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  // Shown while booking in ONE center (board, scheduling modal): that center's agenda.
   const path = await oneCenterPath(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, centroId);
   return apiFetch<unknown>(path, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as AgendaItem[]) : (((r as { items?: AgendaItem[] })?.items) ?? []),
