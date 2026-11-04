@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 import type { ApiWarning } from "./types";
-import { apiFetch, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchEnvelope, oneCenterPath } from "./client";
 
 // Escritura con avisos NO bloqueantes (BE PR #168): la operación se realiza y el BE adjunta
 // `meta.warnings` (p. ej. cupo excedido). El FE los muestra como toast traducido por labelKey.
@@ -36,7 +36,11 @@ export async function listSesionesRango(params: {
   if (params.servicioId) sp.set("serviceId", params.servicioId);
   if (params.tecnicoId) sp.set("technicianId", params.tecnicoId);
   if (params.pacienteId) sp.set("patientId", params.pacienteId);
-  return asArray<Sesion>(await apiFetch(`/frontdesk/sesiones?${sp.toString()}`, {}, params.centroId));
+  // A patient's history spans every center the person can read; a calendar or day view is one center.
+  const path = `/frontdesk/sesiones?${sp.toString()}`;
+  return asArray<Sesion>(
+    await apiFetch(params.pacienteId ? path : await oneCenterPath(path, params.centroId), {}, params.centroId),
+  );
 }
 
 export function getSesion(id: string): Promise<Sesion> {
@@ -171,14 +175,16 @@ export type AgendaItem = {
   serviceName: string | null; // antes `servicioNombre`; el BE lo renombró a `serviceName` (2026-09-17)
   color: string | null;
 };
-export function getAgendaPaciente(
+export async function getAgendaPaciente(
   pacienteId: string,
   desde: string,
   hasta: string,
   centroId?: string,
 ): Promise<AgendaItem[]> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  return apiFetch<unknown>(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, {}, centroId).then((r) =>
+  // Shown while booking in ONE center (board, scheduling modal): that center's agenda.
+  const path = await oneCenterPath(`/frontdesk/pacientes/${pacienteId}/agenda?${sp}`, centroId);
+  return apiFetch<unknown>(path, {}, centroId).then((r) =>
     Array.isArray(r) ? (r as AgendaItem[]) : (((r as { items?: AgendaItem[] })?.items) ?? []),
   );
 }
@@ -490,13 +496,14 @@ export interface FrontdeskAvisosReporte {
   byType: Record<string, number>; // se traduce al inglés en /api/v2 (verificado live 1-oct; sus claves de tipo son datos)
   avisos: FrontdeskAviso[]; // `avisos` NO en el mapa — dejado en español
 }
-export function getAvisosFrontdesk(
+export async function getAvisosFrontdesk(
   desde: string,
   hasta: string,
   centroId?: string,
 ): Promise<FrontdeskAvisosReporte> {
   const sp = new URLSearchParams({ from: desde, to: hasta });
-  return apiFetch<FrontdeskAvisosReporte>(`/frontdesk/reportes/avisos?${sp.toString()}`, {}, centroId);
+  const path = await oneCenterPath(`/frontdesk/reportes/avisos?${sp.toString()}`, centroId);
+  return apiFetch<FrontdeskAvisosReporte>(path, {}, centroId);
 }
 
 // Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey) +

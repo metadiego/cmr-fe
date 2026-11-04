@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 import type { CuadreReconciliacion } from "@/lib/caja/totales";
 
 export type { CuadreReconciliacion };
@@ -199,7 +199,7 @@ export function getReporteDia(
 
 // ---- cuadre (CC2) ---------------------------------------------------
 // Lista cuadres para seleccionar/ver anteriores (alcance por rol lo aplica el BE).
-export function listarCuadres(filtros: {
+export async function listarCuadres(filtros: {
   fecha?: string;
   division?: CajaDivision;
   usuarioId?: string;
@@ -211,7 +211,8 @@ export function listarCuadres(filtros: {
   if (filtros.usuarioId) sp.set("userId", filtros.usuarioId);
   if (filtros.estado) sp.set("status", filtros.estado);
   const qs = sp.toString();
-  return apiFetch<CuadreCaja[]>(`/cash/reconciliations${qs ? `?${qs}` : ""}`);
+  // The cash screen is one center's day: the active center's reconciliations.
+  return apiFetch<CuadreCaja[]>(await oneCenterPath(`/cash/reconciliations${qs ? `?${qs}` : ""}`));
 }
 
 // Abre o RETOMA (idempotente en el BE) el cuadre de esa (división × cajero)/día. `division`

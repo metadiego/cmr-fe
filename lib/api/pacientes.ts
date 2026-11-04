@@ -1,5 +1,5 @@
 import type { components } from "./schema"
-import { apiFetch, apiFetchPaged } from "./client"
+import { apiFetch, apiFetchPaged, oneCenterPath } from "./client"
 import type { Paginated } from "./types"
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
@@ -416,11 +416,11 @@ export interface PatientLiveLocation {
     name: string | null
   } | null
 }
-export function getLiveLocation(
+export async function getLiveLocation(
   centroId?: string
 ): Promise<PatientLiveLocation[]> {
   return apiFetch<PatientLiveLocation[]>(
-    `/patients/live-location`,
+    await oneCenterPath(`/patients/live-location`, centroId),
     {},
     centroId
   )

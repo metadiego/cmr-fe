@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 import type { Paginated } from "./types";
-import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchPaged, apiFetchEnvelope, oneCenterPath } from "./client";
 
 // Facturación (BE PR #39+). Tenant-scoped: pasar centroId (X-Tenant-ID) en escrituras.
 export type Factura = components["schemas"]["FacturaEntity"];
@@ -137,7 +137,7 @@ export interface FacturaTablero {
   columns: FacturaTableroColumna[];
   rows: FacturaTableroFila[];
 }
-export function getFacturasTablero(
+export async function getFacturasTablero(
   params: ListFacturasParams = {},
   centroId?: string,
 ): Promise<FacturaTablero> {
@@ -148,7 +148,7 @@ export function getFacturasTablero(
   if (from) sp.set("from", from);
   if (to) sp.set("to", to);
   if (context) sp.set("context", context);
-  return apiFetch<FacturaTablero>(`/invoices/board?${sp.toString()}`, {}, centroId);
+  return apiFetch<FacturaTablero>(await oneCenterPath(`/invoices/board?${sp.toString()}`, centroId), {}, centroId);
 }
 
 // Resumen del RANGO filtrado (total del servidor, no de la página): importe/exentas/cobradas del
@@ -174,7 +174,8 @@ export async function getFacturasResumen(
   if (from) sp.set("from", from);
   if (to) sp.set("to", to);
   if (context) sp.set("context", context);
-  const env = await apiFetchEnvelope<unknown>(`/invoices?${sp.toString()}`, {}, centroId);
+  // Same center as the list it totals (getFacturasTablero).
+  const env = await apiFetchEnvelope<unknown>(await oneCenterPath(`/invoices?${sp.toString()}`, centroId), {}, centroId);
   const r = env.meta.resumen;
   return {
     importe: Number(r?.importe ?? 0),
@@ -549,7 +550,7 @@ export interface ListDevolucionesParams {
   to?: string;
   context?: "general" | "consulta"; // filtra por tipo de factura de la devolución
 }
-export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?: string): Promise<Paginated<Devolucion>> {
+export async function listDevoluciones(params: ListDevolucionesParams = {}, centroId?: string): Promise<Paginated<Devolucion>> {
   const { page = 1, limit = 20, q, status, from, to, context } = params;
   const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
   if (q?.trim()) sp.set("q", q.trim());
@@ -557,7 +558,7 @@ export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?:
   if (from) sp.set("from", from);
   if (to) sp.set("to", to);
   if (context) sp.set("context", context);
-  return apiFetchPaged<Devolucion>(`/billing/refunds?${sp.toString()}`, {}, centroId);
+  return apiFetchPaged<Devolucion>(await oneCenterPath(`/billing/refunds?${sp.toString()}`, centroId), {}, centroId);
 }
 
 export function registrarPago(facturaId: string, payload: RegistrarPagoPayload, centroId?: string): Promise<unknown> {
