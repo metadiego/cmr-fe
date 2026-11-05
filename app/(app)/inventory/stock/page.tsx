@@ -50,14 +50,13 @@ export default function StockPage() {
   const gate = useCentroGate();
 
   const [vista, setVista] = React.useState<"centro" | "consolidado">("centro");
-  // Centro elegido: "" (TODOS) solo válido en consolidado (admin combinado, sin X-Tenant-ID). Con un solo
-  // centro (gerente), queda fijado a ese.
+  // Centro elegido para "Por centro". Con un solo centro (gerente), queda fijado a ese.
   const unico = gate.centros.length === 1 ? gate.centros[0].id : null;
   const [centroSelRaw, setCentroSelRaw] = React.useState<string>("");
   const centroSel = unico ?? centroSelRaw;
   // Regla del dueño ("que lo entienda un chico de 12"): al entrar YA se ve la tabla, sin elegir centro
-  // antes. "Por centro" nace en un centro relleno (el activo o el primero visible), no en vacío; en
-  // "Consolidado", vacío = todos los centros combinados. El usuario lo cambia después con el selector.
+  // antes. "Por centro" nace en un centro relleno (el activo o el primero visible), no en vacío;
+  // "Consolidado" sigue la barra superior. El usuario lo cambia después con el selector.
   const primerCentro = gate.centro || gate.centros[0]?.id || "";
   const centroCentro = centroSel || primerCentro; // centro EFECTIVO de la vista "Por centro" (nunca vacío)
 
@@ -112,9 +111,9 @@ export default function StockPage() {
   const consolRes = useResource<Paginated<StockConsolidadoFila>>(
     () =>
       vista === "consolidado"
-        ? getStockConsolidado({ q: qApplied, onlyNegative: soloNegativos, asOf: asOf || undefined, includeNonInventoryItems: incluirNI, page, limit: 50 }, centroSel === "" ? null : centroSel)
+        ? getStockConsolidado({ q: qApplied, onlyNegative: soloNegativos, asOf: asOf || undefined, includeNonInventoryItems: incluirNI, page, limit: 50 })
         : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 50 } }),
-    [vista, centroSel, qApplied, soloNegativos, asOf, incluirNI, page],
+    [vista, qApplied, soloNegativos, asOf, incluirNI, page],
   );
 
   const cargando = vista === "centro" ? resumenRes.state.kind === "loading" : consolRes.state.kind === "loading";
@@ -153,15 +152,15 @@ export default function StockPage() {
                 </button>
               ))}
             </div>
-            {/* Selector de centro (admin). En consolidado, "Todos" = combinado. */}
-            {gate.puedeCambiar && (
+            {/* Clinic picker for "by clinic" (a warehouse's stock is one clinic's). The consolidated view
+                follows the top bar (Bayamón / Caguas / Ambos). */}
+            {gate.puedeCambiar && vista === "centro" && (
               <Select
-                value={vista === "centro" ? centroCentro : (centroSel === "" ? TODOS : centroSel)}
-                onValueChange={(v) => { setCentroSelRaw(v === TODOS ? "" : v); setAlmacenId(""); resetPage(); }}
+                value={centroCentro}
+                onValueChange={(v) => { setCentroSelRaw(v); setAlmacenId(""); resetPage(); }}
               >
                 <SelectTrigger className="h-9 w-52"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {vista === "consolidado" && <SelectItem value={TODOS}>{t("todosCentros")}</SelectItem>}
                   {gate.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
