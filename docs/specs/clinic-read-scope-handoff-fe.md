@@ -172,7 +172,19 @@ filtre a uno.
 
 **Queda como estaba:** «ventas por usuario» no trae total del BE; lo suma el FE, igual que antes.
 
+## La barra superior es el filtro: Bayamón / Caguas / Ambos (decisión del dueño, 05-nov-2026)
+
+Reemplaza el filtro de cada pantalla de la sección anterior. Detalle en
+`docs/specs/selector-de-centros-arriba.md`; BE: `feat/money-reads-company-wide` (el dinero vuelve a leerse
+como todo lo demás).
+
+- Un solo filtro, arriba. `useClinicFilter(permiso)` ya no tiene estado propio: lee la barra (un centro, o
+  todos los legibles con «Ambos»). `CenterFilter` se quitó.
+- La columna «Centro» se muestra siempre.
+- Con «Ambos», crear pregunta el centro (obligatorio); las pantallas de un centro por naturaleza enseñan su
+  propio selector; la puerta de facturación (`useCentroGate`) pide elegir.
+- Los reportes ya no leen `?centro=`: los cubre la barra.
+
 ## Sin cambios
 
-- Crear un paciente sigue creando en el centro de la sesión (la barra superior).
-- Dinero (facturas, cobros, caja): sigue siendo de un centro.
+- Las acciones sobre un registro corren en el centro del registro.
