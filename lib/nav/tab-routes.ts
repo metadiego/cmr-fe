@@ -28,7 +28,7 @@ export const PATIENT_TABS = {
 
 export const BILLING_GENERAL_TABS = {
   pattern: "/billing/invoices",
-  tabs: ["invoices", "returns", "cash", "stats"],
+  tabs: ["invoices", "returns", "cash", "stats", "total"],
   legacy: BILLING_LEGACY,
 } as const satisfies TabRoute;
 

@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/paneles";
 import { listPersonal, type Personal } from "@/lib/api/personal";
 import { getActiveCentro } from "@/lib/tenant";
+import { todayPR } from "@/lib/format/fecha";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
@@ -115,8 +116,9 @@ export function PanelSeccionesAdmin({ clave }: { clave: string }) {
     return set.size > 0 ? [...set].sort() : CAPACIDADES_FALLBACK;
   }, [personalState]);
 
-  // Contador de avisos del día por sección (suma sobre el personal).
-  const hoy = new Date().toISOString().slice(0, 10);
+  // Contador de avisos del día por sección (suma sobre el personal). `todayPR()`, no toISOString
+  // (UTC): después de las 8pm AST ya es "mañana" en UTC y contaría el día equivocado.
+  const hoy = todayPR();
   const { state: contState } = useResource<PanelContador[]>(
     () => getPanelContadores(clave, hoy, centro).catch(() => []),
     [clave, centro, hoy, nonce],

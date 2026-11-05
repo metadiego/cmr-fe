@@ -15,6 +15,7 @@ import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { liveForRows } from "@/lib/inventory/live-stock";
+import { todayPR } from "@/lib/format/fecha";
 import { LiveCount, useLiveIndex } from "@/components/inventario/live-cell";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -197,7 +198,7 @@ export default function StockPage() {
           <span>{t("asOf")}</span>
           <DatePicker
             value={asOf}
-            max={new Date().toISOString().slice(0, 10)}
+            max={todayPR()}
             onChange={(v) => { setAsOf(v); resetPage(); }}
             className="h-9 w-40"
             aria-label={t("asOf")}

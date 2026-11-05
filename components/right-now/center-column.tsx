@@ -13,6 +13,9 @@ import { ServicesPanel } from "@/components/right-now/services-panel";
 // patients, the doctors' ranking, prescriptions (shown even while empty) and the services.
 export function CenterColumn({ center, now }: { center: RightNowCenter; now: number }) {
   const t = useTranslations("rightNow");
+  // El BE manda `labelKey` de la fila "sin médico" YA calificado (`rightNow.doctors.noDoctor`), igual
+  // que el resto del motor de tableros — se resuelve con el traductor raíz, no el de este namespace.
+  const tRoot = useTranslations();
   const sales = center.sales;
   const split = attendedSplit(center.patients);
   const sellers = topSellers(sales);
@@ -78,19 +81,25 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {doctors.map((d, i) => (
-                  <tr key={d.doctorId}>
-                    <td className="px-4 py-1.5">
-                      <span className="mr-2 text-muted-foreground tabular-nums">{i + 1}.</span>
-                      {d.name ?? "—"}
-                    </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{d.total}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums font-medium">{d.attended}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{d.firstVisit}</td>
-                    <td className="px-2 py-1.5 text-right tabular-nums">{d.followUp}</td>
-                    <td className="px-4 py-1.5 text-right tabular-nums">{money(d.net)}</td>
-                  </tr>
-                ))}
+                {doctors.map((d, i) => {
+                  // Fila de cierre "lo facturado sin médico" (handoff-ahora-mismo-sin-medico): sin
+                  // ranking (no es un médico) y atenuada; sin ella, la columna Facturado no sumaba la
+                  // venta del día completa.
+                  const sinMedico = !!d.labelKey;
+                  return (
+                    <tr key={d.doctorId ?? "no-doctor"} className={sinMedico ? "text-muted-foreground italic" : undefined}>
+                      <td className="px-4 py-1.5">
+                        {!sinMedico && <span className="mr-2 text-muted-foreground tabular-nums not-italic">{i + 1}.</span>}
+                        {sinMedico ? tRoot(d.labelKey!) : (d.name ?? "—")}
+                      </td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.total}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums font-medium">{sinMedico ? "—" : d.attended}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.firstVisit}</td>
+                      <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.followUp}</td>
+                      <td className="px-4 py-1.5 text-right tabular-nums">{money(d.net)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

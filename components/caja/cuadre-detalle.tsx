@@ -5,10 +5,12 @@ import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Alert02Icon } from "@hugeicons/core-free-icons";
 
-import type { CajaDivision, ReporteDia, TributarioPartida } from "@/lib/api/caja";
+import type { ReporteDia, TributarioPartida } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
+import { ProductSalesSection } from "@/components/caja/product-sales-section";
+import { productSalesPrintHtml, type ProductSalesPrintLabels } from "@/lib/caja/product-sales-print";
 
 // Números de la caja (modelo CMA) que también van en la hoja impresa.
 export interface CuadreResumen {
@@ -28,13 +30,19 @@ export interface CuadreResumen {
 // Pie del cuadre: documentos del día + bloque tributario (lo que se entrega a contabilidad), con su
 // versión impresa firmable. Solo PRESENTA datos del BE — nada se recalcula aquí. Handoff HANDOFF-pie-del-cuadre.
 export function CuadreDetalle({
+  titulo,
   division,
   fecha,
   centroNombre,
   reporte,
   resumen,
 }: {
-  division: CajaDivision;
+  // Título de la hoja impresa; default = t("title") ("Cuadre de caja"). El cuadre TOTAL del día
+  // (handoff cuadre-unico-del-dia) pasa el suyo propio ("Cuadre total del día").
+  titulo?: string;
+  // Etiqueta YA traducida (p.ej. t(`division.${division}`)): este componente ya no conoce el tipo
+  // CajaDivision. Ausente = sin sufijo de división (el cuadre TOTAL del día no es de una sola división).
+  division?: string;
   fecha: string;
   centroNombre?: string;
   reporte: ReporteDia;
@@ -43,8 +51,13 @@ export function CuadreDetalle({
   const t = useTranslations("caja");
   const tp = useTranslations("caja.payments");
   const td = useTranslations("caja.detalle");
+  const tps = useTranslations("caja.productSales");
+  const tituloEfectivo = titulo ?? t("title");
 
   const documentos = React.useMemo(() => reporte.documentos ?? [], [reporte.documentos]);
+  // Columna «División» (handoff cuadre-unico-del-dia): solo en el cuadre TOTAL, donde cada documento
+  // trae la suya. En el reporte por división ningún documento la trae → la columna no se pinta.
+  const conDivision = documentos.some((d) => d.division);
   const devoluciones = reporte.devolucionesDetalle ?? [];
   const trib = reporte.tributario ?? null;
   const conteo = reporte.conteoEfectivo ?? null;
@@ -72,13 +85,17 @@ export function CuadreDetalle({
     if (!w) return;
     w.document.write(
       buildPrintHtml({
-        titulo: t("title"),
-        divisionLabel: t(`division.${division}`),
+        titulo: tituloEfectivo,
+        divisionLabel: division ?? "",
         centroNombre: centroNombre ?? "",
         fechaLabel: formatFechaSolo(fecha),
         resumen,
         reporte,
         exoneradas,
+        productSalesHtml: reporte.productSales
+          ? productSalesPrintHtml(reporte.productSales, Object.fromEntries(PS_KEYS.map((k) => [k, String(tps.raw(k))])) as ProductSalesPrintLabels)
+          : "",
+        divisionLabels: { consulta: t("division.consulta"), general: t("division.general") },
         L: {
           resumen: tp("general"),
           opening: tp("opening"),
@@ -111,6 +128,7 @@ export function CuadreDetalle({
           whoTotal: td("who.total"),
           colCajero: td("who.col"),
           colNumero: td("colNumero"),
+          colDivision: td("colDivision"),
           colRecord: td("colRecord"),
           colPaciente: td("colPaciente"),
           colFacturo: td("colFacturo"),
@@ -227,6 +245,9 @@ export function CuadreDetalle({
         </section>
       )}
 
+      {/* 1b. Venta de productos (IVU): every product invoice + IVU by component + check (BE #470). */}
+      {reporte.productSales && <ProductSalesSection ps={reporte.productSales} />}
+
       {/* 2. Documentos del día */}
       <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h3 className="border-b px-4 py-2.5 text-sm font-semibold">
@@ -240,6 +261,7 @@ export function CuadreDetalle({
               <thead>
                 <tr className="border-b text-[11px] uppercase tracking-wide text-muted-foreground">
                   <th className="px-4 py-2 text-left font-semibold">{td("colNumero")}</th>
+                  {conDivision && <th className="px-4 py-2 text-left font-semibold">{td("colDivision")}</th>}
                   <th className="px-4 py-2 text-left font-semibold">{td("colRecord")}</th>
                   <th className="px-4 py-2 text-left font-semibold">{td("colPaciente")}</th>
                   <th className="px-4 py-2 text-left font-semibold">{td("colFacturo")}</th>
@@ -251,6 +273,11 @@ export function CuadreDetalle({
                 {documentos.map((d) => (
                   <tr key={d.id}>
                     <td className="px-4 py-2 font-mono tabular-nums">{d.number || "—"}</td>
+                    {conDivision && (
+                      <td className="px-4 py-2 text-xs text-muted-foreground">
+                        {d.division ? t(`division.${d.division}`) : "—"}
+                      </td>
+                    )}
                     {/* Sin récord = celda vacía (no "null" ni guion raro). */}
                     <td className="px-4 py-2 tabular-nums text-muted-foreground">{d.medicalRecordNumber || ""}</td>
                     <td className="px-4 py-2">{d.patient || "—"}</td>
@@ -349,6 +376,12 @@ td{padding:5px 6px;border-top:1px solid #f0f0f0}
 `;
 
 type PrintLabels = Record<string, string>;
+const PS_KEYS = [
+  "title", "taxable", "exempt", "exonerated", "taxCollected", "taxWouldBe", "refunds", "net", "amount", "base",
+  "discount", "taxShort", "lines", "colNumber", "colRecord", "colPatient", "colBase", "colDiscount", "colTotal",
+  "colExonerated", "colRefunded", "colPayment", "totals", "none", "yes", "no", "check", "products", "services",
+  "dayNet", "squares", "gap",
+] as const satisfies readonly (keyof ProductSalesPrintLabels)[];
 function esc(s: unknown): string {
   return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 }
@@ -361,9 +394,12 @@ function buildPrintHtml(args: {
   resumen: CuadreResumen;
   reporte: ReporteDia;
   exoneradas: Array<{ id: string; numero: string | null; paciente: string | null }>;
+  productSalesHtml?: string;
+  // Etiquetas para la columna «División» de la tabla de documentos (solo el cuadre TOTAL del día la usa).
+  divisionLabels?: { consulta: string; general: string };
   L: PrintLabels;
 }): string {
-  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, L } = args;
+  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, divisionLabels, L, productSalesHtml } = args;
   const trib = reporte.tributario;
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
@@ -439,16 +475,19 @@ function buildPrintHtml(args: {
        </table>`
     : "";
 
+  const docConDivision = documentos.some((d) => d.division);
+  const divCell = (d: (typeof documentos)[number]) =>
+    docConDivision ? `<td class="dim">${esc(d.division ? (divisionLabels?.[d.division] ?? d.division) : "—")}</td>` : "";
   const docRows = documentos
     .map(
       (d) =>
-        `<tr><td class="mono">${esc(d.number || "—")}</td><td class="mono dim">${esc(d.medicalRecordNumber || "")}</td><td>${esc(d.patient || "—")}</td><td>${esc(d.user?.name || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
+        `<tr><td class="mono">${esc(d.number || "—")}</td>${divCell(d)}<td class="mono dim">${esc(d.medicalRecordNumber || "")}</td><td>${esc(d.patient || "—")}</td><td>${esc(d.user?.name || "—")}</td><td class="mono">${esc(d.formaPago || "—")}</td><td class="r mono">${esc(money(d.total))}</td></tr>`,
     )
     .join("");
   const docBlock = `<h2>${esc(L.documentos)} (${documentos.length})</h2>
     <table>
-      <thead><tr><th>${esc(L.colNumero)}</th><th>${esc(L.colRecord)}</th><th>${esc(L.colPaciente)}</th><th>${esc(L.colFacturo)}</th><th>${esc(L.colFormaPago)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
-      <tbody>${docRows || `<tr><td colspan="6" class="dim">—</td></tr>`}</tbody>
+      <thead><tr><th>${esc(L.colNumero)}</th>${docConDivision ? `<th>${esc(L.colDivision)}</th>` : ""}<th>${esc(L.colRecord)}</th><th>${esc(L.colPaciente)}</th><th>${esc(L.colFacturo)}</th><th>${esc(L.colFormaPago)}</th><th class="r">${esc(L.colTotal)}</th></tr></thead>
+      <tbody>${docRows || `<tr><td colspan="${docConDivision ? 7 : 6}" class="dim">—</td></tr>`}</tbody>
     </table>`;
 
   const devBlock = devoluciones.length
@@ -464,16 +503,18 @@ function buildPrintHtml(args: {
        </table>`
     : "";
 
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(titulo)} ${esc(divisionLabel)} ${esc(fechaLabel)}</title><style>${PRINT_CSS}</style></head><body>
+  const subtitulo = divisionLabel ? `${esc(titulo)} — ${esc(divisionLabel)}` : esc(titulo);
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${subtitulo} ${esc(fechaLabel)}</title><style>${PRINT_CSS}</style></head><body>
     <div class="head">
       <h1>${esc(centroNombre || titulo)}</h1>
-      <div class="sub">${esc(titulo)} — ${esc(divisionLabel)} · ${esc(fechaLabel)}</div>
+      <div class="sub">${subtitulo} · ${esc(fechaLabel)}</div>
     </div>
     <div class="cols">
       <div class="col"><h2>${esc(L.resumen)}</h2><table class="res"><tbody>${resumenRows}</tbody></table></div>
       <div class="col">${conteoBlock}</div>
     </div>
     ${tribBlock}
+    ${productSalesHtml ?? ""}
     ${cajerosBlock}
     ${docBlock}
     ${devBlock}

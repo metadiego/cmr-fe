@@ -46,7 +46,8 @@ export function ResumenPagos({
   emailing,
   onEmail,
 }: {
-  division: CajaDivision;
+  // Ausente en el cuadre TOTAL del día (handoff cuadre-unico-del-dia): no es de una sola división.
+  division?: CajaDivision;
   detalle: ReporteDia["detalle"];
   subtotalesTarjeta: Array<{ clave: string; labelKey: string; nombre: string; monto: number }>;
   ventas: ReporteDia["sales"];
@@ -239,9 +240,11 @@ export function ResumenPagos({
         )}
       </div>
 
-      <p className="text-right text-[11px] uppercase tracking-wide text-muted-foreground">
-        {t(`division.${division}`)}
-      </p>
+      {division && (
+        <p className="text-right text-[11px] uppercase tracking-wide text-muted-foreground">
+          {t(`division.${division}`)}
+        </p>
+      )}
     </div>
   );
 }

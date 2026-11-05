@@ -1203,7 +1203,9 @@
     "expandNav": "Expand menu",
     "patientDesk": "Patient Center",
     "paquetesVenta": "Sales packages",
-    "inventory_live_stock": "Live stock (scales)"
+    "inventory_live_stock": "Live stock (scales)",
+    "ahora_mismo": "Right now",
+    "productosExonerados": "Exonerated products (IVU)"
   },
   "admin": {
     "title": "Administration",
@@ -2239,7 +2241,8 @@
     "facturas": "Invoices",
     "devoluciones": "Returns",
     "caja": "Cash count",
-    "estadisticas": "Statistics"
+    "estadisticas": "Statistics",
+    "cuadreTotal": "Day total"
   },
   "inventario": {
     "prov": {
@@ -2993,7 +2996,11 @@
     "descuentoPasaBase": "The discount (${valor}) is larger than the subtotal (${base}).",
     "descuentoUsarBase": "Give the whole total: ${base}",
     "removeDiscount": "Remove discount",
-    "descuentoActual": "Discount applied: ${monto}"
+    "descuentoActual": "Discount applied: ${monto}",
+    "unitsAreasDays": "Quantity (areas × days)",
+    "unitsAreasDaysHint": "Computed: areas × days. Not typed.",
+    "packages": "Packages",
+    "packagesHint": "How many packages are sold (usually 1)."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",
@@ -3450,6 +3457,7 @@
       "numero": "Invoice #",
       "fecha": "Date",
       "paciente": "Client",
+      "record": "Record",
       "medico": "Doctor",
       "estado": "Status",
       "total": "Total",
@@ -3675,6 +3683,7 @@
       "documentos": "Documents of the day",
       "sinDocumentos": "No documents this day.",
       "colNumero": "No.",
+      "colDivision": "Division",
       "colRecord": "Record",
       "colPaciente": "Patient",
       "colFormaPago": "Payment method",
@@ -3697,6 +3706,26 @@
       },
       "colFacturo": "Billed by"
     },
+    "cuadre_total": {
+      "titulo": "Day total",
+      "tituloImpreso": "Day total reconciliation",
+      "help": "Both divisions, every cashier, one single count — checked against the sum of the two individual reconciliations. This is the sheet for treasury; the per-cashier and per-division reconciliations do not change.",
+      "sinAbrir": "This day's total reconciliation hasn't been opened yet.",
+      "comprobacion": {
+        "titulo": "Check",
+        "consulta": "Consultation",
+        "general": "General",
+        "suma": "Sum",
+        "dia": "Day",
+        "esperado": "Expected",
+        "contado": "Counted",
+        "fondo": "Fund",
+        "diferencia": "Difference"
+      },
+      "suma_cajeros": "Using the cashiers' sum",
+      "conteo_unico": "Do a single count",
+      "descuadre": "The day count differs by {monto}"
+    },
     "cuadreGeneral": {
       "title": "General cash-up",
       "help": "Daily sales by division and payment method. General bundles products, IV and laser; Consultation is separate. The general total sums both.",
@@ -3717,6 +3746,41 @@
         "volver": "Show all",
         "descuadre": "The per-biller sum does not match the day total ({total}). Report it — it is a backend defect."
       }
+    },
+    "productSales": {
+      "title": "Product sales (IVU)",
+      "taxable": "Taxable",
+      "exempt": "Exempt",
+      "exonerated": "Exonerated",
+      "taxCollected": "IVU collected",
+      "taxWouldBe": "IVU that was due",
+      "refunds": "Refunds",
+      "refundDocs": "{n} documents",
+      "net": "Product net",
+      "amount": "Amount",
+      "base": "Base",
+      "discount": "Discount",
+      "taxShort": "IVU",
+      "lines": "Lines",
+      "colNumber": "Invoice",
+      "colRecord": "Record",
+      "colPatient": "Patient",
+      "colBase": "Base",
+      "colDiscount": "Discount",
+      "colTotal": "Total",
+      "colExonerated": "Exonerated",
+      "colRefunded": "Refunded",
+      "colPayment": "Payment",
+      "totals": "Totals ({n})",
+      "none": "No product sales.",
+      "yes": "Yes",
+      "no": "No",
+      "check": "Reconciliation",
+      "products": "Products",
+      "services": "Services",
+      "dayNet": "Day net",
+      "squares": "Squares",
+      "gap": "Off by {amount}"
     }
   },
   "gruposFacturacion": {
@@ -3770,7 +3834,10 @@
     "copyFrom": "Copy the setup from another group",
     "copyFromPlaceholder": "Copy from…",
     "copyDone": "Copied {n} fields from “{origen}”.",
-    "copyNone": "“{origen}” has no extra fields to copy."
+    "copyNone": "“{origen}” has no extra fields to copy.",
+    "productSale": "Product sale (IVU)",
+    "productSaleHint": "Its lines count as product sales in the cash reconciliation: taxable, exempt, exonerated and state + municipal IVU. Also applies to products added later.",
+    "productSaleBadge": "Product"
   },
   "tb": {
     "acc": {
@@ -4961,7 +5028,8 @@
       "colFirst": "1st",
       "colFollow": "F/U",
       "colNet": "Billed",
-      "empty": "No consultations today."
+      "empty": "No consultations today.",
+      "noDoctor": "No doctor"
     },
     "prescriptions": {
       "title": "Prescriptions",
@@ -4998,5 +5066,37 @@
     },
     "noCenters": "You have no centers to view.",
     "error": "Could not load «Right now»."
+  },
+  "exoneratedProducts": {
+    "title": "IVU-exonerated products",
+    "help": "Product invoices that should have carried IVU and went out without it, with the IVU that was due per component. For Accounting's month-end.",
+    "from": "From",
+    "to": "To",
+    "search": "Search",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "export": "Export CSV",
+    "range": "From {from} to {to}",
+    "empty": "No exonerated product invoices in the range.",
+    "totals": "Totals ({n} invoices)",
+    "kpi": {
+      "invoices": "Invoices",
+      "exoneratedBase": "Exonerated base",
+      "taxWouldBe": "IVU that was due",
+      "total": "Total billed"
+    },
+    "col": {
+      "number": "Invoice",
+      "date": "Date",
+      "record": "Record",
+      "patient": "Patient",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "total": "Total",
+      "exoneratedBase": "Exonerated base",
+      "status": "Status",
+      "payment": "Payment"
+    }
   }
 }

@@ -8,6 +8,7 @@ import { getStatus, runNow, runOk, type ClinicStatus } from "@/lib/api/schedulin
 import { useResource } from "@/hooks/use-resource";
 import { toastError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { todayPR } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -110,7 +111,8 @@ function RunNowDialog({
 }) {
   const t = useTranslations("schedulingBridge.status");
   const tRoot = useTranslations();
-  const today = new Date().toISOString().slice(0, 10);
+  // `todayPR()`, no toISOString (UTC): after 8pm AST that's already tomorrow.
+  const today = todayPR();
   const [desde, setDesde] = React.useState(today);
   const [hasta, setHasta] = React.useState(today);
   const [busy, setBusy] = React.useState(false);

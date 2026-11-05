@@ -11,9 +11,13 @@ import type { Producto } from "./inventario";
 //   GET  /billing/columns/divisions           → {slug, labelKey}[] (data-driven, sin hardcode)
 // See docs/specs/fe-grupos-facturacion-admin-handoff.md.
 
-export type GrupoFacturacion = components["schemas"]["GrupoFacturacionEntity"];
-export type CrearGrupoPayload = components["schemas"]["CrearGrupoFacturacionDto"];
-export type ActualizarGrupoPayload = components["schemas"]["UpdateGrupoFacturacionDto"];
+// `isProductSale` (BE PR #468, in prod 05-nov-2026; verified on GET /billing/columns/groups): the group's
+// lines are PRODUCT sales for the cuadre's IVU section. Not in schema.d.ts yet — the prod OpenAPI regen
+// is blocked on unrelated missing entities (see right-now handoff); added here until it regenerates.
+type ProductSaleFlag = { isProductSale?: boolean };
+export type GrupoFacturacion = components["schemas"]["GrupoFacturacionEntity"] & ProductSaleFlag;
+export type CrearGrupoPayload = components["schemas"]["CrearGrupoFacturacionDto"] & ProductSaleFlag;
+export type ActualizarGrupoPayload = components["schemas"]["UpdateGrupoFacturacionDto"] & ProductSaleFlag;
 
 // Esquema de columnas de línea, por grupo (los 7 roles de fábrica + los campos EXTRA que definen
 // qué se le pregunta al empleado al facturar y cuáles multiplican el precio). Contrato verificado

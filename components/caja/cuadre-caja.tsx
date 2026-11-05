@@ -27,7 +27,8 @@ import {
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
-import { totalConteo, estadoCuadreVivo, diferenciaCaja } from "@/lib/caja/totales";
+import { todayPR } from "@/lib/format/fecha";
+import { totalConteo, estadoCuadreVivo, diferenciaCaja, subtotalesTarjeta as calcSubtotalesTarjeta } from "@/lib/caja/totales";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
 import { useMe } from "@/hooks/use-me";
@@ -86,7 +87,10 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   // Editar fechas ANTERIORES está bloqueado por defecto (seguridad); lo habilita el permiso
   // `caja.retroactivo` (RBAC puro, data-driven — ya no colgado de isGerencia/caja.ver_todos).
   const puedeRetroactivo = can("caja.retroactivo");
-  const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // `todayPR()`, NO `new Date().toISOString()`: esta última da el día en UTC, que ya es "mañana" en
+  // Puerto Rico después de las 8pm AST (bug real, 05-nov-2026, encontrado al armar el cuadre total
+  // — ver lib/format/fecha.ts).
+  const hoy = React.useMemo(() => todayPR(), []);
   const [fecha, setFecha] = React.useState(hoy);
   const [scope, setScope] = React.useState<Scope | null>(null);
   const [filterSlot, setFilterSlot] = React.useState<HTMLDivElement | null>(null);
@@ -344,32 +348,11 @@ function Editor({
   const sinContar = !cerrado && vivo.sinContar;
   const porCajero = reporte.porCajero ?? [];
 
-  // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): grupos configurables cuyas
-  // formas son subconjunto ESTRICTO del grupo de tarjetas (el que suma detalle.totalTarjetas).
-  // 100% data-driven (config `grupos_metodo_pago` + `porGrupo`), sin nombres hardcodeados.
-  const subtotalesTarjeta = React.useMemo(() => {
-    const parent = grupos.find(
-      (g) =>
-        (g.paymentMethods?.length ?? 0) > 0 &&
-        (reporte.porGrupo[g.slug] ?? null) === reporte.detalle.totalTarjetas,
-    );
-    if (!parent) return [];
-    const parentFormas = new Set(parent.paymentMethods ?? []);
-    return grupos
-      .filter(
-        (g) =>
-          g.slug !== parent.slug &&
-          (g.paymentMethods?.length ?? 0) > 0 &&
-          (g.paymentMethods ?? []).every((f) => parentFormas.has(f)),
-      )
-      .map((g) => ({
-        clave: g.slug,
-        labelKey: g.labelKey,
-        nombre: g.name,
-        monto: reporte.porGrupo[g.slug] ?? 0,
-      }))
-      .filter((s) => s.monto !== 0);
-  }, [grupos, reporte]);
+  // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): ver lib/caja/totales.ts.
+  const subtotalesTarjeta = React.useMemo(
+    () => calcSubtotalesTarjeta(grupos, reporte.porGrupo, reporte.detalle.totalTarjetas),
+    [grupos, reporte],
+  );
   // Ya vienen acotadas a esta (fecha × división) por el BE (PR #439): vacío = "nadie cobró", no un
   // roster roto — se pinta el aviso, sin fallback que lo oculte.
   const opcionesCajero: Array<{ usuarioId: string; nombre: string }> = cajeros.map((c) => ({
@@ -575,7 +558,7 @@ function Editor({
           En el consolidado los números del resumen son la UNIÓN de cajeros; el detalle/tributario del BE
           es del reporte del día (mismos filtros: división + centro). Handoff HANDOFF-pie-del-cuadre. */}
       <CuadreDetalle
-        division={division}
+        division={t(`division.${division}`)}
         fecha={fecha}
         centroNombre={centroNombre}
         reporte={reporte}
