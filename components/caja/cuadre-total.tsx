@@ -171,8 +171,12 @@ function Editor({
 
   const cerrado = esSoloLecturaCuadreTotal(reporte.dayReconciliation?.status);
   const [contandoUnico, setContandoUnico] = React.useState(reporte.dayReconciliation?.ownCount ?? false);
+  // El conteo único NO es para "cuadrar" desde cero: los cajeros ya contaron el suyo al cerrar su
+  // propia caja (consulta/general). `conteoEfectivo.lines` del BE ya viene UNIFICADO — la suma de
+  // esos conteos, o el override del gerente si ya hizo uno (owner, 05-nov-2026) — así que se siembra
+  // SIEMPRE de ahí, no solo cuando `ownCount` es true. Sin esto, la grilla se veía vacía apenas se
+  // abría la pantalla aunque los cajeros ya hubieran contado, como si hubiera que repetir el trabajo.
   const [conteo, setConteo] = React.useState<Record<string, number>>(() => {
-    if (!reporte.dayReconciliation?.ownCount) return {};
     const lines = reporte.conteoEfectivo?.lines ?? [];
     return Object.fromEntries(
       lines.filter((l): l is typeof l & { denominationId: string } => !!l.denominationId).map((l) => [l.denominationId, l.quantity]),
@@ -297,6 +301,7 @@ function Editor({
             denominaciones={denoms}
             cantidades={conteo}
             disabled={!contarHabilitado}
+            hint={!contandoUnico ? tCaja("count.consolidatedHint") : undefined}
             saveState={contarHabilitado ? autosave.state : "idle"}
             onChange={(id, cantidad) => setConteo((prev) => ({ ...prev, [id]: cantidad }))}
           />
