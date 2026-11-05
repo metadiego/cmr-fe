@@ -38,6 +38,18 @@ test("new sale: nothing active and several readable → undecided (the sale scre
   assert.equal(clinicForNewSale(null, [BAY, CAG], null), null);
 });
 
+test("new sale on «Ambos»: several readable clinics → undecided, never the working clinic", () => {
+  assert.equal(clinicForNewSale([BAY, CAG], [BAY, CAG], BAY, true), null);
+  assert.equal(clinicForNewSale(null, [BAY, CAG], BAY, true), null);
+  // Readable clinics still loading: not the working clinic either.
+  assert.equal(clinicForNewSale(null, [], BAY, true), null);
+});
+
+test("new sale on «Ambos»: one readable clinic is not a question", () => {
+  assert.equal(clinicForNewSale([CAG], [CAG], BAY, true), CAG);
+  assert.equal(clinicForNewSale(null, [CAG], BAY, true), CAG);
+});
+
 test("row clinics: distinct, in order, skipping rows without a clinic", () => {
   assert.deepEqual(rowClinicIds([{ clinicId: CAG }, { clinicId: BAY }, { clinicId: CAG }, { clinicId: null }, {}]), [CAG, BAY]);
 });

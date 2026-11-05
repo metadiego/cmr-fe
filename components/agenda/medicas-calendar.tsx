@@ -204,12 +204,12 @@ export function MedicasCalendar() {
           )}
           <div className="ml-auto flex items-center gap-2">
             {/* «Nueva Cita» in ONE clinic (the single ticked one, else the active one), by the create
-                permission THERE; it says which when the person reads several. */}
+                permission THERE; it says which when the person reads several. On «Ambos» the form asks. */}
             {clinics.canCreate && (
               <Button onClick={() => setModal({ fecha: toISO(new Date()) })}>
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={2} data-icon="inline-start" />
                 {t("new")}
-                {clinics.showColumn && <span className="opacity-70">· {clinics.shortOf(clinics.oneName)}</span>}
+                {clinics.showColumn && clinics.bookIn && <span className="opacity-70">· {clinics.shortOf(clinics.oneName)}</span>}
               </Button>
             )}
           </div>
@@ -293,7 +293,7 @@ export function MedicasCalendar() {
           fecha={modal.fecha}
           cita={modal.cita}
           pacienteInicial={modal.paciente}
-          centroId={clinics.one || undefined}
+          centroId={clinics.bookIn}
           tipos={tipos}
           medicos={medicosCrear}
           canal="callcenter"

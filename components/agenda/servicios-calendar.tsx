@@ -265,8 +265,8 @@ export function ServiciosCalendar() {
           open
           fecha={modal.fecha}
           paciente={modal.paciente}
-          centro={clinics.one || undefined}
-          centroNombre={clinics.showColumn ? clinics.oneName : undefined}
+          centro={clinics.bookIn}
+          centroNombre={clinics.showColumn && clinics.bookIn ? clinics.oneName : undefined}
           onOpenChange={(o) => !o && setModal(null)}
           onSaved={refresh}
         />

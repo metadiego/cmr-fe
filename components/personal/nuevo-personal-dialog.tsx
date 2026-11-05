@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 import { createPersonal } from "@/lib/api/personal";
 import { toastError } from "@/lib/api/errors";
+import { createClinicReady } from "@/lib/create-clinic";
+import { isClinicViewAll } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,9 +40,11 @@ export function NuevoPersonalDialog({
   const [busy, setBusy] = React.useState(false);
   const [picked, setPicked] = React.useState("");
   const centro = picked || defaultClinicId || undefined;
+  // On «Ambos» `defaultClinicId` is empty: nothing is sent until a clinic is picked (lib/create-clinic.ts).
+  const clinicReady = createClinicReady(centro ?? "", centers.length, isClinicViewAll());
 
   async function crear() {
-    if (busy || !name.trim()) return;
+    if (busy || !name.trim() || !clinicReady) return;
     setBusy(true);
     try {
       const creada = await createPersonal({ name: name.trim(), lastName: lastName.trim() || null }, centro);
@@ -73,7 +77,7 @@ export function NuevoPersonalDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={busy}>{tRoot("common.cancel")}</Button>
-          <Button onClick={crear} disabled={busy || !name.trim()}>{busy ? t("guardando") : t("crear")}</Button>
+          <Button onClick={crear} disabled={busy || !name.trim() || !clinicReady}>{busy ? t("guardando") : t("crear")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

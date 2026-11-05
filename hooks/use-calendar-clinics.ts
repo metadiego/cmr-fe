@@ -34,6 +34,11 @@ export function useCalendarClinics(readPermission: string, writePermission: stri
     shownIds: filter.choice ?? readable,
     one,
     oneName: filter.nameOf(one),
+    /**
+     * The clinic a booking from the month starts in: `one`, except on «Ambos» for someone who reads
+     * several clinics — then none, and the booking form asks (docs/specs/selector-de-centros-arriba.md).
+     */
+    bookIn: filter.viewAll && filter.multiClinic ? undefined : (one ?? undefined),
     canCreate,
     shortOf,
     // Only for someone who reads several clinics; with one, the day view opens as it always did.

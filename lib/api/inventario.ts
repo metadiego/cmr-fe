@@ -382,11 +382,12 @@ export interface RecibirCompraLoteResult {
   documentId: string;
   lines: Array<{ lot?: unknown; movement?: unknown }>;
 }
-export function recibirCompraLote(payload: RecibirCompraLotePayload): Promise<RecibirCompraLoteResult> {
+// `clinicId`: the warehouse's clinic (lib/warehouse-clinic.ts), sent as X-Tenant-ID; undefined = the working one.
+export function recibirCompraLote(payload: RecibirCompraLotePayload, clinicId?: string): Promise<RecibirCompraLoteResult> {
   return apiFetch<RecibirCompraLoteResult>(`/inventory/operations/receive-purchase-lot`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, clinicId);
 }
 
 // Recepción DESDE el papel del proveedor (foto/pegado → emparejar → confirmar). El emparejamiento se
@@ -451,11 +452,12 @@ export function confirmarRecepcion(payload: {
   effectiveDate?: string;
   notes?: string;
   lines: ConfirmarRecepcionLinea[];
-}): Promise<ConfirmarRecepcionResult> {
+}, clinicId?: string): Promise<ConfirmarRecepcionResult> {
+  // `clinicId`: the warehouse's clinic (lib/warehouse-clinic.ts); undefined = the working one.
   return apiFetch<ConfirmarRecepcionResult>(`/inventory/receipts/confirm`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, clinicId);
 }
 
 // Recibo de una recepción por lote (para volver a verlo tras guardar). Perm inventario.read.

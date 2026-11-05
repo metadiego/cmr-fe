@@ -96,11 +96,12 @@ export function listPlantillas(): Promise<Plantilla[]> {
   return apiFetch<Plantilla[]>(`/communications/notifications/templates`);
 }
 // Alta de plantilla — endpoint del dominio único (RBAC: notificaciones.config; el BE es la autoridad).
-export function crearPlantilla(payload: CreatePlantillaPayload): Promise<Plantilla> {
+// `clinicId`: the clinic it is created in (X-Tenant-ID); undefined = the working clinic.
+export function crearPlantilla(payload: CreatePlantillaPayload, clinicId?: string): Promise<Plantilla> {
   return apiFetch<Plantilla>(`/communications/notifications/templates`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, clinicId);
 }
 
 // SSE de la campana (via fetch stream; EventSource no puede mandar Authorization).

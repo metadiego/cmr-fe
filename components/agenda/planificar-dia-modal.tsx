@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler";
+import { CreateClinicGate } from "@/components/kit/create-clinic-gate";
 import type { Paciente } from "@/lib/api/pacientes";
 
 // «Planificar el día» desde el calendario de Citas de servicio: al pulsar una fecha (o un paciente) se abre
@@ -39,15 +40,20 @@ export function PlanificarDiaModal({
         <DialogHeader>
           <DialogTitle>{centroNombre ? `${t("title")} · ${centroNombre}` : t("title")}</DialogTitle>
         </DialogHeader>
-        <TherapyDayScheduler
-          defaultDate={fecha}
-          defaultPatient={paciente}
-          centro={centro}
-          onBooked={({ close }) => {
-            onSaved();
-            if (close) onOpenChange(false);
-          }}
-        />
+        {/* Opened without a clinic on «Ambos» (the month calendar): it asks first. */}
+        <CreateClinicGate permission="frontdesk.create" clinicId={centro}>
+          {(clinicId) => (
+            <TherapyDayScheduler
+              defaultDate={fecha}
+              defaultPatient={paciente}
+              centro={clinicId}
+              onBooked={({ close }) => {
+                onSaved();
+                if (close) onOpenChange(false);
+              }}
+            />
+          )}
+        </CreateClinicGate>
       </DialogContent>
     </Dialog>
   );

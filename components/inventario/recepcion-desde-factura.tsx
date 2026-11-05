@@ -18,6 +18,7 @@ import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { useResource } from "@/hooks/use-resource";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { warehouseClinic, warehouseLabel } from "@/lib/warehouse-clinic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -144,7 +145,7 @@ export function RecepcionDesdeFactura() {
           ...(f.lote.trim() ? { lotNumber: f.lote.trim() } : {}),
           ...(f.venc ? { expirationDate: f.venc } : {}),
         })),
-      });
+      }, warehouseClinic(almacenes, almacenId)); // in the warehouse's clinic (lib/warehouse-clinic.ts)
       setAprendidos(r.aliasAprendidos ?? 0);
       toast.success(t("recibido"));
     } catch (e) {
@@ -254,7 +255,7 @@ export function RecepcionDesdeFactura() {
             <Campo label={t("field.almacen")}>
               <Select value={almacenId} onValueChange={setAlmacenId}>
                 <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selAlmacen")} /></SelectTrigger>
-                <SelectContent>{almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}</SelectContent>
+                <SelectContent>{almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{warehouseLabel(a, almacenes)}</SelectItem>)}</SelectContent>
               </Select>
             </Campo>
             <Campo label={t("field.proveedor")}>
