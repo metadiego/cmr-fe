@@ -24,6 +24,7 @@ import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
+import { useFillViewportHeight } from "@/hooks/use-fill-viewport-height";
 import { PillsSkeleton } from "@/components/kit/skeletons";
 import { AgendaSkeleton, DiaRowsSkeleton, LegendDotsSkeleton } from "@/components/calendario/calendario-skeleton";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -156,6 +157,16 @@ export function Calendario() {
   const centroIdCrear = centro.centroIdCrear;
   const modalCommon = { cats, catLabel, tRoot, tc, t };
 
+  // Month and week grids run to the bottom of the window (desktop), leaving room for the legend
+  // below; their rows stretch to share the height, and scroll inside the grid if it gets too short.
+  // One ref per grid: the two are different elements, and a shared ref would keep measuring the
+  // one that just unmounted when the view switches.
+  const monthRef = React.useRef<HTMLDivElement>(null);
+  const weekRef = React.useRef<HTMLDivElement>(null);
+  const monthHeight = useFillViewportHeight(monthRef, { enabled: vista === "mes" });
+  const weekHeight = useFillViewportHeight(weekRef, { enabled: vista === "semana" });
+  const gridHeight = vista === "mes" ? monthHeight : vista === "semana" ? weekHeight : undefined;
+
   return (
     <PageContainer>
       <PageHeader title={t("pageTitle")} />
@@ -200,7 +211,12 @@ export function Calendario() {
 
       {/* MES */}
       {vista === "mes" && (
-        <div aria-busy={cargandoEventos || undefined} className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
+        <div
+          ref={monthRef}
+          aria-busy={cargandoEventos || undefined}
+          style={gridHeight ? { height: gridHeight, gridTemplateRows: "auto repeat(6, minmax(104px, 1fr))" } : undefined}
+          className={cn("grid grid-cols-7 gap-px rounded-md ring-1 ring-foreground/10 bg-border", gridHeight ? "overflow-y-auto" : "overflow-hidden")}
+        >
           {cargandoEventos && <span className="sr-only">{tc("loading")}</span>}
           {diasSemanaLbl.map((d, i) => (
             <div key={i} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{d}</div>
@@ -211,7 +227,7 @@ export function Calendario() {
             const evs = eventosDe(ds);
             return (
               <button key={ds} type="button" onClick={() => puedeCrear && setModal({ dia: ds })}
-                className={cn("min-h-[104px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", !delMes && "bg-muted/20 text-muted-foreground")}>
+                className={cn("min-h-[104px] overflow-hidden bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", !delMes && "bg-muted/20 text-muted-foreground")}>
                 <div className={cn("mb-1 inline-flex size-6 items-center justify-center rounded-full text-xs font-medium", ds === hoyStr() && "bg-primary text-primary-foreground")}>{cel.getDate()}</div>
                 {cargandoEventos ? (delMes && <PillsSkeleton seed={idx} />) : (
                 <div className="space-y-0.5">
@@ -227,7 +243,12 @@ export function Calendario() {
 
       {/* SEMANA */}
       {vista === "semana" && (
-        <div aria-busy={cargandoEventos || undefined} className="grid grid-cols-7 gap-px overflow-hidden rounded-md ring-1 ring-foreground/10 bg-border">
+        <div
+          ref={weekRef}
+          aria-busy={cargandoEventos || undefined}
+          style={gridHeight ? { height: gridHeight, gridTemplateRows: "auto minmax(240px, 1fr)" } : undefined}
+          className={cn("grid grid-cols-7 gap-px rounded-md ring-1 ring-foreground/10 bg-border", gridHeight ? "overflow-y-auto" : "overflow-hidden")}
+        >
           {cargandoEventos && <span className="sr-only">{tc("loading")}</span>}
           {celdasSemana.map((cel) => (
             <div key={ymd(cel)} className="bg-muted/60 px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -239,7 +260,7 @@ export function Calendario() {
             const evs = eventosDe(ds);
             return (
               <button key={ds} type="button" onClick={() => puedeCrear && setModal({ dia: ds })}
-                className={cn("min-h-[420px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", ds === hoyStr() && "ring-1 ring-inset ring-primary/40")}>
+                className={cn(gridHeight ? "min-h-0 overflow-y-auto" : "min-h-[420px]", "bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", ds === hoyStr() && "ring-1 ring-inset ring-primary/40")}>
                 {cargandoEventos ? <PillsSkeleton seed={idx} max={4} /> : (
                 <div className="space-y-1">
                   {evs.map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
@@ -287,7 +308,7 @@ export function Calendario() {
 
       {/* Leyenda */}
       {(catsRes.state.kind === "loading" || cats.length > 0) && (
-        <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
           {catsRes.state.kind === "loading" && <LegendDotsSkeleton />}
           {cats.map((c) => (
             <span key={c.id} className="inline-flex items-center gap-1.5"><span className={cn("size-2.5 rounded-full", (COLOR[c.color] || COLOR.gris).dot)} />{catLabel(c)}</span>
