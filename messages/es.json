@@ -5043,5 +5043,37 @@
     },
     "noCenters": "No tienes centros para ver.",
     "error": "No se pudo cargar «Ahora mismo»."
+  },
+  "exoneratedProducts": {
+    "title": "Productos exonerados de IVU",
+    "help": "Facturas de productos que debían llevar IVU y salieron sin él, con el IVU que tocaba por componente. Para el cierre de mes de Contabilidad.",
+    "from": "Desde",
+    "to": "Hasta",
+    "search": "Buscar",
+    "thisMonth": "Este mes",
+    "lastMonth": "Mes pasado",
+    "export": "Exportar CSV",
+    "range": "Del {from} al {to}",
+    "empty": "No hay facturas de productos exoneradas en el rango.",
+    "totals": "Totales ({n} facturas)",
+    "kpi": {
+      "invoices": "Facturas",
+      "exoneratedBase": "Base exonerada",
+      "taxWouldBe": "IVU que tocaba",
+      "total": "Total facturado"
+    },
+    "col": {
+      "number": "Factura",
+      "date": "Fecha",
+      "record": "Récord",
+      "patient": "Paciente",
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "shipping": "Envío",
+      "total": "Total",
+      "exoneratedBase": "Base exonerada",
+      "status": "Estatus",
+      "payment": "Forma de pago"
+    }
   }
 }

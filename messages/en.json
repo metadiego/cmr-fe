@@ -5043,5 +5043,37 @@
     },
     "noCenters": "You have no centers to view.",
     "error": "Could not load «Right now»."
+  },
+  "exoneratedProducts": {
+    "title": "IVU-exonerated products",
+    "help": "Product invoices that should have carried IVU and went out without it, with the IVU that was due per component. For Accounting's month-end.",
+    "from": "From",
+    "to": "To",
+    "search": "Search",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "export": "Export CSV",
+    "range": "From {from} to {to}",
+    "empty": "No exonerated product invoices in the range.",
+    "totals": "Totals ({n} invoices)",
+    "kpi": {
+      "invoices": "Invoices",
+      "exoneratedBase": "Exonerated base",
+      "taxWouldBe": "IVU that was due",
+      "total": "Total billed"
+    },
+    "col": {
+      "number": "Invoice",
+      "date": "Date",
+      "record": "Record",
+      "patient": "Patient",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "total": "Total",
+      "exoneratedBase": "Exonerated base",
+      "status": "Status",
+      "payment": "Payment"
+    }
   }
 }
