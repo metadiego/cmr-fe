@@ -14,6 +14,7 @@ import {
 } from "@/lib/api/frontdesk";
 import type { Servicio } from "@/lib/api/servicios";
 import { fmtHora, POSTACCION_PROGRAMAR, STAMP_FIELD } from "@/components/frontdesk/frontdesk-board.helpers";
+import { requiredStateMet } from "@/lib/frontdesk/required-state";
 import { editarCelda, ejecutarAccion, type Opcion, type Transicion } from "@/lib/api/tablero";
 import { useCan } from "@/hooks/use-can";
 import { usePersistenciaToast } from "@/hooks/use-persistencia-toast";
@@ -276,10 +277,8 @@ export function FilaSesion({
       const conSaldo = esDosis && compradas.length > 0;
       const shownOpt = ops.find((o) => o.value === shown);
       const label = shownOpt ? (esDosis ? etiquetaDosis(shownOpt) : shownOpt.label) : (raw || undefined);
-      // Gate data-driven: si la columna declara render.requiereEstado, el select se deshabilita hasta que
-      // la sesión alcanzó ese estado (p. ej. técnico bloqueado hasta 'presente'). Genérico, sin hardcode.
-      const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado;
-      const estadoNoCumplido = !!reqEstado && !(sesion && STAMP_FIELD[reqEstado] && sesion[STAMP_FIELD[reqEstado]]);
+      const reqEstado = (c.render as { requiereEstado?: string } | null)?.requiereEstado; // data-driven gate (lib/frontdesk/required-state.ts)
+      const estadoNoCumplido = !requiredStateMet({ required: reqEstado, sessionStamp: reqEstado && STAMP_FIELD[reqEstado] ? sesion?.[STAMP_FIELD[reqEstado]] : null, rowState: estadoActual, rowStamp: reqEstado ? fila[reqEstado] : null });
       return (
         <Select
           value={shown}
