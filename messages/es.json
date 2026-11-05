@@ -1195,7 +1195,8 @@
     "expandNav": "Desplegar menú",
     "patientDesk": "Centro de Pacientes",
     "paquetesVenta": "Paquetes de venta",
-    "inventory_live_stock": "Stock live (balanzas)"
+    "inventory_live_stock": "Stock live (balanzas)",
+    "ahora_mismo": "Ahora mismo"
   },
   "admin": {
     "title": "Administración",

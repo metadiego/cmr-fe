@@ -1195,7 +1195,8 @@
     "expandNav": "Expand menu",
     "patientDesk": "Patient Center",
     "paquetesVenta": "Sales packages",
-    "inventory_live_stock": "Live stock (scales)"
+    "inventory_live_stock": "Live stock (scales)",
+    "ahora_mismo": "Right now"
   },
   "admin": {
     "title": "Administration",
