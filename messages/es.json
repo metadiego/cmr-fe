@@ -3444,6 +3444,7 @@
       "numero": "Nº Factura",
       "fecha": "Fecha",
       "paciente": "Cliente",
+      "record": "Récord",
       "medico": "Médico",
       "estado": "Estado",
       "total": "Total",
