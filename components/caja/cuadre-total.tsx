@@ -202,10 +202,6 @@ function Editor({
     try {
       await autosave.flush();
       const abierto = await abrirCuadreTotal(fecha);
-      // BUG CONOCIDO del BE (verificado en vivo 05-nov-2026, mismo defecto que ya tenía
-      // /cash/reconciliations/:id/count): `conteos: []` responde 400 "conteos should not be
-      // empty", contradiciendo el propio handoff ("un conteo vacío vuelve a la suma"). Reportado
-      // al BE. Hasta que lo arreglen, esto falla con un error visible en vez de quedarse mudo.
       await contarCuadreTotal(abierto.id, []);
       setContandoUnico(false);
       setConteo({});
