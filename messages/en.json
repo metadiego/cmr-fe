@@ -5005,7 +5005,8 @@
       "colFirst": "1st",
       "colFollow": "F/U",
       "colNet": "Billed",
-      "empty": "No consultations today."
+      "empty": "No consultations today.",
+      "noDoctor": "No doctor"
     },
     "prescriptions": {
       "title": "Prescriptions",

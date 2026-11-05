@@ -5005,7 +5005,8 @@
       "colFirst": "1ª vez",
       "colFollow": "Seg.",
       "colNet": "Facturado",
-      "empty": "Sin consultas hoy."
+      "empty": "Sin consultas hoy.",
+      "noDoctor": "Sin médico"
     },
     "prescriptions": {
       "title": "Recetas",

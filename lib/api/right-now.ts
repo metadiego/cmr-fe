@@ -26,13 +26,16 @@ export type RightNowPatients = {
 };
 
 export type RightNowDoctor = {
-  doctorId: string;
+  doctorId: string | null;
   name: string | null;
   total: number;
   attended: number;
   firstVisit: number;
   followUp: number;
   net: number;
+  // Fila de cierre "lo facturado sin médico" (BE PR #474, handoff-ahora-mismo-sin-medico): solo
+  // presente en esa fila (doctorId/name null). Pintar t(labelKey) en vez de name.
+  labelKey?: string;
 };
 
 export type RightNowWaiting = { medicalRecordNumber: string | null; patient: string; since: string | null };
