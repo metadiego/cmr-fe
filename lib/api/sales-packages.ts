@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 import type { FacturaItem } from "./facturas";
 
 // Sales packages per center (e.g. «Láser IV · 12 terapias»: 12 sessions for $1,440). The BE computes
@@ -9,15 +9,13 @@ export type SalesPackage = components["schemas"]["SalesPackageResponseDto"];
 export type CreateSalesPackagePayload = components["schemas"]["CreateSalesPackageDto"];
 export type UpdateSalesPackagePayload = components["schemas"]["UpdateSalesPackageDto"];
 
-// `centroId` resolves the permission in that center (X-Tenant-ID) and also goes as `centerIds`.
-export function listSalesPackages(
+// `centroId` resolves the permission in that center (X-Tenant-ID) and also goes as `centerIds`; without
+// it, the top bar's clinic (every readable one on «Ambos»).
+export async function listSalesPackages(
   opts: { centroId?: string; includeInactive?: boolean } = {},
 ): Promise<SalesPackage[]> {
-  const sp = new URLSearchParams();
-  if (opts.centroId) sp.set("centerIds", opts.centroId);
-  if (opts.includeInactive) sp.set("includeInactive", "true");
-  const q = sp.toString();
-  return apiFetch<SalesPackage[]>(`/billing/sales-packages${q ? `?${q}` : ""}`, {}, opts.centroId);
+  const q = opts.includeInactive ? "?includeInactive=true" : "";
+  return apiFetch<SalesPackage[]>(await oneCenterPath(`/billing/sales-packages${q}`, opts.centroId), {}, opts.centroId);
 }
 
 export function createSalesPackage(payload: CreateSalesPackagePayload, centroId?: string): Promise<SalesPackage> {

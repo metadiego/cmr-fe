@@ -15,6 +15,20 @@ export function readCenterIds(
 }
 
 /**
+ * The `CenterChoice` of a read that takes both a screen's picked center and an explicit list: the list
+ * when it names clinics, else the picked center, else — an explicit empty list — every clinic in scope
+ * (`null`), else `undefined`: the top bar decides (its clinic, or every readable one on «Ambos»).
+ */
+export function readChoice(
+  centroId: string | undefined,
+  centerIds: readonly string[] | undefined,
+): CenterChoice {
+  if (centerIds?.length) return [...centerIds];
+  if (centroId) return centroId;
+  return centerIds ? null : undefined;
+}
+
+/**
  * The center a one-center read is about, as `centerIds`: the picked one (`tenant`), else the one the
  * X-Tenant-ID header carries (the active center, else the session's). `tenant === null` is a combined
  * view: nothing is sent and the BE reads every center in scope. Keeps one-center screens on one

@@ -1,5 +1,5 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 
 // Live stock from the inventory scales (Pasti). INFORMATIVE ONLY: the BE never moves book stock with
 // it, and book stock includes the displays outside the warehouse, so the two numbers differ on
@@ -49,14 +49,14 @@ export type LiveWarehouse = {
 
 export type LiveStock = { generatedAt: string; warehouses: LiveWarehouse[] };
 
-// `centroId` resolves the permission in that center (X-Tenant-ID) and also goes as `centerIds`.
-export function getLiveStock(opts: { centroId?: string; warehouseId?: string; productId?: string } = {}): Promise<LiveStock> {
+// `centroId` resolves the permission in that center (X-Tenant-ID) and also goes as `centerIds`; without
+// it, the top bar's clinic (every readable one on «Ambos»).
+export async function getLiveStock(opts: { centroId?: string; warehouseId?: string; productId?: string } = {}): Promise<LiveStock> {
   const sp = new URLSearchParams();
-  if (opts.centroId) sp.set("centerIds", opts.centroId);
   if (opts.warehouseId) sp.set("warehouseId", opts.warehouseId);
   if (opts.productId) sp.set("productId", opts.productId);
   const q = sp.toString();
-  return apiFetch<LiveStock>(`/inventory/scale/live-stock${q ? `?${q}` : ""}`, {}, opts.centroId);
+  return apiFetch<LiveStock>(await oneCenterPath(`/inventory/scale/live-stock${q ? `?${q}` : ""}`, opts.centroId), {}, opts.centroId);
 }
 
 export type StockEventsFilter = {
@@ -68,16 +68,15 @@ export type StockEventsFilter = {
   limit?: number;
 };
 
-// Newest first.
-export function listScaleStockEvents(f: StockEventsFilter): Promise<ScaleStockEvent[]> {
+// Newest first. Its clinic: `centroId`, else the top bar's (every readable one on «Ambos»).
+export async function listScaleStockEvents(f: StockEventsFilter): Promise<ScaleStockEvent[]> {
   const sp = new URLSearchParams();
-  if (f.centroId) sp.set("centerIds", f.centroId);
   if (f.warehouseId) sp.set("warehouseId", f.warehouseId);
   if (f.deviceId) sp.set("deviceId", f.deviceId);
   if (f.pad != null) sp.set("pad", String(f.pad));
   if (f.supplierPresentationId) sp.set("supplierPresentationId", f.supplierPresentationId);
   sp.set("limit", String(f.limit ?? 100));
-  return apiFetch<ScaleStockEvent[]>(`/inventory/scale/stock-events?${sp}`, {}, f.centroId);
+  return apiFetch<ScaleStockEvent[]>(await oneCenterPath(`/inventory/scale/stock-events?${sp}`, f.centroId), {}, f.centroId);
 }
 
 // Retires a scale: deletes ALL its stock events in the center (e.g. a test device). Book stock is never

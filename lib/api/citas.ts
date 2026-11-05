@@ -1,8 +1,8 @@
 import type { components } from "./schema";
-import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchPaged, apiFetchEnvelope, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
 import { getCentrosDondePuedo } from "./centers";
-import { readCenterIds, tenantOf } from "@/lib/clinic-read-scope";
+import { readChoice, tenantOf, type CenterChoice } from "@/lib/clinic-read-scope";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
 //
@@ -76,28 +76,35 @@ export interface ListCitasParams {
   centerIds?: string[]; // the centers to read; each needs citas.read THERE
 }
 
-// Query string of a read: the filters plus `centerIds` (lib/clinic-read-scope.ts). The screen's picked
-// center (`centroId`) goes as `centerIds`, not as X-Tenant-ID, so the read stays on it whatever the BE's
-// default is. Handoff docs/specs/clinic-read-scope-handoff-fe.md.
-function readQuery(filters: object, centroId?: string, centerIds?: string[]): URLSearchParams {
+// Query string of a read: the filters only. Its clinics go as `centerIds` through `oneCenterPath`
+// (lib/clinic-read-scope.ts `readChoice`): explicit `centerIds`, else the screen's picked center
+// (`centroId`), else the top bar's clinic (nothing on «Ambos»). Never by X-Tenant-ID alone: the BE reads
+// every clinic in scope when none is named. docs/specs/selector-de-centros-arriba.md.
+function readQuery(filters: object): URLSearchParams {
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(filters)) {
     if (v) sp.set(k, String(v));
   }
-  const ids = readCenterIds(centroId, centerIds);
-  if (ids) sp.set("centerIds", ids.join(","));
   return sp;
 }
 
-// `centroId` (optional): the center picked on the screen, without moving the session's.
-export function listCitas(
+// `path` with the read's clinics, and the X-Tenant-ID that goes with them (a clinic of the read).
+async function scopedRead(path: string, centroId?: string, centerIds?: string[]): Promise<[string, string | undefined]> {
+  const choice: CenterChoice = readChoice(centroId, centerIds);
+  return [await oneCenterPath(path, choice), tenantOf(choice)];
+}
+
+// `centroId` (optional): the center picked on the screen, without moving the session's. Neither it nor
+// `centerIds`: the top bar's clinic (every readable one on «Ambos»).
+export async function listCitas(
   params: ListCitasParams = {},
   centroId?: string,
 ): Promise<Paginated<Cita>> {
   const { page = 1, limit = 100, centerIds, ...filters } = params;
-  const sp = readQuery({ page, limit, ...filters }, centroId, centerIds);
+  const sp = readQuery({ page, limit, ...filters });
   // X-Tenant-ID = a clinic of the read, so the guard checks one where the permission is held.
-  return apiFetchPaged<Cita>(`/appointments?${sp.toString()}`, {}, tenantOf(readCenterIds(centroId, centerIds)));
+  const [path, tenant] = await scopedRead(`/appointments?${sp.toString()}`, centroId, centerIds);
+  return apiFetchPaged<Cita>(path, {}, tenant);
 }
 
 // Centers where the person can read appointments. Empty = not known (the read falls back to the
@@ -148,7 +155,7 @@ export interface ConteoPorDia {
 
 // Month calendar (BE PR #440): un número por (día × tipo) en vez de traer CADA cita para contarla a
 // mano — reemplaza `listCitasRango` en la vista mes. Mismos filtros que la lista.
-export function countByDay(params: {
+export async function countByDay(params: {
   from: string;
   to: string;
   doctorId?: string;
@@ -158,8 +165,9 @@ export function countByDay(params: {
   centerIds?: string[];
 }): Promise<ConteoPorDia[]> {
   const { centroId, centerIds, ...filters } = params;
-  const sp = readQuery(filters, centroId, centerIds);
-  return apiFetch<ConteoPorDia[]>(`/appointments/count-by-day?${sp.toString()}`, {}, tenantOf(readCenterIds(centroId, centerIds)));
+  const sp = readQuery(filters);
+  const [path, tenant] = await scopedRead(`/appointments/count-by-day?${sp.toString()}`, centroId, centerIds);
+  return apiFetch<ConteoPorDia[]>(path, {}, tenant);
 }
 
 // Found by id in every center the person can read; the row carries `clinicId`/`clinicName`.

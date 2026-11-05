@@ -1,9 +1,9 @@
-import { apiFetch, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchEnvelope, oneCenterPath } from "./client";
 import type { components } from "./schema";
 import type { Persistencia } from "./types";
 import type { ColumnaEfectiva, CitaFila } from "./agenda-dia";
 import type { EstadoCitaCatalogo } from "./citas";
-import { readCenterIds, tenantOf } from "@/lib/clinic-read-scope";
+import { readChoice, tenantOf } from "@/lib/clinic-read-scope";
 
 // Catalog column definition (GET /board/columns). `scopes` = which boards
 // it's eligible for. Distinct from ColumnaEfectiva (a placed column).
@@ -21,18 +21,17 @@ export interface Tablero {
 
 // tablero: which board composition ("citas" = Atención al Paciente).
 // soloAtencion: only Atención states (confirmada→atendida) — the AP board.
-// The picked center (`centroId`) or `centerIds` goes as `?centerIds=` (lib/clinic-read-scope.ts); each
-// row carries `clinicId`.
-export function getTablero(
+// The picked center (`centroId`) or `centerIds` goes as `?centerIds=` (lib/clinic-read-scope.ts); neither:
+// the top bar's clinic (every readable one on «Ambos»). Each row carries `clinicId`.
+export async function getTablero(
   fecha: string,
   opts: { tablero?: string; centroId?: string; centerIds?: string[]; soloAtencion?: boolean } = {},
 ): Promise<Tablero> {
   const sp = new URLSearchParams({ date: fecha });
   if (opts.tablero) sp.set("boardSlug", opts.tablero);
   if (opts.soloAtencion) sp.set("onlyCare", "true");
-  const ids = readCenterIds(opts.centroId, opts.centerIds);
-  if (ids) sp.set("centerIds", ids.join(","));
-  return apiFetch<Tablero>(`/appointments/board?${sp.toString()}`, {}, tenantOf(ids));
+  const choice = readChoice(opts.centroId, opts.centerIds);
+  return apiFetch<Tablero>(await oneCenterPath(`/appointments/board?${sp.toString()}`, choice), {}, tenantOf(choice));
 }
 
 // ── Column builder (metadata engine — works for any tablero key) ─────────────
