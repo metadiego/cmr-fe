@@ -2228,7 +2228,8 @@
     "facturas": "Facturas",
     "devoluciones": "Devoluciones",
     "caja": "Cuadre de caja",
-    "estadisticas": "Estadísticas"
+    "estadisticas": "Estadísticas",
+    "cuadreTotal": "Cuadre total"
   },
   "inventario": {
     "prov": {
@@ -3662,6 +3663,7 @@
       "documentos": "Documentos del día",
       "sinDocumentos": "No hubo documentos este día.",
       "colNumero": "Nº",
+      "colDivision": "División",
       "colRecord": "Récord",
       "colPaciente": "Paciente",
       "colFormaPago": "Forma de pago",
@@ -3683,6 +3685,26 @@
         "col": "Facturador"
       },
       "colFacturo": "Facturó"
+    },
+    "cuadre_total": {
+      "titulo": "Cuadre total",
+      "tituloImpreso": "Cuadre total del día",
+      "help": "Las dos divisiones, todos los cajeros, un solo conteo — se comprueba contra la suma de los dos cuadres individuales. Es la hoja para tesorería; el cuadre por cajero y por división no cambia.",
+      "sinAbrir": "Aún no se ha abierto el cuadre total de este día.",
+      "comprobacion": {
+        "titulo": "Comprobación",
+        "consulta": "Consulta",
+        "general": "General",
+        "suma": "Suma",
+        "dia": "Día",
+        "esperado": "Esperado",
+        "contado": "Contado",
+        "fondo": "Fondo",
+        "diferencia": "Diferencia"
+      },
+      "suma_cajeros": "Se usa la suma de los cajeros",
+      "conteo_unico": "Hacer un conteo único",
+      "descuadre": "El conteo del día difiere en {monto}"
     },
     "cuadreGeneral": {
       "title": "Cuadre general",

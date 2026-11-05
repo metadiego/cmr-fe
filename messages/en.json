@@ -2228,7 +2228,8 @@
     "facturas": "Invoices",
     "devoluciones": "Returns",
     "caja": "Cash count",
-    "estadisticas": "Statistics"
+    "estadisticas": "Statistics",
+    "cuadreTotal": "Day total"
   },
   "inventario": {
     "prov": {
@@ -3662,6 +3663,7 @@
       "documentos": "Documents of the day",
       "sinDocumentos": "No documents this day.",
       "colNumero": "No.",
+      "colDivision": "Division",
       "colRecord": "Record",
       "colPaciente": "Patient",
       "colFormaPago": "Payment method",
@@ -3683,6 +3685,26 @@
         "col": "Biller"
       },
       "colFacturo": "Billed by"
+    },
+    "cuadre_total": {
+      "titulo": "Day total",
+      "tituloImpreso": "Day total reconciliation",
+      "help": "Both divisions, every cashier, one single count — checked against the sum of the two individual reconciliations. This is the sheet for treasury; the per-cashier and per-division reconciliations do not change.",
+      "sinAbrir": "This day's total reconciliation hasn't been opened yet.",
+      "comprobacion": {
+        "titulo": "Check",
+        "consulta": "Consultation",
+        "general": "General",
+        "suma": "Sum",
+        "dia": "Day",
+        "esperado": "Expected",
+        "contado": "Counted",
+        "fondo": "Fund",
+        "diferencia": "Difference"
+      },
+      "suma_cajeros": "Using the cashiers' sum",
+      "conteo_unico": "Do a single count",
+      "descuadre": "The day count differs by {monto}"
     },
     "cuadreGeneral": {
       "title": "General cash-up",

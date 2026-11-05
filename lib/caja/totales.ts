@@ -109,6 +109,49 @@ export function ordenarDenominaciones<T extends DenominacionOrdenable>(
   return [...denoms].sort((a, b) => b.valor - a.valor);
 }
 
+/** Grupo de método de pago mínimo para calcular subtotales (duck-typed: evita importar lib/api/caja,
+ * que a su vez importa de este archivo — ciclo). */
+export interface GrupoMetodoPagoMin {
+  slug: string;
+  labelKey: string;
+  name: string;
+  paymentMethods?: string[] | null;
+}
+
+export interface SubtotalTarjeta {
+  clave: string;
+  labelKey: string;
+  nombre: string;
+  monto: number;
+}
+
+/**
+ * Subtotales INFORMATIVOS de tarjetas (p.ej. "VISA + MASTERCARD"): grupos configurables cuyas formas
+ * de pago son subconjunto ESTRICTO del grupo "padre" (el que ya suma `totalTarjetas`). 100% data-driven
+ * (config `grupos_metodo_pago` + `porGrupo` del reporte), sin nombres hardcodeados. Extraído de
+ * cuadre-caja.tsx para reusarlo también en el cuadre total del día (handoff cuadre-unico-del-dia).
+ */
+export function subtotalesTarjeta(
+  grupos: ReadonlyArray<GrupoMetodoPagoMin>,
+  porGrupo: Record<string, number>,
+  totalTarjetas: number,
+): SubtotalTarjeta[] {
+  const parent = grupos.find(
+    (g) => (g.paymentMethods?.length ?? 0) > 0 && (porGrupo[g.slug] ?? null) === totalTarjetas,
+  );
+  if (!parent) return [];
+  const parentFormas = new Set(parent.paymentMethods ?? []);
+  return grupos
+    .filter(
+      (g) =>
+        g.slug !== parent.slug &&
+        (g.paymentMethods?.length ?? 0) > 0 &&
+        (g.paymentMethods ?? []).every((f) => parentFormas.has(f)),
+    )
+    .map((g) => ({ clave: g.slug, labelKey: g.labelKey, nombre: g.name, monto: porGrupo[g.slug] ?? 0 }))
+    .filter((s) => s.monto !== 0);
+}
+
 /** Formato de moneda de la app (mismo estilo que el recibo térmico: `$0.00`). */
 // Formateador ÚNICO del dinero de toda la caja (pantalla y hoja impresa): en-US con separador de miles
 // y dos decimales ($28,138.37). El dueño lo pidió: quien firma el cuadre compara importes de un vistazo

@@ -110,6 +110,9 @@ export interface ReporteDia {
     // que `porCajero`, cuadra la suma). `user:null` = sin a quién atribuir; `name:null` = sello de
     // integración (llave). En ambos casos se pinta "—", NUNCA el id. Handoff documentos-del-dia-quien-facturo.
     user?: { id: string; name: string | null } | null;
+    // Solo presente en el cuadre TOTAL del día (handoff cuadre-unico-del-dia): de qué división es ese
+    // documento, para marcarlo en la tabla combinada. Ausente (undefined) en el reporte por división.
+    division?: CajaDivision;
   }>;
   // Devoluciones del día con su detalle (bloque aparte, en rojo). `number` = nº de nota de crédito.
   devolucionesDetalle?: Array<{
@@ -252,5 +255,70 @@ export function enviarCuadreEmail(
   return apiFetch<unknown>(`/cash/reconciliations/${id}/email`, {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+// ---- Cuadre TOTAL del día (handoff cuadre-unico-del-dia, cmr-be #457, en prod desde 04-nov-2026) --
+// Las DOS divisiones + todos los cajeros, un solo conteo opcional, comprobado contra la suma de los
+// cuadres individuales. Rutas confirmadas leyendo /api/docs-json de prod (no están en schema.d.ts: el
+// BE no les da un DTO de respuesta en Swagger — mismo caso que ReporteDia, tipado a mano aquí).
+// Permisos (del handoff, no inferidos): ver = caja.read + caja.ver_todos; abrir/contar =
+// caja.create + caja.ver_todos; cerrar = caja.cerrar + caja.ver_todos.
+
+export type CuadreTotalEstado = "abierto" | "cerrado";
+
+// Una columna de la comprobación (consulta / general / suma de las dos / cuadre del día).
+export interface ComprobacionColumna {
+  expected: number;
+  counted: number;
+  fund: number;
+  difference: number;
+}
+
+export interface ComprobacionCuadreTotal {
+  consultation: ComprobacionColumna;
+  general: ComprobacionColumna;
+  sum: ComprobacionColumna;
+  day: ComprobacionColumna;
+  squares: boolean;
+  gap: number;
+}
+
+// Mismo árbol que ReporteDia (el BE reusa el reporte del día, con `division`/`userId` en null: las dos
+// divisiones juntas) más el estado del cuadre único y la comprobación. `documentos` trae la división de
+// cada factura (campo opcional en ReporteDia, siempre presente aquí).
+export interface CuadreTotalDia extends ReporteDia {
+  dayReconciliation: { id: string; status: CuadreTotalEstado; ownCount: boolean } | null;
+  check: ComprobacionCuadreTotal;
+}
+
+export function getReporteCuadreTotal(fecha: string): Promise<CuadreTotalDia> {
+  return apiFetch<CuadreTotalDia>(`/cash/total-reconciliation?fecha=${encodeURIComponent(fecha)}`);
+}
+
+// Abre o retoma (idempotente en el BE) el cuadre total de ese día. Devuelve su id.
+export function abrirCuadreTotal(fecha: string): Promise<{ id: string; status: CuadreTotalEstado }> {
+  return apiFetch<{ id: string; status: CuadreTotalEstado }>(`/cash/total-reconciliation`, {
+    method: "POST",
+    body: JSON.stringify({ fecha }),
+  });
+}
+
+export function contarCuadreTotal(
+  id: string,
+  conteos: ConteoLinea[],
+): Promise<unknown> {
+  // Mismo DTO que contarCuadre (`ConteoLineaDto`, api-ingles lo traduce en /api/v2: `denominationId`/
+  // `quantity`); el contenedor `conteos` tampoco se traduce aquí (igual que en contarCuadre). Vacío =
+  // vuelve a "la suma de los dos consolidados" (handoff, §API).
+  return apiFetch<unknown>(`/cash/total-reconciliation/${id}/count`, {
+    method: "POST",
+    body: JSON.stringify({ conteos }),
+  });
+}
+
+export function cerrarCuadreTotal(id: string): Promise<unknown> {
+  return apiFetch<unknown>(`/cash/total-reconciliation/${id}/close`, {
+    method: "POST",
   });
 }
