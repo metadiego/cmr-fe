@@ -1,7 +1,7 @@
 // Reads across clinics (lib/clinic-read-scope.ts). Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clinicFilterChoice, oneCenterIds, readCenterIds, tenantOf, topBarSelection } from "./clinic-read-scope.ts";
+import { clinicFilterChoice, oneCenterIds, readCenterIds, readChoice, tenantOf, topBarSelection } from "./clinic-read-scope.ts";
 
 test("a screen's picked center is sent as centerIds, so the read does not depend on the BE default", () => {
   assert.deepEqual(readCenterIds("cag", undefined), ["cag"]);
@@ -70,4 +70,19 @@ test("the top bar's selection: one clinic → that one; «Ambos» → nothing ti
   // Fed to the list's choice: one clinic narrows, «Ambos» names every readable one, active first.
   assert.deepEqual(clinicFilterChoice(["bay", "cag"], topBarSelection(false, "cag"), "cag"), ["cag"]);
   assert.deepEqual(clinicFilterChoice(["bay", "cag"], topBarSelection(true, "cag"), "cag"), ["cag", "bay"]);
+});
+
+test("readChoice: an explicit list wins, then the picked center", () => {
+  assert.deepEqual(readChoice("cag", ["bay", "cag"]), ["bay", "cag"]);
+  assert.equal(readChoice("cag", undefined), "cag");
+  assert.equal(readChoice("cag", []), "cag");
+});
+
+test("readChoice: nothing picked follows the top bar; an explicit empty list reads every clinic", () => {
+  assert.equal(readChoice(undefined, undefined), undefined);
+  assert.equal(readChoice(undefined, []), null);
+  // What oneCenterPath then sends: the top bar's clinic, or nothing (every clinic in scope).
+  assert.deepEqual(oneCenterIds(readChoice(undefined, undefined), "bay", null), ["bay"]);
+  assert.equal(oneCenterIds(readChoice(undefined, undefined), "bay", null, true), undefined);
+  assert.equal(oneCenterIds(readChoice(undefined, []), "bay", null), undefined);
 });

@@ -89,7 +89,7 @@ export type StockConsolidadoParams = {
   page?: number;
   limit?: number;
 };
-export function getStockConsolidado(
+export async function getStockConsolidado(
   params: StockConsolidadoParams = {},
   centro?: string | null,
 ): Promise<Paginated<StockConsolidadoFila>> {
@@ -100,9 +100,10 @@ export function getStockConsolidado(
   if (params.includeNonInventoryItems) sp.set("includeNonInventoryItems", "true");
   sp.set("page", String(params.page ?? 1));
   sp.set("limit", String(Math.min(params.limit ?? 50, 100)));
-  // `centro` undefined/null → every center the person can read (one column each); an id → that center.
-  if (centro) sp.set("centerIds", centro);
-  return apiFetchPaged<StockConsolidadoFila>(`/inventory/stock/consolidated?${sp.toString()}`, {}, centro);
+  // `centro` an id → that center; undefined/null → the top bar's clinic, or on «Ambos» every center the
+  // person can read (one column each).
+  const path = await oneCenterPath(`/inventory/stock/consolidated?${sp.toString()}`, centro ?? undefined);
+  return apiFetchPaged<StockConsolidadoFila>(path, {}, centro ?? undefined);
 }
 
 // Detalle de la existencia de UN producto: desglose por almacén/lote con los estados que componen la
