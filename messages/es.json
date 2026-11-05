@@ -2984,7 +2984,11 @@
     "descuentoPasaBase": "El descuento (${valor}) es mayor que el subtotal (${base}).",
     "descuentoUsarBase": "Regalar el total: ${base}",
     "removeDiscount": "Quitar descuento",
-    "descuentoActual": "Descuento aplicado: ${monto}"
+    "descuentoActual": "Descuento aplicado: ${monto}",
+    "unitsAreasDays": "Cantidad (áreas × días)",
+    "unitsAreasDaysHint": "Se calcula sola: áreas × días. No se escribe.",
+    "packages": "Paquetes",
+    "packagesHint": "Cuántos paquetes se venden (normalmente 1)."
   },
   "agregarCita": {
     "eyebrow": "Walk-in",

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ProductOptionsSkeleton } from "@/components/facturacion/invoice-detail-skeleton";
 import { Lbl } from "@/components/facturacion/field-label";
+import { isPackageLine, packageUnits } from "@/lib/facturacion/package-units";
 
 // Extracted from app/(app)/billing/invoices/[id]/page.tsx (its line ceiling only goes down).
 
@@ -168,14 +169,25 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
   const dosisClave = capturables.find((c) => /dosis/i.test(c.slug))?.slug ?? null;
   const sugeridoClave = capturables.find((c) => /sugerid/i.test(c.slug))?.slug ?? null;
 
+  // Package lines (laser, PEMF…): the group has a multiplier column that COUNTS VISITS. There the units
+  // are areas × days and Cantidad is read-only; what is sent is the number of PACKAGES (usually 1). The
+  // desk used to type the expected total into Cantidad as well and the BE (quantity × areas × days ×
+  // price) multiplied it again — 2 × 6 × 12 (owner, 05-nov-2026). Data-driven, never product names.
+  const multipliers = capturables.filter((c) => c.role === "multiplicador" && !esSelectCaptura(c));
+  const packageMode = isPackageLine(multipliers);
+  const [paquetes, setPaquetes] = React.useState("1");
+
   // Defaults por columna (modelo del dueño): áreas = 1; días = cantidad (mismas visitas); resto vacío.
   // El valor mostrado = override del usuario (metaVals) ?? default → sin efectos ni setState en render.
   const isArea = (c: string) => /[aá]rea/i.test(c);
   const isDias = (c: string) => /d[ií]a/i.test(c) && !/dosis/i.test(c);
   // áreas = preset del producto (areasDefault ?? 1); días = cantidad (mismas visitas). Data-driven (PR #158).
   const areasDefault = (prod as { defaultAreas?: number | null } | undefined)?.defaultAreas ?? 1;
-  const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? cant : "");
+  // In package mode days start at the product's treatment days (TD12 → 12), never at a typed quantity.
+  const diasPaquete = prod?.treatmentDays != null ? String(prod.treatmentDays) : "";
+  const defMeta = (c: string) => (isArea(c) ? String(areasDefault) : isDias(c) ? (packageMode ? diasPaquete : cant) : "");
   const metaShown = (c: string) => metaVals[c] ?? defMeta(c);
+  const unidades = packageMode ? packageUnits(multipliers, metaShown) : 0;
 
   // Flujo con Enter: cantidad → columnas (áreas, días…) → Enter en la última confirma la línea. La
   // navegación se resuelve por DOM DENTRO del handler (marca `data-flow`), sin refs leídos en render.
@@ -242,6 +254,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
     setGravadoOverride(null); // vuelve al default del nuevo producto
     setMetaVals({});
     setPrecio("");
+    setPaquetes("1");
     // Cantidad = diasTratamiento del pack (TD12→12…). Si el producto no lo trae → campo VACÍO (no 1).
     const dt = (p as { treatmentDays?: number | null }).treatmentDays;
     setCant(dt != null ? String(dt) : "");
@@ -270,14 +283,14 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
     onAdd({
       productId: prod.id,
       description: prod.name,
-      quantity: Math.max(1, Math.floor(Number(cant) || 1)),
+      quantity: Math.max(1, Math.floor(Number(packageMode ? paquetes : cant) || 1)),
       ...(precioUnitarioEff !== undefined ? { unitPrice: precioUnitarioEff } : {}),
       // Solo el flag gravado (cuando se conoce): NO se manda impuestoId — el servidor resuelve el impuesto
       // por la cascada del precio (desglose Estatal+Municipal completo). Handoff IVU compuesto.
       ...(gravadoKnown ? { taxable: g } : {}),
       ...(Object.keys(meta).length ? { meta } : {}),
     });
-    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({});
+    setProdId(""); setCant("1"); setPrecio(""); setGravadoOverride(null); setMetaVals({}); setPaquetes("1");
   }
 
   return (
@@ -332,7 +345,20 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
           </label>
         );
       })}
-      {/* Cantidad DESPUÉS de áreas/días. Con dosis, ya viene pre-calculada; queda editable. */}
+      {/* Package lines: Units (areas × days) shown LOCKED, and the packages as their own explicit field. */}
+      {packageMode ? (
+        <>
+          <label className="flex w-32 flex-col gap-1">
+            <Lbl>{t("unitsAreasDays")}</Lbl>
+            <Input value={unidades ? String(unidades) : ""} readOnly tabIndex={-1} className="h-9 bg-muted text-right font-semibold tabular-nums" title={t("unitsAreasDaysHint")} />
+          </label>
+          <label className="flex w-20 flex-col gap-1">
+            <Lbl>{t("packages")}</Lbl>
+            <Input data-flow value={paquetes} onChange={(e) => setPaquetes(e.target.value)} onFocus={selectOnFocus} onKeyDown={onFlowKey} className="h-9 text-right tabular-nums" inputMode="numeric" title={t("packagesHint")} />
+          </label>
+        </>
+      ) : (
+      /* Cantidad DESPUÉS de áreas/días. Con dosis, ya viene pre-calculada; queda editable. */
       <label className="flex w-20 flex-col gap-1">
         <Lbl>{t("qty")}</Lbl>
         <Input
@@ -345,6 +371,7 @@ export function AddItem({ catalogo, showIvu, tipoPrecioId, tenant, disabled, onA
           inputMode="numeric"
         />
       </label>
+      )}
       <label className="flex w-28 flex-col gap-1">
         <Lbl>{t("price")}</Lbl>
         <Input value={precioMostrado} onChange={(e) => setPrecio(e.target.value)} placeholder={buscando ? "…" : t("priceAuto")} title={t("priceAutoHint")} className="h-9 text-right tabular-nums" inputMode="decimal" />
