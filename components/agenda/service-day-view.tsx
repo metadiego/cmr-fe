@@ -13,7 +13,7 @@ import { getAvailability, type Availability } from "@/lib/api/resources";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
 import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
-import { parseDayUTC } from "@/lib/format/fecha";
+import { parseDayUTC, todayPR } from "@/lib/format/fecha";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +124,8 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
   const dayTitle = format.dateTime(parseDayUTC(fecha) ?? new Date(), "dayLong");
   const prev = shiftDay(fecha, -1);
   const next = shiftDay(fecha, +1);
-  const today = new Date().toISOString().slice(0, 10);
+  // `todayPR()`, no toISOString (UTC): after 8pm AST that's already tomorrow.
+  const today = todayPR();
 
   return (
     <PageContainer>

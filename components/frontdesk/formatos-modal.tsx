@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { getFormato, type Formato, type LaserTipo, type LaserParametro } from "@/lib/api/laser";
 import { getDisponibilidadServicio, type PaqueteDisponibilidad } from "@/lib/api/frontdesk";
 import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
-import { formatFechaSolo } from "@/lib/format/fecha";
+import { formatFechaSolo, todayPR } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -247,7 +247,7 @@ function FormatoRender({ tipo, centro, header, onVolver }: { tipo: LaserTipo; ce
           </div>
           <div className="text-right text-xs">
             {/* header.fecha = fecha de la cita, no la de hoy; sin ella (caller viejo), hoy es el fallback. */}
-            <div>{formatFechaSolo(header.fecha || new Date().toISOString().slice(0, 10))}</div>
+            <div>{formatFechaSolo(header.fecha || todayPR())}</div>
             <div>{t("colSesion")}: {header.sesion} · {t("colAreas")}: {header.areas}</div>
           </div>
         </div>
