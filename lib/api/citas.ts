@@ -1,6 +1,7 @@
 import type { components } from "./schema";
 import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
 import type { Paginated } from "./types";
+import { needsConfirmAfterCreate } from "../citas/requested-status";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
 //
@@ -154,15 +155,24 @@ export function asignarEnfermeraVitales(
 }
 
 // Writes are tenant-scoped: pass centroId to set X-Tenant-ID for this request.
-export function createCita(
+export async function createCita(
   payload: CreateCitaPayload,
   centroId?: string,
 ): Promise<Cita> {
-  return apiFetch<Cita>(`/appointments`, {
+  const cita = await apiFetch<Cita>(`/appointments`, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: centroId ? { "X-Tenant-ID": centroId } : undefined,
   });
+  // A reschedule-into-today comes back «programada» (hidden on the board) — see requested-status.ts.
+  const requested = (payload as { status?: string }).status;
+  if (!needsConfirmAfterCreate(requested, (cita as { status?: string }).status)) return cita;
+  await apiFetch(
+    `/board/action`,
+    { method: "POST", body: JSON.stringify({ boardSlug: "atencion", entityId: cita.id, action: "confirmar" }) },
+    centroId,
+  );
+  return { ...cita, status: "confirmada" } as Cita;
 }
 
 // Dry-run overlap check before saving (POST /appointments/validate). Does NOT create.
