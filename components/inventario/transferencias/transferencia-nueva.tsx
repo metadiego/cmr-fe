@@ -17,7 +17,9 @@ import { listAlmacenes, type Almacen } from "@/lib/api/inventario";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
+import { useCreateClinic } from "@/hooks/use-create-clinic";
+import { CreateClinicField } from "@/components/kit/create-clinic-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,7 +46,12 @@ export function TransferenciaNueva() {
   const activeCentro = getActiveCentro();
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
-  const origenId = activeCentro ?? "";
+  // Origin = the top bar's clinic. On «Ambos» the top bar names none: the person picks the origin among
+  // the clinics where they may transfer (docs/specs/selector-de-centros-arriba.md).
+  const viewAll = isClinicViewAll();
+  const origenes = useCreateClinic("inventario.transferir", null);
+  const [origenSel, setOrigenSel] = React.useState("");
+  const origenId = viewAll ? origenSel || origenes.defaultClinicId : (activeCentro ?? "");
   const centroName = (cid: string) => centros.find((c) => c.id === cid)?.name ?? cid;
 
   const [destinoId, setDestinoId] = React.useState("");
@@ -54,14 +61,20 @@ export function TransferenciaNueva() {
   const [lineas, setLineas] = React.useState<Linea[]>([nuevaLinea()]);
   const [busy, setBusy] = React.useState(false);
 
-  // Almacenes del ORIGEN (centro activo) por su tenant.
-  const almOrigenRes = useResource<Almacen[]>(() => listAlmacenes(), []);
+  // The ORIGIN's warehouses, by its tenant (never every clinic's, which is what «Ambos» would read).
+  const almOrigenRes = useResource<Almacen[]>(
+    () => (viewAll && !origenId ? Promise.resolve([]) : listAlmacenes(viewAll ? origenId : undefined)),
+    [viewAll, origenId],
+  );
   const almOrigen = almOrigenRes.state.kind === "ok" ? almOrigenRes.state.data : [];
 
   // DESTINOS: endpoint propio (otros centros activos con SUS almacenes DENTRO). No `me/centros`, y los
   // almacenes del destino salen del mismo payload → sin otra llamada. Handoff transferencia-destinos.
-  const destinosRes = useResource<DestinoTransferencia[]>(() => getDestinosTransferencia(), []);
-  const destinos = destinosRes.state.kind === "ok" ? destinosRes.state.data : [];
+  const destinosRes = useResource<DestinoTransferencia[]>(
+    () => (viewAll && !origenId ? Promise.resolve([]) : getDestinosTransferencia(viewAll ? origenId : undefined)),
+    [viewAll, origenId],
+  );
+  const destinos = (destinosRes.state.kind === "ok" ? destinosRes.state.data : []).filter((d) => d.clinicId !== origenId);
   const destinoSel = destinos.find((d) => d.clinicId === destinoId) ?? null;
   const almDestino = destinoSel?.warehouses ?? [];
   const destinoSinAlmacen = !!destinoSel && almDestino.length === 0;
@@ -118,9 +131,21 @@ export function TransferenciaNueva() {
 
       {/* Cabecera */}
       <div className="grid gap-4 rounded-md bg-card p-5 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)] sm:grid-cols-2">
-        <Field label={t("field.origen")}>
-          <Input value={centroName(origenId)} disabled />
-        </Field>
+        {viewAll ? (
+          <CreateClinicField
+            centers={origenes.centers}
+            value={origenId}
+            show
+            onChange={(v) => {
+              setOrigenSel(v); setAlmacenOrigenId(""); setAutoAlmO(null);
+              setDestinoId(""); setAlmacenDestinoId(""); setAutoAlmD(null);
+            }}
+          />
+        ) : (
+          <Field label={t("field.origen")}>
+            <Input value={centroName(origenId)} disabled />
+          </Field>
+        )}
         <Field label={t("field.destino")}>
           <Select value={destinoId} onValueChange={(v) => { setDestinoId(v); setAlmacenDestinoId(""); setAutoAlmD(null); }}>
             <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectCentro")} /></SelectTrigger>

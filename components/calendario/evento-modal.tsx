@@ -14,6 +14,8 @@ import {
 } from "@/lib/api/calendario";
 import { apiErrorLabel } from "@/lib/api/errors";
 import { CreateClinicField } from "@/components/kit/create-clinic-field";
+import { createClinicReady } from "@/lib/create-clinic";
+import { isClinicViewAll } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -62,10 +64,12 @@ export function EventoModal({
   const [busy, setBusy] = React.useState(false);
   const [clinicPicked, setClinicPicked] = React.useState("");
   const createClinic = clinicPicked || defaultClinicId;
+  // A new event on «Ambos» waits for its clinic (lib/create-clinic.ts); editing never moves it.
+  const clinicReady = !!ev || createClinicReady(createClinic, createCenters.length, isClinicViewAll());
   const soloLectura = !puedeEditar;
 
   async function guardar() {
-    if (soloLectura || !titulo.trim() || busy) return;
+    if (soloLectura || !titulo.trim() || busy || !clinicReady) return;
     setBusy(true);
     const payload: CrearEventoPayload = {
       day: dia, endDay: diaFin || null,
@@ -137,7 +141,7 @@ export function EventoModal({
             <div>{ev && puedeBorrar && <Button variant="outline" size="sm" onClick={borrar} disabled={busy} className="text-destructive">{tc("delete")}</Button>}</div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
-              {!soloLectura && <Button size="sm" onClick={guardar} disabled={busy || !titulo.trim()}>{busy ? tc("loading") : tc("save")}</Button>}
+              {!soloLectura && <Button size="sm" onClick={guardar} disabled={busy || !titulo.trim() || !clinicReady}>{busy ? tc("loading") : tc("save")}</Button>}
             </div>
           </div>
         </div>

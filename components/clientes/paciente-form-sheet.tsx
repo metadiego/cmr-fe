@@ -26,7 +26,8 @@ import {
 } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { MedicoSelectField } from "@/components/clientes/medico-select-field";
-import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
+import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
 import { toastError } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
@@ -89,11 +90,9 @@ export function PacienteFormSheet({
   const centros = centrosState.kind === "ok" ? centrosState.data : [];
   const needsCentro = !isEdit && centros.length > 1;
   const [centroSel, setCentroSel] = React.useState<string>("");
-  // Effective center: explicit choice → active-center cookie → the only center.
-  const effectiveCentro =
-    centroSel ||
-    getActiveCentro() ||
-    (centros.length === 1 ? centros[0].id : "");
+  // Effective center: choice → top bar's → the only one; on «Ambos» empty, the form asks (lib/create-clinic.ts).
+  const viewAll = isClinicViewAll();
+  const effectiveCentro = formCreateClinic({ picked: centroSel, active: getActiveCentro(), centers: centros.map((c) => c.id), viewAll });
   // Tenant every request of THIS form goes to (edit stays in the patient's center).
   const tenant = isEdit
     ? (paciente?.clinicId ?? undefined)
@@ -202,7 +201,7 @@ export function PacienteFormSheet({
     !dueno &&
     !checkingRecord &&
     !submitting &&
-    (!needsCentro || !!effectiveCentro);
+    (isEdit || createClinicReady(effectiveCentro, centros.length, viewAll));
 
   async function onSubmit() {
     if (!canSubmit) return;

@@ -44,8 +44,9 @@ export interface DestinoTransferencia {
   name: string;
   warehouses: Array<{ id: string; name: string }>;
 }
-export function getDestinosTransferencia(): Promise<DestinoTransferencia[]> {
-  return apiFetch<DestinoTransferencia[]>(`/inventory/transfers/destinations`);
+// `origin`: the clinic it ships from (X-Tenant-ID); undefined = the working clinic.
+export function getDestinosTransferencia(origin?: string): Promise<DestinoTransferencia[]> {
+  return apiFetch<DestinoTransferencia[]>(`/inventory/transfers/destinations`, {}, origin);
 }
 
 // Pending transfers with either end in a clinic where the person holds inventario.read (clinic-read-scope;
@@ -81,13 +82,14 @@ export async function listTransferencias(
 export function getTransferencia(id: string): Promise<TransferenciaDetalle> {
   return apiFetch<TransferenciaDetalle>(`/inventory/transfers/${id}`);
 }
+// Sent from the ORIGIN clinic (X-Tenant-ID = `payload.sourceClinicId`): the permission is checked there.
 export function crearTransferencia(
   payload: CrearTransferenciaPayload,
 ): Promise<Transferencia> {
   return apiFetch<Transferencia>(`/inventory/transfers`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, payload.sourceClinicId || undefined);
 }
 // Recibir/Aprobar — SOLO el centro DESTINO (el BE responde 403 si no). `items` omitido =
 // recepción TOTAL; con items = parcial (0 ≤ recibida ≤ enviada). politicaRemanente default devolver_origen.

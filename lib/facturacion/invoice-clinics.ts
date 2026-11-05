@@ -7,14 +7,18 @@
  * active clinic (top bar / session) when the person may bill there, else the only readable clinic.
  * `null` = undecided: the sale screen asks for one. `readable` empty = not known yet (trust `active`).
  * Unlike `createClinicOf` (lib/create-clinic.ts), it never falls back to "the first clinic": a sale moves
- * money, so when the clinic is not obvious the person picks it.
+ * money, so when the clinic is not obvious the person picks it. On «Ambos» (`viewAll`) the top bar names no
+ * clinic: with anything but one readable clinic it is undecided, so the link carries no `?centro=` and the
+ * sale screen's gate asks (docs/specs/selector-de-centros-arriba.md).
  */
 export function clinicForNewSale(
   choice: readonly string[] | null,
   readable: readonly string[],
   active: string | null | undefined,
+  viewAll = false,
 ): string | null {
   if (choice && choice.length === 1) return choice[0];
+  if (viewAll) return readable.length === 1 ? readable[0] : null;
   if (active && (readable.length === 0 || readable.includes(active))) return active;
   if (readable.length === 1) return readable[0];
   return null;

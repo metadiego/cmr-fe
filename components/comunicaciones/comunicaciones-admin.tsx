@@ -24,6 +24,10 @@ import { apiErrorMessage, toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { useCreateClinic } from "@/hooks/use-create-clinic";
+import { createClinicReady } from "@/lib/create-clinic";
+import { isClinicViewAll } from "@/lib/tenant";
+import { CreateClinicField } from "@/components/kit/create-clinic-field";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -336,11 +340,18 @@ function PlantillaForm({
     setForm((prev) => ({ ...prev, [k]: v }));
 
   function handleOpenChange(next: boolean) {
-    if (!next) setForm(EMPTY);
+    if (!next) { setForm(EMPTY); setClinicPicked(""); }
     onOpenChange(next);
   }
 
-  const canSubmit = !!form.clave.trim() && !!form.cuerpo.trim() && !submitting;
+  // The clinic it is created in: the top bar's; on «Ambos» the form asks (lib/create-clinic.ts).
+  const create = useCreateClinic("notificaciones.config", null);
+  const [clinicPicked, setClinicPicked] = React.useState("");
+  const clinicId = clinicPicked || create.defaultClinicId;
+  const viewAll = isClinicViewAll();
+
+  const canSubmit = !!form.clave.trim() && !!form.cuerpo.trim() && !submitting &&
+    createClinicReady(clinicId, create.centers.length, viewAll);
 
   async function onSubmit() {
     if (!canSubmit) return;
@@ -353,7 +364,7 @@ function PlantillaForm({
         subject: form.asunto.trim() || undefined,
         body: form.cuerpo.trim(),
       };
-      await crearPlantilla(payload);
+      await crearPlantilla(payload, clinicId || undefined);
       toast.success(t("plantillaCreada"));
       handleOpenChange(false);
       onSaved();
@@ -403,6 +414,7 @@ function PlantillaForm({
       <Field label={t("col.cuerpo")}>
         <Textarea rows={5} value={form.cuerpo} onChange={(e) => set("cuerpo", e.target.value)} />
       </Field>
+      <CreateClinicField centers={create.centers} value={clinicId} onChange={setClinicPicked} show={viewAll} disabled={submitting} />
     </FormDialog>
   );
 }

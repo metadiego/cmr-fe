@@ -98,7 +98,7 @@ export default function FacturacionPage() {
   const search = useSearchParams();
   const router = useRouter();
   const id = String(params.id);
-  const centro = search.get("centro") ?? undefined;
+  const urlCentro = search.get("centro") ?? undefined;
   const [descartando, setDescartando] = React.useState(false);
   const [cambiarOpen, setCambiarOpen] = React.useState(false);
   const [cabeceraOpen, setCabeceraOpen] = React.useState(false);
@@ -120,7 +120,7 @@ export default function FacturacionPage() {
   const [busy, setBusy] = React.useState(false);
   // Receipt viewer + print, in a modal so the user never leaves billing: see ReceiptPrintDialog.
   const [reciboOpen, setReciboOpen] = React.useState(false);
-  const invoiceCenter = centro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined;
+  const centro = urlCentro ?? (factura as { clinicId?: string } | null)?.clinicId ?? undefined; // the INVOICE's clinic
 
   const refetch = React.useCallback(() => {
     return getFactura(id, centro)
@@ -132,12 +132,12 @@ export default function FacturacionPage() {
     let active = true;
     // La factura primero: si es de CONSULTA (tiene citaId) el catálogo se pide con contexto=consulta
     // (solo Consulta/Seguimiento); una factura de venta pide el catálogo completo.
-    getFactura(id, centro)
+    getFactura(id, urlCentro)
       .then((f) =>
         Promise.all([
           Promise.resolve(f),
-          getCatalogoFacturacion(centro, f.appointmentId ? "consulta" : undefined),
-          getFormasPago(centro),
+          getCatalogoFacturacion(urlCentro ?? (f as { clinicId?: string }).clinicId, f.appointmentId ? "consulta" : undefined),
+          getFormasPago(urlCentro ?? (f as { clinicId?: string }).clinicId),
         ]),
       )
       .then(([f, c, fp]) => {
@@ -146,7 +146,7 @@ export default function FacturacionPage() {
         setCatalogo(c);
         setFormas(fp);
         if (f.patientId) {
-          getPaciente(String(f.patientId), centro).then((p) => active && setPaciente(p)).catch(() => {});
+          getPaciente(String(f.patientId), urlCentro ?? (f as { clinicId?: string }).clinicId ?? undefined).then((p) => active && setPaciente(p)).catch(() => {});
         }
       })
       .catch((err) => toastError(err, tRoot))
@@ -154,7 +154,7 @@ export default function FacturacionPage() {
     return () => {
       active = false;
     };
-  }, [id, centro, tRoot]);
+  }, [id, urlCentro, tRoot]);
 
   const run = React.useCallback(
     async (fn: () => Promise<unknown>) => {
@@ -307,7 +307,7 @@ export default function FacturacionPage() {
               {esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
             </Button>
             {/* Reopen to correct (back to draft, same number): the BE says whether it can. */}
-            {estado === "emitida" && can("factura.reopen") && <ReopenInvoiceButton invoiceId={id} centerId={invoiceCenter} onReopened={() => refetch()} />}
+            {estado === "emitida" && can("factura.reopen") && <ReopenInvoiceButton invoiceId={id} centerId={centro} onReopened={() => refetch()} />}
             {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
                 EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
             {estado === "emitida" && can("factura.reparar") && (
@@ -332,7 +332,7 @@ export default function FacturacionPage() {
         open={reciboOpen}
         onOpenChange={setReciboOpen}
         invoiceId={id}
-        centerId={invoiceCenter}
+        centerId={centro}
         printLabel={esPresupuesto ? t("imprimirPresupuesto") : tRoot("receipt.print")}
         buildBackupBytes={buildBackupReceiptBytes}
       />
@@ -389,7 +389,7 @@ export default function FacturacionPage() {
         }
       />
 
-      <InvoiceReopenings invoiceId={id} centerId={invoiceCenter} invoice={factura} />
+      <InvoiceReopenings invoiceId={id} centerId={centro} invoice={factura} />
     </PageContainer>
   );
 }

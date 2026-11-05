@@ -190,7 +190,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   // A new sale needs ONE clinic: the single ticked one, else the active one (top bar). Shown on the
   // button to whoever can bill in more than one clinic.
   const active = useActiveClinic();
-  const saleClinic = clinicForNewSale(filter.choice, readable, active);
+  const saleClinic = clinicForNewSale(filter.choice, readable, active, filter.viewAll);
   const saleClinicName = filter.multiClinic && saleClinic ? filter.nameOf(saleClinic) : "";
 
   function cell(clave: string, value: unknown) {
