@@ -18,12 +18,15 @@ export function ConteoDenominaciones({
   onChange,
   disabled,
   hint,
+  saveState = "idle",
 }: {
   denominaciones: Denominacion[];
   cantidades: Record<string, number>;
   onChange: (denominacionId: string, cantidad: number) => void;
   disabled?: boolean;
   hint?: string;
+  // Autosave of the count (cuadre-caja): a quiet line so the cashier knows it persisted.
+  saveState?: "idle" | "saving" | "saved" | "error";
 }) {
   const t = useTranslations("caja.count");
 
@@ -42,7 +45,14 @@ export function ConteoDenominaciones({
   return (
     <div className="rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       <div className="border-b px-4 py-3">
-        <h3 className="text-sm font-semibold">{t("title")}</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">{t("title")}</h3>
+          {saveState !== "idle" && (
+            <span className={"text-xs " + (saveState === "error" ? "text-destructive" : "text-muted-foreground")}>
+              {t(saveState === "saving" ? "saving" : saveState === "saved" ? "saved" : "saveError")}
+            </span>
+          )}
+        </div>
         {hint && (
           <p className="mt-0.5 text-xs text-warning-foreground">⚠ {hint}</p>
         )}

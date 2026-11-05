@@ -2045,7 +2045,9 @@
       "enServicio": "In {servicio}"
     },
     "patientNotFound": "That patient does not exist in this center.",
-    "serviceNotFound": "One of the chosen services does not exist in this center."
+    "serviceNotFound": "One of the chosen services does not exist in this center.",
+    "removeStep": "Remove {step}",
+    "formatoTherapyCount": "Therapies to print"
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -3573,7 +3575,15 @@
       "saved": "Count saved",
       "hint": "Select a cashier to enable counting.",
       "pastLocked": "Editing past dates requires permission (caja.retroactivo).",
-      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers."
+      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers.",
+      "saveError": "The count could not be saved; it will retry on the next change.",
+      "managerCount": "Manager's count",
+      "managerCountHint": "This single count overrides the cashiers' sum.",
+      "cashiersSum": "Cashiers' sum",
+      "cashiersSumHint": "Read only: the sum of each cashier's count.",
+      "countMyself": "Do a single count",
+      "backToSum": "Back to the cashiers' sum",
+      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used."
     },
     "petty": "Petty cash",
     "summary": {
@@ -4533,7 +4543,8 @@
     "ehrVinculado": "Linked with the EHR.",
     "ehrActualizado": "EHR role updated.",
     "centroOrigen": "Home clinic: {nombre}",
-    "centrosColumna": "Clinic(s)"
+    "centrosColumna": "Clinic(s)",
+    "extension": "Extension (phone system)"
   },
   "acciones": {
     "subtitle": "Their whole history, without leaving here.",
@@ -4748,7 +4759,7 @@
     "pickPatient": "Pick a patient from the list to see their services.",
     "record": "Record",
     "firstAt": "first booking {time}",
-    "markPresent": "Present",
+    "markPresent": "Not present",
     "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "vitalsBy": "Vitals: {name}",
@@ -4791,7 +4802,9 @@
     "bookService": "Book a service",
     "bookConsultation": "Book a consultation",
     "cancelled": "Cancelled",
-    "presentAt": "Present {time}"
+    "presentAt": "Present {time}",
+    "markPendingPresent": "Mark present (pending: {n})",
+    "markPresentHint": "Click to mark present"
   },
   "salesPackages": {
     "title": "Sales packages",
@@ -4906,5 +4919,84 @@
     "label": "Clinic",
     "placeholder": "Choose a clinic…",
     "help": "It is created in this clinic."
+  },
+  "rightNow": {
+    "title": "Right now",
+    "description": "What is happening in each office, live.",
+    "updatedAt": "Updated {time}",
+    "live": "Live",
+    "offline": "Live updates offline",
+    "combined": "All centers",
+    "kpi": {
+      "netSales": "Net sales",
+      "invoices": "Invoices",
+      "refunds": "Refunds",
+      "present": "Patients present",
+      "attended": "Attended",
+      "pending": "Pending",
+      "calls": "Calls",
+      "alerts": "Alerts"
+    },
+    "sales": {
+      "title": "Sales",
+      "net": "Net today",
+      "refunds": "Refunds: {n}",
+      "topSellers": "Top sellers",
+      "noSellers": "No sales yet.",
+      "unknownSeller": "No name"
+    },
+    "patients": {
+      "title": "Patients (consultations)",
+      "present": "Present",
+      "firstVisit": "First visit",
+      "followUp": "Follow-up",
+      "attended": "Attended",
+      "pending": "Pending"
+    },
+    "doctors": {
+      "title": "Doctors",
+      "colDoctor": "Doctor",
+      "colTotal": "Appts",
+      "colAttended": "Attended",
+      "colFirst": "1st",
+      "colFollow": "F/U",
+      "colNet": "Billed",
+      "empty": "No consultations today."
+    },
+    "prescriptions": {
+      "title": "Prescriptions",
+      "empty": "Prescriptions will come from the medical record (EHR); no data yet."
+    },
+    "services": {
+      "title": "Services",
+      "colService": "Service",
+      "colWaiting": "Waiting",
+      "colInCare": "In care",
+      "colCompleted": "Completed",
+      "colStaff": "Staff",
+      "empty": "No services today.",
+      "waitingList": "Waiting · {service}",
+      "completedList": "Completed · {service}",
+      "minutes": "{n} min",
+      "attendedBy": "Seen by {name}",
+      "none": "Nobody."
+    },
+    "calls": {
+      "title": "Calls",
+      "total": "Total",
+      "inbound": "Inbound",
+      "outbound": "Outbound",
+      "missed": "Missed",
+      "answerRate": "Answered",
+      "byPbx": "By PBX",
+      "ranking": "Operators",
+      "colExtension": "Ext.",
+      "colName": "Operator",
+      "colAnswered": "Answered",
+      "colOutbound": "Outbound",
+      "empty": "No calls recorded yet."
+    },
+    "noCenters": "You have no centers to view.",
+    "error": "Could not load «Right now»."
   }
 }

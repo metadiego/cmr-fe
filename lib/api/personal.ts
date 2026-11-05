@@ -93,6 +93,8 @@ export type StaffEditable = {
   capabilities?: string[];
   specialty?: string | null;
   phone?: string | null;
+  // PBX extension (max 20, UNIQUE: 409 when someone else has it) — names calls in «Ahora mismo».
+  extension?: string | null;
   email?: string | null;
   sex?: string | null;
   color?: string;

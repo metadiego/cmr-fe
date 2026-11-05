@@ -124,27 +124,32 @@ export function ServiceSessionsTable({
   )
 
   // Options of the editable selects / datalists of THIS service (e.g. the dose products).
+  // Keyed by the column KEYS, not the board object: every refresh brings a new board, and refetching
+  // each select's options on every refresh helped burst the BE quota (RATE_LIMITED, 04-nov-2026).
   const [options, setOptions] = React.useState<Record<string, Option[]>>({})
-  React.useEffect(() => {
-    const cols = columns.filter(
+  const optionKeys = columns
+    .filter(
       (c) =>
         c.editable &&
         (c.tipo === "select" ||
           !!(c.render as { optionsSource?: string } | null)?.optionsSource)
     )
-    if (!cols.length || !centerId) return
+    .map((c) => c.clave)
+    .join(",")
+  React.useEffect(() => {
+    if (!optionKeys || !centerId) return
     let active = true
     Promise.all(
-      cols.map((c) =>
-        getColumnOptions(slug, c.clave, centerId)
-          .then((o) => [c.clave, o] as const)
-          .catch(() => [c.clave, [] as Option[]] as const)
+      optionKeys.split(",").map((clave) =>
+        getColumnOptions(slug, clave, centerId)
+          .then((o) => [clave, o] as const)
+          .catch(() => [clave, [] as Option[]] as const)
       )
     ).then((pairs) => active && setOptions(Object.fromEntries(pairs)))
     return () => {
       active = false
     }
-  }, [columns, slug, centerId])
+  }, [optionKeys, slug, centerId])
 
   // Dose balance of this patient, only when the service has a dose column.
   const hasDose = columns.some(

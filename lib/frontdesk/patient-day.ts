@@ -72,6 +72,7 @@ export interface PatientDay {
   sections?: PatientSection[]
   earliestTime: string | null // HH:MM of the first booking of the day
   presentAt: string | null // first arrival stamp (any service or the consultation)
+  consultationPresentAt: string | null // the consultation's own arrival (Consulta view: services do not count)
   allCancelled: boolean
 }
 
@@ -79,6 +80,15 @@ const text = (v: unknown) =>
   typeof v === "string" ? v : v == null ? "" : String(v)
 const minIso = (a: string | null, b: string | null | undefined) =>
   !b ? a : !a || b < a ? b : a
+
+// Consultation statuses still waiting for the patient to arrive.
+const CONSULTATION_AWAITING = new Set(["programada", "confirmada"])
+
+// The Consulta view speaks only of the consultation: arrival is the consultation's own, and a
+// patient who came for therapies but not the doctor reads «No presente» there (owner, 04-nov-2026).
+export function asConsultationView(p: PatientDay): PatientDay {
+  return { ...p, presentAt: p.consultationPresentAt }
+}
 
 export function groupByPatient(
   sessions: DaySession[],
@@ -101,6 +111,7 @@ export function groupByPatient(
         consultationSubtypes: [],
         earliestTime: null,
         presentAt: null,
+        consultationPresentAt: null,
         allCancelled: true,
       }
       map.set(id, p)
@@ -153,6 +164,9 @@ export function groupByPatient(
     const cancelled = status === "cancelada"
     if (!cancelled) p.allCancelled = false
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
+    // Only a consultation that actually reached «presente» (or beyond) counts as arrived to see the doctor.
+    if (!cancelled && !CONSULTATION_AWAITING.has(status))
+      p.consultationPresentAt = minIso(p.consultationPresentAt, text(c.presente) || null)
   }
 
   // A cancelled session is not a session (handoff patient-desk-cancelada-no-es-sesion, 14-oct-2026):
@@ -233,6 +247,39 @@ export function sortPatients(
     if (a.presentAt && b.presentAt)
       return a.presentAt.localeCompare(b.presentAt)
     if (a.presentAt || b.presentAt) return a.presentAt ? -1 : 1
+    if (a.earliestTime && b.earliestTime && a.earliestTime !== b.earliestTime)
+      return a.earliestTime.localeCompare(b.earliestTime)
+    if (a.earliestTime !== b.earliestTime) return a.earliestTime ? -1 : 1
+    return a.name.localeCompare(b.name)
+  })
+}
+
+// Present patient with something still waiting to be marked present: a service session still
+// 'pendiente' (added after arrival, or created by the scheduling bridge the day before) or a
+// consultation still programada/confirmada. Per-row «presente» is hidden on purpose (one arrival per
+// patient), so the header must offer it again or those rows stay locked (BE, 04-nov-2026: records
+// 14497, 11643, 4604).
+export function pendingArrivals(p: PatientDay): number {
+  const sessions = p.services
+    .flatMap((s) => s.statuses)
+    .filter((x) => x === "pendiente").length
+  const consults = p.consultationStatuses.filter((x) =>
+    CONSULTATION_AWAITING.has(x)
+  ).length
+  return sessions + consults
+}
+
+// Consultation view: everyone PRESENT together, in arrival order — finished or not (owner 04-nov-2026:
+// the presents were split, some on top, the rest sunk below the not-yet-arrived). Then whoever has
+// not arrived, by booking time; fully cancelled days last.
+export function sortByArrival(list: PatientDay[]): PatientDay[] {
+  const rankOf = (p: PatientDay) => (p.allCancelled ? 2 : p.presentAt ? 0 : 1)
+  return list.slice().sort((a, b) => {
+    const ra = rankOf(a)
+    const rb = rankOf(b)
+    if (ra !== rb) return ra - rb
+    if (a.presentAt && b.presentAt && a.presentAt !== b.presentAt)
+      return a.presentAt.localeCompare(b.presentAt)
     if (a.earliestTime && b.earliestTime && a.earliestTime !== b.earliestTime)
       return a.earliestTime.localeCompare(b.earliestTime)
     if (a.earliestTime !== b.earliestTime) return a.earliestTime ? -1 : 1

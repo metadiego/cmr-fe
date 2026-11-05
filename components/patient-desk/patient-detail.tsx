@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  pendingArrivals,
   patientSections,
   serviceCancelledOnly,
   serviceConcluded,
@@ -229,7 +230,11 @@ export function PatientDetail({
   async function handlePresent() {
     setPresenceBusy(true)
     try {
-      const res = await presentPatient(patient.patientId, date, centerId)
+      // Consulta view: the button speaks only of the consultation — never marks the therapies.
+      const res =
+        kind === "consultation"
+          ? { failed: [] as { reason: string }[] }
+          : await presentPatient(patient.patientId, date, centerId)
       const warnings = res.failed.map((f) => f.reason)
       const pendingConsultIds = patient.consultationIds.filter((_, i) =>
         CONSULT_PENDING_STATUSES.has(patient.consultationStatuses[i])
@@ -292,7 +297,9 @@ export function PatientDetail({
   async function handleUndoPresent() {
     setPresenceBusy(true)
     try {
-      await undoPresentPatient(patient.patientId, centerId)
+      // Consulta view: undo only the consultation's arrival; the therapies keep theirs.
+      if (kind !== "consultation")
+        await undoPresentPatient(patient.patientId, centerId)
       // Simétrico: solo la consulta que el present de arriba pudo haber marcado (sigue en "presente"
       // exacto) — nunca una que ya avanzó a triage/en_consulta/atendida por su cuenta.
       const presentConsultIds = patient.consultationIds.filter(
@@ -401,10 +408,30 @@ export function PatientDetail({
                 >
                   {t("undoPresent")}
                 </Button>
+                {/* Already present, but a therapy/consultation is still waiting: mark those too. */}
+                {kind !== "consultation" && pendingArrivals(patient) > 0 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-6 bg-amber-400 px-2 text-xs text-black hover:bg-amber-300"
+                    disabled={presenceBusy}
+                    onClick={handlePresent}
+                  >
+                    {t("markPendingPresent", { n: pendingArrivals(patient) })}
+                  </Button>
+                )}
               </div>
             ) : (
-              <Button size="sm" disabled={presenceBusy} onClick={handlePresent}>
-                <HugeiconsIcon icon={Tick02Icon} className="size-4" />
+              // NOT present yet: an action, so it must not look like the green «Presente 10:47» state
+              // (owner, 04-nov-2026: "no sé si dice marcar como presente o es que ya está presente").
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-dashed border-muted-foreground text-muted-foreground hover:border-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                title={t("markPresentHint")}
+                disabled={presenceBusy}
+                onClick={handlePresent}
+              >
                 {t("markPresent")}
               </Button>
             ))}

@@ -38,6 +38,7 @@ export function FichaEditor({
   const [lastName, setLastName] = React.useState(persona.lastName ?? "");
   const [specialty, setSpecialty] = React.useState(persona.specialty ?? "");
   const [phone, setPhone] = React.useState(persona.phone ?? "");
+  const [extension, setExtension] = React.useState(persona.extension ?? "");
   const [email, setEmail] = React.useState(persona.email ?? "");
   const [sex, setSex] = React.useState(p.sex ?? "");
   const [color, setColor] = React.useState(p.color || "#4a90d9");
@@ -60,6 +61,7 @@ export function FichaEditor({
     norm(lastName) !== (persona.lastName ?? "") ||
     norm(specialty) !== (persona.specialty ?? "") ||
     norm(phone) !== (persona.phone ?? "") ||
+    norm(extension) !== (persona.extension ?? "") ||
     norm(email) !== (persona.email ?? "") ||
     (sex || "") !== (p.sex ?? "") ||
     (color || "") !== (p.color ?? "") ||
@@ -75,6 +77,7 @@ export function FichaEditor({
         lastName: norm(lastName) || null,
         specialty: norm(specialty) || null,
         phone: norm(phone) || null,
+        extension: norm(extension) || null,
         email: norm(email) || null,
         sex: sex || null,
         color: color || undefined,
@@ -112,6 +115,7 @@ export function FichaEditor({
         <Campo label={t("apellido")}><Input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Campo>
         <Campo label={t("email")}><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Campo>
         <Campo label={t("telefono")}><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></Campo>
+        <Campo label={t("extension")}><Input value={extension} maxLength={20} inputMode="numeric" onChange={(e) => setExtension(e.target.value)} /></Campo>
         <Campo label={t("especialidad")}><Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} /></Campo>
         <Campo label={t("sexo")}>
           <Select value={sex || undefined} onValueChange={setSex}>

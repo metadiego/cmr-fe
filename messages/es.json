@@ -2045,7 +2045,9 @@
       "enServicio": "En {servicio}"
     },
     "patientNotFound": "Ese paciente no existe en este centro.",
-    "serviceNotFound": "Algún servicio elegido no existe en este centro."
+    "serviceNotFound": "Algún servicio elegido no existe en este centro.",
+    "removeStep": "Quitar {step}",
+    "formatoTherapyCount": "Terapias a imprimir"
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -3573,7 +3575,15 @@
       "saved": "Conteo guardado",
       "hint": "Selecciona un cajero para habilitar el conteo.",
       "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo).",
-      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros."
+      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros.",
+      "saveError": "No se pudo guardar el conteo; se reintentará al cambiar algo.",
+      "managerCount": "Conteo del gerente",
+      "managerCountHint": "Este conteo único manda sobre la suma de los cajeros.",
+      "cashiersSum": "Suma de los cajeros",
+      "cashiersSumHint": "Solo lectura: suma de los conteos de cada cajero.",
+      "countMyself": "Hacer un solo conteo",
+      "backToSum": "Volver a la suma de los cajeros",
+      "backToSumConfirm": "Se borrará el conteo del gerente y se usará la suma de los cajeros."
     },
     "petty": "Caja chica (petty)",
     "summary": {
@@ -4533,7 +4543,8 @@
     "ehrVinculado": "Vinculado con el EHR.",
     "ehrActualizado": "Rol del EHR actualizado.",
     "centroOrigen": "Centro de origen: {nombre}",
-    "centrosColumna": "Centro(s)"
+    "centrosColumna": "Centro(s)",
+    "extension": "Extensión (central telefónica)"
   },
   "acciones": {
     "subtitle": "Todo su historial, sin salir de aquí.",
@@ -4748,7 +4759,7 @@
     "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
     "record": "Record",
     "firstAt": "primera cita {time}",
-    "markPresent": "Presente",
+    "markPresent": "No presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "vitalsBy": "Vitales: {name}",
@@ -4791,7 +4802,9 @@
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",
     "cancelled": "Cancelada",
-    "presentAt": "Presente {time}"
+    "presentAt": "Presente {time}",
+    "markPendingPresent": "Marcar presente (pendientes: {n})",
+    "markPresentHint": "Clic para marcar presente"
   },
   "salesPackages": {
     "title": "Paquetes de venta",
@@ -4906,5 +4919,84 @@
     "label": "Centro",
     "placeholder": "Elegir centro…",
     "help": "Se crea en este centro."
+  },
+  "rightNow": {
+    "title": "Ahora mismo",
+    "description": "Lo que pasa en cada oficina, en vivo.",
+    "updatedAt": "Actualizado {time}",
+    "live": "En vivo",
+    "offline": "Sin conexión en vivo",
+    "combined": "Todos los centros",
+    "kpi": {
+      "netSales": "Ventas netas",
+      "invoices": "Facturas",
+      "refunds": "Devoluciones",
+      "present": "Pacientes presentes",
+      "attended": "Atendidos",
+      "pending": "Pendientes",
+      "calls": "Llamadas",
+      "alerts": "Alertas"
+    },
+    "sales": {
+      "title": "Ventas",
+      "net": "Neto del día",
+      "refunds": "Devoluciones: {n}",
+      "topSellers": "Mejores vendedores",
+      "noSellers": "Aún no hay ventas.",
+      "unknownSeller": "Sin nombre"
+    },
+    "patients": {
+      "title": "Pacientes (consultas)",
+      "present": "Presentes",
+      "firstVisit": "Primera vez",
+      "followUp": "Seguimiento",
+      "attended": "Atendidos",
+      "pending": "Pendientes"
+    },
+    "doctors": {
+      "title": "Médicos",
+      "colDoctor": "Médico",
+      "colTotal": "Citas",
+      "colAttended": "Atendidos",
+      "colFirst": "1ª vez",
+      "colFollow": "Seg.",
+      "colNet": "Facturado",
+      "empty": "Sin consultas hoy."
+    },
+    "prescriptions": {
+      "title": "Recetas",
+      "empty": "Las recetas llegarán desde el expediente (EHR); todavía no hay datos."
+    },
+    "services": {
+      "title": "Servicios",
+      "colService": "Servicio",
+      "colWaiting": "En espera",
+      "colInCare": "En atención",
+      "colCompleted": "Completados",
+      "colStaff": "Atiende",
+      "empty": "Sin servicios hoy.",
+      "waitingList": "En espera · {service}",
+      "completedList": "Completados · {service}",
+      "minutes": "{n} min",
+      "attendedBy": "Atendió {name}",
+      "none": "Nadie."
+    },
+    "calls": {
+      "title": "Llamadas",
+      "total": "Total",
+      "inbound": "Entrantes",
+      "outbound": "Salientes",
+      "missed": "Perdidas",
+      "answerRate": "Contestadas",
+      "byPbx": "Por central",
+      "ranking": "Operadoras",
+      "colExtension": "Ext.",
+      "colName": "Operadora",
+      "colAnswered": "Contestadas",
+      "colOutbound": "Salientes",
+      "empty": "Sin llamadas registradas todavía."
+    },
+    "noCenters": "No tienes centros para ver.",
+    "error": "No se pudo cargar «Ahora mismo»."
   }
 }
