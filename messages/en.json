@@ -1205,7 +1205,8 @@
     "paquetesVenta": "Sales packages",
     "inventory_live_stock": "Live stock (scales)",
     "ahora_mismo": "Right now",
-    "productosExonerados": "Exonerated products (IVU)"
+    "productosExonerados": "Exonerated products (IVU)",
+    "bothCenters": "Both"
   },
   "admin": {
     "title": "Administration",

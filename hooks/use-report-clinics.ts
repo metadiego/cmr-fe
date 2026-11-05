@@ -1,53 +1,41 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
-import { clinicCoverage, reportClinicChoice, reportFilterSelection } from "@/lib/reports/report-clinics";
-import { getActiveCentro } from "@/lib/tenant";
+import { clinicCoverage } from "@/lib/reports/report-clinics";
 
 /**
- * A report over "every clinic I can read + a filter" (handoff clinic-read-scope). Wraps `useClinicFilter`
- * so a `?centro=` link preselects that clinic until the filter is touched. The BE sums the clinics into one
- * figure, so `scopeLabel` names what a total covers ("CMR Caguas" / "2 clinics"); it is null for someone who
- * reads a single clinic, whose screen stays as it was. Fetch only once `ready`, so a link never shows the
- * all-clinics figure first.
+ * A report over the clinics the top bar shows (Bayamón / Caguas / Ambos, docs/specs/selector-de-centros-
+ * arriba.md), among those where the person holds `permission`. The BE sums the clinics into one figure, so
+ * `scopeLabel` names what a total covers ("CMR Caguas" / "2 clinics"). Fetch only once `ready`.
  */
 export function useReportClinics(permission: string) {
   const t = useTranslations("reports.clinicScope");
-  const urlCenter = useSearchParams().get("centro");
   const filter = useClinicFilter(permission);
-  const [touched, setTouched] = React.useState(false);
   const readable = React.useMemo(() => filter.centers.map((c) => c.id), [filter.centers]);
 
-  const choice = reportClinicChoice(readable, filter.selected, urlCenter, touched, getActiveCentro());
+  const choice = filter.choice;
   const coverage = clinicCoverage(readable, choice);
-  // What the figures cover, always (e.g. a printed letterhead); `scopeLabel` only for a multi-clinic reader.
+  // What the figures cover, always (e.g. a printed letterhead, a total's label).
   const coverageText =
     coverage.kind === "one"
       ? filter.nameOf(coverage.id) || t("many", { count: 1 })
       : coverage.kind === "many"
         ? t("many", { count: coverage.count })
         : "";
-  const scopeLabel = filter.showColumn && coverageText ? coverageText : null;
+  const scopeLabel = coverageText || null;
 
   return {
     choice,
-    choiceKey: choice ? choice.join(",") : "all",
+    choiceKey: filter.choiceKey,
     ready: !filter.loading,
-    showFilter: filter.showFilter,
     centers: filter.centers,
-    selected: reportFilterSelection(readable, filter.selected, urlCenter, touched),
-    onChange: (next: string[] | null) => {
-      setTouched(true);
-      filter.setSelected(next);
-    },
     noClinic: !filter.loading && filter.centers.length === 0,
     coverageText,
     scopeLabel,
-    /** `label` followed by the clinics it covers, e.g. "Totals (2 clinics)"; unchanged for a one-clinic reader. */
+    /** `label` followed by the clinics it covers, e.g. "Totals (2 clinics)". */
     withScope: (label: string) => (scopeLabel ? t("total", { label, scope: scopeLabel }) : label),
   };
 }

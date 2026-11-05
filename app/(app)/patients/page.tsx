@@ -7,9 +7,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
-import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
-import { patientCenterScope, patientRecordHref } from "@/lib/pacientes/center-scope";
-import { CenterFilter } from "@/components/kit/center-filter";
+import { patientRecordHref } from "@/lib/pacientes/center-scope";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useResource } from "@/hooks/use-resource";
 import type { Paginated } from "@/lib/api/types";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -41,31 +40,18 @@ export default function ClientesPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
-  // The BE reads every clinic the person may read patients in (lib/pacientes/center-scope.ts), so the
-  // list loads at once. The clinics this person can read only fill the filter; the column follows what
-  // the response covered.
-  const centrosRes = useResource<Centro[]>(() => getCentrosDondePuedo("pacientes.read"));
-  const centros = React.useMemo(() => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []), [centrosRes.state]);
-  const centroName = React.useMemo(() => new Map(centros.map((c) => [c.id, c.name])), [centros]);
-  const [selected, setSelected] = React.useState<string[] | null>(null);
-  const chosen = patientCenterScope(centros.map((c) => c.id), selected, undefined).centerIds;
-  const chosenKey = chosen?.join(",");
+  // The clinics the top bar shows (Bayamón / Caguas / Ambos) among those where the person reads patients;
+  // the Centro column always shows (docs/specs/selector-de-centros-arriba.md).
+  const clinics = useClinicFilter("pacientes.read");
+  const centroName = React.useMemo(() => new Map(clinics.centers.map((c) => [c.id, c.name])), [clinics.centers]);
+  const chosen = clinics.choice ?? undefined;
 
   // Server-side search: the BE filters by name/docId/phone/etc via `q`.
   const { state, reload } = useResource<Paginated<Paciente>>(
     () => listPacientes({ page, limit: LIMIT, q, centerIds: chosen }),
-    [page, q, chosenKey],
+    [page, q, clinics.choiceKey],
   );
-  const scope = patientCenterScope(
-    centros.map((c) => c.id),
-    selected,
-    state.kind === "ok" ? state.data.clinicScope?.clinicIds : undefined,
-  );
-
-  function onCentersChange(next: string[] | null) {
-    setPage(1);
-    setSelected(next);
-  }
+  const scope = { showColumn: clinics.showColumn };
 
   function onSearch(value: string) {
     setPage(1);
@@ -87,7 +73,6 @@ export default function ClientesPage() {
           search={q}
           onSearchChange={onSearch}
           searchPlaceholder={t("searchPlaceholder")}
-          filters={scope.showFilter && <CenterFilter centers={centros} selected={selected} onChange={onCentersChange} />}
         >
           <Can permiso="pacientes.create">
             <Button onClick={() => setCreateOpen(true)}>

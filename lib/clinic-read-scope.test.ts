@@ -1,7 +1,7 @@
 // Reads across clinics (lib/clinic-read-scope.ts). Run: `npm test`.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { clinicFilterChoice, oneCenterIds, readCenterIds, showsClinicColumn, tenantOf } from "./clinic-read-scope.ts";
+import { clinicFilterChoice, oneCenterIds, readCenterIds, tenantOf, topBarSelection } from "./clinic-read-scope.ts";
 
 test("a screen's picked center is sent as centerIds, so the read does not depend on the BE default", () => {
   assert.deepEqual(readCenterIds("cag", undefined), ["cag"]);
@@ -56,8 +56,18 @@ test("a read over several clinics sends the first as X-Tenant-ID; every clinic (
   assert.equal(tenantOf([]), undefined);
 });
 
-test("the clinic column shows for anyone who can read more than one clinic, even filtered to one", () => {
-  assert.equal(showsClinicColumn(["bay", "cag"]), true);
-  assert.equal(showsClinicColumn(["bay"]), false);
-  assert.equal(showsClinicColumn([]), false);
+test("the top bar on «Ambos»: a one-center read with no picked center names nothing (every center in scope)", () => {
+  assert.equal(oneCenterIds(undefined, "cag", "bay", true), undefined);
+  // A picked center or an explicit list still wins.
+  assert.deepEqual(oneCenterIds("bay", "cag", "bay", true), ["bay"]);
+  assert.deepEqual(oneCenterIds(["cag"], "cag", "bay", true), ["cag"]);
+});
+
+test("the top bar's selection: one clinic → that one; «Ambos» → nothing ticked (every readable clinic)", () => {
+  assert.deepEqual(topBarSelection(false, "cag"), ["cag"]);
+  assert.equal(topBarSelection(true, "cag"), null);
+  assert.equal(topBarSelection(false, null), null);
+  // Fed to the list's choice: one clinic narrows, «Ambos» names every readable one, active first.
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], topBarSelection(false, "cag"), "cag"), ["cag"]);
+  assert.deepEqual(clinicFilterChoice(["bay", "cag"], topBarSelection(true, "cag"), "cag"), ["cag", "bay"]);
 });

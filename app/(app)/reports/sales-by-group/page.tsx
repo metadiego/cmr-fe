@@ -13,7 +13,6 @@ import {
 } from "@/lib/api/facturacion-reportes";
 import { useResource } from "@/hooks/use-resource";
 import { useReportClinics } from "@/hooks/use-report-clinics";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -155,9 +154,6 @@ export default function VentasPorGrupoPage() {
             <Button key={k} variant="ghost" size="sm" className="h-9 text-xs" onClick={() => atajo(k)}>{t(`atajo.${k}`)}</Button>
           ))}
         </div>
-        {clinics.showFilter && (
-          <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.onChange} />
-        )}
         {clinics.scopeLabel && (
           <div className="ml-auto self-center text-sm text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</div>
         )}

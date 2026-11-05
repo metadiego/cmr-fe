@@ -11,8 +11,8 @@ import { useResource } from "@/hooks/use-resource";
 
 /**
  * A month calendar over every clinic the person can read (`readPermission`), with the clinic filter
- * (`useClinicFilter`). What needs ONE clinic — the day view a click opens, a booking — runs in `one`:
- * the single ticked clinic, else the active one (lib/agenda/calendar-clinics.ts `pickOneClinic`).
+ * (`useClinicFilter`: the top bar's Bayamón / Caguas / Ambos). What needs ONE clinic — the day view a click opens, a booking — runs in `one`:
+ * the top bar's clinic, else the active one (lib/agenda/calendar-clinics.ts `pickOneClinic`).
  * `canCreate` = `writePermission` held there. `dayQuery` names that clinic in the day view's link.
  */
 export function useCalendarClinics(readPermission: string, writePermission: string) {
@@ -37,6 +37,6 @@ export function useCalendarClinics(readPermission: string, writePermission: stri
     canCreate,
     shortOf,
     // Only for someone who reads several clinics; with one, the day view opens as it always did.
-    dayQuery: filter.showFilter && one ? `?centro=${encodeURIComponent(one)}` : "",
+    dayQuery: filter.multiClinic && one ? `?centro=${encodeURIComponent(one)}` : "",
   };
 }

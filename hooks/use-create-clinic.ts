@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { createClinicOf } from "@/lib/create-clinic";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
 
@@ -20,8 +20,8 @@ export function useCreateClinic(permission: string, choice: readonly string[] | 
   const sessionCenterId = me.kind === "ok" ? (me.me.activeClinicId ?? null) : null;
   return {
     centers,
-    /** "" while loading or when the person cannot create anywhere. */
-    defaultClinicId: createClinicOf(choice, centers.map((c) => c.id), getActiveCentro(), sessionCenterId),
+    /** "" while loading, when the person cannot create anywhere, or on «Ambos» (the form asks). */
+    defaultClinicId: createClinicOf(choice, centers.map((c) => c.id), getActiveCentro(), sessionCenterId, isClinicViewAll()),
     canCreate: centers.length > 0,
     loading: res.state.kind === "loading",
   };

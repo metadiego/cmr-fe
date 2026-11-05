@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { getCentrosDondePuedo, getMyCentrosOperativos, type Centro } from "@/lib/api/centers";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { defaultScreenCenter, isScreenPickerRedundant } from "@/lib/screen-center";
 import { useMe } from "@/hooks/use-me";
 import { useResource } from "@/hooks/use-resource";
@@ -62,7 +62,9 @@ export function useCentroPantalla(
 
   const centroIds = centros.map((c) => c.id);
   const pedido = !!requested && centroIds.includes(requested);
-  const redundante = !pedido && isScreenPickerRedundant(centroIds, operativosIds, topBarCentroId);
+  // On «Ambos» the top bar names no one clinic, so a screen that shows ONE keeps its own picker.
+  const redundante =
+    !pedido && !isClinicViewAll() && isScreenPickerRedundant(centroIds, operativosIds, topBarCentroId);
 
   const [centroSel, setCentroSel] = React.useState(requested ?? "");
   const centroActivo =

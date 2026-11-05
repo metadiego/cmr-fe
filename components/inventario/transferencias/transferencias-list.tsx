@@ -18,7 +18,6 @@ import { getCentrosDondePuedo, getMyCentros, type Centro } from "@/lib/api/cente
 import { useResource } from "@/hooks/use-resource";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { canReceiveTransfer, transferClinicName } from "@/lib/inventario/transfer-clinics";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -93,9 +92,6 @@ export function TransferenciasList() {
         description={t("help")}
         actions={
           <>
-            {clinics.showFilter && (
-              <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.setSelected} />
-            )}
             <Button size="sm" asChild>
               <Link href="/inventory/transfers/new">
                 <HugeiconsIcon icon={Add01Icon} className="size-4" />

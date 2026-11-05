@@ -2,7 +2,7 @@ import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
 import { oneCenterIds, type CenterChoice } from "@/lib/clinic-read-scope";
 import {
@@ -221,7 +221,8 @@ export function apiFetchPagedV1<T>(
 
 // `path` of a read with its centers named as `?centerIds=` (lib/clinic-read-scope.ts `oneCenterIds`):
 // the picked `tenant`, a clinic filter's list, nothing for every center in scope (`null` or `[]`), else
-// the center X-Tenant-ID carries. The BE reads every center in scope when none is named.
+// the center X-Tenant-ID carries — or, with the top bar on «Ambos», nothing. The BE reads every center in
+// scope when none is named.
 export async function oneCenterPath(path: string, tenant?: CenterChoice): Promise<string> {
   const active = getActiveCentro();
   let sessionCenter: string | null = null;
@@ -229,7 +230,7 @@ export async function oneCenterPath(path: string, tenant?: CenterChoice): Promis
     const { data } = await createClient().auth.getSession();
     sessionCenter = (data.session?.user.app_metadata?.clinic_id as string | undefined) ?? null;
   }
-  const ids = oneCenterIds(tenant, active, sessionCenter);
+  const ids = oneCenterIds(tenant, active, sessionCenter, isClinicViewAll());
   if (!ids) return path;
   return `${path}${path.includes("?") ? "&" : "?"}centerIds=${ids.map(encodeURIComponent).join(",")}`;
 }

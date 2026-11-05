@@ -20,3 +20,18 @@ export function setActiveCentro(centroId: string): void {
     centroId,
   )}; path=/; max-age=${oneYear}; samesite=lax`;
 }
+
+// The top bar's «Ambos» (docs/specs/selector-de-centros-arriba.md): reads span every clinic the person
+// can read; the active center above stays the X-Tenant-ID and where writes go. Unset = that one clinic.
+export const CLINIC_VIEW_COOKIE = "cmr_clinic_view";
+
+export function isClinicViewAll(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split("; ").includes(`${CLINIC_VIEW_COOKIE}=all`);
+}
+
+export function setClinicViewAll(all: boolean): void {
+  if (typeof document === "undefined") return;
+  const maxAge = all ? 60 * 60 * 24 * 365 : 0;
+  document.cookie = `${CLINIC_VIEW_COOKIE}=all; path=/; max-age=${maxAge}; samesite=lax`;
+}

@@ -24,7 +24,6 @@ import { apiErrorMessage, toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -128,11 +127,6 @@ function AlertasPanel() {
     finally { setBusyId(null); }
   }
 
-  const filter = clinics.showFilter && (
-    <div className="mb-3 flex justify-end">
-      <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.setSelected} />
-    </div>
-  );
   let body: React.ReactNode;
   if (state.kind === "loading") body = <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
   else if (state.kind === "fail")
@@ -148,7 +142,6 @@ function AlertasPanel() {
 
   return (
     <>
-      {filter}
       {body}
     </>
   );
@@ -217,11 +210,6 @@ function NotificacionesPanel() {
 
   return (
     <>
-      {clinics.showFilter && (
-        <div className="mb-3 flex justify-end">
-          <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.setSelected} />
-        </div>
-      )}
       <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <table className="w-full text-sm">
           <thead className="bg-muted/60">

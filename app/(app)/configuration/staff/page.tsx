@@ -17,7 +17,6 @@ import { getEhrRoles, listEhrStaffLinks, type EhrRole, type EhrStaffLink } from 
 import { getCentrosDondePuedo } from "@/lib/api/centers";
 import { staffFullName as nombreDe } from "@/lib/personal/staff-name";
 import { EhrLinkSection } from "@/components/personal/ehr-link-section";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
@@ -101,9 +100,6 @@ export function StaffPanel() {
         <aside className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             {create.canCreate && <Button size="sm" onClick={() => setNuevoOpen(true)}>{t("nuevo")}</Button>}
-            {filter.showFilter && (
-              <CenterFilter centers={filter.centers} selected={filter.selected} onChange={(next) => { filter.setSelected(next); setSelId(""); }} />
-            )}
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <input type="checkbox" checked={verInactivos} onChange={(e) => { setVerInactivos(e.target.checked); setSelId(""); }} className="size-3.5" />
               {t("verInactivos")}

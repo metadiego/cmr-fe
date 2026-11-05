@@ -31,7 +31,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Can } from "@/components/kit/can";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { ControlSkeleton } from "@/components/kit/skeletons";
 import { LegendSkeleton, MonthCalendar, type DayTypeCount } from "@/components/agenda/month-calendar";
 import { CitaModal } from "@/components/agenda/cita-modal";
@@ -69,7 +68,7 @@ export function MedicasCalendar() {
   const medicosRes = useResource<Personal[]>(() => getMedicos(clinics.choice), [clinics.choiceKey]);
   // Booking runs in ONE clinic: its doctors only. Asked for (when the modal opens) only if the calendar
   // shows more than that clinic; otherwise it is the same list.
-  const ownDoctors = clinics.showFilter && !!clinics.one && clinics.choiceKey !== clinics.one;
+  const ownDoctors = clinics.multiClinic && !!clinics.one && clinics.choiceKey !== clinics.one;
   const medicosCrearRes = useResource<Personal[]>(
     () => (modal && ownDoctors && clinics.one ? getMedicos(clinics.one) : Promise.resolve([])),
     [!!modal, ownDoctors, clinics.one],
@@ -187,9 +186,6 @@ export function MedicasCalendar() {
           <Button variant="outline" onClick={goToday}>{t("today")}</Button>
           {/* Fixed min width: a short month name must not pull the filters left of where a long one puts them. */}
           <h2 className="min-w-52 px-1 text-xl font-semibold whitespace-nowrap">{monthLabel}</h2>
-          {clinics.showFilter && (
-            <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.setSelected} />
-          )}
           {/* The doctor list hangs off the clinics shown, so a filter change shows the placeholder again. */}
           {medicosRes.state.kind === "loading" ? (
             <ControlSkeleton className="w-52" />

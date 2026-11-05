@@ -9,7 +9,6 @@ import { getEstadisticasServicios, type EstadisticasServicios, type EstServicio 
 import { useResource } from "@/hooks/use-resource";
 import { useReportClinics } from "@/hooks/use-report-clinics";
 import { useMe } from "@/hooks/use-me";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -153,9 +152,6 @@ export default function EstadisticasServiciosPage() {
               <DatePicker value={hasta} min={desde} onChange={setHasta} className="h-9 w-[160px]" />
             </label>
             <Button className="h-9" onClick={() => setQuery({ desde, hasta })}>{t("generate")}</Button>
-            {clinics.showFilter && (
-              <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.onChange} />
-            )}
             {clinics.scopeLabel && (
               <div className="ml-auto text-sm text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</div>
             )}

@@ -13,7 +13,6 @@ import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useCreateClinic } from "@/hooks/use-create-clinic";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { EventoModal } from "@/components/calendario/evento-modal";
 import { cn } from "@/lib/utils";
 import { PillsSkeleton } from "@/components/kit/skeletons";
@@ -179,8 +178,6 @@ export function Calendario() {
         )}
         <h2 className="px-1 text-lg font-semibold">{titulo}</h2>
 
-        {/* Clinic filter: only for someone who reads more than one clinic. */}
-        {filter.showFilter && <CenterFilter centers={filter.centers} selected={filter.selected} onChange={filter.setSelected} />}
         {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
 
         <div className="ml-auto flex flex-wrap items-center gap-2">

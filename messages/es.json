@@ -1205,7 +1205,8 @@
     "paquetesVenta": "Paquetes de venta",
     "inventory_live_stock": "Stock live (balanzas)",
     "ahora_mismo": "Ahora mismo",
-    "productosExonerados": "Productos exonerados (IVU)"
+    "productosExonerados": "Productos exonerados (IVU)",
+    "bothCenters": "Ambos"
   },
   "admin": {
     "title": "Administración",

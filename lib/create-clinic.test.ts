@@ -24,3 +24,9 @@ test("a ticked or active clinic without the create permission is skipped", () =>
 test("nowhere to create: empty", () => {
   assert.equal(createClinicOf(["cag"], [], "cag", "cag"), "");
 });
+
+test("top bar on «Ambos» and two clinics to create in: nothing picked, the form asks", () => {
+  assert.equal(createClinicOf(["bay", "cag"], ["bay", "cag"], "cag", "bay", true), "");
+  // …but one clinic to create in is not a question.
+  assert.equal(createClinicOf(["bay", "cag"], ["bay"], "cag", "bay", true), "bay");
+});

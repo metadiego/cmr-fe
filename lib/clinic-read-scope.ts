@@ -30,8 +30,10 @@ export function oneCenterIds(
   tenant: CenterChoice,
   activeCenterId: string | null,
   sessionCenterId: string | null,
+  /** The top bar is on «Ambos»: a read with no picked center reads every center in scope. */
+  viewAll = false,
 ): string[] | undefined {
-  if (tenant === null) return undefined;
+  if (tenant === null || (tenant === undefined && viewAll)) return undefined;
   if (tenant !== undefined && typeof tenant !== "string") return tenant.length ? [...tenant] : undefined;
   const id = tenant ?? activeCenterId ?? sessionCenterId;
   return id ? [id] : undefined;
@@ -66,7 +68,10 @@ export function tenantOf(choice: CenterChoice): string | undefined {
   return choice?.[0];
 }
 
-/** The clinic column: for anyone who can read more than one clinic, even when filtered to one. */
-export function showsClinicColumn(readable: readonly string[]): boolean {
-  return readable.length > 1;
+/**
+ * What the top bar (Bayamón / Caguas / Ambos, docs/specs/selector-de-centros-arriba.md) ticks for a list:
+ * its one clinic, or nothing on «Ambos» — `clinicFilterChoice` then names every readable clinic.
+ */
+export function topBarSelection(viewAll: boolean, activeCenterId: string | null): string[] | null {
+  return !viewAll && activeCenterId ? [activeCenterId] : null;
 }

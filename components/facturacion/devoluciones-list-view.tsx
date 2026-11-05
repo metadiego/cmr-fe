@@ -10,7 +10,6 @@ import type { Paginated } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useCan } from "@/hooks/use-can";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { toastError } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -124,7 +123,6 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
             search={q}
             onSearchChange={setQ}
             searchPlaceholder={t("searchPlaceholder")}
-            filters={filter.showFilter && <CenterFilter centers={filter.centers} selected={filter.selected} onChange={filter.setSelected} />}
           >
             <Select value={estado || ALL} onValueChange={(v) => setEstado(v === ALL ? "" : v)}>
               <SelectTrigger size="sm" className="w-[160px]"><SelectValue placeholder={t("allStates")} /></SelectTrigger>

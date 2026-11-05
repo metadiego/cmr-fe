@@ -25,7 +25,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Can } from "@/components/kit/can";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { ControlSkeleton } from "@/components/kit/skeletons";
 import { LegendSkeleton, MonthCalendar, type AgendaEvent } from "@/components/agenda/month-calendar";
 import { PlanificarDiaModal } from "@/components/agenda/planificar-dia-modal";
@@ -61,8 +60,8 @@ export function ServiciosCalendar() {
   // Services are per clinic: with several clinics shown, their catalogs in one read (?centerIds).
   const shownKey = clinics.shownIds.join(",");
   const serviciosRes = useResource<Servicio[]>(
-    () => (clinics.showFilter && clinics.shownIds.length ? getServiciosDe(clinics.shownIds) : getServicios()),
-    [clinics.showFilter, shownKey],
+    () => (clinics.multiClinic && clinics.shownIds.length ? getServiciosDe(clinics.shownIds) : getServicios()),
+    [clinics.multiClinic, shownKey],
   );
   const festivosRes = useResource<Festivo[]>(() => getFestivos(year, clinics.choice), [year, clinics.choiceKey]);
   const servicios = React.useMemo(
@@ -165,9 +164,6 @@ export function ServiciosCalendar() {
           <Button variant="outline" onClick={goToday}>{t("today")}</Button>
           {/* Fixed min width: a short month name must not pull the filters left of where a long one puts them. */}
           <h2 className="min-w-52 px-1 text-xl font-semibold whitespace-nowrap">{monthLabel}</h2>
-          {clinics.showFilter && (
-            <CenterFilter centers={clinics.centers} selected={clinics.selected} onChange={clinics.setSelected} />
-          )}
           {serviciosRes.state.kind === "loading" ? (
             <ControlSkeleton className="w-52" />
           ) : (

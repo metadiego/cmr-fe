@@ -12,7 +12,6 @@ import { useResource } from "@/hooks/use-resource";
 import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useActiveClinic } from "@/hooks/use-active-clinic";
 import { LiveBadge } from "@/components/live-badge";
-import { CenterFilter } from "@/components/kit/center-filter";
 import { InvoiceLiveFeeds, useInvoiceLiveFeeds } from "@/components/facturacion/invoice-live-feeds";
 import { FacturaRowActions } from "@/components/facturacion/factura-row-actions";
 import { formatFechaSolo } from "@/lib/format/fecha";
@@ -192,7 +191,7 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
   // button to whoever can bill in more than one clinic.
   const active = useActiveClinic();
   const saleClinic = clinicForNewSale(filter.choice, readable, active);
-  const saleClinicName = filter.showFilter && saleClinic ? filter.nameOf(saleClinic) : "";
+  const saleClinicName = filter.multiClinic && saleClinic ? filter.nameOf(saleClinic) : "";
 
   function cell(clave: string, value: unknown) {
     if (clave === "fac_estado") return <EstadoBadge estado={String(value ?? "")} />;
@@ -231,7 +230,6 @@ export function FacturasListView({ contexto }: { contexto: "general" | "consulta
             search={q}
             onSearchChange={setQ}
             searchPlaceholder={t("searchPlaceholder")}
-            filters={filter.showFilter && <CenterFilter centers={filter.centers} selected={filter.selected} onChange={filter.setSelected} />}
           >
             <Select value={estado || ALL} onValueChange={(v) => setEstado(v === ALL ? "" : v)}>
               <SelectTrigger size="sm" className="w-[170px]"><SelectValue placeholder={t("allStates")} /></SelectTrigger>
