@@ -165,6 +165,7 @@ function Contenido({
               <span className="font-medium">
                 {label(g.labelKey, g.slug)}
                 <span className="ml-1 text-xs text-muted-foreground">{g.slug}</span>
+                {g.isProductSale && <Badge variant="outline" className="ml-2 font-normal">{t("productSaleBadge")}</Badge>}
               </span>
               <span>
                 <Badge variant="secondary" className="font-normal">
@@ -219,6 +220,7 @@ function DetalleGrupo({
   const [labelKey, setLabelKey] = React.useState(grupo.labelKey);
   const [division, setDivision] = React.useState(grupo.division);
   const [activo, setActivo] = React.useState(grupo.active);
+  const [productSale, setProductSale] = React.useState(!!grupo.isProductSale);
   const [savingGrupo, setSavingGrupo] = React.useState(false);
 
   // Membresía local (ids que quedan en el grupo). Init = miembros actuales.
@@ -260,6 +262,7 @@ function DetalleGrupo({
         labelKey: labelKey.trim() || grupo.labelKey,
         division,
         active: activo,
+        isProductSale: productSale,
       });
       toast.success(t("updated"));
       onChanged();
@@ -321,6 +324,12 @@ function DetalleGrupo({
           <label className="flex items-center gap-2 text-sm">
             <Switch checked={activo} onCheckedChange={setActivo} />
             {t("active")}
+          </label>
+          {/* Product sale (IVU): its lines — today's and any product added later — feed the cuadre's
+              product-sales section (taxable / exempt / exonerated, state + municipal IVU). */}
+          <label className="flex items-center gap-2 text-sm" title={t("productSaleHint")}>
+            <Switch checked={productSale} onCheckedChange={setProductSale} />
+            {t("productSale")}
           </label>
           <Button size="sm" onClick={guardarGrupo} disabled={savingGrupo}>
             {t("saveGroup")}

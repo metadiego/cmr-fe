@@ -3784,7 +3784,10 @@
     "copyFrom": "Copy the setup from another group",
     "copyFromPlaceholder": "Copy from…",
     "copyDone": "Copied {n} fields from “{origen}”.",
-    "copyNone": "“{origen}” has no extra fields to copy."
+    "copyNone": "“{origen}” has no extra fields to copy.",
+    "productSale": "Product sale (IVU)",
+    "productSaleHint": "Its lines count as product sales in the cash reconciliation: taxable, exempt, exonerated and state + municipal IVU. Also applies to products added later.",
+    "productSaleBadge": "Product"
   },
   "tb": {
     "acc": {

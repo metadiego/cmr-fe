@@ -3784,7 +3784,10 @@
     "copyFrom": "Copiar la configuración de otro grupo",
     "copyFromPlaceholder": "Copiar de…",
     "copyDone": "Se copiaron {n} campos de «{origen}».",
-    "copyNone": "«{origen}» no tiene campos extra para copiar."
+    "copyNone": "«{origen}» no tiene campos extra para copiar.",
+    "productSale": "Venta de producto (IVU)",
+    "productSaleHint": "Sus líneas cuentan como venta de producto en el cuadre: tributable, exento, exonerado e IVU estatal y municipal. Vale también para los productos que se agreguen después.",
+    "productSaleBadge": "Producto"
   },
   "tb": {
     "acc": {
