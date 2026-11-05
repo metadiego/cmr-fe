@@ -27,6 +27,7 @@ import {
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { toCsv } from "@/lib/caja/export";
+import { todayPR } from "@/lib/format/fecha";
 import { totalConteo, estadoCuadreVivo, diferenciaCaja, subtotalesTarjeta as calcSubtotalesTarjeta } from "@/lib/caja/totales";
 import { useResource } from "@/hooks/use-resource";
 import { useCentroGate } from "@/hooks/use-centro-gate";
@@ -86,7 +87,10 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
   // Editar fechas ANTERIORES está bloqueado por defecto (seguridad); lo habilita el permiso
   // `caja.retroactivo` (RBAC puro, data-driven — ya no colgado de isGerencia/caja.ver_todos).
   const puedeRetroactivo = can("caja.retroactivo");
-  const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // `todayPR()`, NO `new Date().toISOString()`: esta última da el día en UTC, que ya es "mañana" en
+  // Puerto Rico después de las 8pm AST (bug real, 05-nov-2026, encontrado al armar el cuadre total
+  // — ver lib/format/fecha.ts).
+  const hoy = React.useMemo(() => todayPR(), []);
   const [fecha, setFecha] = React.useState(hoy);
   const [scope, setScope] = React.useState<Scope | null>(null);
   const [filterSlot, setFilterSlot] = React.useState<HTMLDivElement | null>(null);

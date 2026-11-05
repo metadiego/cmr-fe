@@ -16,6 +16,7 @@ import {
   type GrupoMetodoPago,
 } from "@/lib/api/caja";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { todayPR } from "@/lib/format/fecha";
 import { toCsv } from "@/lib/caja/export";
 import { subtotalesTarjeta as calcSubtotalesTarjeta } from "@/lib/caja/totales";
 import {
@@ -61,7 +62,10 @@ export function CuadreTotal() {
   // avisar es exactamente el tipo de error que esa regla ya existe para evitar.
   const puedeRetroactivo = can("caja.retroactivo");
 
-  const hoy = React.useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // `todayPR()`, NO `new Date().toISOString()`: esta última da el día en UTC, que ya es "mañana" en
+  // Puerto Rico después de las 8pm AST (bug real, 05-nov-2026: a las 10:33pm AST mostraba el día 5
+  // como "hoy" siendo el 4 todavía — ver lib/format/fecha.ts).
+  const hoy = React.useMemo(() => todayPR(), []);
   const [fecha, setFecha] = React.useState(hoy);
 
   const loadingGate = gate.cargando;
@@ -325,7 +329,13 @@ function Editor({
           contado={reporte.check.day.counted}
           aDepositar={reporte.check.day.counted - reporte.check.day.fund}
           diferencia={reporte.check.day.difference}
-          sinContar={!reporte.dayReconciliation}
+          // `!dayReconciliation` solo dice que ESTA pantalla nunca se abrió — no que nadie contó.
+          // Los cajeros ya cuentan al cerrar su propia caja (consulta/general); `conteoEfectivo` viene
+          // UNIFICADO de ahí y puede traer datos reales aunque el cuadre total en sí nunca se haya
+          // abierto. Bug real 05-nov-2026: con $70 ya contados por los cajeros, esto pintaba "Sin
+          // contar" en rojo como si nadie hubiera hecho nada. `null` = de verdad nadie contó todavía
+          // (mismo contrato que ReporteDia.conteoEfectivo, ver lib/api/caja.ts).
+          sinContar={!reporte.conteoEfectivo}
           cerrado={cerrado}
           cerradoEn={null}
           canProcesar={!cerrado && puedeCerrarPermiso}
