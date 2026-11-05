@@ -1196,7 +1196,8 @@
     "patientDesk": "Centro de Pacientes",
     "paquetesVenta": "Paquetes de venta",
     "inventory_live_stock": "Stock live (balanzas)",
-    "ahora_mismo": "Ahora mismo"
+    "ahora_mismo": "Ahora mismo",
+    "productosExonerados": "Productos exonerados (IVU)"
   },
   "admin": {
     "title": "Administración",

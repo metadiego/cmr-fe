@@ -1196,7 +1196,8 @@
     "patientDesk": "Patient Center",
     "paquetesVenta": "Sales packages",
     "inventory_live_stock": "Live stock (scales)",
-    "ahora_mismo": "Right now"
+    "ahora_mismo": "Right now",
+    "productosExonerados": "Exonerated products (IVU)"
   },
   "admin": {
     "title": "Administration",
