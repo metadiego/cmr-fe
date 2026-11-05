@@ -269,7 +269,11 @@ function PlantillasPanel() {
   const tc = useTranslations("common");
   const { can } = useCan();
   const puedeConfig = can("notificaciones.config"); // gate cosmético; el BE es la autoridad
-  const { state, reload } = useResource<Plantilla[]>(() => listPlantillas());
+  const clinics = useClinicFilter("notificaciones.read");
+  const { state, reload } = useResource<(Plantilla & { clinicName?: string | null })[]>(
+    () => listPlantillas(clinics.choice ?? undefined),
+    [clinics.choiceKey],
+  );
   const rows = state.kind === "ok" ? state.data : [];
   const [createOpen, setCreateOpen] = React.useState(false);
 
@@ -289,20 +293,21 @@ function PlantillasPanel() {
               <th className="px-3 py-2 font-semibold">{t("col.idioma")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.asunto")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.estado")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.centro")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {state.kind === "loading" && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
             )}
             {state.kind === "fail" && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center">
+              <tr><td colSpan={6} className="px-3 py-8 text-center">
                 <p className="text-sm text-muted-foreground">{tc("error")}</p>
                 <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
               </td></tr>
             )}
             {state.kind === "ok" && rows.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{t("noPlantillas")}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{t("noPlantillas")}</td></tr>
             )}
             {rows.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
@@ -311,6 +316,7 @@ function PlantillasPanel() {
                 <td className="px-3 py-2 uppercase text-muted-foreground">{p.language}</td>
                 <td className="px-3 py-2 text-muted-foreground">{p.subject ?? "—"}</td>
                 <td className="px-3 py-2"><Badge variant={p.active ? "secondary" : "outline"}>{p.active ? tc("active") : tc("inactive")}</Badge></td>
+                <td className="px-3 py-2"><Badge variant="outline">{p.clinicName || clinics.nameOf(p.clinicId) || "—"}</Badge></td>
               </tr>
             ))}
           </tbody>

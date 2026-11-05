@@ -92,8 +92,9 @@ export function enviarNotificacion(
     body: JSON.stringify(payload),
   });
 }
-export function listPlantillas(): Promise<Plantilla[]> {
-  return apiFetch<Plantilla[]>(`/communications/notifications/templates`);
+// Templates of the clinics `choice` names (the top bar's), each with `clinicName`.
+export async function listPlantillas(choice?: CenterChoice): Promise<(Plantilla & { clinicName?: string | null })[]> {
+  return apiFetch(await oneCenterPath(`/communications/notifications/templates`, choice), undefined, tenantOf(choice));
 }
 // Alta de plantilla — endpoint del dominio único (RBAC: notificaciones.config; el BE es la autoridad).
 // `clinicId`: the clinic it is created in (X-Tenant-ID); undefined = the working clinic.
