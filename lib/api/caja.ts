@@ -3,6 +3,7 @@ import { apiFetch } from "./client";
 import type { CuadreReconciliacion } from "@/lib/caja/totales";
 
 export type { CuadreReconciliacion };
+import type { ProductSales } from "@/lib/caja/product-sales";
 
 // Caja / Cuadre (BE módulo `caja`, v2 `cash`). Tenant-scoped: el X-Tenant-ID lo adjunta client.ts desde el
 // centro activo. TODO el I/O de caja pasa por aquí (API-First). Los tipos de catálogo/DTO salen del
@@ -142,6 +143,9 @@ export interface ReporteDia {
   // Bloque tributario (lo mira contabilidad). Tres partidas con las mismas columnas + las facturas
   // EXONERADAS (producto gravable al que se le quitó el IVU — decisión que hay que ver). NO recalcular
   // en el cliente: los números salen calzados del BE. Handoff HANDOFF-pie-del-cuadre.
+  // «Venta de productos (IVU)» (BE PR #470): product-only taxable/exempt/exonerated, IVU by component,
+  // refunds, every product invoice and the check against the day net. `null` = the BE could not compute it.
+  productSales?: ProductSales | null;
   tributario?: {
     taxable: TributarioPartida;
     exempt: TributarioPartida;

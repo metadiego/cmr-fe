@@ -9,6 +9,8 @@ import type { ReporteDia, TributarioPartida } from "@/lib/api/caja";
 import { money } from "@/lib/caja/totales";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
+import { ProductSalesSection } from "@/components/caja/product-sales-section";
+import { productSalesPrintHtml, type ProductSalesPrintLabels } from "@/lib/caja/product-sales-print";
 
 // Números de la caja (modelo CMA) que también van en la hoja impresa.
 export interface CuadreResumen {
@@ -49,6 +51,7 @@ export function CuadreDetalle({
   const t = useTranslations("caja");
   const tp = useTranslations("caja.payments");
   const td = useTranslations("caja.detalle");
+  const tps = useTranslations("caja.productSales");
   const tituloEfectivo = titulo ?? t("title");
 
   const documentos = React.useMemo(() => reporte.documentos ?? [], [reporte.documentos]);
@@ -89,6 +92,9 @@ export function CuadreDetalle({
         resumen,
         reporte,
         exoneradas,
+        productSalesHtml: reporte.productSales
+          ? productSalesPrintHtml(reporte.productSales, Object.fromEntries(PS_KEYS.map((k) => [k, String(tps.raw(k))])) as ProductSalesPrintLabels)
+          : "",
         divisionLabels: { consulta: t("division.consulta"), general: t("division.general") },
         L: {
           resumen: tp("general"),
@@ -239,6 +245,9 @@ export function CuadreDetalle({
         </section>
       )}
 
+      {/* 1b. Venta de productos (IVU): every product invoice + IVU by component + check (BE #470). */}
+      {reporte.productSales && <ProductSalesSection ps={reporte.productSales} />}
+
       {/* 2. Documentos del día */}
       <section className="overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
         <h3 className="border-b px-4 py-2.5 text-sm font-semibold">
@@ -367,6 +376,12 @@ td{padding:5px 6px;border-top:1px solid #f0f0f0}
 `;
 
 type PrintLabels = Record<string, string>;
+const PS_KEYS = [
+  "title", "taxable", "exempt", "exonerated", "taxCollected", "taxWouldBe", "refunds", "net", "amount", "base",
+  "discount", "taxShort", "lines", "colNumber", "colRecord", "colPatient", "colBase", "colDiscount", "colTotal",
+  "colExonerated", "colRefunded", "colPayment", "totals", "none", "yes", "no", "check", "products", "services",
+  "dayNet", "squares", "gap",
+] as const satisfies readonly (keyof ProductSalesPrintLabels)[];
 function esc(s: unknown): string {
   return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 }
@@ -379,11 +394,12 @@ function buildPrintHtml(args: {
   resumen: CuadreResumen;
   reporte: ReporteDia;
   exoneradas: Array<{ id: string; numero: string | null; paciente: string | null }>;
+  productSalesHtml?: string;
   // Etiquetas para la columna «División» de la tabla de documentos (solo el cuadre TOTAL del día la usa).
   divisionLabels?: { consulta: string; general: string };
   L: PrintLabels;
 }): string {
-  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, divisionLabels, L } = args;
+  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, divisionLabels, L, productSalesHtml } = args;
   const trib = reporte.tributario;
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
@@ -498,6 +514,7 @@ function buildPrintHtml(args: {
       <div class="col">${conteoBlock}</div>
     </div>
     ${tribBlock}
+    ${productSalesHtml ?? ""}
     ${cajerosBlock}
     ${docBlock}
     ${devBlock}
