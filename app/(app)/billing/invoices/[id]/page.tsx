@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -221,6 +222,14 @@ export default function FacturacionPage() {
   const esGeneral = !factura.appointmentId;
   const nombre = paciente ? (paciente.displayName || [paciente.firstName, paciente.lastName].filter(Boolean).join(" ")) : "";
   const record = paciente?.medicalRecordNumber ?? "";
+  // Nombre clicable a la ficha del paciente, igual que en el tablero (components/patient-desk/patient-detail.tsx).
+  const tituloNombre = factura.patientId ? (
+    <Link href={`/patients/${factura.patientId}`} className="hover:underline">
+      {nombre || t("patient")}
+    </Link>
+  ) : (
+    nombre || t("patient")
+  );
   // El recibo se arma 100% de la proyección enriquecida del BE (empresa/pagos/
   // emisor/medico/numeroDisplay/paciente) — sin fallbacks del FE.
   // El precio de cada componente del "Incluye:" viene resuelto en contenido[].precio (BE).
@@ -245,7 +254,7 @@ export default function FacturacionPage() {
 
       {/* Cabecera */}
       <PageHeader
-        title={nombre || t("patient")}
+        title={tituloNombre}
         description={
           <>
             {paciente?.documentId && <p className="text-xs text-muted-foreground">ID {paciente.documentId}</p>}
