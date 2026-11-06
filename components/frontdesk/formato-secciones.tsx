@@ -28,6 +28,9 @@ function lineaText(linea: FormatoFirmaLinea, label: LabelFn): string {
   if (typeof linea === "string") return label(linea);
   return linea.label ?? label(linea.labelKey);
 }
+function lineaValor(linea: FormatoFirmaLinea): string {
+  return typeof linea === "string" ? "" : (linea.valor ?? "");
+}
 // Etiqueta de columna: se prefiere el `label` ya listo del BE; si no, se traduce el labelKey (o cae a la clave).
 function colLabel(col: FormatoColumna, label: LabelFn): string {
   return col.label ?? label(col.labelKey, col.clave);
@@ -106,6 +109,23 @@ export function SeccionInner({
     }
 
     case "firmas":
+      if (s.estilo === "en_linea") {
+        // Legacy «LABEL: ________»: the label, then the line filling the rest of its cell; `columnas` per row.
+        const cols = Math.max(1, s.columnas ?? 2);
+        return (
+          <>
+            <Titulo>{label(s.labelKey)}</Titulo>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, columnGap: 40, rowGap: 22, marginTop: 28, fontSize: 12 }}>
+              {(s.lineas ?? []).map((linea, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-end", gap: 6 }}>
+                  <span style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{lineaText(linea, label)}</span>
+                  <span style={{ flex: 1, borderBottom: BORDER, minHeight: 18, paddingLeft: 4 }}>{lineaValor(linea)}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        );
+      }
       // Una línea horizontal por entrada, con su etiqueta debajo (con aire arriba).
       return (
         <>

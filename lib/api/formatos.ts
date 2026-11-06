@@ -11,7 +11,7 @@ import { apiFetch } from "./client";
 export type FormatoColumna = { clave: string; label?: string | null; labelKey?: string | null; subtitulo?: string | null; ancho?: string | null }; // ancho: CSS width ("28%")
 // Etiqueta de firma: el BE la manda como OBJETO { label, labelKey } (no string). Se acepta también string
 // por compatibilidad. Se PREFIERE `label`. (Verificado en vivo: apex_rf firmas.lineas son objetos.)
-export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null };
+export type FormatoFirmaLinea = string | { label?: string | null; labelKey?: string | null; valor?: string | null };
 export type FormatoFila = Record<string, string>; // dentro de `filas` (opaca): sus claves son claves de columna (datos)
 
 // Celda de `tabla_tematica` con varios grupos de casillas independientes dentro de la misma celda (p. ej.
@@ -61,7 +61,10 @@ export type FormatoSeccion =
   // OBSERVACIONES: caja (por defecto) o N líneas regladas (`estilo:"lineas"`, `lineas` = nº de renglones).
   | { clave: string; labelKey?: string | null; tipo: "texto_libre"; titulo?: string | null; estilo?: "caja" | "lineas"; alto?: number; lineas?: number }
   // Firmas simples: línea horizontal + label debajo. `lineas` son objetos { label, labelKey } (o string).
-  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[] }
+  // `estilo:"en_linea"` = the legacy «LABEL: ________» (label first, the line after it), `columnas` per row
+  // (default 2: «TÉCNICO | FIRMA DEL PACIENTE», then «HORA»). A line's `valor` is printed on it (e.g. the
+  // therapist of the row on TÉCNICO, like ondas_choque_form.php). Absent = line with its label under it.
+  | { clave: string; labelKey?: string | null; tipo: "firmas"; lineas?: FormatoFirmaLinea[]; estilo?: "en_linea" | null; columnas?: number | null }
   // Párrafo estático (p. ej. el texto legal de una constancia). `texto` puede traer "\n" entre líneas
   // (Peptide Rx: "By signing this prescription, you acknowledge that:" + 3 líneas). `titulo` opcional.
   | { clave: string; labelKey?: string | null; tipo: "parrafo"; texto: string; titulo?: string | null; tamano?: number | null; negrita?: boolean }
@@ -132,6 +135,8 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
   camposEnLinea?: string[];
+  // Values of the "campos" header written ON a line («NOMBRE DEL PACIENTE: ̲M̲I̲G̲E̲N̲E̲S̲…», legacy `.fill`).
+  subrayarValores?: boolean;
   numerarFilas?: string;
   numerarComoFraccion?: boolean;
   casillasEnFilas?: boolean;

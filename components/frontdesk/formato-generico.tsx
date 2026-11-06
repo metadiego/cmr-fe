@@ -79,8 +79,27 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // sin ninguna línea para escribir — verificado en vivo contra GET /formats/terapia_camener/assembly.
   // External order forms reproduced sheet by sheet (landscape, own logo, watermark per page).
   if (d.layout === "paginas") return <FormatoPaginado d={d} label={label} onVolver={onVolver} />;
+  // Pain scale, at the legacy size (62%, max 480px; inline because the print sheet caps img at 38px). With
+  // signatures it sits between the observations and them (ondas_choque_form.php); without, before the foot.
+  const primeraFirma = seccionesVisibles.find((s) => s.tipo === "firmas");
+  const escalaAntesDeFirmas = !!primeraFirma;
+  const escalaDolor = render.imagenEscalaDolor ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={render.imagenEscalaDolor}
+      alt=""
+      style={{ display: "block", width: "62%", maxWidth: 480, maxHeight: "none", margin: "20px auto 4px", objectFit: "contain" }}
+    />
+  ) : null;
   const campoValor = (c: { valor?: string | null; origen?: string }) =>
-    !c.valor && c.origen === "" ? <span className="ml-1 inline-block min-w-[90px] border-b border-black">&nbsp;</span> : (c.valor ?? "");
+    !c.valor && c.origen === "" ? <span className="ml-1 inline-block min-w-[90px] border-b border-black" style={{ display: "inline-block", minWidth: 90, borderBottom: "1px solid #000" }}>&nbsp;</span> : (c.valor ?? "");
+  // "campos" header: with render.subrayarValores every value is written ON a line (legacy `.fill`).
+  const valorCampo = (c: { valor?: string | null; origen?: string }) =>
+    render.subrayarValores ? (
+      <span style={{ display: "inline-block", minWidth: c.origen === "" ? 140 : 180, borderBottom: "1px solid #000", padding: "0 4px" }}>{c.valor || "\u00a0"}</span>
+    ) : (
+      <span>{campoValor(c)}</span>
+    );
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
@@ -127,11 +146,12 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
               GET /formats/terapia_ondas_choque/assembly (`render.casillas`); el tipo ya lo declaraba pero
               nunca se pintaba. */}
           {render.casillas && render.casillas.length > 0 && (
-            <div className="mt-2 flex flex-col gap-1 text-sm font-semibold uppercase">
+            // Inline styles: the print window has no Tailwind (it printed «RADIALFOCAL» with no boxes).
+            <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8, fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
               {render.casillas.map((c) => (
-                <div key={c} className="flex items-center gap-2">
-                  <span>{c}</span>
-                  <span className="inline-block h-4 w-6 border border-black" aria-hidden />
+                <div key={c} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ width: 70 }}>{c}</span>
+                  <span style={{ display: "inline-block", width: 34, height: 18, border: "1px solid #000" }} aria-hidden />
                 </div>
               ))}
             </div>
@@ -171,23 +191,30 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
                valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
             <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
-              {/* render.camposEnLinea: esos campos juntos en la PRIMERA línea (APEX); el resto, uno por línea. */}
-              {camposEnLinea.inline.length > 0 && (
-                <div className="campo flex flex-wrap gap-x-8 gap-y-1" style={{ display: "flex", flexWrap: "wrap", columnGap: 32 }}>
-                  {camposEnLinea.inline.map((c) => (
-                    <span key={c.clave}>
-                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {campoValor(c)}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {camposEnLinea.rest.map((c) => (
-                <div key={c.clave} className="campo flex gap-2">
-                  {/* Se PREFIERE el `label` que manda el BE (ya con dos puntos); si no, se traduce el labelKey. */}
-                  <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>
-                  <span>{campoValor(c)}</span>
-                </div>
-              ))}
+              {/* render.camposEnLinea: those fields share ONE line, placed where the first of them sits in the
+                  BE order (ondas_choque: FECHA, then «NOMBRE … | RECORD #» on one line, like the legacy); two
+                  fields = one at each end. The rest, one per line. Labels: the BE's `label` first. */}
+              {campos.map((c) => {
+                const inline = camposEnLinea.inline;
+                if (inline.includes(c)) {
+                  if (c !== campos.find((x) => inline.includes(x))) return null;
+                  return (
+                    <div key={c.clave} className="campo" style={{ display: "flex", flexWrap: "wrap", columnGap: 32, rowGap: 4, justifyContent: inline.length === 2 ? "space-between" : undefined }}>
+                      {inline.map((f) => (
+                        <span key={f.clave} style={{ display: "flex", gap: 8 }}>
+                          <span className="font-bold">{f.label ?? `${label(f.labelKey)} :`}</span> {valorCampo(f)}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                }
+                return (
+                  <div key={c.clave} className="campo flex gap-2">
+                    <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span>
+                    {valorCampo(c)}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <>
@@ -241,6 +268,8 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
           {seccionesVisibles.map((s, i) => {
             const crece = s.tipo === "texto_libre";
             return (
+              <React.Fragment key={s.clave ?? `sec-${i}`}>
+              {escalaAntesDeFirmas && s === primeraFirma && escalaDolor}
               <div
                 key={s.clave ?? `sec-${i}`}
                 className={"region mt-6" + (crece ? " formato-grow" : "")}
@@ -248,6 +277,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
               >
                 <SeccionInner s={s} label={label} casillasEnFilas={render.casillasEnFilas} />
               </div>
+              </React.Fragment>
             );
           })}
 
@@ -268,11 +298,8 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             )
           )}
 
-          {/* Escala de dolor (HILT/MLS): imagen del legacy, tal cual, antes del pie. */}
-          {render.imagenEscalaDolor && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={render.imagenEscalaDolor} alt="" className="mt-6 w-full max-w-2xl self-center object-contain" />
-          )}
+          {/* Escala de dolor sin firmas (HILT/MLS): antes del pie. */}
+          {!escalaAntesDeFirmas && escalaDolor}
 
           {/* Pie del legacy (TODOS): pequeño, a la izquierda, al final. */}
           <PieFormato pie={d.footer} />
