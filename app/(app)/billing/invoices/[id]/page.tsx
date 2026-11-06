@@ -18,7 +18,6 @@ import {
   editarCabeceraFactura,
   getItemOpcionales,
   setItemOpcionales,
-  personalizarKit,
   type ItemOpcional,
   buscarPaciente,
   imprimirFactura,
@@ -29,9 +28,8 @@ import {
   type PacienteBusqueda,
   type EditarCabeceraPayload,
 } from "@/lib/api/facturas";
-import { listComponentes, listProductos, type ProductoComponente, type Producto as ProductoInv } from "@/lib/api/inventario";
-import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { listTiposPrecio, listImpuestos, type TipoPrecio, type Impuesto } from "@/lib/api/precios";
+import { PersonalizarKitDialog } from "@/components/facturacion/personalizar-kit-dialog";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { getPaciente, type Paciente } from "@/lib/api/pacientes";
@@ -960,174 +958,6 @@ function OpcionalesDialog({
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
           <Button size="sm" onClick={guardar} disabled={saving || res.state.kind !== "ok"}>{tc("save")}</Button>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// Personalizar el KIT de una línea: quitar / cambiar cantidad / AGREGAR componentes, SOLO en esta factura
-// (no toca la receta general). Lo que quede es lo que el paciente recibe en el frontdesk (menos sesiones =
-// menos disponibilidad). Overlay sin setState-en-effect: partimos de la receta (o de la personalización ya
-// guardada) y guardamos removidos/cantidades/agregados encima; al guardar mandamos la LISTA FINAL completa.
-type KitRow = { productoId: string; cantidad: number; nombre: string; isAdded?: boolean };
-function PersonalizarKitDialog({
-  open,
-  onOpenChange,
-  facturaId,
-  item,
-  centro,
-  onSaved,
-}: {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  facturaId: string;
-  item: FacturaItem;
-  centro?: string;
-  onSaved: () => void;
-}) {
-  const t = useTranslations("facturacion");
-  const tc = useTranslations("common");
-  const tRoot = useTranslations();
-  const { can } = useCan();
-  const puedeAgregar = can("factura.kit_agregar");
-
-  // Receta base del compuesto (BOM) + nombres de producto. Autocontenido, como ComponentesEditor.
-  const recetaRes = useResource<ProductoComponente[]>(() => listComponentes(String(item.productId)), [item.productId]);
-  const prodRes = useResource<ProductoInv[]>(() => listProductos({}), []);
-  const prodName = React.useMemo(() => {
-    const m = new Map<string, string>();
-    if (prodRes.state.kind === "ok") prodRes.state.data.forEach((p) => m.set(p.id, p.name));
-    return m;
-  }, [prodRes.state]);
-
-  // Base = personalización ya guardada (si la hay) o la receta real (activa, no estimada). Los insumos
-  // ESTIMADOS no se descargan ni entran a frontdesk → fuera de aquí.
-  const perso = (item.customization as { componentes?: { productId: string; quantity: number }[] } | null)?.componentes;
-  const base: KitRow[] = React.useMemo(() => {
-    if (Array.isArray(perso)) {
-      return perso.map((c) => ({ productoId: c.productId, cantidad: Number(c.quantity) || 0, nombre: prodName.get(c.productId) ?? c.productId }));
-    }
-    const receta = recetaRes.state.kind === "ok" ? recetaRes.state.data : [];
-    return receta
-      .filter((c) => c.active !== false && !c.estimated)
-      .map((c) => ({ productoId: c.componentId, cantidad: Number(c.quantity) || 0, nombre: prodName.get(c.componentId) ?? c.componentId }));
-  }, [perso, recetaRes.state, prodName]);
-
-  const [removed, setRemoved] = React.useState<Record<string, boolean>>({});
-  const [qty, setQty] = React.useState<Record<string, string>>({});
-  const [added, setAdded] = React.useState<KitRow[]>([]);
-  const [nuevoId, setNuevoId] = React.useState("");
-  const [nuevoNombre, setNuevoNombre] = React.useState("");
-  const [nuevaCant, setNuevaCant] = React.useState("1");
-  const [saving, setSaving] = React.useState(false);
-
-  const cargando = recetaRes.state.kind === "loading" || prodRes.state.kind === "loading";
-  const cantDe = (r: KitRow) => (qty[r.productoId] !== undefined ? Math.max(0, Number(qty[r.productoId]) || 0) : r.cantidad);
-  // Lista final que se manda: base viva (no removida) + agregados, con la cantidad efectiva.
-  const finalRows: KitRow[] = [
-    ...base.filter((r) => !removed[r.productoId]).map((r) => ({ ...r, cantidad: cantDe(r) })),
-    ...added,
-  ].filter((r) => r.cantidad > 0);
-
-  function agregar() {
-    const c = Math.max(1, Math.floor(Number(nuevaCant) || 0));
-    if (!nuevoId || c <= 0) return;
-    // Si ya está en base y estaba removido, reponerlo en vez de duplicar.
-    if (base.some((b) => b.productoId === nuevoId)) {
-      setRemoved((m) => ({ ...m, [nuevoId]: false }));
-      setQty((m) => ({ ...m, [nuevoId]: String(c) }));
-    } else {
-      setAdded((a) => (a.some((x) => x.productoId === nuevoId) ? a : [...a, { productoId: nuevoId, cantidad: c, nombre: nuevoNombre || nuevoId, isAdded: true }]));
-    }
-    setNuevoId("");
-    setNuevoNombre("");
-    setNuevaCant("1");
-  }
-
-  async function guardar() {
-    setSaving(true);
-    try {
-      await personalizarKit(facturaId, item.id, finalRows.map((r) => ({ productId: r.productoId, quantity: r.cantidad })), centro);
-      onSaved();
-    } catch (err) {
-      toastError(err, tRoot);
-      setSaving(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t("kit.titulo", { nombre: item.description ?? "" })}</DialogTitle>
-        </DialogHeader>
-
-        {cargando ? (
-          <DialogRowsSkeleton trailing="w-16" />
-        ) : (
-          <div className="space-y-3">
-            {base.length === 0 && added.length === 0 && (
-              <p className="py-6 text-center text-sm text-muted-foreground">{t("kit.vacio")}</p>
-            )}
-
-            <ul className="space-y-2">
-              {base.map((r) => {
-                const quitado = !!removed[r.productoId];
-                return (
-                  <li key={r.productoId} className={"flex items-center justify-between gap-3 rounded-lg border px-3 py-2 " + (quitado ? "opacity-50" : "")}>
-                    <span className={"min-w-0 flex-1 truncate text-sm font-medium " + (quitado ? "line-through" : "")}>{r.nombre}</span>
-                    {quitado ? (
-                      <Button variant="ghost" size="sm" onClick={() => setRemoved((m) => ({ ...m, [r.productoId]: false }))}>{t("kit.reponer")}</Button>
-                    ) : (
-                      <>
-                        <Input
-                          value={qty[r.productoId] ?? String(r.cantidad)}
-                          onChange={(e) => setQty((m) => ({ ...m, [r.productoId]: e.target.value }))}
-                          inputMode="numeric"
-                          className="h-8 w-16 text-right tabular-nums"
-                          aria-label={t("kit.cantidad")}
-                        />
-                        <button type="button" onClick={() => setRemoved((m) => ({ ...m, [r.productoId]: true }))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
-                      </>
-                    )}
-                  </li>
-                );
-              })}
-              {added.map((r) => (
-                <li key={r.productoId} className="flex items-center justify-between gap-3 rounded-md border border-primary/40 bg-primary/5 px-3 py-2">
-                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{r.nombre}<span className="ml-2 text-[11px] text-primary">{t("kit.agregado")}</span></span>
-                  <span className="tabular-nums text-sm">×{r.cantidad}</span>
-                  <button type="button" onClick={() => setAdded((a) => a.filter((x) => x.productoId !== r.productoId))} aria-label={t("kit.quitar")} className="text-destructive hover:opacity-70">×</button>
-                </li>
-              ))}
-            </ul>
-
-            {/* Agregar componente: solo con permiso fino (el BE lo exige; no mostramos la puerta si no se abre). */}
-            {puedeAgregar && (
-              <div className="flex items-end gap-2 rounded-md border border-dashed p-3">
-                <div className="min-w-0 flex-1">
-                  <Lbl>{t("kit.agregarComponente")}</Lbl>
-                  <ProductoPicker
-                    value={nuevoId}
-                    soloFisicos={false}
-                    onChange={(id, p) => { setNuevoId(id); setNuevoNombre(p?.name ?? ""); }}
-                    placeholder={t("kit.buscarProducto")}
-                  />
-                </div>
-                <Input value={nuevaCant} onChange={(e) => setNuevaCant(e.target.value)} inputMode="numeric" className="h-9 w-16 text-right tabular-nums" aria-label={t("kit.cantidad")} />
-                <Button size="sm" onClick={agregar} disabled={!nuevoId}>{tc("add")}</Button>
-              </div>
-            )}
-
-            {/* Qué implica: la duda de todos la primera vez. */}
-            <p className="rounded-lg bg-muted/50 px-3 py-2 text-xs text-muted-foreground">{t("kit.avisoFrontdesk")}</p>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={saving}>{tc("cancel")}</Button>
-              <Button size="sm" onClick={guardar} disabled={saving}>{tc("save")}</Button>
-            </div>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -382,15 +382,15 @@ export function setItemOpcionales(facturaId: string, itemId: string, incluidos: 
 }
 
 // Personalizar un KIT en la factura (BE PR #293): cambiar cantidad / quitar / AGREGAR componentes de un
-// producto compuesto SOLO en ESTA línea, sin tocar la receta general. Se manda la LISTA FINAL completa
-// ({productId,quantity}[]): lo ausente se interpreta como quitado. Esto es lo que entra al frontdesk
-// (menos PEMF = menos disponibilidad). Agregar exige el permiso fino `factura.kit_agregar` (el BE lo
-// valida; el FE no muestra la puerta sin permiso). Devuelve la línea con su `personalizacion` guardada.
-// La clave `componentes` NO está en el mapa api-ingles → se envía tal cual (el DTO la espera en español).
+// producto compuesto SOLO en ESTA línea, sin tocar la receta general. Se manda la LISTA FINAL completa:
+// lo ausente se interpreta como quitado (menos PEMF = menos disponibilidad en frontdesk). Agregar exige
+// el permiso fino `factura.kit_agregar` (el BE lo valida). `componentes`/`multipliers` (áreas×días) NO
+// están en el mapa api-ingles → se envían tal cual; con `multipliers` el BE recalcula `quantity` =
+// áreas × días ÷ kits, o 400 KIT_MULTIPLIERS_INVALID.
 export function personalizarKit(
   facturaId: string,
   itemId: string,
-  componentes: { productId: string; quantity: number }[],
+  componentes: { productId: string; quantity: number; multipliers?: Record<string, number> }[],
   centroId?: string,
 ): Promise<FacturaItem> {
   return apiFetch<FacturaItem>(
