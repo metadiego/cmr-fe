@@ -1722,6 +1722,9 @@
     "pago": {
       "excede_total": "El pago no puede pasar del total de la factura.",
       "requiere_permiso_anular": "No tienes permiso para anular pagos."
+    },
+    "kit": {
+      "multiplicadoresInvalidos": "Las terapias (áreas × días) no se reparten exacto entre los kits de la línea."
     }
   },
   "zona": {

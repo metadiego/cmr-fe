@@ -1722,6 +1722,9 @@
     "pago": {
       "excede_total": "The payment cannot exceed the invoice total.",
       "requiere_permiso_anular": "You do not have permission to void payments."
+    },
+    "kit": {
+      "multiplicadoresInvalidos": "The therapies (areas × days) don't split evenly among the line's kits."
     }
   },
   "zona": {
