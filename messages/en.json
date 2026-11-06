@@ -3841,7 +3841,8 @@
       "dayTotal": "Day total",
       "salesCash": "Cash sales",
       "countedCash": "Cash in drawer",
-      "difference": "Difference"
+      "difference": "Difference",
+      "signMine": "Sign my sheet"
     }
   },
   "gruposFacturacion": {

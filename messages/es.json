@@ -3841,7 +3841,8 @@
       "dayTotal": "Total del día",
       "salesCash": "Efectivo de ventas",
       "countedCash": "Efectivo en caja",
-      "difference": "Diferencia"
+      "difference": "Diferencia",
+      "signMine": "Firmar mi hoja"
     }
   },
   "gruposFacturacion": {

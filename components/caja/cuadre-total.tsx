@@ -39,7 +39,7 @@ import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
-import { figuresOfReport } from "@/lib/caja/sign-off";
+import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
 import type { CajaDivision } from "@/lib/api/caja";
 import { ComprobacionCuadreTotal } from "@/components/caja/comprobacion-cuadre-total";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
@@ -115,6 +115,7 @@ export function CuadreTotal() {
               puedeContar={puedeContar}
               puedeCerrarPermiso={puedeCerrarPermiso}
               puedeRetroactivo={puedeRetroactivo}
+              puedeFirmarGerente={can(SIGN_AS_SUPERVISOR)}
               centroNombre={gate.centroNombre}
               centroId={gate.centro}
             />
@@ -131,6 +132,7 @@ type LoaderProps = {
   puedeContar: boolean;
   puedeCerrarPermiso: boolean;
   puedeRetroactivo: boolean;
+  puedeFirmarGerente: boolean;
   centroNombre?: string;
   centroId?: string | null;
 };
@@ -168,6 +170,7 @@ function Editor({
   puedeContar,
   puedeCerrarPermiso,
   puedeRetroactivo,
+  puedeFirmarGerente,
   centroNombre,
   centroId,
   reporte,
@@ -217,7 +220,7 @@ function Editor({
     now: signNow,
     meId: null,
     canSignCashier: false,
-    canSignSupervisor: puedeContar,
+    canSignSupervisor: puedeFirmarGerente,
     centerId: centroId,
     siblings: async () =>
       (await listarCuadres({ fecha }))
@@ -372,7 +375,7 @@ function Editor({
         />
       </div>
 
-      <CashSignOffPanel signOff={signOff} now={signNow} meId={null} canSignCashier={false} canSignSupervisor={puedeContar} />
+      <CashSignOffPanel signOff={signOff} now={signNow} meId={null} canSignCashier={false} canSignSupervisor={puedeFirmarGerente} />
 
       <CuadreDetalle
         titulo={t("tituloImpreso")}

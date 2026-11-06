@@ -165,12 +165,15 @@ export function CashSignOffPanel({
   meId,
   canSignCashier,
   canSignSupervisor,
+  onSignMine,
 }: {
   signOff: CashSignOff;
   now: SignedFigures;
   meId: string | null;
   canSignCashier: boolean;
   canSignSupervisor: boolean;
+  /** Consolidated view of someone who billed that day: open her own sheet to sign it. */
+  onSignMine?: () => void;
 }) {
   const t = useTranslations("caja.signOff");
   const [asking, setAsking] = React.useState<SignOffRole | null>(null);
@@ -212,6 +215,12 @@ export function CashSignOffPanel({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold">{t("title")}</h3>
         <div className="flex flex-wrap gap-2">
+          {onSignMine && (
+            <Button size="sm" onClick={onSignMine}>
+              <HugeiconsIcon icon={CheckmarkBadge01Icon} className="size-4" />
+              {t("signMine")}
+            </Button>
+          )}
           {button("cashier", canSignCashier)}
           {button("supervisor", canSignSupervisor)}
         </div>

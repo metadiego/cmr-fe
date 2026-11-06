@@ -38,7 +38,7 @@ import { consolidatedCount } from "@/lib/caja/consolidated-count";
 import { ConsolidatedCountBar } from "@/components/caja/consolidated-count-bar";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
-import { figuresOfReport } from "@/lib/caja/sign-off";
+import { figuresOfReport, SIGN_AS_SUPERVISOR } from "@/lib/caja/sign-off";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
@@ -152,6 +152,7 @@ export function CuadreCaja({ division }: { division: CajaDivision }) {
           puedeRetroactivo={puedeRetroactivo}
           meId={myStaffId(me)}
           canCerrar={canCerrar}
+          canSignSupervisor={can(SIGN_AS_SUPERVISOR)}
           centro={gate.centro}
           centroNombre={gate.centroNombre}
         />
@@ -181,6 +182,8 @@ type LoaderProps = {
   puedeRetroactivo: boolean;
   meId: string | null;
   canCerrar: boolean;
+  /** Signing as manager has its own permission: every cash role holds caja.ver_todos, billers included. */
+  canSignSupervisor: boolean;
   centro?: string;
   centroNombre?: string;
   /** The date row's slot: the cashier selector renders there, on the same line as the date. */
@@ -254,6 +257,7 @@ function Editor({
   puedeRetroactivo,
   meId,
   canCerrar,
+  canSignSupervisor,
   centro,
   centroNombre,
   filterSlot,
@@ -360,7 +364,7 @@ function Editor({
     now: signNow,
     meId,
     canSignCashier,
-    canSignSupervisor: isGerencia,
+    canSignSupervisor,
     centerId: centro,
     siblings: esConsolidado ? async () => cuadres.filter((c) => c.userId).map((c) => ({ id: c.id, userId: c.userId!, division, name: cajeros.find((x) => x.userId === c.userId)?.name ?? porCajero.find((x) => x.usuarioId === c.userId)?.nombre ?? null })) : undefined,
     siblingNow: async (sib) => figuresOfReport(await getReporteDia(fecha, division, sib.userId)),
@@ -556,7 +560,8 @@ function Editor({
         />
       </div>
 
-      <CashSignOffPanel signOff={signOff} now={signNow} meId={meId} canSignCashier={canSignCashier} canSignSupervisor={isGerencia} />
+      {/* A biller on the consolidated (caja.ver_todos) signs HER sheet: one click takes her to it. */}
+      <CashSignOffPanel signOff={signOff} now={signNow} meId={meId} canSignCashier={canSignCashier} canSignSupervisor={canSignSupervisor} onSignMine={esConsolidado && meId && cajeros.some((c) => c.userId === meId) ? () => setScope(`user:${meId}`) : undefined} />
 
       {/* Facturas pendientes */}
       <FacturasPendientes pendientes={reporte.pendientes} centroId={centro} />
