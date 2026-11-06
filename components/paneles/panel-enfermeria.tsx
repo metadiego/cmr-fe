@@ -152,6 +152,7 @@ export function PanelEnfermeria({ centro }: { centro?: string }) {
 
       {/* Secciones + muro de tarjetas por enfermera */}
       {defRes.state.kind === "loading" && <PanelSkeleton />}
+      {defRes.state.kind === "fail" && <p className="text-sm text-destructive">{defRes.state.message}</p>}
       {def && secciones.length === 0 && <p className="text-muted-foreground">{t("sinSecciones")}</p>}
       <div className="space-y-5">
         {secciones.map((s) => (

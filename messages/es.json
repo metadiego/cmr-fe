@@ -3923,6 +3923,7 @@
     "record": "Récord",
     "soloEnfermeria": "Solo Enfermería puede tomar el aviso.",
     "sinPermiso": "No tienes acceso a este panel (panel.read).",
+    "sinCentro": "No tienes ningún centro asignado.",
     "estatus": {
       "titulo": "Enviar estatus de enfermera",
       "elegirEnfermera": "Elegir enfermera(o)",
