@@ -4858,6 +4858,7 @@
     "filteringBy": "filtering: {name}",
     "clearSearch": "Clear search",
     "enSala": "In the room",
+    "enSalaTotal": "Total",
     "kind": {
       "all": "All",
       "services": "Services",

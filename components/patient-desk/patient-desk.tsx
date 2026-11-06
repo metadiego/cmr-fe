@@ -412,6 +412,13 @@ export function PatientDesk() {
                 <span className="text-sm font-bold tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
               </span>
             ))}
+            {/* La suma, para no obligar al usuario a sumarlas de cabeza (dueño, 06-nov-2026). */}
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary py-0.5 pl-2.5 pr-2 text-primary-foreground">
+              <span className="text-xs font-medium">{t("enSalaTotal")}</span>
+              <span className="text-sm font-bold tabular-nums">
+                {[...consultSubtypeCounts.values()].reduce((sum, n) => sum + n, 0)}
+              </span>
+            </span>
           </span>
         )}
         <div className="ml-auto flex flex-wrap items-center gap-2">

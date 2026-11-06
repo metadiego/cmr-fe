@@ -4858,6 +4858,7 @@
     "filteringBy": "filtrando: {name}",
     "clearSearch": "Limpiar búsqueda",
     "enSala": "En sala",
+    "enSalaTotal": "Total",
     "kind": {
       "all": "Todos",
       "services": "Servicios",
