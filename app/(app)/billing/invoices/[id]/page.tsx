@@ -43,6 +43,7 @@ import { ShellCrumb } from "@/components/shell-crumb";
 import { InvoiceHeaderDialog as CabeceraDialog } from "@/components/facturacion/invoice-header-dialog";
 import { RegenerarDisponibilidadDialog } from "@/components/facturacion/regenerar-disponibilidad-dialog";
 import { ReopenInvoiceButton, InvoiceReopenings } from "@/components/facturacion/invoice-reopen";
+import { ChangeInvoicePatientButton } from "@/components/facturacion/invoice-change-patient";
 import { IssueButton } from "@/components/facturacion/issue-button";
 import { AddItem } from "@/components/facturacion/invoice-add-item";
 import { Lbl } from "@/components/facturacion/field-label";
@@ -315,6 +316,17 @@ export default function FacturacionPage() {
             </Button>
             {/* Reopen to correct (back to draft, same number): the BE says whether it can. */}
             {estado === "emitida" && can("factura.reopen") && <ReopenInvoiceButton invoiceId={id} centerId={centro} onReopened={() => refetch()} />}
+            {/* Cambiar paciente (caso 001103: facturada a quien no era): misma ventana que reabrir,
+                pero mantiene número y total. Handoff cambiar-el-paciente-de-una-factura. */}
+            {estado === "emitida" && can("factura.reopen") && (
+              <ChangeInvoicePatientButton
+                invoiceId={id}
+                centerId={centro}
+                currentPatientId={factura.patientId ? String(factura.patientId) : undefined}
+                currentPatientName={nombre}
+                onChanged={() => refetch()}
+              />
+            )}
             {/* Acciones avanzadas (peligrosas), escondidas en "…". Regenerar disponibilidad solo en facturas
                 EMITIDAS y con permiso factura.reparar (admin/gerente): no se enseña una puerta que no se abre. */}
             {estado === "emitida" && can("factura.reparar") && (

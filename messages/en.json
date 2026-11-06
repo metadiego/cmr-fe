@@ -4853,6 +4853,20 @@
     "dateOutOfRangeFrom": "That date does not fit the number sequence: it must be on or after {from}.",
     "dateOutOfRangeTo": "That date does not fit the number sequence: it must be on or before {to}."
   },
+  "invoiceChangePatient": {
+    "action": "Change patient",
+    "hint": "For when the invoice was billed to the wrong patient",
+    "title": "Change the invoice's patient",
+    "description": "The invoice keeps its number and total; only who it's billed to changes.",
+    "currentPatient": "Current patient",
+    "changeSelection": "Change",
+    "searchPlaceholder": "Search patient: name, record or ID…",
+    "searchHint": "Type at least 2 letters to search.",
+    "reasonLabel": "Reason (required)",
+    "reasonPlaceholder": "E.g.: patient 16034 was billed by mistake instead of 680",
+    "confirm": "Change patient",
+    "done": "Invoice patient updated."
+  },
   "invoice": {
     "notFound": "The invoice does not exist.",
     "reopen": {
@@ -4863,6 +4877,11 @@
       "cashClosed": "That day's cash count is already closed: correcting it changes it.",
       "reasonRequired": "Write the reason to reopen.",
       "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
+    },
+    "changePatient": {
+      "same": "That is already this invoice's patient.",
+      "unknown": "That patient does not exist in this center.",
+      "hasAppointment": "This is a consultation linked to an appointment: change the appointment's patient first."
     }
   },
   "picker": {

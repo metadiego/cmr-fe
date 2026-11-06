@@ -4853,6 +4853,20 @@
     "dateOutOfRangeFrom": "Esa fecha no cabe en la secuencia de números: tiene que ser desde el {from} en adelante.",
     "dateOutOfRangeTo": "Esa fecha no cabe en la secuencia de números: tiene que ser hasta el {to}."
   },
+  "invoiceChangePatient": {
+    "action": "Cambiar paciente",
+    "hint": "Para cuando se facturó al paciente equivocado",
+    "title": "Cambiar el paciente de la factura",
+    "description": "La factura conserva su número y su total; solo cambia a quién está facturada.",
+    "currentPatient": "Paciente actual",
+    "changeSelection": "Cambiar",
+    "searchPlaceholder": "Buscar paciente: nombre, record o ID…",
+    "searchHint": "Escribe al menos 2 letras para buscar.",
+    "reasonLabel": "Motivo (obligatorio)",
+    "reasonPlaceholder": "Ej.: se facturó por error al paciente 16034 en vez del 680",
+    "confirm": "Cambiar paciente",
+    "done": "Paciente de la factura actualizado."
+  },
   "invoice": {
     "notFound": "La factura no existe.",
     "reopen": {
@@ -4863,6 +4877,11 @@
       "cashClosed": "El cuadre de caja de ese día ya está cerrado: corregirla lo altera.",
       "reasonRequired": "Escribe el motivo para reabrir.",
       "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
+    },
+    "changePatient": {
+      "same": "Ya es el paciente de esta factura.",
+      "unknown": "Ese paciente no existe en este centro.",
+      "hasAppointment": "Es una consulta ligada a una cita: cambia primero el paciente de la cita."
     }
   },
   "picker": {
