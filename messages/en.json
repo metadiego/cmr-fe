@@ -1897,6 +1897,7 @@
     "calSinCitas": "No upcoming appointments",
     "calVacios": "{vacios}/{cupo} free",
     "deshacerPregunta": "Undo “{paso}”?",
+    "deshacerAviso": "This clears the stamped time and it cannot be recovered automatically.",
     "deshacer": "Undo",
     "aviso": {
       "cupo_excedido": "Day capacity exceeded (booked {agendadas} / capacity {cupo}).",

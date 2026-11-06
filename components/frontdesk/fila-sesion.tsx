@@ -34,6 +34,7 @@ import { parseAcciones, type ReportAccion } from "@/lib/frontdesk/acciones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDeshacerDialog } from "@/components/frontdesk/confirm-deshacer-dialog";
 import {
   Select,
   SelectContent,
@@ -121,6 +122,7 @@ export function FilaSesion({
     eligiendo: string;
     comprado: { nombre: string; n: number }[];
   } | null>(null);
+  const [confirmDeshacer, setConfirmDeshacer] = React.useState<{ labelKey: string; action: string } | null>(null);
   // Verdad del flujo: el `estado` top-level que ahora manda el BE en cada fila (PR #195). Antes el FE lo
   // deducía de los sellos y pintaba ASISTIDO en filas que estaban en terapia; ya no se deduce.
   const estadoActual = String(fila.estado ?? fila.fd_estado ?? sesion?.status ?? "");
@@ -558,9 +560,7 @@ export function FilaSesion({
         };
         const deshacer = () => {
           if (!puedeDeshacer || !reversa) return;
-          toast(t("deshacerPregunta", { paso: tRoot(paso.labelKey) }), {
-            action: { label: t("deshacer"), onClick: () => run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: reversa }, centro)) },
-          });
+          setConfirmDeshacer({ labelKey: paso.labelKey, action: reversa });
         };
         if (pasosOcultos?.has(paso.estado)) return hecho && puedeDeshacer ? <button key={paso.key} type="button" onClick={deshacer} className="mt-1 mr-2 shrink-0 self-start rounded-md border border-dashed px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground">{t("removeStep", { step: tRoot(paso.labelKey) })}</button> : null; // hidden per-row step (patient desk): still undoable, per service
         return (
@@ -716,6 +716,7 @@ export function FilaSesion({
             });
           }}
         />
+        <ConfirmDeshacerDialog paso={confirmDeshacer} onClose={() => setConfirmDeshacer(null)} onConfirm={() => { const a = confirmDeshacer?.action; setConfirmDeshacer(null); if (a) run(() => ejecutarAccion({ boardSlug: tablero, entityId: fila.id, action: a }, centro)); }} />
       </td>
     </tr>
   );

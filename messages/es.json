@@ -1897,6 +1897,7 @@
     "calSinCitas": "Sin citas próximas",
     "calVacios": "{vacios}/{cupo} libres",
     "deshacerPregunta": "¿Deshacer «{paso}»?",
+    "deshacerAviso": "Esta acción borra la hora sellada y no se puede recuperar automáticamente.",
     "deshacer": "Deshacer",
     "aviso": {
       "cupo_excedido": "Se superó el cupo del día (agendadas {agendadas} / cupo {cupo}).",
