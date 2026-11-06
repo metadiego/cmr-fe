@@ -130,11 +130,15 @@ export type FormatoPie = { prefix?: string; user?: string; login?: string; fecha
 //   SESIONES"). `numerarFilas`/`numerarComoFraccion`: el BE "hornea" el contador de la rejilla y el FE pinta
 //   el valor tal cual, SALVO cuando el usuario escribe cuántas terapias imprimir (solo impresión,
 //   lib/formatos/print-rows.ts): ahí el FE renumera esa columna.
-// - camposEnLinea: claves de `fields` que van JUNTAS en la primera línea del layout "campos", en ese orden
-//   (APEX: paciente, record, sesion, fecha). Sin la clave, un campo por línea como el legacy.
+// - camposEnLinea: claves de `fields` que van JUNTAS en la primera línea del layout "campos", en ese orden.
+//   Sin la clave, un campo por línea como el legacy.
+// - camposEnPares: la rejilla 2 columnas del legacy — una fila por CADA PAR de `fields` consecutivos, en
+//   el orden que mande el BE (APEX RF, 06-nov-2026: Fecha|Paciente, Hora entrada|Hora salida,
+//   Sesión|Record). Distinto de camposEnLinea (que junta TODOS los elegidos en una sola línea).
 export type FormatoRenderMeta = {
   ocultarEmpresa?: boolean;
   camposEnLinea?: string[];
+  camposEnPares?: boolean;
   // Values of the "campos" header written ON a line («NOMBRE DEL PACIENTE: ̲M̲I̲G̲E̲N̲E̲S̲…», legacy `.fill`).
   subrayarValores?: boolean;
   numerarFilas?: string;

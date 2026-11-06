@@ -9,7 +9,7 @@ import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { imprimirFormato, LogoFormato, PieFormato } from "@/components/frontdesk/formato-parts";
 import { FormatoPaginado } from "@/components/frontdesk/formato-paginado";
-import { splitInlineFields } from "@/lib/formatos/inline-fields";
+import { splitInlineFields, chunkPairs } from "@/lib/formatos/inline-fields";
 import { rowsForPrint } from "@/lib/formatos/print-rows";
 import { Input } from "@/components/ui/input";
 
@@ -134,9 +134,10 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             <div className="absolute left-0 top-0" style={{ position: "absolute", left: 0, top: 0 }}>
               <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
             </div>
-            {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa (solo logo + título). */}
+            {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa NI la del centro (solo logo +
+                título) — el logo de esos formatos ya trae "CENTRO DE MEDICINA REGENERATIVA" horneado. */}
             {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
-            {d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
+            {!ocultarEmpresa && d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
             {/* Línea más chica arriba del título (p. ej. "Cámara Energética" sobre "CONTROL DE SESIONES"). */}
             {render.subtitulo && <div className="text-sm font-semibold">{render.subtitulo}</div>}
             <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
@@ -192,10 +193,27 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
             /* Encabezado de pares etiqueta/valor (Vit C): una línea por campo, etiqueta en negrita ` : `
                valor. Aireado (.formato-campos). Nada de rejilla ni columnas inventadas. */
             <div className="formato-campos mt-6 flex flex-col gap-4 text-sm">
-              {/* render.camposEnLinea: those fields share ONE line, placed where the first of them sits in the
+              {/* render.camposEnPares: the legacy 2-column grid — one row per PAIR of fields, in order
+                  (APEX RF: Fecha|Paciente, Hora entrada|Hora salida, Sesión|Record). */}
+              {render.camposEnPares ? (
+                chunkPairs(campos).map((par, i) => (
+                  <div
+                    key={par.map((f) => f.clave).join("-") || i}
+                    className="campo"
+                    style={{ display: "flex", flexWrap: "wrap", columnGap: 32, rowGap: 4, justifyContent: par.length === 2 ? "space-between" : undefined }}
+                  >
+                    {par.map((f) => (
+                      <span key={f.clave} style={{ display: "flex", gap: 8 }}>
+                        <span className="font-bold">{f.label ?? `${label(f.labelKey)} :`}</span> {valorCampo(f)}
+                      </span>
+                    ))}
+                  </div>
+                ))
+              ) : (
+              /* render.camposEnLinea: those fields share ONE line, placed where the first of them sits in the
                   BE order (ondas_choque: FECHA, then «NOMBRE … | RECORD #» on one line, like the legacy); two
-                  fields = one at each end. The rest, one per line. Labels: the BE's `label` first. */}
-              {campos.map((c) => {
+                  fields = one at each end. The rest, one per line. Labels: the BE's `label` first. */
+              campos.map((c) => {
                 const inline = camposEnLinea.inline;
                 if (inline.includes(c)) {
                   if (c !== campos.find((x) => inline.includes(x))) return null;
@@ -215,7 +233,8 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                     {valorCampo(c)}
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
           ) : (
             <>
