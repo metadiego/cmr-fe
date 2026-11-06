@@ -98,7 +98,7 @@ export function buildRecibo(
             quantity?: number;
             price?: number | null;
             note?: string | null;
-            multiplicadores?: Record<string, number> | null;
+            multipliers?: Record<string, number> | null;
           }[];
         }
       ).content ?? [];
@@ -107,7 +107,7 @@ export function buildRecibo(
       cantidad: num(c.quantity),
       ...(c.price != null ? { precio: num(c.price) } : {}),
       ...(c.note ? { nota: c.note } : {}),
-      ...(c.multiplicadores && Object.keys(c.multiplicadores).length ? { multiplicadores: c.multiplicadores } : {}),
+      ...(c.multipliers && Object.keys(c.multipliers).length ? { multiplicadores: c.multipliers } : {}),
     }));
     const visitas = it.productId ? diasTratamiento[String(it.productId)] : undefined;
     // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
