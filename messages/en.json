@@ -5161,5 +5161,9 @@
       "status": "Status",
       "payment": "Payment"
     }
+  },
+  "emailInput": {
+    "suggestions": "Suggested domains",
+    "tabHint": "Tab ↹"
   }
 }

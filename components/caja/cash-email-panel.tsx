@@ -8,10 +8,11 @@ import type { CashEmailSent } from "@/lib/api/caja";
 import { getCentroPreferences, updateCentroPreferences } from "@/lib/api/preferences";
 import { ApiError } from "@/lib/api/types";
 import { apiErrorMessage } from "@/lib/api/errors";
+import { completeRecipients } from "@/lib/email/domains";
 import { cashEmailFailure, parseRecipients, readDefaultRecipients, withDefaultRecipients } from "@/lib/caja/cash-email";
 import type { ThemeConfig } from "@/lib/theme/config";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { EmailInput, useEmailDomains } from "@/components/email-input";
 import { Label } from "@/components/ui/label";
 
 // «Enviar por email» of a cash sheet (per cashier, consolidated or day total). Prefilled with the
@@ -48,7 +49,9 @@ export function CashEmailPanel({
     };
   }, [centerId]);
 
-  const { emails, invalid } = parseRecipients(text);
+  // A bare user part counts as its completed address (house domain), so «larciles» is never «invalid».
+  const domains = useEmailDomains();
+  const { emails, invalid } = parseRecipients(completeRecipients(text, domains));
 
   async function onSend() {
     setBusy(true);
@@ -87,10 +90,11 @@ export function CashEmailPanel({
   return (
     <div className="space-y-2 rounded-md bg-card p-3 ring-1 ring-foreground/10 shadow-sm">
       <Label htmlFor="caja-email" className="text-xs">{t("recipients")}</Label>
-      <Input
+      <EmailInput
         id="caja-email"
+        multiple
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onValueChange={setText}
         className="h-9"
         placeholder={t("placeholder")}
       />

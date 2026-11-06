@@ -5161,5 +5161,9 @@
       "status": "Estatus",
       "payment": "Forma de pago"
     }
+  },
+  "emailInput": {
+    "suggestions": "Dominios sugeridos",
+    "tabHint": "Tab ↹"
   }
 }

@@ -18,6 +18,7 @@ import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { EmailInput } from "@/components/email-input";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -240,12 +241,10 @@ export function InviteDialog({
                 )}
               </Field>
               <Field label={t("email")}>
-                <Input
-                  type="email"
+                <EmailInput
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onValueChange={setEmail}
                   placeholder="you@email.com"
-                  autoComplete="off"
                 />
               </Field>
               <Field label={t("name")}>

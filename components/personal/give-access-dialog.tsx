@@ -10,7 +10,7 @@ import { inviteUser } from "@/lib/api/profiles";
 import { toastError } from "@/lib/api/errors";
 import { staffFullName as nombreDe } from "@/lib/personal/staff-name";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { EmailInput } from "@/components/email-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -69,7 +69,7 @@ export function DarAccesoDialog({
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label>{t("correo")}</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="persona@correo.com" autoComplete="off" />
+            <EmailInput value={email} onValueChange={setEmail} placeholder="persona@correo.com" />
           </div>
           <div className="grid gap-2">
             <Label>{t("rol")}</Label>

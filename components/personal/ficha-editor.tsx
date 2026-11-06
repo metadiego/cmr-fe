@@ -8,6 +8,7 @@ import { updatePersonal, type Personal, type CargoCatalogo, type StaffEditable }
 import { toastError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { EmailInput } from "@/components/email-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -113,7 +114,7 @@ export function FichaEditor({
       <div className="grid gap-4 sm:grid-cols-2">
         <Campo label={t("nombre")}><Input value={name} onChange={(e) => setName(e.target.value)} /></Campo>
         <Campo label={t("apellido")}><Input value={lastName} onChange={(e) => setLastName(e.target.value)} /></Campo>
-        <Campo label={t("email")}><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Campo>
+        <Campo label={t("email")}><EmailInput value={email} onValueChange={setEmail} /></Campo>
         <Campo label={t("telefono")}><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></Campo>
         <Campo label={t("extension")}><Input value={extension} maxLength={20} inputMode="numeric" onChange={(e) => setExtension(e.target.value)} /></Campo>
         <Campo label={t("especialidad")}><Input value={specialty} onChange={(e) => setSpecialty(e.target.value)} /></Campo>

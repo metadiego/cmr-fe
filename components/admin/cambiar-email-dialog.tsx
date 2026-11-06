@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { cambiarEmailPerfil, type Perfil } from "@/lib/api/profiles";
 import { apiErrorMessage } from "@/lib/api/errors";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { EmailInput } from "@/components/email-input";
 import {
   Dialog,
   DialogContent,
@@ -77,10 +77,9 @@ export function CambiarEmailDialog({
         <div className="space-y-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("label")}</span>
-            <Input
-              type="email"
+            <EmailInput
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(null); }}
+              onValueChange={(v) => { setEmail(v); setError(null); }}
               placeholder={t("placeholder")}
               disabled={saving}
               autoFocus

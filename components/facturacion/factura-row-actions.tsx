@@ -11,6 +11,7 @@ import { toastError } from "@/lib/api/errors";
 import { toast } from "sonner";
 import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
+import { EmailInput } from "@/components/email-input";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -157,7 +158,7 @@ function EmailDialog({ facturaId, centroId, onClose }: { facturaId: string; cent
         <div className="space-y-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("emailTo")}</span>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("emailPatientDefault")} />
+            <EmailInput value={email} onValueChange={setEmail} placeholder={t("emailPatientDefault")} />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">{t("emailBody")}</span>
