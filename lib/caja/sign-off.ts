@@ -8,7 +8,7 @@ export type SignOffRole = "cashier" | "supervisor";
 // Signing as MANAGER is its own permission. caja.ver_todos cannot tell a manager from a biller: on prod
 // (6-nov-2026) all six cash roles hold it, Facturación and Facturador included, so billers saw
 // «Firmar como gerente». Handoff docs/specs/cash-sign-as-manager-permission-handoff-be.md.
-export const SIGN_AS_SUPERVISOR = "caja.firmar_gerente";
+export const SIGN_AS_SUPERVISOR = "caja.sign_as_manager";
 
 export interface SignedFigures {
   dayTotal: number;
