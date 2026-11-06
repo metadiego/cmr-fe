@@ -30,6 +30,7 @@ import { useCentroGate as useCenterGate } from "@/hooks/use-centro-gate"
 import { useCan } from "@/hooks/use-can"
 import { todayISO } from "@/components/frontdesk/frontdesk-board.helpers"
 import { UbicacionEnVivoWidget as LiveLocationWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget"
+import { MedicosLibresWidget } from "@/components/frontdesk/medicos-libres-widget"
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
 import { AgregarCitaModal as AddConsultationModal } from "@/components/tablero/agregar-cita-modal"
@@ -419,6 +420,7 @@ export function PatientDesk() {
             nombreServicio={serviceName}
             iconOnly
           />
+          <MedicosLibresWidget rows={data.consultations?.rows ?? []} iconOnly />
           <NurseStatusButton
             centro={gate.centro}
             fecha={date}

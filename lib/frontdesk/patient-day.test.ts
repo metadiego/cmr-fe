@@ -79,6 +79,22 @@ test("consultations join the same patient (Spanish keys of the consultation boar
   assert.deepEqual(out[0].consultationStatuses, ["atendida"])
 })
 
+test("doctorName comes from the consultation board's medico column; absent reads as empty", () => {
+  const withDoctor = groupByPatient(
+    [],
+    [{ id: "c1", pacienteId: "p1", paciente: "P1", record: "1", estado: "atendida", medico: "Victor M. Ocasio" }],
+    services
+  )
+  assert.equal(withDoctor[0].doctorName, "Victor M. Ocasio")
+
+  const withoutDoctor = groupByPatient(
+    [],
+    [{ id: "c1", pacienteId: "p1", paciente: "P1", record: "1", estado: "atendida" }],
+    services
+  )
+  assert.equal(withoutDoctor[0].doctorName, "")
+})
+
 test("a patient with only a consultation still shows up", () => {
   const out = groupByPatient(
     [],

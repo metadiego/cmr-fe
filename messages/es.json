@@ -2053,6 +2053,10 @@
       "enServicioEsperando": "{servicio} — esperando",
       "enServicio": "En {servicio}"
     },
+    "medicosLibres": {
+      "titulo": "Médicos libres",
+      "vacio": "Ningún médico libre ahora mismo."
+    },
     "patientNotFound": "Ese paciente no existe en este centro.",
     "serviceNotFound": "Algún servicio elegido no existe en este centro."
   },

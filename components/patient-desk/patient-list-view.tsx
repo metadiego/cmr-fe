@@ -96,6 +96,7 @@ export function PatientListView({
               </div>
               <div className="mb-1 flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
                 {p.record ? <span className="mr-0.5">#{p.record}</span> : null}
+                {p.doctorName && <span className="mr-0.5">· {p.doctorName}</span>}
                 {(flags.byPatient.get(p.patientId) ?? []).map((f) => (
                   <PriorityFlagPill
                     key={f.slug}

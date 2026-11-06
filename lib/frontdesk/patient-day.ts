@@ -26,6 +26,7 @@ export interface DayConsultation {
   estado?: unknown
   presente?: unknown
   subtipo?: unknown // board's subtype catalog (e.g. nueva/seguimiento) — data-driven, see SubTipo
+  medico?: unknown // the "atencion" board's doctor column (display name) — verified live 06-nov-2026
 }
 
 export interface DayService {
@@ -67,6 +68,7 @@ export interface PatientDay {
   consultationIds: string[]
   consultationStatuses: string[]
   consultationSubtypes: string[] // parallel to consultationIds/consultationStatuses
+  doctorName: string // the consultation's attending doctor (board's "medico" column), "" if none yet
   // The order the patient's sections (services + consultation) are drawn in, set by orderSections.
   // Absent = the configured order (services, then the consultation).
   sections?: PatientSection[]
@@ -76,7 +78,7 @@ export interface PatientDay {
   allCancelled: boolean
 }
 
-const text = (v: unknown) =>
+export const text = (v: unknown) =>
   typeof v === "string" ? v : v == null ? "" : String(v)
 const minIso = (a: string | null, b: string | null | undefined) =>
   !b ? a : !a || b < a ? b : a
@@ -109,6 +111,7 @@ export function groupByPatient(
         consultationIds: [],
         consultationStatuses: [],
         consultationSubtypes: [],
+        doctorName: "",
         earliestTime: null,
         presentAt: null,
         consultationPresentAt: null,
@@ -161,6 +164,8 @@ export function groupByPatient(
     const status = text(c.estado)
     p.consultationStatuses.push(status)
     p.consultationSubtypes.push(text(c.subtipo))
+    const doctor = text(c.medico)
+    if (doctor) p.doctorName = doctor
     const cancelled = status === "cancelada"
     if (!cancelled) p.allCancelled = false
     if (!cancelled) p.presentAt = minIso(p.presentAt, text(c.presente) || null)
