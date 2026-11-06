@@ -14,6 +14,7 @@ import {
   type PlanParams,
 } from "@/lib/api/compras";
 import { listProveedores, listAlmacenes, type Proveedor, type Almacen } from "@/lib/api/inventario";
+import { warehouseLabel } from "@/lib/warehouse-clinic";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
 import { apiErrorLabel } from "@/lib/api/errors";
@@ -243,7 +244,7 @@ export function PlanificacionCompras() {
           <Select value={almacenId} onValueChange={setAlmacenId}>
             <SelectTrigger className="w-52"><SelectValue placeholder={t("field.selAlmacen")} /></SelectTrigger>
             <SelectContent>
-              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+              {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{warehouseLabel(a, almacenes)}</SelectItem>)}
             </SelectContent>
           </Select>
         </Campo>

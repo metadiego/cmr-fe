@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Download04Icon } from "@hugeicons/core-free-icons";
 
 import { getReportePorUsuario, type ReporteUsuarioFila, type DivisionReporte } from "@/lib/api/facturacion-reportes";
 import { useResource } from "@/hooks/use-resource";
+import { useReportClinics } from "@/hooks/use-report-clinics";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -29,7 +29,9 @@ const TODAS = "__todas__";
 export default function VentasPorUsuarioPage() {
   const t = useTranslations("facturacion.ventasPorUsuario");
   const tc = useTranslations("common");
-  const centro = useSearchParams().get("centro") ?? undefined;
+  const tRoot = useTranslations();
+  // Every clinic with estadisticas.read (a ?centro= link preselects one); the BE sums them per user.
+  const clinics = useReportClinics("estadisticas.read");
 
   const hoy = new Date();
   const primero = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -39,8 +41,8 @@ export default function VentasPorUsuarioPage() {
   const [query, setQuery] = React.useState<{ from: string; to: string; context?: DivisionReporte }>({ from: isoDay(primero), to: isoDay(hoy) });
 
   const { state } = useResource<ReporteUsuarioFila[]>(
-    () => getReportePorUsuario(query, centro),
-    [query.from, query.to, query.context, centro],
+    () => (clinics.ready ? getReportePorUsuario(query, clinics.choice) : new Promise<ReporteUsuarioFila[]>(() => {})),
+    [query.from, query.to, query.context, clinics.ready, clinics.choiceKey],
   );
   const rows = state.kind === "ok" ? state.data : [];
   // El BE ya ordena; el total del período se suma solo para la barra proporcional y el pie.
@@ -64,7 +66,7 @@ export default function VentasPorUsuarioPage() {
   function exportarCsv() {
     const lines = [[t("col.usuario"), t("col.total")].join(",")];
     rows.forEach((r) => lines.push([csv(nombreDe(r)), r.total].join(",")));
-    lines.push([csv(t("totales")), total].join(","));
+    lines.push([csv(clinics.withScope(t("totales"))), total].join(","));
     const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -115,6 +117,9 @@ export default function VentasPorUsuarioPage() {
             <Button key={k} variant="ghost" size="sm" className="h-9 text-xs" onClick={() => atajo(k)}>{t(`atajo.${k}`)}</Button>
           ))}
         </div>
+        {clinics.scopeLabel && (
+          <div className="ml-auto self-center text-sm text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</div>
+        )}
       </div>
 
       {state.kind === "loading" && <p className="text-sm text-muted-foreground">{tc("loading")}</p>}
@@ -154,7 +159,7 @@ export default function VentasPorUsuarioPage() {
             {rows.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 bg-muted/40 font-semibold">
-                  <td className="px-3 py-2">{t("totales")}</td>
+                  <td className="px-3 py-2">{clinics.withScope(t("totales"))}</td>
                   <td className="px-3 py-2 text-right text-base tabular-nums">{money(total)}</td>
                 </tr>
               </tfoot>

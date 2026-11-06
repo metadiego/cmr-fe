@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 
-import { listCitas, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
+import { listCitasEveryCenter, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
@@ -50,11 +50,12 @@ function Tabla({ head, children }: { head: React.ReactNode; children: React.Reac
   );
 }
 
-export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
+// The patient's appointments in every clinic the person can read, each with its clinic.
+export function FichaCitas({ pacienteId }: { pacienteId: string }) {
   const t = useTranslations("patients.hub");
   const dia = useDia();
   const [histOpen, setHistOpen] = React.useState(false);
-  const citasRes = useResource<{ items: Cita[] }>(() => listCitas({ patientId: pacienteId, limit: 100 }, centro), [pacienteId, centro]);
+  const citasRes = useResource<{ items: Cita[] }>(() => listCitasEveryCenter({ patientId: pacienteId, limit: 100 }), [pacienteId]);
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data.items : [];
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
@@ -76,30 +77,31 @@ export function FichaCitas({ pacienteId, centro }: { pacienteId: string; centro?
       <div className="flex justify-end">
         <Button variant="outline" size="sm" onClick={() => setHistOpen(true)}>{t("historialReagendamientos")}</Button>
       </div>
-      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("doctor")}</Th><Th>{t("status")}</Th></tr>}>
+      <Tabla head={<tr><Th>{t("date")}</Th><Th>{t("type")}</Th><Th>{t("doctor")}</Th><Th>{t("clinic")}</Th><Th>{t("status")}</Th></tr>}>
         {citasOrdenadas.map((c) => (
           <tr key={c.id} className="border-t">
             <Td>{dia(c.date)}{c.time ? ` · ${c.time}` : ""}</Td>
             <Td>{tipoNombre(c.appointmentTypeId)}</Td>
             <Td>{medicoNombre(c)}</Td>
+            <Td>{c.clinicName ?? "—"}</Td>
             <Td><Estado value={c.status} /></Td>
           </tr>
         ))}
       </Tabla>
-      {histOpen && <ReagendamientosDialog pacienteId={pacienteId} centro={centro} onClose={() => setHistOpen(false)} />}
+      {histOpen && <ReagendamientosDialog pacienteId={pacienteId} onClose={() => setHistOpen(false)} />}
     </div>
   );
 }
 
 // Modal con las citas REPROGRAMADAS del paciente (fecha, hora, motivo). Cada una abre su traza completa
 // antes→después reusando HistorialDialog. GET /appointments?patientId&status=reprogramada.
-function ReagendamientosDialog({ pacienteId, centro, onClose }: { pacienteId: string; centro?: string; onClose: () => void }) {
+function ReagendamientosDialog({ pacienteId, onClose }: { pacienteId: string; onClose: () => void }) {
   const t = useTranslations("patients.hub");
   const tc = useTranslations("common");
   const dia = useDia();
   const res = useResource<{ items: Cita[] }>(
-    () => listCitas({ patientId: pacienteId, status: "reprogramada", limit: 100 }, centro),
-    [pacienteId, centro],
+    () => listCitasEveryCenter({ patientId: pacienteId, status: "reprogramada", limit: 100 }),
+    [pacienteId],
   );
   const [trace, setTrace] = React.useState<Cita | null>(null);
   const items = res.state.kind === "ok" ? res.state.data.items : [];
@@ -189,11 +191,11 @@ export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; cent
 // The «Facturación» tab lives in its own file (full history, paginated).
 export { FichaFacturacion } from "@/components/clientes/ficha-facturacion";
 
-// Tarjeta «Última visita» del Resumen: la cita más reciente del paciente (por fecha). Reusa listCitas.
-export function FichaUltimaVisita({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
+// «Last visit» card of the summary: the patient's most recent appointment, in any clinic the person can read.
+export function FichaUltimaVisita({ pacienteId }: { pacienteId: string }) {
   const t = useTranslations("patients.hub");
   const dia = useDia();
-  const citasRes = useResource<{ items: Cita[] }>(() => listCitas({ patientId: pacienteId, limit: 100 }, centro), [pacienteId, centro]);
+  const citasRes = useResource<{ items: Cita[] }>(() => listCitasEveryCenter({ patientId: pacienteId, limit: 100 }), [pacienteId]);
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
   const citas = citasRes.state.kind === "ok" ? citasRes.state.data.items : [];
   const tipos = tiposRes.state.kind === "ok" ? tiposRes.state.data : [];
@@ -209,6 +211,7 @@ export function FichaUltimaVisita({ pacienteId, centro }: { pacienteId: string; 
           <span className="font-medium">{tipoNombre(ultima.appointmentTypeId)}</span>
           <span className="text-sm text-muted-foreground">{dia(ultima.date)}{ultima.time ? ` · ${ultima.time}` : ""}</span>
           <Estado value={ultima.status} />
+          {ultima.clinicName && <span className="text-sm text-muted-foreground">{ultima.clinicName}</span>}
         </div>
       ) : (
         <div className="mt-0.5 text-sm text-muted-foreground">{t("noLastVisit")}</div>

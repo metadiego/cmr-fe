@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, oneCenterPath } from "@/lib/api/client";
 
 // «Ahora mismo» — the office live dashboard (BE PR #451, handoff docs/specs/right-now-office-dashboard.md).
 // The BE's OpenAPI types this response as an empty object, so these types are copied from the REAL
@@ -107,11 +107,12 @@ export type RightNowCenters = {
   combinado: RightNowCombined;
 };
 
-// GET /right-now/centers — every center the user may read (admin: all active ones). `date` optional:
-// without it each center reports ITS today. No X-Tenant-ID: the scope is the user's centers, not one.
-export function getRightNowCenters(date?: string): Promise<RightNowCenters> {
+// GET /right-now/centers — the top bar's clinic, or on «Ambos» every center the user may read (admin: all
+// active ones), as `centerIds` (oneCenterPath). `date` optional: without it each center reports ITS today.
+// No X-Tenant-ID: the scope is the user's centers, not one.
+export async function getRightNowCenters(date?: string): Promise<RightNowCenters> {
   const qs = date ? `?date=${encodeURIComponent(date)}` : "";
-  return apiFetch<RightNowCenters>(`/right-now/centers${qs}`, {}, null);
+  return apiFetch<RightNowCenters>(await oneCenterPath(`/right-now/centers${qs}`), {}, null);
 }
 
 // SSE of invalidations (no snapshot in the event): on each one, refetch the snapshot (debounced).

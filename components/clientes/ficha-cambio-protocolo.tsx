@@ -7,7 +7,7 @@ import { getCambiosProtocolo, type CambioProtocoloHistorial } from "@/lib/api/fr
 import { listMedicos, type MedicoOpcion } from "@/lib/api/facturacion-config";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { useResource } from "@/hooks/use-resource";
-import { CambioProtocoloForm } from "@/components/clientes/cambio-protocolo-form";
+import { CambioProtocoloPorCentro } from "@/components/clientes/cambio-protocolo-por-centro";
 
 // Pestaña «Cambio de protocolo» de la ficha del paciente: ARRIBA el historial (lo que ya tuvo, del más
 // reciente al más viejo) y ABAJO la acción (reemplazar terapias pendientes), ambas para el paciente ya
@@ -60,7 +60,7 @@ export function FichaCambioProtocolo({ pacienteId, centro }: { pacienteId: strin
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">{t("nuevoTitulo")}</h2>
-        <CambioProtocoloForm pacienteId={pacienteId} centro={centro} onApplied={() => histRes.reload()} />
+        <CambioProtocoloPorCentro pacienteId={pacienteId} fallback={centro ?? null} onApplied={() => histRes.reload()} />
       </section>
     </div>
   );

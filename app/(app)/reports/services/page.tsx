@@ -7,9 +7,8 @@ import { PrinterIcon, Download04Icon } from "@hugeicons/core-free-icons";
 
 import { getEstadisticasServicios, type EstadisticasServicios, type EstServicio } from "@/lib/api/estadisticas";
 import { useResource } from "@/hooks/use-resource";
-import { useCentroGate } from "@/hooks/use-centro-gate";
+import { useReportClinics } from "@/hooks/use-report-clinics";
 import { useMe } from "@/hooks/use-me";
-import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -71,7 +70,8 @@ export default function EstadisticasServiciosPage() {
   const format = useFormatter();
   const tc = useTranslations("common");
   const tRoot = useTranslations();
-  const gate = useCentroGate();
+  // Every clinic with estadisticas.read, narrowed by the filter; the BE sums them into one report.
+  const clinics = useReportClinics("estadisticas.read");
   const me = useMe();
   const printRef = React.useRef<HTMLDivElement>(null);
 
@@ -84,8 +84,8 @@ export default function EstadisticasServiciosPage() {
   const [tab, setTab] = React.useState("general");
 
   const res = useResource<EstadisticasServicios>(
-    () => (gate.centro ? getEstadisticasServicios(query.desde, query.hasta, gate.centro) : Promise.resolve(EMPTY)),
-    [query.desde, query.hasta, gate.centro],
+    () => (clinics.ready ? getEstadisticasServicios(query.desde, query.hasta, clinics.choice) : Promise.resolve(EMPTY)),
+    [query.desde, query.hasta, clinics.ready, clinics.choiceKey],
   );
   const data = res.state.kind === "ok" ? res.state.data : null;
   const cargando = res.state.kind === "loading";
@@ -98,7 +98,6 @@ export default function EstadisticasServiciosPage() {
   // Pestaña efectiva derivada (sin efecto): si la elegida ya no existe (cambió el rango), cae a GENERAL.
   const tabEfectivo = tab === "general" || serviciosActivos.some((s) => s.slug === tab) ? tab : "general";
 
-  const centroNombre = gate.centros.find((c) => c.id === gate.centro)?.name ?? "";
   const emailImpresor = me.kind === "ok" ? (me.me.email ?? "") : "";
 
   function exportarCsv() {
@@ -136,12 +135,10 @@ export default function EstadisticasServiciosPage() {
         }
       />
 
-      {gate.cargando ? (
+      {!clinics.ready ? (
         <p className="text-sm text-muted-foreground">{tc("loading")}</p>
-      ) : gate.sinCentro ? (
+      ) : clinics.noClinic ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
-      ) : gate.necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
           {/* Filtros de rango */}
@@ -155,8 +152,8 @@ export default function EstadisticasServiciosPage() {
               <DatePicker value={hasta} min={desde} onChange={setHasta} className="h-9 w-[160px]" />
             </label>
             <Button className="h-9" onClick={() => setQuery({ desde, hasta })}>{t("generate")}</Button>
-            {gate.puedeCambiar && gate.centro && gate.centros.length > 1 && (
-              <div className="ml-auto text-sm text-muted-foreground">{centroNombre}</div>
+            {clinics.scopeLabel && (
+              <div className="ml-auto text-sm text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</div>
             )}
           </div>
 
@@ -167,7 +164,7 @@ export default function EstadisticasServiciosPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/img/logo_cmr.png" alt="" />
               <div className="bold">{t("empresa")}</div>
-              {centroNombre && <div>{centroNombre}</div>}
+              {clinics.coverageText && <div>{clinics.coverageText}</div>}
               <h1>{t("title")}</h1>
               <div className="muted">{query.desde} — {query.hasta}</div>
             </div>

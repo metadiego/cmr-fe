@@ -23,6 +23,11 @@ import {
 import { apiErrorMessage, toastError } from "@/lib/api/errors";
 import { useResource } from "@/hooks/use-resource";
 import { useCan } from "@/hooks/use-can";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { useCreateClinic } from "@/hooks/use-create-clinic";
+import { createClinicReady } from "@/lib/create-clinic";
+import { isClinicViewAll } from "@/lib/tenant";
+import { CreateClinicField } from "@/components/kit/create-clinic-field";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -103,8 +108,14 @@ function AlertasPanel() {
   const router = useRouter();
   const { can } = useCan();
   const puedeResolver = can("alertas.resolver"); // gate cosmético; el BE aplica la autorización real
-  const { state, reload, refresh } = useResource<AlertasResponse>(() => listAlertas());
+  // Every clinic where the person reads alerts, narrowed by the filter (clinic-read-scope).
+  const clinics = useClinicFilter("alertas.read");
+  const { state, reload, refresh } = useResource<AlertasResponse>(
+    () => listAlertas(clinics.choice),
+    [clinics.choiceKey],
+  );
   const alertas = state.kind === "ok" ? state.data.data : [];
+  const clinicOf = (a: Alerta) => a.clinicName || clinics.nameOf(a.clinicId) || "—";
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
   async function open(a: Alerta) {
@@ -120,17 +131,43 @@ function AlertasPanel() {
     finally { setBusyId(null); }
   }
 
-  if (state.kind === "loading") return <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
-  if (state.kind === "fail")
-    return (
+  let body: React.ReactNode;
+  if (state.kind === "loading") body = <p className="text-sm text-muted-foreground">{tc("loading")}</p>;
+  else if (state.kind === "fail")
+    body = (
       <div className="text-center">
         <p className="text-sm text-muted-foreground">{tc("error")}</p>
         <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
       </div>
     );
-  if (alertas.length === 0)
-    return <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
+  else if (alertas.length === 0)
+    body = <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">{t("empty")}</p>;
+  else body = <AlertasRows alertas={alertas} clinicOf={clinics.showColumn ? clinicOf : null} busyId={busyId} puedeResolver={puedeResolver} onOpen={open} onAct={act} />;
 
+  return (
+    <>
+      {body}
+    </>
+  );
+}
+
+function AlertasRows({
+  alertas,
+  clinicOf,
+  busyId,
+  puedeResolver,
+  onOpen,
+  onAct,
+}: {
+  alertas: Alerta[];
+  /** The row's clinic name, or null when the person reads only one clinic (no badge). */
+  clinicOf: ((a: Alerta) => string) | null;
+  busyId: string | null;
+  puedeResolver: boolean;
+  onOpen: (a: Alerta) => void;
+  onAct: (id: string, fn: (id: string) => Promise<unknown>) => void;
+}) {
+  const t = useTranslations("comunicaciones");
   return (
     <div className="divide-y rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
       {alertas.map((a) => {
@@ -138,14 +175,15 @@ function AlertasPanel() {
         return (
           <div key={a.id} className="flex items-start gap-3 px-4 py-3 hover:bg-muted/30">
             <span className={cn("mt-1.5 size-2.5 shrink-0 rounded-full", SEV_DOT[a.severity] ?? "bg-muted")} />
-            <button type="button" onClick={() => open(a)} className={cn("min-w-0 flex-1 text-left", clickable && "cursor-pointer")}>
+            <button type="button" onClick={() => onOpen(a)} className={cn("min-w-0 flex-1 text-left", clickable && "cursor-pointer")}>
               <p className="font-medium">{a.title}</p>
               {a.body && <p className="text-sm text-muted-foreground">{a.body}</p>}
             </button>
+            {clinicOf && <Badge variant="outline" className="mt-0.5 shrink-0">{clinicOf(a)}</Badge>}
             {puedeResolver && (
               <div className="flex shrink-0 gap-1">
-                <Button size="sm" variant="ghost" disabled={busyId === a.id} onClick={() => act(a.id, resolverAlerta)}>{t("resolver")}</Button>
-                <Button size="sm" variant="ghost" disabled={busyId === a.id} onClick={() => act(a.id, descartarAlerta)}>{t("descartar")}</Button>
+                <Button size="sm" variant="ghost" disabled={busyId === a.id} onClick={() => onAct(a.id, resolverAlerta)}>{t("resolver")}</Button>
+                <Button size="sm" variant="ghost" disabled={busyId === a.id} onClick={() => onAct(a.id, descartarAlerta)}>{t("descartar")}</Button>
               </div>
             )}
           </div>
@@ -161,54 +199,68 @@ function NotificacionesPanel() {
   const t = useTranslations("comunicaciones");
   const tc = useTranslations("common");
   const format = useFormatter();
-  const { state, reload } = useResource<Notificacion[]>(() => listNotificaciones());
+  // Every clinic where the person reads notifications, narrowed by the filter (clinic-read-scope).
+  const clinics = useClinicFilter("notificaciones.read");
+  const { state, reload } = useResource<Notificacion[]>(
+    () => listNotificaciones(undefined, clinics.choice),
+    [clinics.choiceKey],
+  );
   const rows = state.kind === "ok" ? state.data : [];
+  const cols = 5 + (clinics.showColumn ? 1 : 0);
   const fecha = (n: Notificacion) => {
     const iso = n.sentAt ?? n.createdAt;
     return iso ? format.dateTime(new Date(iso), "dateAndTime") : "—";
   };
 
   return (
-    <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/60">
-          <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-            <th className="px-3 py-2 font-semibold">{t("col.canal")}</th>
-            <th className="px-3 py-2 font-semibold">{t("col.destino")}</th>
-            <th className="px-3 py-2 font-semibold">{t("col.asunto")}</th>
-            <th className="px-3 py-2 font-semibold">{t("col.estado")}</th>
-            <th className="px-3 py-2 font-semibold">{t("col.fecha")}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {state.kind === "loading" && (
-            <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
-          )}
-          {state.kind === "fail" && (
-            <tr><td colSpan={5} className="px-3 py-8 text-center">
-              <p className="text-sm text-muted-foreground">{tc("error")}</p>
-              <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
-            </td></tr>
-          )}
-          {state.kind === "ok" && rows.length === 0 && (
-            <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{t("noNotificaciones")}</td></tr>
-          )}
-          {rows.map((n) => (
-            <tr key={n.id} className="hover:bg-muted/30">
-              <td className="px-3 py-2"><Badge variant="outline">{n.channel}</Badge></td>
-              <td className="px-3 py-2 text-muted-foreground">{n.destination ?? "—"}</td>
-              <td className="px-3 py-2 text-muted-foreground">{n.subject ?? "—"}</td>
-              <td className="px-3 py-2">
-                <Badge variant={ESTADO_BADGE[n.status] ?? "outline"}>
-                  {t.has(`estadoNotif.${n.status}`) ? t(`estadoNotif.${n.status}`) : n.status}
-                </Badge>
-              </td>
-              <td className="px-3 py-2 text-muted-foreground">{fecha(n)}</td>
+    <>
+      <div className="overflow-x-auto rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/60">
+            <tr className="border-b text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              {clinics.showColumn && <th className="px-3 py-2 font-semibold">{t("col.centro")}</th>}
+              <th className="px-3 py-2 font-semibold">{t("col.canal")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.destino")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.asunto")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.estado")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.fecha")}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y">
+            {state.kind === "loading" && (
+              <tr><td colSpan={cols} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
+            )}
+            {state.kind === "fail" && (
+              <tr><td colSpan={cols} className="px-3 py-8 text-center">
+                <p className="text-sm text-muted-foreground">{tc("error")}</p>
+                <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
+              </td></tr>
+            )}
+            {state.kind === "ok" && rows.length === 0 && (
+              <tr><td colSpan={cols} className="px-3 py-8 text-center text-muted-foreground">{t("noNotificaciones")}</td></tr>
+            )}
+            {rows.map((n) => (
+              <tr key={n.id} className="hover:bg-muted/30">
+                {clinics.showColumn && (
+                  <td className="px-3 py-2">
+                    <Badge variant="outline">{n.clinicName || clinics.nameOf(n.clinicId) || "—"}</Badge>
+                  </td>
+                )}
+                <td className="px-3 py-2"><Badge variant="outline">{n.channel}</Badge></td>
+                <td className="px-3 py-2 text-muted-foreground">{n.destination ?? "—"}</td>
+                <td className="px-3 py-2 text-muted-foreground">{n.subject ?? "—"}</td>
+                <td className="px-3 py-2">
+                  <Badge variant={ESTADO_BADGE[n.status] ?? "outline"}>
+                    {t.has(`estadoNotif.${n.status}`) ? t(`estadoNotif.${n.status}`) : n.status}
+                  </Badge>
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">{fecha(n)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -217,7 +269,11 @@ function PlantillasPanel() {
   const tc = useTranslations("common");
   const { can } = useCan();
   const puedeConfig = can("notificaciones.config"); // gate cosmético; el BE es la autoridad
-  const { state, reload } = useResource<Plantilla[]>(() => listPlantillas());
+  const clinics = useClinicFilter("notificaciones.read");
+  const { state, reload } = useResource<(Plantilla & { clinicName?: string | null })[]>(
+    () => listPlantillas(clinics.choice ?? undefined),
+    [clinics.choiceKey],
+  );
   const rows = state.kind === "ok" ? state.data : [];
   const [createOpen, setCreateOpen] = React.useState(false);
 
@@ -237,20 +293,21 @@ function PlantillasPanel() {
               <th className="px-3 py-2 font-semibold">{t("col.idioma")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.asunto")}</th>
               <th className="px-3 py-2 font-semibold">{t("col.estado")}</th>
+              <th className="px-3 py-2 font-semibold">{t("col.centro")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {state.kind === "loading" && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{tc("loading")}</td></tr>
             )}
             {state.kind === "fail" && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center">
+              <tr><td colSpan={6} className="px-3 py-8 text-center">
                 <p className="text-sm text-muted-foreground">{tc("error")}</p>
                 <Button variant="outline" size="sm" className="mt-2" onClick={reload}>{tc("retry")}</Button>
               </td></tr>
             )}
             {state.kind === "ok" && rows.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-muted-foreground">{t("noPlantillas")}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">{t("noPlantillas")}</td></tr>
             )}
             {rows.map((p) => (
               <tr key={p.id} className="hover:bg-muted/30">
@@ -259,6 +316,7 @@ function PlantillasPanel() {
                 <td className="px-3 py-2 uppercase text-muted-foreground">{p.language}</td>
                 <td className="px-3 py-2 text-muted-foreground">{p.subject ?? "—"}</td>
                 <td className="px-3 py-2"><Badge variant={p.active ? "secondary" : "outline"}>{p.active ? tc("active") : tc("inactive")}</Badge></td>
+                <td className="px-3 py-2"><Badge variant="outline">{p.clinicName || clinics.nameOf(p.clinicId) || "—"}</Badge></td>
               </tr>
             ))}
           </tbody>
@@ -288,11 +346,18 @@ function PlantillaForm({
     setForm((prev) => ({ ...prev, [k]: v }));
 
   function handleOpenChange(next: boolean) {
-    if (!next) setForm(EMPTY);
+    if (!next) { setForm(EMPTY); setClinicPicked(""); }
     onOpenChange(next);
   }
 
-  const canSubmit = !!form.clave.trim() && !!form.cuerpo.trim() && !submitting;
+  // The clinic it is created in: the top bar's; on «Ambos» the form asks (lib/create-clinic.ts).
+  const create = useCreateClinic("notificaciones.config", null);
+  const [clinicPicked, setClinicPicked] = React.useState("");
+  const clinicId = clinicPicked || create.defaultClinicId;
+  const viewAll = isClinicViewAll();
+
+  const canSubmit = !!form.clave.trim() && !!form.cuerpo.trim() && !submitting &&
+    createClinicReady(clinicId, create.centers.length, viewAll);
 
   async function onSubmit() {
     if (!canSubmit) return;
@@ -305,7 +370,7 @@ function PlantillaForm({
         subject: form.asunto.trim() || undefined,
         body: form.cuerpo.trim(),
       };
-      await crearPlantilla(payload);
+      await crearPlantilla(payload, clinicId || undefined);
       toast.success(t("plantillaCreada"));
       handleOpenChange(false);
       onSaved();
@@ -355,6 +420,7 @@ function PlantillaForm({
       <Field label={t("col.cuerpo")}>
         <Textarea rows={5} value={form.cuerpo} onChange={(e) => set("cuerpo", e.target.value)} />
       </Field>
+      <CreateClinicField centers={create.centers} value={clinicId} onChange={setClinicPicked} show={viewAll} disabled={submitting} />
     </FormDialog>
   );
 }

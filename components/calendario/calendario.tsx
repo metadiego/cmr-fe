@@ -4,42 +4,24 @@ import { isMine } from "@/lib/auth/who-did-it";
 import * as React from "react";
 import { sentenceCase } from "@/lib/format/text";
 import { useFormatter, useTranslations, useLocale } from "next-intl";
-import { toast } from "sonner";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
 
-import {
-  getEventos,
-  getCategorias,
-  crearEvento,
-  actualizarEvento,
-  eliminarEvento,
-  type CalendarioEvento,
-  type CalendarioCategoria,
-  type CrearEventoPayload,
-} from "@/lib/api/calendario";
+import { getEventos, getCategorias, type CalendarioEvento, type CalendarioCategoria } from "@/lib/api/calendario";
+import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
 import { useResource } from "@/hooks/use-resource";
 import { useMe } from "@/hooks/use-me";
-import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
-import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
-import { apiErrorLabel } from "@/lib/api/errors";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
+import { useCreateClinic } from "@/hooks/use-create-clinic";
+import { EventoModal } from "@/components/calendario/evento-modal";
 import { cn } from "@/lib/utils";
 import { PillsSkeleton } from "@/components/kit/skeletons";
 import { AgendaSkeleton, DiaRowsSkeleton, LegendDotsSkeleton } from "@/components/calendario/calendario-skeleton";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { PageContainer, PageHeader } from "@/components/ui/page";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { DatePicker } from "@/components/ui/date-picker";
-import { TimePicker } from "@/components/ui/time-picker";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
 
 // El color de la categoría es una clave SEMÁNTICA (no un hex) → se mapea a la paleta una vez, como la
 // campanita. `dot` para el punto, `chip` para la píldora del evento.
@@ -74,11 +56,20 @@ export function Calendario() {
   const format = useFormatter();
   const me = useMe();
 
-  // Selector de centro EN la pantalla (patrón único, no en el nav): lee/escribe por permiso, sin tocar
-  // la sesión. Handoff selector-de-centro-en-la-pantalla.
-  const centro = useCentroPantalla("calendario.read", "calendario.create");
-  const puedeEscribir = centro.puedeEscribir;
-  const puedeCrear = puedeEscribir;
+  // Every clinic where the person holds calendario.read, narrowed by the clinic filter (handoff
+  // clinic-read-scope); company-wide events always come along. A new event is born in ONE clinic.
+  const filter = useClinicFilter("calendario.read");
+  const create = useCreateClinic("calendario.create", filter.choice);
+  const puedeCrear = create.canCreate;
+  // Edit/delete run in the EVENT's clinic, with the permission held THERE (the BE re-checks).
+  const updRes = useResource<Centro[]>(() => getCentrosDondePuedo("calendario.update"), []);
+  const delRes = useResource<Centro[]>(() => getCentrosDondePuedo("calendario.delete"), []);
+  const idsOf = (r: typeof updRes) => new Set(r.state.kind === "ok" ? r.state.data.map((c) => c.id) : []);
+  const updIds = idsOf(updRes);
+  const delIds = idsOf(delRes);
+  // A company-wide event has no clinic to check beyond holding the permission somewhere.
+  const allowedIn = (ids: Set<string>, ev: CalendarioEvento) =>
+    ev.isGlobal || !ev.clinicId ? ids.size > 0 : ids.has(ev.clinicId);
 
   // «Cada uno toca lo suyo»: editar/borrar solo eventos PROPIOS, salvo admin. Los del legado no traen
   // autor (creadoPor null, legacyId) → solo admin. El BE re-comprueba (403 con motivo), así que esto solo
@@ -88,8 +79,12 @@ export function Calendario() {
   const esMio = (ev?: CalendarioEvento) => isMine(ev?.createdBy, me.kind === "ok" ? me.me : null);
   // Staff absences are projected read-only rows (see lib/api/calendario.ts): they don't belong to
   // calendar_events, so editing/deleting them here 404s — only Disponibilidad can change them.
-  const puedeTocar = (ev?: CalendarioEvento) =>
-    ev?.origin !== "staff_absence" && puedeEscribir && (esAdmin || esMio(ev));
+  const puedeTocar = (ev: CalendarioEvento, ids: Set<string>) =>
+    ev.origin !== "staff_absence" && allowedIn(ids, ev) && (esAdmin || esMio(ev));
+  // The event's clinic, shown when the screen spans more than one; company-wide ones say so.
+  const clinicLabel = (ev: CalendarioEvento) =>
+    ev.isGlobal || !ev.clinicId ? t("global") : (ev.clinicName || filter.nameOf(ev.clinicId));
+  const showClinic = filter.showColumn;
 
   const [vista, setVista] = React.useState<Vista>("mes");
   const [cursor, setCursor] = React.useState(new Date());
@@ -113,9 +108,10 @@ export function Calendario() {
     return { desde: ymd(h), hasta: ymd(addDias(h, 45)), celdasMes: [], celdasSemana: [] };
   }, [vista, cursor]);
 
-  // Solo mandar centroId al VER OTRO centro; en el de la sesión va sin parámetro (lo resuelve el BE).
-  const fetchCentroId = centro.fetchCentroId;
-  const eventosRes = useResource<CalendarioEvento[]>(() => getEventos(desde, hasta, fetchCentroId), [desde, hasta, fetchCentroId]);
+  const eventosRes = useResource<CalendarioEvento[]>(
+    () => getEventos(desde, hasta, filter.choice),
+    [desde, hasta, filter.choiceKey],
+  );
   const catsRes = useResource<CalendarioCategoria[]>(() => getCategorias());
   const eventos = eventosRes.state.kind === "ok" ? eventosRes.state.data : [];
   // First load or a range/centre change: the cells show placeholder pills, never an empty grid.
@@ -152,8 +148,6 @@ export function Calendario() {
   }
   const diasSemanaLbl = Array.from({ length: 7 }, (_, i) => fmt(new Date(2026, 10, 1 + i), { weekday: "short" }));
 
-  // Al CREAR en un centro ≠ sesión, el evento debe nacer allí → pasar centroId. En el de la sesión, sin él.
-  const centroIdCrear = centro.centroIdCrear;
   const modalCommon = { cats, catLabel, tRoot, tc, t };
 
   return (
@@ -184,8 +178,6 @@ export function Calendario() {
         )}
         <h2 className="px-1 text-lg font-semibold">{titulo}</h2>
 
-        {/* On-screen center selector (single pattern). Only with more than one center; the session's one preselected. */}
-        <CentroPantallaSelector estado={centro} />
         {eventosRes.state.kind === "fail" && <span className="text-sm text-destructive">{eventosRes.state.message}</span>}
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
@@ -215,7 +207,7 @@ export function Calendario() {
                 <div className={cn("mb-1 inline-flex size-6 items-center justify-center rounded-full text-xs font-medium", ds === hoyStr() && "bg-primary text-primary-foreground")}>{cel.getDate()}</div>
                 {cargandoEventos ? (delMes && <PillsSkeleton seed={idx} />) : (
                 <div className="space-y-0.5">
-                  {evs.slice(0, 4).map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
+                  {evs.slice(0, 4).map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} clinic={showClinic ? clinicLabel(ev) : ""} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
                   {evs.length > 4 && <div className="px-1 text-[10px] text-muted-foreground">+{evs.length - 4}</div>}
                 </div>
                 )}
@@ -242,7 +234,7 @@ export function Calendario() {
                 className={cn("min-h-[420px] bg-background p-1.5 text-left align-top transition-colors hover:bg-accent/30", ds === hoyStr() && "ring-1 ring-inset ring-primary/40")}>
                 {cargandoEventos ? <PillsSkeleton seed={idx} max={4} /> : (
                 <div className="space-y-1">
-                  {evs.map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
+                  {evs.map((ev) => <Pill key={ev.id} ev={ev} col={colorDe(ev)} clinic={showClinic ? clinicLabel(ev) : ""} onClick={() => setModal({ evento: ev, dia: ev.day })} />)}
                   {evs.length === 0 && <span className="text-[10px] text-muted-foreground">—</span>}
                 </div>
                 )}
@@ -261,7 +253,7 @@ export function Calendario() {
             ) : eventosDe(ymd(cursor)).length === 0 ? (
               <p className="px-4 py-10 text-center text-sm text-muted-foreground">{t("sinEventos")}</p>
             ) : (
-              eventosDe(ymd(cursor)).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)
+              eventosDe(ymd(cursor)).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} clinic={showClinic ? clinicLabel(ev) : ""} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)
             )}
           </div>
         </div>
@@ -277,7 +269,7 @@ export function Calendario() {
               <div key={d}>
                 <div className="mb-1 text-sm font-semibold capitalize">{fmt(new Date(d + "T12:00:00"), { weekday: "long", day: "numeric", month: "long" })}</div>
                 <div className="divide-y overflow-hidden rounded-md bg-card ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-                  {eventos.filter((e) => e.day === d).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)}
+                  {eventos.filter((e) => e.day === d).map((ev) => <Fila key={ev.id} ev={ev} col={colorDe(ev)} clinic={showClinic ? clinicLabel(ev) : ""} cat={catLabel(catPorId.get(ev.categoryId ?? ""))} onClick={() => setModal({ evento: ev, dia: ev.day })} t={t} />)}
                 </div>
               </div>
             ));
@@ -300,9 +292,12 @@ export function Calendario() {
         <EventoModal
           key={modal.evento?.id ?? modal.dia}
           inicial={modal}
-          puedeEditar={modal.evento ? puedeTocar(modal.evento) : puedeCrear}
-          puedeBorrar={modal.evento ? puedeTocar(modal.evento) : false}
-          centroIdCrear={centroIdCrear}
+          puedeEditar={modal.evento ? puedeTocar(modal.evento, updIds) : puedeCrear}
+          puedeBorrar={modal.evento ? puedeTocar(modal.evento, delIds) : false}
+          createCenters={create.centers}
+          defaultClinicId={create.defaultClinicId}
+          showClinic={showClinic}
+          clinicLabel={clinicLabel}
           onClose={() => setModal(null)}
           onSaved={() => { setModal(null); eventosRes.refresh(); }}
           {...modalCommon}
@@ -312,18 +307,20 @@ export function Calendario() {
   );
 }
 
-function Pill({ ev, col, onClick }: { ev: CalendarioEvento; col: { chip: string }; onClick: () => void }) {
+// `clinic`: the event's clinic when the screen spans several ("" otherwise): in the tooltip and after the title.
+function Pill({ ev, col, clinic, onClick }: { ev: CalendarioEvento; col: { chip: string }; clinic: string; onClick: () => void }) {
   return (
     <div role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className={cn("flex items-center gap-1 truncate rounded border px-1.5 py-0.5 text-[11px] font-medium", col.chip)} title={ev.title}>
+      className={cn("flex items-center gap-1 truncate rounded border px-1.5 py-0.5 text-[11px] font-medium", col.chip)} title={clinic ? `${ev.title} · ${clinic}` : ev.title}>
       {ev.isGlobal && <HugeiconsIcon icon={Globe02Icon} className="size-3 shrink-0" />}
       {ev.time && <span className="shrink-0 tabular-nums opacity-80">{ev.time}</span>}
       <span className="truncate">{ev.title}</span>
+      {clinic && !ev.isGlobal && <span className="ml-auto shrink-0 truncate pl-1 text-[10px] opacity-70">{clinic}</span>}
     </div>
   );
 }
 
-function Fila({ ev, col, cat, onClick, t }: { ev: CalendarioEvento; col: { dot: string }; cat: string; onClick: () => void; t: ReturnType<typeof useTranslations> }) {
+function Fila({ ev, col, clinic, cat, onClick, t }: { ev: CalendarioEvento; col: { dot: string }; clinic: string; cat: string; onClick: () => void; t: ReturnType<typeof useTranslations> }) {
   return (
     <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-accent/40">
       <span className={cn("size-2.5 shrink-0 rounded-full", col.dot)} />
@@ -332,121 +329,8 @@ function Fila({ ev, col, cat, onClick, t }: { ev: CalendarioEvento; col: { dot: 
         <span className="truncate font-medium">{ev.title}</span>
         {cat && <span className="ml-2 text-xs text-muted-foreground">{cat}</span>}
       </span>
+      {clinic && <Badge variant="outline" className="shrink-0">{clinic}</Badge>}
       {ev.isGlobal && <HugeiconsIcon icon={Globe02Icon} className="size-3.5 shrink-0 text-muted-foreground" />}
     </button>
-  );
-}
-
-function EventoModal({
-  inicial, cats, catLabel, puedeEditar, puedeBorrar, centroIdCrear, onClose, onSaved, tRoot, tc, t,
-}: {
-  inicial: { evento?: CalendarioEvento; dia: string };
-  cats: CalendarioCategoria[];
-  catLabel: (c?: CalendarioCategoria) => string;
-  puedeEditar: boolean;
-  puedeBorrar: boolean;
-  centroIdCrear?: string; // al crear en un centro ≠ sesión, el evento nace allí
-  onClose: () => void;
-  onSaved: () => void;
-  tRoot: ReturnType<typeof useTranslations>;
-  tc: ReturnType<typeof useTranslations>;
-  t: ReturnType<typeof useTranslations>;
-}) {
-  const ev = inicial.evento;
-  const [titulo, setTitulo] = React.useState(ev?.title ?? "");
-  const [dia, setDia] = React.useState(ev?.day ?? inicial.dia);
-  const [diaFin, setDiaFin] = React.useState(ev?.endDay ?? "");
-  const [todoDia, setTodoDia] = React.useState(ev ? !ev.time : true);
-  const [hora, setHora] = React.useState(ev?.time ?? "");
-  const [horaFin, setHoraFin] = React.useState(ev?.endTime ?? "");
-  const [categoriaId, setCategoriaId] = React.useState(ev?.categoryId ?? "");
-  const [descripcion, setDescripcion] = React.useState(ev?.description ?? "");
-  const [esGlobal, setEsGlobal] = React.useState(!!ev?.isGlobal);
-  const [busy, setBusy] = React.useState(false);
-  const soloLectura = !puedeEditar;
-
-  async function guardar() {
-    if (soloLectura || !titulo.trim() || busy) return;
-    setBusy(true);
-    const payload: CrearEventoPayload = {
-      day: dia, endDay: diaFin || null,
-      time: todoDia ? null : (hora || null), endTime: todoDia ? null : (horaFin || null),
-      title: titulo.trim(), description: descripcion.trim() || null,
-      categoryId: categoriaId || null, isGlobal: esGlobal,
-    };
-    try {
-      // El centroId solo viaja al CREAR en otro centro; editar no cambia el centro del evento.
-      if (ev) await actualizarEvento(ev.id, payload);
-      else await crearEvento(centroIdCrear ? { ...payload, centerId: centroIdCrear } : payload);
-      toast.success(t("guardado"));
-      onSaved();
-    } catch (e) {
-      toast.error(apiErrorLabel(e, tRoot));
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function borrar() {
-    if (!ev || busy) return;
-    if (!window.confirm(t("borrarConfirm"))) return;
-    setBusy(true);
-    try {
-      await eliminarEvento(ev.id);
-      toast.success(t("borrado"));
-      onSaved();
-    } catch (e) {
-      toast.error(apiErrorLabel(e, tRoot));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{ev ? t("editarTitulo") : t("nuevoTitulo")}</DialogTitle>
-          <DialogDescription>{t("modalDesc")}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-3 text-sm">
-          <Campo label={t("field.titulo")}><Input value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={soloLectura} autoFocus /></Campo>
-          <div className="grid grid-cols-2 gap-3">
-            <Campo label={t("field.dia")}><DatePicker value={dia} onChange={setDia} disabled={soloLectura} /></Campo>
-            <Campo label={t("field.diaFin")}><DatePicker value={diaFin} onChange={setDiaFin} disabled={soloLectura} clearable /></Campo>
-          </div>
-          <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={todoDia} onChange={(e) => setTodoDia(e.target.checked)} disabled={soloLectura} />{t("field.todoDia")}</label>
-          {!todoDia && (
-            <div className="grid grid-cols-2 gap-3">
-              <Campo label={t("field.hora")}><TimePicker clearable value={hora} onChange={setHora} disabled={soloLectura} /></Campo>
-              <Campo label={t("field.horaFin")}><TimePicker clearable value={horaFin} onChange={setHoraFin} disabled={soloLectura} /></Campo>
-            </div>
-          )}
-          <Campo label={t("field.categoria")}>
-            <Select value={categoriaId} onValueChange={setCategoriaId} disabled={soloLectura}>
-              <SelectTrigger><SelectValue placeholder={t("field.selCategoria")} /></SelectTrigger>
-              <SelectContent>{cats.map((c) => <SelectItem key={c.id} value={c.id}>{catLabel(c)}</SelectItem>)}</SelectContent>
-            </Select>
-          </Campo>
-          <Campo label={t("field.descripcion")}><Textarea value={descripcion} onChange={(e) => setDescripcion(e.target.value)} rows={2} disabled={soloLectura} /></Campo>
-          <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={esGlobal} onChange={(e) => setEsGlobal(e.target.checked)} disabled={soloLectura} />{t("field.global")}</label>
-          <div className="flex justify-between gap-2 pt-1">
-            <div>{ev && puedeBorrar && <Button variant="outline" size="sm" onClick={borrar} disabled={busy} className="text-destructive">{tc("delete")}</Button>}</div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={onClose} disabled={busy}>{tc("cancel")}</Button>
-              {!soloLectura && <Button size="sm" onClick={guardar} disabled={busy || !titulo.trim()}>{busy ? tc("loading") : tc("save")}</Button>}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
   );
 }

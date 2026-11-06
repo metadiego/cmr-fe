@@ -8,9 +8,9 @@ import { toast } from "sonner";
 import { listDevoluciones, anularDevolucion, type Devolucion } from "@/lib/api/facturas";
 import type { Paginated } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
-import { useCentroGate } from "@/hooks/use-centro-gate";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useCan } from "@/hooks/use-can";
-import { CentroPicker } from "@/components/facturacion/centro-picker";
+import { invoiceDetailHref } from "@/lib/facturacion/invoice-clinics";
 import { toastError } from "@/lib/api/errors";
 import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
@@ -56,8 +56,9 @@ import {
 const ALL = "__all__";
 const ESTADOS = ["activa", "anulada"];
 const money = (v: unknown) => `$${Number(v ?? 0).toFixed(2)}`;
-// devolución, fecha, tipo, monto, estado, motivo, acciones — one loading bar per column.
-const LOADING_SHAPES: CellShape[] = ["short", "short", "text", "short", "badge", "long", "button"];
+// refund, date, type, amount, status, reason, [clinic], actions — one loading bar per column.
+const loadingShapes = (withClinic: boolean): CellShape[] =>
+  ["short", "short", "text", "short", "badge", "long", ...(withClinic ? (["badge"] as const) : []), "button"];
 
 function EstadoBadge({ estado }: { estado: string }) {
   const t = useTranslations("devoluciones.estado");
@@ -79,18 +80,16 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
   const [desde, setDesde] = React.useState("");
   const [hasta, setHasta] = React.useState("");
 
-  const gate = useCentroGate();
+  // Every clinic where the person reads invoices, narrowed by the filter (clinic-read-scope). Each refund
+  // carries its clinic; printing, opening its invoice and voiding it run in THAT clinic.
+  const filter = useClinicFilter("factura.read");
   const { state, refresh } = useResource<Paginated<Devolucion>>(
-    () =>
-      gate.centro
-        ? listDevoluciones({ q, status: estado, from: desde, to: hasta, context: contexto }, gate.centro)
-        : Promise.resolve({ items: [], pagination: { total: 0, page: 1, limit: 20 } }),
-    [q, estado, desde, hasta, gate.centro, contexto],
+    () => listDevoluciones({ q, status: estado, from: desde, to: hasta, context: contexto }, filter.choice),
+    [q, estado, desde, hasta, filter.choiceKey, contexto],
   );
   const rows = state.kind === "ok" ? state.data.items : [];
-  // The centre gate resolving counts as loading too: until then the placeholder fetch reads as empty.
-  const loading = gate.cargando || state.kind === "loading";
-  const detalleHref = (fid: string) => `/billing/invoices/${fid}${gate.centro ? `?centro=${gate.centro}` : ""}`;
+  const loading = state.kind === "loading";
+  const colCount = 7 + (filter.showColumn ? 1 : 0);
 
   const [anular, setAnular] = React.useState<Devolucion | null>(null);
   const [motivo, setMotivo] = React.useState("");
@@ -100,7 +99,7 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     if (!anular || !motivo.trim() || busy) return;
     setBusy(true);
     try {
-      await anularDevolucion(anular.invoiceId, anular.id, motivo.trim(), gate.centro);
+      await anularDevolucion(anular.invoiceId, anular.id, motivo.trim(), anular.clinicId ?? undefined);
       toast.success(t("anuladaOk"));
       setAnular(null);
       setMotivo("");
@@ -116,14 +115,15 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
     <PageContainer>
       <PageHeader title={esConsulta ? t("titleConsulta") : t("title")} />
 
-      {gate.sinCentro ? (
+      {!filter.loading && filter.centers.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
-      ) : gate.necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
       ) : (
         <>
-          {/* Center: switched from the app header's center selector (no per-list bar). */}
-          <ListToolbar search={q} onSearchChange={setQ} searchPlaceholder={t("searchPlaceholder")}>
+          <ListToolbar
+            search={q}
+            onSearchChange={setQ}
+            searchPlaceholder={t("searchPlaceholder")}
+          >
             <Select value={estado || ALL} onValueChange={(v) => setEstado(v === ALL ? "" : v)}>
               <SelectTrigger size="sm" className="w-[160px]"><SelectValue placeholder={t("allStates")} /></SelectTrigger>
               <SelectContent>
@@ -144,13 +144,14 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                 <TableHead className="text-right">{t("col.monto")}</TableHead>
                 <TableHead>{t("col.estado")}</TableHead>
                 <TableHead>{t("col.motivo")}</TableHead>
+                {filter.showColumn && <TableHead>{t("col.centro")}</TableHead>}
                 <TableHead className="text-right">{t("col.acciones")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading && <TableRowsSkeleton columns={LOADING_SHAPES} />}
-              {!loading && state.kind === "fail" && <TableError colSpan={7}>{tRoot("common.error")}</TableError>}
-              {!loading && state.kind === "ok" && rows.length === 0 && <TableEmpty colSpan={7}>{t("empty")}</TableEmpty>}
+              {loading && <TableRowsSkeleton columns={loadingShapes(filter.showColumn)} />}
+              {!loading && state.kind === "fail" && <TableError colSpan={colCount}>{tRoot("common.error")}</TableError>}
+              {!loading && state.kind === "ok" && rows.length === 0 && <TableEmpty colSpan={colCount}>{t("empty")}</TableEmpty>}
               {!loading && rows.map((d) => (
                 <TableRow key={d.id}>
                   <TableCell>
@@ -164,6 +165,11 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                   <TableCell className="text-right font-medium tabular-nums">{money(d.refundedAmount)}</TableCell>
                   <TableCell><EstadoBadge estado={String(d.status ?? "")} /></TableCell>
                   <TableCell className="max-w-[16rem] truncate text-muted-foreground" title={d.reason ?? ""}>{d.reason ?? "—"}</TableCell>
+                  {filter.showColumn && (
+                    <TableCell>
+                      <Badge variant="outline">{d.clinicName || filter.nameOf(d.clinicId) || "—"}</Badge>
+                    </TableCell>
+                  )}
                   <TableCell className="text-right">
                     <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
@@ -173,8 +179,8 @@ export function DevolucionesListView({ contexto }: { contexto: "general" | "cons
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.invoiceId}/returns/${d.id}/receipt${gate.centro ? `?centro=${gate.centro}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => router.push(detalleHref(d.invoiceId))}>{t("verFactura")}</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => router.push(`/billing/invoices/${d.invoiceId}/returns/${d.id}/receipt${d.clinicId ? `?centro=${encodeURIComponent(d.clinicId)}` : ""}`)}>{t("imprimir")}</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => router.push(invoiceDetailHref(d.invoiceId, d.clinicId))}>{t("verFactura")}</DropdownMenuItem>
                           {d.status === "activa" && can("factura.devolver") && (
                             <DropdownMenuItem variant="destructive" onSelect={(e) => { e.preventDefault(); setAnular(d); }}>{t("anular")}</DropdownMenuItem>
                           )}

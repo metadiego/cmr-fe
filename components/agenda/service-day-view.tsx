@@ -29,7 +29,7 @@ const ALL = "__all__";
 // filtros), más las HORAS con puestos libres/llenos del recurso a golpe de vista cuando se filtra un servicio.
 // Sustituye la vieja alta a ciegas: el clic en la fecha del calendario de servicios entra aquí. Planificar
 // abre el MISMO scheduler reutilizable con la fecha puesta.
-export function ServiceDayView({ fecha }: { fecha: string }) {
+export function ServiceDayView({ fecha, centro: centroPedido }: { fecha: string; centro?: string | null }) {
   const t = useTranslations("serviceDay");
   const tEstado = useTranslations("frontdesk.histEstadoVal");
   const tPlanner = useTranslations("therapyPlanner");
@@ -38,7 +38,7 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
   const tAgenda = useTranslations("agenda");
   const format = useFormatter();
 
-  const centro = useCentroPantalla("frontdesk.read", "frontdesk.create");
+  const centro = useCentroPantalla("frontdesk.read", "frontdesk.create", centroPedido);
   const [servicioId, setServicioId] = React.useState(ALL);
   const [estado, setEstado] = React.useState<EstadoSesion | typeof ALL>(ALL);
   const [pacienteQ, setPacienteQ] = React.useState("");
@@ -126,6 +126,8 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
   const next = shiftDay(fecha, +1);
   // `todayPR()`, no toISOString (UTC): after 8pm AST that's already tomorrow.
   const today = todayPR();
+  // Opened on a clinic (from the calendar): moving day by day stays on the one being looked at.
+  const enCentro = centroPedido && centro.centroActivo ? `?centro=${encodeURIComponent(centro.centroActivo)}` : "";
 
   return (
     <PageContainer>
@@ -142,14 +144,14 @@ export function ServiceDayView({ fecha }: { fecha: string }) {
         <h1 className="text-2xl font-bold capitalize">{dayTitle}</h1>
         <div className="flex items-center gap-1">
           <Button asChild variant="outline" size="icon" aria-label="prev">
-            <Link href={`/scheduling/appointments/services/${prev}`}>‹</Link>
+            <Link href={`/scheduling/appointments/services/${prev}${enCentro}`}>‹</Link>
           </Button>
           <Button asChild variant="outline" size="icon" aria-label="next">
-            <Link href={`/scheduling/appointments/services/${next}`}>›</Link>
+            <Link href={`/scheduling/appointments/services/${next}${enCentro}`}>›</Link>
           </Button>
           {fecha !== today && (
             <Button asChild variant="ghost" size="sm">
-              <Link href={`/scheduling/appointments/services/${today}`}>{tAgenda("today")}</Link>
+              <Link href={`/scheduling/appointments/services/${today}${enCentro}`}>{tAgenda("today")}</Link>
             </Button>
           )}
         </div>

@@ -1,4 +1,8 @@
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
+
+// Every report here reads the clinics in `choice` (null = every clinic where the person holds the
+// report's permission; undefined = the active one) and the BE answers ONE figure summing them.
 
 // Reporte de consumo de insumos (BE PR #83). Sale del snapshot congelado de facturas emitidas
 // del período/centro → refleja el consumo real por terapia. La respuesta no está tipada en el
@@ -20,14 +24,14 @@ export interface ConsumoInsumo {
 
 export type EstimadoFiltro = "true" | "false" | "all";
 
-// from/to = YYYY-MM-DD (requeridos). estimated default 'true'. Multi-tenant por centro (X-Tenant-ID).
-export function getConsumoInsumos(
+// from/to = YYYY-MM-DD (requeridos). estimated default 'true'.
+export async function getConsumoInsumos(
   params: { from: string; to: string; estimated?: EstimadoFiltro },
-  centroId?: string,
+  choice?: CenterChoice,
 ): Promise<ConsumoInsumo[]> {
   const sp = new URLSearchParams({ from: params.from, to: params.to });
   if (params.estimated) sp.set("estimated", params.estimated);
-  return apiFetch<ConsumoInsumo[]>(`/billing/reports/supplies-consumption?${sp.toString()}`, {}, centroId);
+  return apiFetch<ConsumoInsumo[]>(await oneCenterPath(`/billing/reports/supplies-consumption?${sp.toString()}`, choice), {}, tenantOf(choice));
 }
 
 // Ventas por GRUPO (reporte de gerencia, BE en prod). Mide MOVIMIENTO de producto por grupo de
@@ -80,13 +84,13 @@ export interface ReportePorGrupo {
   totals: ReporteTotales;
   reconciliation: ReporteCuadre;
 }
-export function getReportePorGrupo(
+export async function getReportePorGrupo(
   params: { from: string; to: string; context?: DivisionReporte },
-  centroId?: string,
+  choice?: CenterChoice,
 ): Promise<ReportePorGrupo> {
   const sp = new URLSearchParams({ from: params.from, to: params.to });
   if (params.context) sp.set("context", params.context); // omitido = las dos divisiones
-  return apiFetch<ReportePorGrupo>(`/billing/reports/group-by?${sp.toString()}`, {}, centroId);
+  return apiFetch<ReportePorGrupo>(await oneCenterPath(`/billing/reports/group-by?${sp.toString()}`, choice), {}, tenantOf(choice));
 }
 
 // Ventas por USUARIO (quién vende). Ordenado de mayor a menor. `name: null` = factura sin usuario
@@ -97,11 +101,11 @@ export interface ReporteUsuarioFila {
   name: string | null;
   total: number;
 }
-export function getReportePorUsuario(
+export async function getReportePorUsuario(
   params: { from: string; to: string; context?: DivisionReporte },
-  centroId?: string,
+  choice?: CenterChoice,
 ): Promise<ReporteUsuarioFila[]> {
   const sp = new URLSearchParams({ from: params.from, to: params.to });
   if (params.context) sp.set("context", params.context);
-  return apiFetch<ReporteUsuarioFila[]>(`/billing/reports/user-by?${sp.toString()}`, {}, centroId);
+  return apiFetch<ReporteUsuarioFila[]>(await oneCenterPath(`/billing/reports/user-by?${sp.toString()}`, choice), {}, tenantOf(choice));
 }

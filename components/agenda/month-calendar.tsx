@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import type { Festivo } from "@/lib/api/disponibilidad";
 import { monthMatrix, toISO, isFestivo } from "@/lib/agenda/calendar";
+import type { DayHoliday } from "@/lib/agenda/calendar-clinics";
 import { cn } from "@/lib/utils";
 import { LoadingRegion, PillsSkeleton } from "@/components/kit/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +16,8 @@ export interface AgendaEvent {
   hora: string | null; // null for day-based events (service sessions)
   label: string;
   color: string;
+  /** The row's clinic (short name), when the calendar shows several: printed before the label. */
+  clinic?: string;
 }
 
 // One big number per appointment type for a day (medical appointments month view, BE PR #440):
@@ -38,6 +41,7 @@ export function MonthCalendar({
   eventsByDate,
   countsByDate,
   festivos,
+  holidayOf,
   onDayClick,
   onEventClick,
   loading = false,
@@ -50,6 +54,9 @@ export function MonthCalendar({
   eventsByDate?: Map<string, AgendaEvent[]>;
   countsByDate?: Map<string, DayTypeCount[]>;
   festivos: Festivo[];
+  // Over several clinics a holiday is per clinic (lib/agenda/calendar-clinics.ts `dayHoliday`): when
+  // given, it decides the day's holiday instead of `festivos`.
+  holidayOf?: (iso: string) => DayHoliday | null;
   onDayClick: (iso: string) => void;
   onEventClick?: (id: string) => void;
   loading?: boolean;
@@ -72,7 +79,7 @@ export function MonthCalendar({
         {weeks.flat().map((date, idx) => {
           const iso = toISO(date);
           const inMonth = date.getMonth() === month0;
-          const fest = isFestivo(festivos, iso);
+          const fest = holidayOf ? holidayOf(iso) : festLabel(isFestivo(festivos, iso));
           const events = eventsByDate?.get(iso) ?? [];
           const counts = countsByDate?.get(iso) ?? [];
           return (
@@ -83,7 +90,7 @@ export function MonthCalendar({
               className={cn(
                 "flex min-h-28 flex-col justify-start border-r border-b p-1.5 text-left transition-colors hover:bg-accent/40",
                 !inMonth && "bg-muted/20 text-muted-foreground",
-                fest && "bg-destructive/10",
+                fest?.allClinics && "bg-destructive/10",
               )}
             >
               <div className="flex items-center justify-between">
@@ -96,8 +103,8 @@ export function MonthCalendar({
                   {date.getDate()}
                 </span>
                 {fest && (
-                  <span className="truncate text-[10px] text-destructive" title={fest.name}>
-                    {fest.name}
+                  <span className="truncate text-[10px] text-destructive" title={fest.label}>
+                    {fest.label}
                   </span>
                 )}
               </div>
@@ -146,9 +153,10 @@ export function MonthCalendar({
                     }}
                     className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-[11px] text-white"
                     style={{ backgroundColor: e.color }}
-                    title={`${e.hora ?? ""} ${e.label}`}
+                    title={[e.hora, e.clinic, e.label].filter(Boolean).join(" · ")}
                   >
                     {e.hora && <span className="font-mono">{e.hora}</span>}
+                    {e.clinic && <span className="shrink-0 rounded-sm bg-black/20 px-1 font-medium">{e.clinic}</span>}
                     <span className="truncate">{e.label}</span>
                   </div>
                 ))}
@@ -165,6 +173,11 @@ export function MonthCalendar({
       </div>
     </div>
   );
+}
+
+// One clinic's holiday (the `festivos` prop): tinted and named, as always.
+function festLabel(f: Festivo | null): DayHoliday | null {
+  return f ? { label: f.name, allClinics: true } : null;
 }
 
 /** Aside legend rows (colour square + name) while their catalog loads; same row markup as the loaded list. */

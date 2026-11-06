@@ -18,9 +18,9 @@ import { getMedicos, type Personal } from "@/lib/api/personal";
 import { getFestivos, type Festivo } from "@/lib/api/disponibilidad";
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
 import { useResource } from "@/hooks/use-resource";
-import { useCentroPantalla } from "@/hooks/use-centro-pantalla";
-import { CentroPantallaSelector } from "@/components/centro-pantalla-selector";
+import { useCalendarClinics } from "@/hooks/use-calendar-clinics";
 import { monthMatrix, toISO } from "@/lib/agenda/calendar";
+import { dayHoliday } from "@/lib/agenda/calendar-clinics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,7 +38,10 @@ import { PacienteFormSheet } from "@/components/clientes/paciente-form-sheet";
 
 const ALL = "__all__";
 
-// Medical appointments calendar (doctor + hora/horaFin). Call-center scheduling.
+// Medical appointments calendar (doctor + hora/horaFin). Call-center scheduling. Every clinic the person
+// reads appointments in, with a clinic filter (clinic-read-scope): the day numbers add up the clinics
+// shown. A day click opens the day view on ONE clinic (the single ticked one, else the active one), and
+// a booking runs there too (`useCalendarClinics`).
 export function MedicasCalendar() {
   const t = useTranslations("agenda");
   const tRoot = useTranslations();
@@ -53,18 +56,24 @@ export function MedicasCalendar() {
   const [newPatientOpen, setNewPatientOpen] = React.useState(false);
   const [q, setQ] = React.useState("");
 
-  // Selector de centro EN la pantalla (patrón único): agendar/leer en otro centro sin tocar la sesión.
-  const centro = useCentroPantalla("citas.read", "citas.create");
+  const clinics = useCalendarClinics("citas.read", "citas.create");
 
   const weeks = monthMatrix(year, month0);
   const desde = toISO(weeks[0][0]);
   const hasta = toISO(weeks[weeks.length - 1][6]);
 
   const tiposRes = useResource<TipoCita[]>(() => getTiposCita());
-  // Médicos del centro que se está MIRANDO (cuelga del centro): recargar al cambiarlo, o se agendaría con
-  // un médico que no está allí. Handoff selector-de-centro §«Todo lo que cuelga del centro se recarga».
-  const medicosRes = useResource<Personal[]>(() => getMedicos(centro.fetchCentroId), [centro.fetchCentroId]);
-  const festivosRes = useResource<Festivo[]>(() => getFestivos(year), [year]);
+  // The doctors of the clinics SHOWN (the filter): reloaded when it changes, so the doctor filter never
+  // offers someone of a clinic that is not on the calendar.
+  const medicosRes = useResource<Personal[]>(() => getMedicos(clinics.choice), [clinics.choiceKey]);
+  // Booking runs in ONE clinic: its doctors only. Asked for (when the modal opens) only if the calendar
+  // shows more than that clinic; otherwise it is the same list.
+  const ownDoctors = clinics.multiClinic && !!clinics.one && clinics.choiceKey !== clinics.one;
+  const medicosCrearRes = useResource<Personal[]>(
+    () => (modal && ownDoctors && clinics.one ? getMedicos(clinics.one) : Promise.resolve([])),
+    [!!modal, ownDoctors, clinics.one],
+  );
+  const festivosRes = useResource<Festivo[]>(() => getFestivos(year, clinics.choice), [year, clinics.choiceKey]);
   const tipos = React.useMemo(
     () => (tiposRes.state.kind === "ok" ? tiposRes.state.data : []),
     [tiposRes.state],
@@ -74,9 +83,10 @@ export function MedicasCalendar() {
     [medicosRes.state],
   );
   const festivos = festivosRes.state.kind === "ok" ? festivosRes.state.data : [];
+  const medicosCrear = !ownDoctors ? medicos : medicosCrearRes.state.kind === "ok" ? medicosCrearRes.state.data : [];
 
-  // Si al cambiar de centro el médico filtrado ya no existe allí, se trata como «todos» (sin resetear
-  // estado — lo prohíbe el React Compiler): así no se filtra por un médico de otro centro.
+  // Si al cambiar el filtro de centros el médico filtrado ya no está entre los mostrados, se trata como
+  // «todos» (sin resetear estado — lo prohíbe el React Compiler).
   const medicoEfectivo = medico === ALL || medicos.some((m) => m.id === medico) ? medico : ALL;
 
   // Month calendar: un número por (día × tipo), no cada cita (BE PR #440, 16-oct-2026) — antes era
@@ -87,9 +97,10 @@ export function MedicasCalendar() {
         from: desde,
         to: hasta,
         doctorId: medicoEfectivo === ALL ? undefined : medicoEfectivo,
-        centroId: centro.fetchCentroId,
+        // The clinics shown: the ticked ones, or none named = every clinic with citas.read.
+        centerIds: clinics.choice ?? undefined,
       }),
-    [desde, hasta, medicoEfectivo, centro.fetchCentroId],
+    [desde, hasta, medicoEfectivo, clinics.choiceKey],
   );
   const conteos = React.useMemo(() => (state.kind === "ok" ? state.data : []), [state]);
 
@@ -175,9 +186,7 @@ export function MedicasCalendar() {
           <Button variant="outline" onClick={goToday}>{t("today")}</Button>
           {/* Fixed min width: a short month name must not pull the filters left of where a long one puts them. */}
           <h2 className="min-w-52 px-1 text-xl font-semibold whitespace-nowrap">{monthLabel}</h2>
-          {/* Selector de centro EN la pantalla: solo si hay más de uno; chip «Solo lectura» si no puede agendar allí. */}
-          <CentroPantallaSelector estado={centro} />
-          {/* The doctor list hangs off the centre, so a centre change shows the placeholder again. */}
+          {/* The doctor list hangs off the clinics shown, so a filter change shows the placeholder again. */}
           {medicosRes.state.kind === "loading" ? (
             <ControlSkeleton className="w-52" />
           ) : (
@@ -194,11 +203,13 @@ export function MedicasCalendar() {
           </Select>
           )}
           <div className="ml-auto flex items-center gap-2">
-            {/* «Nueva Cita» según el permiso de creación EN el centro elegido, no según «es mi centro». */}
-            {centro.puedeEscribir && (
+            {/* «Nueva Cita» in ONE clinic (the single ticked one, else the active one), by the create
+                permission THERE; it says which when the person reads several. On «Ambos» the form asks. */}
+            {clinics.canCreate && (
               <Button onClick={() => setModal({ fecha: toISO(new Date()) })}>
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={2} data-icon="inline-start" />
                 {t("new")}
+                {clinics.showColumn && clinics.bookIn && <span className="opacity-70">· {clinics.shortOf(clinics.oneName)}</span>}
               </Button>
             )}
           </div>
@@ -216,10 +227,12 @@ export function MedicasCalendar() {
             countsByDate={countsByDate}
             loading={state.kind === "loading"}
             festivos={festivos}
+            holidayOf={(iso) => dayHoliday(festivos, iso, clinics.shownIds, clinics.shortOf)}
             // Un número por tipo ya no es una cita individual que editar — clic en el día sigue
             // llevando al día (donde sí se edita cada cita una por una; el rol `citas` llega ahí
             // igual, handoff agenda-abrir-la-cita, sin cambios).
-            onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}`)}
+            // The day view is ONE clinic: named in the link (`?centro=`), shown in its picker.
+            onDayClick={(iso) => router.push(`/scheduling/appointments/${iso}${clinics.dayQuery}`)}
           />
         )}
       </div>
@@ -280,9 +293,9 @@ export function MedicasCalendar() {
           fecha={modal.fecha}
           cita={modal.cita}
           pacienteInicial={modal.paciente}
-          centroId={centro.centroActivo || undefined}
+          centroId={clinics.bookIn}
           tipos={tipos}
-          medicos={medicos}
+          medicos={medicosCrear}
           canal="callcenter"
           onOpenChange={(o) => !o && setModal(null)}
           onSaved={refresh}

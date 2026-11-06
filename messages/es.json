@@ -4,6 +4,13 @@
     "noProfileTitle": "Tu cuenta no tiene un perfil asignado",
     "noProfileBody": "Iniciaste sesión, pero un administrador aún no ha enlazado tu cuenta a un perfil con permisos. Contacta a un administrador para que te lo asigne."
   },
+  "reports": {
+    "clinicScope": {
+      "many": "{count, plural, one {# centro} other {# centros}}",
+      "total": "{label} ({scope})",
+      "covers": "Cubre: {scope}"
+    }
+  },
   "ehrIntegration": {
     "title": "Enganche con el EHR",
     "description": "Al marcar Presente, el paciente se registra también en el EHR. Consultas y Servicios se encienden por separado, por centro.",
@@ -897,6 +904,7 @@
       "protocolChange": "Cambio de protocolo"
     },
     "hub": {
+      "clinic": "Centro",
       "alerts": "Alertas y precauciones",
       "allergies": "Alergias",
       "implants": "Implantes y dispositivos",
@@ -1207,7 +1215,8 @@
     "paquetesVenta": "Paquetes de venta",
     "inventory_live_stock": "Stock live (balanzas)",
     "ahora_mismo": "Ahora mismo",
-    "productosExonerados": "Productos exonerados (IVU)"
+    "productosExonerados": "Productos exonerados (IVU)",
+    "bothCenters": "AMBOS"
   },
   "admin": {
     "title": "Administración",
@@ -1902,8 +1911,6 @@
     "colAreas": "Áreas",
     "volver": "Volver",
     "generar": "Generar",
-    "removeStep": "Quitar {step}",
-    "formatoTherapyCount": "Terapias a imprimir",
     "formatoError": "No se pudo cargar el formato",
     "formatoHiltTitle": "Terapia HILT",
     "formatoMlsTitle": "Terapia MLS",
@@ -2058,7 +2065,9 @@
       "vacio": "Ningún médico libre ahora mismo."
     },
     "patientNotFound": "Ese paciente no existe en este centro.",
-    "serviceNotFound": "Algún servicio elegido no existe en este centro."
+    "serviceNotFound": "Algún servicio elegido no existe en este centro.",
+    "removeStep": "Quitar {step}",
+    "formatoTherapyCount": "Terapias a imprimir"
   },
   "programarCitas": {
     "title": "Programar citas",
@@ -2239,9 +2248,12 @@
       "cienDescuento": "100% descuento",
       "cobradas": "cobradas",
       "pagina": "Página",
-      "rango": "Rango"
+      "rango": "Rango",
+      "centros": "Total ({n} centros)"
     },
-    "live": "En vivo"
+    "live": "En vivo",
+    "nuevaVentaEn": "Nueva venta en {centro}",
+    "colCentro": "Centro"
   },
   "facturacionTabs": {
     "facturas": "Facturas",
@@ -2830,8 +2842,8 @@
       "recordLabel": "Record",
       "cambiarPaciente": "Cambiar",
       "lista": "Lista de precios",
-      "pickCentroTitle": "Selecciona el centro",
-      "pickCentroGo": "Facturar aquí",
+      "pickCentroTitle": "¿En qué centro trabajas?",
+      "pickCentroHelp": "Esta pantalla muestra un centro a la vez. Elige con cuál trabajar.",
       "centroLabel": "Centro:",
       "cambiarCentro": "Cambiar centro",
       "medico": "Médico tratante",
@@ -3428,7 +3440,8 @@
       "estado": "Estado",
       "destino": "Destino",
       "fecha": "Fecha",
-      "cuerpo": "Cuerpo"
+      "cuerpo": "Cuerpo",
+      "centro": "Centro"
     },
     "estadoNotif": {
       "pendiente": "Pendiente",
@@ -3548,7 +3561,8 @@
       "monto": "Monto",
       "estado": "Estado",
       "motivo": "Motivo",
-      "acciones": "Acciones"
+      "acciones": "Acciones",
+      "centro": "Centro"
     }
   },
   "caja": {
@@ -3588,6 +3602,9 @@
       "empty": "No hay denominaciones configuradas.",
       "saving": "Guardando…",
       "saved": "Conteo guardado",
+      "hint": "Selecciona un cajero para habilitar el conteo.",
+      "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo).",
+      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros.",
       "saveError": "No se pudo guardar el conteo; se reintentará al cambiar algo.",
       "managerCount": "Conteo del gerente",
       "managerCountHint": "Este conteo único manda sobre la suma de los cajeros.",
@@ -3595,10 +3612,7 @@
       "cashiersSumHint": "Solo lectura: suma de los conteos de cada cajero.",
       "countMyself": "Hacer un solo conteo",
       "backToSum": "Volver a la suma de los cajeros",
-      "backToSumConfirm": "Se borrará el conteo del gerente y se usará la suma de los cajeros.",
-      "hint": "Selecciona un cajero para habilitar el conteo.",
-      "pastLocked": "Editar fechas anteriores requiere permiso (caja.retroactivo).",
-      "consolidatedHint": "Conteo consolidado (solo lectura): suma de todos los cajeros."
+      "backToSumConfirm": "Se borrará el conteo del gerente y se usará la suma de los cajeros."
     },
     "petty": "Caja chica (petty)",
     "summary": {
@@ -4060,6 +4074,7 @@
       "historialTitulo": "Cambios anteriores",
       "sinHistorial": "Sin cambios de protocolo.",
       "cargando": "Cargando…",
+      "enCentro": "En {centro}",
       "cambioResumen": "{cerrados} cerrado(s) · {creados} nuevo(s)",
       "nuevoTitulo": "Nuevo cambio"
     }
@@ -4357,7 +4372,8 @@
       "categoria": "Categoría",
       "selCategoria": "Elige categoría",
       "descripcion": "Descripción",
-      "global": "Evento global (todos los centros)"
+      "global": "Evento global (todos los centros)",
+      "centro": "Centro"
     },
     "proximos": "Próximos eventos",
     "anterior": "Anterior",
@@ -4587,7 +4603,6 @@
     "buscar": "Buscar por nombre o cargo…",
     "cargando": "Cargando…",
     "vacio": "Sin personal.",
-    "elegirCentro": "Elige un centro para ver su personal.",
     "elegirPersona": "Elige una persona de la lista.",
     "sinCargo": "Sin cargo",
     "sinCuenta": "sin cuenta de acceso",
@@ -4655,6 +4670,8 @@
     "ehrGuardar": "Guardar",
     "ehrVinculado": "Vinculado con el EHR.",
     "ehrActualizado": "Rol del EHR actualizado.",
+    "centroOrigen": "Centro de origen: {nombre}",
+    "centrosColumna": "Centro(s)",
     "extension": "Extensión (central telefónica)"
   },
   "acciones": {
@@ -4695,6 +4712,7 @@
     "issuedOn": "Expedido el {fecha}."
   },
   "medicoHub": {
+    "clinic": "Centro",
     "back": "Personal",
     "loading": "Cargando…",
     "active": "Activo",
@@ -4869,9 +4887,7 @@
     "pickPatient": "Elige un paciente de la lista para ver sus servicios.",
     "record": "Record",
     "firstAt": "primera cita {time}",
-    "markPendingPresent": "Marcar presente (pendientes: {n})",
     "markPresent": "No presente",
-    "markPresentHint": "Clic para marcar presente",
     "undoPresent": "Deshacer",
     "sessionsCount": "{n, plural, one {# sesión} other {# sesiones}}",
     "vitalsBy": "Vitales: {name}",
@@ -4916,7 +4932,9 @@
     "bookService": "Citar servicio",
     "bookConsultation": "Citar consulta",
     "cancelled": "Cancelada",
-    "presentAt": "Presente {time}"
+    "presentAt": "Presente {time}",
+    "markPendingPresent": "Marcar presente (pendientes: {n})",
+    "markPresentHint": "Clic para marcar presente"
   },
   "salesPackages": {
     "title": "Paquetes de venta",
@@ -5026,6 +5044,11 @@
     "notMovable": "Esta cita ya no está abierta y no se puede mover desde aquí.",
     "noneThatDay": "No queda cupo de seguimiento ese día.",
     "freeDay": "Hay cupo de seguimiento ese día ({n} libres)."
+  },
+  "createClinic": {
+    "label": "Centro",
+    "placeholder": "Elegir centro…",
+    "help": "Se crea en este centro."
   },
   "rightNow": {
     "title": "Ahora mismo",

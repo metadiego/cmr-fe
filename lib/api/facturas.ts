@@ -1,6 +1,6 @@
 import type { components } from "./schema";
 import type { Paginated } from "./types";
-import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchPaged } from "./client";
 
 // Facturación (BE PR #39+). Tenant-scoped: pasar centroId (X-Tenant-ID) en escrituras.
 export type Factura = components["schemas"]["FacturaEntity"];
@@ -113,75 +113,6 @@ export function listFacturas(
   if (patientId) sp.set("patientId", patientId);
   if (context) sp.set("context", context);
   return apiFetchPaged<Factura>(`/invoices?${sp.toString()}`, {}, centroId);
-}
-
-// Lista metadata-driven de facturación (GET /invoices/board): columnas RESUELTAS por el BE
-// (fac_numero/fac_fecha/fac_paciente/fac_medico/fac_estado/fac_total/fac_medio/fac_acciones) + filas
-// con esos valores YA resueltos (nombre de paciente, etc.) — a diferencia de GET /invoices (entidad cruda).
-// Es la fuente correcta para la LISTA de facturas. context=general excluye consultas.
-// OJO: `columns`/`rows` son bolsas OPACAS (el BE traduce la CLAVE columnas→columns/filas→rows pero NO su
-// CONTENIDO): las claves internas de la columna (clave/rol/tipo) siguen en español a propósito (motor de tableros).
-export interface FacturaTableroColumna {
-  clave: string;
-  labelKey: string;
-  rol?: string | null;
-  // Columnas editables inline (fac_medico/fac_usuario): el BE las declara select con writeBinding
-  // (factura.medicoId / factura.usuarioId) y optionsSource; la fila trae `<clave>__valor` = el id crudo
-  // (perfilId/medicoId). Se escribe por PUT /invoices/:id/header. Handoff usuario-de-la-factura.
-  tipo?: string;
-  editable?: boolean;
-  render?: { writeBinding?: string; optionsSource?: string; [k: string]: unknown } | null;
-}
-export type FacturaTableroFila = { id: string } & Record<string, unknown>;
-export interface FacturaTablero {
-  columns: FacturaTableroColumna[];
-  rows: FacturaTableroFila[];
-}
-export function getFacturasTablero(
-  params: ListFacturasParams = {},
-  centroId?: string,
-): Promise<FacturaTablero> {
-  const { page = 1, limit = 20, q, status, from, to, context } = params;
-  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (q?.trim()) sp.set("q", q.trim());
-  if (status) sp.set("status", status);
-  if (from) sp.set("from", from);
-  if (to) sp.set("to", to);
-  if (context) sp.set("context", context);
-  return apiFetch<FacturaTablero>(`/invoices/board?${sp.toString()}`, {}, centroId);
-}
-
-// Resumen del RANGO filtrado (total del servidor, no de la página): importe/exentas/cobradas del
-// `meta.resumen` de GET /invoices + el conteo total del `meta.pagination`. Mismos filtros que la lista.
-// La lista pinta filas resueltas vía /invoices/board (sin resumen); este es el único que trae el
-// total del rango — no sumar la página (número falso si hay paginación). Handoff facturación-totales.
-// `meta` es una bolsa OPACA: el BE NO traduce su contenido → `resumen.importe/exentas/cobradas` van en español.
-export interface FacturasResumen {
-  importe: number;
-  exentas: number;
-  cobradas: number;
-  total: number; // nº de facturas del rango (meta.pagination.total)
-}
-export async function getFacturasResumen(
-  params: ListFacturasParams = {},
-  centroId?: string,
-): Promise<FacturasResumen> {
-  const { q, status, from, to, context } = params;
-  // limit=1: solo interesa el meta (resumen + total); no traer filas de más.
-  const sp = new URLSearchParams({ page: "1", limit: "1" });
-  if (q?.trim()) sp.set("q", q.trim());
-  if (status) sp.set("status", status);
-  if (from) sp.set("from", from);
-  if (to) sp.set("to", to);
-  if (context) sp.set("context", context);
-  const env = await apiFetchEnvelope<unknown>(`/invoices?${sp.toString()}`, {}, centroId);
-  const r = env.meta.resumen;
-  return {
-    importe: Number(r?.importe ?? 0),
-    exentas: Number(r?.exentas ?? 0),
-    cobradas: Number(r?.cobradas ?? 0),
-    total: Number(env.meta.pagination?.total ?? 0),
-  };
 }
 
 // Crear/obtener la factura BORRADOR de una cita (idempotente: si existe activa,
@@ -465,7 +396,7 @@ export function emailFactura(facturaId: string, payload: { email?: string; body?
 // Anular (mismo día, error) ≠ Devolver (día siguiente/24h). El actor lo sella el BE (RequestContext).
 // displayNumber = correlativo PROPIO de la devolución (p. ej. "D-000001"), secuencia independiente de
 // facturas (BE PR #113). Lo proyecta el BE en la lista/detalle aunque no esté en la entidad base.
-export type Devolucion = components["schemas"]["DevolucionEntity"] & { displayNumber?: string | null };
+export type Devolucion = components["schemas"]["DevolucionEntity"] & { displayNumber?: string | null; clinicName?: string | null };
 export type DevolverPayload = components["schemas"]["DevolverDto"];
 
 // Recibo PROPIO de una devolución (documento "Devolución #D-000001", no la factura). El BE no tipó la
@@ -538,28 +469,6 @@ export function getPrecioBase(productoId: string, centroId?: string): Promise<{ 
   );
 }
 
-// Lista GLOBAL de devoluciones (por centro), paginada + filtros. Cada fila = DevolucionEntity
-// (invoiceNumber incluido). Multi-tenant por X-Tenant-ID.
-export interface ListDevolucionesParams {
-  page?: number;
-  limit?: number;
-  q?: string; // nº de factura
-  status?: string; // activa|anulada
-  from?: string;
-  to?: string;
-  context?: "general" | "consulta"; // filtra por tipo de factura de la devolución
-}
-export function listDevoluciones(params: ListDevolucionesParams = {}, centroId?: string): Promise<Paginated<Devolucion>> {
-  const { page = 1, limit = 20, q, status, from, to, context } = params;
-  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (q?.trim()) sp.set("q", q.trim());
-  if (status) sp.set("status", status);
-  if (from) sp.set("from", from);
-  if (to) sp.set("to", to);
-  if (context) sp.set("context", context);
-  return apiFetchPaged<Devolucion>(`/billing/refunds?${sp.toString()}`, {}, centroId);
-}
-
 export function registrarPago(facturaId: string, payload: RegistrarPagoPayload, centroId?: string): Promise<unknown> {
   return apiFetch(`/invoices/${facturaId}/payments`, { method: "POST", body: JSON.stringify(payload) }, centroId);
 }
@@ -598,3 +507,5 @@ export function anularPago(
 // Series de numeración (SerieNumeracion + get/actualizar/establecerArranque) extraídas a
 // ./facturas-series por el techo de tamaño (max-lines); se re-exportan para no tocar consumidores.
 export * from "./facturas-series";
+// The list reads that span clinics (invoice board, range summary, refunds) live in ./facturas-listas.
+export * from "./facturas-listas";

@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PrinterIcon, Download04Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 import { getConsumoInsumos, type ConsumoInsumo, type EstimadoFiltro } from "@/lib/api/facturacion-reportes";
 import { useResource } from "@/hooks/use-resource";
+import { useReportClinics } from "@/hooks/use-report-clinics";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -30,7 +30,9 @@ const num = (v: number) => new Intl.NumberFormat("en-US", { maximumFractionDigit
 export default function ConsumoInsumosPage() {
   const t = useTranslations("inventario.consumoReporte");
   const tc = useTranslations("common");
-  const centro = useSearchParams().get("centro") ?? undefined;
+  const tRoot = useTranslations();
+  // Every clinic with estadisticas.read (a ?centro= link preselects one); the BE sums them per supply.
+  const clinics = useReportClinics("estadisticas.read");
 
   const hoy = new Date();
   const primero = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -41,8 +43,8 @@ export default function ConsumoInsumosPage() {
   const [query, setQuery] = React.useState({ from: isoDay(primero), to: isoDay(hoy), estimated: "true" as EstimadoFiltro });
 
   const { state } = useResource<ConsumoInsumo[]>(
-    () => getConsumoInsumos(query, centro),
-    [query.from, query.to, query.estimated, centro],
+    () => (clinics.ready ? getConsumoInsumos(query, clinics.choice) : new Promise<ConsumoInsumo[]>(() => {})),
+    [query.from, query.to, query.estimated, clinics.ready, clinics.choiceKey],
   );
   const rows = state.kind === "ok" ? state.data : [];
   const totalUnidades = rows.reduce((s, r) => s + (r.quantity ?? 0), 0);
@@ -119,6 +121,9 @@ export default function ConsumoInsumosPage() {
           </Select>
         </label>
         <Button onClick={buscar} className="h-9">{t("search")}</Button>
+        {clinics.scopeLabel && (
+          <div className="ml-auto self-center text-sm text-muted-foreground">{tRoot("reports.clinicScope.covers", { scope: clinics.scopeLabel })}</div>
+        )}
       </div>
 
       {/* KPIs */}

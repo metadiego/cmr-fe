@@ -2,8 +2,9 @@ import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 import { env } from "@/lib/env";
-import { getActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll } from "@/lib/tenant";
 import { handleSessionExpired } from "@/lib/auth/session-expired";
+import { oneCenterIds, type CenterChoice } from "@/lib/clinic-read-scope";
 import {
   ApiError,
   type ApiEnvelope,
@@ -148,7 +149,7 @@ export async function apiRequest<T>(
   return envelope == null ? (undefined as T) : envelope.data;
 }
 
-// Like apiRequest but keeps meta.pagination, returning { items, pagination }.
+// Like apiRequest but keeps meta.pagination (and meta.clinicScope), returning { items, pagination, clinicScope }.
 // Falls back to a single-page shape when the BE omits meta.pagination.
 export async function apiRequestPaged<T>(
   path: string,
@@ -162,7 +163,7 @@ export async function apiRequestPaged<T>(
     page: 1,
     limit: items.length,
   };
-  return { items, pagination };
+  return { items, pagination, clinicScope: envelope?.meta.clinicScope };
 }
 
 // Convenience for versioned feature endpoints: apiFetch("/api-keys") → /api/v2/api-keys.
@@ -217,3 +218,21 @@ export function apiFetchPagedV1<T>(
 ): Promise<Paginated<T>> {
   return apiRequestPaged<T>(`/api/v1${path}`, init, tenant);
 }
+
+// `path` of a read with its centers named as `?centerIds=` (lib/clinic-read-scope.ts `oneCenterIds`):
+// the picked `tenant`, a clinic filter's list, nothing for every center in scope (`null` or `[]`), else
+// the center X-Tenant-ID carries — or, with the top bar on «Ambos», nothing. The BE reads every center in
+// scope when none is named.
+export async function oneCenterPath(path: string, tenant?: CenterChoice): Promise<string> {
+  const active = getActiveCentro();
+  let sessionCenter: string | null = null;
+  if (tenant === undefined && !active) {
+    const { data } = await createClient().auth.getSession();
+    sessionCenter = (data.session?.user.app_metadata?.clinic_id as string | undefined) ?? null;
+  }
+  const ids = oneCenterIds(tenant, active, sessionCenter, isClinicViewAll());
+  if (!ids) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}centerIds=${ids.map(encodeURIComponent).join(",")}`;
+}
+
+export { tenantOf } from "@/lib/clinic-read-scope";

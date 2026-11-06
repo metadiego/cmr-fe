@@ -1,5 +1,6 @@
 import type { components } from "./schema";
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath, tenantOf } from "./client";
+import type { CenterChoice } from "@/lib/clinic-read-scope";
 
 // Transferencias de inventario entre centros con recepción/aprobación PARCIAL.
 // Contrato verificado contra prod 2026-07-13 (reversible: crear→detalle→recibir/rechazar).
@@ -28,7 +29,8 @@ export interface TransferenciaItem {
   receivedQuantity: number | string | null;
 }
 export interface TransferenciaDetalle {
-  transfer: Transferencia;
+  // The BE resolves both clinic names in the detail too (detalle-de-transferencia.ts).
+  transfer: Transferencia & { originName?: string | null; destinationName?: string | null };
   items: TransferenciaItem[];
 }
 
@@ -42,13 +44,15 @@ export interface DestinoTransferencia {
   name: string;
   warehouses: Array<{ id: string; name: string }>;
 }
-export function getDestinosTransferencia(): Promise<DestinoTransferencia[]> {
-  return apiFetch<DestinoTransferencia[]>(`/inventory/transfers/destinations`);
+// `origin`: the clinic it ships from (X-Tenant-ID); undefined = the working clinic.
+export function getDestinosTransferencia(origin?: string): Promise<DestinoTransferencia[]> {
+  return apiFetch<DestinoTransferencia[]>(`/inventory/transfers/destinations`, {}, origin);
 }
 
-// Pendientes del centro activo (como origen o destino).
-export function listTransferenciasPendientes(): Promise<Transferencia[]> {
-  return apiFetch<Transferencia[]>(`/inventory/transfers/pending`);
+// Pending transfers with either end in a clinic where the person holds inventario.read (clinic-read-scope;
+// `choice` null = all of them, ids = only those). No clinic names here: resolve them in the FE.
+export async function listTransferenciasPendientes(choice: CenterChoice = null): Promise<Transferencia[]> {
+  return apiFetch<Transferencia[]>(await oneCenterPath(`/inventory/transfers/pending`, choice), undefined, tenantOf(choice));
 }
 
 // HISTORIAL: todas las transferencias del centro (enviadas + recibidas), recientes primero (tope 200),
@@ -60,25 +64,32 @@ export interface TransferenciaHistorial extends Transferencia {
   originName?: string | null;
   destinationName?: string | null;
 }
-export function listTransferencias(
+// `choice`: as in listTransferenciasPendientes; `address` is relative to the clinics read.
+export async function listTransferencias(
   params: { status?: string; address?: "enviadas" | "recibidas" } = {},
+  choice: CenterChoice = null,
 ): Promise<TransferenciaHistorial[]> {
   const sp = new URLSearchParams();
   if (params.status) sp.set("status", params.status);
   if (params.address) sp.set("address", params.address);
   const qs = sp.toString();
-  return apiFetch<TransferenciaHistorial[]>(`/inventory/transfers${qs ? `?${qs}` : ""}`);
+  return apiFetch<TransferenciaHistorial[]>(
+    await oneCenterPath(`/inventory/transfers${qs ? `?${qs}` : ""}`, choice),
+    undefined,
+    tenantOf(choice),
+  );
 }
 export function getTransferencia(id: string): Promise<TransferenciaDetalle> {
   return apiFetch<TransferenciaDetalle>(`/inventory/transfers/${id}`);
 }
+// Sent from the ORIGIN clinic (X-Tenant-ID = `payload.sourceClinicId`): the permission is checked there.
 export function crearTransferencia(
   payload: CrearTransferenciaPayload,
 ): Promise<Transferencia> {
   return apiFetch<Transferencia>(`/inventory/transfers`, {
     method: "POST",
     body: JSON.stringify(payload),
-  });
+  }, payload.sourceClinicId || undefined);
 }
 // Recibir/Aprobar — SOLO el centro DESTINO (el BE responde 403 si no). `items` omitido =
 // recepción TOTAL; con items = parcial (0 ≤ recibida ≤ enviada). politicaRemanente default devolver_origen.

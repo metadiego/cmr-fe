@@ -15,12 +15,13 @@ import {
   type CitaConflicto,
   type CuposLibres,
 } from "@/lib/api/citas";
-import type { Personal } from "@/lib/api/personal";
+import { getMedicos, type Personal } from "@/lib/api/personal";
 import { parseDayUTC } from "@/lib/format/fecha";
 import type { Paciente } from "@/lib/api/pacientes";
 import { getMyCentros, type Centro } from "@/lib/api/centers";
 import { SlotPicker, type Slot, type SlotVariant } from "@/components/agenda/slot-picker";
-import { getActiveCentro, setActiveCentro } from "@/lib/tenant";
+import { getActiveCentro, isClinicViewAll, setActiveCentro } from "@/lib/tenant";
+import { createClinicReady, formCreateClinic } from "@/lib/create-clinic";
 import { toastError } from "@/lib/api/errors";
 import { datosFaltantesDe } from "@/lib/api/ehr-gate";
 import type { EhrReadinessField } from "@/lib/api/ehr-integration";
@@ -64,7 +65,7 @@ export function CitaModal({
   horaInicial,
   tipoCitaIdInicial,
   tipos,
-  medicos,
+  medicos: medicosProp,
   canal,
   onOpenChange,
   onSaved,
@@ -106,9 +107,20 @@ export function CitaModal({
   const centrosRes = useResource<Centro[]>(() => getMyCentros());
   const centros = centrosRes.state.kind === "ok" ? centrosRes.state.data : [];
   const needsCentro = !isEdit && centros.length > 1;
-  const [centroSel, setCentroSel] = React.useState(centroId ?? "");
-  const effectiveCentro =
-    centroSel || cita?.clinicId || centroId || getActiveCentro() || (centros.length === 1 ? centros[0].id : "");
+  const [centroSel, setCentroSel] = React.useState("");
+  // The record's clinic on edit, else the one it was opened in, else the top bar's; on «Ambos» with no
+  // clinic given it starts empty and asks (lib/create-clinic.ts).
+  const viewAll = isClinicViewAll();
+  const effectiveCentro = formCreateClinic({
+    picked: centroSel, given: cita?.clinicId || centroId, active: getActiveCentro(), centers: centros.map((c) => c.id), viewAll,
+  });
+  // `medicos` are the clinic the caller opened it in; a clinic picked here lists its own doctors.
+  const otherClinic = !!effectiveCentro && effectiveCentro !== centroId;
+  const medicosRes = useResource<Personal[] | null>(
+    () => (otherClinic ? getMedicos(effectiveCentro) : Promise.resolve(null)),
+    [otherClinic, effectiveCentro],
+  );
+  const medicos = otherClinic ? (medicosRes.state.kind === "ok" ? (medicosRes.state.data ?? []) : []) : medicosProp;
 
   // La fecha es EDITABLE dentro del modal (antes era de solo lectura): se puede citar para otro día sin salir.
   // Nace con la que trae el contexto (la vista del día / la cita en edición). Handoff bug-agenda-sin-selector §1.
@@ -237,7 +249,7 @@ export function CitaModal({
     !!hora &&
     !!horaFin &&
     (!medicoRequired || !!medicoId) &&
-    (!needsCentro || !!effectiveCentro) &&
+    (isEdit || createClinicReady(effectiveCentro, centros.length, viewAll)) &&
     !submitting;
 
   async function avisarReagendo(fromId: string) {

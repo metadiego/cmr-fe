@@ -7,10 +7,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon } from "@hugeicons/core-free-icons";
 
 import { listPacientes, type Paciente } from "@/lib/api/pacientes";
-import { getActiveCentro } from "@/lib/tenant";
-import { getCentrosDondePuedo, type Centro } from "@/lib/api/centers";
-import { patientCenterScope, patientRecordHref } from "@/lib/pacientes/center-scope";
-import { CenterFilter } from "@/components/kit/center-filter";
+import { patientRecordHref } from "@/lib/pacientes/center-scope";
+import { useClinicFilter } from "@/hooks/use-clinic-filter";
 import { useResource } from "@/hooks/use-resource";
 import type { Paginated } from "@/lib/api/types";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -42,30 +40,18 @@ export default function ClientesPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
   const [accionesFor, setAccionesFor] = React.useState<Paciente | null>(null);
 
-  // Every clinic the person may read patients in, in one list (lib/pacientes/center-scope.ts): one clinic
-  // → pre-filtered to it; more → all by default, a filter to narrow them and a clinic column.
-  const centrosRes = useResource<Centro[]>(() => getCentrosDondePuedo("pacientes.read"));
-  const centros = React.useMemo(() => (centrosRes.state.kind === "ok" ? centrosRes.state.data : []), [centrosRes.state]);
-  const centroName = React.useMemo(() => new Map(centros.map((c) => [c.id, c.name])), [centros]);
-  const [selected, setSelected] = React.useState<string[] | null>(null);
-  const scope = patientCenterScope(centros.map((c) => c.id), selected);
-  const sesion = getActiveCentro();
+  // The clinics the top bar shows (Bayamón / Caguas / Ambos) among those where the person reads patients;
+  // the Centro column always shows (docs/specs/selector-de-centros-arriba.md).
+  const clinics = useClinicFilter("pacientes.read");
+  const centroName = React.useMemo(() => new Map(clinics.centers.map((c) => [c.id, c.name])), [clinics.centers]);
+  const chosen = clinics.choice ?? undefined;
 
-  // Server-side search: the BE filters by name/docId/phone/etc via `q`. Waits (a pending promise keeps
-  // the table in its loading state) until the clinics are known, so it never flashes the session
-  // clinic's list before the full one.
+  // Server-side search: the BE filters by name/docId/phone/etc via `q`.
   const { state, reload } = useResource<Paginated<Paciente>>(
-    () =>
-      centrosRes.state.kind === "loading"
-        ? new Promise<never>(() => {})
-        : listPacientes({ page, limit: LIMIT, q, centerIds: scope.centerIds }),
-    [page, q, scope.centerIds, centrosRes.state.kind],
+    () => listPacientes({ page, limit: LIMIT, q, centerIds: chosen }),
+    [page, q, clinics.choiceKey],
   );
-
-  function onCentersChange(next: string[] | null) {
-    setPage(1);
-    setSelected(next);
-  }
+  const scope = { showColumn: clinics.showColumn };
 
   function onSearch(value: string) {
     setPage(1);
@@ -87,7 +73,6 @@ export default function ClientesPage() {
           search={q}
           onSearchChange={onSearch}
           searchPlaceholder={t("searchPlaceholder")}
-          filters={scope.showFilter && <CenterFilter centers={centros} selected={selected} onChange={onCentersChange} />}
         >
           <Can permiso="pacientes.create">
             <Button onClick={() => setCreateOpen(true)}>
@@ -134,7 +119,7 @@ export default function ClientesPage() {
               <TableRow
                 key={p.id}
                 className="cursor-pointer"
-                onClick={() => router.push(patientRecordHref(p, sesion))}
+                onClick={() => router.push(patientRecordHref(p))}
               >
                 <TableCell className="w-10 text-right tabular-nums text-muted-foreground">
                   {(page - 1) * LIMIT + i + 1}
@@ -157,7 +142,7 @@ export default function ClientesPage() {
                 </TableCell>
                 {scope.showColumn && (
                   <TableCell>
-                    <Badge variant="outline">{(p.clinicId && centroName.get(p.clinicId)) || "—"}</Badge>
+                    <Badge variant="outline">{p.clinicName || (p.clinicId && centroName.get(p.clinicId)) || "—"}</Badge>
                   </TableCell>
                 )}
                 <TableCell className="text-right">

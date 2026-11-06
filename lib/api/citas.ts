@@ -1,16 +1,20 @@
 import type { components } from "./schema";
-import { apiFetch, apiFetchPaged, apiFetchEnvelope } from "./client";
+import { apiFetch, apiFetchPaged, apiFetchEnvelope, oneCenterPath } from "./client";
 import type { Paginated } from "./types";
+import { getCentrosDondePuedo } from "./centers";
+import { readChoice, tenantOf, type CenterChoice } from "@/lib/clinic-read-scope";
 
 // Types generated from the BE Swagger (run `npm run gen:api` after BE changes).
 //
 // `patient`/`doctorName` are hand-added: GET /appointments embeds them on every row (verified
 // live against prod, 09-oct-2026 — 100/100 rows carried patient.name), but the BE's Swagger
 // doesn't document /appointments' response shape yet, so gen:api never picks them up. Drop this
-// intersection once the Swagger gap closes and CitaEntity declares them itself.
+// intersection once the Swagger gap closes and CitaEntity declares them itself. `clinicName` likewise:
+// the BE puts it on every row it reads (clinic-read-scope).
 export type Cita = components["schemas"]["CitaEntity"] & {
   patient?: { id: string; name: string; medicalRecordNumber?: string | null } | null;
   doctorName?: string | null;
+  clinicName?: string | null;
 };
 export type CreateCitaPayload = components["schemas"]["CreateCitaDto"];
 export type TipoCita = components["schemas"]["TipoCitaEntity"];
@@ -69,20 +73,52 @@ export interface ListCitasParams {
   status?: EstadoCita;
   channel?: CanalCita;
   onlyCare?: boolean; // only states visible to the Atención board
+  centerIds?: string[]; // the centers to read; each needs citas.read THERE
 }
 
-// `centroId` (opcional) fuerza el centro de ESTA lectura vía X-Tenant-ID, sin tocar el centro de la
-// sesión — para el selector de centro EN la pantalla (leer el otro centro). Handoff selector-de-centro.
-export function listCitas(
-  params: ListCitasParams = {},
-  centroId?: string,
-): Promise<Paginated<Cita>> {
-  const { page = 1, limit = 100, ...filters } = params;
-  const sp = new URLSearchParams({ page: String(page), limit: String(limit) });
+// Query string of a read: the filters only. Its clinics go as `centerIds` through `oneCenterPath`
+// (lib/clinic-read-scope.ts `readChoice`): explicit `centerIds`, else the screen's picked center
+// (`centroId`), else the top bar's clinic (nothing on «Ambos»). Never by X-Tenant-ID alone: the BE reads
+// every clinic in scope when none is named. docs/specs/selector-de-centros-arriba.md.
+function readQuery(filters: object): URLSearchParams {
+  const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(filters)) {
     if (v) sp.set(k, String(v));
   }
-  return apiFetchPaged<Cita>(`/appointments?${sp.toString()}`, {}, centroId);
+  return sp;
+}
+
+// `path` with the read's clinics, and the X-Tenant-ID that goes with them (a clinic of the read).
+async function scopedRead(path: string, centroId?: string, centerIds?: string[]): Promise<[string, string | undefined]> {
+  const choice: CenterChoice = readChoice(centroId, centerIds);
+  return [await oneCenterPath(path, choice), tenantOf(choice)];
+}
+
+// `centroId` (optional): the center picked on the screen, without moving the session's. Neither it nor
+// `centerIds`: the top bar's clinic (every readable one on «Ambos»).
+export async function listCitas(
+  params: ListCitasParams = {},
+  centroId?: string,
+): Promise<Paginated<Cita>> {
+  const { page = 1, limit = 100, centerIds, ...filters } = params;
+  const sp = readQuery({ page, limit, ...filters });
+  // X-Tenant-ID = a clinic of the read, so the guard checks one where the permission is held.
+  const [path, tenant] = await scopedRead(`/appointments?${sp.toString()}`, centroId, centerIds);
+  return apiFetchPaged<Cita>(path, {}, tenant);
+}
+
+// Centers where the person can read appointments. Empty = not known (the read falls back to the
+// BE's default).
+export async function citasReadableCenterIds(): Promise<string[]> {
+  const centros = await getCentrosDondePuedo("citas.read").catch(() => []);
+  return centros.map((c) => c.id);
+}
+
+// A patient's or a doctor's appointments in every center the person can read, each row with its
+// clinic. Once the BE reads every center by default this is plain `listCitas(params)`.
+export async function listCitasEveryCenter(params: Omit<ListCitasParams, "centerIds"> = {}): Promise<Paginated<Cita>> {
+  const centerIds = await citasReadableCenterIds();
+  return listCitas({ ...params, centerIds });
 }
 
 // Fetch ALL citas for a range across pages (BE caps limit at 100). Used by the
@@ -92,7 +128,8 @@ export async function listCitasRango(params: {
   to: string;
   doctorId?: string;
   status?: EstadoCita;
-  centroId?: string; // fuerza el centro de la lectura (selector de centro EN la pantalla)
+  centroId?: string; // the center picked on the screen
+  centerIds?: string[];
 }): Promise<Cita[]> {
   const { centroId, ...filters } = params;
   const acc: Cita[] = [];
@@ -118,22 +155,22 @@ export interface ConteoPorDia {
 
 // Month calendar (BE PR #440): un número por (día × tipo) en vez de traer CADA cita para contarla a
 // mano — reemplaza `listCitasRango` en la vista mes. Mismos filtros que la lista.
-export function countByDay(params: {
+export async function countByDay(params: {
   from: string;
   to: string;
   doctorId?: string;
   status?: EstadoCita;
   channel?: CanalCita;
   centroId?: string;
+  centerIds?: string[];
 }): Promise<ConteoPorDia[]> {
-  const { centroId, ...filters } = params;
-  const sp = new URLSearchParams();
-  for (const [k, v] of Object.entries(filters)) {
-    if (v) sp.set(k, String(v));
-  }
-  return apiFetch<ConteoPorDia[]>(`/appointments/count-by-day?${sp.toString()}`, {}, centroId);
+  const { centroId, centerIds, ...filters } = params;
+  const sp = readQuery(filters);
+  const [path, tenant] = await scopedRead(`/appointments/count-by-day?${sp.toString()}`, centroId, centerIds);
+  return apiFetch<ConteoPorDia[]>(path, {}, tenant);
 }
 
+// Found by id in every center the person can read; the row carries `clinicId`/`clinicName`.
 export function getCita(id: string): Promise<Cita> {
   return apiFetch<Cita>(`/appointments/${id}`);
 }

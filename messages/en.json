@@ -4,6 +4,13 @@
     "noProfileTitle": "Your account has no profile assigned",
     "noProfileBody": "You're signed in, but an administrator hasn't linked your account to a profile with permissions yet. Contact an administrator to get it assigned."
   },
+  "reports": {
+    "clinicScope": {
+      "many": "{count, plural, one {# clinic} other {# clinics}}",
+      "total": "{label} ({scope})",
+      "covers": "Covers: {scope}"
+    }
+  },
   "ehrIntegration": {
     "title": "EHR integration",
     "description": "When you mark Present, the patient is also registered in the EHR. Consultations and Services are switched on separately, per center.",
@@ -897,6 +904,7 @@
       "protocolChange": "Protocol change"
     },
     "hub": {
+      "clinic": "Clinic",
       "alerts": "Alerts & precautions",
       "allergies": "Allergies",
       "implants": "Implants & devices",
@@ -1207,7 +1215,8 @@
     "paquetesVenta": "Sales packages",
     "inventory_live_stock": "Live stock (scales)",
     "ahora_mismo": "Right now",
-    "productosExonerados": "Exonerated products (IVU)"
+    "productosExonerados": "Exonerated products (IVU)",
+    "bothCenters": "BOTH"
   },
   "admin": {
     "title": "Administration",
@@ -1902,8 +1911,6 @@
     "colAreas": "Areas",
     "volver": "Back",
     "generar": "Generate",
-    "removeStep": "Remove {step}",
-    "formatoTherapyCount": "Therapies to print",
     "formatoError": "Could not load the format",
     "formatoHiltTitle": "HILT therapy",
     "formatoMlsTitle": "MLS therapy",
@@ -2058,7 +2065,9 @@
       "vacio": "No doctor is free right now."
     },
     "patientNotFound": "That patient does not exist in this center.",
-    "serviceNotFound": "One of the chosen services does not exist in this center."
+    "serviceNotFound": "One of the chosen services does not exist in this center.",
+    "removeStep": "Remove {step}",
+    "formatoTherapyCount": "Therapies to print"
   },
   "programarCitas": {
     "title": "Schedule sessions",
@@ -2239,9 +2248,12 @@
       "cienDescuento": "100% off",
       "cobradas": "charged",
       "pagina": "Page",
-      "rango": "Range"
+      "rango": "Range",
+      "centros": "Total ({n} clinics)"
     },
-    "live": "Live"
+    "live": "Live",
+    "nuevaVentaEn": "New sale in {centro}",
+    "colCentro": "Clinic"
   },
   "facturacionTabs": {
     "facturas": "Invoices",
@@ -2830,8 +2842,8 @@
       "recordLabel": "Record",
       "cambiarPaciente": "Change",
       "lista": "Price list",
-      "pickCentroTitle": "Select the center",
-      "pickCentroGo": "Bill here",
+      "pickCentroTitle": "Which center are you working in?",
+      "pickCentroHelp": "This screen shows one center at a time. Choose which one to work in.",
       "centroLabel": "Center:",
       "cambiarCentro": "Change center",
       "medico": "Attending physician",
@@ -3428,7 +3440,8 @@
       "estado": "Status",
       "destino": "Recipient",
       "fecha": "Date",
-      "cuerpo": "Body"
+      "cuerpo": "Body",
+      "centro": "Clinic"
     },
     "estadoNotif": {
       "pendiente": "Pending",
@@ -3548,7 +3561,8 @@
       "monto": "Amount",
       "estado": "Status",
       "motivo": "Reason",
-      "acciones": "Actions"
+      "acciones": "Actions",
+      "centro": "Clinic"
     }
   },
   "caja": {
@@ -3588,6 +3602,9 @@
       "empty": "No denominations configured.",
       "saving": "Saving…",
       "saved": "Count saved",
+      "hint": "Select a cashier to enable counting.",
+      "pastLocked": "Editing past dates requires permission (caja.retroactivo).",
+      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers.",
       "saveError": "The count could not be saved; it will retry on the next change.",
       "managerCount": "Manager's count",
       "managerCountHint": "This single count overrides the cashiers' sum.",
@@ -3595,10 +3612,7 @@
       "cashiersSumHint": "Read only: the sum of each cashier's count.",
       "countMyself": "Do a single count",
       "backToSum": "Back to the cashiers' sum",
-      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used.",
-      "hint": "Select a cashier to enable counting.",
-      "pastLocked": "Editing past dates requires permission (caja.retroactivo).",
-      "consolidatedHint": "Consolidated count (read-only): sum of all cashiers."
+      "backToSumConfirm": "The manager's count will be cleared and the cashiers' sum used."
     },
     "petty": "Petty cash",
     "summary": {
@@ -4060,6 +4074,7 @@
       "historialTitulo": "Previous changes",
       "sinHistorial": "No protocol changes.",
       "cargando": "Loading…",
+      "enCentro": "At {centro}",
       "cambioResumen": "{cerrados} closed · {creados} new",
       "nuevoTitulo": "New change"
     }
@@ -4357,7 +4372,8 @@
       "categoria": "Category",
       "selCategoria": "Pick category",
       "descripcion": "Description",
-      "global": "Global event (all centers)"
+      "global": "Global event (all centers)",
+      "centro": "Clinic"
     },
     "proximos": "Upcoming events",
     "anterior": "Previous",
@@ -4587,7 +4603,6 @@
     "buscar": "Search by name or role…",
     "cargando": "Loading…",
     "vacio": "No staff.",
-    "elegirCentro": "Pick a center to see its staff.",
     "elegirPersona": "Pick a person from the list.",
     "sinCargo": "No role",
     "sinCuenta": "no login account",
@@ -4655,6 +4670,8 @@
     "ehrGuardar": "Save",
     "ehrVinculado": "Linked with the EHR.",
     "ehrActualizado": "EHR role updated.",
+    "centroOrigen": "Home clinic: {nombre}",
+    "centrosColumna": "Clinic(s)",
     "extension": "Extension (phone system)"
   },
   "acciones": {
@@ -4695,6 +4712,7 @@
     "issuedOn": "Issued on {fecha}."
   },
   "medicoHub": {
+    "clinic": "Clinic",
     "back": "Staff",
     "loading": "Loading…",
     "active": "Active",
@@ -4869,9 +4887,7 @@
     "pickPatient": "Pick a patient from the list to see their services.",
     "record": "Record",
     "firstAt": "first booking {time}",
-    "markPendingPresent": "Mark present (pending: {n})",
     "markPresent": "Not present",
-    "markPresentHint": "Click to mark present",
     "undoPresent": "Undo",
     "sessionsCount": "{n, plural, one {# session} other {# sessions}}",
     "vitalsBy": "Vitals: {name}",
@@ -4916,7 +4932,9 @@
     "bookService": "Book a service",
     "bookConsultation": "Book a consultation",
     "cancelled": "Cancelled",
-    "presentAt": "Present {time}"
+    "presentAt": "Present {time}",
+    "markPendingPresent": "Mark present (pending: {n})",
+    "markPresentHint": "Click to mark present"
   },
   "salesPackages": {
     "title": "Sales packages",
@@ -5026,6 +5044,11 @@
     "notMovable": "This appointment is no longer open and cannot be moved from here.",
     "noneThatDay": "No follow-up room left that day.",
     "freeDay": "Follow-up room that day ({n} free)."
+  },
+  "createClinic": {
+    "label": "Clinic",
+    "placeholder": "Choose a clinic…",
+    "help": "It is created in this clinic."
   },
   "rightNow": {
     "title": "Right now",

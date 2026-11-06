@@ -72,7 +72,8 @@ export default function PatientRecordLayout({ children }: { children: React.Reac
   // lib/scheduling/call-origin.ts) — single-use, so it does not linger past this visit.
   const [callOrigin] = React.useState<string | null>(() => readCallOrigin());
 
-  // Opened from the patient list while it looked at another center (?centro=): look the patient up there.
+  // The BE finds the record by id in every center the person can read. `?centro=` only comes from links
+  // saved before that; it still narrows the lookup to that center.
   const centroPedido = useSearchParams().get("centro");
   const { state, reload } = useResource<Paciente>(
     () => getPaciente(id, undefined, { centerIds: centroPedido ? [centroPedido] : undefined }),
@@ -342,11 +343,11 @@ function PacienteDetail({
               <InfoRow label={t("form.aseguradora")} value={p.insurer} />
             </Card>
           </div>
-          <div className="mt-6"><FichaUltimaVisita pacienteId={p.id} centro={centroId} /></div>
+          <div className="mt-6"><FichaUltimaVisita pacienteId={p.id} /></div>
         </TabsContent>
 
         {puedeCitas && (
-          <TabsContent value="appointments"><FichaCitas pacienteId={p.id} centro={centroId} /></TabsContent>
+          <TabsContent value="appointments"><FichaCitas pacienteId={p.id} /></TabsContent>
         )}
         {puedeFrontdesk && (
           <TabsContent value="therapies"><FichaTerapias pacienteId={p.id} centro={centroId} /></TabsContent>

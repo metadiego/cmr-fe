@@ -16,6 +16,8 @@ import {
 } from "@/lib/api/inventario";
 import { ProductoPicker } from "@/components/inventario/producto-picker";
 import { toastError } from "@/lib/api/errors";
+import { isClinicViewAll } from "@/lib/tenant";
+import { warehouseClinic, warehouseLabel, warehouseReady } from "@/lib/warehouse-clinic";
 import { useResource } from "@/hooks/use-resource";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,8 +104,11 @@ export function RecibirCompra() {
     setLineas((ls) => ls.map((l) => (l.key === key ? { ...l, [campo]: valor } : l)));
   }
 
+  // The receipt lands in the warehouse's clinic; on «Ambos» the warehouse is required (lib/warehouse-clinic.ts).
+  const almacenListo = warehouseReady(almacenId, isClinicViewAll());
+
   async function recibir() {
-    if (lineas.length === 0 || submitting) return;
+    if (lineas.length === 0 || submitting || !almacenListo) return;
     setSubmitting(true);
     try {
       const items: RecibirCompraLoteItem[] = lineas.map((l) => ({
@@ -120,7 +125,7 @@ export function RecibirCompra() {
         ...(fecha ? { effectiveDate: fecha } : {}),
         ...(notas.trim() ? { notes: notas.trim() } : {}),
         items,
-      });
+      }, warehouseClinic(almacenes, almacenId));
       setReciboId(r.documentId ?? null);
       toast.success(t("received"));
       // Limpia el carrito; conserva la cabecera por si siguen cargando del mismo proveedor.
@@ -154,7 +159,7 @@ export function RecibirCompra() {
             <Select value={almacenId} onValueChange={setAlmacenId}>
               <SelectTrigger className="w-full"><SelectValue placeholder={t("field.selectAlmacen")} /></SelectTrigger>
               <SelectContent>
-                {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                {almacenes.map((a) => <SelectItem key={a.id} value={a.id}>{warehouseLabel(a, almacenes)}</SelectItem>)}
               </SelectContent>
             </Select>
           </Row>
@@ -255,7 +260,7 @@ export function RecibirCompra() {
           )}
 
           <div className="flex justify-end pt-1">
-            <Button onClick={recibir} disabled={lineas.length === 0 || submitting}>
+            <Button onClick={recibir} disabled={lineas.length === 0 || submitting || !almacenListo}>
               {submitting ? t("receiving") : t("receive")}
             </Button>
           </div>

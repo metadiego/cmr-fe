@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 import type { Scope } from "./cupos";
 
 // Holidays. Per-center or global (scope). `bloqueaAgenda` decides whether the
@@ -38,12 +38,13 @@ function params(q: { anio?: number; scope?: Scope }): string {
   return qs ? `?${qs}` : "";
 }
 
-// GET /holidays?anio=&scope=
-export function getFestivos(
+// GET /holidays?anio=&scope= — a clinic's holidays name it as `centerIds` (the BE reads every clinic in
+// scope otherwise): the picked `centroId`, else the top bar's. The company-wide ones (`global`) have none.
+export async function getFestivos(
   q: { anio?: number; scope?: Scope; centroId?: string } = {},
 ): Promise<Festivo[]> {
-  const tenant = q.scope === "global" ? null : q.centroId;
-  return apiFetch<Festivo[]>(`/holidays${params(q)}`, {}, tenant);
+  if (q.scope === "global") return apiFetch<Festivo[]>(`/holidays${params(q)}`, {}, null);
+  return apiFetch<Festivo[]>(await oneCenterPath(`/holidays${params(q)}`, q.centroId), {}, q.centroId);
 }
 
 export function createFestivo(input: FestivoInput, centroId?: string): Promise<Festivo> {

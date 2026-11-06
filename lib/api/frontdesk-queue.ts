@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, oneCenterPath } from "./client";
 
 // La cola por terapia (GET /frontdesk/queue, BE PR #420 + #421, verificado por HTTP en prod 10-oct-2026
 // — ver docs/specs/cola-por-terapia-contrato-verificado.md). Por servicio: quién espera (ordenado por
@@ -99,7 +99,7 @@ export type FrontdeskQueue = {
 };
 
 // GET /frontdesk/queue?date=&serviceId=&centerIds= — permiso frontdesk.read.
-export function getFrontdeskQueue(
+export async function getFrontdeskQueue(
   date: string,
   params?: { serviceId?: string; centerIds?: string[] },
   centroId?: string,
@@ -107,7 +107,9 @@ export function getFrontdeskQueue(
   const sp = new URLSearchParams({ date });
   if (params?.serviceId) sp.set("serviceId", params.serviceId);
   if (params?.centerIds?.length) sp.set("centerIds", params.centerIds.join(","));
-  return apiFetch<FrontdeskQueue>(`/frontdesk/queue?${sp.toString()}`, {}, centroId);
+  const path = `/frontdesk/queue?${sp.toString()}`;
+  // Without explicit centers, the queue of the picked (or active) center, as before.
+  return apiFetch<FrontdeskQueue>(params?.centerIds?.length ? path : await oneCenterPath(path, centroId), {}, centroId);
 }
 
 // POST /frontdesk/sessions/:id/call — permiso frontdesk.call (PR #423). Sin `technicianId` usa el
