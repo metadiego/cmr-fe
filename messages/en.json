@@ -5092,7 +5092,10 @@
       "colFollow": "F/U",
       "colNet": "Billed",
       "empty": "No consultations today.",
-      "noDoctor": "No doctor"
+      "noDoctor": "No doctor",
+      "pendingDoctor": "New patients waiting for a doctor to be assigned",
+      "pendingDoctorEmpty": "No doctor-less invoice right now.",
+      "pendingDoctorLoading": "Looking…"
     },
     "prescriptions": {
       "title": "Prescriptions",

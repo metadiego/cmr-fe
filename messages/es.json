@@ -5092,7 +5092,10 @@
       "colFollow": "Seg.",
       "colNet": "Facturado",
       "empty": "Sin consultas hoy.",
-      "noDoctor": "Sin médico"
+      "noDoctor": "Sin médico",
+      "pendingDoctor": "Pacientes nuevos en espera de que se les asigne médico",
+      "pendingDoctorEmpty": "Ninguna factura sin médico ahora mismo.",
+      "pendingDoctorLoading": "Buscando…"
     },
     "prescriptions": {
       "title": "Recetas",

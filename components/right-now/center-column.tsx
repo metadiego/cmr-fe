@@ -4,10 +4,13 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import type { RightNowCenter } from "@/lib/api/right-now";
+import { getFacturasTablero, type FacturaTableroFila } from "@/lib/api/facturas";
+import { useResource } from "@/hooks/use-resource";
 import { money } from "@/lib/caja/totales";
 import { attendedSplit, topSellers } from "@/lib/right-now/view";
 import { Empty, Panel, Stat } from "@/components/right-now/parts";
 import { ServicesPanel } from "@/components/right-now/services-panel";
+import { Tooltip } from "@/components/ui/tooltip";
 
 // One center's column on the «Ahora mismo» board, as the legacy screen had it: sales, consultation
 // patients, the doctors' ranking, prescriptions (shown even while empty) and the services.
@@ -96,7 +99,17 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
                       <td className="px-2 py-1.5 text-right tabular-nums font-medium">{sinMedico ? "—" : d.attended}</td>
                       <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.firstVisit}</td>
                       <td className="px-2 py-1.5 text-right tabular-nums">{sinMedico ? "—" : d.followUp}</td>
-                      <td className="px-4 py-1.5 text-right tabular-nums">{money(d.net)}</td>
+                      <td className="px-4 py-1.5 text-right tabular-nums">
+                        {sinMedico ? (
+                          <Tooltip content={<PendingDoctorList clinicId={center.clinicId} date={center.date} />}>
+                            <span className="cursor-help underline decoration-dotted underline-offset-2">
+                              {money(d.net)}
+                            </span>
+                          </Tooltip>
+                        ) : (
+                          money(d.net)
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -122,6 +135,42 @@ export function CenterColumn({ center, now }: { center: RightNowCenter; now: num
           <Empty>{t("prescriptions.empty")}</Empty>
         )}
       </Panel>
+    </div>
+  );
+}
+
+// Contenido del hover sobre el "Facturado" de la fila "Sin médico": qué facturas de HOY no tienen
+// médico, para que el mostrador pueda ir a corregirlas. Se arma client-side con el tablero de
+// facturas (ya resuelve el nombre del paciente); no hace falta nada nuevo del BE. Se dispara perezoso
+// (la petición no corre hasta que el Tooltip la monta, al primer hover/foco).
+function PendingDoctorList({ clinicId, date }: { clinicId: string; date: string }) {
+  const t = useTranslations("rightNow.doctors");
+  const { state } = useResource<FacturaTableroFila[]>(
+    () =>
+      getFacturasTablero({ from: date, to: date, limit: 100 }, clinicId).then((b) =>
+        b.rows.filter((r) => r["fac_medico__valor"] == null),
+      ),
+    [clinicId, date],
+  );
+  if (state.kind === "loading") return <p>{t("pendingDoctorLoading")}</p>;
+  const rows = state.kind === "ok" ? state.data : [];
+  return (
+    <div className="max-w-full">
+      <p className="mb-1 font-medium not-italic">{t("pendingDoctor")}</p>
+      {rows.length === 0 ? (
+        <p className="not-italic">{t("pendingDoctorEmpty")}</p>
+      ) : (
+        <ul className="space-y-0.5 not-italic">
+          {rows.map((r) => (
+            <li key={r.id} className="flex justify-between gap-3">
+              <span className="truncate">
+                #{String(r["fac_numero"] ?? "—")} · {String(r["fac_paciente"] ?? "—")}
+              </span>
+              <span className="shrink-0 tabular-nums">{money(Number(r["fac_total"] ?? 0))}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
