@@ -12,8 +12,13 @@ export interface DoctorStatus {
 }
 
 // Only doctors with at least one row TODAY are reported — an unscheduled doctor is unknown, not free.
-// `free` = none of their rows today is actively `en_consulta` (with a patient right now).
-export function doctorsStatus(rows: CitaFila[]): DoctorStatus[] {
+// `free` = none of their rows today is actively `en_consulta` (with a patient right now) AND they are
+// not on an active vacation/leave covering today (`absentIds` — owner, 06-nov-2026: a doctor on
+// vacation must never show as free just because nothing is booked under them).
+export function doctorsStatus(
+  rows: CitaFila[],
+  absentIds: ReadonlySet<string> = new Set(),
+): DoctorStatus[] {
   const byId = new Map<string, { name: string; busy: boolean }>()
   for (const r of rows) {
     const id = text(r.medico__valor)
@@ -25,10 +30,10 @@ export function doctorsStatus(rows: CitaFila[]): DoctorStatus[] {
     byId.set(id, cur)
   }
   return [...byId.entries()]
-    .map(([id, v]) => ({ id, name: v.name || id, free: !v.busy }))
+    .map(([id, v]) => ({ id, name: v.name || id, free: !v.busy && !absentIds.has(id) }))
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export function freeDoctors(rows: CitaFila[]): DoctorStatus[] {
-  return doctorsStatus(rows).filter((d) => d.free)
+export function freeDoctors(rows: CitaFila[], absentIds: ReadonlySet<string> = new Set()): DoctorStatus[] {
+  return doctorsStatus(rows, absentIds).filter((d) => d.free)
 }

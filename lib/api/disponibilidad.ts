@@ -65,6 +65,13 @@ export async function listDoctorAbsences(doctorId: string, from?: string, to?: s
   if (to) sp.set("to", to);
   return asArray<DoctorAbsence>(await apiFetch(`/doctors/absences?${sp.toString()}`, {}, centroId));
 }
+// Todos los médicos de vacaciones/permiso que SOLAPAN una fecha (sin filtrar por médico) — el BE ya
+// acepta `staffId` opcional (verificado en schema.d.ts, DoctorAbsencesController_list v2). Para "quién
+// está libre hoy" (médicos-libres-widget).
+export async function listActiveDoctorAbsences(date: string, centroId?: string): Promise<DoctorAbsence[]> {
+  const sp = new URLSearchParams({ from: date, to: date });
+  return asArray<DoctorAbsence>(await apiFetch(`/doctors/absences?${sp.toString()}`, {}, centroId));
+}
 export function createDoctorAbsence(payload: DoctorAbsencePayload, centroId?: string): Promise<DoctorAbsence> {
   return apiFetch<DoctorAbsence>(`/doctors/absences`, { method: "POST", body: JSON.stringify(payload) }, centroId);
 }

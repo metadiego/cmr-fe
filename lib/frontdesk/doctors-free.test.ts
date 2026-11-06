@@ -35,3 +35,11 @@ test("freeDoctors filters out the busy ones, keeping the free list sorted by nam
     ["Beto", "Zoe"]
   )
 })
+
+test("a doctor with no row en_consulta but on an active absence never counts as free", () => {
+  const rows = [{ id: "r1", medico: "Gilberto Caraballo", medico__valor: "d1", estado: "confirmada" }]
+  assert.deepEqual(doctorsStatus(rows, new Set(["d1"])), [
+    { id: "d1", name: "Gilberto Caraballo", free: false },
+  ])
+  assert.deepEqual(freeDoctors(rows, new Set(["d1"])), [])
+})

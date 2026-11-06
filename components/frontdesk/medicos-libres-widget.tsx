@@ -7,6 +7,8 @@ import { Doctor03Icon } from "@hugeicons/core-free-icons"
 
 import type { CitaFila } from "@/lib/api/agenda-dia"
 import { freeDoctors } from "@/lib/frontdesk/doctors-free"
+import { listActiveDoctorAbsences } from "@/lib/api/disponibilidad"
+import { useResource } from "@/hooks/use-resource"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -17,19 +19,31 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 
-// Quién puede recibir un paciente AHORA MISMO: médicos con fila hoy en el tablero de Atención y
-// ninguna de ellas `en_consulta` (owner, 06-nov-2026 — pide esto junto al widget de ubicación en vivo,
-// mismos datos que ya trae la pestaña Consulta, sin pedir nada nuevo al BE). Un médico sin fila hoy no
-// sale: no agendado no es lo mismo que libre.
+// Quién puede recibir un paciente AHORA MISMO: médicos con fila hoy en el tablero de Atención,
+// ninguna de ellas `en_consulta`, Y sin una ausencia activa (vacaciones/permiso) hoy (owner,
+// 06-nov-2026 — caso real: Gilberto Caraballo de vacaciones no debe salir "libre" solo porque nadie
+// le agendó nada). Un médico sin fila hoy tampoco sale: no agendado no es lo mismo que libre.
 export function MedicosLibresWidget({
   rows,
+  date,
+  centroId,
   iconOnly = false,
 }: {
   rows: CitaFila[]
+  date: string
+  centroId?: string
   iconOnly?: boolean
 }) {
   const t = useTranslations("frontdesk.medicosLibres")
-  const libres = React.useMemo(() => freeDoctors(rows), [rows])
+  const ausenciasRes = useResource(
+    () => (centroId ? listActiveDoctorAbsences(date, centroId) : Promise.resolve([])),
+    [date, centroId],
+  )
+  const ausentes = React.useMemo(() => {
+    const data = ausenciasRes.state.kind === "ok" ? ausenciasRes.state.data : []
+    return new Set(data.filter((a) => a.active !== false).map((a) => a.doctorId))
+  }, [ausenciasRes.state])
+  const libres = React.useMemo(() => freeDoctors(rows, ausentes), [rows, ausentes])
 
   return (
     <DropdownMenu>

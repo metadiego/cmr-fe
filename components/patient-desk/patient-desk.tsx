@@ -427,7 +427,7 @@ export function PatientDesk() {
             nombreServicio={serviceName}
             iconOnly
           />
-          <MedicosLibresWidget rows={data.consultations?.rows ?? []} iconOnly />
+          <MedicosLibresWidget rows={data.consultations?.rows ?? []} date={date} centroId={gate.centro} iconOnly />
           <NurseStatusButton
             centro={gate.centro}
             fecha={date}
