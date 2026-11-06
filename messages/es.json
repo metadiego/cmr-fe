@@ -4879,9 +4879,9 @@
       "dateOutOfSequence": "Esa fecha no cabe entre la factura anterior y la siguiente."
     },
     "changePatient": {
-      "same": "Ya es el paciente de esta factura.",
-      "unknown": "Ese paciente no existe en este centro.",
-      "hasAppointment": "Es una consulta ligada a una cita: cambia primero el paciente de la cita."
+      "INVOICE_CHANGE_PATIENT_SAME": "Ya es el paciente de esta factura.",
+      "INVOICE_CHANGE_PATIENT_UNKNOWN": "Ese paciente no existe en este centro.",
+      "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "Es una consulta ligada a una cita: cambia primero el paciente de la cita."
     }
   },
   "picker": {

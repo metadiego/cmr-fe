@@ -4879,9 +4879,9 @@
       "dateOutOfSequence": "That date does not fit between the previous and the next invoice."
     },
     "changePatient": {
-      "same": "That is already this invoice's patient.",
-      "unknown": "That patient does not exist in this center.",
-      "hasAppointment": "This is a consultation linked to an appointment: change the appointment's patient first."
+      "INVOICE_CHANGE_PATIENT_SAME": "That is already this invoice's patient.",
+      "INVOICE_CHANGE_PATIENT_UNKNOWN": "That patient does not exist in this center.",
+      "INVOICE_CHANGE_PATIENT_HAS_APPOINTMENT": "This is a consultation linked to an appointment: change the appointment's patient first."
     }
   },
   "picker": {
