@@ -36,6 +36,7 @@ import { useCan } from "@/hooks/use-can";
 import { useCashCountAutosave } from "@/hooks/use-cash-count-autosave";
 import { consolidatedCount } from "@/lib/caja/consolidated-count";
 import { ConsolidatedCountBar } from "@/components/caja/consolidated-count-bar";
+import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
@@ -301,7 +302,6 @@ function Editor({
     cuadreInicial?.pettyCashApplies ?? true,
   );
   const [procesando, setProcesando] = React.useState(false);
-  const [emailing, setEmailing] = React.useState(false);
   // The Inicio input is saved as typed; «Aplica» travels apart without zeroing it (see procesarCierre).
   const openPayload = { division, userId: usuarioId, date: fecha, declaredPettyCash: esConsolidado ? 0 : Math.max(0, Number(inicioStr) || 0), pettyCashApplies: !esConsolidado && aplicarInicio }; // consolidated Inicio = the cashiers' funds
   const autosave = useCashCountAutosave(contarHabilitado, openPayload, conteo, onReload);
@@ -384,19 +384,6 @@ function Editor({
       toast.error(apiErrorMessage(err));
     } finally {
       setProcesando(false);
-    }
-  }
-
-  async function enviarEmail(email: string) {
-    if (!cuadreInicial) return;
-    setEmailing(true);
-    try {
-      await enviarCuadreEmail(cuadreInicial.id, { email });
-      toast.success(t("emailSent"));
-    } catch (err) {
-      toast.error(apiErrorMessage(err));
-    } finally {
-      setEmailing(false);
     }
   }
 
@@ -546,8 +533,7 @@ function Editor({
           onProcesar={procesarCierre}
           onExport={exportar}
           canEmail={!!cuadreInicial}
-          emailing={emailing}
-          onEmail={enviarEmail}
+          emailPanel={cuadreInicial && <CashEmailPanel centerId={centro} send={(emails) => enviarCuadreEmail(cuadreInicial.id, emails, centro)} />}
         />
       </div>
 

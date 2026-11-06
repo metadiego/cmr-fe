@@ -8,6 +8,7 @@ import {
   abrirCuadreTotal,
   cerrarCuadreTotal,
   contarCuadreTotal,
+  enviarCuadreTotalEmail,
   getDenominaciones,
   getGruposMetodoPago,
   getReporteCuadreTotal,
@@ -34,6 +35,7 @@ import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
+import { CashEmailPanel } from "@/components/caja/cash-email-panel";
 import { ComprobacionCuadreTotal } from "@/components/caja/comprobacion-cuadre-total";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -109,6 +111,7 @@ export function CuadreTotal() {
               puedeCerrarPermiso={puedeCerrarPermiso}
               puedeRetroactivo={puedeRetroactivo}
               centroNombre={gate.centroNombre}
+              centroId={gate.centro}
             />
           )}
         </>
@@ -124,6 +127,7 @@ type LoaderProps = {
   puedeCerrarPermiso: boolean;
   puedeRetroactivo: boolean;
   centroNombre?: string;
+  centroId?: string | null;
 };
 
 function Loader(props: LoaderProps) {
@@ -160,6 +164,7 @@ function Editor({
   puedeCerrarPermiso,
   puedeRetroactivo,
   centroNombre,
+  centroId,
   reporte,
   denoms,
   grupos,
@@ -338,9 +343,8 @@ function Editor({
           procesando={procesando}
           onProcesar={procesarCierre}
           onExport={exportar}
-          canEmail={false}
-          emailing={false}
-          onEmail={() => {}}
+          canEmail
+          emailPanel={<CashEmailPanel centerId={centroId} send={(emails) => enviarCuadreTotalEmail(fecha, emails, centroId)} />}
         />
       </div>
 

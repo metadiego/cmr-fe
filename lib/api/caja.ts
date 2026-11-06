@@ -16,7 +16,6 @@ export type GrupoMetodoPago = components["schemas"]["GrupoMetodoPagoEntity"];
 export type CuadreCaja = components["schemas"]["CuadreCajaEntity"];
 export type AbrirCuadrePayload = components["schemas"]["AbrirCuadreDto"];
 export type ConteoLinea = components["schemas"]["ConteoLineaDto"];
-export type EmailCuadrePayload = components["schemas"]["EmailCuadreDto"];
 export type CajaDivision = "consulta" | "general";
 export type Cajero = components["schemas"]["CajeroDto"];
 
@@ -252,13 +251,27 @@ export function cerrarCuadre(id: string): Promise<CuadreConItems> {
 }
 
 // Envía el cuadre por email (archivar/compartir). Requiere email destino.
-export function enviarCuadreEmail(
-  id: string,
-  payload: EmailCuadrePayload,
-): Promise<unknown> {
-  return apiFetch<unknown>(`/cash/reconciliations/${id}/email`, {
+// The sheet by email FOR REAL (BE #478): HTML body + PDF attachment. `emails` empty = the center's
+// default list (preference caja.emailRecipients). Answers ONLY when the SMTP server accepted it; 503
+// MAIL_NOT_CONFIGURED / 502 MAIL_NOT_SENT / 400 no recipients come back as ApiError.
+export type CashEmailSent = { sent: boolean; to: string[]; messageId: string | null; notificationId: string };
+
+function centerQs(centerId?: string | null): string {
+  return centerId ? `?centerIds=${encodeURIComponent(centerId)}` : "";
+}
+
+export function enviarCuadreEmail(id: string, emails: string[], centerId?: string | null): Promise<CashEmailSent> {
+  return apiFetch<CashEmailSent>(`/cash/reconciliations/${id}/email${centerQs(centerId)}`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(emails.length ? { emails } : {}),
+  });
+}
+
+// The day TOTAL sheet by email (supervisor). One center: `centerIds`, else the session's.
+export function enviarCuadreTotalEmail(fecha: string, emails: string[], centerId?: string | null): Promise<CashEmailSent> {
+  return apiFetch<CashEmailSent>(`/cash/total-reconciliation/email${centerQs(centerId)}`, {
+    method: "POST",
+    body: JSON.stringify(emails.length ? { date: fecha, emails } : { date: fecha }),
   });
 }
 

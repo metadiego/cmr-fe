@@ -3771,6 +3771,20 @@
       "dayNet": "Neto del día",
       "squares": "Cuadra",
       "gap": "Descuadre de {amount}"
+    },
+    "emailPanel": {
+      "recipients": "Destinatarios",
+      "placeholder": "contabilidad@centrodemedicinaregenerativa.com, otro@…",
+      "hint": "Separa varios correos con comas. Vacío = la lista del centro.",
+      "invalid": "No son correos válidos: {list}",
+      "send": "Enviar",
+      "sending": "Enviando…",
+      "saveDefault": "Guardar como lista del centro",
+      "defaultSaved": "Lista del centro guardada",
+      "sentTo": "Enviado a {to}",
+      "notSent": "El servidor de correo no aceptó el mensaje. No se envió.",
+      "notConfigured": "El servidor no tiene correo configurado. No se envió.",
+      "noRecipients": "Indica a quién enviarlo: no hay destinatarios ni lista del centro."
     }
   },
   "gruposFacturacion": {

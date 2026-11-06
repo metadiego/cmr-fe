@@ -3771,6 +3771,20 @@
       "dayNet": "Day net",
       "squares": "Squares",
       "gap": "Off by {amount}"
+    },
+    "emailPanel": {
+      "recipients": "Recipients",
+      "placeholder": "accounting@centrodemedicinaregenerativa.com, other@…",
+      "hint": "Separate several addresses with commas. Empty = the center's list.",
+      "invalid": "Not valid addresses: {list}",
+      "send": "Send",
+      "sending": "Sending…",
+      "saveDefault": "Save as the center's list",
+      "defaultSaved": "Center list saved",
+      "sentTo": "Sent to {to}",
+      "notSent": "The mail server did not accept the message. It was not sent.",
+      "notConfigured": "The server has no email configured. It was not sent.",
+      "noRecipients": "Say who to send it to: no recipients and no center list."
     }
   },
   "gruposFacturacion": {
