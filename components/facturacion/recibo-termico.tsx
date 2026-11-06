@@ -152,6 +152,9 @@ export function ReciboTermico({ recibo }: { recibo: Recibo }) {
                     <span>{c.cantidad} · {c.descripcion}</span>
                     {c.precio != null && <span className="shrink-0 tabular-nums">{money(c.precio)}</span>}
                   </div>
+                  {c.multiplicadores && Object.keys(c.multiplicadores).length > 0 && (
+                    <div className="pl-3 text-[0.9em] italic opacity-80">({multTexto(c.multiplicadores)})</div>
+                  )}
                   {c.nota && <div className="pl-3 text-[0.9em] italic opacity-80">{c.nota}</div>}
                 </div>
               ))}

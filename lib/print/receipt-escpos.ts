@@ -86,6 +86,7 @@ export function receiptToEscPos(r: Recibo, text: ReceiptText, logo: Uint8Array |
         const label = `${c.cantidad} · ${c.descripcion}`;
         if (c.precio != null) w.columnsRow(label, money(c.precio), 3);
         else w.wrapped(label, 3);
+        if (c.multiplicadores && Object.keys(c.multiplicadores).length > 0) w.wrapped(`(${multText(c.multiplicadores)})`, 6);
         if (c.nota) w.wrapped(c.nota, 6);
       }
     }

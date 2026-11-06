@@ -17,7 +17,15 @@ export type ReciboItem = {
   // "Incluye:" de un kit (item.content, disponible en borrador+emitida). Vacío = compacto.
   // `precio` = REFERENCIA (mapeado del catálogo por productId); NO suma al total.
   // `nota` = programación/protocolo del componente (PR #100), opcional.
-  componentes?: { descripcion: string; cantidad: number; precio?: number; nota?: string | null }[];
+  // `multiplicadores` del componente (kit con terapia de áreas×días, PR areas-y-dias-en-el-kit):
+  // el label lo resuelve el recibo igual que el de arriba (fac.col.<clave>).
+  componentes?: {
+    descripcion: string;
+    cantidad: number;
+    precio?: number;
+    nota?: string | null;
+    multiplicadores?: Record<string, number>;
+  }[];
   // Duración del protocolo del kit en visitas (producto.treatmentDays), si aplica.
   protocoloVisitas?: number;
   // Multiplicadores (láser: {dias:12, areas:2}) — el label lo resuelve el recibo (fac.col.<clave>).
@@ -82,12 +90,24 @@ export function buildRecibo(
     // El PRECIO viene RESUELTO en content[].price (cascada centro→global→base, BE #99) → leerlo
     // tal cual; NO mapear del catálogo (que solo tiene precios por-centro y omitía componentes).
     const content =
-      (it as { content?: { productId?: string; name?: string; quantity?: number; price?: number | null; note?: string | null }[] }).content ?? [];
+      (
+        it as {
+          content?: {
+            productId?: string;
+            name?: string;
+            quantity?: number;
+            price?: number | null;
+            note?: string | null;
+            multiplicadores?: Record<string, number> | null;
+          }[];
+        }
+      ).content ?? [];
     const itemComps = content.map((c) => ({
       descripcion: c.name ?? "—",
       cantidad: num(c.quantity),
       ...(c.price != null ? { precio: num(c.price) } : {}),
       ...(c.note ? { nota: c.note } : {}),
+      ...(c.multiplicadores && Object.keys(c.multiplicadores).length ? { multiplicadores: c.multiplicadores } : {}),
     }));
     const visitas = it.productId ? diasTratamiento[String(it.productId)] : undefined;
     // Multiplicadores (láser: áreas×días) → cantidad EFECTIVA = base × Π(multiplicadores).
