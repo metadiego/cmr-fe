@@ -129,8 +129,9 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
           {/* Membrete: el bloque de títulos (empresa / centro / título) queda CENTRADO e intacto; el logo va
               ARRIBA-IZQUIERDA en posición absoluta para no empujar ni una línea (regla dura del handoff:
               si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
-          <div className="relative text-center">
-            <div className="absolute left-0 top-0">
+          <div className="relative text-center" style={{ position: "relative" }}>
+            {/* Inline position: the print window has no Tailwind, and the logo landed centred over the title. */}
+            <div className="absolute left-0 top-0" style={{ position: "absolute", left: 0, top: 0 }}>
               <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
             </div>
             {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa (solo logo + título). */}
@@ -273,7 +274,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
               <div
                 key={s.clave ?? `sec-${i}`}
                 className={"region mt-6" + (crece ? " formato-grow" : "")}
-                style={crece ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto" } : { breakInside: "avoid" }}
+                style={crece ? { breakInside: "avoid", display: "flex", flexDirection: "column", flex: "1 1 auto", marginTop: 24 } : { breakInside: "avoid" }}
               >
                 <SeccionInner s={s} label={label} casillasEnFilas={render.casillasEnFilas} />
               </div>
