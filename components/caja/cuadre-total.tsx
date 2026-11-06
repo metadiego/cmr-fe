@@ -12,6 +12,8 @@ import {
   getDenominaciones,
   getGruposMetodoPago,
   getReporteCuadreTotal,
+  getReporteDia,
+  listarCuadres,
   type CuadreTotalDia,
   type Denominacion,
   type GrupoMetodoPago,
@@ -36,6 +38,9 @@ import { ResumenPagos } from "@/components/caja/resumen-pagos";
 import { DesgloseCajeros } from "@/components/caja/desglose-cajeros";
 import { CuadreDetalle } from "@/components/caja/cuadre-detalle";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
+import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
+import { figuresOfReport } from "@/lib/caja/sign-off";
+import type { CajaDivision } from "@/lib/api/caja";
 import { ComprobacionCuadreTotal } from "@/components/caja/comprobacion-cuadre-total";
 import { CuadreCajaSkeleton } from "@/components/caja/cuadre-caja-skeleton";
 import { PageContainer, PageHeader } from "@/components/ui/page";
@@ -203,6 +208,25 @@ function Editor({
   );
   const porCajero = reporte.porCajero ?? [];
 
+  // Sign-off: only the manager signs the day total; its blocks show every cashier's own sheet.
+  const signNow = figuresOfReport(reporte);
+  const signOff = useCashSignOff({
+    sheetId: reporte.dayReconciliation?.id ?? null,
+    ensureSheet: async () => (await abrirCuadreTotal(fecha)).id,
+    isCashierSheet: false,
+    now: signNow,
+    meId: null,
+    canSignCashier: false,
+    canSignSupervisor: puedeContar,
+    centerId: centroId,
+    siblings: async () =>
+      (await listarCuadres({ fecha }))
+        .filter((c) => c.userId && (c.division === "consulta" || c.division === "general"))
+        .map((c) => ({ id: c.id, userId: c.userId!, division: c.division, name: porCajero.find((x) => x.usuarioId === c.userId)?.nombre ?? null })),
+    siblingNow: async (sib) => figuresOfReport(await getReporteDia(fecha, sib.division as CajaDivision, sib.userId)),
+    onSigned: onReload,
+  });
+
   async function volverASuma() {
     try {
       await autosave.flush();
@@ -348,8 +372,12 @@ function Editor({
         />
       </div>
 
+      <CashSignOffPanel signOff={signOff} now={signNow} meId={null} canSignCashier={false} canSignSupervisor={puedeContar} />
+
       <CuadreDetalle
         titulo={t("tituloImpreso")}
+        firmas={signOff.printed}
+        firmaTexto={signOff.statement}
         fecha={fecha}
         centroNombre={centroNombre}
         reporte={reporte}

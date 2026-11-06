@@ -4,6 +4,7 @@ import type { CuadreReconciliacion } from "@/lib/caja/totales";
 
 export type { CuadreReconciliacion };
 import type { ProductSales } from "@/lib/caja/product-sales";
+import type { CashSignature, SignOffRole } from "@/lib/caja/sign-off";
 
 // Caja / Cuadre (BE módulo `caja`, v2 `cash`). Tenant-scoped: el X-Tenant-ID lo adjunta client.ts desde el
 // centro activo. TODO el I/O de caja pasa por aquí (API-First). Los tipos de catálogo/DTO salen del
@@ -273,6 +274,22 @@ export function enviarCuadreTotalEmail(fecha: string, emails: string[], centerId
     method: "POST",
     body: JSON.stringify(emails.length ? { date: fecha, emails } : { date: fecha }),
   });
+}
+
+// ---- Sign-off («Acepto», BE #486, handoff docs/specs/cash-sign-off-handoff.md) ----------------
+// Signing = accepting the sheet as it is now; the sheet need NOT be closed. `cashier` = only the
+// sheet's own cashier; `supervisor` = caja.ver_todos, any sheet (cashier, consolidated, day total).
+// 409 CASH_SHEET_ALREADY_SIGNED = someone else signed in that role (body: signedBy + signedAt).
+export function signCashSheet(id: string, signAs: SignOffRole, centerId?: string | null): Promise<CashSignature> {
+  return apiFetch<CashSignature>(`/cash/reconciliations/${id}/sign${centerQs(centerId)}`, {
+    method: "POST",
+    body: JSON.stringify({ signAs, agree: true }),
+  });
+}
+
+// Every signature of the sheet, voided ones included (history), oldest first.
+export function getCashSignatures(id: string, centerId?: string | null): Promise<CashSignature[]> {
+  return apiFetch<CashSignature[]>(`/cash/reconciliations/${id}/signatures${centerQs(centerId)}`);
 }
 
 // ---- Cuadre TOTAL del día (handoff cuadre-unico-del-dia, cmr-be #457, en prod desde 04-nov-2026) --

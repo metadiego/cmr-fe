@@ -11,6 +11,7 @@ import { formatFechaSolo } from "@/lib/format/fecha";
 import { Button } from "@/components/ui/button";
 import { ProductSalesSection } from "@/components/caja/product-sales-section";
 import { productSalesPrintHtml, type ProductSalesPrintLabels } from "@/lib/caja/product-sales-print";
+import { signaturesPrintHtml, type PrintedSignature } from "@/lib/caja/sign-off";
 
 // Números de la caja (modelo CMA) que también van en la hoja impresa.
 export interface CuadreResumen {
@@ -36,6 +37,8 @@ export function CuadreDetalle({
   centroNombre,
   reporte,
   resumen,
+  firmas,
+  firmaTexto,
 }: {
   // Título de la hoja impresa; default = t("title") ("Cuadre de caja"). El cuadre TOTAL del día
   // (handoff cuadre-unico-del-dia) pasa el suyo propio ("Cuadre total del día").
@@ -47,6 +50,10 @@ export function CuadreDetalle({
   centroNombre?: string;
   reporte: ReporteDia;
   resumen: CuadreResumen;
+  // Sign-off blocks already put into words (components/caja/cash-sign-off.tsx): «Aceptado por … · when»
+  // over each line. Absent = the two blank lines of before.
+  firmas?: PrintedSignature[];
+  firmaTexto?: string;
 }) {
   const t = useTranslations("caja");
   const tp = useTranslations("caja.payments");
@@ -92,6 +99,7 @@ export function CuadreDetalle({
         resumen,
         reporte,
         exoneradas,
+        firmasHtml: firmas?.length ? signaturesPrintHtml(firmas, firmaTexto) : undefined,
         productSalesHtml: reporte.productSales
           ? productSalesPrintHtml(reporte.productSales, Object.fromEntries(PS_KEYS.map((k) => [k, String(tps.raw(k))])) as ProductSalesPrintLabels)
           : "",
@@ -372,6 +380,13 @@ td{padding:5px 6px;border-top:1px solid #f0f0f0}
 .dim{color:#999}
 .firmas{display:flex;gap:40px;margin-top:48px}
 .firma{flex:1;text-align:center;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#333}
+.firmas:has(.firma-wrap){flex-wrap:wrap;row-gap:28px}
+.firmas .firma-wrap{flex:1;min-width:150px;display:flex;flex-direction:column;justify-content:flex-end}
+.firma-sello{min-height:28px;text-align:center;font-size:10.5px;color:#1b5e20;padding-bottom:4px}
+.firma-sello .rojo{font-weight:600;margin-top:2px}
+.firma-texto{margin-top:40px;font-size:11px;color:#333;text-align:center}
+.firma-texto + .firmas{margin-top:28px}
+.firma-wrap .firma{flex:none}
 .rojo{color:#b3261e}
 `;
 
@@ -395,11 +410,12 @@ function buildPrintHtml(args: {
   reporte: ReporteDia;
   exoneradas: Array<{ id: string; numero: string | null; paciente: string | null }>;
   productSalesHtml?: string;
+  firmasHtml?: string;
   // Etiquetas para la columna «División» de la tabla de documentos (solo el cuadre TOTAL del día la usa).
   divisionLabels?: { consulta: string; general: string };
   L: PrintLabels;
 }): string {
-  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, divisionLabels, L, productSalesHtml } = args;
+  const { titulo, divisionLabel, centroNombre, fechaLabel, resumen: s, reporte, exoneradas, divisionLabels, L, productSalesHtml, firmasHtml } = args;
   const trib = reporte.tributario;
   const documentos = reporte.documentos ?? [];
   const devoluciones = reporte.devolucionesDetalle ?? [];
@@ -518,9 +534,9 @@ function buildPrintHtml(args: {
     ${cajerosBlock}
     ${docBlock}
     ${devBlock}
-    <div class="firmas">
+    ${firmasHtml ?? `<div class="firmas">
       <div class="firma">${esc(L.cajero)}</div>
       <div class="firma">${esc(L.gerente)}</div>
-    </div>
+    </div>`}
   </body></html>`;
 }

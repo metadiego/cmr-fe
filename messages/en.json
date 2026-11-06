@@ -3802,6 +3802,32 @@
       "notSent": "The mail server did not accept the message. It was not sent.",
       "notConfigured": "The server has no email configured. It was not sent.",
       "noRecipients": "Say who to send it to: no recipients and no center list."
+    },
+    "signOff": {
+      "title": "Sheet sign-off",
+      "signCashier": "Sign and accept",
+      "signSupervisor": "Sign as manager",
+      "signAgain": "Sign again",
+      "accept": "I accept",
+      "signing": "Signing…",
+      "cancel": "Cancel",
+      "dialogTitle": "Accept the sheet",
+      "dialogHint": "Your name, the date and time, and these figures are saved. The sheet is not closed: if a sale comes in later, it will show you signed other figures.",
+      "defaultStatement": "I confirm that the count and the totals on this sheet are correct.",
+      "acceptedBy": "Accepted by {name} · {when}",
+      "otherFigures": "Signed with other figures: total {total} · difference {difference}",
+      "unsigned": "Not signed",
+      "cashier": "Cashier",
+      "cashierNamed": "Cashier — {name}",
+      "supervisor": "Manager",
+      "signed": "Sheet signed",
+      "alreadySigned": "Someone else already signed the sheet in that role.",
+      "alreadySignedBy": "Already signed by {name} ({when}).",
+      "loadError": "Could not read the sheet's signatures.",
+      "dayTotal": "Day total",
+      "salesCash": "Cash sales",
+      "countedCash": "Cash in drawer",
+      "difference": "Difference"
     }
   },
   "gruposFacturacion": {

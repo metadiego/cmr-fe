@@ -3802,6 +3802,32 @@
       "notSent": "El servidor de correo no aceptó el mensaje. No se envió.",
       "notConfigured": "El servidor no tiene correo configurado. No se envió.",
       "noRecipients": "Indica a quién enviarlo: no hay destinatarios ni lista del centro."
+    },
+    "signOff": {
+      "title": "Firmas de la hoja",
+      "signCashier": "Firmar y aceptar",
+      "signSupervisor": "Firmar como gerente",
+      "signAgain": "Volver a firmar",
+      "accept": "Acepto",
+      "signing": "Firmando…",
+      "cancel": "Cancelar",
+      "dialogTitle": "Aceptar la hoja",
+      "dialogHint": "Se guardan tu nombre, la fecha y la hora, y estas cifras. La hoja no se cierra: si luego entra una venta, se verá que firmaste con otras cifras.",
+      "defaultStatement": "Confirmo que el conteo y los totales de esta hoja son correctos.",
+      "acceptedBy": "Aceptado por {name} · {when}",
+      "otherFigures": "Firmado con otras cifras: total {total} · diferencia {difference}",
+      "unsigned": "Sin firmar",
+      "cashier": "Cajero",
+      "cashierNamed": "Cajero — {name}",
+      "supervisor": "Gerente",
+      "signed": "Hoja firmada",
+      "alreadySigned": "Otra persona ya firmó la hoja en ese papel.",
+      "alreadySignedBy": "Ya firmó {name} ({when}).",
+      "loadError": "No se pudieron leer las firmas de la hoja.",
+      "dayTotal": "Total del día",
+      "salesCash": "Efectivo de ventas",
+      "countedCash": "Efectivo en caja",
+      "difference": "Diferencia"
     }
   },
   "gruposFacturacion": {

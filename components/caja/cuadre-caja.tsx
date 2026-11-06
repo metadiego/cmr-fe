@@ -37,6 +37,8 @@ import { useCashCountAutosave } from "@/hooks/use-cash-count-autosave";
 import { consolidatedCount } from "@/lib/caja/consolidated-count";
 import { ConsolidatedCountBar } from "@/components/caja/consolidated-count-bar";
 import { CashEmailPanel } from "@/components/caja/cash-email-panel";
+import { CashSignOffPanel, useCashSignOff } from "@/components/caja/cash-sign-off";
+import { figuresOfReport } from "@/lib/caja/sign-off";
 import { CentroPicker } from "@/components/facturacion/centro-picker";
 import { ConteoDenominaciones } from "@/components/caja/conteo-denominaciones";
 import { ResumenPagos } from "@/components/caja/resumen-pagos";
@@ -348,6 +350,23 @@ function Editor({
   const sinContar = !cerrado && vivo.sinContar;
   const porCajero = reporte.porCajero ?? [];
 
+  // Sign-off («Acepto»): the cashier signs her own sheet; caja.ver_todos signs any sheet as manager.
+  const signNow = figuresOfReport(reporte);
+  const canSignCashier = !esConsolidado && (usuarioId === undefined || usuarioId === meId);
+  const signOff = useCashSignOff({
+    sheetId: cuadreInicial?.id ?? null,
+    ensureSheet: async () => (await abrirCuadre(openPayload)).id,
+    isCashierSheet: !esConsolidado,
+    now: signNow,
+    meId,
+    canSignCashier,
+    canSignSupervisor: isGerencia,
+    centerId: centro,
+    siblings: esConsolidado ? async () => cuadres.filter((c) => c.userId).map((c) => ({ id: c.id, userId: c.userId!, division, name: cajeros.find((x) => x.userId === c.userId)?.name ?? porCajero.find((x) => x.usuarioId === c.userId)?.nombre ?? null })) : undefined,
+    siblingNow: async (sib) => figuresOfReport(await getReporteDia(fecha, division, sib.userId)),
+    onSigned: onReload,
+  });
+
   // Subtotales informativos de tarjetas (p.ej. "VISA + MASTERCARD"): ver lib/caja/totales.ts.
   const subtotalesTarjeta = React.useMemo(
     () => calcSubtotalesTarjeta(grupos, reporte.porGrupo, reporte.detalle.totalTarjetas),
@@ -537,6 +556,8 @@ function Editor({
         />
       </div>
 
+      <CashSignOffPanel signOff={signOff} now={signNow} meId={meId} canSignCashier={canSignCashier} canSignSupervisor={isGerencia} />
+
       {/* Facturas pendientes */}
       <FacturasPendientes pendientes={reporte.pendientes} centroId={centro} />
 
@@ -548,6 +569,8 @@ function Editor({
         fecha={fecha}
         centroNombre={centroNombre}
         reporte={reporte}
+        firmas={signOff.printed}
+        firmaTexto={signOff.statement}
         resumen={{
           inicio,
           salesCash,
