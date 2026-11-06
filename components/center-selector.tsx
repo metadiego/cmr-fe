@@ -64,6 +64,21 @@ export function CenterSelector() {
         style={{ backgroundColor: colores[id] }}
       />
     ) : null;
+  // «AMBOS»: one dot split into every clinic's color, so it reads as all of them together.
+  const both = centros.map((c) => colores[c.id]).filter(Boolean);
+  const allDot =
+    both.length > 0 ? (
+      <span
+        aria-hidden
+        className="inline-block size-2.5 shrink-0 rounded-full ring-1 ring-black/10 dark:ring-white/20"
+        style={{
+          background:
+            both.length === 1
+              ? both[0]
+              : `linear-gradient(90deg, ${both.map((c, i) => `${c} ${(i * 100) / both.length}% ${((i + 1) * 100) / both.length}%`).join(", ")})`,
+        }}
+      />
+    ) : null;
 
   function onChange(id: string) {
     if (id === ALL) {
@@ -101,7 +116,10 @@ export function CenterSelector() {
           </SelectItem>
         ))}
         <SelectItem value={ALL}>
-          <span className="truncate">{t("bothCenters")}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            {allDot}
+            <span className="truncate">{t("bothCenters")}</span>
+          </span>
         </SelectItem>
       </SelectContent>
     </Select>

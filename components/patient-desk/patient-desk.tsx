@@ -458,9 +458,7 @@ export function PatientDesk() {
           {tRoot("facturacion.general.sinCentro")}
         </p>
       ) : gate.necesitaPicker ? (
-        <div className="max-w-xl">
-          <CenterPicker centros={gate.centros} onPick={gate.pick} />
-        </div>
+        <CenterPicker centros={gate.centros} onPick={gate.pick} />
       ) : data.error ? (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {data.error}

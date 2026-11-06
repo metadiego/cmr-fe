@@ -1206,7 +1206,7 @@
     "inventory_live_stock": "Stock live (balanzas)",
     "ahora_mismo": "Ahora mismo",
     "productosExonerados": "Productos exonerados (IVU)",
-    "bothCenters": "Ambos"
+    "bothCenters": "AMBOS"
   },
   "admin": {
     "title": "Administración",
@@ -2825,8 +2825,8 @@
       "recordLabel": "Record",
       "cambiarPaciente": "Cambiar",
       "lista": "Lista de precios",
-      "pickCentroTitle": "Selecciona el centro",
-      "pickCentroGo": "Facturar aquí",
+      "pickCentroTitle": "¿En qué centro trabajas?",
+      "pickCentroHelp": "Esta pantalla muestra un centro a la vez. Elige con cuál trabajar.",
       "centroLabel": "Centro:",
       "cambiarCentro": "Cambiar centro",
       "medico": "Médico tratante",

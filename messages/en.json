@@ -1206,7 +1206,7 @@
     "inventory_live_stock": "Live stock (scales)",
     "ahora_mismo": "Right now",
     "productosExonerados": "Exonerated products (IVU)",
-    "bothCenters": "Both"
+    "bothCenters": "BOTH"
   },
   "admin": {
     "title": "Administration",
@@ -2825,8 +2825,8 @@
       "recordLabel": "Record",
       "cambiarPaciente": "Change",
       "lista": "Price list",
-      "pickCentroTitle": "Select the center",
-      "pickCentroGo": "Bill here",
+      "pickCentroTitle": "Which center are you working in?",
+      "pickCentroHelp": "This screen shows one center at a time. Choose which one to work in.",
       "centroLabel": "Center:",
       "cambiarCentro": "Change center",
       "medico": "Attending physician",

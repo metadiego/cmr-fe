@@ -528,7 +528,7 @@ export function FrontdeskBoard() {
       ) : gate.sinCentro ? (
         <p className="text-sm text-muted-foreground">{tRoot("facturacion.general.sinCentro")}</p>
       ) : gate.necesitaPicker ? (
-        <div className="max-w-xl"><CentroPicker centros={gate.centros} onPick={gate.pick} /></div>
+        <CentroPicker centros={gate.centros} onPick={gate.pick} />
       ) : (
         <>
           {isConsulta ? (
