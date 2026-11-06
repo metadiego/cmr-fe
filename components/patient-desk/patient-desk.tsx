@@ -164,6 +164,21 @@ export function PatientDesk() {
     consultSubtypeFilter,
     query,
   ])
+  // Nuevos/seguimiento visibles HOY en Consulta (dueño, 06-nov-2026): por paciente mostrado, no por
+  // cita — data-driven del catálogo de subtipos del tablero (consultSubtypes), nunca "nueva"/"seguimiento"
+  // a mano, para que cubra cualquier subtipo que el centro configure.
+  const consultSubtypeCounts = React.useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const s of consultSubtypes) counts.set(s.slug, 0)
+    if (kind === "consultation") {
+      for (const p of patients) {
+        for (const slug of p.consultationSubtypes) {
+          if (counts.has(slug)) counts.set(slug, (counts.get(slug) ?? 0) + 1)
+        }
+      }
+    }
+    return counts
+  }, [kind, patients, consultSubtypes])
   // List view: keep a selection that still exists, else the first patient.
   const effectiveSelected = patients.some((p) => p.patientId === selectedId)
     ? selectedId
@@ -377,6 +392,16 @@ export function PatientDesk() {
         ) : (
           <span className="text-xs text-muted-foreground">
             {t("patientsCount", { n: patients.length })}
+          </span>
+        )}
+        {!loadingDay && kind === "consultation" && consultSubtypes.length > 0 && (
+          <span className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+            {consultSubtypes.map((s) => (
+              <span key={s.slug}>
+                {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}:{" "}
+                <span className="font-medium tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
+              </span>
+            ))}
           </span>
         )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
