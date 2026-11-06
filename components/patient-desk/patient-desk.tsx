@@ -164,14 +164,17 @@ export function PatientDesk() {
     consultSubtypeFilter,
     query,
   ])
-  // Nuevos/seguimiento visibles HOY en Consulta (dueño, 06-nov-2026): por paciente mostrado, no por
-  // cita — data-driven del catálogo de subtipos del tablero (consultSubtypes), nunca "nueva"/"seguimiento"
-  // a mano, para que cubra cualquier subtipo que el centro configure.
+  // Nuevos/seguimiento EN SALA HOY (dueño, 06-nov-2026): solo pacientes PRESENTES — contar la lista
+  // completa (agendados que ni han llegado) no dice nada útil sobre lo que está pasando ahora mismo.
+  // `presentAt` ya es el de la CONSULTA (asConsultationView lo pisa con consultationPresentAt), no el
+  // de un servicio. Data-driven del catálogo de subtipos del tablero (consultSubtypes), nunca
+  // "nueva"/"seguimiento" a mano, para que cubra cualquier subtipo que el centro configure.
   const consultSubtypeCounts = React.useMemo(() => {
     const counts = new Map<string, number>()
     for (const s of consultSubtypes) counts.set(s.slug, 0)
     if (kind === "consultation") {
       for (const p of patients) {
+        if (!p.presentAt) continue
         for (const slug of p.consultationSubtypes) {
           if (counts.has(slug)) counts.set(slug, (counts.get(slug) ?? 0) + 1)
         }
@@ -395,11 +398,17 @@ export function PatientDesk() {
           </span>
         )}
         {!loadingDay && kind === "consultation" && consultSubtypes.length > 0 && (
-          <span className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+          <span className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              {t("enSala")}
+            </span>
             {consultSubtypes.map((s) => (
-              <span key={s.slug}>
-                {tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}:{" "}
-                <span className="font-medium tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
+              <span
+                key={s.slug}
+                className="inline-flex items-center gap-1 rounded-full bg-primary/10 py-0.5 pl-2.5 pr-2 text-primary"
+              >
+                <span className="text-xs font-medium">{tRoot.has(s.labelKey) ? tRoot(s.labelKey) : s.slug}</span>
+                <span className="text-sm font-bold tabular-nums">{consultSubtypeCounts.get(s.slug) ?? 0}</span>
               </span>
             ))}
           </span>

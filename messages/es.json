@@ -4853,6 +4853,7 @@
     "allTypes": "Todos los tipos",
     "filteringBy": "filtrando: {name}",
     "clearSearch": "Limpiar búsqueda",
+    "enSala": "En sala",
     "kind": {
       "all": "Todos",
       "services": "Servicios",
