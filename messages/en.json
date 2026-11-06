@@ -926,7 +926,15 @@
       "pending": "Pending",
       "refunded": "Refunded",
       "lastVisit": "Last visit",
-      "noLastVisit": "No visits on record."
+      "noLastVisit": "No visits on record.",
+      "invoiceHistoryCount": "{n, plural, one {# invoice} other {# invoices}} in the history",
+      "department": "Department",
+      "origin": "Origin",
+      "legacy": "Legacy · {origin}",
+      "newSystem": "New system",
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "pageOf": "Page {page} of {pages}"
     },
     "centerFilter": {
       "label": "Clinics",
@@ -3455,6 +3463,9 @@
       "medio": "Referral",
       "usuario": "User",
       "acciones": "Actions"
+    },
+    "grupo": {
+      "producto": "Product"
     }
   },
   "configFactura": {

@@ -926,7 +926,15 @@
       "pending": "Pendiente",
       "refunded": "Devuelto",
       "lastVisit": "Última visita",
-      "noLastVisit": "Sin visitas registradas."
+      "noLastVisit": "Sin visitas registradas.",
+      "invoiceHistoryCount": "{n, plural, one {# factura} other {# facturas}} en el historial",
+      "department": "Departamento",
+      "origin": "Origen",
+      "legacy": "Legado · {origin}",
+      "newSystem": "Sistema nuevo",
+      "prevPage": "Anterior",
+      "nextPage": "Siguiente",
+      "pageOf": "Página {page} de {pages}"
     },
     "centerFilter": {
       "label": "Centros",
@@ -3455,6 +3463,9 @@
       "medio": "Referido",
       "usuario": "Usuario",
       "acciones": "Acciones"
+    },
+    "grupo": {
+      "producto": "Producto"
     }
   },
   "configFactura": {

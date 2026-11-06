@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 
 import { listCitas, getTiposCita, type Cita, type TipoCita } from "@/lib/api/citas";
 import { getHistorialPaciente, type HistorialSesion } from "@/lib/api/frontdesk";
-import { getResumenPaciente, type ResumenPaciente } from "@/lib/api/facturas";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +16,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Pestañas de la ficha (hub): listas simples FECHA · TIPO/CONCEPTO · ESTADO, cada una llamando SOLO a
 // su endpoint (nada de recomponer lo que el BE ya suma). Extraídas de la página para mantenerla bajo el
 // techo. Handoff ficha-del-paciente-hub-y-certificacion-de-gastos.
-const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 // Fecha con el MES PRIMERO (negocio USA/PR), igual en es y en: MM/DD/YYYY. Locale EXPLÍCITO en-US a
 // propósito (permitido por la norma 3b) porque los formatos con nombre siguen el orden del locale y en
@@ -188,41 +186,8 @@ export function FichaTerapias({ pacienteId, centro }: { pacienteId: string; cent
   );
 }
 
-export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
-  const t = useTranslations("patients.hub");
-  const tRoot = useTranslations();
-  const res = useResource<ResumenPaciente>(() => getResumenPaciente(pacienteId, undefined, centro), [pacienteId, centro]);
-  const data = res.state.kind === "ok" ? res.state.data : null;
-  const invoices = data?.invoices ?? [];
-  const concepto = (keys?: string[]) =>
-    (keys ?? []).map((k) => (tRoot.has(k) ? tRoot(k) : k)).join(", ") || "—";
-  if (res.state.kind === "loading") return <Vacio texto={t("loading")} />;
-  if (res.state.kind === "fail") return <p className="text-sm text-destructive">{res.state.message}</p>;
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label={t("total")} value={money.format(data?.totalGeneral ?? 0)} />
-        <Kpi label={t("collected")} value={money.format(data?.totalCobrado ?? 0)} />
-        <Kpi label={t("pending")} value={money.format(data?.totalPendiente ?? 0)} />
-        <Kpi label={t("refunded")} value={money.format(data?.totalDevuelto ?? 0)} />
-      </div>
-      {invoices.length === 0 ? (
-        <Vacio texto={t("noFacturas")} />
-      ) : (
-        <Tabla head={<tr><Th>{t("invoice")}</Th><Th>{t("concept")}</Th><Th>{t("status")}</Th><Th right>{t("net")}</Th></tr>}>
-          {invoices.map((f) => (
-            <tr key={f.id} className={"border-t " + (f.cuenta ? "" : "opacity-60")}>
-              <Td className="font-mono">{f.reference}</Td>
-              <Td>{concepto(f.conceptoLabelKeys)}</Td>
-              <Td><Estado value={f.status} /></Td>
-              <Td className="text-right font-medium tabular-nums">{money.format(f.neto ?? 0)}</Td>
-            </tr>
-          ))}
-        </Tabla>
-      )}
-    </div>
-  );
-}
+// The «Facturación» tab lives in its own file (full history, paginated).
+export { FichaFacturacion } from "@/components/clientes/ficha-facturacion";
 
 // Tarjeta «Última visita» del Resumen: la cita más reciente del paciente (por fecha). Reusa listCitas.
 export function FichaUltimaVisita({ pacienteId, centro }: { pacienteId: string; centro?: string }) {
@@ -257,12 +222,4 @@ function Th({ children, right }: { children: React.ReactNode; right?: boolean })
 }
 function Td({ children, className }: { children: React.ReactNode; className?: string }) {
   return <td className={"px-3 py-2 " + (className ?? "")}>{children}</td>;
-}
-function Kpi({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md bg-card px-3 py-2 ring-1 ring-foreground/10 shadow-sm shadow-[rgba(16,32,64,0.06)]">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold tabular-nums">{value}</div>
-    </div>
-  );
 }
