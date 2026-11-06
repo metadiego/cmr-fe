@@ -4,10 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import { listFacturas, type Factura } from "@/lib/api/facturas";
+import { listFacturas, imprimirFactura, type Factura } from "@/lib/api/facturas";
 import type { Paginated } from "@/lib/api/types";
 import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
+import { buildRecibo } from "@/lib/factura/build-recibo";
+import { buildReceiptText } from "@/lib/print/receipt-labels";
+import { RECEIPT_LOGO_MAX_HEIGHT_MM, receiptToEscPos } from "@/lib/print/receipt-escpos";
+import { loadLogoRaster } from "@/lib/print/load-logo";
+import { BackupPrintButton } from "@/components/facturacion/backup-print-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -106,8 +111,21 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
 // leaving the patient's record. «Abrir factura» goes to the full editor when needed.
 function InvoiceQuickView({ invoice, centro, onClose }: { invoice: Factura | null; centro?: string; onClose: () => void }) {
   const t = useTranslations("patients.hub");
+  const tReceipt = useTranslations("receipt");
+  const tRoot = useTranslations();
   const center = (invoice as { clinicId?: string } | null)?.clinicId ?? centro;
   const qs = center ? `centro=${encodeURIComponent(center)}` : "";
+  // Same backup path as the invoice editor (components/facturacion/receipt-print-dialog.tsx): raw
+  // ESC/POS through the print hub, for when the ficha's quick-view browser print fails/isn't set up —
+  // the owner noticed this view never had it. `imprimirFactura` marks it printed on the BE (same call
+  // the editor makes), so the audit trail is identical regardless of where the reprint was triggered.
+  async function buildBackupBytes(): Promise<Uint8Array> {
+    if (!invoice) throw new Error("no invoice");
+    const r = await imprimirFactura(invoice.id, center);
+    const recibo = buildRecibo(r.invoice, {}, {}, r.quoteNumber ?? null);
+    const logo = await loadLogoRaster(recibo.logoUrl ?? "/img/logo_cmr.png", RECEIPT_LOGO_MAX_HEIGHT_MM);
+    return receiptToEscPos(recibo, buildReceiptText(tReceipt, tRoot), logo);
+  }
   return (
     <Dialog open={!!invoice} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="flex max-h-[calc(100svh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[28rem]">
@@ -123,6 +141,7 @@ function InvoiceQuickView({ invoice, centro, onClose }: { invoice: Factura | nul
         )}
         {invoice && (
           <div className="flex justify-end gap-2 border-t px-4 py-3">
+            <BackupPrintButton centerId={center} buildBytes={buildBackupBytes} />
             <Button variant="outline" size="sm" onClick={() => window.open(`/print/invoice/${invoice.id}${qs ? `?${qs}` : ""}`, "_blank", "noopener")}>
               {t("printInvoice")}
             </Button>
