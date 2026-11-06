@@ -1,7 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { completeEmail, completeRecipients, domainSuggestions, lastToken, readEmailDomains } from "./domains.ts";
+import { parseRecipients } from "../caja/cash-email.ts";
+
+import { commitRecipient, completeEmail, completeRecipients, domainSuggestions, lastToken, readEmailDomains } from "./domains.ts";
 
 const D = ["centrodemedicinaregenerativa.com", "cmr.pr"];
 
@@ -46,4 +48,20 @@ test("domainSuggestions: only after '@', matching the typed start, never the com
   assert.deepEqual(domainSuggestions("ana", D), []);
   assert.deepEqual(domainSuggestions("@cen", D), []);
   assert.deepEqual(domainSuggestions("ana@gm", D), []);
+});
+
+test("commitRecipient: Enter/comma completes and leaves ', ' for the next one, never a double comma", () => {
+  assert.equal(commitRecipient("larciles", D), "larciles@centrodemedicinaregenerativa.com, ");
+  assert.equal(commitRecipient("a@gmail.com, larciles", D), "a@gmail.com, larciles@centrodemedicinaregenerativa.com, ");
+  assert.equal(commitRecipient("larciles@centrodemedicinaregenerativa.com, ", D), "larciles@centrodemedicinaregenerativa.com, ");
+  assert.equal(commitRecipient("", D), "");
+  assert.equal(commitRecipient("ana@gmail.com", []), "ana@gmail.com, ");
+});
+
+test("a single recipient with the trailing comma left by Enter sends fine: no empty or invalid piece", () => {
+  assert.deepEqual(parseRecipients("larciles@centrodemedicinaregenerativa.com, "), {
+    emails: ["larciles@centrodemedicinaregenerativa.com"],
+    invalid: [],
+  });
+  assert.deepEqual(parseRecipients(" , ;"), { emails: [], invalid: [] });
 });

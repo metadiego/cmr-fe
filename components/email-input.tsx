@@ -4,7 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 
 import { getMyPreferences } from "@/lib/api/preferences";
-import { completeEmail, completeRecipients, domainSuggestions, lastToken, readEmailDomains } from "@/lib/email/domains";
+import { commitRecipient, completeEmail, completeRecipients, domainSuggestions, lastToken, readEmailDomains } from "@/lib/email/domains";
 import { Input } from "@/components/ui/input";
 
 // The ONE email field of the app (handoff docs/specs/email-domain-autocomplete-handoff.md): a bare user
@@ -59,12 +59,18 @@ export function EmailInput({ value, onValueChange, multiple = false, onKeyDown, 
       accept(suggestions[0]);
       return;
     }
-    if (e.key === "Enter" || (multiple && e.key === ",")) {
+    if (multiple && (e.key === "Enter" || e.key === ",")) {
+      // A list: complete what is typed and leave ", " ready for the next recipient. Enter never sends.
+      e.preventDefault();
+      onValueChange(commitRecipient(value, domains));
+      return;
+    }
+    if (e.key === "Enter") {
       const next = completeAll(value);
       if (next !== value) {
         // Completed: this keystroke only completes; the next Enter does what the form does.
         e.preventDefault();
-        onValueChange(multiple && e.key === "," ? `${next}, ` : next);
+        onValueChange(next);
         return;
       }
     }

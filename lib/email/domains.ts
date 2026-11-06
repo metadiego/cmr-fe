@@ -50,3 +50,12 @@ export function domainSuggestions(token: string, domains: string[]): string[] {
   const typed = token.slice(at + 1).toLowerCase();
   return domains.filter((d) => d.startsWith(typed) && d !== typed).map((d) => `${user}@${d}`);
 }
+
+// Enter / comma in a list: complete what is typed and leave ", " ready for the next recipient. Nothing
+// typed after the last separator = no change (never a second comma). The trailing ", " is harmless:
+// parseRecipients (lib/caja/cash-email.ts) skips empty pieces.
+export function commitRecipient(text: string, domains: string[]): string {
+  if (!lastToken(text).token.trim()) return text;
+  const parts = text.split(/[\s,;]+/).filter(Boolean);
+  return `${parts.map((p) => completeEmail(p, domains)).join(", ")}, `;
+}
