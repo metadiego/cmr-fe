@@ -934,7 +934,9 @@
       "newSystem": "New system",
       "prevPage": "Previous",
       "nextPage": "Next",
-      "pageOf": "Page {page} of {pages}"
+      "pageOf": "Page {page} of {pages}",
+      "printInvoice": "Print",
+      "openInvoice": "Open invoice"
     },
     "centerFilter": {
       "label": "Clinics",

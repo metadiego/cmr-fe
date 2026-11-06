@@ -10,6 +10,7 @@ import { useResource } from "@/hooks/use-resource";
 import { parseDayUTC } from "@/lib/format/fecha";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Patient record, «Facturación» tab: the patient's FULL invoice history, every department (consulta +
 // general), legacy invoices included (`legacyOrigin`), newest first, paginated — from GET /invoices?patientId
@@ -25,6 +26,7 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
   const t = useTranslations("patients.hub");
   const tRoot = useTranslations();
   const [page, setPage] = React.useState(1);
+  const [shown, setShown] = React.useState<Factura | null>(null);
   const res = useResource<Paginated<Factura>>(
     () => listFacturas({ patientId: pacienteId, page, limit: PAGE_SIZE }, centro),
     [pacienteId, centro, page],
@@ -62,12 +64,13 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
           </thead>
           <tbody className="divide-y">
             {items.map((f) => {
-              const href = `/billing/invoices/${f.id}${centro ? `?centro=${encodeURIComponent(centro)}` : ""}`;
               const ctx = (f as { context?: string | null }).context;
               return (
                 <tr key={f.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2 font-mono">
-                    <Link href={href} className="underline-offset-2 hover:underline">{f.number || "—"}</Link>
+                    <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={() => setShown(f)}>
+                      {f.number || "—"}
+                    </button>
                   </td>
                   <td className="px-3 py-2 tabular-nums">{day(f.date)}</td>
                   <td className="px-3 py-2">{ctx ? label(`caja.division.${ctx === "consulta" ? "consulta" : "general"}`, ctx) : "—"}</td>
@@ -87,6 +90,7 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
           </tbody>
         </table>
       </div>
+      <InvoiceQuickView invoice={shown} centro={centro} onClose={() => setShown(null)} />
       {pages > 1 && (
         <div className="flex items-center justify-end gap-2 text-sm">
           <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{t("prevPage")}</Button>
@@ -95,5 +99,39 @@ export function FichaFacturacion({ pacienteId, centro }: { pacienteId: string; c
         </div>
       )}
     </div>
+  );
+}
+
+// Click on a number: the invoice itself, as printed (the /print/invoice page in an iframe), without
+// leaving the patient's record. «Abrir factura» goes to the full editor when needed.
+function InvoiceQuickView({ invoice, centro, onClose }: { invoice: Factura | null; centro?: string; onClose: () => void }) {
+  const t = useTranslations("patients.hub");
+  const center = (invoice as { clinicId?: string } | null)?.clinicId ?? centro;
+  const qs = center ? `centro=${encodeURIComponent(center)}` : "";
+  return (
+    <Dialog open={!!invoice} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[calc(100svh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-[28rem]">
+        <DialogHeader className="border-b px-4 py-3">
+          <DialogTitle className="font-mono text-base">{invoice?.number ?? ""}</DialogTitle>
+        </DialogHeader>
+        {invoice && (
+          <iframe
+            src={`/print/invoice/${invoice.id}?embed=1${qs ? `&${qs}` : ""}`}
+            title={invoice.number ?? invoice.id}
+            className="block h-[min(75svh,44rem)] w-full bg-white"
+          />
+        )}
+        {invoice && (
+          <div className="flex justify-end gap-2 border-t px-4 py-3">
+            <Button variant="outline" size="sm" onClick={() => window.open(`/print/invoice/${invoice.id}${qs ? `?${qs}` : ""}`, "_blank", "noopener")}>
+              {t("printInvoice")}
+            </Button>
+            <Button size="sm" asChild>
+              <Link href={`/billing/invoices/${invoice.id}${qs ? `?${qs}` : ""}`}>{t("openInvoice")}</Link>
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
