@@ -40,6 +40,7 @@ import { TherapyQueueStrip } from "@/components/patient-desk/therapy-queue-strip
 import { PatientDeskSkeleton } from "@/components/patient-desk/patient-desk-skeleton"
 import type { ScheduleRequest } from "@/components/patient-desk/patient-detail"
 import { LiveBadge } from "@/components/live-badge"
+import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner"
 import { PageContainer, PageHeader } from "@/components/ui/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -233,6 +234,11 @@ export function PatientDesk() {
         title={t("title")}
         count={data.live && <LiveBadge label={t("live")} />}
       />
+      {!gate.cargando && !gate.sinCentro && !gate.necesitaPicker && (
+        <div className="mb-3">
+          <EnTerapiaSinAsistirBanner centro={gate.centro} />
+        </div>
+      )}
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative min-w-[240px] flex-1 sm:max-w-md">
