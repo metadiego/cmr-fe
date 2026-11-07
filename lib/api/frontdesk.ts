@@ -503,15 +503,15 @@ export async function getAvisosFrontdesk(
   return apiFetch<FrontdeskAvisosReporte>(path, {}, centroId);
 }
 
-// Estatus de enfermeras del día (triage/vitales): actuales + catálogo de tipos (color/labelKey) +
-// set tipado (PR #141: SetNurseStatusDto — statusTipoId null = reset).
+// Estatus de personal del día (triage/vitales/descanso): actuales + catálogo + set (PR #141, statusTipoId null = reset).
 export type NurseStatusTipo = components["schemas"]["NurseStatusTipoEntity"];
-export type SetNurseStatusPayload = components["schemas"]["SetNurseStatusDto"];
+export type SetNurseStatusPayload = components["schemas"]["SetNurseStatusDto"] & { durationMinutes?: number }; // caducidad, BE PR #498 — a mano hasta gen:api
 export type NurseStatusActual = {
   staffId: string;
   personalNombre?: string | null; // NO en el mapa — dejado en español
   statusTypeId: string | null;
   date?: string;
+  expiresAt?: string | null; // caducidad (BE PR #498); vencido = ya no viene en la lectura
 };
 export function getNurseStatusTipos(centroId?: string): Promise<NurseStatusTipo[]> {
   return apiFetch<NurseStatusTipo[]>(`/frontdesk/nurse-status/tipos`, {}, centroId);
