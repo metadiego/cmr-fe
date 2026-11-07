@@ -425,7 +425,13 @@ export function SesionesFormato({
           {page.map((s, i) => (
             <div key={i} style={{ breakInside: "avoid", minHeight: SESSION_BLOCK_MIN_HEIGHT, display: "flex", flexDirection: "column" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 12 }}>
-                <span />
+                <span>
+                  {(s.fields ?? []).map((f, fi) => (
+                    <span key={f.clave ?? fi} style={{ marginRight: 16 }}>
+                      <b>{f.label ?? label(f.labelKey)}</b> {f.valor ?? ""}
+                    </span>
+                  ))}
+                </span>
                 <span>
                   <b>{label("formato.sessionNumber", "SESIÓN # :")}</b> {s.session ?? ""}
                 </span>

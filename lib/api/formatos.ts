@@ -166,7 +166,10 @@ export type FormatoRenderMeta = {
 // Bloque por SESIÓN (láser a color multipágina). Verificado en vivo (GET /formats/terapia_laser_iv/assembly):
 // el BE ya manda estos 3 campos en INGLÉS (`session`/`date`/`notes`) — no son los nombres en español que
 // asumía esta definición antes, y por eso el número de sesión y la fecha nunca se imprimían.
-export type FormatoSesion = { session?: string | null; date?: string | null; notes?: string[] };
+// `fields`: per-session header values printed left of «SESIÓN #», e.g. «DOSIS VITAMINA C : 25g» (legacy
+// sueroterapia_form.php). Handoff docs/specs/session-sheet-dose-handoff-be.md; absent → nothing printed.
+export type FormatoSesionCampo = { clave?: string; label?: string | null; labelKey?: string | null; valor?: string | null };
+export type FormatoSesion = { session?: string | null; date?: string | null; notes?: string[]; fields?: FormatoSesionCampo[] };
 
 // Documento ARMADO (print-ready) para una sesión. El `layout` es el discriminador:
 // "campos" = encabezado de pares etiqueta/valor (no rejilla); "tabla" = rejilla de columnas/filas.
