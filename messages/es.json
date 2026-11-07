@@ -1217,7 +1217,8 @@
     "inventory_live_stock": "Stock live (balanzas)",
     "ahora_mismo": "Ahora mismo",
     "productosExonerados": "Productos exonerados (IVU)",
-    "bothCenters": "AMBOS"
+    "bothCenters": "AMBOS",
+    "bodyMeasurementsUnlinked": "Medidas sin vincular"
   },
   "admin": {
     "title": "Administración",
@@ -5230,5 +5231,70 @@
   "emailInput": {
     "suggestions": "Dominios sugeridos",
     "tabHint": "Tab ↹"
+  },
+  "bodyMeasurements": {
+    "title": "Medidas sin vincular",
+    "description": "Lecturas de báscula y cinta que no encontraron su visita GLP-1: un récord equivocado o un paciente que no se metió al frontdesk. Al vincularla, la medida toma el paciente y el día de esa visita.",
+    "count": "{n, plural, one {# medida} other {# medidas}}",
+    "from": "Desde",
+    "empty": "No hay medidas sueltas",
+    "emptyHint": "Todas las lecturas de este rango ya están en su visita.",
+    "loadError": "No se pudieron cargar las medidas",
+    "retry": "Reintentar",
+    "noPermission": "No tienes permiso para ver las medidas corporales.",
+    "noPatient": "Sin paciente",
+    "link": "Vincular",
+    "linking": "Vinculando…",
+    "linked": "Medida vinculada a la visita",
+    "cancel": "Cancelar",
+    "linkTitle": "Vincular a una visita",
+    "linkHint": "Visitas del frontdesk del {date} en {center}. Primero las del mismo paciente.",
+    "searchVisit": "Buscar por nombre, récord o servicio",
+    "visitsError": "No se pudieron cargar las visitas de ese día",
+    "noVisits": "No hay visitas ese día que coincidan",
+    "samePatient": "Mismo paciente",
+    "kind": {
+      "scale": "Báscula",
+      "tape": "Cinta"
+    },
+    "col": {
+      "date": "Fecha",
+      "center": "Centro",
+      "kind": "Tipo",
+      "patient": "Paciente",
+      "values": "Valores",
+      "source": "Origen"
+    },
+    "field": {
+      "weightKg": "Peso (kg)",
+      "bodyFatPct": "Grasa %",
+      "bmi": "IMC",
+      "skeletalMusclePct": "Músculo esq. %",
+      "muscleMassKg": "Masa muscular (kg)",
+      "proteinPct": "Proteína %",
+      "bmrKcal": "Metabolismo basal (kcal)",
+      "visceralFat": "Grasa visceral",
+      "hydrationPct": "Hidratación %",
+      "boneMassKg": "Masa ósea (kg)",
+      "metabolicAge": "Edad metabólica",
+      "neck": "Cuello",
+      "shoulder": "Hombro",
+      "leftBiceps": "Bíceps izq.",
+      "rightBiceps": "Bíceps der.",
+      "chest": "Pecho",
+      "waist": "Cintura",
+      "abdomen": "Abdomen",
+      "hip": "Cadera",
+      "leftThigh": "Muslo izq.",
+      "rightThigh": "Muslo der.",
+      "leftCalf": "Pantorrilla izq.",
+      "rightCalf": "Pantorrilla der.",
+      "waistHipRatio": "Cintura/cadera"
+    },
+    "error": {
+      "alreadyLinked": "Esa visita ya tiene su medida de este tipo",
+      "visionNotConfigured": "La lectura por imagen aún no está configurada en el servidor",
+      "visionUnreadable": "No se pudo leer la imagen de la báscula"
+    }
   }
 }

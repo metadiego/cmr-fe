@@ -41749,6 +41749,614 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/medidas-corporales/bascula-imagen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/bascula-imagen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScaleImage[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/scale-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/scale-image`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScaleImage[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/bascula-imagen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/bascula-imagen`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScaleImage[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/scale-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/scale-image`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_ingestScaleImage[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/bascula-imagen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día. */
+        post: operations["BodyMeasurementsController_ingestScaleImage[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/scale-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día. */
+        post: operations["BodyMeasurementsController_ingestScaleImage[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/bascula-imagen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día. */
+        post: operations["BodyMeasurementsController_ingestScaleImage[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/scale-image": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Entrada de la báscula por IMAGEN (atajo de iOS: captura de la app de la báscula GE). multipart `image` (PNG/JPG, máx. 5 MB) + record | codclien ("R15808") | patientId. La IA configurada lee los campos; se guarda por la misma puerta, source = vision:<proveedor>, y se enlaza a la visita GLP-1 del día. */
+        post: operations["BodyMeasurementsController_ingestScaleImage[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/sin-vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/sin-vincular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_listUnlinked[0]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/unlinked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/unlinked`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_listUnlinked[1]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/sin-vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/sin-vincular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_listUnlinked[2]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/unlinked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/unlinked`, que devuelve lo mismo con los nombres en inglés.
+         */
+        get: operations["BodyMeasurementsController_listUnlinked[3]_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/sin-vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota. */
+        get: operations["BodyMeasurementsController_listUnlinked[4]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/unlinked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota. */
+        get: operations["BodyMeasurementsController_listUnlinked[5]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/sin-vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota. */
+        get: operations["BodyMeasurementsController_listUnlinked[6]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/unlinked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Medidas sin visita (el hub): primero intenta enlazar cada una sola; lista solo lo que queda suelto, con el paciente y su récord. `from` (YYYY-MM-DD, por defecto 14 días atrás); `centerIds` acota. */
+        get: operations["BodyMeasurementsController_listUnlinked[7]_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/bascula/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/bascula/{id}/vincular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkScale[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/scale/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/scale/{id}/link`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkScale[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/bascula/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/bascula/{id}/vincular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkScale[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/scale/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/scale/{id}/link`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkScale[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/bascula/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkScale[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/scale/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkScale[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/bascula/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkScale[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/scale/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de báscula suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkScale[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/cinta/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/cinta/{id}/vincular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkTape[0]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/medidas-corporales/tape/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/medidas-corporales/tape/{id}/link`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkTape[1]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/cinta/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/cinta/{id}/vincular`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkTape[2]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/body-measurements/tape/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita.
+         * @deprecated
+         * @description **Deprecado.** Sigue funcionando y no se va a apagar sin avisar, pero lo nuevo va en `/api/v2/body-measurements/tape/{id}/link`, que devuelve lo mismo con los nombres en inglés.
+         */
+        post: operations["BodyMeasurementsController_linkTape[3]_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/cinta/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkTape[4]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/medidas-corporales/tape/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkTape[5]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/cinta/{id}/vincular": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkTape[6]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v2/body-measurements/tape/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enlaza a mano una medida de cinta suelta a una visita; toma el paciente y el día de la visita. Escritura en el centro de la visita. */
+        post: operations["BodyMeasurementsController_linkTape[7]_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/inventario/balanza/productos": {
         parameters: {
             query?: never;
@@ -55449,7 +56057,7 @@ export interface components {
             slug: string;
             labelKey: string;
             /** @enum {string} */
-            type: "numero" | "texto" | "select" | "readonly" | "calculado";
+            type: "readonly" | "numero" | "texto" | "select" | "calculado";
             /** @enum {string} */
             role: "cantidad" | "accion" | "producto" | "subtotal" | "descuento" | "impuesto" | "precio" | "tarifa" | "multiplicador" | "informativo";
             /**
@@ -59588,6 +60196,24 @@ export interface components {
             patientId?: string;
             /** @description Contenido del CSV de Renpho (si no se sube archivo). */
             csv?: string;
+        };
+        IngestScaleImageDto: {
+            /** @description Récord; el atajo manda "R15808" (o "M15808") y la letra se quita. / Record; the leading letter is stripped. */
+            medicalRecordNumber?: string;
+            /** @description Código legacy del paciente. El atajo del legado manda aquí "R" + récord, y se trata como récord. / Legacy patient code; "R" + record is taken as the record. */
+            codclien?: string;
+            /**
+             * Format: uuid
+             * @description Id del paciente (gana sobre record y codclien). / Patient id (wins).
+             */
+            patientId?: string;
+        };
+        LinkReadingDto: {
+            /**
+             * Format: uuid
+             * @description La visita (sesión de frontdesk) a la que se enlaza; la medida toma su paciente y su día. / The visit; the reading takes its patient and day.
+             */
+            sessionId: string;
         };
         IngestScaleReadingsDto: {
             /** @description Identificador de la balanza (p. ej. la MAC del ESP32). */
@@ -122056,6 +122682,990 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_ingestScaleImage[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["IngestScaleImageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_UNREADABLE (bodyMeasurements.error.visionUnreadable): la IA no vio un peso; no se guarda nada. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BODY_SCALE_VISION_NOT_CONFIGURED (bodyMeasurements.error.visionNotConfigured): no hay proveedor o llave de IA en el servidor. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[0]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[1]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[2]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[3]_v1": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[4]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[5]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[6]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_listUnlinked[7]_v2": {
+        parameters: {
+            query?: {
+                /** @description Centros a los que acotar la lectura, separados por coma; sin él, todos donde se tiene el permiso. / Centers to narrow the read to; without it, every center where the caller holds the permission. */
+                centerIds?: string[];
+                /** @description Desde qué día (YYYY-MM-DD); por defecto, los últimos 14 días. / From which day; default the last 14 days. */
+                from?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkScale[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de báscula. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[0]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[1]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[2]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[3]_v1": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[4]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[5]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[6]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "BodyMeasurementsController_linkTape[7]_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkReadingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description BODY_MEASUREMENT_ALREADY_LINKED (bodyMeasurements.error.alreadyLinked): la visita ya tiene su medida de cinta. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

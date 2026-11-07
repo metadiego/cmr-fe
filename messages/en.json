@@ -1217,7 +1217,8 @@
     "inventory_live_stock": "Live stock (scales)",
     "ahora_mismo": "Right now",
     "productosExonerados": "Exonerated products (IVU)",
-    "bothCenters": "BOTH"
+    "bothCenters": "BOTH",
+    "bodyMeasurementsUnlinked": "Unlinked measurements"
   },
   "admin": {
     "title": "Administration",
@@ -5230,5 +5231,70 @@
   "emailInput": {
     "suggestions": "Suggested domains",
     "tabHint": "Tab ↹"
+  },
+  "bodyMeasurements": {
+    "title": "Unlinked measurements",
+    "description": "Scale and tape readings that found no GLP-1 visit: a wrong record, or a patient never put on the frontdesk. Linking one moves it to that visit's patient and day.",
+    "count": "{n, plural, one {# measurement} other {# measurements}}",
+    "from": "From",
+    "empty": "No loose measurements",
+    "emptyHint": "Every reading in this range is already on its visit.",
+    "loadError": "The measurements could not be loaded",
+    "retry": "Retry",
+    "noPermission": "You do not have permission to see body measurements.",
+    "noPatient": "No patient",
+    "link": "Link",
+    "linking": "Linking…",
+    "linked": "Measurement linked to the visit",
+    "cancel": "Cancel",
+    "linkTitle": "Link to a visit",
+    "linkHint": "Frontdesk visits on {date} at {center}. The same patient's first.",
+    "searchVisit": "Search by name, record or service",
+    "visitsError": "That day's visits could not be loaded",
+    "noVisits": "No visits that day match",
+    "samePatient": "Same patient",
+    "kind": {
+      "scale": "Scale",
+      "tape": "Tape"
+    },
+    "col": {
+      "date": "Date",
+      "center": "Center",
+      "kind": "Kind",
+      "patient": "Patient",
+      "values": "Values",
+      "source": "Source"
+    },
+    "field": {
+      "weightKg": "Weight (kg)",
+      "bodyFatPct": "Body fat %",
+      "bmi": "BMI",
+      "skeletalMusclePct": "Skeletal muscle %",
+      "muscleMassKg": "Muscle mass (kg)",
+      "proteinPct": "Protein %",
+      "bmrKcal": "BMR (kcal)",
+      "visceralFat": "Visceral fat",
+      "hydrationPct": "Hydration %",
+      "boneMassKg": "Bone mass (kg)",
+      "metabolicAge": "Metabolic age",
+      "neck": "Neck",
+      "shoulder": "Shoulder",
+      "leftBiceps": "Left biceps",
+      "rightBiceps": "Right biceps",
+      "chest": "Chest",
+      "waist": "Waist",
+      "abdomen": "Abdomen",
+      "hip": "Hip",
+      "leftThigh": "Left thigh",
+      "rightThigh": "Right thigh",
+      "leftCalf": "Left calf",
+      "rightCalf": "Right calf",
+      "waistHipRatio": "Waist/hip ratio"
+    },
+    "error": {
+      "alreadyLinked": "That visit already has its measurement of this kind",
+      "visionNotConfigured": "Reading by image is not configured on the server yet",
+      "visionUnreadable": "The scale image could not be read"
+    }
   }
 }

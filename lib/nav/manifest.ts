@@ -61,6 +61,7 @@ export const NAV_MANIFEST: NavEntry[] = [
   { clave: "panel-enfermeria", route: "/services/nursing-panel", group: "services", order: 4 },
   { clave: "servicios", route: "/boards/servicios", group: "services", order: 5 },
   { clave: "cambio-de-protocolo", route: "/patients/protocol-change", group: "services", order: 6 },
+  { clave: "body-measurements-unlinked", route: "/body-measurements/unlinked", group: "services", order: 7 }, // BE #509
   // Billing
   { clave: "facturacion", route: "/billing/invoices", group: "billing", order: 1 },
   { clave: "consultas", route: "/billing/consultations", group: "billing", order: 2 },
