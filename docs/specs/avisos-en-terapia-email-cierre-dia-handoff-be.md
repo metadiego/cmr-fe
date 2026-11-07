@@ -35,6 +35,8 @@ dueño no distingue tono entre uno y otro. Debe explicar, no solo listar:
   tratamiento, historial clínico/de servicio).
 - Que esto alimenta las ESTADÍSTICAS de técnicos, enfermeras y médicos — dejar sesiones sin cerrar
   ensucia esos números para todo el equipo, no solo para quien la dejó así.
+- Que es un reflejo del VALOR PROFESIONAL del propio trabajador: cerrar bien su trabajo es parte de lo
+  que lo hace valioso para el centro, no un trámite aparte.
 - La lista de pacientes/sesiones concretas que ese usuario dejó sin asistir (fecha, servicio,
   paciente).
 
