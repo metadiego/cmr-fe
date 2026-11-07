@@ -100,6 +100,47 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
     ) : (
       <span>{campoValor(c)}</span>
     );
+  // «sesiones» patient line, legacy-style: one column per field (NOMBRE | RECORD), on a rule. Inline
+  // grid: the print window has no Tailwind, and «gap-x-6» printed «LOZADARECORD #» glued together.
+  const pacienteSesiones = (
+    <div
+      style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(1, campos.length || 2)}, 1fr)`, gap: 12, marginTop: 18, paddingBottom: 8, borderBottom: "1px solid #ccc", fontSize: 11 }}
+    >
+      {campos.length > 0 ? (
+        campos.map((c) => (
+          <span key={c.clave}>
+            <b>{c.label ?? `${label(c.labelKey)} :`}</b> {campoValor(c)}
+          </span>
+        ))
+      ) : (
+        <>
+          <b>{d.patient?.name ?? "—"}</b>
+          <span>{d.patient?.medicalRecordNumber ? `${t("recordLabel")} #${d.patient.medicalRecordNumber}` : ""}</span>
+        </>
+      )}
+    </div>
+  );
+  const membrete = (
+    <>
+          {/* Membrete: el bloque de títulos (empresa / centro / título) queda CENTRADO e intacto; el logo va
+              ARRIBA-IZQUIERDA en posición absoluta para no empujar ni una línea (regla dura del handoff:
+              si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
+          <div className="relative text-center" style={{ position: "relative" }}>
+            {/* Inline position: the print window has no Tailwind, and the logo landed centred over the title. */}
+            <div className="absolute left-0 top-0" style={{ position: "absolute", left: 0, top: 0 }}>
+              <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
+            </div>
+            {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa NI la del centro (solo logo +
+                título) — el logo de esos formatos ya trae "CENTRO DE MEDICINA REGENERATIVA" horneado. */}
+            {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
+            {!ocultarEmpresa && d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
+            {/* Línea más chica arriba del título (p. ej. "Cámara Energética" sobre "CONTROL DE SESIONES"). */}
+            {render.subtitulo && <div className="text-sm font-semibold">{render.subtitulo}</div>}
+            <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
+          </div>
+
+    </>
+  );
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between no-print">
@@ -126,22 +167,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
           arriba. Norma repetida del dueño: los reportes ocupan toda la página con aire. */}
       <div ref={printRef} className="formato-print rounded-lg border bg-white p-6 text-black">
         <div className="formato-doc flex min-h-[70vh] flex-col">
-          {/* Membrete: el bloque de títulos (empresa / centro / título) queda CENTRADO e intacto; el logo va
-              ARRIBA-IZQUIERDA en posición absoluta para no empujar ni una línea (regla dura del handoff:
-              si el logo mueve algo, está mal). En rejillas apretadas el logo baja a 32px. */}
-          <div className="relative text-center" style={{ position: "relative" }}>
-            {/* Inline position: the print window has no Tailwind, and the logo landed centred over the title. */}
-            <div className="absolute left-0 top-0" style={{ position: "absolute", left: 0, top: 0 }}>
-              <LogoFormato logoUrl={d.letterhead?.logoUrl} size={esCampos ? 42 : 32} />
-            </div>
-            {/* Arquetipos 1 y 4 del legacy NO llevan la línea de empresa NI la del centro (solo logo +
-                título) — el logo de esos formatos ya trae "CENTRO DE MEDICINA REGENERATIVA" horneado. */}
-            {!ocultarEmpresa && <div className="text-base font-bold uppercase tracking-wide">{t("formatoEmpresa")}</div>}
-            {!ocultarEmpresa && d.letterhead?.center && <div className="text-sm font-semibold uppercase">{d.letterhead.center}</div>}
-            {/* Línea más chica arriba del título (p. ej. "Cámara Energética" sobre "CONTROL DE SESIONES"). */}
-            {render.subtitulo && <div className="text-sm font-semibold">{render.subtitulo}</div>}
-            <h2 className="mt-1 text-lg font-bold uppercase">{d.title}</h2>
-          </div>
+          {membrete}
 
           {/* Selectores de tipo (p. ej. RADIAL/FOCAL en Ondas de Choque): una casilla en blanco por opción,
               a la izquierda, antes de los campos — se marca a mano cuál aplica. Verificado en vivo contra
@@ -165,20 +191,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                   "Nano + Láser Intravenoso" trae un 3er campo FECHA que "Vit C + Láser IV" no trae) igual
                   que en el layout "campos", así que se pinta tal cual viene, en línea, sin inventar qué
                   campos mostrar. Fallback a `d.patient` solo si el BE no manda `fields` (contrato viejo). */}
-              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 border-b pb-2 text-sm">
-                {campos.length > 0 ? (
-                  campos.map((c) => (
-                    <span key={c.clave}>
-                      <span className="font-bold">{c.label ?? `${label(c.labelKey)} :`}</span> {campoValor(c)}
-                    </span>
-                  ))
-                ) : (
-                  <>
-                    <span className="text-base font-bold">{d.patient?.name ?? "—"}</span>
-                    {d.patient?.medicalRecordNumber && <span className="font-semibold">{t("recordLabel")} #{d.patient.medicalRecordNumber}</span>}
-                  </>
-                )}
-              </div>
+              {pacienteSesiones}
               {/* Láser a color por sesión (multipágina): bloques por sesión con paginación. */}
               <SesionesFormato
                 columns={cols}
@@ -187,6 +200,12 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
                 porPagina={d.porPagina ?? render.porPagina ?? 2}
                 firmas={firmasSesion}
                 label={label}
+                repeat={
+                  <>
+                    {membrete}
+                    {pacienteSesiones}
+                  </>
+                }
               />
             </>
           ) : esCampos ? (

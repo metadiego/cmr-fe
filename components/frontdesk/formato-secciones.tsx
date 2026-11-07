@@ -378,10 +378,14 @@ export function SeccionInner({
   }
 }
 
-// Láser a color POR SESIÓN (layout "sessions"): un bloque por sesión = SESIÓN #, tabla de columnas con la
-// fecha de la sesión + 1 fila en blanco, las 2 cajas de notas VACÍAS (para escribir a mano) y las firmas.
-// `porPagina` sesiones por página física (salto de página impreso). Si el BE no manda sesiones (impresión en
-// blanco), se pinta UN bloque vacío para que la hoja sea usable. Idéntico al legacy (nano_laser*, sueroterapia).
+// One block per SESSION (layout "sesiones"), drawn like the legacy sheet
+// (.personal/formatos-legacy/Sueroterapia Vit C con Laser Intravenoso-intra2.pdf, sueroterapia_form.php):
+// «SESIÓN # : n/m» on a light rule, the colour table with a tall blank row, two stacked grey note bands,
+// and the signatures in two columns (ENFERMERO + HORA on the left, FIRMA DEL PACIENTE on the right), each
+// label OVER its line. `porPagina` blocks per physical page; every page after the first repeats `repeat`
+// (letterhead + patient line), as the legacy prints a full header on each sheet. Each block is sized so two
+// of them fill a letter page with air. Inline styles only: the print window has no Tailwind.
+const SESSION_BLOCK_MIN_HEIGHT = "4.15in";
 export function SesionesFormato({
   columns,
   sessions,
@@ -389,6 +393,7 @@ export function SesionesFormato({
   porPagina = 2,
   firmas,
   label,
+  repeat,
 }: {
   columns: FormatoColumna[];
   sessions: FormatoSesion[];
@@ -396,49 +401,71 @@ export function SesionesFormato({
   porPagina?: number;
   firmas?: Extract<FormatoSeccion, { tipo: "firmas" }>;
   label: LabelFn;
+  /** Header repeated at the top of every page after the first. */
+  repeat?: React.ReactNode;
 }) {
-  const bloques = sessions.length > 0 ? sessions : [{ session: null, date: null }];
+  const bloques: FormatoSesion[] = sessions.length > 0 ? sessions : [{ session: null, date: null }];
+  const per = Math.max(1, porPagina);
+  const pages: FormatoSesion[][] = [];
+  for (let i = 0; i < bloques.length; i += per) pages.push(bloques.slice(i, i + per));
+  const lineas = firmas?.lineas ?? [];
+  const left = lineas.filter((_, i) => i % 2 === 0);
+  const right = lineas.filter((_, i) => i % 2 === 1);
+  const signLine = (l: FormatoFirmaLinea, k: React.Key, first: boolean) => (
+    <div key={k} style={{ marginTop: first ? 0 : 18 }}>
+      <div style={{ fontSize: 11 }}>{lineaText(l, label)}</div>
+      <div style={{ borderBottom: BORDER, marginTop: 26, minHeight: 2, fontSize: 11, paddingLeft: 4 }}>{lineaValor(l)}</div>
+    </div>
+  );
   return (
-    <div className="mt-4">
-      {bloques.map((s, i) => {
-        const saltar = (i + 1) % porPagina === 0 && i + 1 < bloques.length;
-        return (
-          <div key={i} style={{ breakInside: "avoid", pageBreakAfter: saltar ? "always" : "auto", marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
-              SESIÓN{s.session ? ` ${s.session}` : ""}
-            </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-              <thead>
-                <tr style={{ background: "#f5f5f5" }}>
-                  {columns.map((c) => (
-                    <th key={c.clave} style={{ border: BORDER, padding: "5px 8px", textAlign: "left" }}>{colLabel(c, label)}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr style={{ height: 34 }}>
-                  {columns.map((c) => (
-                    <td key={c.clave} style={{ border: BORDER, padding: "6px 8px", verticalAlign: "top" }}>
-                      {c.clave === "fecha" ? (s.date ?? "") : ""}
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
-            {/* Dos cajas de notas VACÍAS (para escribir a mano) — legacy. */}
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-              {(notas.length ? notas : ["", ""]).map((_, ni) => (
-                <div key={ni} style={{ flex: 1, border: "1px solid #999", minHeight: 44 }} />
-              ))}
-            </div>
-            {firmas && (
-              <div className="region" style={{ marginTop: 12 }}>
-                <SeccionInner s={firmas} label={label} />
+    <div style={{ marginTop: 18 }}>
+      {pages.map((page, pi) => (
+        <div key={pi} style={{ pageBreakAfter: pi + 1 < pages.length ? "always" : "auto" }}>
+          {pi > 0 && repeat}
+          {page.map((s, i) => (
+            <div key={i} style={{ breakInside: "avoid", minHeight: SESSION_BLOCK_MIN_HEIGHT, display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 11 }}>
+                <span />
+                <span>
+                  <b>{label("formato.sessionNumber", "SESIÓN # :")}</b> {s.session ?? ""}
+                </span>
               </div>
-            )}
-          </div>
-        );
-      })}
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10.5 }}>
+                <thead>
+                  <tr>
+                    {columns.map((c) => (
+                      <th key={c.clave} style={{ border: BORDER, background: "#f0f0f0", padding: "6px 6px", textAlign: "center", fontWeight: 700 }}>
+                        {colLabel(c, label)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {columns.map((c) => (
+                      <td key={c.clave} style={{ border: BORDER, height: 44, padding: "6px 6px", textAlign: "center", verticalAlign: "middle" }}>
+                        {c.clave === "fecha" ? (s.date ?? "") : ""}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+              {/* Two grey bands to write by hand, stacked full width (legacy). */}
+              {(notas.length ? notas : ["", ""]).map((_, ni) => (
+                <div key={ni} style={{ height: 34, background: "#f0f0f0", marginTop: ni === 0 ? 20 : 10 }} />
+              ))}
+              {lineas.length > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 30 }}>
+                  <div style={{ width: "42%" }}>{left.map((l, k) => signLine(l, k, k === 0))}</div>
+                  <div style={{ width: "42%", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                    {right.map((l, k) => signLine(l, k, k === 0))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
