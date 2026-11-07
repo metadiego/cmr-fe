@@ -104,7 +104,7 @@ export function GenericFormatoRender({ clave, sesionId, centro, onVolver }: { cl
   // grid: the print window has no Tailwind, and «gap-x-6» printed «LOZADARECORD #» glued together.
   const pacienteSesiones = (
     <div
-      style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(1, campos.length || 2)}, 1fr)`, gap: 12, marginTop: 18, paddingBottom: 8, borderBottom: "1px solid #ccc", fontSize: 11 }}
+      style={{ display: "grid", gridTemplateColumns: `repeat(${Math.max(1, campos.length || 2)}, 1fr)`, gap: 12, marginTop: 18, paddingBottom: 8, borderBottom: "1px solid #ccc", fontSize: 12 }}
     >
       {campos.length > 0 ? (
         campos.map((c) => (

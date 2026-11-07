@@ -385,7 +385,7 @@ export function SeccionInner({
 // label OVER its line. `porPagina` blocks per physical page; every page after the first repeats `repeat`
 // (letterhead + patient line), as the legacy prints a full header on each sheet. Each block is sized so two
 // of them fill a letter page with air. Inline styles only: the print window has no Tailwind.
-const SESSION_BLOCK_MIN_HEIGHT = "4.15in";
+const SESSION_BLOCK_MIN_HEIGHT = "4.3in";
 export function SesionesFormato({
   columns,
   sessions,
@@ -413,7 +413,7 @@ export function SesionesFormato({
   const right = lineas.filter((_, i) => i % 2 === 1);
   const signLine = (l: FormatoFirmaLinea, k: React.Key, first: boolean) => (
     <div key={k} style={{ marginTop: first ? 0 : 18 }}>
-      <div style={{ fontSize: 11 }}>{lineaText(l, label)}</div>
+      <div style={{ fontSize: 12 }}>{lineaText(l, label)}</div>
       <div style={{ borderBottom: BORDER, marginTop: 26, minHeight: 2, fontSize: 11, paddingLeft: 4 }}>{lineaValor(l)}</div>
     </div>
   );
@@ -421,16 +421,16 @@ export function SesionesFormato({
     <div style={{ marginTop: 18 }}>
       {pages.map((page, pi) => (
         <div key={pi} style={{ pageBreakAfter: pi + 1 < pages.length ? "always" : "auto" }}>
-          {pi > 0 && repeat}
+          {pi > 0 && <div style={{ marginBottom: 18 }}>{repeat}</div>}
           {page.map((s, i) => (
             <div key={i} style={{ breakInside: "avoid", minHeight: SESSION_BLOCK_MIN_HEIGHT, display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 11 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid #ccc", paddingBottom: 8, marginBottom: 14, fontSize: 12 }}>
                 <span />
                 <span>
                   <b>{label("formato.sessionNumber", "SESIÓN # :")}</b> {s.session ?? ""}
                 </span>
               </div>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10.5 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                 <thead>
                   <tr>
                     {columns.map((c) => (
