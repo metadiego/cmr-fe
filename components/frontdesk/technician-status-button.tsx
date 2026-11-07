@@ -11,10 +11,14 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tooltip } from "@/components/ui/tooltip";
 
 // Ícono "Técnicos": libre/en terapia AHORA, derivado de la misma cola que ya alimenta
-// therapy-queue-strip.tsx (GET /frontdesk/queue) — sin estado propio, sin pedir nada nuevo al BE. Un
-// técnico puede salir en el `onShift` de varios servicios (varias capacidades); se cuenta UNA sola
-// vez: ocupado si tiene algo en `inTherapy` en CUALQUIER servicio, libre si no. "Descanso" (manual, con
-// auto-expiración por minutos) queda pendiente de BE — ver
+// therapy-queue-strip.tsx (GET /frontdesk/queue) — sin estado propio, sin pedir nada nuevo al BE.
+// A PROPÓSITO no se usa `onShift` (el roster por CAPACIDAD configurada): trae relleno de catálogo
+// (p. ej. "noaplica", un registro legado activo pero sin ser una persona real) y personal que puede
+// hacer el servicio pero no está trabajando hoy. El dueño pidió (06-nov-2026) contar SOLO a quien
+// realmente tiene un paciente hoy: ocupado = tiene algo en `inTherapy`; libre = ya le asignaron
+// alguien (`waiting[].technicianId`, llamado) pero no está en terapia ahora mismo. El roster completo
+// (todo el personal con la capacidad, esté o no activo hoy) queda para una iteración aparte.
+// "Descanso" (manual, con auto-expiración por minutos) queda pendiente de BE — ver
 // docs/specs/estatus-tecnicos-libre-ocupado-descanso-handoff-be.md.
 export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fecha: string }) {
   const t = useTranslations("frontdesk");
@@ -30,16 +34,20 @@ export function TechnicianStatusButton({ centro, fecha }: { centro?: string; fec
 
   const { libres, ocupados } = React.useMemo(() => {
     const ocupadosMap = new Map<string, { name: string; servicio: string }>();
-    const onShiftMap = new Map<string, string>();
+    const activosHoy = new Map<string, string>();
     for (const s of queue?.services ?? []) {
       for (const p of s.inTherapy) {
-        if (p.technicianId && !ocupadosMap.has(p.technicianId)) {
+        if (!p.technicianId) continue;
+        activosHoy.set(p.technicianId, p.technicianName ?? p.technicianId.slice(0, 8));
+        if (!ocupadosMap.has(p.technicianId)) {
           ocupadosMap.set(p.technicianId, { name: p.technicianName ?? p.technicianId.slice(0, 8), servicio: s.name });
         }
       }
-      for (const o of s.onShift) onShiftMap.set(o.staffId, o.name);
+      for (const w of s.waiting) {
+        if (w.technicianId) activosHoy.set(w.technicianId, w.technicianName ?? w.technicianId.slice(0, 8));
+      }
     }
-    const libres = [...onShiftMap.entries()].filter(([id]) => !ocupadosMap.has(id)).map(([id, name]) => ({ id, name }));
+    const libres = [...activosHoy.entries()].filter(([id]) => !ocupadosMap.has(id)).map(([id, name]) => ({ id, name }));
     return { libres, ocupados: [...ocupadosMap.entries()].map(([id, v]) => ({ id, ...v })) };
   }, [queue]);
 
