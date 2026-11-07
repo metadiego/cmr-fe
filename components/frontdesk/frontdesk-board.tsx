@@ -50,7 +50,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tick02Icon, Alert02Icon } from "@hugeicons/core-free-icons";
 import { LiveBadge } from "@/components/live-badge";
-
+import { EnTerapiaSinAsistirBanner } from "@/components/frontdesk/en-terapia-sin-asistir-banner";
 // ————————————————————————————————————————————————————————————————————————————
 // Frontdesk del día (F4): tabs por servicio (data-driven /servicios) + KPIs-filtro + tabla dinámica
 // (columnas del BE) con flujo Presente→En terapia→Asistido con sello de hora, búsqueda con dictado,
@@ -469,7 +469,7 @@ export function FrontdeskBoard() {
           )
         }
       />
-
+      {gateListo && !isConsulta && <EnTerapiaSinAsistirBanner centro={gate.centro} />}
       {/* Layout by view hierarchy: title → service tabs → ONE toolbar row (search + filters | actions). */}
       {tabsCargando ? <ServiceTabsSkeleton /> : gateListo && (
         <ServiciosTabs

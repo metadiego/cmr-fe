@@ -1900,6 +1900,7 @@
     "deshacerPregunta": "Undo “{paso}”?",
     "deshacerAviso": "This clears the stamped time and it cannot be recovered automatically.",
     "deshacer": "Undo",
+    "enTerapiaSinAsistir": "{nombre} left {n, plural, one {# patient} other {# patients}} unattended from previous days.",
     "aviso": {
       "cupo_excedido": "Day capacity exceeded (booked {agendadas} / capacity {cupo}).",
       "sin_cupo_configurado": "No capacity configured for this date."

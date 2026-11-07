@@ -1900,6 +1900,7 @@
     "deshacerPregunta": "¿Deshacer «{paso}»?",
     "deshacerAviso": "Esta acción borra la hora sellada y no se puede recuperar automáticamente.",
     "deshacer": "Deshacer",
+    "enTerapiaSinAsistir": "{nombre} dejó {n, plural, one {# paciente} other {# pacientes}} sin asistir de días anteriores.",
     "aviso": {
       "cupo_excedido": "Se superó el cupo del día (agendadas {agendadas} / cupo {cupo}).",
       "sin_cupo_configurado": "No hay cupos configurados para esta fecha."
