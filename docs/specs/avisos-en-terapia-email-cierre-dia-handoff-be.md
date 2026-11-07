@@ -5,6 +5,13 @@ hasta que él apruebe a quién va — se descubrieron 4 cuentas de prueba con el
 `unclosed_therapy.notify` (qagercag@cmr.test, clon@test.com, gerentebay@cmr.test, gerentecag@cmr.test)
 que recibirían el correo y rebotarían. NO activar el envío hasta su confirmación explícita.
 
+**Destinatarios EXACTOS para Caguas, por ahora (pedido del dueño):** SOLO Mirna Arciles, larciles
+(ya automático, admin) y el responsable de cada sesión. Eduardo Ortiz está de vacaciones y NO debe
+recibir nada por ahora — ni Fabiola Olalde, ni Sheila González, ni los gerentes "todos los centros", ni
+las cuentas de prueba. Esto probablemente implica ajustar quién tiene `unclosed_therapy.notify` para
+Caguas (dato/RBAC), no un cambio de código — BE a confirmar el mecanismo correcto (permiso por persona
+vs. quitarlo temporalmente a Eduardo/Fabiola/Sheila).
+
 **Pedido del dueño, 06-nov-2026, quiere esto corriendo DESDE HOY.** (Superado por la pausa de arriba.)
 
 ## Qué ya existe en el FE (hecho, commit b173b09)
