@@ -1,6 +1,11 @@
 # Handoff FE → BE — URGENTE: email de cierre del día por sesiones "En terapia" sin cerrar
 
-**Pedido del dueño, 06-nov-2026, quiere esto corriendo DESDE HOY.**
+**⛔ EN PAUSA (06-nov-2026, mismo día):** el dueño pidió explícitamente que NO salga ningún correo
+hasta que él apruebe a quién va — se descubrieron 4 cuentas de prueba con el permiso
+`unclosed_therapy.notify` (qagercag@cmr.test, clon@test.com, gerentebay@cmr.test, gerentecag@cmr.test)
+que recibirían el correo y rebotarían. NO activar el envío hasta su confirmación explícita.
+
+**Pedido del dueño, 06-nov-2026, quiere esto corriendo DESDE HOY.** (Superado por la pausa de arriba.)
 
 ## Qué ya existe en el FE (hecho, commit b173b09)
 
