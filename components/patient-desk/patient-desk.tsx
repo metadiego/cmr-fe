@@ -32,6 +32,7 @@ import { todayISO } from "@/components/frontdesk/frontdesk-board.helpers"
 import { UbicacionEnVivoWidget as LiveLocationWidget } from "@/components/frontdesk/ubicacion-en-vivo-widget"
 import { MedicosLibresWidget } from "@/components/frontdesk/medicos-libres-widget"
 import { NurseStatusButton } from "@/components/frontdesk/nurse-status-button"
+import { TechnicianStatusButton } from "@/components/frontdesk/technician-status-button"
 import { TherapyDayScheduler } from "@/components/agenda/therapy-day-scheduler"
 import { AgregarCitaModal as AddConsultationModal } from "@/components/tablero/agregar-cita-modal"
 import { CentroPicker as CenterPicker } from "@/components/facturacion/centro-picker"
@@ -439,6 +440,7 @@ export function PatientDesk() {
             fecha={date}
             onChanged={data.refresh}
           />
+          <TechnicianStatusButton centro={gate.centro} fecha={date} />
           <Button variant="outline" size="sm" asChild>
             <Link href="/scheduling/appointments/services">
               {t("serviceAppointments")}
