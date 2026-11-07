@@ -24,15 +24,24 @@ paciente haya venido.
 - Hoy quedó `atendida` y facturada como seguimiento: F001109, $20, ATH. La próxima, el 21-nov, ya es
   seguimiento de verdad.
 
-**Causa probable:** la ficha se crea **con récord** y la cita se agenda enseguida. La señal «tiene
-récord» de `un-paciente-conocido-es-seguimiento.ts` la convierte en seguimiento. Con la señal
-«tiene médico» pasa lo mismo.
+**Causa (corregida por el BE, 7-nov, contra producción):** la sincronización de la hoja la trajo con
+`legacy_id CAGUAS_MEDICA_2026-11-07_8:00_7`. A las 8:00, Caguas tiene 7 cupos NUEVO (índices 0 a 6), así
+que el 7 es un cupo **SEGUIMIENTO**. El tipo sale de la columna TIPO de la hoja: **el call center la
+agendó en un cupo de seguimiento**. Mi primera hipótesis («la señal de récord la convirtió») era un
+supuesto y **no** es la causa.
+
+**Hueco que queda:** el CMR copia el tipo de la hoja sin contrastarlo con los datos. Con la regla del
+dueño, una paciente sin ninguna consulta atendida **no puede ser seguimiento**, aunque el call center
+la ponga en ese cupo. La hoja es una intención; el hecho lo dan los datos (la misma idea del 22-sep,
+aplicada al revés).
 
 ## Lo que se pide al BE
 
-1. **`un-paciente-conocido-es-seguimiento.ts`:** seguimiento **solo** si el paciente tiene una cita
-   médica anterior en estado `atendida` (atendido y asistido), sin contar la cita que se está creando
-   o moviendo. Quitar las señales «récord» y «médico asignado».
+1. **Una sola regla, en `create()` y en la sincronización de la hoja:** seguimiento **solo** si el
+   paciente tiene una cita médica anterior en estado `atendida` (atendido y asistido), sin contar la
+   cita que se está creando o moviendo. Sin ninguna → `nueva`, diga lo que diga la hoja. Quitar las
+   señales «récord» y «médico asignado» (decisión del 22-sep). **Antes de cambiarla, el BE la confirma
+   con el dueño**, porque reemplaza una decisión documentada.
 2. **Reparar la cita de Lillian** (`e4f53c87-…`): tipo `nueva` y `isFirstVisit: true`, por
    `POST /citas/:id/reparar` con motivo. Que la regla nueva no la vuelva a pasar a seguimiento por su
    propia atención.
